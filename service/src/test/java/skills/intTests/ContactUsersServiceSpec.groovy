@@ -15,11 +15,10 @@
  */
 package skills.intTests
 
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
-import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.intTests.utils.DefaultIntSpec
@@ -27,11 +26,8 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.services.ContactUsersService
 import skills.services.UserAttrsService
-import skills.storage.repos.nativeSql.QueryUserCriteriaHelper
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
-
-import java.util.stream.Stream
 
 class ContactUsersServiceSpec extends DefaultIntSpec {
 
@@ -374,6 +370,180 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notAchievedAndAchieved.sort() == allUsers.sort()
     }
 
+    def "email should include any additional project admins as cc recipients"() {
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj3 = SkillsFactory.createSubject(1, 3)
+        def subj4 = SkillsFactory.createSubject(1, 4)
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = true
+
+        Map skill1 = [projectId: proj.projectId, subjectId: subj.subjectId, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill2 = [projectId: proj.projectId, subjectId: subj2.subjectId, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill3 = [projectId: proj.projectId, subjectId: subj3.subjectId, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill4 = [projectId: proj.projectId, subjectId: subj3.subjectId, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+
+        Map skill5 = [projectId: proj.projectId, subjectId: subj4.subjectId, skillId: "skill5", name  : "Test Skill 5", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map skill6 = [projectId: proj.projectId, subjectId: subj4.subjectId, skillId: "skill6", name  : "Test Skill 6", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 2, pointIncrementInterval: 0, numMaxOccurrencesIncrementInterval: 1]
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSubject(subj4)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+        skillsService.createSkill(skill6)
+        skillsService.createBadge(badge)
+
+        [skill2.skillId, skill3.skillId, skill6.skillId].each {
+            skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, it)
+        }
+
+        def users = getRandomUsers(10, true)
+        createService(users[7])
+        createService(users[8])
+        createService(users[9])
+        skillsService.addProjectAdmin(proj.projectId, users[7])
+        skillsService.addProjectAdmin(proj.projectId, users[8])
+        skillsService.addProjectAdmin(proj.projectId, users[9])
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
+        greenMail.reset();
+
+        skillsService.addSkill(skill1, users[0])
+        skillsService.addSkill(skill2, users[0])
+        skillsService.addSkill(skill3, users[0])
+
+        skillsService.addSkill(skill2, users[1])
+
+        skillsService.addSkill(skill2, users[2])
+        skillsService.addSkill(skill3, users[2])
+        skillsService.addSkill(skill5, users[2])
+        skillsService.addSkill(skill6, users[2])
+        skillsService.addSkill(skill6, users[2])
+
+        skillsService.addSkill(skill2, users[3])
+        skillsService.addSkill(skill3, users[3])
+        skillsService.addSkill(skill6, users[3])
+        skillsService.addSkill(skill6, users[3])
+
+        skillsService.addSkill(skill6, users[4])
+        skillsService.addSkill(skill6, users[5])
+        skillsService.addSkill(skill6, users[6])
+
+
+        String emailSubject = "The Subject"
+        String emailBody = """# The Body
+* one item
+* two items
+        """
+
+        String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
+        String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
+        String adminUser1Email = userAttrsService.findByUserId(users[7].toLowerCase()).email
+        String adminUser2Email = userAttrsService.findByUserId(users[8].toLowerCase()).email
+        String adminUser3Email = userAttrsService.findByUserId(users[9].toLowerCase()).email
+
+        when:
+        skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 8 }
+
+        def messages = EmailUtils.getEmails(greenMail)
+
+        then:
+        messages.findAll { it.fromEmail.contains("skills@skills.org") }.size() == messages.size()
+        messages.findAll { it.ccRecipients.contains(adminUser1Email) &&
+                                        it.ccRecipients.contains(adminUser2Email) &&
+                                        it.ccRecipients.contains(adminUser3Email)}.size() == messages.size()
+        messages.findAll { it.ccRecipients.contains("skills@skills.org") }.size() == 0
+        messages.find { it.recipients.contains(user2Email) }
+        messages.find { it.recipients.contains(user3Email) }
+        messages[0].html.replaceAll('\r\n', '\n') == '''<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body class="overall-container">
+
+<h1>The Body</h1>
+<ul>
+<li>one item</li>
+<li>two items</li>
+</ul>
+
+
+</body>
+</html>'''.replaceAll('\r\n', '\n')
+
+        messages[1].html.replaceAll('\r\n', '\n') == '''<!--
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html   lang="en"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.thymeleaf.org http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body class="overall-container">
+
+<h1>The Body</h1>
+<ul>
+<li>one item</li>
+<li>two items</li>
+</ul>
+
+
+</body>
+</html>'''.replaceAll('\r\n', '\n')
+    }
+
     def "test email"() {
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
@@ -461,6 +631,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
+        messages.findAll { it.fromEmail.contains("skills@skills.org") }.size() == 2
         messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user2Email) }
         messages.find { it.recipients.size() == 1 && it.recipients[0].contains(user3Email) }
         messages[0].html.replaceAll('\r\n', '\n') == '''<!--

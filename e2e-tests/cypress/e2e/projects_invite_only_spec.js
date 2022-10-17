@@ -30,7 +30,6 @@ describe('Projects Invite-Only Tests', () => {
             .as('getRolesForRoot');
     });
 
-
     it('invite only project full flow', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/settings')
@@ -122,8 +121,12 @@ describe('Projects Invite-Only Tests', () => {
                 cy.login('uuuuuu', 'password');
 
                 cy.visit('/progress-and-rankings/projects/proj1');
-                cy.contains('User Not Authorized')
+                cy.contains('Invite Only Project')
                     .should('be.visible');
+                cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'This Project is configured for Invite Only access.');
+                cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+                cy.wait(500);//give animation time to complete
+                cy.get('[data-cy="contactOwnersMsgInput"]').should('be.visible');
 
                 cy.visit(inviteLink);
                 cy.get('[data-cy=joinProject]')
@@ -173,8 +176,10 @@ describe('Projects Invite-Only Tests', () => {
                         cy.login('uuuuuu', 'password');
 
                         cy.visit('/progress-and-rankings/projects/proj1');
-                        cy.contains('User Not Authorized')
+                        cy.contains('Invite Only Project')
                             .should('be.visible');
+                        cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'This Project is configured for Invite Only access.');
+                        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible');
                     });
             });
 

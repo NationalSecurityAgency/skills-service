@@ -53,6 +53,7 @@ limitations under the License.
                     @page-changed="pageChanged"
                     @page-size-changed="pageSizeChanged"
                     @sort-changed="sortTable"
+                    tableStoredStateId="skillsReportApprovalTable"
                     data-cy="skillsReportApprovalTable">
       <template #head(request)="data">
         <span class="text-primary"><i class="fas fa-hand-pointer skills-color-skills" /> {{ data.label }}</span>
@@ -139,7 +140,7 @@ limitations under the License.
           <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
         </div>
         <div class="col">
-          <p class="h6">This will <b class="font-weight-bold">permanently</b> reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
+          <p class="h6">This will reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
         </div>
       </div>
       <ValidationProvider rules="maxSelfReportRejectionMessageLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"

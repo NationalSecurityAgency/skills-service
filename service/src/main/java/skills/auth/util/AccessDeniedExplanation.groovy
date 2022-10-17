@@ -17,4 +17,6 @@ package skills.auth.util
 
 class AccessDeniedExplanation {
     String explanation;
+    String errorCode;
+    String projectId //this is only populated in the case of access attempts for an invite only project
 }

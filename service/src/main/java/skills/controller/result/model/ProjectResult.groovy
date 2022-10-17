@@ -41,4 +41,5 @@ class ProjectResult extends SimpleProjectResult{
     int totalPointsReused
 
     String description
+    String userRole
 }

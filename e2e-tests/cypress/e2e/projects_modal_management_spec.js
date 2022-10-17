@@ -203,8 +203,9 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator');
         cy.get('[data-cy=newProjectButton]')
             .click();
-        cy.get('body')
-            .type('{esc}');
+        cy.contains('New Project').should('be.visible');
+        cy.get('[data-cy="projectName"').should('have.focus');
+        cy.realPress('Escape');
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
 

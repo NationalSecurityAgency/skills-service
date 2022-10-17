@@ -33,12 +33,27 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
         UserAttrs getAttrs()
     }
 
+    @Nullable
+    UserRole findByUserIdAndRoleNameAndProjectId(String userId, RoleName roleName, @Nullable String projectId)
+
+    @Nullable
+    List<UserRole> findAllByUserId(String userId)
+
+    @Query('''SELECT count(ur.id)
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.projectId = ?1 and 
+            ur.roleName in ?2 ''')
+    Integer countUserRolesByProjectIdAndUserRoles(String projectId, List<RoleName> roles)
+
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
-            ur.projectId = ?1''')
-    List<UserRoleWithAttrs> findRoleWithAttrsByProjectId(String projectId)
+            ur.projectId = ?1 and 
+            ur.roleName in ?2 ''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndUserRoles(String projectId, List<RoleName> roles, PageRequest pageRequest)
 
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 

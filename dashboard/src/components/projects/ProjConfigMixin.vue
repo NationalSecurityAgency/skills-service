@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
+  import UserRolesUtil from '@/components/utils/UserRolesUtil';
+
   export default {
     name: 'ProjConfigMixin',
     methods: {
@@ -22,6 +24,9 @@ limitations under the License.
       },
     },
     computed: {
+      isLoadingProjConfig() {
+        return this.$store.getters.loadingProjConfig;
+      },
       projConfig() {
         return this.$store.getters.projConfig;
       },
@@ -33,6 +38,12 @@ limitations under the License.
       },
       projConfigRootHelpUrl() {
         return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
+      },
+      isReadOnlyProj() {
+        return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.user_project_role);
+      },
+      userProjRole() {
+        return this.$store.getters.projConfig && this.$store.getters.projConfig.user_project_role;
       },
     },
   };

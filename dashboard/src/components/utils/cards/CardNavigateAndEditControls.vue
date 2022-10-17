@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row">
+  <div class="row" :class="{ 'justify-content-center' : isReadOnlyProj }">
     <div class="col-auto">
       <b-button
         :to="options.navTo"
         variant="outline-primary" size="sm" class="mr-2"
         :aria-label="`Manage ${options.type} ${options.name}`"
         :data-cy="`manageBtn_${options.id}`">
-        Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+        <span v-if="isReadOnlyProj">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
       </b-button>
     </div>
 
-    <div class="col text-right">
+    <div v-if="!isReadOnlyProj" class="col text-right">
       <b-button-group size="sm" class="buttons">
         <b-button v-if="options.showShare === true"
                   ref="shareBtn"
@@ -61,8 +61,11 @@ limitations under the License.
 </template>
 
 <script>
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+
   export default {
     name: 'CardNavigateAndEditControls',
+    mixins: [ProjConfigMixin],
     props: {
       options: Object,
     },

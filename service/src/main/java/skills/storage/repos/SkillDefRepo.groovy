@@ -650,7 +650,6 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query('''select count(s) > 0 from SkillDefWithExtra s where s.copiedFrom = ?1 and s.skillId like '%STREUSESKILLST%' ''')
     Boolean wasThisSkillReusedElsewhere(int skillRefId)
 
-
     @Nullable
     @Query('''SELECT sd.totalPoints FROM SkillDef sd WHERE sd.projectId = ?1 and sd.skillId = ?2''')
     Integer getTotalPointsByProjectIdAndSkillId(String projectId, String skillId)
@@ -658,5 +657,21 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Nullable
     @Query('''SELECT sum(sd.totalPoints) FROM SkillDef sd WHERE sd.projectId = ?1 and sd.skillId in ?2''')
     Integer getTotalPointsSumForSkills(String projectId, List<String> skillId)
+
+    @Nullable
+    @Query('''SELECT pd.projectId as projectId, pd.name as name, ld.level as level from ProjDef pd 
+                join LevelDef ld on ld.projectRefId = pd.id and ld.skillRefId is null and ld.pointsFrom > pd.totalPoints''')
+    List<UnachievableProjectLevel> findUnachievableProjectLevels()
+
+    @Nullable
+    @Query('''select pd.projectId as projectId, 
+                    pd.name as projectName, 
+                    sd.skillId as subjectId, 
+                    sd.name as name,
+                    ld.level as level 
+            from ProjDef pd 
+            join SkillDef sd on sd.type = 'Subject' and sd.projDef = pd
+            join LevelDef ld on ld.skillRefId = sd.id and ld.pointsFrom > sd.totalPoints''')
+    List<UnachievableSubjectLevel> findUnachievableSubjectLevels()
 
 }

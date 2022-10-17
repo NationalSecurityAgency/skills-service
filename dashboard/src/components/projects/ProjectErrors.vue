@@ -35,6 +35,7 @@ limitations under the License.
       <skills-b-table v-if="!loading"
                       :options="table.options"
                       :items="errors"
+                      tableStoredStateId="projectErrorsTable"
                       data-cy="projectErrorsTable"
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"

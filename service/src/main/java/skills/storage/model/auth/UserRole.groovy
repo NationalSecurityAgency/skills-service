@@ -32,6 +32,7 @@ class UserRole implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
+    Integer userRefId
     String userId
 
     String projectId

@@ -438,6 +438,28 @@ describe('Client Display Self Report Skills Tests', () => {
             .contains('Submitted 5 days ago');
     });
 
+    it('self report - skill was submitted for approval - on subject page skill header', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="approvalPending"]').should('not.exist');
+
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
+        cy.submitForApproval();
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="approvalPending"]').should('exist');
+
+        cy.approveRequest();
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="approvalPending"]').should('not.exist');
+    });
+
     it('self report - skill was rejected', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.submitForApproval();

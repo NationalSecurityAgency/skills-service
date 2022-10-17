@@ -47,4 +47,6 @@ public interface ProjSummaryResult {
     public abstract Integer getNumSkillsReused();
 
     public abstract Integer getTotalPointsReused();
+
+    String getUserRole();
 }

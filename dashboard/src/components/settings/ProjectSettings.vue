@@ -751,7 +751,7 @@ limitations under the License.
                 SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
               }
             });
-            this.$store.dispatch('loadProjConfigState', this.$route.params.projectId);
+            this.$store.dispatch('loadProjConfigState', { projectId: this.$route.params.projectId, updateLoadingVar: false });
           })
           .finally(() => {
             this.isLoading = false;

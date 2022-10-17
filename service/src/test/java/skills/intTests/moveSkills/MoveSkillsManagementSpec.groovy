@@ -250,6 +250,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         !skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == p1Skills[0].skillId
         skillAdminInfo.name == p1Skills[0].name
+        skillAdminInfo.groupId == p1subj2g1.skillId
     }
 
     def "move skill from group into a group under the same subject"() {
@@ -298,6 +299,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         !skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == p1Skills[0].skillId
         skillAdminInfo.name == p1Skills[0].name
+        skillAdminInfo.groupId == p1subj1g2.skillId
     }
 
     def "move skill from group into a parent subject"() {
@@ -340,6 +342,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         !skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == p1Skills[0].skillId
         skillAdminInfo.name == p1Skills[0].name
+        !skillAdminInfo.groupId
     }
 
     def "move skill from subject into a child group"() {
@@ -378,6 +381,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         !skillAdminInfo.reusedSkill
         skillAdminInfo.skillId == p1Skills[0].skillId
         skillAdminInfo.name == p1Skills[0].name
+        skillAdminInfo.groupId == p1subj1g1.skillId
     }
 
     def "move multiple skills from subject into another subject"() {

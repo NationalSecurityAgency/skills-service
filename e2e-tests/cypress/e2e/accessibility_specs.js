@@ -304,7 +304,7 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="rejectionTitle"]')
-            .contains('This will permanently reject user\'s request(s) to get points');
+            .contains('This will reject user\'s request(s) to get points');
         cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail
         cy.customA11y();
         cy.get('[data-cy="cancelRejectionBtn"]')
@@ -1169,7 +1169,7 @@ describe('Accessibility Tests', () => {
             .as('loadMetrics');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
             .as('loadErrors');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles/*')
+        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles**')
             .as('loadAccess');
         cy.intercept('GET', '/admin/projects/MyNewtestProject/settings')
             .as('loadSettings');

@@ -25,17 +25,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.security.access.AccessDecisionManager
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.access.ConfigAttribute
-import org.springframework.security.access.vote.AuthenticatedVoter
-import org.springframework.security.access.vote.RoleVoter
-import org.springframework.security.access.vote.UnanimousBased
-import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -43,7 +36,6 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.access.AccessDeniedHandlerImpl
-import org.springframework.security.web.access.expression.WebExpressionVoter
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.firewall.HttpFirewall
 import org.springframework.security.web.firewall.StrictHttpFirewall
@@ -52,7 +44,6 @@ import org.springframework.web.context.request.RequestContextListener
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-import skills.auth.inviteOnly.InviteOnlyProjectAccessDecisionVoter
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
 
@@ -107,6 +98,9 @@ class SecurityConfiguration {
         @Autowired
         UserDetailsService userDetailsService
 
+        @Autowired
+        AccessDeniedHandler accessDeniedHandler
+
         AccessDeniedExplanationGenerator explanationGenerator = new AccessDeniedExplanationGenerator()
 
         @Override
@@ -115,7 +109,7 @@ class SecurityConfiguration {
             portalWebSecurityHelper.configureHttpSecurity(http)
                     .securityContext().securityContextRepository(securityContextRepository)
             .and()
-                    .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
+                    .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(restAuthenticationEntryPoint)
 
             if (this.authMode == AuthMode.PKI) {
                 http
@@ -166,15 +160,20 @@ class SecurityConfiguration {
             @Override
             void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
                 log.warn("Received AccessDeniedException for [${request.getRequestURI()}]", accessDeniedException)
-                super.handle(request, response, accessDeniedException)
-                AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServerName())
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN)
-                if(explanation) {
+                if (response.isCommitted()) {
+                    logger.trace("Did not write to response since already committed");
+                    return;
+                }
+                AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServerName(), accessDeniedException)
+                if (explanation) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                     String asJson = objectMapper.writeValueAsString(explanation)
                     response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                     response.setContentLength(asJson.bytes.length)
                     response.getWriter().print(asJson)
                     response.getWriter().flush()
+                } else {
+                    super.handle(request, response, accessDeniedException)
                 }
             }
         }

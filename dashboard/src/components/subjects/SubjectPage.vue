@@ -15,8 +15,8 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="subSubTitle" v-if="subject">
+    <page-header :loading="isLoadingData" :options="headerOptions">
+      <div slot="subSubTitle" v-if="subject && !isReadOnlyProj">
         <b-button @click="displayEditSubject"
                   ref="editSubjectButton"
                   class="btn btn-outline-primary mr-1"
@@ -32,12 +32,7 @@ limitations under the License.
       </div>
     </page-header>
 
-    <navigation v-if="!isLoading" :nav-items="[
-          {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills'},
-          {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels'},
-          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics'},
-        ]">
+    <navigation v-if="!isLoadingData" :nav-items="navItems">
     </navigation>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject"
@@ -50,15 +45,17 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
-  import Navigation from '../utils/Navigation';
-  import PageHeader from '../utils/pages/PageHeader';
-  import EditSubject from './EditSubject';
-  import SubjectsService from './SubjectsService';
+  import Navigation from '@/components/utils/Navigation';
+  import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditSubject from '@/components/subjects/EditSubject';
+  import SubjectsService from '@/components/subjects/SubjectsService';
+  import projConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('subjects');
 
   export default {
     name: 'SubjectPage',
+    mixins: [projConfigMixin],
     components: {
       ImportFinalizeAlert,
       PageHeader,
@@ -67,7 +64,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingSubjects: true,
         projectId: '',
         subjectId: '',
         showEditSubject: false,
@@ -84,6 +81,22 @@ limitations under the License.
       ...mapGetters([
         'subject',
       ]),
+      isLoadingData() {
+        return this.isLoadingSubjects || this.isLoadingProjConfig;
+      },
+      navItems() {
+        const items = [
+          { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' },
+        ];
+
+        if (!this.isReadOnlyProj) {
+          items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' });
+        }
+        items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' });
+        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics' });
+
+        return items;
+      },
       headerOptions() {
         if (!this.subject) {
           return {};
@@ -143,14 +156,14 @@ limitations under the License.
         'setSubject',
       ]),
       loadSubject() {
-        this.isLoading = true;
+        this.isLoadingSubjects = true;
         if (this.$route.params.subject) {
           this.setSubject(this.$route.params.subject);
-          this.isLoading = false;
+          this.isLoadingSubjects = false;
         } else {
           this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subjectId })
             .finally(() => {
-              this.isLoading = false;
+              this.isLoadingSubjects = false;
             });
         }
       },

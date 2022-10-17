@@ -19,7 +19,6 @@ import groovy.transform.ToString
 
 import javax.persistence.*
 
-@ToString(excludes = ['roles'])
 @Entity
 @Table(name = 'users')
 class User implements Serializable {
@@ -34,8 +33,4 @@ class User implements Serializable {
 
     // optional, not used during PKI authentication
     String password
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval=true)
-    @JoinColumn(name="userRefId", nullable = false)
-    List<UserRole> roles = []
 }

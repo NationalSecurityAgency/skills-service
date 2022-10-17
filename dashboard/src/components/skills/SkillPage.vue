@@ -26,7 +26,7 @@ limitations under the License.
       </div>
       <div slot="subSubTitle" v-if="!isImported">
         <b-button-group>
-          <b-button v-if="skill" @click="displayEdit"
+          <b-button v-if="skill && projConfig && !isReadOnlyProj" @click="displayEdit"
                     size="sm"
                     variant="outline-primary" :data-cy="`editSkillButton_${this.$route.params.skillId}`"
                     :aria-label="'edit Skill '+skill.name" ref="editSkillInPlaceBtn">
@@ -57,17 +57,19 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
-  import SkillsService from './SkillsService';
-  import Navigation from '../utils/Navigation';
-  import PageHeader from '../utils/pages/PageHeader';
-  import EditSkill from './EditSkill';
-  import ShowMore from './selfReport/ShowMore';
+  import SkillsService from '@/components/skills/SkillsService';
+  import Navigation from '@/components/utils/Navigation';
+  import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditSkill from '@/components/skills/EditSkill';
+  import ShowMore from '@/components/skills/selfReport/ShowMore';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
 
   const subjects = createNamespacedHelpers('subjects');
   const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'SkillPage',
+    mixins: [ProjConfigMixin],
     components: {
       PageHeader,
       Navigation,
@@ -76,7 +78,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: true,
+        isLoadingData: true,
         subjectId: '',
         headerOptions: {},
         showEdit: false,
@@ -92,8 +94,11 @@ limitations under the License.
       ...skills.mapGetters([
         'skill',
       ]),
+      isLoading() {
+        return this.isLoadingData || this.isLoadingProjConfig;
+      },
       navItems() {
-        if (this.isLoading) {
+        if (this.isLoadingData) {
           return [];
         }
         const items = [];
@@ -113,7 +118,7 @@ limitations under the License.
         if (isReadOnlyNonSr) {
           msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting';
         }
-        if (!this.isImported) {
+        if (!this.isImported && !this.isReadOnlyProj) {
           items.push({
             name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr, msg,
           });
@@ -151,7 +156,7 @@ limitations under the License.
         this.showEdit = true;
       },
       loadData() {
-        this.isLoading = true;
+        this.isLoadingData = true;
         const { projectId, subjectId } = this.$route.params;
         this.loadSkill({
           projectId: this.$route.params.projectId,
@@ -160,19 +165,19 @@ limitations under the License.
         }).then(() => {
           this.headerOptions = this.buildHeaderOptions(this.skill);
           if (this.subject) {
-            this.isLoading = false;
+            this.isLoadingData = false;
           } else {
             this.loadSubjectDetailsState({
               projectId,
               subjectId,
             }).then(() => {
-              this.isLoading = false;
+              this.isLoadingData = false;
             });
           }
         });
       },
       skillEdited(editedSkil) {
-        this.isLoading = true;
+        this.isLoadingData = true;
         SkillsService.saveSkill(editedSkil).then((res) => {
           const origId = this.skill.skillId;
           const edited = Object.assign(res, { subjectId: this.$route.params.subjectId });
@@ -194,7 +199,7 @@ limitations under the License.
           }
         })
         .finally(() => {
-          this.isLoading = false;
+          this.isLoadingData = false;
           this.handleFocus();
         });
       },

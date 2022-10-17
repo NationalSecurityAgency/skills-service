@@ -159,27 +159,15 @@ describe('Metrics Using User Tags Tests', () => {
                 const expected2 = [
                     [{
                         colIndex: 0,
-                        value: 'tag9'
+                        value: 'tag0'
                     }],
                     [{
                         colIndex: 0,
-                        value: 'tag8'
+                        value: 'tag1'
                     }],
                     [{
                         colIndex: 0,
-                        value: 'tag7'
-                    }],
-                    [{
-                        colIndex: 0,
-                        value: 'tag6'
-                    }],
-                    [{
-                        colIndex: 0,
-                        value: 'tag5'
-                    }],
-                    [{
-                        colIndex: 0,
-                        value: 'tag4'
+                        value: 'tag2'
                     }],
                     [{
                         colIndex: 0,
@@ -187,15 +175,27 @@ describe('Metrics Using User Tags Tests', () => {
                     }],
                     [{
                         colIndex: 0,
-                        value: 'tag24'
+                        value: 'tag4'
                     }],
                     [{
                         colIndex: 0,
-                        value: 'tag23'
+                        value: 'tag5'
                     }],
                     [{
                         colIndex: 0,
-                        value: 'tag22'
+                        value: 'tag6'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: 'tag7'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: 'tag8'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: 'tag9'
                     }],
                 ];
                 cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);

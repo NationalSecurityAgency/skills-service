@@ -18,24 +18,26 @@ limitations under the License.
     <sub-page-header title="Performed Skills"/>
 
     <b-card body-class="p-0">
-      <div class="row px-3 pt-3">
-        <div class="col-12">
-          <b-form-group label="Skill Filter" label-class="text-muted">
-            <b-input v-model="filters.skillId" v-on:keydown.enter="applyFilters" data-cy="performedSkills-skillIdFilter" aria-label="skill id filter"/>
-          </b-form-group>
+      <skills-spinner :is-loading="!table.options.fields" class="mb-5"/>
+      <div v-if="table.options.fields">
+        <div class="row px-3 pt-3">
+          <div class="col-12">
+            <b-form-group label="Skill Filter" label-class="text-muted">
+              <b-input v-model="filters.skillId" v-on:keydown.enter="applyFilters" data-cy="performedSkills-skillIdFilter" aria-label="skill id filter"/>
+            </b-form-group>
+          </div>
+          <div class="col-md">
+          </div>
         </div>
-        <div class="col-md">
-        </div>
-      </div>
 
-      <div class="row pl-3 mb-3">
-        <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+        <div class="row pl-3 mb-3">
+          <div class="col">
+            <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
+            <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          </div>
         </div>
-      </div>
 
-      <skills-b-table :options="table.options" :items="table.items"
+        <skills-b-table v-if="table.options.fields" :options="table.options" :items="table.items" tableStoredStateId="performedSkillsTable"
                       @page-changed="pageChanged"
                       @page-size-changed="pageSizeChanged"
                       @sort-changed="sortTable"
@@ -74,7 +76,7 @@ limitations under the License.
           </b-button>
         </template>
       </skills-b-table>
-
+      </div>
     </b-card>
   </div>
 </template>
@@ -84,19 +86,22 @@ limitations under the License.
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import dayjs from '@/common-components/DayJsCustomizer';
   import ShowMore from '@/components/skills/selfReport/ShowMore';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import ToastSupport from '../utils/ToastSupport';
-  import UsersService from './UsersService';
-  import SkillsBTable from '../utils/table/SkillsBTable';
-  import DateCell from '../utils/table/DateCell';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ToastSupport from '@/components/utils/ToastSupport';
+  import UsersService from '@/components/users/UsersService';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import DateCell from '@/components/utils/table/DateCell';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   const { mapActions } = createNamespacedHelpers('users');
 
   export default {
     name: 'UserSkillsPerformed',
-    mixins: [MsgBoxMixin, ToastSupport],
+    mixins: [MsgBoxMixin, ToastSupport, ProjConfigMixin],
     components: {
+      SkillsSpinner,
       ShowMore,
       DateCell,
       SkillsBTable,
@@ -120,23 +125,7 @@ limitations under the License.
             sortBy: 'performedOn',
             sortDesc: true,
             tableDescription: 'User\'s Skill Events',
-            fields: [
-              {
-                key: 'skillId',
-                label: 'Skill Id',
-                sortable: true,
-              },
-              {
-                key: 'performedOn',
-                label: 'Performed On',
-                sortable: true,
-              },
-              {
-                key: 'control',
-                label: 'Delete',
-                sortable: false,
-              },
-            ],
+            fields: null,
             pagination: {
               server: true,
               currentPage: 1,
@@ -153,6 +142,29 @@ limitations under the License.
     created() {
       this.projectId = this.$route.params.projectId;
       this.userId = this.$route.params.userId;
+      this.loadProjConfig()
+        .then(() => {
+          const fields = [
+            {
+              key: 'skillId',
+              label: 'Skill Id',
+              sortable: true,
+            },
+            {
+              key: 'performedOn',
+              label: 'Performed On',
+              sortable: true,
+            },
+          ];
+          if (!this.isReadOnlyProj) {
+            fields.push({
+              key: 'control',
+              label: 'Delete',
+              sortable: false,
+            });
+          }
+          this.table.options.fields = fields;
+        });
     },
     mounted() {
       this.loadData();
@@ -187,6 +199,9 @@ limitations under the License.
         this.loadData();
       },
       loadData() {
+        this.loadTableData();
+      },
+      loadTableData() {
         this.table.options.busy = true;
         const url = this.getUrl();
         UsersService.ajaxCall(url, {

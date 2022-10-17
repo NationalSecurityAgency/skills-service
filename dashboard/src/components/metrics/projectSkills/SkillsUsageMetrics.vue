@@ -49,7 +49,7 @@ limitations under the License.
       </div>
     </div>
 
-    <skills-b-table :items="items" :options="tableOptions" data-cy="skillsNavigator-table">
+    <skills-b-table :items="items" :options="tableOptions" data-cy="skillsNavigator-table" tableStoredStateId="skillsNavigator-table">
       <template v-slot:cell(skillName)="data">
         <span class="ml-2">{{ data.value }} <b-badge v-if="data.item.isReusedSkill"
                                                      variant="success" class="text-uppercase"><i

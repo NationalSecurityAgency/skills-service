@@ -69,6 +69,7 @@ import 'matchmedia-polyfill/matchMedia.addListener';
 // import './filters/NumberFilter';
 import './filters/TruncateFilter';
 import './filters/DateFilter';
+import './filters/UserRoleFilter';
 // import './filters/TimeFromNowFilter';
 import './directives/SkillsOnMountDirective';
 import RegisterValidators from './validators/RegisterValidators';
@@ -128,10 +129,14 @@ Vue.config.productionTip = false;
 window.dayjs = dayjs;
 
 window.axios = require('axios');
+
+window.cancellationController = new AbortController();
+
 require('./interceptors/errorHandler');
 require('./interceptors/clientVersionInterceptor');
 require('./interceptors/userAgreementInterceptor');
 require('./interceptors/upgradeInProgressInterceptor');
+require('./interceptors/globalCancelInterceptor');
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
 const isAdminPage = (route) => route.path.startsWith('/administrator');
@@ -178,7 +183,7 @@ router.beforeEach((to, from, next) => {
       if (isActiveProjectIdChange(to, from)) {
         store.commit('currentProjectId', to.params.projectId);
         if (isAdminPage(to) && to.params.projectId) {
-          store.dispatch('loadProjConfigState', to.params.projectId);
+          store.dispatch('loadProjConfigState', { projectId: to.params.projectId });
         }
       }
       if (to.matched.some((record) => record.meta.requiresAuth)) {

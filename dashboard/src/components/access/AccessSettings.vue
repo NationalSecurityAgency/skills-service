@@ -16,8 +16,8 @@ limitations under the License.
 <template>
   <loading-container v-bind:is-loading="isLoading">
     <sub-page-header title="Access Management"/>
-    <metrics-card title="Project Administrators" data-cy="projectAdmins" :no-padding="true">
-      <role-manager :project-id="projectId" :add-user-label="'Add Administrator'"
+    <metrics-card title="Project Management Users" data-cy="projectAdmins" :no-padding="true">
+      <role-manager :project-id="projectId"
                     :add-role-confirmation="addUserConfirmationConfig"/>
     </metrics-card>
 

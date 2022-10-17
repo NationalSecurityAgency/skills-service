@@ -15,9 +15,9 @@ limitations under the License.
 */
 <template>
   <div id="simple-skills-table" v-if="this.skills && this.skills.length">
-    <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable">
+    <skills-b-table :options="table.options" :items="skills" data-cy="simpleSkillsTable" tableStoredStateId="simpleSkillsTable">
       <template #cell(controls)="data">
-        <button v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
+        <button v-if="!isReadOnly" v-on:click="onDeleteEvent(data.item)" class="btn btn-sm btn-outline-primary"
                 :data-cy="`deleteSkill_${data.item.skillId}`"
                 :aria-label="`remove dependency on ${data.item.skillId}`">
           <i class="text-warning fas fa-trash" aria-hidden="true"/>
@@ -26,7 +26,7 @@ limitations under the License.
                 params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                      class="btn btn-sm btn-outline-hc ml-2"
                      :data-cy="`manage_${data.item.skillId}`">
-          Manage <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+          {{ isReadOnly ? 'View': 'Manage' }} <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
         </router-link>
       </template>
 
@@ -43,7 +43,7 @@ limitations under the License.
 
 <script>
   import ShowMore from '@/components/skills/selfReport/ShowMore';
-  import SkillsBTable from '../utils/table/SkillsBTable';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
 
   export default {
     name: 'SimpleSkillsTable',
@@ -54,6 +54,10 @@ limitations under the License.
         required: true,
       },
       showProject: {
+        type: Boolean,
+        default: false,
+      },
+      isReadOnly: {
         type: Boolean,
         default: false,
       },

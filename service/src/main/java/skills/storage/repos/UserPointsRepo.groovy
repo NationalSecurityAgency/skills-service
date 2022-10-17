@@ -234,7 +234,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
             p.skillId=?2 and 
@@ -333,10 +332,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
      *      *  the parameter is withing left join clause and they didn't handle that properly
      */
-    @Query('''select sdChild, userPoints, pd.name
+    @Query('''select sdChild, userPoints, pd.name, approval
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
+    left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.projectId=?2 and approval.rejectedOn=null and approval.approverUserId=null
       where srd.parent=sdParent.id and  srd.child=sdChild.id and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
@@ -348,9 +348,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
      *      *  the parameter is withing left join clause and they didn't handle that properly
      */
-    @Query('''select sdChild, userPoints
+    @Query('''select sdChild, userPoints, approval
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
+    left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn=null and approval.approverUserId=null
       where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
@@ -876,4 +877,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
     void updateSubjectUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
+    @Modifying
+    @Query('''delete from UserPoints where projectId = :projectId and points = 0''')
+    void deleteZeroPointEntries(@Param("projectId") String projectId)
 }

@@ -22,8 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.transaction.annotation.Transactional
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
+import skills.services.LockingService
 import skills.storage.model.UserAttrs
 import skills.storage.repos.ClientPrefRepo
 import skills.storage.repos.NotificationsRepo
@@ -35,6 +37,7 @@ import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.utils.RetryUtil
 import spock.lang.Specification
 
 import javax.annotation.PostConstruct
@@ -100,6 +103,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     ClientPrefRepo clientPrefRepo
 
+    @Autowired
+    LockingService lockingService
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -125,7 +131,9 @@ class DefaultIntSpec extends Specification {
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()
         // notificationsRepo no longer has a fk to users so must delete explicitly
-        notificationsRepo.deleteAll()
+        RetryUtil.withRetry(3, {
+            notificationsRepo.deleteAll()
+        })
 
         settingRepo.findAll().each {
             if (!it.settingGroup?.startsWith("public_")) {

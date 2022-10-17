@@ -22,21 +22,13 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.services.UserEventService
 import skills.services.settings.SettingsService
 import skills.storage.model.EventType
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
-import skills.storage.repos.NotificationsRepo
-import skills.storage.repos.SkillApprovalRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAttrsRepo
-import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.*
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
-
-import java.time.LocalDate
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
