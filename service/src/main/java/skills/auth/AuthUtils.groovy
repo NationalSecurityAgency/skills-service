@@ -31,6 +31,9 @@ class AuthUtils {
     // Example: /admin/projects/{projectId}/approvals/reject
     static final Pattern PROJECT_SELF_REPORT_APPROVE_OR_REJECT_PATTERN = Pattern.compile("^/admin/projects/[^/]+/approvals/(?:approve|reject)\$")
 
+    // Example: /admin/projects/{projectId}/approverConf
+    static final Pattern PROJECT_SELF_REPORT_APPROVER_CONF_PATTERN = Pattern.compile("^/admin/projects/[^/]+/approverConf\$")
+
     static String getProjectIdFromRequest(HttpServletRequest servletRequest) {
         String projectId
         if (servletRequest) {
@@ -51,6 +54,14 @@ class AuthUtils {
         if (servletRequest) {
             String servletPath = servletRequest.getServletPath()
             return PROJECT_SELF_REPORT_APPROVE_OR_REJECT_PATTERN.matcher(servletPath).matches()
+        }
+        return false
+    }
+
+    static boolean isSelfReportApproverConfEndpoint(HttpServletRequest servletRequest) {
+        if (servletRequest) {
+            String servletPath = servletRequest.getServletPath()
+            return PROJECT_SELF_REPORT_APPROVER_CONF_PATTERN.matcher(servletPath).matches()
         }
         return false
     }

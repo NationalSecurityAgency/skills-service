@@ -588,6 +588,10 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approverConf")
     }
 
+    def deleteApproverConf(String projectId, Integer approverRefId) {
+        return wsHelper.adminDelete("/projects/${projectId}/approverConf/${approverRefId}")
+    }
+
     def configureApproverForSkillId(String projectId, String approverUserId, String skillId) {
         return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [skillId: skillId])
     }

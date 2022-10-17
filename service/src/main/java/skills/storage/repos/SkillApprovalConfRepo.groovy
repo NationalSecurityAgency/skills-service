@@ -49,6 +49,8 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
 
         String getSkillName()
         String getSkillId()
+
+        Date getUpdated()
     }
 
     @Nullable
@@ -59,10 +61,26 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
             s.userTagKey as userTagKey,
             s.userTagValue as userTagValue,
             skill.name as skillName, 
-            skill.skillId as skillId
+            skill.skillId as skillId,
+            s.updated as updated
         from SkillApprovalConf s
         left join UserAttrs uAttrs on s.userId = uAttrs.userId
         left join SkillDef skill on s.skillRefId = skill.id
         where s.projectId = ?1''')
     List<ApproverConfResult> findAllByProjectId(String projectId)
+
+    @Query('''select s.id as id, 
+            s.approverUserId as approverUserId, 
+            s.userId as userId, 
+            uAttrs.userIdForDisplay as userIdForDisplay,
+            s.userTagKey as userTagKey,
+            s.userTagValue as userTagValue,
+            skill.name as skillName, 
+            skill.skillId as skillId,
+            s.updated as updated
+        from SkillApprovalConf s
+        left join UserAttrs uAttrs on s.userId = uAttrs.userId
+        left join SkillDef skill on s.skillRefId = skill.id
+        where s.id = ?1''')
+    ApproverConfResult findConfResultById(Integer id)
 }

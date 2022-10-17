@@ -289,41 +289,53 @@ class SkillApprovalService {
     }
 
     @Transactional
-    void configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
+    ApproverConfResult configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
         validateApproverAccess(projectId, approverId)
-
         if (skillApproverConfRequest.userId) {
-            String userId = skillApproverConfRequest.userId.toLowerCase()
-            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
-            if(!conf) {
-                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userId: userId)
-            }
-            // update no matter what so the latest date is saved
-            skillApprovalConfRepo.save(conf)
+            SkillsValidator.isTrue(!skillApproverConfRequest.skillId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.skillId) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.userTagValue) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.skillId, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
         }
 
-        if (skillApproverConfRequest.userTagKey) {
+        SkillApprovalConf saved
+        if (skillApproverConfRequest.userId) {
+            String userId = skillApproverConfRequest.userId.toLowerCase()
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userId=[${userId}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userId: userId)
+            skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
+            assert saved
+        }
+        else if (skillApproverConfRequest.userTagKey) {
             SkillsValidator.isNotBlank(skillApproverConfRequest.userTagValue, "userTagValue", projectId)
 
             String userTagKey = skillApproverConfRequest.userTagKey.toLowerCase()
             String userTagValue = skillApproverConfRequest.userTagValue.toLowerCase()
-            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
-            if(!conf) {
-                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userTagKey: userTagKey, userTagValue: userTagValue)
-            }
-            // update no matter what so the latest date is saved
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userTagKey=[${userTagKey}], userTagValue=[${userTagValue}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userTagKey: userTagKey, userTagValue: userTagValue)
             skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            assert saved
+        }
+        else if (skillApproverConfRequest.skillId) {
+            SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillApproverConfRequest.skillId, [SkillDef.ContainerType.Skill])
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], skillId=[${skillApproverConfRequest.skillId}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, skillRefId: skillDef.id)
+            skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
+            assert saved
         }
 
-        if (skillApproverConfRequest.skillId) {
-            SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillApproverConfRequest.skillId, [SkillDef.ContainerType.Skill])
-            SkillApprovalConf conf = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
-            if(!conf) {
-                conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, skillRefId: skillDef.id)
-            }
-            // update no matter what so the latest date is saved
-            skillApprovalConfRepo.save(conf)
-        }
+        log.info("Saved {}", saved)
+        SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+        return convertToClientRes(dbRes)
     }
 
     @Profile
@@ -339,17 +351,37 @@ class SkillApprovalService {
     List<ApproverConfResult> getProjectApproverConf(String projectId) {
         List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
         List<ApproverConfResult> res = approverConfResults.collect {
-            new ApproverConfResult(
-                    id: it.getId(),
-                    approverUserId: it.getApproverUserId(),
-                    userIdForDisplay: it.getUserIdForDisplay(),
-                    userId: it.getUserId(),
-                    userTagKey: it.getUserTagKey(),
-                    userTagValue: it.getUserTagValue(),
-                    skillName: it.getSkillName(),
-                    skillId: it.getSkillId(),
-            )
+            convertToClientRes(it)
         }
         return res?.sort({ it.id })
+    }
+
+    private ApproverConfResult convertToClientRes(SkillApprovalConfRepo.ApproverConfResult it) {
+        new ApproverConfResult(
+                id: it.getId(),
+                approverUserId: it.getApproverUserId(),
+                userIdForDisplay: it.getUserIdForDisplay(),
+                userId: it.getUserId(),
+                userTagKey: it.getUserTagKey(),
+                userTagValue: it.getUserTagValue(),
+                skillName: it.getSkillName(),
+                skillId: it.getSkillId(),
+                updated: it.getUpdated()
+        )
+    }
+
+    @Transactional
+    void deleteApproverConfId(String projectId, Integer approverConfId) {
+        Optional<SkillApprovalConf> found = skillApprovalConfRepo.findById(approverConfId)
+        if (found?.isPresent()) {
+            SkillApprovalConf approvalConf = found.get()
+            if (approvalConf.projectId != projectId) {
+                throw new SkillException("You are not authorized to delete approval with id [${approverConfId}]", projectId, null, ErrorCode.AccessDenied)
+            }
+            skillApprovalConfRepo.delete(approvalConf)
+            log.info("Removed {}", approvalConf)
+        } else {
+            log.warn("Failed to find SkillApprovalConf with id [{}]", approverConfId)
+        }
     }
 }

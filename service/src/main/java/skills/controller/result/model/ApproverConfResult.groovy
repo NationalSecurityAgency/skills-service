@@ -32,4 +32,6 @@ class ApproverConfResult {
 
     String skillName
     String skillId
+
+    Date updated
 }

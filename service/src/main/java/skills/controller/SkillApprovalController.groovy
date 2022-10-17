@@ -155,21 +155,28 @@ class SkillApprovalController {
         selfReportingService.getApprovalRequestEmailSubscriptionStatus(projectId);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
-    RequestResult configureApprover(@PathVariable("projectId") String projectId,
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult configureApprover(@PathVariable("projectId") String projectId,
                                     @PathVariable("approverUserId") String approverUserId,
                                     @RequestBody SkillApproverConfRequest approverConfRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(approverUserId, "Approver User Id")
         SkillsValidator.isTrue(approverConfRequest.userId || approverConfRequest.skillId || approverConfRequest.userTagValue, "Must provide one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
-        skillApprovalService.configureApprover(projectId, approverUserId, approverConfRequest)
-        return RequestResult.success()
+        return skillApprovalService.configureApprover(projectId, approverUserId, approverConfRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/approverConf", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<ApproverConfResult>  getProjectApproverConf(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return skillApprovalService.getProjectApproverConf(projectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{aproverConfId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult deleteConfig(@PathVariable("projectId") String projectId,
+                                         @PathVariable("aproverConfId") Integer aproverConfId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(aproverConfId >= 0, "Approver Conf Id")
+        return skillApprovalService.deleteApproverConfId(projectId, aproverConfId)
     }
 
 }

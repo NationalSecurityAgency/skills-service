@@ -80,4 +80,24 @@ class AuthUtilsSpec extends Specification {
         true    | "/admin/projects/${URLEncoder.encode("some fancy 23 id", StandardCharsets.UTF_8.toString())}/approvals/reject"
     }
 
+    def "only match approver conf endpoint"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isSelfReportApproverConfEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/approverConf"
+        true    | "/admin/projects/pROJ2/approverConf"
+        false   | "/admin/projects/proj1/approverConf1"
+        false   | "/admin/projects/proj1/approverConf/"
+        false   | "/admin/projects/proj1/approvercConf"
+        false   | "/b/admin/projects/proj1/approverConf"
+        false   | "/admin/co/projects/proj1/approverConf"
+        false   | "/admin/projects//proj1/approverConf"
+    }
+
 }
+

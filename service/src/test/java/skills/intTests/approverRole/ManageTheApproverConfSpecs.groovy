@@ -15,7 +15,7 @@
  */
 package skills.intTests.approverRole
 
-import groovy.json.JsonOutput
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -176,6 +176,161 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approvals_t1_u2.data.userId == [users[2]]
     }
 
+    def "conf is returned after being saved"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+
+        when:
+        def forUserConf = skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2]).body
+        def forSkillConf = skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId).body
+        def forTagConf = skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc").body
+
+        then:
+        forUserConf.id
+        forUserConf.approverUserId == user1Service.userName
+        forUserConf.userId == users[2]
+        forUserConf.userIdForDisplay == user2ForDisplay
+        !forUserConf.userTagKey
+        !forUserConf.userTagValue
+        !forUserConf.skillName
+        !forUserConf.skillId
+
+        forSkillConf.id
+        forSkillConf.approverUserId == user2Service.userName
+        !forSkillConf.userId
+        !forSkillConf.userIdForDisplay
+        !forSkillConf.userTagKey
+        !forSkillConf.userTagValue
+        forSkillConf.skillName == skills[0].name
+        forSkillConf.skillId == skills[0].skillId
+
+        forTagConf.id
+        forTagConf.approverUserId == user1Service.userName
+        !forTagConf.userId
+        !forTagConf.userIdForDisplay
+        forTagConf.userTagKey == userTagKey
+        forTagConf.userTagValue == "abc"
+        !forTagConf.skillName
+        !forTagConf.skillId
+    }
+
+    def "cannot save duplicate user conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        when:
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("exist for projectId=[${proj.projectId}], approverId=[${user1Service.userName}], userId=[${users[2]}] already exist.")
+    }
+
+    def "cannot save duplicate skill conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId)
+        when:
+        skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId)
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("exist for projectId=[${proj.projectId}], approverId=[${user2Service.userName}], skillId=[${skills[0].skillId}] already exist.")
+    }
+
+    def "cannot save duplicate tag conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        when:
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("exist for projectId=[${proj.projectId}], approverId=[${user1Service.userName}], userTagKey=[${userTagKey}], userTagValue=[abc] already exist.")
+    }
+
     def "project admin of a different project should be rejected"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -250,8 +405,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
 
         when:
-        def approverConf = user1Service.getApproverConf(proj.projectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(approverConf))
+        def approverConf = skillsService.getApproverConf(proj.projectId)
 
         then:
         approverConf.approverUserId == [user1Service.userName, user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
@@ -261,6 +415,117 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approverConf.userTagValue == [null, null, null, "abc", "nomatch"]
         approverConf.skillName == [null, skills[0].name, null, null, null]
         approverConf.skillId == [null, skills[0].skillId, null, null, null]
+    }
+
+    def "remove approver conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
+
+        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+
+        when:
+        def approverConf = skillsService.getApproverConf(proj.projectId)
+        skillsService.deleteApproverConf(proj.projectId, approverConf[1].id)
+        def approverConf_t1 = skillsService.getApproverConf(proj.projectId)
+        skillsService.deleteApproverConf(proj.projectId, approverConf[4].id)
+        def approverConf_t2 = skillsService.getApproverConf(proj.projectId)
+
+        then:
+        approverConf.approverUserId == [user1Service.userName, user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
+        approverConf.userId == [users[2], null, users[2], null, null]
+        approverConf.userIdForDisplay == [user2ForDisplay, null, user2ForDisplay, null, null]
+        approverConf.userTagKey == [null, null, null, userTagKey, userTagKey]
+        approverConf.userTagValue == [null, null, null, "abc", "nomatch"]
+        approverConf.skillName == [null, skills[0].name, null, null, null]
+        approverConf.skillId == [null, skills[0].skillId, null, null, null]
+
+        approverConf_t1.approverUserId == [user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
+        approverConf_t1.userId == [users[2], users[2], null, null]
+        approverConf_t1.userIdForDisplay == [user2ForDisplay, user2ForDisplay, null, null]
+        approverConf_t1.userTagKey == [null, null, userTagKey, userTagKey]
+        approverConf_t1.userTagValue == [null, null, "abc", "nomatch"]
+        approverConf_t1.skillName == [null, null, null, null]
+        approverConf_t1.skillId == [null, null, null, null]
+
+        approverConf_t2.approverUserId == [user1Service.userName, user2Service.userName, user1Service.userName]
+        approverConf_t2.userId == [users[2], users[2], null]
+        approverConf_t2.userIdForDisplay == [user2ForDisplay, user2ForDisplay, null]
+        approverConf_t2.userTagKey == [null, null, userTagKey]
+        approverConf_t2.userTagValue == [null, null, "abc"]
+        approverConf_t2.skillName == [null, null, null]
+        approverConf_t2.skillId == [null, null, null]
+    }
+
+    def "deleted conf must exist under the requested project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId)
+
+        def approverConf = skillsService.getApproverConf(proj.projectId)
+        when:
+        skillsService.deleteApproverConf(proj2.projectId, approverConf[0].id)
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("You are not authorized to delete approval with id [${approverConf[0].id}]")
+    }
+
+    def "approver conf can only be viewed by admins"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        user1Service.getApproverConf(proj.projectId)
+
+        then:
+        SkillsClientException e = thrown()
+        e.resBody.contains("You do not have permission to view/manage this Project") || e.resBody.contains("HTTP Status 403 – Forbidden")
     }
 
 

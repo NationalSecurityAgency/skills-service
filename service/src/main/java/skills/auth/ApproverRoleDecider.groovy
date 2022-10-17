@@ -37,7 +37,8 @@ class ApproverRoleDecider {
 
     private boolean isSupportedHttpMethod(HttpServletRequest servletRequest) {
         String method = servletRequest.method
-        return method && method == HttpMethod.GET.toString()
+        boolean isGetApprovalConfEndpoint = AuthUtils.isSelfReportApproverConfEndpoint(servletRequest)
+        return method && method == HttpMethod.GET.toString() && !isGetApprovalConfEndpoint
     }
 
     private boolean isSelfReportAction(HttpServletRequest servletRequest) {

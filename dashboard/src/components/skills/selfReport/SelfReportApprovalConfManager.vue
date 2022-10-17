@@ -16,12 +16,7 @@ limitations under the License.
 <template>
   <b-card body-class="p-0">
     <template #header>
-      <div class="row">
-        <div class="col h6 mb-0 font-weight-bold"><i class="fas fa-cogs" aria-hidden="true"/> Configure Approval Workload</div>
-        <div v-if="numUsersConfigured > 0" class="col text-right">
-          <b-badge variant="success">{{ numUsersConfigured }}</b-badge> User{{ numUsersConfigured > 1 ? 's' : ''}} Configured
-        </div>
-      </div>
+       <div class="h6 mb-0 font-weight-bold"><i class="fas fa-cogs" aria-hidden="true"/> Configure Approval Workload</div>
     </template>
 
     <skills-b-table :options="table.options" :items="table.items"
@@ -37,6 +32,11 @@ limitations under the License.
         <span class="text-primary"><i class="fas fa-users skills-color-access" aria-hidden="true"/> {{ data.label }}</span>
       </template>
 
+      <template v-slot:cell(userIdForDisplay)="data">
+        <div :class="{'font-weight-bold text-primary' : data.detailsShowing }">{{ data.value }}</div>
+        <div v-if="data.detailsShowing"><i class="fas fa-user-edit animate__bounceIn" aria-hidden="true"/> Editing...</div>
+      </template>
+
       <template v-slot:cell(roleName)="data">
         {{ data.value | userRole }}
       </template>
@@ -46,7 +46,7 @@ limitations under the License.
           <div class="col">
             <div v-if="!data.item.hasConf" >Fallback - All Requests</div>
             <div v-if="data.item.tagConf && data.item.tagConf.length > 0">
-              <div v-for="tConf in data.item.tagConf" :key="tConf.userTagKey">Users in <span class="font-italic text-secondary">{{tConf.userTagKey}}:</span> <span>{{tConf.userTagValue}}</span></div>
+              <div v-for="tConf in data.item.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKey}}:</span> <span>{{tConf.userTagValue}}</span></div>
             </div>
             <div v-if="data.item.userConf && data.item.userConf.length > 0" >
               <b-badge variant="success">{{data.item.userConf.length}}</b-badge> specific users
@@ -56,14 +56,25 @@ limitations under the License.
             </div>
           </div>
           <div class="col-auto">
-            <b-button size="sm" variant="outline-primary" @click="data.toggleDetails"><i class="fas fa-edit" aria-hidden="true" /> Edit</b-button>
+            <b-button size="sm"
+                      :aria-label="`Edit ${data.item.userIdForDisplay} approval workload`"
+                      variant="outline-primary"
+                      @click="data.toggleDetails">
+              <span v-if="!data.detailsShowing"><i class="fas fa-edit" aria-hidden="true" /> Edit</span>
+              <span v-if="data.detailsShowing"><i class="fas fa-arrow-alt-circle-up" aria-hidden="true" /> Collapse</span>
+            </b-button>
           </div>
         </div>
       </template>
 
       <template #row-details="row">
-        <div class="ml-3">
-          <self-report-approval-conf-user-tag :user="row.item" class="mt-3"/>
+        <div class="ml-5">
+          <self-report-approval-conf-user-tag :user-info="row.item"
+                                              tag-key="TagKey"
+                                              tag-label="TagKeyFromProps"
+                                              @conf-added="updatedTagConf"
+                                              @conf-removed="removeTagConf"
+                                              class="mt-3"/>
           <self-report-approval-conf-skill :user="row.item" class="mt-3"/>
           <self-report-approval-conf-specific-users :user="row.item" class="mt-3"/>
         </div>
@@ -139,15 +150,6 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
-    computed: {
-      numUsersConfigured() {
-        if (!this.table.items) {
-          return 0;
-        }
-
-        return this.table.items.filter((item) => item.hasConf).length;
-      },
-    },
     methods: {
       loadData() {
         const pageParams = {
@@ -185,6 +187,18 @@ limitations under the License.
           };
         });
         return res;
+      },
+      updatedTagConf(newConf) {
+        const itemToUpdate = this.table.items.find((i) => i.userId === newConf.approverUserId);
+        itemToUpdate.allConf.push(newConf);
+        itemToUpdate.tagConf.push(newConf);
+        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
+      },
+      removeTagConf(removedConf) {
+        const itemToUpdate = this.table.items.find((i) => i.userId === removedConf.approverUserId);
+        itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== removedConf.id);
+        itemToUpdate.tagConf = itemToUpdate.tagConf.filter((i) => i.id !== removedConf.id);
+        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
       },
     },
   };

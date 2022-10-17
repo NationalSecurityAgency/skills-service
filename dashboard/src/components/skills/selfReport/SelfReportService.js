@@ -60,4 +60,12 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  configureApproverForUserTag(projectId, approverId, userTagKey, userTagValue) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}`;
+    return axios.post(url, { userTagKey, userTagValue })
+      .then((response) => response.data);
+  },
+  removeApproverConfig(projectId, approverConfigID) {
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/approverConf/${approverConfigID}`).then((response) => response.data);
+  },
 };
