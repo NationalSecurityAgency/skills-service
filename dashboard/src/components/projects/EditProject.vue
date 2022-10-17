@@ -22,7 +22,8 @@ limitations under the License.
               :no-close-on-backdrop="true"
               :centered="true"
               header-bg-variant="info"
-              header-text-variant="light" no-fade>
+              header-text-variant="light" no-fade
+              size="xl">
 
       <b-container fluid>
         <div class="row">

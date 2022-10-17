@@ -26,7 +26,6 @@ limitations under the License.
       :height="markdownHeight"
       @change="onEditorChange"
     ></editor>
-    <div><small><b-link to="/markdown" target="_blank">Markdown</b-link> is supported</small></div>
   </div>
 </template>
 
@@ -34,7 +33,6 @@ limitations under the License.
   import '@toast-ui/editor/dist/toastui-editor.css';
   import { Editor } from '@toast-ui/vue-editor';
   import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
-  import emoji from 'node-emoji';
 
   export default {
     name: 'MarkdownEditor',
@@ -79,27 +77,28 @@ limitations under the License.
         const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');
         return markdown;
       },
-      emojiWidgetRule() {
-        const reWidgetRule = /([:]\S+[:])/;
-        return {
-          rule: reWidgetRule,
-          toDOM(text) {
-            const rule = reWidgetRule;
-            const matched = text.match(rule);
-            const span = document.createElement('span');
-            const onMissing = (name) => name;
-            const emojified = emoji.emojify(matched[1], onMissing);
-            span.innerHTML = emojified;
-            return span;
-          },
-        };
-      },
+      // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
+      // emojiWidgetRule() {
+      //   const reWidgetRule = /([:]\S+[:])/;
+      //   return {
+      //     rule: reWidgetRule,
+      //     toDOM(text) {
+      //       const rule = reWidgetRule;
+      //       const matched = text.match(rule);
+      //       const span = document.createElement('span');
+      //       const onMissing = (name) => name;
+      //       const emojified = emoji.emojify(matched[1], onMissing);
+      //       span.innerHTML = emojified;
+      //       return span;
+      //     },
+      //   };
+      // },
       editorOptions() {
         const options = {
           hideModeSwitch: false,
           usageStatistics: false,
           autofocus: false,
-          widgetRules: [this.emojiWidgetRule],
+          // widgetRules: [this.emojiWidgetRule],
         };
         return Object.assign(this.markdownOptions, options);
       },
