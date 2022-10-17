@@ -645,4 +645,8 @@ where ua.projectId = :projectId and ua.skillId = :skillId
                 )
             ''', nativeQuery = true)
     void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+
+    @Modifying
+    @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')
+    void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
 }

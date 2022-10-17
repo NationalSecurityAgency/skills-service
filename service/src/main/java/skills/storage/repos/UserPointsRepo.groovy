@@ -234,7 +234,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
 
-
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
             p.skillId=?2 and 
@@ -876,4 +875,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
     void updateSubjectUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
+    @Modifying
+    @Query('''delete from UserPoints where projectId = :projectId and points = 0''')
+    void deleteZeroPointEntries(@Param("projectId") String projectId)
 }
