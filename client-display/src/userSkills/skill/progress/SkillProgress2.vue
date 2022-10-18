@@ -74,17 +74,8 @@ limitations under the License.
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
               </b-badge>
-
             </div>
           </div>
-        </div>
-        <div v-if="skill.badges" style="padding-bottom: 5px;">
-          <span v-for="badge in skill.badges" data-cy="hasBadgesIndicator" variant="info" style="font-size: 0.9rem" class="ml-2 overflow-hidden"
-                   v-bind:key="badge.badgeId">
-            <router-link :to="genLink(badge)" class="btn btn-sm btn-outline-info skills-theme-btn mr-1">
-              <i class="fa fa-award"></i> {{ badge.name }}
-            </router-link>
-          </span>
         </div>
       </div>
       <div class="col-auto text-right"
@@ -111,7 +102,16 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-
+    <div v-if="skill.badges && skill.badges.length > 0" class="row" style="padding-top:8px;">
+      <div class="col" style="font-size: 0.9rem">
+        <i class="fa fa-award"></i> Badges:
+        <span v-for="(badge, index) in skill.badges" data-cy="hasBadgesIndicator" class="overflow-hidden"
+              v-bind:key="badge.badgeId">
+          <router-link :to="genLink(badge)" style="text-decoration:underline;">{{ badge.name }}</router-link>
+          <span v-if="index != (skill.badges.length - 1)">, </span>
+        </span>
+      </div>
+    </div>
     <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)" :data-cy="`skillDescription-${skill.skillId}`">
       <div v-if="skill.type === 'SkillsGroup'">
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
