@@ -20,32 +20,47 @@ limitations under the License.
         <i class="fas fa-graduation-cap text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By Skill</span>
       </div>
     </template>
-    <skills-selector2 :options="[]" class="mx-3 mb-3 mt-2"
+    <skills-selector2 class="mx-3 mb-3 mt-2"
+                      :options="availableSkills"
+                      :selected="selectedSkills"
+                      @added="addSkillToConf"
+                      placeholder="Select skill"
                       :onlySingleSelectedValue="true"></skills-selector2>
 
-    <skills-b-table class=""
+    <skills-b-table v-if="hadData" class=""
                     :options="table.options" :items="table.items"
                     tableStoredStateId="skillApprovalConfSpecificUsersTable"
                     data-cy="skillApprovalConfSpecificUsersTable">
-      <template v-slot:cell(user)="data">
+      <template v-slot:cell(skillId)="data">
         <div class="row">
           <div class="col">
-            {{ data.value }}
+            {{ data.item.skillName }}
           </div>
           <div class="col-auto">
             <b-button title="Delete Skill"
                       variant="outline-danger"
+                      :aria-label="`Remove ${data.value} tag.`"
+                      @click="removeTagConf(data.item)"
+                      :disabled="data.item.deleteInProgress"
                       size="sm">
-              <i class="fas fa-trash" aria-hidden="true"/>
+              <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
+              <i v-else class="fas fa-trash" aria-hidden="true"/>
             </b-button>
           </div>
         </div>
 
       </template>
-      <template v-slot:cell(created)="data">
+      <template v-slot:cell(updated)="data">
         <date-cell :value="data.value" />
       </template>
     </skills-b-table>
+
+    <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                 class="my-5"
+                 icon-size="fa-2x"
+                 icon="fas fa-graduation-cap">
+      You can split approval workload by routing approval requests for selected skills approval requests to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+    </no-content2>
 
   </b-card>
 </template>
@@ -54,25 +69,29 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import SkillsSelector2 from '@/components/skills/SkillsSelector2';
+  import SkillsService from '@/components/skills/SkillsService';
+  import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import SelfReportApprovalConfMixin
+    from '@/components/skills/selfReport/SelfReportApprovalConfMixin';
 
   export default {
     name: 'SelfReportApprovalConfSkill',
-    components: { SkillsSelector2, DateCell, SkillsBTable },
+    components: {
+      NoContent2, SkillsSelector2, DateCell, SkillsBTable,
+    },
+    mixins: [SelfReportApprovalConfMixin],
     props: {
-      user: Object,
+      userInfo: Object,
     },
     data() {
       return {
         projectId: this.$route.params.projectId,
         currentSelectedUser: null,
+        availableSkills: [],
+        selectedSkills: [],
         table: {
-          items: [{
-            user: 'Great Skill 1',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Another Fun Skill',
-            created: new Date().getTime() - 100000,
-          }],
+          items: [],
           options: {
             busy: false,
             bordered: true,
@@ -84,12 +103,12 @@ limitations under the License.
             tableDescription: 'Configure Approval Workload',
             fields: [
               {
-                key: 'user',
+                key: 'skillId',
                 label: 'Skill',
                 sortable: true,
               },
               {
-                key: 'created',
+                key: 'updated',
                 label: 'Configured On',
                 sortable: true,
               },
@@ -106,9 +125,38 @@ limitations under the License.
         },
       };
     },
+    mounted() {
+      const hasConf = this.userInfo.skillConf && this.userInfo.skillConf.length > 0;
+      if (hasConf) {
+        this.table.items = this.userInfo.skillConf.map((u) => ({ ...u }));
+      }
+      this.loadAvailableSkills();
+    },
     computed: {
       pkiAuthenticated() {
         return this.$store.getters.isPkiAuthenticated;
+      },
+      hadData() {
+        return this.table.items && this.table.items.length > 0;
+      },
+    },
+    methods: {
+      loadAvailableSkills() {
+        SkillsService.getProjectSkills(this.projectId, null, false, true)
+          .then((loadedSkills) => {
+            const alreadySelectedSkillIds = this.table.items.map((item) => item.skillId);
+            this.availableSkills = loadedSkills.filter((item) => !alreadySelectedSkillIds.includes(item.skillId));
+          });
+      },
+      addSkillToConf(newItem) {
+        SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, newItem.skillId)
+          .then((res) => {
+            this.table.items.push(res);
+            this.$emit('conf-added', res);
+            this.availableSkills = this.availableSkills.filter((item) => item.skillId !== newItem.skillId);
+            this.selectedSkills = [];
+            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${newItem.skillId} skill.`));
+          });
       },
     },
   };

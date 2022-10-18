@@ -49,7 +49,7 @@ limitations under the License.
               <div v-for="tConf in data.item.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKey}}:</span> <span>{{tConf.userTagValue}}</span></div>
             </div>
             <div v-if="data.item.userConf && data.item.userConf.length > 0" >
-              <b-badge variant="success">{{data.item.userConf.length}}</b-badge> specific users
+              <b-badge variant="success">{{data.item.userConf.length}}</b-badge> Specific User{{ data.item.userConf.length > 1 ? 's' : '' }}
             </div>
             <div v-if="data.item.skillConf && data.item.skillConf.length > 0" >
               <b-badge variant="info">{{ data.item.skillConf.length }}</b-badge> Specific Skill{{ data.item.skillConf.length  > 1 ? 's' : '' }}
@@ -75,8 +75,14 @@ limitations under the License.
                                               @conf-added="updatedTagConf"
                                               @conf-removed="removeTagConf"
                                               class="mt-3"/>
-          <self-report-approval-conf-skill :user="row.item" class="mt-3"/>
-          <self-report-approval-conf-specific-users :user="row.item" class="mt-3"/>
+          <self-report-approval-conf-skill :user-info="row.item"
+                                           @conf-added="updatedSkillConf"
+                                           @conf-removed="removeSkillConf"
+                                           class="mt-3"/>
+          <self-report-approval-conf-specific-users :user-info="row.item"
+                                                    @conf-added="updatedUserConf"
+                                                    @conf-removed="removeUserConf"
+                                                    class="mt-3"/>
         </div>
       </template>
 
@@ -189,15 +195,33 @@ limitations under the License.
         return res;
       },
       updatedTagConf(newConf) {
-        const itemToUpdate = this.table.items.find((i) => i.userId === newConf.approverUserId);
-        itemToUpdate.allConf.push(newConf);
-        itemToUpdate.tagConf.push(newConf);
-        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
+        this.updatedConf(newConf, 'tagConf');
       },
       removeTagConf(removedConf) {
+        this.removeConf(removedConf, 'tagConf');
+      },
+      updatedSkillConf(newConf) {
+        this.updatedConf(newConf, 'skillConf');
+      },
+      removeSkillConf(removedConf) {
+        this.removeConf(removedConf, 'skillConf');
+      },
+      updatedUserConf(newConf) {
+        this.updatedConf(newConf, 'userConf');
+      },
+      removeUserConf(removedConf) {
+        this.removeConf(removedConf, 'userConf');
+      },
+      updatedConf(newConf, confName) {
+        const itemToUpdate = this.table.items.find((i) => i.userId === newConf.approverUserId);
+        itemToUpdate.allConf.push(newConf);
+        itemToUpdate[confName].push(newConf);
+        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
+      },
+      removeConf(removedConf, confName) {
         const itemToUpdate = this.table.items.find((i) => i.userId === removedConf.approverUserId);
         itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== removedConf.id);
-        itemToUpdate.tagConf = itemToUpdate.tagConf.filter((i) => i.id !== removedConf.id);
+        itemToUpdate[confName] = itemToUpdate[confName].filter((i) => i.id !== removedConf.id);
         itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
       },
     },

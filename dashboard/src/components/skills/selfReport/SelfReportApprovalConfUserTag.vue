@@ -26,7 +26,7 @@ limitations under the License.
           <b-form-input id="tagValueInput"
                         v-model="enteredTag"
                         v-on:keydown.enter="addTagConf"
-                        :placeholder="`Enter ${tagLabel} to add to the config!`"
+                        :placeholder="`Enter ${tagLabel} value`"
                         data-cy="tagValueInput"
                         :aria-invalid="errors && errors.length > 0"
                         aria-describedby="tagValueInputError"
@@ -75,7 +75,9 @@ limitations under the License.
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="my-5"
                  icon-size="fa-2x"
-                 :message="`You can split approval workload by ${tagLabel}.`" />
+                 icon="fas fa-user-tag">
+      You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+    </no-content2>
 
   </b-card>
 </template>
@@ -164,6 +166,7 @@ limitations under the License.
                 this.table.items.push(res);
                 this.enteredTag = '';
                 this.$emit('conf-added', res);
+                this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.enteredTag} ${this.tagLabel}.`));
               });
           }
         });
@@ -174,6 +177,7 @@ limitations under the License.
           .then(() => {
             this.table.items = this.table.items.filter((i) => i.id !== removedIem.id);
             this.$emit('conf-removed', removedIem);
+            this.$nextTick(() => this.$announcer.polite(`Removed workload configuration successfully for ${removedIem.userTagValue} ${this.tagLabel}.`));
           });
       },
       assignCustomValidation() {

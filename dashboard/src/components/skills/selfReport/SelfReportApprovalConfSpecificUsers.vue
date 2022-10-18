@@ -68,7 +68,7 @@ limitations under the License.
     name: 'SelfReportApprovalConfSpecificUsers',
     components: { DateCell, SkillsBTable, ExistingUserInput },
     props: {
-      user: Object,
+      userInfo: Object,
     },
     data() {
       return {
