@@ -546,12 +546,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT1S'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'PT55M'
         });
@@ -618,12 +618,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'P1D'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
@@ -689,12 +689,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT1S'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
@@ -765,12 +765,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT1H'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
@@ -839,12 +839,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT1H'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
@@ -911,12 +911,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT1S'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
@@ -990,12 +990,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc@abc.org'],
             validityDuration: 'PT5S'
         });
 
-        cy.request('POST', '/admin//projects/proj1/invite', {
+        cy.request('POST', '/admin/projects/proj1/invite', {
             recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org'],
             validityDuration: 'P90D'
         });
