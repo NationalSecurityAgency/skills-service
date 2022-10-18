@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils
 import org.ocpsoft.prettytime.PrettyTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -130,23 +131,27 @@ class InviteOnlyProjectService {
         Expiration expiration = ExpirationUtils.getExpiration(validDuration)
         String currentUser = userInfoService.getCurrentUserId()
 
-        ProjectAccessToken accessToken = new ProjectAccessToken()
-        accessToken.token = code
-        accessToken.project = projDef
-        accessToken.expires = expiration.expiresOn
-        accessToken.created = created
-        accessToken.recipientEmail = email?.toLowerCase();
-        accessToken = projectAccessTokenRepo.save(accessToken)
+        try {
+            ProjectAccessToken accessToken = new ProjectAccessToken()
+            accessToken.token = code
+            accessToken.project = projDef
+            accessToken.expires = expiration.expiresOn
+            accessToken.created = created
+            accessToken.recipientEmail = email?.toLowerCase();
+            accessToken = projectAccessTokenRepo.save(accessToken)
 
-        ProjectInvite invite = new ProjectInvite()
-        invite.projectId = projDef.projectId
-        invite.projectName = projDef.name
-        invite.validFor = expiration.validFor
-        invite.token = accessToken.token
-        invite.recipientEmail = email?.toLowerCase()
+            ProjectInvite invite = new ProjectInvite()
+            invite.projectId = projDef.projectId
+            invite.projectName = projDef.name
+            invite.validFor = expiration.validFor
+            invite.token = accessToken.token
+            invite.recipientEmail = email?.toLowerCase()
 
-        log.info("user [{}] has generated invite token [{}] for project [{}] for recipient [{}]", currentUser, code, projectId, email)
-        return invite
+            log.info("user [{}] has generated invite token [{}] for project [{}] for recipient [{}]", currentUser, code, projectId, email)
+            return invite
+        } catch (DataIntegrityViolationException ex) {
+            throw new SkillException("Project Invite already exists for [${email}]", projectId, null, ErrorCode.ProjectInviteAlreadyExists)
+        }
     }
 
     /**
