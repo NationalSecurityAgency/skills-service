@@ -155,6 +155,7 @@ limitations under the License.
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
           });
+        this.searchChanged('');
       },
       searchChanged(query) {
         this.search = query;

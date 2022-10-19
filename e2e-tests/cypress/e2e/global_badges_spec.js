@@ -1993,4 +1993,89 @@ describe('Global Badges Tests', () => {
             .contains(0);
     });
 
+    it('skill filter is fully cleared after skill is selected', () => {
+        cy.intercept('GET', '/supervisor/badges/badge1/skills/available**').as('loadBadgeSkills');
+
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skillOne`,
+            name: `This is One`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill11`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skillOneOne`,
+            name: `This is One One`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skillTwo`,
+            name: `This is Two`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill3`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: `skillThree`,
+            name: `This is Three`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.request('POST', '/supervisor/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+
+        cy.visit('/administrator/globalBadges/badge1');
+        cy.wait('@loadBadgeSkills');
+
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[role="listbox"]').children().should('have.length', 4);
+        cy.get('[data-cy="skillsSelector"]').click().type('one');
+        cy.get('[role="listbox"]').children().eq(0).click();
+        cy.get('[data-cy="simpleSkillsTable"').children().eq(0).children().find('td').eq(0).should('contain.text', 'proj1');
+        cy.get('[data-cy="skillsSelector"]').should('not.contain.text', 'one');
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[role="listbox"]').children().should('have.length', 3);
+    });
+
 });
