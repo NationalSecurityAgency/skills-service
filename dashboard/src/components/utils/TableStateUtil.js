@@ -15,7 +15,10 @@
  */
 export default class TableStateUtil {
   static saveTableSortState(id, sortBy, sortDesc) {
-    const sorting = {};
+    let sorting = JSON.parse(localStorage.getItem('tableState'));
+    if (!sorting) {
+      sorting = {};
+    }
     sorting[id] = {
       sortBy,
       sortDesc,
