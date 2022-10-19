@@ -16,14 +16,23 @@
 package skills.intTests
 
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserPointsRepo
 import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class AdminEditSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     def "Edit subjectId"(){
         Map proj = SkillsFactory.createProject()
@@ -1138,6 +1147,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         then:
         !projectUsersPostDelete.data.find { it.userId == user1 }
         projectUsersPostDelete.data.find { it.userId == user2 && it.totalPoints == 20 }
+        !userPointsRepo.findByProjectIdAndUserId(project.projectId, user1)
+        !userAchievedLevelRepo.findAllByUserAndProjectIds(user1 , [project.projectId])
         !u1LevelPostDelete
         u2LevelPostDelete == 1
     }
