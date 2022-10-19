@@ -14,34 +14,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span class="markdown">
-        <span v-html="parseMarkdown(text)"/>
-    </span>
+  <span class="markdown">
+    <viewer ref="toastuiViewer"
+            data-cy="markdownViewer"
+            :initialValue="text"
+            :options="viewerOptions"
+            :height="markdownHeight" />
+  </span>
 </template>
-
 <script>
-  import { marked } from 'marked';
-  import emoji from 'node-emoji';
-  import DOMPurify from 'dompurify';
+
+  import '@toast-ui/editor/dist/toastui-editor-viewer.css';
+  import { Viewer } from '@toast-ui/vue-editor';
+  import MarkdownMixin from './MarkdownMixin';
 
   export default {
     name: 'MarkdownText',
     props: {
       text: String,
+      markdownHeight: {
+        type: String,
+        default: '300px',
+      },
     },
-    methods: {
-      parseMarkdown(text) {
-        const compiled = marked(text);
-        const onMissing = (name) => name;
-        const emojified = emoji.emojify(compiled, onMissing);
-        const sanitized = DOMPurify.sanitize(emojified, { ADD_ATTR: ['target'] });
-        return sanitized;
+    components: {
+      viewer: Viewer,
+    },
+    mixins: [MarkdownMixin],
+    watch: {
+      text(newVal) {
+        this.$refs.toastuiViewer.invoke('setMarkdown', newVal);
+      },
+    },
+    computed: {
+      viewerOptions() {
+        return this.markdownOptions;
       },
     },
   };
 </script>
 
 <style>
+    .markdown div.toastui-editor-contents p {
+      color: inherit !important;
+    }
+
     .markdown blockquote {
         padding: 10px 20px;
         margin: 0 0 20px;

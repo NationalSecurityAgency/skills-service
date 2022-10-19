@@ -397,18 +397,19 @@ describe('Projects Tests', () => {
         cy.intercept('POST', '/admin/projects/proj1').as('saveProject');
 
         // validate that edit on both /projects and /project/projId view retain edits to description
+        const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container > div > div'
         cy.visit('/administrator/projects/proj1');
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
-        cy.get('[data-cy="markdownEditorInput"]').should('be.empty');
-        cy.get('[data-cy="markdownEditorInput"]').click().type('I am a description');
+        cy.get(makdownDivSelector).invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="markdownEditorInput"]').type('I am a description');
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
         cy.get('[data-cy="saveProjectButton"]').click();
         cy.wait('@saveProject');
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
-        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'I am a description');
+        cy.get(makdownDivSelector).should('have.text', 'I am a description');
         cy.get('[data-cy="markdownEditorInput"]').click().type('jabberwocky jabberwocky jabberwocky');
         cy.wait('@validateDescription');
         cy.get('[data-cy="projectDescriptionError"]').should('be.visible');
@@ -424,7 +425,7 @@ describe('Projects Tests', () => {
         cy.contains('This is project 1');
         cy.get('[data-cy="editProjBtn"]').click();
         cy.wait('@loadDescription');
-        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'I am a description sans jw');
+        cy.get(makdownDivSelector).should('have.text', 'I am a description sans jw');
         cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}Am I a description?');
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
         cy.get('[data-cy="saveProjectButton"]').click();
@@ -432,7 +433,7 @@ describe('Projects Tests', () => {
         cy.contains('This is project 1');
         cy.get('[data-cy="editProjBtn"]').click();
         cy.wait('@loadDescription');
-        cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'Am I a description?');
+        cy.get(makdownDivSelector).should('have.text', 'Am I a description?');
     });
 
 });

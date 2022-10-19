@@ -107,12 +107,12 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import SkillsService from '../SkillsService';
   import EditSkill from '../EditSkill';
   import LoadingContainer from '../../utils/LoadingContainer';
   import MsgBoxMixin from '../../utils/modal/MsgBoxMixin';
   import EditNumRequiredSkills from './EditNumRequiredSkills';
-  import MarkdownText from '../../utils/MarkdownText';
   import ImportFromCatalog from '../catalog/ImportFromCatalog';
   import CatalogService from '../catalog/CatalogService';
 

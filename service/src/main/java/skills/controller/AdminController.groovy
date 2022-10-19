@@ -51,6 +51,8 @@ import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 
+import java.nio.charset.StandardCharsets
+
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
@@ -183,13 +185,55 @@ class AdminController {
         return res
     }
 
+    @RequestMapping(value ="/projects/{id}/invites/status", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getInviteStatus(@PathVariable("id") String projectId, @RequestParam int limit,
+                                              @RequestParam int page,
+                                              @RequestParam String orderBy,
+                                              @RequestParam Boolean ascending,
+                                              @RequestParam(required = false, defaultValue = "") String query) {
+
+        PageRequest pagingRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
+        return inviteOnlyProjectService.getPendingInvites(projectId, URLDecoder.decode(query, StandardCharsets.UTF_8), pagingRequest)
+    }
+
+    @RequestMapping(value="/projects/{id}/invites/extend", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    RequestResult extendInviteExpiration(@PathVariable("id") String projectId, @RequestBody InviteExtensionRequest inviteExtensionRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project ID")
+        SkillsValidator.isNotBlank(inviteExtensionRequest?.extensionDuration, "Extension Duration")
+        SkillsValidator.isNotBlank(inviteExtensionRequest?.recipientEmail, "Recipient Email")
+
+        inviteOnlyProjectService.extendValidity(projectId, inviteExtensionRequest.recipientEmail, inviteExtensionRequest.extensionDuration)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{id}/invites/{recipient}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    RequestResult deleteInvite(@PathVariable("id") String projectId, @PathVariable("recipient") String recipientEmail) {
+        SkillsValidator.isNotBlank(projectId, "Project ID")
+        SkillsValidator.isNotBlank(recipientEmail, "Recipient Email")
+
+        inviteOnlyProjectService.deleteInvite(projectId, recipientEmail)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value="/projects/{id}/invites/{recipient}/remind", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    RequestResult sendInviteReminder(@PathVariable("id") String projectId, @PathVariable("recipient") String recipientEmail) {
+        SkillsValidator.isNotBlank(projectId, "Project ID")
+        SkillsValidator.isNotBlank(recipientEmail, "Recipient Email")
+
+        inviteOnlyProjectService.remindUser(projectId, recipientEmail)
+        return RequestResult.success()
+    }
+
     @RequestMapping(value="/projects/{id}/cancelExpiration")
     RequestResult cancelExpiration(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         projAdminService.cancelProjectExpiration(projectId)
         return new RequestResult(success: true)
     }
-
 
     @RequestMapping(value = "/projects/{id}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("id") String projectId) {
@@ -1305,9 +1349,9 @@ class AdminController {
                                   @RequestParam(required=false) String subjectNameSearch,
                                   @RequestParam(required=false) String skillNameSearch) {
         TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId,
-                URLDecoder.decode(projectNameSearch, "utf-8"),
-                URLDecoder.decode(subjectNameSearch, "utf-8"),
-                URLDecoder.decode(skillNameSearch, "utf-8"), createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+                URLDecoder.decode(projectNameSearch, StandardCharsets.UTF_8),
+                URLDecoder.decode(subjectNameSearch, StandardCharsets.UTF_8),
+                URLDecoder.decode(skillNameSearch, StandardCharsets.UTF_8), createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
         TableResult tr = new TableResult()
         tr.count = res.results?.size()
         tr.totalCount = res.total
@@ -1360,21 +1404,6 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/skills/exported/stats", method = RequestMethod.GET, produces = "application/json")
     ExportedSkillsStats getExportedSkillsStats(@PathVariable("projectId") String projectId) {
         return skillCatalogService.getSkillsExportedStats(projectId)
-    }
-
-
-    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
-        PageRequest pageRequest
-        if (useUnsafeSort) {
-            pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
-        } else {
-            pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        }
-
-        return pageRequest
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -1449,5 +1478,18 @@ class AdminController {
         return RequestResult.success()
     }
 
+    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        PageRequest pageRequest
+        if (useUnsafeSort) {
+            pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
+        } else {
+            pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        }
+
+        return pageRequest
+    }
 }
 

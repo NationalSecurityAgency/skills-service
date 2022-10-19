@@ -53,7 +53,7 @@ limitations under the License.
 </template>
 
 <script>
-  import MarkdownText from '@/components/utils/MarkdownText';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import ShowMore from '@/components/skills/selfReport/ShowMore';
 
   export default {

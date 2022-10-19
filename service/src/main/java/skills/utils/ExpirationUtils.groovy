@@ -34,4 +34,13 @@ class ExpirationUtils {
 
         return expiration
     }
+
+    public static Expiration extendExpiration(Date currentExpiration, String iso8601Duration) {
+        Duration extensionPeriod = Duration.parse(iso8601Duration)
+        LocalDateTime expires = currentExpiration.toLocalDateTime().plus(extensionPeriod)
+
+        String validFor = DurationFormatUtils.formatDurationWords(Duration.between(LocalDateTime.now(), expires).toMillis(), true, true)
+        Expiration expiration = new Expiration(expiresOn: Date.from(expires.atZone(ZoneId.systemDefault()).toInstant()), validFor: validFor)
+        return expiration
+    }
 }

@@ -56,7 +56,6 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import Vuex from 'vuex';
-import { marked } from 'marked';
 import VueApexCharts from 'vue-apexcharts';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
@@ -227,21 +226,6 @@ router.afterEach((to) => {
     document.title = newTitle;
   });
 });
-
-const renderer = {
-  link(href, title, text) {
-    let titleRes = title;
-    if (!title) {
-      titleRes = text;
-    }
-    const link = marked.Renderer.prototype.link.call(this, href, titleRes, text);
-    let resLink = link.replace('<a', "<a target='_blank' ");
-    resLink = resLink.replace('</a>', ' <i class="fas fa-external-link-alt" style="font-size: 0.8rem"></i></a>');
-    return resLink;
-  },
-};
-
-marked.use({ renderer });
 
 store.dispatch('loadConfigState').finally(() => {
   RegisterValidators.init();

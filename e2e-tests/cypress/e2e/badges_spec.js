@@ -16,7 +16,7 @@
 describe('Badges Tests', () => {
 
     const tableSelector = '[data-cy="simpleSkillsTable"]';
-
+    const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container > div > div'
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -432,8 +432,8 @@ describe('Badges Tests', () => {
             .fill('a')
             .join('');
         // it takes way too long using .type method
-        cy.get('#markdown-editor textarea')
-            .fill(invalidDescription);
+        cy.get(makdownDivSelector)
+            .invoke('text', invalidDescription);
         cy.get('#markdown-editor')
             .type('a');
         cy.get('[data-cy=badgeDescriptionError]')

@@ -183,8 +183,9 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="expandDetailsBtn_group2"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group2"] [data-cy="description"]').contains('second group description');
 
+        const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container > div > div'
         cy.get('[data-cy="editSkillButton_group2"]').click();
-        cy.get('[data-cy="groupDescription"] [data-cy="markdownEditorInput"]').should('have.value', 'second group description');
+        cy.get(makdownDivSelector).should('have.text', 'second group description');
 
         cy.get('[data-cy="groupDescription"] [data-cy="markdownEditorInput"]').clear().type('another value');
         cy.get('[data-cy="groupName"]').clear().type('Updated Group Name');
@@ -197,7 +198,7 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="editSkillButton_group2"]').click();
         cy.get('[data-cy="groupName"]').should('have.value', 'Updated Group Name');
-        cy.get('[data-cy="groupDescription"] [data-cy="markdownEditorInput"]').should('have.value', 'another value');
+        cy.get(makdownDivSelector).should('have.text', 'another value');
     });
 
     it('Skills Group modal - edit id of an existing group', () => {
