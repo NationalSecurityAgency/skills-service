@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
           <b-form-group label="Projects Filter" label-class="text-muted">
@@ -35,6 +35,24 @@ limitations under the License.
 
       <skills-b-table :options="table.options" :items="projectsInternal" tableStoredStateId="projectsTable"
                       data-cy="projectsTable">
+        <template #head(name)="data">
+          <span class="text-primary"><i class="fas fa-list-alt skills-color-projects" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(numSubjects)="data">
+          <span class="text-primary"><i class="fas fa-cubes skills-color-subjects" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(numSkills)="data">
+          <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(totalPoints)="data">
+          <span class="text-primary"><i class="far fa-arrow-alt-circle-up skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(numBadges)="data">
+          <span class="text-primary"><i class="fas fa-award skills-color-badges" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(created)="data">
+          <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
 
         <template v-slot:cell(name)="data">
           <div class="row" :id="`proj${data.item.projectId}`" tabindex="-1">
@@ -46,19 +64,22 @@ limitations under the License.
               </router-link>
 
               <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.projectId }}</div>
+              <div class="mt-2">
+                <i class="fas fa-user-shield text-success" style="font-size: 1.05rem;" aria-hidden="true"></i> <i>Role:</i> <span data-cy="userRole">{{ data.item.userRole | userRole }}</span>
+              </div>
             </div>
             <div class="col-auto ml-auto mr-0">
               <router-link :data-cy="`manageProjBtn_${data.item.projectId}`" :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
                            :aria-label="`Manage Project ${data.item.name}`"
                            class="btn btn-outline-primary btn-sm mr-2">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+                <span class="d-none d-sm-inline">{{ isProjReadOnly(data.item) ? 'View' : 'Manage' }} </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
               <b-button v-if="isRootUser" class="mr-2" @click="unpin(data.item)" data-cy="unpin" size="sm"
                         variant="outline-primary" :aria-label="'remove pin for project '+ data.item.name"
                         :aria-pressed="data.item.pinned">
                 <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
               </b-button>
-              <b-button-group size="sm" class="ml-0">
+              <b-button-group v-if="!isProjReadOnly(data.item)" size="sm" class="ml-0">
                 <b-button @click="showProjectEditModal(data.item)"
                           variant="outline-primary" :data-cy="`editProjectId${data.item.projectId}`"
                           :aria-label="'edit Project '+data.item.name"
@@ -132,18 +153,19 @@ limitations under the License.
                   :is-copy="true"
                   @project-saved="projectCopied"
                   @hidden="handleCopyModalIsHidden"/>
-  </div>
+  </b-card>
 
 </template>
 
 <script>
   import dayjs from '@/common-components/DayJsCustomizer';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import ProjectService from './ProjectService';
-  import SkillsBTable from '../utils/table/SkillsBTable';
-  import RemovalValidation from '../utils/modal/RemovalValidation';
-  import EditProject from './EditProject';
-  import SettingsService from '../settings/SettingsService';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ProjectService from '@/components/projects/ProjectService';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import EditProject from '@/components/projects/EditProject';
+  import SettingsService from '@/components/settings/SettingsService';
+  import UserRolesUtil from '@/components/utils/UserRolesUtil';
 
   export default {
     name: 'ProjectsTable',
@@ -172,7 +194,7 @@ limitations under the License.
             busy: true,
             bordered: false,
             outlined: true,
-            stacked: 'md',
+            stacked: 'lg',
             tableDescription: 'Projects',
             fields: [
               {
@@ -331,6 +353,9 @@ limitations under the License.
         this.$nextTick(() => {
           ref.focus();
         });
+      },
+      isProjReadOnly(proj) {
+        return UserRolesUtil.isReadOnlyProjRole(proj.userRole);
       },
     },
   };
