@@ -1096,8 +1096,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         u2SubjLevelPostDelete == 1
     }
 
-    @IgnoreRest
-    def "deleting a subject should remove ophaned points and achievements"() {
+    def "deleting a subject should remove orphaned points and achievements"() {
         def project = SkillsFactory.createProject()
         def subject = SkillsFactory.createSubject()
         def subject2 = SkillsFactory.createSubject(1, 2)
