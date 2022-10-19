@@ -1499,6 +1499,26 @@ class SkillsService {
         return resp
     }
 
+    def getPendingProjectInvites(String projectId, int limit, int page, String orderBy, Boolean ascending) {
+        def resp = wsHelper.adminGet("/projects/${projectId}/invites/status?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+        return resp
+    }
+
+    def deletePendingInvite(String projectId, String recipientEmail) {
+        return wsHelper.adminDelete("/projects/${projectId}/invites/${recipientEmail}")
+    }
+
+    def remindUserOfPendingInvite(String projectId, String recipientEmail) {
+       return wsHelper.adminPost("/projects/${projectId}/invites/${recipientEmail}/remind", [:])
+    }
+
+    def extendProjectInviteExpiration(String projectId, String recipientEmail, String isoDuration) {
+        def body = [:]
+        body.extensionDuration = isoDuration
+        body.recipientEmail = recipientEmail
+        return wsHelper.adminPost("/projects/${projectId}/invites/extend", body)
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

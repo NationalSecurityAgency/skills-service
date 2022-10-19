@@ -438,6 +438,18 @@ Cypress.Commands.add("getLinkFromEmail", () => {
     });
 });
 
+Cypress.Commands.add("getEmails", () => {
+    cy.request({
+        "method":"GET",
+        "url": "http://localhost:1081/api/emails"
+    }).then((response) => {
+        if (response.body) {
+            return cy.wrap(response.body);
+        }
+        return '';
+    });
+});
+
 Cypress.Commands.add('customLighthouse', () => {
     cy.closeToasts();
     cy.wait(500);

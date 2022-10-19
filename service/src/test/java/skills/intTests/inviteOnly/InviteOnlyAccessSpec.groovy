@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.InviteOnlyProjectService
+import skills.storage.repos.ProjectAccessTokenRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
@@ -330,6 +331,10 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         userService.joinProject(proj.projectId, inviteCode)
         greenMail.reset()
 
+        //to allow a user to accept a second invite we have to clear out the invite tables - accepted invites are retained for a configurable period of days
+        //to allow better error handling if a user tries to re-use an already claimed invite
+        inviteOnlyProjectService.removeClaimedInviteTokens(new Date())
+
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
@@ -365,6 +370,9 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         userService.joinProject(proj.projectId, inviteCode)
         greenMail.reset()
+        //to allow a user to accept a second invite we have to clear out the invite tables - accepted invites are retained for a configurable period of days
+        //to allow better error handling if a user tries to re-use an already claimed invite
+        inviteOnlyProjectService.removeClaimedInviteTokens(new Date())
 
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }

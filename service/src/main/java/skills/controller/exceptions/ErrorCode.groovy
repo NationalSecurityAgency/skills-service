@@ -48,4 +48,6 @@ enum ErrorCode {
     ClaimedInvitationCode,
     UserRoleAlreadyAssigned,
     NotYourInvitationCode,
+    ExpiredProjectInvite,
+    ProjectInviteAlreadyExists
 }

@@ -25,7 +25,6 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.InviteTokenValidationRequest
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.result.model.CustomIconResult

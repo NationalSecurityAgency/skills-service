@@ -17,8 +17,11 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.ocpsoft.prettytime.PrettyTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
@@ -26,10 +29,7 @@ import skills.auth.*
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.result.model.InviteTokenValidationResponse
-import skills.controller.result.model.InviteUsersResult
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.UserRoleRes
+import skills.controller.result.model.*
 import skills.services.AccessSettingsStorageService
 import skills.services.EmailSendingService
 import skills.services.FeatureService
@@ -49,6 +49,8 @@ import skills.utils.Expiration
 import skills.utils.ExpirationUtils
 import skills.utils.PatternsUtil
 
+import java.util.regex.Pattern
+
 @Slf4j
 @Component
 class InviteOnlyProjectService {
@@ -56,6 +58,9 @@ class InviteOnlyProjectService {
 
     private static final int MAX_GENERATION_ATTEMPTS = 5
     private static final String INVITE_TEMPLATE = "project_invitation.html"
+    private static final String INVITE_REMINDER_TEMPLATE = "project_invitation_reminder.html"
+
+    private static final Pattern REPLACE_ZERO_ELEMENTS = ~/\b0\s\S+\s?/
 
     @Value('#{"${skills.authorization.invite.validateEmail:false}"}')
     Boolean validateInviteEmail
@@ -126,23 +131,27 @@ class InviteOnlyProjectService {
         Expiration expiration = ExpirationUtils.getExpiration(validDuration)
         String currentUser = userInfoService.getCurrentUserId()
 
-        ProjectAccessToken accessToken = new ProjectAccessToken()
-        accessToken.token = code
-        accessToken.project = projDef
-        accessToken.expires = expiration.expiresOn
-        accessToken.created = created
-        accessToken.recipientEmail = email;
-        accessToken = projectAccessTokenRepo.save(accessToken)
+        try {
+            ProjectAccessToken accessToken = new ProjectAccessToken()
+            accessToken.token = code
+            accessToken.project = projDef
+            accessToken.expires = expiration.expiresOn
+            accessToken.created = created
+            accessToken.recipientEmail = email?.toLowerCase();
+            accessToken = projectAccessTokenRepo.save(accessToken)
 
-        ProjectInvite invite = new ProjectInvite()
-        invite.projectId = projDef.projectId
-        invite.projectName = projDef.name
-        invite.validFor = expiration.validFor
-        invite.token = accessToken.token
-        invite.recipientEmail = email
+            ProjectInvite invite = new ProjectInvite()
+            invite.projectId = projDef.projectId
+            invite.projectName = projDef.name
+            invite.validFor = expiration.validFor
+            invite.token = accessToken.token
+            invite.recipientEmail = email?.toLowerCase()
 
-        log.info("user [{}] has generated invite token [{}] for project [{}] for recipient [{}]", currentUser, code, projectId, email)
-        return invite
+            log.info("user [{}] has generated invite token [{}] for project [{}] for recipient [{}]", currentUser, code, projectId, email)
+            return invite
+        } catch (DataIntegrityViolationException ex) {
+            throw new SkillException("Project Invite already exists for [${email}]", projectId, null, ErrorCode.ProjectInviteAlreadyExists)
+        }
     }
 
     /**
@@ -340,6 +349,96 @@ class InviteOnlyProjectService {
         }
         List<UserRoleRes> roles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId)
         return roles?.find {it.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER }
+    }
+
+    @Transactional(readOnly = true)
+    public TableResult getPendingInvites(String projectId, String userEmailQuery, PageRequest pagingRequest) {
+        if (!isInviteOnlyProject(projectId)) {
+            throw new SkillsAuthorizationException("Project is not configured as Invite Only")
+        }
+        int total = projectAccessTokenRepo.countAllUnclaimedByProjectId(projectId, userEmailQuery)
+        List<ProjectInviteStatus> inviteStatuses = []
+        if (total > 0) {
+            List<ProjectAccessToken> invites = projectAccessTokenRepo.findAllUnclaimedByProjectId(projectId, userEmailQuery, pagingRequest)
+            invites.each {
+                inviteStatuses << convert(it)
+            }
+        }
+
+        return new TableResult(data: inviteStatuses, count: inviteStatuses.size(), totalCount: total)
+    }
+
+    @Transactional(readOnly = false)
+    public void extendValidity(String projectId, String recipientEmail, String duration) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotBlank(recipientEmail, "recipientEmail")
+        SkillsValidator.isNotBlank(duration, "extensionDuration")
+        log.info("User [{}] is extending the expiration for invite token to project [{}] for user [{}] by [{}]", userInfoService.getCurrentUserId(), projectId, recipientEmail, duration)
+        ProjectAccessToken accessToken = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
+        Date now = new Date()
+        if (accessToken.expires.before(now)) {
+            log.debug("invite token for user [{}] is already expired, resetting expiration to [{}] before adding extension duration of [{}]", accessToken.recipientEmail, now, duration)
+            accessToken.expires = now
+        }
+        Expiration expiration = ExpirationUtils.extendExpiration(accessToken.expires, duration)
+        accessToken.expires = expiration.expiresOn
+        projectAccessTokenRepo.save(accessToken)
+    }
+
+    @Transactional(readOnly = false)
+    public void deleteInvite(String projectId, String recipientEmail) {
+        projectAccessTokenRepo.deleteByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
+    }
+
+    public void remindUser(String projectId, String recipientEmail) {
+        boolean enabled = featureService.isEmailServiceFeatureEnabled()
+        SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
+
+        final SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
+        final List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
+
+        final String htmlHeader =  emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null
+        final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
+
+        if (!settingsResult) {
+            throw new SkillException("No public URL is configured for the system, unable to send project invite email")
+        }
+
+        String publicUrl = settingsResult.value
+        if (!publicUrl.endsWith("/")){
+            publicUrl += "/"
+        }
+
+        final String url = "${publicUrl}"
+        ProjectAccessToken existingToken = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
+        if (!existingToken) {
+            throw new SkillException("No project invite exists for [${recipientEmail}]", projectId)
+        }
+
+        if (existingToken.expires.before(new Date())) {
+            throw new SkillException("Project Invite for [${existingToken.recipientEmail}] is expired", projectId, null, ErrorCode.ExpiredProjectInvite)
+        }
+
+        PrettyTime prettyTime = new PrettyTime()
+        String relativeTime = prettyTime.format(existingToken.expires)
+        Context templateContext = new Context()
+        templateContext.setVariable("relativeTime", relativeTime)
+        templateContext.setVariable("inviteCode", existingToken.token)
+        templateContext.setVariable("projectId", existingToken.project.projectId)
+        templateContext.setVariable("projectName", existingToken.project.name)
+        templateContext.setVariable("publicUrl", url)
+        templateContext.setVariable("htmlHeader", htmlHeader)
+        templateContext.setVariable("htmlFooter", htmlFooter)
+
+        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation Reminder", recipientEmail, INVITE_REMINDER_TEMPLATE, templateContext)
+    }
+
+    private ProjectInviteStatus convert(ProjectAccessToken token) {
+        return new ProjectInviteStatus(
+                recipientEmail: token.recipientEmail,
+                created: token.created,
+                expires: token.expires
+        )
     }
 
     // generate invite code, attempt to resolve the unlikely scenario where a conflict occurs with an already

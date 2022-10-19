@@ -52,6 +52,8 @@
         <db-scheduler.version>10.5</db-scheduler.version>
 
         <caffeine.version>3.1.1</caffeine.version>
+
+        <pretty-time.version>5.0.3.Final</pretty-time.version>
     </properties>
 
     <parent>

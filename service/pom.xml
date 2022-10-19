@@ -345,6 +345,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.ocpsoft.prettytime</groupId>
+            <artifactId>prettytime</artifactId>
+            <version>${pretty-time.version}</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
