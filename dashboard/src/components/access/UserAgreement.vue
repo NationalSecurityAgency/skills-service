@@ -52,7 +52,7 @@ limitations under the License.
 </template>
 
 <script>
-  import MarkdownText from '../utils/MarkdownText';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import AccessService from './AccessService';
   import SettingsService from '../settings/SettingsService';
   import LoadingContainer from '../utils/LoadingContainer';

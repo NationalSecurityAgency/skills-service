@@ -15,36 +15,29 @@ limitations under the License.
 */
 <template>
   <div id="markdown-editor">
-    <b-tabs class="h-100">
-      <b-tab active>
-        <template slot="title">
-          <i class="fa fa-edit mr-1" aria-hidden="true"/> <span id="markdownEditLabel" :aria-label="`Write ${name} using Markdown`">Write</span>
-        </template>
-        <div class="mt-2" :style="[!resizable ? {'height':markdownHeight} : {}]">
-          <b-form-textarea rows="5" max-rows="5" v-model="valueInternal" @input="dataChanged"
-                           :no-resize="!resizable"
-                           data-cy="markdownEditorInput" aria-labelledby="markdownEditLabel" @mouseup="wasResized"/>
-        </div>
-      </b-tab>
-      <b-tab>
-        <template slot="title">
-          <i class="fa fa-eye mr-1" aria-hidden="true"/> <span :aria-label="`Preview ${name} Markdown rendering`">Preview</span>
-        </template>
-        <div class="mt-2 border rounded p-3" :style="{'overflow-y':'scroll','height':markdownHeight}" data-cy="markdownEditor-preview">
-          <markdown-text v-if="valueInternal" :text="valueInternal"/>
-        </div>
-      </b-tab>
-    </b-tabs>
-    <div><small><b-link to="/markdown" target="_blank">Markdown</b-link> is supported</small></div>
+    <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+      class="markdown"
+      data-cy="markdownEditorInput"
+      ref="toastuiEditor"
+      initialEditType="wysiwyg"
+      previewStyle="tab"
+      :initialValue="valueInternal"
+      :options="editorOptions"
+      :height="markdownHeight"
+      @change="onEditorChange"
+    ></editor>
   </div>
 </template>
 
 <script>
-  import MarkdownText from './MarkdownText';
+  import '@toast-ui/editor/dist/toastui-editor.css';
+  import { Editor } from '@toast-ui/vue-editor';
+  import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
 
   export default {
     name: 'MarkdownEditor',
-    components: { MarkdownText },
+    components: { Editor },
+    mixins: [MarkdownMixin],
     props: {
       value: String,
       resizable: {
@@ -55,35 +48,80 @@ limitations under the License.
         type: String,
         default: 'Description',
       },
+      markdownHeight: {
+        type: String,
+        default: '300px',
+      },
     },
     data() {
       return {
         valueInternal: this.value,
-        markdownHeight: '10rem',
+        intervalId: null,
+        intervalRuns: 0,
+        maxIntervalAttempts: 8,
       };
     },
-    watch: {
-      value(newValue) {
-        this.valueInternal = newValue;
+    mounted() {
+      this.intervalId = setInterval(() => {
+        this.intervalRuns += 1;
+        if (this.intervalRuns <= this.maxIntervalAttempts) {
+          this.setLabelForMoreButton();
+        } else {
+          clearInterval(this.intervalId);
+        }
+      }, 250);
+      this.setLabelForMoreButton();
+    },
+    computed: {
+      markdownText() {
+        const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');
+        return markdown;
+      },
+      // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
+      // emojiWidgetRule() {
+      //   const reWidgetRule = /([:]\S+[:])/;
+      //   return {
+      //     rule: reWidgetRule,
+      //     toDOM(text) {
+      //       const rule = reWidgetRule;
+      //       const matched = text.match(rule);
+      //       const span = document.createElement('span');
+      //       const onMissing = (name) => name;
+      //       const emojified = emoji.emojify(matched[1], onMissing);
+      //       span.innerHTML = emojified;
+      //       return span;
+      //     },
+      //   };
+      // },
+      editorOptions() {
+        const options = {
+          hideModeSwitch: false,
+          usageStatistics: false,
+          autofocus: false,
+          // widgetRules: [this.emojiWidgetRule],
+        };
+        return Object.assign(this.markdownOptions, options);
       },
     },
     methods: {
-      dataChanged() {
-        this.$emit('input', this.valueInternal);
+      onEditorChange() {
+        this.$emit('input', this.markdownText);
       },
-      wasResized(e) {
-        if (this.resizable) {
-          const oneRem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-          const targetHeight = e.target.clientHeight;
-          const inRem = `${targetHeight / oneRem}rem`;
-          if (inRem !== this.markdownHeight) {
-            this.markdownHeight = inRem;
+      setLabelForMoreButton() {
+        this.$nextTick(() => {
+          const toolbarElem = document.getElementsByClassName('more toastui-editor-toolbar-icons')[0];
+          if (toolbarElem) {
+            toolbarElem.setAttribute('aria-label', 'More');
           }
-        }
+        });
       },
     },
   };
 </script>
 
 <style scoped>
+  .markdown >>> .toastui-editor-mode-switch .tab-item {
+    color: #555;
+  }
+
 </style>

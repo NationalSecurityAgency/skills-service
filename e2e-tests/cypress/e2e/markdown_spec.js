@@ -23,6 +23,25 @@ describe('Markdown Tests', () => {
         capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
     };
 
+    const markdownInput = '[data-cy=markdownEditorInput]';
+
+    Cypress.Commands.add('clickToolbarButton', (buttonName) => {
+        cy.get(`button.${buttonName}`).click({force: true})
+    });
+    Cypress.Commands.add('addHeading', (headingLevel, headingText) => {
+        cy.clickToolbarButton('heading')
+        cy.get(`ul > li[data-level=${headingLevel}]`).click({force: true})
+        cy.focused().type(headingText);
+    });
+    Cypress.Commands.add('selectParagraphText', () => {
+        cy.clickToolbarButton('heading')
+        cy.get('ul > li[data-type=Paragraph]').click({force: true})
+    });
+    Cypress.Commands.add('addBold', (text) => {
+        cy.clickToolbarButton('bold')
+        cy.focused().type(text);
+    });
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -39,6 +58,7 @@ describe('Markdown Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy=newSkillButton]')
             .click();
+        cy.get('#markdown-editor > div > div > div.toastui-editor-mode-switch').contains('Markdown').click()
         cy.get('[data-cy=skillName]')
             .type('skill1');
         cy.get('[data-cy=skillDescription]')
@@ -62,6 +82,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
             .click();
 
+        cy.get('#markdown-editor > div > div > div.toastui-editor-mode-switch').contains('Markdown').click()
         const validateMarkdown = (markdown, snapshotName, expectedText = null, clickWrite = true) => {
             if (clickWrite) {
                 cy.contains('Write')
@@ -79,7 +100,7 @@ describe('Markdown Tests', () => {
             if (expectedText) {
                 cy.contains(expectedText);
             }
-            cy.matchSnapshotImageForElement('[data-cy="markdownEditor-preview"]', snapshotName);
+            cy.matchSnapshotImageForElement('#markdown-editor div.toastui-editor-main-container', snapshotName);
         };
         validateMarkdown('# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n', 'Markdown-Titles', null, false);
 
@@ -98,9 +119,9 @@ describe('Markdown Tests', () => {
             '```';
         validateMarkdown(multiLineCode, 'Markdown-MultiLineCode');
 
-        validateMarkdown('Some text:\n1. Item one\n1. Item two\n1. Item three (actual number does not matter)', 'Markdown-NumberedList');
+        validateMarkdown('Some text:\n1. Item one\nItem two\nItem three (actual number does not matter)', 'Markdown-NumberedList');
 
-        validateMarkdown('List:\n* Item\n* Item\n* Item\n', 'Markdown-UnorderedList');
+        validateMarkdown('List:\n* Item\nItem\nItem ', 'Markdown-UnorderedList');
 
         validateMarkdown('this is [in line link](https://www.somewebsite.com)', 'Markdown-Link');
 
@@ -111,6 +132,97 @@ describe('Markdown Tests', () => {
 
         validateMarkdown('Separate me\n\n___\n\nSeparate me\n\n---\n\nSeparate me\n\n***', 'Markdown-Separator');
 
+    });
+
+    it('wysiwyg features', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get(markdownInput).clear()
+        cy.addHeading(1, 'Title1\n')
+        cy.addHeading(2, 'Title2\n')
+        cy.addHeading(3, 'Title3\n')
+        cy.addHeading(4, 'Title4\n')
+        cy.addHeading(5, 'Title5\n')
+        cy.addHeading(6, 'Title6\n\n')
+
+        cy.selectParagraphText()
+        cy.focused().type('regular paragraph text\n\n');
+
+        cy.focused().type('bold: ');
+        cy.clickToolbarButton('bold')
+        cy.focused().type('bolded\n\n');
+
+        cy.focused().type('strikethrough: ');
+        cy.clickToolbarButton('strike')
+        cy.focused().type('struck\n\n');
+
+        cy.clickToolbarButton('hrline')
+        cy.focused().type('{downArrow}Separate me\n');
+        cy.clickToolbarButton('hrline')
+        cy.focused().type('{downArrow}Separate me\n');
+        cy.clickToolbarButton('hrline')
+        cy.focused().type('{downArrow}Separate me\n\n');
+
+        cy.focused().type('list: \n');
+        cy.clickToolbarButton('bullet-list')
+        cy.focused().type('Item 1\nItem 1-A')
+        cy.clickToolbarButton('indent')
+        cy.focused().type('\nItem 1-B\nItem 1-C\nItem 2');
+        cy.clickToolbarButton('outdent')
+        cy.focused().type('\nItem 3\nItem 4\n\n')
+
+        cy.focused().type('ordered list: \n');
+        cy.clickToolbarButton('ordered-list')
+        cy.focused().type('Item 1\nItem 1-A')
+        cy.clickToolbarButton('indent')
+        cy.focused().type('\nItem 1-B\nItem 1-C\nItem 2');
+        cy.clickToolbarButton('outdent')
+        cy.focused().type('\nItem 3\nItem 4\n\n')
+
+        cy.focused().type('task list: \n');
+        cy.clickToolbarButton('task-list')
+        cy.focused().type('Task 1\nTask 1-A')
+        cy.clickToolbarButton('indent')
+        cy.focused().type('\nTask 1-B\nTask 1-C\nTask 2');
+        cy.clickToolbarButton('outdent')
+        cy.focused().type('\nTask 3\nTask 4\n\n')
+
+        cy.clickToolbarButton('image')
+        cy.get('div.toastui-editor-popup.toastui-editor-popup-add-image').contains('URL').click()
+        cy.get('#toastuiImageUrlInput').type('https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png')
+        cy.get('.toastui-editor-ok-button').click()
+        cy.focused().type('\n\n')
+
+        cy.clickToolbarButton('link')
+        cy.get('#toastuiLinkUrlInput').type('https://skilltreeplatform.dev/')
+        cy.get('#toastuiLinkTextInput').type('SkillTree Docs')
+        cy.get('.toastui-editor-ok-button').click()
+        cy.focused().type('\n\n')
+
+        cy.focused().type('This is some ');
+        cy.clickToolbarButton('code')
+        cy.focused().type('inline code');
+        cy.clickToolbarButton('code')
+        cy.focused().type('surrounded by normal text\n\n');
+
+        cy.focused().type('\n{upArrow}Some text followed by a code block\n');
+        cy.clickToolbarButton('codeblock')
+        cy.focused().type('\n' +
+          'const validateMarkdown = (markdown, snapshotName) => {\n' +
+          '}\n');
+        cy.clickToolbarButton('codeblock')
+
+        cy.clickSave();
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'WYSIWYG-Features', snapshotOptions);
     });
 
     it('on skills pages', () => {

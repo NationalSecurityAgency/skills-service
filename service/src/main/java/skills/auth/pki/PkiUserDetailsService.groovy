@@ -17,19 +17,16 @@ package skills.auth.pki
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 import skills.auth.SkillsAuthorizationException
 import skills.auth.UserInfo
 import skills.utils.RetryUtil
-
-import javax.transaction.Transactional
 
 @Slf4j
 class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
@@ -69,10 +66,10 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
             }
         } catch (Exception e) {
             String msg = "Unable to retrieve user info for [${dn}] - ${e.getMessage()}"
-            if (e.getCause() instanceof HttpClientErrorException) {
-                msg = ((HttpClientErrorException) e.getCause()).getResponseBodyAsString()
-            } else if (e instanceof HttpClientErrorException) {
-                msg = ((HttpClientErrorException) e).getResponseBodyAsString()
+            if (e.getCause() instanceof RestClientResponseException) {
+                msg = ((RestClientResponseException) e.getCause()).getResponseBodyAsString()
+            } else if (e instanceof RestClientResponseException) {
+                msg = ((RestClientResponseException) e).getResponseBodyAsString()
             }
             throw new BadCredentialsException(msg, e)
         }

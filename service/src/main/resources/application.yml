@@ -100,7 +100,7 @@ skills:
       buildTimestamp: @maven.build.timestamp@
       minimumSubjectPoints: 100
       minimumProjectPoints: 100
-      descriptionMaxLength: 2000
+      descriptionMaxLength: 2000000
       maxTimeWindowInMinutes: 43200
       docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
