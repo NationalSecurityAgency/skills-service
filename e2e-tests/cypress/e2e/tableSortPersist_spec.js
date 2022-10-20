@@ -59,4 +59,35 @@ describe('Test persistence of table sorting', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.validateTable('[data-cy="skillsTable"]', expected.map((item) => item).reverse(), 10);
     });
+
+    it('Verify skills table sort remains sorted after navigating away and sorting another table', () => {
+
+        const numSkills = 13;
+        const expected = [];
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            const skillName = `Skill # ${skillsCounter}`;
+            expected.push([{ colIndex: 0,  value: skillName }, { colIndex: 1,  value: skillsCounter }])
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: skillName,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
+            });
+        };
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // test skill name sorting
+        cy.get('[data-cy="skillsTable"]').contains('Skill').click();
+        cy.validateTable('[data-cy="skillsTable"]', expected, 10);
+
+        cy.visit('/administrator/projects/proj1/users');
+        cy.get('[data-cy="usersTable"]').contains('Progress').click();
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.validateTable('[data-cy="skillsTable"]', expected, 10);
+
+    });
 });
