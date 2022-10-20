@@ -34,9 +34,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserEventsRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
-
-import java.time.LocalDate
 
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
@@ -370,6 +367,7 @@ SkillTree Bot'''
         String user = "skills@skills.org"
 
         def proj = SkillsFactory.createProject()
+        proj.description = 'this is an important project'
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
