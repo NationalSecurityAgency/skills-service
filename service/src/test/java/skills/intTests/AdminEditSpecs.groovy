@@ -22,7 +22,6 @@ import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -206,6 +205,22 @@ class AdminEditSpecs extends DefaultIntSpec {
         assert updatedResult.projectId == "TestProject47"
         !shouldBeNull
         shouldFail
+    }
+
+    def "Edit project description"(){
+        Map proj = SkillsFactory.createProject()
+        proj.description = "first"
+        skillsService.createProject(proj)
+
+        when:
+        def start = skillsService.getProjectDescription(proj.projectId)
+        proj.description = "second"
+        skillsService.updateProject(proj, proj.projectId)
+        def updated = skillsService.getProjectDescription(proj.projectId)
+
+        then:
+        start.description == "first"
+        updated.description == "second"
     }
 
     def "Create project with invalid json"(){

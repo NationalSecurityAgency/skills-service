@@ -17,18 +17,37 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+import javax.persistence.*
 
-@Entity
-@Table(name = 'project_definition')
-@EntityListeners(AuditingEntityListener)
 @CompileStatic
-@ToString(includeNames = true)
-class ProjDef extends ProjDefParent {
+@MappedSuperclass
+class ProjDefParent implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id
+
+    String projectId
+
+    String name
+
+    String clientSecret
+
+    // need to be denormalized so levels can be efficiently calculated (without the need of loading all of the rules)
+    int totalPoints
+
+    @Column(name="created", updatable = false, insertable = false)
+    Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
+
+//    @Lob
+//    @Column(columnDefinition = "text")
+//    String description
 
 }

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 interface CustomIconRepo extends CrudRepository<CustomIcon, Integer> {
 
     //TODO: add method that loads custom icons without loading the binary column
+    @Nullable
     //generating css doesn't need to load that and it could make performance a bit better
     @Transactional(readOnly = true)
     List<CustomIcon> findAllByProjectId(String projectId)

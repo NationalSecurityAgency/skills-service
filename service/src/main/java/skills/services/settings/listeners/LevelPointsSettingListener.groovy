@@ -24,8 +24,10 @@ import skills.services.settings.Settings
 import skills.storage.model.LevelDef
 import skills.storage.model.ProjDef
 import skills.storage.model.Setting
+import skills.storage.model.SkillDef
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillDefRepo
 
 import javax.transaction.Transactional
 
@@ -37,6 +39,9 @@ class LevelPointsSettingListener implements SettingChangedListener{
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     LevelDefRepo levelDefRepo
@@ -71,17 +76,19 @@ class LevelPointsSettingListener implements SettingChangedListener{
             List<LevelDef> levelDefs = levelDefRepo.findAllByProjectRefId(project.id)
             levelUtils.convertToPoints(levelDefs, project.totalPoints)
             levelDefRepo.saveAll(levelDefs)
-            project.subjects?.each{
+            List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(project.projectId, SkillDef.ContainerType.Subject)
+            subjects?.each{
                 List<LevelDef> subjectLevelDefs = levelDefRepo.findAllBySkillRefId(it.id)
                 levelUtils.convertToPoints(subjectLevelDefs, it.totalPoints == 0 ? LevelUtils.defaultTotalPointsGuess : it.totalPoints)
                 levelDefRepo.saveAll(subjectLevelDefs)
             }
         }else if(!setting.isEnabled()){
-            log.info("converting all levels for project [${setting.projectId}] (including skill levels) to percentages")
+            log.info("converting all levels for project [${project.projectId}] (including skill levels) to percentages")
             List<LevelDef> levelDefs = levelDefRepo.findAllByProjectRefId(project.id)
             levelUtils.convertToPercentage(levelDefs, project.totalPoints)
             levelDefRepo.saveAll(levelDefs)
-            project.subjects?.each {
+            List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(project.projectId, SkillDef.ContainerType.Subject)
+            subjects?.each {
                 List<LevelDef> subjectLevelDefs = levelDefRepo.findAllBySkillRefId(it.id)
                 log.info("converting level definitions ${subjectLevelDefs} for subject ${it}")
                 levelUtils.convertToPercentage(subjectLevelDefs, it.totalPoints)

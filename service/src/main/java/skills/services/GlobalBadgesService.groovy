@@ -280,10 +280,9 @@ class GlobalBadgesService {
     @Transactional(readOnly = true)
     List<ProjectResult> getAllProjectsForBadge(String badgeId) {
         List<String> projectIdsAlreadyInBadge = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
-        return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) && it.projectId != InceptionProjectService.inceptionProjectId }.collect { definition ->
-            ProjectResult res = new ProjectResult(
+        return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) && it.projectId != InceptionProjectService.inceptionProjectId }.collect { ProjDef definition ->
+            new ProjectResult(
                     projectId: definition.projectId, name: InputSanitizer.unsanitizeName(definition.name), totalPoints: definition.totalPoints,
-                    numSubjects: definition.subjects ? definition.subjects.size() : 0,
                     displayOrder: 0,
             )
         }

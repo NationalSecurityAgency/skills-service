@@ -24,12 +24,16 @@ import skills.controller.exceptions.SkillException
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.ProjDefWithDescriptionRepo
 
 @Service
 class ProjDefAccessor {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    ProjDefWithDescriptionRepo projDefWithDescriptionRepo
 
     @Transactional()
     ProjDef getProjDef(String projectId) {
@@ -48,7 +52,7 @@ class ProjDefAccessor {
         if (StringUtils.isBlank(projectId)) {
             throw new SkillException("Bad project id parameter, [${projectId}] was provided", ErrorCode.BadParam)
         }
-        return projDefRepo.getProjectDescription(projectId)
+        return projDefWithDescriptionRepo.getDescriptionByProjectId(projectId)
     }
 
     @Transactional()

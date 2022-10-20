@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.storage.repos
 
-import groovy.transform.CompileStatic
-import groovy.transform.ToString
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
+import skills.storage.model.ProjDefWithDescription
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+interface ProjDefWithDescriptionRepo extends CrudRepository<ProjDefWithDescription, Long> {
 
-@Entity
-@Table(name = 'project_definition')
-@EntityListeners(AuditingEntityListener)
-@CompileStatic
-@ToString(includeNames = true)
-class ProjDef extends ProjDefParent {
+    @Nullable
+    ProjDefWithDescription findByProjectIdIgnoreCase(String projectId)
 
-
+    @Nullable
+    @Query("select p.description from ProjDefWithDescription p where p.projectId = ?1" )
+    String getDescriptionByProjectId(String projectId)
 }

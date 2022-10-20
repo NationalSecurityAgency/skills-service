@@ -19,16 +19,17 @@ import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = 'project_definition')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
 @ToString(includeNames = true)
-class ProjDef extends ProjDefParent {
+class ProjDefWithDescription extends ProjDefParent {
 
+    @Lob
+    @Column(columnDefinition = "text")
+    String description
 
 }

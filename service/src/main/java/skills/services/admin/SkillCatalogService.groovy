@@ -533,9 +533,10 @@ class SkillCatalogService {
         stats.isReusedLocally = copies.find({ it.projectId == projectId })
         copies.findAll { it.projectId != projectId }.each {
             SkillDef mySubject = relationshipService.getMySubjectParent(it.id)
+            ProjDef myProjDef = projDefRepo.findById(mySubject.projRefId)?.get()
             stats.users << new ExportedSkillUser(
                     importingProjectId: it.projectId,
-                    importingProjectName: mySubject.projDef.name,
+                    importingProjectName: myProjDef?.name,
                     importedOn: it.created,
                     importedIntoSubjectId: mySubject.skillId,
                     importedIntoSubjectName: mySubject.name,

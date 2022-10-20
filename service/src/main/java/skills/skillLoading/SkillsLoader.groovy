@@ -73,7 +73,10 @@ class SkillsLoader {
     ProjDefRepo projDefRepo
 
     @Autowired
-    private PublicProps publicProps;
+    ProjDefWithDescriptionRepo projDefWithDescriptionRepo
+
+    @Autowired
+    PublicProps publicProps;
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -245,12 +248,7 @@ class SkillsLoader {
     @Profile
     @Transactional(readOnly = true)
     OverallSkillSummary loadOverallSummary(String projectId, String userId, Integer version = -1) {
-        return loadOverallSummary(getProjDef(userId, projectId), userId, version)
-    }
-
-    @Profile
-    @Transactional(readOnly = true)
-    OverallSkillSummary loadOverallSummary(ProjDef projDef, String userId, Integer version = -1) {
+        ProjDef projDef = getProjDef(userId, projectId)
         List<SkillSubjectSummary> subjects = loadSubjectsSummaries(projDef, userId, version)
 
         int points
@@ -284,6 +282,13 @@ class SkillsLoader {
         numBadgesAchieved += achievedLevelRepository.countAchievedGlobalBadgeForUserIntersectingProjectId(userId, projDef.projectId)
         numTotalBadges += skillDefRepo.countGlobalBadgesIntersectingWithProjectIdWhereEnabled(projDef.projectId)
 
+        SettingsResult showDescSetting = settingsService.getProjectSetting(projDef.projectId, Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName)
+        String projectDescription
+        if (showDescSetting?.value?.equalsIgnoreCase(Boolean.TRUE.toString())) {
+            String projDefString = projDefWithDescriptionRepo.getDescriptionByProjectId(projDef.projectId)
+            projectDescription = projDefString ? InputSanitizer.unsanitizeForMarkdown(projDefString) : null
+        }
+
         OverallSkillSummary res = new OverallSkillSummary(
                 projectId: projDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -296,7 +301,7 @@ class SkillsLoader {
                 levelTotalPoints: levelTotalPoints,
                 subjects: subjects,
                 badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0),
-                projectDescription: InputSanitizer.unsanitizeForMarkdown(projDef.description)
+                projectDescription: projectDescription
         )
 
         return res
@@ -757,7 +762,7 @@ class SkillsLoader {
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
 
         } else {
-            totalPoints = calculateTotalForSubject(projDef, subjectDefinition, version)
+            totalPoints = calculateTotalForSubject(projDef.projectId, subjectDefinition, version)
         }
 
         // pick large enough version = version is not provide;
@@ -766,7 +771,7 @@ class SkillsLoader {
             points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
             todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
         } else {
-            points = calculatePointsForSubject(projDef, userId, subjectDefinition)
+            points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
         }
 
@@ -821,8 +826,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private int calculateTotalForSubject(ProjDef projDef, SkillDefParent subjectDefinition, int version) {
-        Integer res = skillDefRepo.calculateTotalPointsForSubject(projDef.projectId, subjectDefinition.skillId, version)
+    private int calculateTotalForSubject(String projectId, SkillDefParent subjectDefinition, int version) {
+        Integer res = skillDefRepo.calculateTotalPointsForSubject(projectId, subjectDefinition.skillId, version)
         return res ?: 0
     }
 
@@ -838,8 +843,8 @@ class SkillsLoader {
     }
 
     @Profile
-    private Integer calculatePointsForSubject(ProjDef projDef, String userId, SkillDefParent subjectDefinition) {
-        Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projDef.projectId, userId, subjectDefinition.id)
+    private Integer calculatePointsForSubject(String projectId, String userId, SkillDefParent subjectDefinition) {
+        Integer res = userPointsRepo.getPointsByProjectIdAndUserIdAndSkillRefId(projectId, userId, subjectDefinition.id)
         return res ?: 0
     }
 
@@ -1115,8 +1120,14 @@ class SkillsLoader {
         return res
     }
 
+    @Profile
     private ProjDef getProjDef(String userId, String projectId) {
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
+        validateProjDef(projectId, userId, projDef)
+        return projDef
+    }
+
+    private void validateProjDef(String projectId, String userId, ProjDef projDef) {
         if(!projDef){
             throw new SkillExceptionBuilder()
                     .msg("Project definition with id [${projectId}] doesn't exist")
@@ -1124,7 +1135,6 @@ class SkillsLoader {
                     .projectId(projectId)
                     .build()
         }
-        return projDef
     }
 
     private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<SkillDef.ContainerType> containerTypes) {

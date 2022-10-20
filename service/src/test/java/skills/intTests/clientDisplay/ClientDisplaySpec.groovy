@@ -20,7 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
+import skills.services.settings.Settings
 
 class ClientDisplaySpec extends DefaultIntSpec {
 
@@ -37,6 +37,23 @@ class ClientDisplaySpec extends DefaultIntSpec {
         res.subjects.size() == 1
         res.subjects.first().subjectId == subj1.subjectId
         res.subjects.first().totalPoints == 0
+    }
+
+    def "only return project description if setting show_project_description_everywhere=true"() {
+        def proj1 = SkillsFactory.createProject(1)
+        proj1.description = "desc1"
+        def proj2 = SkillsFactory.createProject(2)
+        proj2.description = "desc2"
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.addOrUpdateProjectSetting(proj1.projectId, Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName, "true")
+        when:
+        def resProj1 = skillsService.getSkillSummary("user1", proj1.projectId)
+        def resProj2 = skillsService.getSkillSummary("user1", proj2.projectId)
+        then:
+        resProj1.projectDescription == "desc1"
+        !resProj2.projectDescription
     }
 
     def "global badge with no dependencies on requested project should not be included in count of completed badges"() {
