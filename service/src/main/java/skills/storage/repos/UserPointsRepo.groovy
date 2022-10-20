@@ -880,4 +880,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Modifying
     @Query('''delete from UserPoints where projectId = :projectId and points = 0''')
     void deleteZeroPointEntries(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query('''delete from UserPoints up where up.projectId = :projectId and 
+                                                up.userId in (
+                                                    select upp.userId 
+                                                    from UserPoints upp 
+                                                    where upp.projectId = :projectId 
+                                                    group by upp.userId 
+                                                    having count(upp.id) = 1
+                                                )''')
+    void removeOrphanedProjectPoints(@Param("projectId") String projectId)
 }

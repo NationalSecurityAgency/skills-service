@@ -76,6 +76,8 @@ class UserAchievementsAndPointsManagement {
     @Transactional
     void handleSubjectRemoval(SkillDef subject) {
         nativeQueriesRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
+        userPointsRepo.removeOrphanedProjectPoints(subject.projectId)
+        userAchievedLevelRepo.deleteAchievementsWithNoPoints(subject.projectId)
     }
 
     @Profile

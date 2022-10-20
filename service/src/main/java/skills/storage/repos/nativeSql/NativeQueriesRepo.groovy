@@ -15,10 +15,7 @@
  */
 package skills.storage.repos.nativeSql
 
-import org.springframework.data.domain.Pageable
-import org.springframework.data.repository.query.Param
-import skills.controller.request.model.QueryUsersCriteriaRequest
-import skills.controller.result.model.ProjectUser
+
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefPartial
