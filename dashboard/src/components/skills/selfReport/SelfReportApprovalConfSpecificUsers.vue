@@ -21,41 +21,62 @@ limitations under the License.
       </div>
     </template>
     <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode">
-      <existing-user-input :project-id="projectId"
-                           class="mr-3 mt-1"
-                         v-model="currentSelectedUser"
-                         :can-enter-new-user="!pkiAuthenticated"
-                         name="User Id"
-                         aria-errormessage="userIdInputError"
-                         aria-describedby="userIdInputError"
-                         :aria-invalid="errors && errors.length > 0"
-                         data-cy="userIdInput"/>
-      <small role="alert" id="userIdInputError" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+      <div class="row mx-2 no-gutters">
+        <div class="col px-1">
+          <existing-user-input :project-id="projectId"
+                             v-model="currentSelectedUser"
+                             :can-enter-new-user="false"
+                             name="User Id"
+                             aria-errormessage="userIdInputError"
+                             aria-describedby="userIdInputError"
+                             :aria-invalid="errors && errors.length > 0"
+                             data-cy="userIdInput"/>
+          <small role="alert" id="userIdInputError" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+        </div>
+        <div class="col-auto px-1">
+          <b-button
+            aria-label="Add Tag Value"
+            @click="addConf"
+            :disabled="!currentSelectedUser || (errors && errors.length > 0)"
+            variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
+          </b-button>
+        </div>
+      </div>
     </ValidationProvider>
 
-    <skills-b-table class="mt-3"
+    <skills-b-table v-if="hadData" class="mt-3"
                     :options="table.options" :items="table.items"
                     tableStoredStateId="skillApprovalConfSpecificUsersTable"
                     data-cy="skillApprovalConfSpecificUsersTable">
-      <template v-slot:cell(user)="data">
+      <template v-slot:cell(userId)="data">
         <div class="row">
           <div class="col">
-            {{ data.value }}
+            {{ data.item.userIdForDisplay }}
           </div>
           <div class="col-auto">
             <b-button title="Delete Skill"
                       variant="outline-danger"
+                      :aria-label="`Remove ${data.value} tag.`"
+                      @click="removeTagConf(data.item)"
+                      :disabled="data.item.deleteInProgress"
                       size="sm">
-              <i class="fas fa-trash" aria-hidden="true"/>
+              <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
+              <i v-else class="fas fa-trash" aria-hidden="true"/>
             </b-button>
           </div>
         </div>
       </template>
-      <template v-slot:cell(created)="data">
+      <template v-slot:cell(updated)="data">
         <date-cell :value="data.value" />
       </template>
     </skills-b-table>
 
+    <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                 class="my-5"
+                 icon-size="fa-2x"
+                 icon="fas fa-user-plus">
+      You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+    </no-content2>
   </b-card>
 </template>
 
@@ -63,10 +84,17 @@ limitations under the License.
   import ExistingUserInput from '@/components/utils/ExistingUserInput';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
+  import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+  import SelfReportApprovalConfMixin
+    from '@/components/skills/selfReport/SelfReportApprovalConfMixin';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'SelfReportApprovalConfSpecificUsers',
-    components: { DateCell, SkillsBTable, ExistingUserInput },
+    components: {
+      NoContent2, DateCell, SkillsBTable, ExistingUserInput,
+    },
+    mixins: [SelfReportApprovalConfMixin],
     props: {
       userInfo: Object,
     },
@@ -75,32 +103,7 @@ limitations under the License.
         projectId: this.$route.params.projectId,
         currentSelectedUser: null,
         table: {
-          items: [{
-            user: 'Cool Dude (skills@skills.org)',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'anther (blah@skills.org)',
-            role: 'Approver',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Third One (third@skills.org)',
-            role: 'Admin',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Fourth One (4@skills.org)',
-            role: 'Approver',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Fourth One (4@skills.org)',
-            role: 'Approver',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Fourth One (4@skills.org)',
-            created: new Date().getTime() - 100000,
-          }, {
-            user: 'Fourth One (4@skills.org)',
-            created: new Date().getTime() - 100000,
-          }],
+          items: [],
           options: {
             busy: false,
             bordered: true,
@@ -112,12 +115,12 @@ limitations under the License.
             tableDescription: 'Configure Approval Workload',
             fields: [
               {
-                key: 'user',
+                key: 'userId',
                 label: 'User',
                 sortable: true,
               },
               {
-                key: 'created',
+                key: 'updated',
                 label: 'Configured On',
                 sortable: true,
               },
@@ -137,6 +140,26 @@ limitations under the License.
     computed: {
       pkiAuthenticated() {
         return this.$store.getters.isPkiAuthenticated;
+      },
+      hadData() {
+        return this.table.items && this.table.items.length > 0;
+      },
+    },
+    mounted() {
+      const hasConf = this.userInfo.userConf && this.userInfo.userConf.length > 0;
+      if (hasConf) {
+        this.table.items = this.userInfo.userConf.map((u) => ({ ...u }));
+      }
+    },
+    methods: {
+      addConf() {
+        SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, this.currentSelectedUser.userId)
+          .then((res) => {
+            this.table.items.push(res);
+            this.$emit('conf-added', res);
+            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.currentSelectedUser.userId} user.`));
+            this.currentSelectedUser = null;
+          });
       },
     },
   };
