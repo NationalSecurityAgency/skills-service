@@ -243,7 +243,7 @@ class SkillApprovalService {
             return
         }
 
-        ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
+        ProjectSummaryResult projDef = projDefRepo.getProjectName(skillDefinition.projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: [skillApproval.userId],
                 type: Notification.Type.SkillApprovalResponse.toString(),
@@ -252,7 +252,7 @@ class SkillApprovalService {
                         approved     : approved,
                         skillName    : skillDefinition.name,
                         skillId      : skillDefinition.skillId,
-                        projectName  : projDef.name,
+                        projectName  : projDef.getProjectName(),
                         projectId    : skillDefinition.projectId,
                         rejectionMsg : rejectionMsg,
                         publicUrl    : publicUrl,

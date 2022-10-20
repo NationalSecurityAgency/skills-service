@@ -362,6 +362,7 @@ SkillTree Bot'''
         String user = "skills@skills.org"
 
         def proj = SkillsFactory.createProject()
+        proj.description = 'this is an important project'
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)
         skills[0].pointIncrement = 200
