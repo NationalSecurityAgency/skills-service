@@ -107,7 +107,7 @@ limitations under the License.
         <i class="fa fa-award"></i> Badges:
         <span v-for="(badge, index) in skill.badges" data-cy="hasBadgesIndicator" class="overflow-hidden"
               v-bind:key="badge.badgeId">
-          <router-link :to="genLink(badge)" style="text-decoration:underline;">{{ badge.name }}</router-link>
+          <router-link :to="genLink(badge)" class="skills-theme-primary-color" style="text-decoration:underline;">{{ badge.name }}</router-link>
           <span v-if="index != (skill.badges.length - 1)">, </span>
         </span>
       </div>
