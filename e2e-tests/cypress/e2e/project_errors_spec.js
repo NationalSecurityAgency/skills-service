@@ -191,6 +191,23 @@ describe('Project Errors Tests', () => {
             .contains('There are 3 issues to address');
     });
 
+    it('issues text formats properly for singular issue count', () => {
+        cy.intercept('GET', '/admin/projects')
+            .as('getProjects');
+
+        cy.visit('/administrator');
+        cy.wait('@getProjects');
+        cy.get('[data-cy="ProjectCardFooter_issues"]')
+            .contains('No Issues');
+
+        cy.reportSkill(1, 42, 'user@skills.org', '2021-02-24 10:00', false);
+
+        cy.visit('/administrator');
+        cy.wait('@getProjects');
+        cy.get('[data-cy="ProjectCardFooter_issues"]')
+            .contains('There is 1 issue to address');
+    });
+
     it('validate table', () => {
         cy.reportSkill(1, 41, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill(1, 42, 'user@skills.org', '2021-02-24 10:00', false);
