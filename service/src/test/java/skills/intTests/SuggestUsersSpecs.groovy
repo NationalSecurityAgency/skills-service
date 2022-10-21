@@ -82,4 +82,31 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         results2.unique().size() == results2.size()
         users.containsAll(results2)
     }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "suggest all users"() {
+        given:
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        def users = ["userA", "userB"]
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        // user by reporting
+        skillsService.addSkill([projectId:proj.projectId, skillId: skills[0].skillId], users.get(0), new Date())
+
+        // user by registering with dashboard
+        createService(users[1])
+
+        String user1UserIdForDisplay = userAttrsRepo.findByUserId(users[1].toLowerCase()).userIdForDisplay
+
+        when:
+        def allUsers = skillsService.suggestClientUsers("user")
+
+        then:
+        allUsers.userId == [users[0], user1UserIdForDisplay]
+    }
 }

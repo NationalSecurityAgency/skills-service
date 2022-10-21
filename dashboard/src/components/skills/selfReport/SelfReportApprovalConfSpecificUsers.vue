@@ -20,10 +20,10 @@ limitations under the License.
         <i class="fas fa-user-plus text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By Specific Users</span>
       </div>
     </template>
-    <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode">
+    <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode|uniqueUserConf">
       <div class="row mx-2 no-gutters">
         <div class="col px-1">
-          <existing-user-input :project-id="projectId"
+          <existing-user-input
                              v-model="currentSelectedUser"
                              :can-enter-new-user="false"
                              name="User Id"
@@ -81,6 +81,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { extend } from 'vee-validate';
   import ExistingUserInput from '@/components/utils/ExistingUserInput';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
@@ -109,7 +110,7 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'requestedOn',
+            sortBy: 'updated',
             sortDesc: true,
             emptyText: 'You are the only user',
             tableDescription: 'Configure Approval Workload',
@@ -145,6 +146,9 @@ limitations under the License.
         return this.table.items && this.table.items.length > 0;
       },
     },
+    created() {
+      this.assignCustomValidation();
+    },
     mounted() {
       const hasConf = this.userInfo.userConf && this.userInfo.userConf.length > 0;
       if (hasConf) {
@@ -160,6 +164,15 @@ limitations under the License.
             this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.currentSelectedUser.userId} user.`));
             this.currentSelectedUser = null;
           });
+      },
+      assignCustomValidation() {
+        const self = this;
+        extend('uniqueUserConf', {
+          message: (field) => `${field} value is already taken.`,
+          validate(value) {
+            return !self.table.items.find((i) => value?.userId?.toLowerCase() === i.userId?.toLowerCase());
+          },
+        });
       },
     },
   };
