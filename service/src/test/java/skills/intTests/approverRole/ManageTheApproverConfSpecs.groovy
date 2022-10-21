@@ -15,7 +15,7 @@
  */
 package skills.intTests.approverRole
 
-
+import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -528,5 +528,116 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         e.resBody.contains("You do not have permission to view/manage this Project") || e.resBody.contains("HTTP Status 403 – Forbidden")
     }
 
+
+    def "explicitly designate user to catch all unmatched requests"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        def approverConf = skillsService.getApproverConf(proj.projectId)
+        println JsonOutput.toJson(approverConf)
+
+        then:
+        approverConf.size() == 1
+        def approver = approverConf[0]
+        approver.approverUserId == user1Service.userName
+        !approver.userId
+        !approver.userId
+        !approver.userTagValue
+        !approver.skillName
+        !approver.skillId
+    }
+
+    def "must be admin or approver of the project in order to be designated for approval fallback"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+
+        when:
+        skillsService.configureFallbackApprover(proj2.projectId, user1Service.userName)
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("Approver [${user1Service.userName}] does not have permission to approve for the project [${proj2.projectId}]")
+    }
+
+    def "can only configure fallback once"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        when:
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("[${user1Service.userName}] is already a fallback approver")
+    }
+
+    def "once fallback is configured approver cannot be assigned other conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        when:
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, "key", "val")
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("[${user1Service.userName}] is already a fallback approver")
+    }
+
+    def "once conf is configured approver cannot be assigned fallback"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, "key", "val")
+        when:
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("Cannot configure fallback approver since this approver already has existing workload config")
+    }
 
 }

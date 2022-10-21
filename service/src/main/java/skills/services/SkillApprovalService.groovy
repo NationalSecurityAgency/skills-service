@@ -291,6 +291,7 @@ class SkillApprovalService {
     @Transactional
     ApproverConfResult configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
         validateApproverAccess(projectId, approverId)
+        validateNotFallbackApprover(projectId, approverId)
         if (skillApproverConfRequest.userId) {
             SkillsValidator.isTrue(!skillApproverConfRequest.skillId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
         }
@@ -382,6 +383,33 @@ class SkillApprovalService {
             log.info("Removed {}", approvalConf)
         } else {
             log.warn("Failed to find SkillApprovalConf with id [{}]", approverConfId)
+        }
+    }
+
+    @Transactional
+    ApproverConfResult configureFallBackApprover(String projectId, String approverId) {
+        validateApproverAccess(projectId, approverId)
+        validateNotFallbackApprover(projectId, approverId)
+
+        long count = skillApprovalConfRepo.countByProjectIdAndApproverUserId(projectId, approverId)
+        if (count > 0) {
+            throw new SkillException("Cannot configure fallback approver since this approver already has existing workload config. Approver Id = [${approverId}]", projectId, null, ErrorCode.BadParam)
+        }
+
+        SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId)
+        skillApprovalConfRepo.save(conf)
+        SkillApprovalConf saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId)
+        assert saved
+
+        log.info("Saved {}", saved)
+        SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+        return convertToClientRes(dbRes)
+    }
+
+    private void validateNotFallbackApprover(String projectId, String approverId) {
+        SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId)
+        if (found) {
+            throw new SkillException(" [${approverId}] is already a fallback approver.", projectId, null, ErrorCode.BadParam)
         }
     }
 }

@@ -600,6 +600,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userTagKey: userTagKey, userTagValue: userTagValue])
     }
 
+    def configureFallbackApprover(String projectId, String approverUserId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}/fallback", [])
+    }
+
     def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg = null) {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
     }

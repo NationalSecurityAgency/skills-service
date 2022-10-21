@@ -179,4 +179,14 @@ class SkillApprovalController {
         return skillApprovalService.deleteApproverConfId(projectId, aproverConfId)
     }
 
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}/fallback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult assignFallbackUser(@PathVariable("projectId") String projectId,
+                                         @PathVariable("approverUserId") String approverUserId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(approverUserId, "Approver User Id")
+        return skillApprovalService.configureFallBackApprover(projectId, approverUserId)
+    }
+
+
 }
