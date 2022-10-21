@@ -45,7 +45,9 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
+import skills.storage.repos.CustomIconRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.ProjDefWithDescriptionRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserRepo
@@ -64,6 +66,9 @@ class ProjAdminService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    ProjDefWithDescriptionRepo projDefWithDescriptionRepo
 
     @Autowired
     LevelDefinitionStorageService levelDefService
@@ -119,6 +124,9 @@ class ProjAdminService {
     @Autowired
     ServiceValidatorHelper serviceValidatorHelper
 
+    @Autowired
+    CustomIconRepo customIconRepo
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -131,7 +139,7 @@ class ProjAdminService {
             throw new SkillException(customValidationResult.msg)
         }
 
-        ProjDef projectDefinition = originalProjectId ? projDefRepo.findByProjectIdIgnoreCase(originalProjectId) : null
+        ProjDefWithDescription projectDefinition = originalProjectId ? projDefWithDescriptionRepo.findByProjectIdIgnoreCase(originalProjectId) : null
         if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
             serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
         }
@@ -143,7 +151,7 @@ class ProjAdminService {
             log.debug("Updating [{}]", projectDefinition)
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId) {
-                projectDefinition = projDefRepo.save(projectDefinition)
+                projectDefinition = projDefWithDescriptionRepo.save(projectDefinition)
             }
             log.debug("Saved [{}]", projectDefinition)
         } else {
@@ -151,7 +159,7 @@ class ProjAdminService {
             // This will be addressed in ticket #139
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
-            projectDefinition = new ProjDef(projectId: projectRequest.projectId, name: projectRequest.name,
+            projectDefinition = new ProjDefWithDescription(projectId: projectRequest.projectId, name: projectRequest.name,
                     clientSecret: clientSecret, description: projectRequest.description)
             log.debug("Created project [{}]", projectDefinition)
 
@@ -160,12 +168,12 @@ class ProjAdminService {
             }
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId) {
-                projectDefinition = projDefRepo.save(projectDefinition)
+                projectDefinition = projDefWithDescriptionRepo.save(projectDefinition)
             }
 
             log.debug("Saved [{}]", projectDefinition)
-
-            levelDefService.createDefault(projectRequest.projectId, projectDefinition)
+            ProjDef projDef = projDefRepo.findByProjectId(projectDefinition.projectId)
+            levelDefService.createDefault(projectRequest.projectId, projDef)
 
             String userId = userIdParam ?: userInfoService.getCurrentUserId()
             accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
@@ -451,7 +459,8 @@ class ProjAdminService {
     @Transactional(readOnly = true)
     List<CustomIconResult> getCustomIcons(String projectId){
         ProjDef project = projDefAccessor.getProjDef(projectId)
-        return project.getCustomIcons().collect { CustomIcon icon ->
+        List<CustomIcon> customIcons = customIconRepo.findAllByProjectId(project.projectId)
+        return customIcons?.collect { CustomIcon icon ->
             String cssClassname = IconCssNameUtil.getCssClass(icon.projectId, icon.filename)
             return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }

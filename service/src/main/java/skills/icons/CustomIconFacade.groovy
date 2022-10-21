@@ -98,7 +98,7 @@ class CustomIconFacade {
 
             if (projectId) {
                 ProjDef project = projDefAccessor.getProjDef(projectId)
-                customIcon.setProjDef(project)
+                customIcon.projRefId = project.id
             }
 
             iconService.saveIcon(customIcon)

@@ -134,6 +134,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     @Query('''select max(displayOrder) from SkillDef where projectId is null and type = ?1''')
     Integer getMaxDisplayOrderByTypeAndProjectIdIsNull(SkillDef.ContainerType type)
 
+    @Nullable
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
 
     List<SkillDef> findAllByProjectIdAndTypeIn(@Nullable String id, List<SkillDef.ContainerType> type)
@@ -210,12 +211,6 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             where (:projectId is null or s.projectId=:projectId) and s.type=:type and s.enabled = 'true'  
         ''')
     int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
-
-    @Query('''select count(c) 
-            from SkillRelDef r, SkillDef c 
-            where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = 'true'
-        ''')
-    long countActiveChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query('''select count(c) 
             from SkillRelDef r, SkillDef c 
@@ -663,7 +658,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
                     sd.name as name,
                     ld.level as level 
             from ProjDef pd 
-            join SkillDef sd on sd.type = 'Subject' and sd.projDef = pd
+            join SkillDef sd on sd.type = 'Subject' and sd.projRefId = pd.id
             join LevelDef ld on ld.skillRefId = sd.id and ld.pointsFrom > sd.totalPoints''')
     List<UnachievableSubjectLevel> findUnachievableSubjectLevels()
 

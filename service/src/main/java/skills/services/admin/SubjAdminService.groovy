@@ -132,7 +132,7 @@ class SubjAdminService {
                     name: subjectRequest?.name,
                     description: subjectRequest?.description,
                     iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
-                    projDef: projDef,
+                    projRefId: projDef.id,
                     displayOrder: displayOrder,
                     helpUrl: subjectRequest.helpUrl,
                     enabled: Boolean.TRUE.toString(),
@@ -171,7 +171,7 @@ class SubjAdminService {
 
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
         // reset display order attribute - make sure the order is continuous - 0...N
-        List<SkillDef> subjects = projDef.subjects
+        List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
         subjects = subjects?.findAll({ it.id != subjectDefinition.id }) // need to remove because of JPA level caching?
         displayOrderService.resetDisplayOrder(subjects)
 
@@ -241,7 +241,8 @@ class SubjAdminService {
         lockingService.lockProject(projectId)
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
         if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == subjectPatchRequest.action) {
-            displayOrderService.updateDisplayOrderByUsingNewIndex(subjectId, projDef.subjects, subjectPatchRequest)
+            List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
+            displayOrderService.updateDisplayOrderByUsingNewIndex(subjectId, subjects, subjectPatchRequest)
         }
     }
 

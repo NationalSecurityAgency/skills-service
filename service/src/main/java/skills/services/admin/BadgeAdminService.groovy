@@ -141,7 +141,7 @@ class BadgeAdminService {
                     iconClass: badgeRequest?.iconClass ?: "fa fa-question-circle",
                     startDate: badgeRequest.startDate,
                     endDate: badgeRequest.endDate,
-                    projDef: projDef,
+                    projRefId: projDef?.id,
                     displayOrder: displayOrder,
                     helpUrl: badgeRequest.helpUrl,
                     enabled: Boolean.FALSE.toString()
@@ -232,7 +232,8 @@ class BadgeAdminService {
         lockingService.lockProject(projectId)
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
         if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == badgePatchRequest.action) {
-            displayOrderService.updateDisplayOrderByUsingNewIndex(badgeId, projDef.badges, badgePatchRequest)
+            List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Badge)
+            displayOrderService.updateDisplayOrderByUsingNewIndex(badgeId, badges, badgePatchRequest)
         }
     }
 

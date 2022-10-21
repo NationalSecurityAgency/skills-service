@@ -16,12 +16,12 @@
 package skills.storage.model
 
 import groovy.transform.ToString
-import org.hibernate.annotations.Type
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 import javax.persistence.*
+
 /**
  * Created with IntelliJ IDEA.
  * Date: 11/29/18
@@ -29,7 +29,7 @@ import javax.persistence.*
  */
 @Entity
 @Table(name='custom_icons')
-@ToString(includeNames = true, excludes = 'projDef')
+@ToString(includeNames = true)
 @EntityListeners(AuditingEntityListener)
 class CustomIcon {
     @Id
@@ -58,12 +58,6 @@ class CustomIcon {
     @LastModifiedDate
     Date updated
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="projRefId")
-    ProjDef projDef
+    Integer projRefId
 
-    void setProjDef(ProjDef project) {
-        this.projDef = project;
-        this.projDef.customIcons.add(this);
-    }
 }

@@ -60,9 +60,7 @@ class SkillDefParent {
     @Temporal(TemporalType.TIMESTAMP)
     Date endDate  // optional, used for "gem" badges only currently
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="projRefId")
-    ProjDef projDef
+    Integer projRefId
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate

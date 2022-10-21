@@ -22,9 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.InviteOnlyProjectService
-import skills.storage.repos.ProjectAccessTokenRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 

@@ -401,6 +401,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     ''')
     ProjectSummaryResult getMyProjectName(String userId, String projectId)
 
+    @Nullable
     @Query('''
             SELECT pd.id as projectRefId,
                    pd.projectId as projectId,
@@ -425,9 +426,5 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     @Query('''SELECT pd.totalPoints FROM ProjDef pd WHERE pd.projectId = ?1''')
     Integer getTotalPointsByProjectId(String projectId)
-
-    @Nullable
-    @Query('''select pd.description from ProjDef pd where pd.projectId = :projectId''')
-    String getProjectDescription(@Param("projectId") String projectId)
 
 }
