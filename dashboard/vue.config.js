@@ -122,7 +122,7 @@ module.exports = {
       '^/login$': proxyConf,
       '^/static/': proxyConf,
       '^/root/': proxyConf,
-      '^/userExists$': proxyConf,
+      '^/userExists': proxyConf,
       '^/supervisor/': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
