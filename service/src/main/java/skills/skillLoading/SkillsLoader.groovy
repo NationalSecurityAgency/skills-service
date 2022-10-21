@@ -487,10 +487,6 @@ class SkillsLoader {
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
-        def badgeIds = badges.collect{ it.badgeId }
-        List<SkillBadgeSummary> relevantBadges = loadBadgeSummaries(crossProjectId ?: projectId, userId, 0)
-        relevantBadges.addAll(loadGlobalBadgeSummaries(userId, crossProjectId ?: projectId, 0));
-        relevantBadges = relevantBadges.findAll{ badgeIds.contains(it.badgeId) }
 
         String nextSkillId;
         String prevSkillId;
@@ -569,7 +565,6 @@ class SkillsLoader {
                 type: skillDef.type,
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
-                badgeSummaries: relevantBadges,
                 badges: badges,
         )
     }

@@ -37,20 +37,6 @@ limitations under the License.
                 <skill-progress2 :skill="skill" @points-earned="onPointsEarned" />
               </div>
             </div>
-            <div class="card" v-if="skill.badgeSummaries && skill.badgeSummaries.length > 0" style="margin-top: 15px;">
-              <span style="font-size: 1.2rem; padding: 10px;">Used in These Badges</span>
-              <div class="card-body">
-                <div v-for="(badge, index) in skill.badgeSummaries" v-bind:key="badge.badgeId">
-                  <badge-catalog-item
-                      :display-project-name="false"
-                      :badge="badge" class="pb-3"
-                      :badgeRouterLinkGenerator="genLink"></badge-catalog-item>
-                  <div v-if="index !== skill.badgeSummaries.length - 1">
-                    <hr/>
-                  </div>
-                </div>
-              </div>
-            </div>
             <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
                                 :skill-id="$route.params.skillId" :subject-id="this.$route.params.subjectId"></skill-dependencies>
         </div>
@@ -67,7 +53,6 @@ limitations under the License.
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import SkillProgress2 from '@/userSkills/skill/progress/SkillProgress2';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
-  import BadgeCatalogItem from '@/common-components/badges/BadgeCatalogItem';
   import SkillEnricherUtil from '../utils/SkillEnricherUtil';
   import SkillHistoryUtil from '../utils/SkillHistoryUtil';
 
@@ -79,7 +64,6 @@ limitations under the License.
       'skill-dependencies': () => import(/* webpackChunkName: 'skillDependencies' */'@/userSkills/skill/dependencies/SkillDependencies'),
       SkillsSpinner,
       SkillProgress2,
-      BadgeCatalogItem,
     },
     data() {
       return {
