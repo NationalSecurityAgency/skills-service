@@ -25,7 +25,7 @@ limitations under the License.
           .then(() => {
             this.table.items = this.table.items.filter((i) => i.id !== removedIem.id);
             this.$emit('conf-removed', removedIem);
-            this.$nextTick(() => this.$announcer.polite(`Removed workload configuration successfully for ${removedIem.userTagValue} ${this.tagLabel}.`));
+            this.$nextTick(() => this.$announcer.polite('Removed workload configuration successfully.'));
           });
       },
     },

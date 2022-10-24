@@ -44,7 +44,16 @@ limitations under the License.
       <template v-slot:cell(workload)="data">
         <div class="row">
           <div class="col">
-            <div v-if="!data.item.hasConf" >Fallback - All Requests</div>
+            <div v-if="!data.item.hasConf">
+              <b-form-checkbox
+                  :name="`Enable and disable fallback for ${data.item.userId} approver`"
+                  @change="handleFallback($event, data.item)"
+                  switch :checked="data.item.isFallbackConfPresent">
+                <span v-if="!data.item.hasAnyFallbackConf">Default Fallback - All Unmatched Requests</span>
+                <span v-if="data.item.hasAnyFallbackConf && !data.item.fallbackConf">Not Handling Approval Workload</span>
+                <span v-if="data.item.fallbackConf">Assigned Fallback - All Unmatched Requests</span>
+              </b-form-checkbox>
+            </div>
             <div v-if="data.item.tagConf && data.item.tagConf.length > 0">
               <div v-for="tConf in data.item.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKey}}:</span> <span>{{tConf.userTagValue}}</span></div>
             </div>
@@ -59,6 +68,7 @@ limitations under the License.
             <b-button size="sm"
                       :aria-label="`Edit ${data.item.userIdForDisplay} approval workload`"
                       variant="outline-primary"
+                      :disabled="data.item.isFallbackConfPresent"
                       @click="data.toggleDetails">
               <span v-if="!data.detailsShowing"><i class="fas fa-edit" aria-hidden="true" /> Edit</span>
               <span v-if="data.detailsShowing"><i class="fas fa-arrow-alt-circle-up" aria-hidden="true" /> Collapse</span>
@@ -72,16 +82,16 @@ limitations under the License.
           <self-report-approval-conf-user-tag :user-info="row.item"
                                               tag-key="TagKey"
                                               tag-label="TagKeyFromProps"
-                                              @conf-added="updatedTagConf"
-                                              @conf-removed="removeTagConf"
+                                              @conf-added="updatedConf"
+                                              @conf-removed="removeConf"
                                               class="mt-3"/>
           <self-report-approval-conf-skill :user-info="row.item"
-                                           @conf-added="updatedSkillConf"
-                                           @conf-removed="removeSkillConf"
+                                           @conf-added="updatedConf"
+                                           @conf-removed="removeConf"
                                            class="mt-3"/>
           <self-report-approval-conf-specific-users :user-info="row.item"
-                                                    @conf-added="updatedUserConf"
-                                                    @conf-removed="removeUserConf"
+                                                    @conf-added="updatedConf"
+                                                    @conf-removed="removeConf"
                                                     class="mt-3"/>
         </div>
       </template>
@@ -169,60 +179,85 @@ limitations under the License.
           .then((users) => {
             SelfReportService.getApproverConf(this.projectId)
               .then((approverConf) => {
-                this.table.items = this.buildDisplayModel(users.data, approverConf);
+                const basicTableInfo = users.data.map((u) => {
+                  const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
+                  return {
+                    userIdForDisplay: u.userIdForDisplay,
+                    userId: u.userId,
+                    roleName: u.roleName,
+                    allConf,
+                  };
+                });
+                this.updateTable(basicTableInfo);
               }).finally(() => {
                 this.table.options.busy = false;
               });
           });
       },
-      buildDisplayModel(users, approverConf) {
-        const res = users.map((u) => {
-          const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
+      updateTable(basicTableInfo) {
+        let hasAnyFallbackConf = false;
+        let res = basicTableInfo.map((row) => {
+          const { allConf } = row;
           const tagConf = allConf.filter((c) => c.userTagKey);
           const userConf = allConf.filter((c) => c.userId);
           const skillConf = allConf.filter((c) => c.skillId);
+          const fallbackConf = allConf.find((c) => !c.skillId && !c.userId && !c.userTagKey);
+          if (fallbackConf) {
+            hasAnyFallbackConf = true;
+          }
           return {
-            userIdForDisplay: u.userIdForDisplay,
-            userId: u.userId,
-            roleName: u.roleName,
+            ...row,
             tagConf,
             userConf,
             skillConf,
             allConf,
-            hasConf: allConf && allConf.length > 0,
+            fallbackConf,
+            isFallbackConfPresent: fallbackConf !== null && fallbackConf !== undefined,
+            hasAnyFallbackConf,
+            hasConf: tagConf?.length > 0 || userConf?.length > 0 || skillConf?.length > 0,
           };
         });
-        return res;
-      },
-      updatedTagConf(newConf) {
-        this.updatedConf(newConf, 'tagConf');
+        if (hasAnyFallbackConf) {
+          res = res.map((item) => ({ ...item, hasAnyFallbackConf: true }));
+        }
+        this.table.items = res;
       },
       removeTagConf(removedConf) {
         this.removeConf(removedConf, 'tagConf');
       },
-      updatedSkillConf(newConf) {
-        this.updatedConf(newConf, 'skillConf');
-      },
-      removeSkillConf(removedConf) {
-        this.removeConf(removedConf, 'skillConf');
-      },
-      updatedUserConf(newConf) {
-        this.updatedConf(newConf, 'userConf');
-      },
-      removeUserConf(removedConf) {
-        this.removeConf(removedConf, 'userConf');
-      },
-      updatedConf(newConf, confName) {
+      updatedConf(newConf) {
         const itemToUpdate = this.table.items.find((i) => i.userId === newConf.approverUserId);
         itemToUpdate.allConf.push(newConf);
-        itemToUpdate[confName].push(newConf);
-        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
+        this.updateTable(this.table.items);
       },
-      removeConf(removedConf, confName) {
+      removeConf(removedConf) {
         const itemToUpdate = this.table.items.find((i) => i.userId === removedConf.approverUserId);
         itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== removedConf.id);
-        itemToUpdate[confName] = itemToUpdate[confName].filter((i) => i.id !== removedConf.id);
-        itemToUpdate.hasConf = itemToUpdate.allConf && itemToUpdate.allConf.length > 0;
+        this.updateTable(this.table.items);
+      },
+      handleFallback(checked, rowItem) {
+        const itemToUpdate = this.table.items.find((i) => i.userId === rowItem.userId);
+        itemToUpdate.loading = true;
+        if (checked) {
+          SelfReportService.configureApproverForFallback(this.projectId, rowItem.userId)
+            .then((newConf) => {
+              itemToUpdate.allConf.push(newConf);
+              this.updateTable(this.table.items);
+              this.$nextTick(() => this.$announcer.polite(`Assigned ${newConf.approverUserId} as a fallback approver.`));
+            })
+            .finally(() => {
+              itemToUpdate.loading = false;
+            });
+        } else {
+          SelfReportService.removeApproverConfig(this.projectId, rowItem.fallbackConf.id)
+            .then(() => {
+              itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== rowItem.fallbackConf.id);
+              this.updateTable(this.table.items);
+              this.$nextTick(() => this.$announcer.polite('Removed workload configuration successfully.'));
+            }).finally(() => {
+              itemToUpdate.loading = false;
+            });
+        }
       },
     },
   };

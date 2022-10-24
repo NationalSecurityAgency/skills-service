@@ -75,6 +75,11 @@ export default {
     return axios.post(url, { userId })
       .then((response) => response.data);
   },
+  configureApproverForFallback(projectId, approverId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}/fallback`;
+    return axios.post(url)
+      .then((response) => response.data);
+  },
   removeApproverConfig(projectId, approverConfigID) {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/approverConf/${approverConfigID}`).then((response) => response.data);
   },

@@ -157,11 +157,12 @@ limitations under the License.
     },
     methods: {
       addConf() {
-        SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, this.currentSelectedUser.userId)
+        const currentUserId = this.currentSelectedUser.userId;
+        SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, currentUserId)
           .then((res) => {
             this.table.items.push(res);
             this.$emit('conf-added', res);
-            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.currentSelectedUser.userId} user.`));
+            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
             this.currentSelectedUser = null;
           });
       },
