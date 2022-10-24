@@ -25,7 +25,18 @@ limitations under the License.
       :options="editorOptions"
       :height="markdownHeight"
       @change="onEditorChange"
+      @keydown="handleTab"
     ></editor>
+    <div class="editor-help-footer border px-3 py-2 rounded-bottom">
+      <div class="row text-secondary small">
+        <div class="col">
+          Insert images by pasting, dragging & dropping, or selecting from toolbar.
+        </div>
+        <div class="col-auto">
+          <a ref="editorFeatureLinkRef" :href="editorFeaturesUrl" target="_blank" style="display: inline-block"><i class="far fa-question-circle editor-help-footer-help-icon"/></a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -74,8 +85,10 @@ limitations under the License.
     },
     computed: {
       markdownText() {
-        const markdown = this.$refs.toastuiEditor.invoke('getMarkdown');
-        return markdown;
+        return this.$refs.toastuiEditor.invoke('getMarkdown');
+      },
+      editorFeaturesUrl() {
+        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
       },
       // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
       // emojiWidgetRule() {
@@ -95,9 +108,17 @@ limitations under the License.
       // },
       editorOptions() {
         const options = {
-          hideModeSwitch: false,
+          hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
+          toolbarItems: [
+            ['heading', 'bold', 'italic', 'strike'],
+            ['hr', 'quote'],
+            ['ul', 'ol', 'indent', 'outdent'],
+            ['table', 'image', 'link'],
+            ['code', 'codeblock'],
+            ['scrollSync'],
+          ],
           // widgetRules: [this.emojiWidgetRule],
         };
         return Object.assign(this.markdownOptions, options);
@@ -115,13 +136,33 @@ limitations under the License.
           }
         });
       },
+      handleTab(mode, event) {
+        const eventType = event.key.toUpperCase();
+        if (eventType === 'TAB' || eventType === 'ESCAPE') {
+          if (!event.shiftKey) {
+            event.stopPropagation();
+            this.$refs.editorFeatureLinkRef?.focus({ focusVisible: true });
+          }
+        }
+      },
     },
   };
 </script>
 
 <style scoped>
-  .markdown >>> .toastui-editor-mode-switch .tab-item {
-    color: #555;
+  .editor-help-footer {
+    border-top: 0.9px dashed rgba(0, 0, 0, 0.2) !important;
+    background-color: #f7f9fc !important;
   }
+  .editor-help-footer-help-icon {
+    font-size: 1rem;
+  }
+</style>
 
+<style>
+  .markdown .toastui-editor-defaultUI {
+    border-bottom: none !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
 </style>
