@@ -194,22 +194,32 @@ const actions = {
                                       state,
                                       getters: gettersParam,
                                     }) {
-    if (state.userInfo) {
-      const projectId = 'Inception';
-      const serviceUrl = window.location.origin;
-      let authenticator;
-      if (gettersParam.isPkiAuthenticated) {
-        authenticator = 'pki';
-      } else {
-        authenticator = `/app/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(gettersParam.userInfo.userId)}/token`;
-      }
+    return new Promise((resolve, reject) => {
+      if (state.userInfo) {
+        const projectId = 'Inception';
+        const serviceUrl = window.location.origin;
+        let authenticator;
+        if (gettersParam.isPkiAuthenticated) {
+          authenticator = 'pki';
+        } else {
+          authenticator = `/app/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(gettersParam.userInfo.userId)}/token`;
+        }
 
-      SkillsConfiguration.configure({
-        serviceUrl,
-        projectId,
-        authenticator,
-      });
-    }
+        SkillsConfiguration.configure({
+          serviceUrl,
+          projectId,
+          authenticator,
+        });
+
+        SkillsConfiguration.afterConfigure()
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => reject(error));
+      } else {
+        resolve();
+      }
+    });
   },
 };
 
