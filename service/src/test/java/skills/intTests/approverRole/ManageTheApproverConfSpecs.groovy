@@ -528,7 +528,6 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         e.resBody.contains("You do not have permission to view/manage this Project") || e.resBody.contains("HTTP Status 403 – Forbidden")
     }
 
-
     def "explicitly designate user to catch all unmatched requests"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -638,6 +637,49 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown()
         e.message.contains("Cannot configure fallback approver since this approver already has existing workload config")
+    }
+
+    def "there must be 1 implicit or explicit fallback approver"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, "key", "val")
+        when:
+        skillsService.configureApproverForUserTag(proj.projectId, skillsService.userName, "key", "val")
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("This operation will assign the last approver [${skillsService.userName}] away from fallback duties, which is sadly not allowed")
+    }
+
+    def "there must be 1 implicit or explicit fallback approver - explit fallback conf present so no error"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(3, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, "key", "val")
+        skillsService.configureFallbackApprover(proj.projectId, user2Service.userName)
+        when:
+        skillsService.configureApproverForUserTag(proj.projectId, skillsService.userName, "key", "val")
+
+        then:
+        true
     }
 
 }

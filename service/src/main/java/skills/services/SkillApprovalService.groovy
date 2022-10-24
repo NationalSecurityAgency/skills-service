@@ -28,11 +28,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApproverConfRequest
-import skills.controller.result.model.ApproverConfResult
-import skills.controller.result.model.LabelCountItem
-import skills.controller.result.model.SkillApprovalResult
-import skills.controller.result.model.TableResult
-import skills.controller.result.model.UserRoleRes
+import skills.controller.result.model.*
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.SkillCatalogService
@@ -42,11 +38,7 @@ import skills.services.settings.SettingsService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillApprovalConfRepo
-import skills.storage.repos.SkillApprovalRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
@@ -93,6 +85,9 @@ class SkillApprovalService {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         String currentApproverId = userInfoService.currentUser.username
@@ -290,17 +285,10 @@ class SkillApprovalService {
 
     @Transactional
     ApproverConfResult configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
+        validateParamConsistency(skillApproverConfRequest)
         validateApproverAccess(projectId, approverId)
         validateNotFallbackApprover(projectId, approverId)
-        if (skillApproverConfRequest.userId) {
-            SkillsValidator.isTrue(!skillApproverConfRequest.skillId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
-        }
-        if (skillApproverConfRequest.skillId) {
-            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
-        }
-        if (skillApproverConfRequest.userTagValue) {
-            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.skillId, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
-        }
+        validatePresenceOfFallbackApprover(approverId, projectId)
 
         SkillApprovalConf saved
         if (skillApproverConfRequest.userId) {
@@ -337,6 +325,39 @@ class SkillApprovalService {
         log.info("Saved {}", saved)
         SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
         return convertToClientRes(dbRes)
+    }
+
+    private void validateParamConsistency(SkillApproverConfRequest skillApproverConfRequest) {
+        if (skillApproverConfRequest.userId) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.skillId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.skillId) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.userTagValue) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.skillId, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+    }
+
+    private static Closure<SkillApprovalConfRepo.ApproverConfResult> isFallBackConf = { SkillApprovalConfRepo.ApproverConfResult conf ->
+        !conf.userId && !conf.userTagValue && !conf.userTagKey && !conf.skillId
+    }
+    @Profile
+    private void validatePresenceOfFallbackApprover(String approverId, String projectId) {
+        List<ApproverConfResult> existingProjectConf = skillApprovalConfRepo.findAllByProjectId(projectId)
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE)
+        List<RoleName> roles = [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]
+        List<UserRoleRepo.UserRoleWithAttrs> userRoles = userRoleRepo.findRoleWithAttrsByProjectIdAndUserRoles(projectId, roles, pageRequest)
+        List<String> allApprovers = userRoles.collect { it.role.userId }
+        boolean hasFallBackApprover = existingProjectConf.find(isFallBackConf)
+        if (!hasFallBackApprover) {
+            // must have at 1 implicit fallback approver
+            Set<String> existingApprovers = existingProjectConf.collect { it.approverUserId }.toSet()
+            List<String> implicitFallbackApprovers = allApprovers.findAll({ !existingApprovers.contains(it) && it != approverId })
+            if (!implicitFallbackApprovers) {
+                throw new SkillException("Must have a least 1 fallback implicit or explicit approver. This operation will assign the last approver [${approverId}] away from fallback duties, which is sadly not allowed.", projectId, null, ErrorCode.BadParam)
+            }
+        }
     }
 
     @Profile
@@ -407,7 +428,7 @@ class SkillApprovalService {
     }
 
     private void validateNotFallbackApprover(String projectId, String approverId) {
-        SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId)
+        SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId);
         if (found) {
             throw new SkillException(" [${approverId}] is already a fallback approver.", projectId, null, ErrorCode.BadParam)
         }
