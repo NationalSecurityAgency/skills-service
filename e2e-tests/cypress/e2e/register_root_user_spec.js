@@ -169,8 +169,9 @@ describe('Register Root Users', () => {
             .type('password');
         cy.contains('Create Account')
             .click();
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
 
-        // if rankingAndProgressViewsEnabled are disabled then always navigate to admin page
+        // if rankingAndProgressViewsEnabled are enabled
         cy.url()
             .should('include', '/progress-and-ranking');
     });

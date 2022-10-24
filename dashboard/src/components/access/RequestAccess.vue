@@ -203,18 +203,20 @@ limitations under the License.
       login() {
         this.createInProgress = true;
         this.$store.dispatch('signup', { isRootAccount: this.isRootAccount, ...this.loginFields }).then(() => {
-          this.$store.dispatch('configureSkillsClientForInception');
-          if (this.verifyEmailAddresses) {
-            this.handlePush({ name: 'EmailVerificationSent', params: { email: this.loginFields.email } });
-          } else if (this.$route.query.redirect) {
-            this.handlePush(this.$route.query.redirect);
-          } else if (!this.isProgressAndRankingEnabled()) {
-            this.handlePush({ name: 'AdminHomePage' });
-          } else {
-            const defaultHomePage = this.$store.getters.config.defaultLandingPage;
-            const pageName = defaultHomePage === 'progress' ? 'MyProgressPage' : 'AdminHomePage';
-            this.handlePush({ name: pageName });
-          }
+          this.$store.dispatch('configureSkillsClientForInception')
+            .then(() => {
+              if (this.verifyEmailAddresses) {
+                this.handlePush({ name: 'EmailVerificationSent', params: { email: this.loginFields.email } });
+              } else if (this.$route.query.redirect) {
+                this.handlePush(this.$route.query.redirect);
+              } else if (!this.isProgressAndRankingEnabled()) {
+                this.handlePush({ name: 'AdminHomePage' });
+              } else {
+                const defaultHomePage = this.$store.getters.config.defaultLandingPage;
+                const pageName = defaultHomePage === 'progress' ? 'MyProgressPage' : 'AdminHomePage';
+                this.handlePush({ name: pageName });
+              }
+            });
         });
       },
       oAuth2Login(registrationId) {
