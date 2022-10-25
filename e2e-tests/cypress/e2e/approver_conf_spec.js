@@ -50,6 +50,60 @@ describe('Approver Config Tests', () => {
             });
     });
 
+
+    it('must have at least 1 admin to configure the proejct', function () {
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        cy.get('[data-cy="approvalConfNotAvailable"]')
+        cy.get('[data-cy="approvalConfNotAvailable"] [data-cy="navToAccessPage"]').click();
+        cy.get('[data-cy="projectAdmins"]')
+    });
+
+    it('assign approver to handle all of the approval requests', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            const user1 = 'user1'
+            cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+            cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
+
+            const defaultUser = vars.defaultUser
+            cy.get(`[data-cy="workloadCell_${defaultUser}"]`).contains('Default Fallback - All Unmatched Requests')
+            cy.get(`[data-cy="workloadCell_${defaultUser}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
+
+            // switch to fallback
+            cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click({force: true})
+
+            // validate
+            cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Assigned Fallback - All Unmatched Requests')
+            cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).should('be.disabled')
+
+            cy.get(`[data-cy="workloadCell_${defaultUser}"]`).contains('Not Handling Approval Workload')
+            cy.get(`[data-cy="workloadCell_${defaultUser}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
+
+            // refresh and re-validate
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Assigned Fallback - All Unmatched Requests')
+            cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).should('be.disabled')
+
+            cy.get(`[data-cy="workloadCell_${defaultUser}"]`).contains('Not Handling Approval Workload')
+            cy.get(`[data-cy="workloadCell_${defaultUser}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
+        });
+    });
+
+    it('switching to the fallback should close the expanded child', function () {
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"]`).should('exist')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click({force: true})
+        cy.get(`[data-cy="expandedChild_${user1}"]`).should('not.exist')
+    });
+
     it('configure approver for a specific user', function () {
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
         cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
@@ -60,6 +114,7 @@ describe('Approver Config Tests', () => {
         cy.configureApproverForUser(1, 'user1', 'userB')
 
         cy.visit('/administrator/projects/proj1/self-report/configure');
+
 
 
     });

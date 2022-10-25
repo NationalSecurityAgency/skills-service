@@ -19,7 +19,11 @@ limitations under the License.
        <div class="h6 mb-0 font-weight-bold"><i class="fas fa-cogs" aria-hidden="true"/> Configure Approval Workload</div>
     </template>
 
-    <skills-b-table :options="table.options" :items="table.items"
+    <skills-spinner :is-loading="loading" class="mb-5"/>
+    <div v-if="!loading">
+      <skills-b-table v-if="hasMoreThanOneApprover"
+                    :options="table.options"
+                    :items="table.items"
                     tableStoredStateId="skillApprovalConfTable"
                     data-cy="skillApprovalConfTable">
       <template #head(userIdForDisplay)="data">
@@ -42,13 +46,14 @@ limitations under the License.
       </template>
 
       <template v-slot:cell(workload)="data">
-        <div class="row">
+        <div class="row" :data-cy="`workloadCell_${data.item.userId}`">
           <div class="col">
             <div v-if="!data.item.hasConf">
               <b-form-checkbox
                   :name="`Enable and disable fallback for ${data.item.userId} approver`"
                   @change="handleFallback($event, data.item)"
-                  switch :checked="data.item.isFallbackConfPresent">
+                  data-cy="fallbackSwitch"
+                  :checked="data.item.isFallbackConfPresent" switch>
                 <span v-if="!data.item.hasAnyFallbackConf">Default Fallback - All Unmatched Requests</span>
                 <span v-if="data.item.hasAnyFallbackConf && !data.item.fallbackConf">Not Handling Approval Workload</span>
                 <span v-if="data.item.fallbackConf">Assigned Fallback - All Unmatched Requests</span>
@@ -69,6 +74,7 @@ limitations under the License.
                       :aria-label="`Edit ${data.item.userIdForDisplay} approval workload`"
                       variant="outline-primary"
                       :disabled="data.item.isFallbackConfPresent"
+                      data-cy="editApprovalBtn"
                       @click="data.toggleDetails">
               <span v-if="!data.detailsShowing"><i class="fas fa-edit" aria-hidden="true" /> Edit</span>
               <span v-if="data.detailsShowing"><i class="fas fa-arrow-alt-circle-up" aria-hidden="true" /> Collapse</span>
@@ -78,7 +84,7 @@ limitations under the License.
       </template>
 
       <template #row-details="row">
-        <div class="ml-5">
+        <div class="ml-5" :data-cy="`expandedChild_${row.item.userId}`">
           <self-report-approval-conf-user-tag :user-info="row.item"
                                               tag-key="TagKey"
                                               tag-label="TagKeyFromProps"
@@ -97,6 +103,16 @@ limitations under the License.
       </template>
 
     </skills-b-table>
+
+      <no-content2 v-if="!hasMoreThanOneApprover" title="Not Available"
+                 class="my-5"
+                 icon-size="fa-2x"
+                 icon="fas fa-cogs"
+                 data-cy="approvalConfNotAvailable">
+      Ability to split approval workload is currently not available because there is only <b-badge variant="info">1</b-badge> Admin for this project.
+      Please add <b>Admins</b> or <b>Approvers</b> on the <b-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/> Access</b-link> page in order to start using this feature.
+    </no-content2>
+    </div>
   </b-card>
 </template>
 
@@ -111,10 +127,14 @@ limitations under the License.
   import AccessService from '@/components/access/AccessService';
   import RoleName from '@/components/access/RoleName';
   import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
     name: 'SelfReportApprovalConfManager',
     components: {
+      SkillsSpinner,
+      NoContent2,
       SelfReportApprovalConfSkill,
       SelfReportApprovalConfUserTag,
       SelfReportApprovalConfSpecificUsers,
@@ -123,10 +143,11 @@ limitations under the License.
     data() {
       return {
         projectId: this.$route.params.projectId,
+        loading: true,
         table: {
           items: [],
           options: {
-            busy: true,
+            busy: false,
             bordered: true,
             outlined: true,
             stacked: 'md',
@@ -166,6 +187,11 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
+    computed: {
+      hasMoreThanOneApprover() {
+        return this.table.items && this.table.items.length > 1;
+      },
+    },
     methods: {
       loadData() {
         const pageParams = {
@@ -190,7 +216,7 @@ limitations under the License.
                 });
                 this.updateTable(basicTableInfo);
               }).finally(() => {
-                this.table.options.busy = false;
+                this.loading = false;
               });
           });
       },
@@ -243,6 +269,8 @@ limitations under the License.
             .then((newConf) => {
               itemToUpdate.allConf.push(newConf);
               this.updateTable(this.table.items);
+              // close expanded child
+              this.table.items = this.table.items.map((i) => ({ ...i, _showDetails: false }));
               this.$nextTick(() => this.$announcer.polite(`Assigned ${newConf.approverUserId} as a fallback approver.`));
             })
             .finally(() => {
