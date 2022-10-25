@@ -28,12 +28,16 @@ limitations under the License.
       @keydown="handleTab"
     ></editor>
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
-      <div class="row text-secondary small">
+      <div class="row small">
         <div class="col">
           Insert images by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="col-auto">
-          <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef" :href="editorFeaturesUrl" target="_blank" style="display: inline-block"><i class="far fa-question-circle editor-help-footer-help-icon"/></a>
+          <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
+             aria-label="SkillTree documentation of rich text editor features"
+             :href="editorFeaturesUrl" target="_blank" style="display: inline-block">
+            <i class="far fa-question-circle editor-help-footer-help-icon"/>
+          </a>
         </div>
       </div>
     </div>
@@ -153,6 +157,7 @@ limitations under the License.
   .editor-help-footer {
     border-top: 0.9px dashed rgba(0, 0, 0, 0.2) !important;
     background-color: #f7f9fc !important;
+    color: #687278 !important;
   }
   .editor-help-footer-help-icon {
     font-size: 1rem;
