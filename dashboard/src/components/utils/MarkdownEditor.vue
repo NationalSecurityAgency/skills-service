@@ -33,7 +33,7 @@ limitations under the License.
           Insert images by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="col-auto">
-          <a ref="editorFeatureLinkRef" :href="editorFeaturesUrl" target="_blank" style="display: inline-block"><i class="far fa-question-circle editor-help-footer-help-icon"/></a>
+          <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef" :href="editorFeaturesUrl" target="_blank" style="display: inline-block"><i class="far fa-question-circle editor-help-footer-help-icon"/></a>
         </div>
       </div>
     </div>
