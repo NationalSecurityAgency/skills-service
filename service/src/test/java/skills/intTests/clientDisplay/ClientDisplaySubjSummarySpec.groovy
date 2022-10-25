@@ -396,4 +396,37 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills[3].selfReporting.requestedOn == null
         summary.skills[4].selfReporting.requestedOn == null
     }
+
+    def "load subject summary with badges"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
+        SkillsService supervisorService = createSupervisor()
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        allSkills.each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        supervisorService.createGlobalBadge(badge2)
+
+        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+        then:
+        summary.skills.size() == 3
+        summary.skills[0].badges.size() == 2
+        summary.skills[0].badges[0].badgeId == badge1.badgeId
+        summary.skills[0].badges[1].badgeId == badge2.badgeId
+        summary.skills[1..2].every { it.badges.size() == 1 && it.badges[0].badgeId == badge1.badgeId }
+
+    }
 }

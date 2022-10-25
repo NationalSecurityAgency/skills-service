@@ -103,9 +103,9 @@ limitations under the License.
       </div>
     </div>
     <div v-if="skill.badges && skill.badges.length > 0" class="row" style="padding-top:8px;">
-      <div class="col" style="font-size: 0.9rem">
+      <div class="col" style="font-size: 0.9rem" data-cy="skillBadges">
         <i class="fa fa-award"></i> Badges:
-        <span v-for="(badge, index) in skill.badges" data-cy="hasBadgesIndicator" class="overflow-hidden"
+        <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
               v-bind:key="badge.badgeId">
           <router-link :to="genLink(badge)" class="skills-theme-primary-color" style="text-decoration:underline;">{{ badge.name }}</router-link>
           <span v-if="index != (skill.badges.length - 1)">, </span>
