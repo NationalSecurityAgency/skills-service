@@ -149,11 +149,25 @@ class SubjectDataLoader {
     @Profile
     private List<SkillsAndPoints> handleBadges(String projectId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
-            List<String> skillIds = skillsAndPoints.collect{ it -> it.skillDef.skillId }
+            List<String> skillIds = []
+            skillsAndPoints.forEach{ it ->
+                if(it.skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+                    if(it.children) {
+                        skillIds.addAll(it.children.collect{ child -> child.skillDef.skillId })
+                    }
+                }
+                else if(it.skillDef.type == SkillDef.ContainerType.Skill) {
+                    skillIds.add(it.skillDef.skillId)
+                }
+            }
+
             def badges = skillDefRepo.findAllBadgesForSkill(skillIds, projectId);
             def badgesById = badges.groupBy{ it.skillId }
             skillsAndPoints.forEach{ it ->
                 it.badges = badgesById[it.skillDef.skillId]
+                it.children.forEach{ child ->
+                    child.badges = badgesById[child.skillDef.skillId]
+                }
             }
         }
         return skillsAndPoints;
