@@ -27,7 +27,7 @@ limitations under the License.
                         v-model="enteredTag"
                         v-on:keydown.enter="addTagConf"
                         :placeholder="`Enter ${tagLabel} value`"
-                        data-cy="tagValueInput"
+                        data-cy="userTagValueInput"
                         :aria-invalid="errors && errors.length > 0"
                         aria-describedby="tagValueInputError"
                         aria-errormessage="tagValueInputError"></b-form-input>
@@ -37,6 +37,7 @@ limitations under the License.
         <b-button
           aria-label="Add Tag Value"
           @click="addTagConf"
+          data-cy="addTagKeyConfBtn"
           :disabled="!enteredTag || (errors && errors.length > 0)"
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
@@ -45,17 +46,18 @@ limitations under the License.
     </ValidationProvider>
 
     <skills-b-table v-if="hadData" class="mt-3"
+                    data-cy="tagKeyConfTable"
                     :options="table.options" :items="table.items"
-                    tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                    data-cy="skillApprovalConfSpecificUsersTable">
+                    tableStoredStateId="skillApprovalConfSpecificUsersTable">
       <template v-slot:cell(userTagValue)="data">
-        <div class="row">
+        <div class="row" :data-cy="`tagValue_${data.value}`">
           <div class="col">
             {{ data.value }}
           </div>
           <div class="col-auto">
             <b-button title="Delete Skill"
                       variant="outline-danger"
+                      data-cy="deleteBtn"
                       :aria-label="`Remove ${data.value} tag.`"
                       @click="removeTagConf(data.item)"
                       :disabled="data.item.deleteInProgress"
@@ -75,6 +77,7 @@ limitations under the License.
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="my-5"
                  icon-size="fa-2x"
+                 data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
       You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
     </no-content2>
@@ -183,7 +186,7 @@ limitations under the License.
       assignCustomValidation() {
         const self = this;
         extend('uniqueTagConf', {
-          message: (field) => `${field} value is already taken.`,
+          message: (field) => `There is already an entry for this ${field} value.`,
           validate(value) {
             return !self.table.items.find((i) => value.toLowerCase() === i.userTagValue);
           },

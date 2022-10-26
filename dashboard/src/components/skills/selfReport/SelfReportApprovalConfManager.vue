@@ -85,20 +85,23 @@ limitations under the License.
 
       <template #row-details="row">
         <div class="ml-5" :data-cy="`expandedChild_${row.item.userId}`">
-          <self-report-approval-conf-user-tag :user-info="row.item"
-                                              tag-key="TagKey"
-                                              tag-label="TagKeyFromProps"
-                                              @conf-added="updatedConf"
-                                              @conf-removed="removeConf"
-                                              class="mt-3"/>
-          <self-report-approval-conf-skill :user-info="row.item"
-                                           @conf-added="updatedConf"
-                                           @conf-removed="removeConf"
-                                           class="mt-3"/>
-          <self-report-approval-conf-specific-users :user-info="row.item"
-                                                    @conf-added="updatedConf"
-                                                    @conf-removed="removeConf"
-                                                    class="mt-3"/>
+          <self-report-approval-conf-user-tag v-if="userTagConfKey"
+            :user-info="row.item"
+            :tag-key="userTagConfKey"
+            :tag-label="userTagConfLabel"
+            @conf-added="updatedConf"
+            @conf-removed="removeConf"
+            class="mt-3"/>
+          <self-report-approval-conf-skill
+            :user-info="row.item"
+            @conf-added="updatedConf"
+            @conf-removed="removeConf"
+            class="mt-3"/>
+          <self-report-approval-conf-specific-users
+            :user-info="row.item"
+            @conf-added="updatedConf"
+            @conf-removed="removeConf"
+            class="mt-3"/>
         </div>
       </template>
 
@@ -109,8 +112,8 @@ limitations under the License.
                  icon-size="fa-2x"
                  icon="fas fa-cogs"
                  data-cy="approvalConfNotAvailable">
-      Ability to split approval workload is currently not available because there is only <b-badge variant="info">1</b-badge> Admin for this project.
-      Please add <b>Admins</b> or <b>Approvers</b> on the <b-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/> Access</b-link> page in order to start using this feature.
+        The ability to split the approval workload is unavailable because there is only<b-badge variant="info">1</b-badge> Admin for this project.
+        Please add <b>Admins</b> or <b>Approvers</b> on the <b-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</b-link> page in order to start using this feature.
     </no-content2>
     </div>
   </b-card>
@@ -190,6 +193,12 @@ limitations under the License.
     computed: {
       hasMoreThanOneApprover() {
         return this.table.items && this.table.items.length > 1;
+      },
+      userTagConfKey() {
+        return this.$store.getters.config.approvalConfUserTagKey;
+      },
+      userTagConfLabel() {
+        return this.$store.getters.config.approvalConfUserTagLabel ? this.$store.getters.config.approvalConfUserTagLabel : this.$store.getters.config.approvalConfUserTagKey;
       },
     },
     methods: {
