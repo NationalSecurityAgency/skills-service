@@ -19,6 +19,11 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <skills-spinner :is-loading="!table.options.fields" class="mb-5"/>
+          <b-button @click="deleteAllSkills" variant="outline-info" size="sm"
+                    :aria-label="`remove all skill events from user`">
+            <i class="fas fa-trash" aria-hidden="true"/>
+          </b-button>
+
       <div v-if="table.options.fields">
         <div class="row px-3 pt-3">
           <div class="col-12">
@@ -236,6 +241,13 @@ limitations under the License.
             }
           });
       },
+      deleteAllSkills() {
+        this.msgConfirm(`Removing all skills for user [${this.userId}]`).then((res) => {
+          if (res) {
+            this.doDeleteAllSkills();
+          }
+        });
+      },
       doDeleteSkill(skill) {
         this.isLoading = true;
         UsersService.deleteSkillEvent(this.projectId, skill, this.userId)
@@ -248,6 +260,19 @@ limitations under the License.
             }
           })
           .finally(() => {
+            this.isLoading = false;
+          });
+      },
+      doDeleteAllSkills() {
+        this.isLoading = true;
+        UsersService.deleteAllSkillEvents(this.projectId, this.userId)
+          .then((data) => {
+            if (data.success) {
+              this.loadData();
+            } else {
+              this.errorToast('Unable to Remove User Skills', `Skill events were not removed.  ${data.explanation}`);
+            }
+          }).finally(() => {
             this.isLoading = false;
           });
       },

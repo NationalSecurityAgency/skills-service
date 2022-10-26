@@ -171,6 +171,12 @@ class SkillEventAdminService {
         return results
     }
 
+    @Profile
+    @Transactional
+    RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
+        log.info('Delete request received for ' + projectId + ' and ' + userId);
+    }
+
     @Transactional
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
         if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
