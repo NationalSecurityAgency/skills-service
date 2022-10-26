@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div id="project-selector">
-    <v-select :options="projects"
+    <v-select :options="projectsInternal"
               v-model="selectedInternal"
               placeholder="Select Project..."
               :filterable="internalSearch"
@@ -38,7 +38,6 @@ limitations under the License.
 
 <script>
   import vSelect from 'vue-select';
-  import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
 
   export default {
     name: 'ProjectSelector',
@@ -46,6 +45,10 @@ limitations under the License.
     props: {
       value: {
         type: Object,
+      },
+      projects: {
+        type: Array,
+        required: true,
       },
       internalSearch: {
         type: Boolean,
@@ -55,24 +58,28 @@ limitations under the License.
         type: String,
         default: '',
       },
+      isLoading: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
-        isLoading: false,
-        projects: [],
         selectedInternal: null,
         badgeId: null,
+        projectsInternal: [],
       };
     },
     mounted() {
       this.badgeId = this.$route.params.badgeId;
-      this.isLoading = true;
       this.setSelectedInternal();
-      this.loadProjectsForBadge();
     },
     watch: {
       value: function watchUpdatesToSelected() {
         this.setSelectedInternal();
+      },
+      projects: function updateProjects() {
+        this.projectsInternal = this.projects;
       },
     },
     methods: {
@@ -99,13 +106,6 @@ limitations under the License.
       },
       searchChanged(query, loadingFunction) {
         this.$emit('search-change', query, loadingFunction);
-      },
-      loadProjectsForBadge() {
-        GlobalBadgeService.getAllProjectsForBadge(this.badgeId)
-          .then((response) => {
-            this.isLoading = false;
-            this.projects = response.map((entry) => entry);
-          });
       },
     },
   };

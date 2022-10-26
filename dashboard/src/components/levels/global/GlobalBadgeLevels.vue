@@ -22,7 +22,14 @@ limitations under the License.
         <div class="mb-4 m-3">
           <div class="row p-0">
             <div class="col-md">
-              <project-selector ref="projectSelectorRef" v-model="selectedProject" @added="projectAdded" @removed="projectRemoved"></project-selector>
+              <project-selector ref="projectSelectorRef" v-model="selectedProject"
+                                :projects="availableProjects"
+                                :after-list-slot-text="afterListSlotText"
+                                @added="projectAdded"
+                                :is-loading="loadingAvailableProjects"
+                                :internal-search="false"
+                                @search-change="searchChanged"
+                                @removed="projectRemoved"></project-selector>
             </div>
             <div class="col-md my-3 m-md-0">
               <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
@@ -57,6 +64,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import debounce from 'lodash.debounce';
 
   import ChangeProjectLevel from '@/components/levels/global/ChangeProjectLevel';
   import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
@@ -87,6 +95,7 @@ limitations under the License.
         selectedProject: null,
         selectedLevel: null,
         isLoading: true,
+        loadingAvailableProjects: false,
         levelPlaceholder: 'First choose a Project',
         badge: null,
         badgeId: null,
@@ -95,6 +104,9 @@ limitations under the License.
         projectLevelId: null,
         projectLevel: null,
         projectLevelName: null,
+        availableProjects: [],
+        afterListSlotText: '',
+        projectSearch: '',
       };
     },
     computed: {
@@ -109,6 +121,7 @@ limitations under the License.
     mounted() {
       this.badgeId = this.$route.params.badgeId;
       this.loadBadgeLevels();
+      this.loadProjectsForBadge();
     },
     watch: {
       '$route.params.badgeId': function badgeIdParamChanged() {
@@ -210,6 +223,26 @@ limitations under the License.
             }
           });
         }
+      },
+      loadProjectsForBadge: debounce(function loadProjects() {
+        this.loadingAvailableProjects = true;
+        GlobalBadgeService.suggestProjectsForPage(this.badgeId, this.projectSearch)
+          .then((response) => {
+            if (response && response.projects) {
+              this.availableProjects = response.projects;
+            }
+            if (response?.totalAvailable > response?.projects?.length) {
+              this.afterListSlotText = `Showing ${response.projects.length} of ${response.totalAvailable} results.  Use search to narrow results.`;
+            } else {
+              this.afterListSlotText = '';
+            }
+          }).finally(() => {
+            this.loadingAvailableProjects = false;
+        });
+      }, 250),
+      searchChanged(query) {
+        this.projectSearch = query;
+        this.loadProjectsForBadge();
       },
     },
   };

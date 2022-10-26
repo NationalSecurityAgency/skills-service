@@ -202,8 +202,8 @@ class SupervisorController {
 
     @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<ProjectResult> getAllProjectsForBadgeId(@PathVariable("badgeId") String badgeId) {
-        return globalBadgesService.getAllProjectsForBadge(badgeId)
+    GlobalBadgesService.AvailableProjectResult getAllProjectsForBadgeId(@PathVariable("badgeId") String badgeId, @RequestParam String query) {
+        return globalBadgesService.getAvailableProjectsForBadge(badgeId, query)
     }
 
     @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
