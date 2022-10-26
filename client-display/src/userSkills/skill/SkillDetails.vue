@@ -91,6 +91,9 @@ limitations under the License.
       },
     },
     methods: {
+      genLink(b) {
+        return { name: b.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
       loadData() {
         this.loading.dependencies = true;
         this.loading.skill = true;
@@ -160,5 +163,9 @@ limitations under the License.
 
 .nextButton {
   float: right;
+}
+
+/deep/ div.skills-badge-icon {
+  text-align: center;
 }
 </style>

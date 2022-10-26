@@ -26,12 +26,14 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
 import skills.storage.model.ClientPref
+import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.SettingRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
@@ -59,6 +61,9 @@ class SubjectDataLoader {
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
+    @Autowired
+    SkillDefRepo skillDefRepo
+
     static class SkillsAndPoints {
         SkillDef skillDef
         int points
@@ -71,6 +76,7 @@ class SubjectDataLoader {
 
         List<SkillsAndPoints> children = []
         SkillApproval approval
+        List<SimpleBadgeRes> badges = []
     }
 
     static class SkillsData {
@@ -123,6 +129,8 @@ class SubjectDataLoader {
 
         skillsAndPoints = handleGroupSkills(skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
+        skillsAndPoints = handleBadges(projectId, skillsAndPoints)
+
         new SkillsData(childrenWithPoints: skillsAndPoints)
     }
 
@@ -136,6 +144,19 @@ class SubjectDataLoader {
         skillsAndPoints.each {
             it.isLastViewed = it.skillDef.skillId == lastViewedSkillId
         }
+    }
+
+    @Profile
+    private List<SkillsAndPoints> handleBadges(String projectId, List<SkillsAndPoints> skillsAndPoints) {
+        if(projectId) {
+            List<String> skillIds = skillsAndPoints.collect{ it -> it.skillDef.skillId }
+            def badges = skillDefRepo.findAllBadgesForSkill(skillIds, projectId);
+            def badgesById = badges.groupBy{ it.skillId }
+            skillsAndPoints.forEach{ it ->
+                it.badges = badgesById[it.skillDef.skillId]
+            }
+        }
+        return skillsAndPoints;
     }
 
     private List<SkillsAndPoints> handleGroupDescriptions(String projectId, List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {

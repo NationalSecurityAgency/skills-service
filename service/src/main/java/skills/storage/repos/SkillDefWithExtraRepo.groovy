@@ -18,6 +18,8 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
+import skills.skillLoading.model.SkillBadgeSummary
+import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefWithExtra
