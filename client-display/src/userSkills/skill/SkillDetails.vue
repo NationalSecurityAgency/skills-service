@@ -87,7 +87,7 @@ limitations under the License.
       },
       isCrossProject() {
         const routeName = this.$route.name;
-        return routeName === 'crossProjectSkillDetails';
+        return routeName === 'crossProjectSkillDetails' || this.$route.params.crossProjectId;
       },
     },
     methods: {
@@ -120,7 +120,6 @@ limitations under the License.
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
-
             if (skillId && this.skill.projectId && !this.isCrossProject) {
               SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
             }
