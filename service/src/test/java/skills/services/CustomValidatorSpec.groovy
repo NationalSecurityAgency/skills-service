@@ -15,7 +15,6 @@
  */
 package skills.services
 
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class CustomValidatorSpec extends Specification{
