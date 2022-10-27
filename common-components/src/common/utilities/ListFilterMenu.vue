@@ -16,32 +16,39 @@ limitations under the License.
 <template>
     <div class="skills-theme-filter-menu d-inline-block" data-cy="filterMenu">
       <b-dropdown variant="outline-info" toggle-class="skills-theme-btn" class="ml-1" dropup>
-                <template slot="button-content">
-                    <i class="fas fa-filter" style="font-size: 1.1rem" aria-hidden="true" data-cy="filterBtn"/>
-                    <span class="sr-only">clear filter</span>
-                </template>
-              <b-dropdown-group v-for="filterGroup in filters" :key="filterGroup.groupId" :id="filterGroup.groupId">
-                <template slot="header">
-                  <span class="skills-theme-menu-secondary-color" style="font-size: 0.9rem">{{ filterGroup.groupLabel }}</span>
-                </template>
-                <b-dropdown-item href="#" v-for="(filter, index) in filterGroup.filterItems" :key="filter.id" @click="filterSelected(filter.id)" :disabled="filter.count === 0"
-                                 :data-cy="`filter_${filter.id}`" class="text-primary m-0"
-                                 :class="{ 'skills-theme-menu-primary-color' : filter.count > 0, 'skills-theme-menu-secondary-color' : filter.count === 0, '' : index > 0  }">
-                  <div class="row no-gutters skills-dropdown-item">
-                    <div class="col-auto">
-                      <i class="text-center border rounded p-1" :class="filter.icon" />
-                    </div>
-                    <div class="col">
-                      <span class="ml-2 align-middle" v-html="filter.html"></span>
-                    </div>
-                    <div class="col-auto">
-                      <span class="badge badge-info float-right" data-cy="filterCount">{{ filter.count }}</span>
-                    </div>
-                  </div>
-                </b-dropdown-item>
-              </b-dropdown-group>
-            </b-dropdown>
-      <b-badge v-if="selectedFilter" variant="light" class="mx-1 py-1 border-info border selected-filter"
+        <template slot="button-content">
+          <i class="fas fa-filter" style="font-size: 1.1rem" aria-hidden="true" data-cy="filterBtn"/>
+          <span class="sr-only">Skills Filter</span>
+        </template>
+        <b-dropdown-group v-for="filterGroup in filters" :key="filterGroup.groupId" :id="filterGroup.groupId">
+          <template slot="header">
+            <span class="skills-theme-menu-secondary-color" style="font-size: 0.9rem">{{ filterGroup.groupLabel }}</span>
+            <span class="sr-only">{{ filterGroup.groupLabel }}</span>
+          </template>
+          <b-dropdown-item href="#" v-for="(filter, index) in filterGroup.filterItems"
+                           :key="filter.id"
+                           @click="filterSelected(filter.id)"
+                           :disabled="filter.count === 0"
+                           :data-cy="`filter_${filter.id}`"
+                           class="text-primary m-0"
+                           :class="{ 'skills-theme-menu-primary-color' : filter.count > 0, 'skills-theme-menu-secondary-color' : filter.count === 0, '' : index > 0  }">
+            <div class="row no-gutters skills-dropdown-item">
+              <div class="col-auto">
+                <i class="text-center border rounded p-1" :class="filter.icon" :aria-hidden="true" />
+              </div>
+              <div class="col">
+                <span class="ml-2 align-middle" v-html="filter.html"></span>
+              </div>
+              <div class="col-auto">
+                <span class="badge badge-info float-right" data-cy="filterCount">{{ filter.count }}</span>
+              </div>
+            </div>
+          </b-dropdown-item>
+        </b-dropdown-group>
+      </b-dropdown>
+      <b-badge v-if="selectedFilter"
+               variant="light"
+               class="mx-1 py-1 border-info border selected-filter"
                data-cy="selectedFilter"
                pill>
         <i :class="selectedFilter.icon" class="ml-1"></i> <span v-html="selectedFilter.html"></span>

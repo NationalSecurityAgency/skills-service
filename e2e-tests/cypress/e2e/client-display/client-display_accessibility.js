@@ -235,7 +235,7 @@ describe('Client Display Accessibility tests', () => {
         cy.get('[data-cy="filter_withoutProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills without progress');
+            .contains('Without Progress');
 
         // open filter
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
