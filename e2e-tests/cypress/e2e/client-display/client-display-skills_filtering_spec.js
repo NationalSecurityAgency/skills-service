@@ -1145,6 +1145,23 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
     });
 
+    it('Last Viewed button is still enabled if skill was found under a group', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 2);
+        cy.addSkillToGroup(1, 1, 2, 3);
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy="group-group2_skillProgress-skill3"] [data-cy="skillProgressBar"]').click();
+        cy.get('[data-cy="skillProgressTitle"]').should('exist')
+        cy.cdBack('Subject 1');
+
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
+        cy.get('[data-cy="skillsSearchInput"]').type('3');
+        cy.get('[id="skillRow-skill1"]').should('not.exist')
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
+    });
+
     it('Visual Test: skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
