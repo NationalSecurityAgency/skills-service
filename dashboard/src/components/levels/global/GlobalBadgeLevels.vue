@@ -161,7 +161,7 @@ limitations under the License.
             const { selectedLevel } = this;
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId }).then(() => this.$announcer.polite(`added ${selectedProject} level ${selectedLevel} to global badge`));
             this.selectedProject = null;
-            this.$refs.projectSelectorRef.loadProjectsForBadge();
+            this.loadProjectsForBadge();
             this.$emit('global-badge-levels-changed', newLevel);
           });
       },
@@ -179,7 +179,7 @@ limitations under the License.
           .then(() => {
             this.badgeLevels = this.badgeLevels.filter((item) => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
             this.loadGlobalBadgeDetailsState({ badgeId: this.badgeId }).then(() => this.$announcer.polite('project level removed from global badge'));
-            this.$refs.projectSelectorRef.loadProjectsForBadge();
+            this.loadProjectsForBadge();
             this.$emit('global-badge-levels-changed', deletedItem);
           });
       },

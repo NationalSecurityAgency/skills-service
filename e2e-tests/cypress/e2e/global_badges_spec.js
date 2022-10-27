@@ -286,7 +286,7 @@ describe('Global Badges Tests', () => {
             .as('getBadges');
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available*')
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
@@ -631,7 +631,7 @@ describe('Global Badges Tests', () => {
             .as('idExists');
         cy.intercept('POST', '/supervisor/badges/name/exists')
             .as('nameExists');
-        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available*')
             .as('availableProjects');
         cy.intercept('GET', '/supervisor/badges/ABadgeBadge/skills/available?query=')
             .as('availableSkills');
@@ -728,7 +728,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@availableProjects');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@proj2Levels');
         cy.get('#level-selector')
@@ -822,7 +824,7 @@ describe('Global Badges Tests', () => {
 
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available*')
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
@@ -866,7 +868,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.get('#level-selector')
             .click()
@@ -1718,7 +1722,7 @@ describe('Global Badges Tests', () => {
             .as('getBadges');
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/a_new_id/projects/available')
+        cy.intercept('GET', '/supervisor/badges/a_new_id/projects/available*')
             .as('getAvailableLevels');
         cy.intercept('DELETE', '/supervisor/badges/a_new_id/projects/proj2/level/5')
             .as('removeLevel');
@@ -1787,7 +1791,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getAvailableLevels');
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
