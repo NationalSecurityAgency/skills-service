@@ -26,6 +26,7 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 
 import javax.annotation.PostConstruct
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Slf4j
@@ -53,6 +54,9 @@ class CustomValidator {
     private static final Pattern BULLET = ~/^\s*(?:\d\. |\* |- )/
     private static final Pattern NEWLINE = ~/\n/
     private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^[#>]{1,}/
+
+    private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
+    private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
 
     @PostConstruct
     CustomValidator init() {
@@ -102,11 +106,12 @@ class CustomValidator {
         if (!paragraphPattern || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
+        log.debug("Validating description:\n[${description}]")
 
         // split if
         // - there is at least 2 new lines
         // - markdown separator (3 underscores, 3 dashes, 3 stars)
-        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
+        String[] paragraphs = preProcessForMarkdownSupport(description).split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
 
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
@@ -122,6 +127,19 @@ class CustomValidator {
         }
 
         return validationResult
+    }
+
+    private String preProcessForMarkdownSupport(String toValidate) {
+//        String toValidate = s.trim()
+
+        // treat all linebreaks and separators as newlines
+        toValidate = toValidate.replaceAll(/(\n\s*[-_*]{3,})|(\n<br>)/, '\n')
+
+        // remove a single new line above a table and/or codeblock
+        toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
+        toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
+
+        return toValidate.trim()
     }
 
     private String adjustForMarkdownSupport(String s) {
@@ -163,6 +181,7 @@ class CustomValidator {
         } else {
             validationResult = new CustomValidationResult(true)
         }
+        log.debug("CustomValidationResult: \nvalid [${validationResult.valid}]\nvalue [${value}]\nregex [${regex}]")
         return validationResult;
     }
 }

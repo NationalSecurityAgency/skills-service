@@ -103,7 +103,7 @@ describe('Markdown Tests', () => {
         cy.get('div.ProseMirror.toastui-editor-contents').should('have.focus')
     });
 
-    it('wysiwyg features', () => {
+    it.only('wysiwyg features', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
             subjectId: 'subj1',

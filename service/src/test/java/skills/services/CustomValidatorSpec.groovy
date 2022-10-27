@@ -15,7 +15,7 @@
  */
 package skills.services
 
-
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class CustomValidatorSpec extends Specification{
@@ -208,7 +208,19 @@ A paragraph two
 A paragraph two
 """).valid
 
+        validator.validateDescription("""A Paragraph one
+
+| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+
+A paragraph two
+""").valid
+
         !validator.validateDescription("""A Paragraph one
+
 
 | header 1 | header 2 | header 3 |
 | ---      |  ------  |---------:|
@@ -229,6 +241,110 @@ A
 
 A paragraph two
 """).valid
+
+        validator.validateDescription("""A
+
+| heading 1 | heading 2 | heading 3 |
+| --------- | :-------: | --------- |
+| row 1-A | row 1-B | row 1-C |
+| row 2-A | lots of text centering in the middle | row 2-C<br><br><br>a few newlines |
+
+
+<br>
+<br>
+<br>
+<br>
+A new sentence after a few new lines
+```""").valid
+
+        validator.validateDescription("""A dsfdsdf
+
+|  |  |
+| --- | --- |
+|  | <br> |
+
+
+<br>
+""").valid
+    }
+
+    def "support markdown codeblocks"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""A Paragraph one
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+A paragraph two
+""").valid
+
+        validator.validateDescription("""A Paragraph one
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+A paragraph two
+""").valid
+
+        !validator.validateDescription("""A Paragraph one
+
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+
+A paragraph two
+""").valid
+
+        !validator.validateDescription("""A Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+A paragraph two
+""").valid
+
+        validator.validateDescription("""A Paragraph one
+A
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+A paragraph two
+""").valid
+
+        validator.validateDescription("""A
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+
+<br>
+<br>
+<br>
+<br>
+A new sentence after a few new lines
+```""").valid
     }
 
     def "support markdown headers"() {
