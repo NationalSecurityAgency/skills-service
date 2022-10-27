@@ -82,7 +82,9 @@ jobs:
 
       - name: Build skills-service
         run: |
-          cd service
+          cd dashboard
+          npm run getDashboardVersion
+          cd ../service
           ../.github/scripts/runSubsetOfServiceTests.sh -t 3 -c ${{ matrix.container }}
 
       - name: upload result artifacts
