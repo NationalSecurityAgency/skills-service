@@ -418,7 +418,7 @@ limitations under the License.
           });
           resultSkills = filteredRes;
         }
-        this.lastViewedButtonDisabled = resultSkills.findIndex((item) => item.isLastViewed) < 0;
+        this.lastViewedButtonDisabled = resultSkills.findIndex((i) => i.isLastViewed || (i.children && i.children.findIndex((c) => c.isLastViewed) >= 0)) < 0;
         this.skillsInternal = resultSkills;
       },
     },
