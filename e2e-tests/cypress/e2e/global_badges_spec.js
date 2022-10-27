@@ -316,7 +316,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
@@ -2082,6 +2084,96 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="skillsSelector"]').should('not.contain.text', 'one');
         cy.get('[data-cy="skillsSelector"]').click();
         cy.get('[role="listbox"]').children().should('have.length', 3);
+    });
+
+    it.only('Project selector displays message if project count exceeds displayable max', () => {
+        //proj/subj/skill1
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        //proj/subj/skill2
+        cy.request('POST', '/app/projects/proj2', {
+            projectId: 'proj2',
+            name: 'proj2'
+        });
+        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        [3,4,5,6,7,8,9,10,11,12,13,14].forEach((num) => {
+            cy.request('POST', `/app/projects/proj${num}`, {
+                projectId: `proj${num}`,
+                name: `proj${num}`
+            });
+        });
+
+        const badgeId = 'a_badge';
+        cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+            badgeId: badgeId,
+            description: '',
+            iconClass: 'fas fa-award',
+            isEdit: false,
+            name: 'A Badge',
+            originalBadgeId: ''
+        });
+
+        cy.intercept('GET', '/supervisor/badges')
+            .as('getBadges');
+        cy.intercept('GET', '/supervisor/projects/proj2/levels')
+            .as('getLevels');
+        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available*')
+            .as('getAvailableLevels');
+
+        cy.visit('/administrator/');
+        cy.clickNav('Global Badges');
+        cy.wait('@getBadges');
+        cy.get('[data-cy="manageBtn_a_badge"]')
+            .click();
+
+        cy.clickNav('Levels');
+        cy.wait('@getAvailableLevels');
+
+        cy.get('#project-selector')
+            .click()
+        cy.get('[data-cy="projectSelectorCountMsg"]').should('exist').should('contain.text', 'Showing 10 of 14 results.  Use search to narrow results.');
+
+        cy.get('#project-selector')
+            .click().type('1');
+        cy.wait('@getAvailableLevels');
+        //not displayed if results less then availableCount
+        cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
 });
