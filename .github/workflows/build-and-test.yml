@@ -51,8 +51,6 @@ jobs:
       fail-fast: false
       matrix:
         # run 3 copies of the current job in parallel
-        # totalRuns must equal to the number of items in container
-        totalRuns: 3
         container: [ 1, 2, 3 ]
 
     env:
@@ -83,7 +81,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build skills-service
-        run: ./.github/scripts/runSubsetOfServiceTests.sh -t ${{ matrix.totalRuns }} -c ${{ matrix.container }}
+        run: ./.github/scripts/runSubsetOfServiceTests.sh -t 3 -c ${{ matrix.container }}
 
       - name: upload result artifacts
         if: ${{ always() }}
