@@ -403,7 +403,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
         List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
-        SkillsService supervisorService = createSupervisor()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -414,10 +413,14 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         allSkills.each {
             skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
         }
-        Map badge2 = SkillsFactory.createBadge(1, 2)
-        supervisorService.createGlobalBadge(badge2)
+        badge1.enabled = true
+        skillsService.updateBadge(badge1, badge1.badgeId)
 
-        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        badge2.enabled = true
+        skillsService.updateBadge(badge2, badge2.badgeId)
 
         when:
         def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
@@ -447,10 +450,8 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         allSkills[0..2].each {
             skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
         }
-        Map badge2 = SkillsFactory.createBadge(1, 2)
-        supervisorService.createGlobalBadge(badge2)
-
-        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        badge1.enabled = true
+        skillsService.updateBadge(badge1, badge1.badgeId)
 
         def skillsGroup1 = allSkills[3]
         skillsGroup1.type = 'SkillsGroup'
@@ -466,15 +467,47 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
         then:
         summary.skills.size() == 4
-        summary.skills[0].badges.size() == 2
+        summary.skills[0].badges.size() == 1
         summary.skills[0].badges[0].badgeId == badge1.badgeId
-        summary.skills[0].badges[1].badgeId == badge2.badgeId
         summary.skills[3].children.size() == 2
         summary.skills[3].children[0].badges.size() == 1
         summary.skills[3].children[1].badges.size() == 1
         summary.skills[3].children[0].badges[0].badgeId == badge1.badgeId
         summary.skills[3].children[1].badges[0].badgeId == badge1.badgeId
         summary.skills[1..2].every { it.badges.size() == 1 && it.badges[0].badgeId == badge1.badgeId }
+
+    }
+
+    def "load subject summary with badges, does not load disabled badges"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
+        SkillsService supervisorService = createSupervisor()
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        badge1.enabled = true
+
+        skillsService.createBadge(badge1)
+        allSkills.each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+        skillsService.updateBadge(badge1, badge1.badgeId)
+
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+        then:
+        summary.skills.size() == 3
+        summary.skills[0].badges.size() == 1
 
     }
 }
