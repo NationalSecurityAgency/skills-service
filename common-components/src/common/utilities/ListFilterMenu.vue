@@ -77,9 +77,7 @@ limitations under the License.
     methods: {
       updateFilters() {
         const keys = Object.keys(this.counts);
-        console.log(JSON.stringify(this.filters));
         this.flattenedFilters = this.filters.map((group) => group.filterItems).flat();
-        console.log(this.flattenedFilters);
         keys.map((key) => {
           const filter = this.flattenedFilters.find((item) => item.id === key);
           // some of the filters are optionally configured based on the page

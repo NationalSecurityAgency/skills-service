@@ -291,8 +291,6 @@ limitations under the License.
             count: 0,
           });
         }
-
-        console.log(`build attribute items: ${JSON.stringify(res)}`);
         return res;
       },
       updateMetaCountsForSkillRes(skillRes) {
