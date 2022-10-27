@@ -2086,7 +2086,7 @@ describe('Global Badges Tests', () => {
         cy.get('[role="listbox"]').children().should('have.length', 3);
     });
 
-    it.only('Project selector displays message if project count exceeds displayable max', () => {
+    it('Project selector displays message if project count exceeds displayable max', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
