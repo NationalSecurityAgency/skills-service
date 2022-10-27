@@ -69,6 +69,8 @@ export default {
             withPointsToday: skill.todaysPoints > 0,
             withoutProgress: skill.points === 0,
             inProgress: skill.points > 0 && skill.points < skill.totalPoints,
+            pendingApproval: skill.selfReporting && skill.selfReporting.requestedOn && !skill.selfReporting.rejectedOn,
+            belongsToBadge: skill.badges && skill.badges.length > 0,
         };
         return copy;
     },

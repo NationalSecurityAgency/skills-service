@@ -526,7 +526,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');

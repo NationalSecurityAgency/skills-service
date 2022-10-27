@@ -109,25 +109,31 @@ limitations under the License.
         },
         filters: [
           {
-            icon: 'fas fa-list-alt',
-            id: 'projectBadges',
-            html: `${store.getters.projectDisplayName} Badges`,
-            count: 0,
-            filter: (badge) => badge.projectId,
-          },
-          {
-            icon: 'fas fa-gem',
-            id: 'gems',
-            html: 'Gems',
-            count: 0,
-            filter: (badge) => badge.startDate && badge.endDate,
-          },
-          {
-            icon: 'fas fa-globe',
-            id: 'globalBadges',
-            html: 'Global Badges',
-            count: 0,
-            filter: (badge) => badge.global === true,
+            groupId: 'progressGroup',
+            groupLabel: 'Badge Filters',
+            filterItems: [
+              {
+                icon: 'fas fa-list-alt',
+                id: 'projectBadges',
+                html: `${store.getters.projectDisplayName} Badges`,
+                count: 0,
+                filter: (badge) => badge.projectId,
+              },
+              {
+                icon: 'fas fa-gem',
+                id: 'gems',
+                html: 'Gems',
+                count: 0,
+                filter: (badge) => badge.startDate && badge.endDate,
+              },
+              {
+                icon: 'fas fa-globe',
+                id: 'globalBadges',
+                html: 'Global Badges',
+                count: 0,
+                filter: (badge) => badge.global === true,
+              },
+            ],
           },
         ],
       };
