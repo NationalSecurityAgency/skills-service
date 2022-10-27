@@ -102,7 +102,7 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="skill.badges && skill.badges.length > 0" class="row" style="padding-top:8px;">
+    <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="row" style="padding-top:8px;">
       <div class="col" style="font-size: 0.9rem" data-cy="skillBadges">
         <i class="fa fa-award"></i> Badges:
         <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
