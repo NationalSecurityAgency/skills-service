@@ -24,11 +24,11 @@ if [ -z "${currentRun}" ] || [ -z "${totalConcurrent}" ]; then
 fi
 
 
-cd ./service/src/test/java/
+cd ./src/test/java/
 IFS=$'\n'
 allTests=($(find . | grep -E '(Test[s]?|Spec[s]?)\.(groovy|java)' | sed "s/\.\///g" | sed "s/\//\./g" | sed "s/\.groovy//g" | sed "s/\.java//g" | sort))
 unset IFS
-cd ../../../../
+cd ../../../
 
 totalNum=${#allTests[@]}
 numPerRun=$((totalNum/totalConcurrent))
