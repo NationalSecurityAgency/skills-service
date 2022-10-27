@@ -29,7 +29,7 @@
     "cy:run:dev": "TZ=UTC cypress run --config baseUrl=http://localhost:8082",
     "cy:run:dev:specificTest": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --spec \"cypress/e2e/projects_spec.js\"",
     "cy:run:dev:metrics": "TZ=UTC cypress run --config baseUrl=http://localhost:8082  --env customSnapshotsDir=./cypress/snapshots/metrics --spec \"cypress/e2e/metrics/multipleProjectMetrics_spec.js\"",
-    "cy:run:dev:clientDisplay": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env customSnapshotsDir=./cypress/snapshots/client-display --spec \"cypress/e2e/client-display/client-display_breadcrumb_spec.js\"",
+    "cy:run:dev:clientDisplay": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env customSnapshotsDir=./cypress/snapshots/client-display --spec \"cypress/e2e/client-display/client-display-skills_filtering_spec.js\"",
     "cy:run:dev:accessibility": "TZ=UTC cypress run --browser chrome --headless --config baseUrl=http://localhost:8082 --spec cypress/e2e/accessibility*.js",
     "cy:run:dev:postgres": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env db=postgres",
     "cy:run:dev:oauth": "TZ=UTC cypress run --config baseUrl=http://localhost:8082 --env oauthMode=true",
