@@ -109,10 +109,3 @@ unset IFS
 commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test ${verifyExecString}"
 echo $commandToRun
 exec $commandToRun
-
-gitHubSummary="# Service Tests, Run $currentRun \n\n
-               - Service Tests (Spec[s]?): **${#serviceTests[@]}** \n
-               - Integration Tests (IT$): **${#integrationTests[@]}**";
-echo $gitHubSummary
-echo "$gitHubSummary" >> $GITHUB_STEP_SUMMARY
-
