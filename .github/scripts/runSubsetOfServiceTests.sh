@@ -29,7 +29,7 @@ echo "Total Concurrent: $totalConcurrent";
 
 cd ./src/test/java/
 IFS=$'\n'
-allTests=($(find . | grep -E '(Test[s]?|Spec[s]?)\.(groovy|java)' | sed "s/\.\///g" | sed "s/\//\./g" | sed "s/\.groovy//g" | sed "s/\.java//g" | sort))
+allTests=($(find . | grep -i -E '(Test[s]?|Spec[s]?|IT)\.(groovy|java)' | sed "s/\.\///g" | sed "s/\//\./g" | sed "s/\.groovy//g" | sed "s/\.java//g" | sort))
 unset IFS
 cd ../../../
 
