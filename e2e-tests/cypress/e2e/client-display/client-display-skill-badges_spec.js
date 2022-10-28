@@ -29,6 +29,7 @@ describe('Client Display Badges Visible on Skill Summaries', () => {
 
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
+        cy.enableBadge(1, 1);
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -82,6 +83,7 @@ describe('Client Display Badges Visible on Skill Summaries', () => {
 
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
+        cy.enableBadge(1, 1);
 
         cy.loginAsRootUser();
         cy.createGlobalBadge(1)
