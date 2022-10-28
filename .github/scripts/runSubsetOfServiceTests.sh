@@ -108,5 +108,9 @@ commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${int
 echo $commandToRun
 exec $commandToRun
 
-echo '### Service tests run!' >> $GITHUB_STEP_SUMMARY
+gitHubSummary="# Service Tests, Run $currentRun \n\n
+               - Service Tests (Spec[s]?): **${#serviceTests[@]}** \n
+               - Integration Tests (IT$): **${#integrationTests[@]}**";
+echo $gitHubSummary
+echo "$gitHubSummary" >> $GITHUB_STEP_SUMMARY
 
