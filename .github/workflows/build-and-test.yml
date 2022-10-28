@@ -50,9 +50,9 @@ jobs:
       # when one test fails, DO NOT cancel the other containers
       fail-fast: false
       matrix:
-        # run 3 copies of the current job in parallel
+        # run in parallel
         # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
-        container: [ 1, 2, 3, 4, 5, 6 ]
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8 ]
 
     env:
       PREVENT_IGNOREREST: true
@@ -84,7 +84,7 @@ jobs:
       - name: Build skills-service
         run: |
           cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 6 -c ${{ matrix.container }}
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 8 -c ${{ matrix.container }}
 
       - name: upload result artifacts
         if: ${{ always() }}
@@ -134,7 +134,7 @@ jobs:
 
   ui-tests-against-h2:
     runs-on: ubuntu-latest
-    needs: [build-skills-service-for-ui-tests]
+    needs: [build-skills-service-for-ui-tests, service-against-postgresql, service-tests-against-h2]
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -142,8 +142,8 @@ jobs:
       # https://github.com/cypress-io/github-action/issues/48
       fail-fast: false
       matrix:
-        # run 6 copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6]
+        # run in parallel
+        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     steps:
     - name: Install Emoji Support
@@ -216,7 +216,7 @@ jobs:
       matrix:
         # run 3 copies of the current job in parallel
         # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
-        container: [ 1, 2, 3, 4, 5, 6, 7 ]
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 
     services:
       postgres:
@@ -265,7 +265,7 @@ jobs:
       - name: Build skills-service
         run: |
           cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 7 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 9 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
 
       - name: upload result artifacts
         if: ${{ always() }}

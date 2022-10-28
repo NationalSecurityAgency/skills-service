@@ -55,6 +55,9 @@ done
 
 if  [ "$cachingSpec" == 'yes' ]; then
     echo 'Found CachingSpec. Building client-display...'
+    cd ../dashboard
+    npm install
+    npm run deploy
     cd ../client-display
     npm install
     npm run deploy
