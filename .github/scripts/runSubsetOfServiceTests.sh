@@ -39,19 +39,47 @@ start=$(((currentRun-1)*numPerRun))
 if  [ "$currentRun" -eq "$totalConcurrent" ]; then
     numPerRun=$totalNum
 fi
-smallArray=${allTests[@]:$start:$numPerRun}
+testsInThisRun=${allTests[@]:$start:$numPerRun}
 echo "There are [$totalNum] total tests. Run [$currentRun]: Start Number=[$start], running up to [$numPerRun] tests"
-echo "Running these tests:"
-count=1;
+
+# this variable will be tracked to see if CachingSpec tests is in this run/batch
+# CachingSpec requires dashboard and client-display projects build and deployed
 cachingSpec='no'
-for testClass in ${smallArray[@]}
+
+# separate tests that end with IT into another array
+# tests that end with IT must be executed with maven-failsafe-plugin
+integrationTests=()
+serviceTests=()
+for testClass in ${testsInThisRun[@]}
 do
-  echo "$count: $testClass"
-  count=$((count+1))
+  if [[ $testClass =~ .*IT$ ]]; then
+    integrationTests+=($testClass)
+  else
+    serviceTests+=($testClass)
+  fi
   if  [ "$testClass" == 'skills.intTests.CachingSpec' ]; then
     cachingSpec='yes'
   fi
 done
+echo "Running [${#serviceTests[@]}] service tests (Spec[s]?) and [${#integrationTests[@]}] integration (IT$) tests."
+
+echo "Service tests:"
+count=1;
+for testClass in ${serviceTests[@]}
+do
+  echo "$count: $testClass"
+  count=$((count+1))
+done
+
+if (( ${#integrationTests[@]} != 0 )); then
+  echo "Integration tests:"
+  count=1;
+  for testClass in ${integrationTests[@]}
+  do
+    echo "$count: $testClass"
+    count=$((count+1))
+  done
+fi
 
 if  [ "$cachingSpec" == 'yes' ]; then
     echo 'Found CachingSpec. Building client-display...'
@@ -68,8 +96,15 @@ cd ../dashboard
 npm run getDashboardVersion
 cd ../service
 
-batchStr=${smallArray[*]// /,}
-commandToRun="mvn ${additionalTestVars} -Dtest="${batchStr}" test"
+IFS=,;
+serviceTestsExecString="${serviceTests[*]}"
+if (( ${#integrationTests[@]} != 0 )); then
+  integrationTestsString="${integrationTests[*]}"
+  integrationTestsExecString="-Dit.test="$integrationTestsString""
+fi
+unset IFS
+
+commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test"
 echo $commandToRun
 exec $commandToRun
 
