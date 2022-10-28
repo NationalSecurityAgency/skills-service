@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
@@ -1177,6 +1178,41 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         res
         res.prevSkillId == null
         res.nextSkillId == null
+    }
+
+    def "load skill summary with badges"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
+        SkillsService supervisorService = createSupervisor()
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        allSkills.each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.updateBadge(badge1, badge1.badgeId)
+
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        badge2.enabled = true
+        supervisorService.createGlobalBadge(badge2)
+        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        supervisorService.updateGlobalBadge(badge2, badge2.badgeId)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, allSkills[0].skillId)
+        then:
+        summary.badges.size() == 2
+        summary.badges[0].badgeId == badge1.badgeId
+        summary.badges[1].badgeId == badge2.badgeId
+
     }
 
     private String getSkillId(Integer skillRefId) {

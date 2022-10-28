@@ -491,6 +491,8 @@ class SkillsLoader {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
 
+        def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
+
         String nextSkillId;
         String prevSkillId;
         int totalSkills = 0;
@@ -568,6 +570,7 @@ class SkillsLoader {
                 type: skillDef.type,
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
+                badges: badges,
         )
     }
 
@@ -758,6 +761,7 @@ class SkillsLoader {
                     SkillRelDef.RelationshipType.GroupSkillToSubject, // skills under groups
             ]
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, subjectDefinition, version, relTypes)
+
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
             totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
 
@@ -774,8 +778,6 @@ class SkillsLoader {
             points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
         }
-
-
 
         // convert null result to 0
         points = points ?: 0
@@ -1051,6 +1053,7 @@ class SkillsLoader {
                 skillsRes << skillsSummary
             } else if (skillDef.type == SkillDef.ContainerType.Skill) {
                 boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
+
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
 
                 skillsRes << new SkillSummary(
@@ -1071,7 +1074,8 @@ class SkillsLoader {
                         type: skillDef.type,
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
-                        isLastViewed: skillDefAndUserPoints.isLastViewed
+                        isLastViewed: skillDefAndUserPoints.isLastViewed,
+                        badges: skillDefAndUserPoints.badges,
                 )
             }
         }

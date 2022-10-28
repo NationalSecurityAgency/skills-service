@@ -102,7 +102,16 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-
+    <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="row" style="padding-top:8px;">
+      <div class="col" style="font-size: 0.9rem" data-cy="skillBadges">
+        <i class="fa fa-award"></i> Badges:
+        <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
+              v-bind:key="badge.badgeId">
+          <router-link :to="genLink(badge)" class="skills-theme-primary-color" style="text-decoration:underline;">{{ badge.name }}</router-link>
+          <span v-if="index != (skill.badges.length - 1)">, </span>
+        </span>
+      </div>
+    </div>
     <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)" :data-cy="`skillDescription-${skill.skillId}`">
       <div v-if="skill.type === 'SkillsGroup'">
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
@@ -316,6 +325,9 @@ limitations under the License.
           route = 'globalBadgeSkillDetails';
         }
         return route;
+      },
+      genLink(b) {
+        return { name: b.skillType === 'GlobalBadge' ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
       },
     },
   };

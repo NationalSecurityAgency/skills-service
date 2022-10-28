@@ -33,20 +33,19 @@ limitations under the License.
                   </div>
                 </div>
                 <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <div class="d-flex">
-                    <div class="d-inline-block" style="min-width: 4rem;">
-                      <skills-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSkills" @clear-filter="clearFilters"/>
-                    </div>
-                    <div  v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill" class="d-inline-block">
-                      <b-button @click.prevent="scrollToLastViewedSkill"
-                                class="skills-theme-btn d-inline" variant="outline-info"
-                                :aria-label="`Jump to Last Viewed Skill`"
-                                data-cy="jumpToLastViewedButton">
-                        <i class="fas fa-eye"></i>
-                        Last Viewed
-                      </b-button>
-                    </div>
-                  </div>
+                  <skills-filter :counts="metaCounts"
+                                 :filters="filters"
+                                 @filter-selected="filterSkills"
+                                 @clear-filter="clearFilters"/>
+                    <b-button v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill"
+                              :disabled="lastViewedButtonDisabled"
+                              @click.prevent="scrollToLastViewedSkill"
+                              class="skills-theme-btn ml-2" variant="outline-info"
+                              :aria-label="`Jump to Last Viewed Skill`"
+                              data-cy="jumpToLastViewedButton">
+                      <i class="fas fa-eye"></i>
+                      Last Viewed
+                    </b-button>
                 </div>
                 <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
                     <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
@@ -168,12 +167,15 @@ limitations under the License.
       return {
         searchString: '',
         filterId: '',
+        lastViewedButtonDisabled: false,
         metaCounts: {
           complete: 0,
           selfReported: 0,
           withPointsToday: 0,
           withoutProgress: 0,
           inProgress: 0,
+          belongsToBadge: 0,
+          pendingApproval: 0,
         },
         loading: false,
         showDescriptionsInternal: false,
@@ -184,34 +186,39 @@ limitations under the License.
         skillsInternalOrig: [],
         filters: [
           {
-            icon: 'fas fa-battery-empty',
-            id: 'withoutProgress',
-            html: `${store.getters.skillDisplayName}s <b>without</b> progress`,
-            count: 0,
+            groupId: 'progressGroup',
+            groupLabel: `${store.getters.skillDisplayName} Progress Filter`,
+            filterItems: [
+              {
+                icon: 'fas fa-battery-empty',
+                id: 'withoutProgress',
+                html: '<b>Without</b> Progress',
+                count: 0,
+              },
+              {
+                icon: 'far fa-calendar-check',
+                id: 'withPointsToday',
+                html: 'With Points Earned <b>Today</b>',
+                count: 0,
+              },
+              {
+                icon: 'far fa-check-circle',
+                id: 'complete',
+                html: 'Completed',
+                count: 0,
+              },
+              {
+                icon: 'fas fa-running',
+                id: 'inProgress',
+                html: 'In Progress',
+                count: 0,
+              },
+            ],
           },
           {
-            icon: 'far fa-calendar-check',
-            id: 'withPointsToday',
-            html: `${store.getters.skillDisplayName}s with points earned <b>today</b>`,
-            count: 0,
-          },
-          {
-            icon: 'far fa-check-circle',
-            id: 'complete',
-            html: `<b>Completed</b> ${store.getters.skillDisplayName}s`,
-            count: 0,
-          },
-          {
-            icon: 'fas fa-laptop',
-            id: 'selfReported',
-            html: `<b>Self</b> Reported ${store.getters.skillDisplayName}s`,
-            count: 0,
-          },
-          {
-            icon: 'fas fa-running',
-            id: 'inProgress',
-            html: `${store.getters.skillDisplayName}s <b>in progress</b>`,
-            count: 0,
+            groupId: 'attributeGroups',
+            groupLabel: `${store.getters.skillDisplayName} Attribute Filter`,
+            filterItems: this.createAttributeFilterItems(),
           },
         ],
       };
@@ -261,6 +268,31 @@ limitations under the License.
       },
     },
     methods: {
+      createAttributeFilterItems() {
+        const res = [
+          {
+            icon: 'fas fa-laptop',
+            id: 'selfReported',
+            html: '<b>Self</b> Reported',
+            count: 0,
+          },
+          {
+            icon: 'fas fa-check',
+            id: 'pendingApproval',
+            html: 'Pending Approval',
+            count: 0,
+          },
+        ];
+        if (this.type === 'subject') {
+          res.push({
+            icon: 'fas fa-award',
+            id: 'belongsToBadge',
+            html: 'Belongs to a <b>Badge</b>',
+            count: 0,
+          });
+        }
+        return res;
+      },
       updateMetaCountsForSkillRes(skillRes) {
         if (skillRes.isSkillsGroupType) {
           skillRes.children.forEach((childItem) => {
@@ -285,6 +317,12 @@ limitations under the License.
         }
         if (meta.inProgress) {
           this.metaCounts.inProgress += 1;
+        }
+        if (meta.belongsToBadge) {
+          this.metaCounts.belongsToBadge += 1;
+        }
+        if (meta.pendingApproval) {
+          this.metaCounts.pendingApproval += 1;
         }
       },
       onDetailsToggle() {
@@ -380,6 +418,7 @@ limitations under the License.
           });
           resultSkills = filteredRes;
         }
+        this.lastViewedButtonDisabled = resultSkills.findIndex((i) => i.isLastViewed || (i.children && i.children.findIndex((c) => c.isLastViewed) >= 0)) < 0;
         this.skillsInternal = resultSkills;
       },
     },

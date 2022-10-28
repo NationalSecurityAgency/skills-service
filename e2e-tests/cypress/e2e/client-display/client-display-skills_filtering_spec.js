@@ -42,19 +42,27 @@ describe('Client Display Skills Filtering Tests', () => {
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         });
 
-        Cypress.Commands.add('validateCounts', (withoutProgress, withPointsToday, complete, selfReported, inProgress) => {
+        Cypress.Commands.add('validateCounts', (withoutProgress, withPointsToday, complete, selfReported, inProgress, pendingApproval, belongsToBadge = null) => {
             cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
                 .click();
             cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]')
-                .contains(withoutProgress);
+                .should('have.text', withoutProgress);
             cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]')
-                .contains(withPointsToday);
+                .should('have.text', withPointsToday);
             cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]')
-                .contains(complete);
+                .should('have.text', complete);
             cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]')
-                .contains(selfReported);
+                .should('have.text', selfReported);
             cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]')
-                .contains(inProgress);
+                .should('have.text', inProgress);
+            cy.get('[data-cy="filter_pendingApproval"] [data-cy="filterCount"]')
+                .should('have.text', pendingApproval);
+            if (belongsToBadge !== null) {
+                cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]')
+                    .should('have.text', belongsToBadge);
+            } else {
+                cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]').should('not.exist');
+            }
         });
     });
 
@@ -68,35 +76,46 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0);
-        cy.validateCounts(1, 0, 0, 0, 0);
+        cy.validateCounts(1, 0, 0, 0, 0, 0, 0);
 
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.refreshCounts();
-        cy.validateCounts(4, 0, 0, 0, 0);
+        cy.validateCounts(4, 0, 0, 0, 0, 0, 0);
 
         cy.createSkill(1, 1, 5, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 6, { selfReportingType: 'HonorSystem' });
         cy.refreshCounts();
-        cy.validateCounts(6, 0, 0, 2, 0);
+        cy.validateCounts(6, 0, 0, 2, 0, 0, 0);
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.refreshCounts();
-        cy.validateCounts(5, 1, 0, 2, 1);
+        cy.validateCounts(5, 1, 0, 2, 1, 0, 0);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.refreshCounts();
-        cy.validateCounts(4, 1, 0, 2, 2);
+        cy.validateCounts(4, 1, 0, 2, 2, 0, 0);
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
         cy.refreshCounts();
-        cy.validateCounts(3, 2, 1, 2, 2);
+        cy.validateCounts(3, 2, 1, 2, 2, 0, 0);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.refreshCounts();
-        cy.validateCounts(3, 3, 2, 2, 1);
+        cy.validateCounts(3, 3, 2, 2, 1, 0, 0);
+
+        cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
+        cy.refreshCounts();
+        cy.validateCounts(3, 3, 2, 2, 1, 1, 0);
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+        cy.createBadge(1, 1, { enabled: true });
+        cy.refreshCounts();
+        cy.validateCounts(3, 3, 2, 2, 1, 1, 2);
     });
 
     it('filter skills', () => {
@@ -114,6 +133,12 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
+        cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+        cy.createBadge(1, 1, { enabled: true });
+
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
@@ -122,7 +147,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withoutProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills without progress');
+            .contains('Without Progress');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 5');
@@ -136,7 +161,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 1');
@@ -154,7 +179,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_complete"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Completed Skills');
+            .contains('Completed');
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 1');
         cy.get('[data-cy="skillProgress_index-1"]')
@@ -167,7 +192,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_selfReported"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Self Reported Skills');
+            .contains('Self Reported');
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 5');
         cy.get('[data-cy="skillProgress_index-1"]')
@@ -180,13 +205,36 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_inProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills in progress');
+            .contains('In Progress');
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 2');
         cy.get('[data-cy="skillProgress_index-1"]')
             .contains('Very Great Skill 4');
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
+            .click();
+        cy.get('[data-cy="filter_pendingApproval"]')
+            .click();
+        cy.get('[data-cy="selectedFilter"]')
+            .contains('Pending Approval');
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 5');
+        cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
+            .click();
+        cy.get('[data-cy="filter_belongsToBadge"]')
+            .click();
+        cy.get('[data-cy="selectedFilter"]')
+            .contains('Belongs to a Badge');
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgress_index-1"]')
+            .contains('Very Great Skill 2');
+        cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
+
     });
 
     it('filter expanded skills', () => {
@@ -215,7 +263,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withoutProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills without progress');
+            .contains('Without Progress');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 5');
@@ -233,7 +281,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 1');
@@ -278,7 +326,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withoutProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills without progress');
+            .contains('Without Progress');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 5');
@@ -313,7 +361,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 1');
@@ -375,7 +423,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withoutProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills without progress');
+            .contains('Without Progress');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 5');
@@ -618,7 +666,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -683,7 +731,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -724,7 +772,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -779,7 +827,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -834,7 +882,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -902,7 +950,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-5"]')
             .should('not.exist');
 
-        cy.validateCounts(1, 4, 2, 1, 2);
+        cy.validateCounts(1, 4, 2, 1, 2, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -958,7 +1006,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"]')
             .contains('skill 4');
 
-        cy.validateCounts(0, 4, 4, 0, 0);
+        cy.validateCounts(0, 4, 4, 0, 0, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -1032,7 +1080,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"]')
             .contains('skill 4');
 
-        cy.validateCounts(0, 4, 4, 0, 0);
+        cy.validateCounts(0, 4, 4, 0, 0, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -1054,6 +1102,47 @@ describe('Client Display Skills Filtering Tests', () => {
             .contains('skill 3');
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
+    });
+
+    it('Last Viewed button must be disabled if last visited skill was filtered out', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="skillProgressTitle"]').should('exist')
+        cy.cdBack('Subject 1');
+
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
+            .click();
+        cy.get('[data-cy="filter_selfReported"]')
+            .click();
+        cy.get('[data-cy="selectedFilter"]')
+            .contains('Self Reported');
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 2');
+        cy.get('[data-cy="skillProgress_index-11"]')
+            .should('not.exist');
+
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('be.disabled')
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
+            .click();
+        cy.get('[data-cy="filter_belongsToBadge"]')
+            .click();
+        cy.get('[data-cy="selectedFilter"]')
+            .contains('Belongs to a Badge');
+        cy.get('[data-cy="skillProgress_index-0"]')
+            .contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
+
+        cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
     });
 
     it('Visual Test: skills search and skills filter selected', () => {
@@ -1096,7 +1185,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filter_withPointsToday"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('Skills with points earned today');
+            .contains('With Points Earned Today');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
@@ -1177,6 +1266,25 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
         cy.matchSnapshotImage(snapshotOptions);
+    });
+
+    it('Visual Tests: filter selected and last viewed button present', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+        cy.get('[data-cy="skillProgressTitle"]').should('exist')
+        cy.cdBack('Subject 1');
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_selfReported"]').click();
+        cy.get('[data-cy="selectedFilter"]').contains('Self Reported');
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] .card-header');
     });
 
 });

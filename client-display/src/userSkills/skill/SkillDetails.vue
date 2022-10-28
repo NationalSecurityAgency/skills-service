@@ -87,10 +87,13 @@ limitations under the License.
       },
       isCrossProject() {
         const routeName = this.$route.name;
-        return routeName === 'crossProjectSkillDetails';
+        return routeName === 'crossProjectSkillDetails' || this.$route.params.crossProjectId;
       },
     },
     methods: {
+      genLink(b) {
+        return { name: b.global ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
       loadData() {
         this.loading.dependencies = true;
         this.loading.skill = true;
@@ -117,7 +120,6 @@ limitations under the License.
           .then((res) => {
             this.skill = res;
             this.loading.skill = false;
-
             if (skillId && this.skill.projectId && !this.isCrossProject) {
               SkillHistoryUtil.updateSkillHistory(this.skill.projectId, skillId);
             }
@@ -160,5 +162,9 @@ limitations under the License.
 
 .nextButton {
   float: right;
+}
+
+/deep/ div.skills-badge-icon {
+  text-align: center;
 }
 </style>
