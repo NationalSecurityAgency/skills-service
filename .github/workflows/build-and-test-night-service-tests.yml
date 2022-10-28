@@ -21,7 +21,6 @@ on:
 
 jobs:
   service-against-h2:
-    needs: pre_job
     runs-on: ubuntu-latest
 
     steps:
@@ -63,7 +62,6 @@ jobs:
             ./e2e-tests/cypress/snapshots/*.js/__diff_output__/**
 
   service-against-postgresql:
-    needs: pre_job
     runs-on: ubuntu-latest
 
     services:
