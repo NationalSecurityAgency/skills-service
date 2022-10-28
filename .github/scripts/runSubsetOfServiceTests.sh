@@ -104,7 +104,9 @@ if (( ${#integrationTests[@]} != 0 )); then
 fi
 unset IFS
 
-commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test"
+commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test verify"
 echo $commandToRun
-exec $commandToRun
+#exec $commandToRun
+
+echo '### Service tests run!' >> $GITHUB_STEP_SUMMARY
 
