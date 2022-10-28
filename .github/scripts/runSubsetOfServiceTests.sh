@@ -98,15 +98,17 @@ cd ../service
 
 IFS=,;
 serviceTestsExecString="${serviceTests[*]}"
+verifyExecString=""
 if (( ${#integrationTests[@]} != 0 )); then
   integrationTestsString="${integrationTests[*]}"
   integrationTestsExecString="-Dit.test="$integrationTestsString""
+  verifyExecString="verify"
 fi
 unset IFS
 
-commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test verify"
+commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test ${verifyExecString}"
 echo $commandToRun
-exec $commandToRun
+#exec $commandToRun
 
 gitHubSummary="# Service Tests, Run $currentRun \n\n
                - Service Tests (Spec[s]?): **${#serviceTests[@]}** \n
