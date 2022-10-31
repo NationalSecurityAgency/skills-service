@@ -17,7 +17,7 @@ package skills.services
 
 import spock.lang.Specification
 
-class CustomValidatorSpec extends Specification{
+class CustomValidatorSpec extends Specification {
 
     def "Test custom name validation"(){
         CustomValidator validator = new CustomValidator();
@@ -409,6 +409,13 @@ A new sentence after a few new lines
 
         then:
         validator.validateDescription("""> A This is a block quote""").valid
+        validator.validateDescription("""A hello world\n" +
+                "\n" +
+                "\n" +
+                "<br>\n" +
+                "> \n" +
+                "> \n" +
+                "> A quote<em>s</em>""").valid
         !validator.validateDescription("""> This is a block quote""").valid
     }
 

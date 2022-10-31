@@ -53,7 +53,7 @@ class CustomValidator {
 
     private static final Pattern BULLET = ~/^\s*(?:\d\. |\* |- )/
     private static final Pattern NEWLINE = ~/\n/
-    private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^[#>]{1,}/
+    private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^([\n]?[#>]{1,}[\s])+/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
