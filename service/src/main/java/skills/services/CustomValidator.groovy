@@ -24,6 +24,7 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
+import skills.utils.InputSanitizer
 
 import javax.annotation.PostConstruct
 import java.util.regex.Matcher
@@ -76,7 +77,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(ProjectRequest projectRequest) {
-        return validateName(projectRequest.name)
+        return validateDescriptionAndName(projectRequest.description, projectRequest.name)
     }
 
     CustomValidationResult validate(SubjectRequest subjectRequest) {
@@ -107,6 +108,8 @@ class CustomValidator {
             return new CustomValidationResult(valid: true)
         }
         log.debug("Validating description:\n[${description}]")
+
+        description = InputSanitizer.unsanitizeForMarkdown(description)
 
         // split if
         // - there is at least 2 new lines
