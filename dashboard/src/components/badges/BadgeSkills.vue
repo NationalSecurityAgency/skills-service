@@ -23,7 +23,7 @@ limitations under the License.
                           v-on:added="skillAdded"
                           :onlySingleSelectedValue="true"></skills-selector2>
 
-        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
+        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" :hide-manage-button="true"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
 
         <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"

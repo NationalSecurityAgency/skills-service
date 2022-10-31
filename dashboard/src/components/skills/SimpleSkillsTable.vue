@@ -22,7 +22,7 @@ limitations under the License.
                 :aria-label="`remove dependency on ${data.item.skillId}`">
           <i class="text-warning fas fa-trash" aria-hidden="true"/>
         </button>
-        <router-link v-if="data.item.subjectId" :id="data.item.skillId" :to="{ name:'SkillOverview',
+        <router-link v-if="data.item.subjectId && !hideManageButton" :id="data.item.skillId" :to="{ name:'SkillOverview',
                 params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                      class="btn btn-sm btn-outline-hc ml-2"
                      :data-cy="`manage_${data.item.skillId}`">
@@ -58,6 +58,10 @@ limitations under the License.
         default: false,
       },
       isReadOnly: {
+        type: Boolean,
+        default: false,
+      },
+      hideManageButton: {
         type: Boolean,
         default: false,
       },
