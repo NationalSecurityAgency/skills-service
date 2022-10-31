@@ -67,6 +67,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     ''')
     Integer countByProjectIdAndSkillIdAndLevelAndUserTag(String projectId, int level, String userTagKey, String userTagValue)
 
+    void deleteAllByProjectIdAndUserId(String projectId, String userId)
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     void deleteByProjectIdAndSkillIdAndUserIdAndLevel(String projectId, @Nullable String skillId, String userId, @Nullable Integer level)
 

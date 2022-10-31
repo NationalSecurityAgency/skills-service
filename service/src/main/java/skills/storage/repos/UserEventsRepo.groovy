@@ -418,6 +418,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     void deleteByEventTypeAndEventTimeLessThan(EventType type, Date start)
 
+    void deleteAllByUserIdAndProjectId(String projectId, String userId)
+
     @Modifying
     @Query(value='''
         update UserEvent ue

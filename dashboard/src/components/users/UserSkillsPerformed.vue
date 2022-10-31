@@ -19,10 +19,6 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <skills-spinner :is-loading="!table.options.fields" class="mb-5"/>
-          <b-button @click="deleteAllSkills" variant="outline-info" size="sm"
-                    :aria-label="`remove all skill events from user`">
-            <i class="fas fa-trash" aria-hidden="true"/>
-          </b-button>
 
       <div v-if="table.options.fields">
         <div class="row px-3 pt-3">
@@ -39,6 +35,12 @@ limitations under the License.
           <div class="col">
             <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
             <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          </div>
+          <div class="col">
+            <b-button @click="deleteAllSkills" variant="outline-info" :disabled="table.items.length === 0"
+                      :aria-label="`remove all skill events from user`" style="float: right; margin-right: 15px">
+              <i class="fas fa-trash" aria-hidden="true"/> Delete All
+            </b-button>
           </div>
         </div>
 
@@ -242,7 +244,7 @@ limitations under the License.
           });
       },
       deleteAllSkills() {
-        this.msgConfirm(`Removing all skills for user [${this.userId}]`).then((res) => {
+        this.msgConfirm(`Removing all skills for [${this.userId}].  This will permanently remove all of this user's skill events and cannot be undone.`).then((res) => {
           if (res) {
             this.doDeleteAllSkills();
           }
@@ -269,6 +271,7 @@ limitations under the License.
           .then((data) => {
             if (data.success) {
               this.loadData();
+              this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId });
             } else {
               this.errorToast('Unable to Remove User Skills', `Skill events were not removed.  ${data.explanation}`);
             }
