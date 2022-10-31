@@ -272,4 +272,22 @@ describe('Markdown Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SubjectPage-SkillPreview', snapshotOptions);
     });
 
+    it('enter a block quote', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get(markdownInput).clear()
+        cy.clickToolbarButton('quote')
+        cy.focused().type('this is a quote');
+        cy.clickSave();
+    });
+
 });

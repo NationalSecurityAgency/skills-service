@@ -734,12 +734,12 @@ class AdminEditSpecs extends DefaultIntSpec {
     def "Prevent injection in Project description"(){
         when:
         def proj1 = SkillsFactory.createProject(1)
-        proj1.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>"
+        proj1.description = "this is a description <a href='http://somewhere' onclick='doNefariousStuff()'>I'm a link</a>\n> this is a quote"
         skillsService.createProject(proj1)
 
         def projDescription = skillsService.getProjectDescription(proj1.projectId)
         then:
-        projDescription.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+        projDescription.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>\n> this is a quote'
     }
 
     def "decreasing skill point increment post achievement causes user points to be updated"() {

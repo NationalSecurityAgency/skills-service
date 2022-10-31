@@ -24,6 +24,7 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
+import skills.utils.InputSanitizer
 
 import javax.annotation.PostConstruct
 import java.util.regex.Matcher
@@ -53,7 +54,7 @@ class CustomValidator {
 
     private static final Pattern BULLET = ~/^\s*(?:\d\. |\* |- )/
     private static final Pattern NEWLINE = ~/\n/
-    private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^[#>]{1,}/
+    private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^([\n]?[#>]{1,}[\s])+/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
@@ -76,7 +77,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(ProjectRequest projectRequest) {
-        return validateName(projectRequest.name)
+        return validateDescriptionAndName(projectRequest.description, projectRequest.name)
     }
 
     CustomValidationResult validate(SubjectRequest subjectRequest) {
@@ -107,6 +108,8 @@ class CustomValidator {
             return new CustomValidationResult(valid: true)
         }
         log.debug("Validating description:\n[${description}]")
+
+        description = InputSanitizer.unsanitizeForMarkdown(description)
 
         // split if
         // - there is at least 2 new lines

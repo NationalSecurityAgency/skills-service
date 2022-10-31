@@ -233,8 +233,12 @@ describe('Copy Project Tests', () => {
             .click();
         cy.contains('Copy Project').should('be.visible');
         cy.get('[data-cy="projectName"]').type('Lorem Ipsum');
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'LoremIpsum')
+
         cy.realPress('Tab');
         cy.contains('Enable to override auto-generated value').should('be.visible');
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
         cy.realPress('Enter');
         cy.contains('Copying Project').should('be.visible');
         cy.get('[data-cy="allDoneBtn"]').click();

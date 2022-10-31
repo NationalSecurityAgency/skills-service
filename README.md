@@ -19,8 +19,6 @@ These pages provide in-depth guidance on installation, usage and contribution.
 
 [![Run integration tests using OAuth](https://github.com/NationalSecurityAgency/skills-service/workflows/Continuous%20Integration%20with%20OAuth/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-oauth.yml?query=workflow%3A%22Continuous+Integration+with+OAuth%22)
 
-[![Publish Docker Image Snapshot](https://github.com/NationalSecurityAgency/skills-service/workflows/Publish%20Docker%20Image%20Snapshot/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Publish+Docker+Image+Snapshot%22)
-
 [![Average Lighthouse Score](https://raw.githubusercontent.com/NationalSecurityAgency/skills-service/badges/master/average_accessibility_score.svg)](https://raw.githubusercontent.com/NationalSecurityAgency/skills-service/badges/master/average_accessibility_score.svg)
 
 [![Continuous Integration with Email Confirmation Enabled](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-email-confirmation.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-email-confirmation.yml)
