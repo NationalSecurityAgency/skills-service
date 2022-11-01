@@ -965,6 +965,50 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
     });
 
+    it('global badge skills table does not have manage button', () => {
+        cy.request('POST', '/app/projects/proj1', {
+             projectId: 'proj1',
+             name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        const numSkills = 8;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${i}`,
+                name: `This is ${100 - i}`,
+                type: 'Skill',
+                pointIncrement: 100,
+                numPerformToCompletion: 5,
+                pointIncrementInterval: 0,
+                numMaxOccurrencesIncrementInterval: -1,
+                version: 0,
+            });
+        }
+
+        cy.request('POST', '/supervisor/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/supervisor/badges/badge1/projects/proj1/skills/skill${i}`);
+        }
+
+        cy.visit('/administrator/globalBadges/badge1');
+
+        for (let i = 0; i < 5; i +=1) {
+            cy.get(`[data-cy="manage_skill${i}"]`).should('not.exist')
+            cy.get(`[data-cy="deleteSkill_skill${i}"]`).should('exist')
+        }
+
+    });
+
     it('sort skills table', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
