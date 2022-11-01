@@ -290,4 +290,31 @@ describe('Markdown Tests', () => {
         cy.clickSave();
     });
 
+    it('data-type selector does not exist on code blocks', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get(markdownInput).clear()
+        cy.clickToolbarButton('codeblock')
+        cy.focused().type('this is some fancy code');
+        cy.get('div.toastui-editor-ww-code-block').then($els => {
+            // get Window reference from element
+            const win = $els[0].ownerDocument.defaultView
+            // use getComputedStyle to read the pseudo selector
+            const after = win.getComputedStyle($els[0], 'after')
+            // read the value of the `content` CSS property
+            const contentValue = after.getPropertyValue('content')
+            expect(contentValue).to.eq('none')
+        })
+        cy.clickSave();
+    });
+
 });

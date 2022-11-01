@@ -170,4 +170,7 @@ limitations under the License.
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
   }
+  div.toastui-editor-ww-code-block:after {
+    content: none !important;
+  }
 </style>
