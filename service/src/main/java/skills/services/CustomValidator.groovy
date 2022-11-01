@@ -58,6 +58,7 @@ class CustomValidator {
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
+    private static final Pattern LIST_FIX = ~/(?m)(^\n)(\s*\d\. |\* |- .*$)/
 
     @PostConstruct
     CustomValidator init() {
@@ -141,6 +142,7 @@ class CustomValidator {
         // remove a single new line above a table and/or codeblock
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
+        toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
 
         return toValidate.trim()
     }

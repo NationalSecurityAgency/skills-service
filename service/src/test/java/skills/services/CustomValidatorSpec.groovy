@@ -164,7 +164,7 @@ A paragraph two
 
 """).valid
 
-        !validator.validateDescription("""A Paragraph one
+        validator.validateDescription("""A Paragraph one
 
 * item 1
 * item 2
