@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AdminUsersOnlyWhenUserIdSupplied {
+public @interface AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied {
     // user this annotation on methods that should be restricted to user's with ROLE_PROJECT_ADMIN
+    // OR ROLE_PROJECT_APPROVER + HTTP_Method:GET
 }

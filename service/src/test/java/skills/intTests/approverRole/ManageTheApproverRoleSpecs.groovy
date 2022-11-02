@@ -111,6 +111,50 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         skillsRes.skillId == [skills[0].skillId]
     }
 
+    def "approver can view project's user client display data"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 5
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(2, true)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
+
+        def user1Service = createService(users[1])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        def user0ProjSummary = user1Service.getSkillSummary(users[0], proj.projectId)
+        def user0SubjSummary = user1Service.getSkillSummary(users[0], proj.projectId, subj.subjectId)
+        then:
+        user0ProjSummary.points == 200
+        user0SubjSummary.points == 200
+    }
+
+    def "approvers cannot report skills on behalf of other users"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 5
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        List<String> users = getRandomUsers(2, true)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 2)
+
+        def user1Service = createService(users[1])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        user1Service.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
+        then:
+        SkillsClientException e = thrown()
+        e.httpStatus == HttpStatus.FORBIDDEN
+        e.message.contains("Access Denied")
+    }
+
+
     def "approver can not mutate project's data"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

@@ -54,25 +54,25 @@ class AuthorizationAspect {
     @Autowired
     skills.auth.UserAuthService userAuthService;
 
-    @Around(value = "@within(AdminUsersOnlyWhenUserIdSupplied) || @annotation(AdminUsersOnlyWhenUserIdSupplied)")
+    @Around(value = "@within(skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied) || @annotation(skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied)")
     Object authorizeAdmin(ProceedingJoinPoint joinPoint) throws Throwable {
         String userIdProvided = getUserIdParam(joinPoint);
         if (StringUtils.isNotBlank(userIdProvided)) {
             UserInfo userInfo = userInfoService.getCurrentUser();
-            checkAdminAccess(userInfo);
+            checkAccess(userInfo);
         }
         return joinPoint.proceed();
     }
 
     @Profile
-    private void checkAdminAccess(UserInfo userInfo) {
+    private void checkAccess(UserInfo userInfo) {
         Collection<GrantedAuthority> authorities = !userInfo.isProxied() ? userInfo.getAuthorities() : userAuthService.loadAuthorities(userInfo.getUsername());
         boolean foundAdmin = false;
         if (authorities != null) {
             for (GrantedAuthority grantedAuthority : authorities) {
                 UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
                 RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
-                if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
+                if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_PROJECT_APPROVER) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
                     foundAdmin = true;
                     break;
                 }
