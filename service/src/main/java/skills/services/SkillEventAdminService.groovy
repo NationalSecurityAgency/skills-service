@@ -57,6 +57,9 @@ class SkillEventAdminService {
     SkillRelDefRepo skillRelDefRepo
 
     @Autowired
+    SkillApprovalRepo skillApprovalRepo
+
+    @Autowired
     ProjDefAccessor projDefAccessor
 
     @Autowired
@@ -174,15 +177,12 @@ class SkillEventAdminService {
     @Profile
     @Transactional
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
-        List<UserPerformedSkill> performedSkills = performedSkillRepository.findByUserIdAndProjectId(userId, projectId)
         RequestResult res = new RequestResult()
-        performedSkillRepository.deleteAllInBatch(performedSkills);
+        performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        def userPoints = userPointsRepo.findByProjectIdAndUserId(projectId, userId)
-        userPoints.forEach{ it ->
-            userPointsRepo.delete(it)
-        }
+        userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         res.success = true
         return res
     }

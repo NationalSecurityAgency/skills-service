@@ -80,6 +80,51 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         !addedSkills?.data?.find { it.skillId == skills[0].skillId }
     }
 
+    def "delete all skill events"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(30, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        Long timestamp = new Date().time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date(timestamp))
+        }
+
+        def userInfo = skillsService.getUserStats(proj.projectId, userId)
+        def level = skillsService.getUserLevel(proj.projectId, userId)
+        assert userInfo.numSkills == 30
+        assert userInfo.userTotalPoints == 300
+        assert level == 5
+        def badges = skillsService.getBadgesSummary(userId, proj.projectId)
+        assert badges.size() == 1
+        assert badges[0].badgeAchieved == true
+
+        when:
+        skillsService.deleteAllSkillEvents([projectId: proj.projectId, userId: userId])
+        userInfo = skillsService.getUserStats(proj.projectId, userId)
+        level = skillsService.getUserLevel(proj.projectId, userId)
+        badges = skillsService.getBadgesSummary(userId, proj.projectId)
+
+        then:
+        userInfo.numSkills == 0
+        userInfo.userTotalPoints == 0
+        level == 0
+        badges[0].badgeAchieved == false
+    }
+
     def "delete skill event on skill imported from the catalog should not work"() {
         def proj2 = SkillsFactory.createProject(22)
         def subj2 = SkillsFactory.createSubject(22, 22)
