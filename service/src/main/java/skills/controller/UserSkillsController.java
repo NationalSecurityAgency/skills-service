@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
+import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied;
 import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
@@ -50,7 +51,7 @@ import java.util.Locale;
 @CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
 @RequestMapping("/api")
-@skills.auth.aop.AdminUsersOnlyWhenUserIdSupplied
+@AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
 @skills.profile.EnableCallStackProf
 class UserSkillsController {
     private Logger log = LoggerFactory.getLogger(UserSkillsController.class);
