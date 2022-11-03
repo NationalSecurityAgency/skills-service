@@ -296,4 +296,17 @@ describe('Projects Modal Validation Tests', () => {
         cy.get(`[data-cy="projectCard_${longValid}"]`)
     });
 
+    it('run validation on load in case validation improved and existing values fail to validate', () => {
+        cy.intercept('POST', '/api/validation/description', {
+            valid: false,
+            msg: 'Mocked up validation failure'
+        }).as('validateDesc');
+
+        cy.createProject(1, {description: 'Very cool project'})
+        cy.visit('/administrator/');
+        cy.get('[data-cy="editProjBtn"]').click()
+        cy.wait('@validateDesc')
+        cy.get('[data-cy="projectDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+    });
+
 });
