@@ -408,6 +408,12 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(allSkills)
 
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        badge2.enabled = true
+        skillsService.updateBadge(badge2, badge2.badgeId)
+
         Map badge1 = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge1)
         allSkills.each {
@@ -415,12 +421,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         }
         badge1.enabled = true
         skillsService.updateBadge(badge1, badge1.badgeId)
-
-        Map badge2 = SkillsFactory.createBadge(1, 2)
-        skillsService.createBadge(badge2)
-        skillsService.assignSkillToBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
-        badge2.enabled = true
-        skillsService.updateBadge(badge2, badge2.badgeId)
 
         when:
         def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
@@ -430,7 +430,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills[0].badges[0].badgeId == badge1.badgeId
         summary.skills[0].badges[1].badgeId == badge2.badgeId
         summary.skills[1..2].every { it.badges.size() == 1 && it.badges[0].badgeId == badge1.badgeId }
-
     }
 
     def "load subject summary with badges in a group"(){
