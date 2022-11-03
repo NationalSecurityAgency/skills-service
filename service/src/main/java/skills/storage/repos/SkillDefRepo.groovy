@@ -296,7 +296,7 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
         from SkillDef s, SkillRelDef r, SkillDef c 
         where s.id = r.parent and c.id = r.child and r.type='BadgeRequirement' and (
               (s.type='Badge' and s.projectId=?2) or s.type='GlobalBadge') and s.enabled='true' and
-              c.id = r.child and c.skillId in ?1 and c.type='Skill' and c.projectId=?2 order by c.skillId''')
+              c.id = r.child and c.skillId in ?1 and c.type='Skill' and c.projectId=?2 order by c.skillId, s.skillId''')
     List<SimpleBadgeRes> findAllBadgesForSkill(List<String> skillId, String projectId)
 
     @Query(value='''select sum(c.totalPoints) 

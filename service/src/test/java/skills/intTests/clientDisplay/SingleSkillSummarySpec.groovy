@@ -1192,6 +1192,12 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(allSkills)
 
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        badge2.enabled = true
+        supervisorService.createGlobalBadge(badge2)
+        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        supervisorService.updateGlobalBadge(badge2, badge2.badgeId)
+
         Map badge1 = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge1)
         allSkills.each {
@@ -1199,12 +1205,6 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         }
         badge1.enabled = true
         skillsService.updateBadge(badge1, badge1.badgeId)
-
-        Map badge2 = SkillsFactory.createBadge(1, 2)
-        badge2.enabled = true
-        supervisorService.createGlobalBadge(badge2)
-        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
-        supervisorService.updateGlobalBadge(badge2, badge2.badgeId)
 
         when:
         def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId, allSkills[0].skillId)
