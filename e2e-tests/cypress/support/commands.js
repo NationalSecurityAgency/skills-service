@@ -129,7 +129,7 @@ Cypress.Commands.add("removeFromMyProjects", (projNum) => {
     cy.request('DELETE', `/api/myprojects/proj${projNum}`, {});
 });
 
-Cypress.Commands.add("register", (user, pass, grantRoot) => {
+Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = null) => {
     return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {
             if (response.body !== true) {
@@ -140,6 +140,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
                         lastName: 'LastName',
                         email: user,
                         password: pass,
+                        usernameForDisplay,
                     });
                     // cy.request('POST', '/grantFirstRoot');
                 } else {
@@ -149,6 +150,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot) => {
                         lastName: 'LastName',
                         email: user,
                         password: pass,
+                        usernameForDisplay,
                     });
                 }
                 cy.request('POST', '/logout');

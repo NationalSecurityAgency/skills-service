@@ -343,5 +343,47 @@ describe('Projects Admin Management Tests', () => {
         ], 5, true, null, false);
     });
 
+    it('Existing projects are not suggested', () => {
+        cy.register('newuser', 'password', false, 'some display name')
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout()
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+
+        cy.intercept('PUT', '/admin/projects/proj1/users/newuser/roles/ROLE_PROJECT_APPROVER')
+            .as('addApprover');
+
+        cy.intercept('POST', '*suggestDashboardUsers*')
+            .as('suggest');
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+        cy.intercept('GET', '/admin/projects/proj1')
+            .as('loadProject');
+
+        cy.visit('/administrator/projects/proj1/access');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProject');
+
+
+        cy.get('[data-cy="existingUserInput"]').type('some');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('.vs__dropdown-menu').contains('some display name')
+            .click();
+        cy.get('[data-cy="userRoleSelector"]').select('Approver');
+        cy.get('[data-cy="addUserBtn"]').click();
+        cy.wait('@addApprover');
+
+        cy.get('[data-cy="userCell_newuser"]').should("exist");
+        cy.get('[data-cy="existingUserInput"]').type('some');
+        cy.wait('@suggest');
+        cy.wait(1500);
+        cy.get('.vs__dropdown-menu').contains('some display name').should('not.exist')
+    });
 
 })

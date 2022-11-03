@@ -314,12 +314,8 @@ limitations under the License.
             this.table.options.busy = false;
             this.data = result.data;
             this.table.options.pagination.totalRows = result.totalCount;
-            this.userIds = result.data.map(({ userIdForDisplay }) => userIdForDisplay);
+            this.userIds = result.data.map(({ userId }) => userId);
           });
-      },
-      userAdded(userRole) {
-        this.data.push(userRole);
-        this.userIds.push(userRole.userIdForDisplay);
       },
       deleteUserRoleConfirm(row) {
         const msg = `Are you absolutely sure you want to remove ${this.getUserDisplay(row)} as a ${this.roleDescription}?`;
@@ -335,7 +331,7 @@ limitations under the License.
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter((item) => item.userId !== row.userId);
-            this.userIds = this.userIds.filter((userId) => userId !== row.userIdForDisplay);
+            this.userIds = this.userIds.filter((userId) => userId !== row.userId);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
             this.table.options.busy = false;
             this.table.options.pagination.totalRows = this.data.length;
