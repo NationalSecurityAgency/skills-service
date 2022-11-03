@@ -13,6 +13,8 @@ These pages provide in-depth guidance on installation, usage and contribution.
 
 [![DB Test Badge](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20against%20PostgreSQL/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+against+PostgreSQL%22)
 
+[![Nightly Service Tests](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-night-service-tests.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-night-service-tests.yml)
+
 [![Test Web Sockets over STOMP using RabbitMQ](https://github.com/NationalSecurityAgency/skills-service/workflows/Test%20Web%20Sockets%20over%20STOMP%20using%20RabbitMQ/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Test+Web+Sockets+over+STOMP+using+RabbitMQ%22)
 
 [![Run integration tests using two way ssl](https://github.com/NationalSecurityAgency/skills-service/workflows/Run%20integration%20tests%20using%20two%20way%20ssl/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions?query=workflow%3A%22Run+integration+tests+using+two+way+ssl%22)
