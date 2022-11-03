@@ -459,5 +459,57 @@ A new sentence after a few new lines
         success
         !shouldBeInvalid
     }
+
+    def "ignore bold/italics at the beginning of a line"() {
+        String text = """
+
+*A* an italic at the beginning of a line
+
+**A** bold at the  beginning of a line
+
+***A*** bold and italic at the  beginning of a line
+
+*A an italic sentence*
+
+**A bold sentence**
+
+***A bold and italic sentence***
+
+*A an italic words* not preceded by spaces
+
+**A bold words** not preceded by spaces
+
+***A bold and italic words** sentence not preceded by spaces
+
+        *A* an italic at the beginning of a line preceded by spaces
+        
+        **A** bold at the  beginning of a line preceded by spaces
+        
+        ***A*** bold and italic at the  beginning of a line preceded by spaces
+        
+        *A an italic sentence preceded by spaces*
+        
+        **A bold sentence preceded by spaces**
+        
+        ***A bold and italic sentence preceded by spaces***
+        
+        *A an italic words* preceded by spaces
+        
+        **A bold words** preceded by spaces
+        
+        ***A bold and italic words** sentence preceded by spaces
+        """
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        boolean success = validator.validateDescription(text).valid
+        then:
+        success
+    }
 }
 

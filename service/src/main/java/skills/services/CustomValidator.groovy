@@ -55,6 +55,7 @@ class CustomValidator {
     private static final Pattern BULLET = ~/^\s*(?:\d\. |\* |- )/
     private static final Pattern NEWLINE = ~/\n/
     private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^([\n]?[#>]{1,}[\s])+/
+    private static final Pattern BOLD_AND_ITALICS = ~/^(\s*)[*_]{1,3}([^*_]+)[*_]{1,3}/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
@@ -151,7 +152,10 @@ class CustomValidator {
 
         String toValidate = s.trim()
 
-        //remove markdown bullets that start at the beginning of a line/paragraph
+        // remove all bold and/or italics from the beginning of a line
+        toValidate = BOLD_AND_ITALICS.matcher(toValidate).replaceAll('$1$2')
+
+        // remove markdown bullets that start at the beginning of a line/paragraph
         toValidate = BULLET.matcher(toValidate).replaceAll("")
 
         // remove a single newline so the provided regex does not need check for newlines themselves
