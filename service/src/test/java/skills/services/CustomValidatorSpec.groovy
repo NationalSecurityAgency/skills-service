@@ -500,6 +500,10 @@ A new sentence after a few new lines
         ***A bold and italic words** sentence preceded by spaces
         """
 
+        String invalidText = """A simple lined
+
+***another***"""
+
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^A.*$'
         validator.paragraphValidationMessage = 'fail'
@@ -508,8 +512,10 @@ A new sentence after a few new lines
         validator.init()
 
         boolean success = validator.validateDescription(text).valid
+        boolean fail = validator.validateDescription(invalidText).valid
         then:
         success
+        !fail
     }
 }
 

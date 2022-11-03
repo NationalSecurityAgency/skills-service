@@ -138,7 +138,7 @@ class CustomValidator {
 //        String toValidate = s.trim()
 
         // treat all linebreaks and separators as newlines
-        toValidate = toValidate.replaceAll(/(\n\s*[-_*]{3,})|(\n<br>)/, '\n')
+        toValidate = toValidate.replaceAll(/(\n\s*[-_*]{3,}^)|(\n<br>)/, '\n')
 
         // remove a single new line above a table and/or codeblock
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
