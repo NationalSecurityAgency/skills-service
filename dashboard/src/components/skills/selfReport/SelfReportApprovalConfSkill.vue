@@ -20,48 +20,78 @@ limitations under the License.
         <i class="fas fa-graduation-cap text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By Skill</span>
       </div>
     </template>
-    <skills-selector2 class="mx-3 mb-3 mt-2"
+    <div class="row no-gutters mx-1">
+      <div class="col-md mx-1 mt-1 ">
+        <skills-selector2
+                      :disabled="selectedSubject !== null || loading"
                       :options="availableSkills"
                       :selected="selectedSkills"
-                      @added="addSkillToConf"
+                      @added="selectSkill"
+                      @removed="selectedSkills = []"
                       placeholder="Select skill"
-                      :onlySingleSelectedValue="true"></skills-selector2>
+                      :onlySingleSelectedValue="true"
+                      :warnBeforeRemoving="false"/>
+      </div>
+      <div class="col-md-auto mx-1 mt-2 text-center">
+        <span class="">OR</span>
+      </div>
+      <div class="col-md mx-1 mt-1 ">
+        <subject-selector
+          :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
+          :options="availableSubjects"
+          :selected="selectedSubject"
+          @added="selectSubject"
+          @removed="selectedSubject = null"
+          :onlySingleSelectedValue="true"
+          :warnBeforeRemoving="false"/>
+      </div>
+      <div class="col-md-auto mx-1 mt-1 text-center">
+        <b-button
+          aria-label="Add Tag Value"
+          @click="addSkillToConf"
+          data-cy="addTagKeyConfBtn"
+          :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
+          variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
+        </b-button>
+      </div>
+    </div>
 
-    <skills-b-table v-if="hadData" class=""
-                    :options="table.options" :items="table.items"
-                    tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                    data-cy="skillApprovalConfSpecificUsersTable">
-      <template v-slot:cell(skillId)="data">
-        <div class="row">
-          <div class="col">
-            {{ data.item.skillName }}
+    <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
+    <div v-if="!loading">
+      <skills-b-table v-if="hadData" class="mt-3"
+                      :options="table.options" :items="table.items"
+                      tableStoredStateId="skillApprovalConfSpecificUsersTable"
+                      data-cy="skillApprovalConfSpecificUsersTable">
+        <template v-slot:cell(skillId)="data">
+          <div class="row">
+            <div class="col">
+              {{ data.item.skillName }}
+            </div>
+            <div class="col-auto">
+              <b-button title="Delete Skill"
+                        variant="outline-danger"
+                        :aria-label="`Remove ${data.value} tag.`"
+                        @click="removeTagConf(data.item)"
+                        :disabled="data.item.deleteInProgress"
+                        size="sm">
+                <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
+                <i v-else class="fas fa-trash" aria-hidden="true"/>
+              </b-button>
+            </div>
           </div>
-          <div class="col-auto">
-            <b-button title="Delete Skill"
-                      variant="outline-danger"
-                      :aria-label="`Remove ${data.value} tag.`"
-                      @click="removeTagConf(data.item)"
-                      :disabled="data.item.deleteInProgress"
-                      size="sm">
-              <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
-              <i v-else class="fas fa-trash" aria-hidden="true"/>
-            </b-button>
-          </div>
-        </div>
 
-      </template>
-      <template v-slot:cell(updated)="data">
-        <date-cell :value="data.value" />
-      </template>
-    </skills-b-table>
-
-    <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                 class="my-5"
+        </template>
+        <template v-slot:cell(updated)="data">
+          <date-cell :value="data.value" />
+        </template>
+      </skills-b-table>
+      <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                 class="p-2 py-5"
                  icon-size="fa-2x"
                  icon="fas fa-graduation-cap">
       You can split approval workload by routing approval requests for selected skills approval requests to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
     </no-content2>
-
+    </div>
   </b-card>
 </template>
 
@@ -74,11 +104,19 @@ limitations under the License.
   import NoContent2 from '@/components/utils/NoContent2';
   import SelfReportApprovalConfMixin
     from '@/components/skills/selfReport/SelfReportApprovalConfMixin';
+  import SubjectSelector from '@/components/skills/SubjectSelector';
+  import SubjectsService from '@/components/subjects/SubjectsService';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
     name: 'SelfReportApprovalConfSkill',
     components: {
-      NoContent2, SkillsSelector2, DateCell, SkillsBTable,
+      SkillsSpinner,
+      SubjectSelector,
+      NoContent2,
+      SkillsSelector2,
+      DateCell,
+      SkillsBTable,
     },
     mixins: [SelfReportApprovalConfMixin],
     props: {
@@ -86,10 +124,18 @@ limitations under the License.
     },
     data() {
       return {
+        loadingMeta: {
+          skills: true,
+          subjects: true,
+          loadingSkillsUnderASubject: false,
+          numSkillsToProcess: 0,
+        },
         projectId: this.$route.params.projectId,
         currentSelectedUser: null,
         availableSkills: [],
+        availableSubjects: [],
         selectedSkills: [],
+        selectedSubject: null,
         table: {
           items: [],
           options: {
@@ -133,6 +179,9 @@ limitations under the License.
       this.loadAvailableSkills();
     },
     computed: {
+      loading() {
+        return this.loadingMeta.skills || this.loadingMeta.subjects || this.loadingMeta.loadingSkillsUnderASubject || this.loadingMeta.numSkillsToProcess > 0;
+      },
       pkiAuthenticated() {
         return this.$store.getters.isPkiAuthenticated;
       },
@@ -146,22 +195,72 @@ limitations under the License.
           .then((loadedSkills) => {
             const alreadySelectedSkillIds = this.table.items.map((item) => item.skillId);
             this.availableSkills = loadedSkills.filter((item) => !alreadySelectedSkillIds.includes(item.skillId));
+          }).finally(() => {
+            this.loadingMeta.skills = false;
+          });
+        SubjectsService.getSubjects(this.projectId)
+          .then((subjects) => {
+            this.availableSubjects = subjects;
+          }).finally(() => {
+            this.loadingMeta.subjects = false;
           });
       },
-      addSkillToConf(newItem) {
-        SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, newItem.skillId)
-          .then((res) => {
-            this.table.items.push(res);
-            this.$emit('conf-added', res);
-            this.availableSkills = this.availableSkills.filter((item) => item.skillId !== newItem.skillId);
-            this.selectedSkills = [];
-            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${newItem.skillId} skill.`));
-          });
+      selectSkill(newItem) {
+        this.selectedSkills = [newItem];
+      },
+      addSkillToConf() {
+        if (this.selectedSkills && this.selectedSkills.length > 0) {
+          const { skillId } = this.selectedSkills[0];
+          SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, skillId)
+            .then((res) => {
+              this.table.items.push(res);
+              this.$emit('conf-added', res);
+              this.availableSkills = this.availableSkills.filter((item) => item.skillId !== skillId);
+              this.selectedSkills = [];
+              this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${skillId} skill.`));
+            });
+        }
+        if (this.selectedSubject) {
+          const existingSkills = this.table.items.map((s) => s.skillId);
+          console.log(existingSkills);
+          this.loadingMeta.loadingSkillsUnderASubject = true;
+          const { subjectId } = this.selectedSubject;
+          this.selectedSubject = null;
+          SkillsService.getSubjectSkills(this.projectId, subjectId)
+            .then((subjectSkills) => {
+              const skillsToAdd = subjectSkills.filter((s) => {
+                console.log(`consider ${s.skillId}`);
+                return existingSkills.indexOf(s.skillId) < 0;
+              });
+              const numSkillsToAdd = skillsToAdd.length;
+              this.loadingMeta.numSkillsToProcess = numSkillsToAdd;
+              console.log(skillsToAdd);
+              skillsToAdd.forEach((sToAdd) => {
+                SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, sToAdd.skillId)
+                  .then((res) => {
+                    this.table.items.push(res);
+                    this.$emit('conf-added', res);
+                    this.availableSkills = this.availableSkills.filter((item) => item.skillId !== sToAdd.skillId);
+                    this.loadingMeta.numSkillsToProcess -= 1;
+                    if (this.loadingMeta.numSkillsToProcess === 0) {
+                      this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${numSkillsToAdd} skills.`));
+                    }
+                  });
+              });
+            }).finally(() => {
+              this.loadingMeta.loadingSkillsUnderASubject = false;
+            });
+        }
+      },
+      selectSubject(newItem) {
+        this.selectedSubject = newItem;
       },
     },
   };
 </script>
 
 <style scoped>
-
+.approver-conf-skills-selector .st-skills-selector input {
+  height: 3rem !important;
+}
 </style>

@@ -18,47 +18,27 @@ limitations under the License.
     <v-select :options="optionsInternal"
               v-model="selectedInternal"
               :placeholder="placeholder"
-              :multiple="multipleSelection"
+              :multiple="false"
               :filterable="internalSearch"
               label="name"
               v-on:search="searchChanged"
               v-on:option:selected="added"
-              v-on:option:deselecting="considerRemoval"
+              v-on:option:deselecting="removed"
               :loading="isLoading"
               :disabled="disabled"
               class="st-skills-selector"
               data-cy="skillsSelector">
       <template #option="option">
         <slot name="dropdown-item" :option="option">
-          <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
-            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName">{{ option.name }}
-              <b-badge v-if="option.isReused" variant="success" size="sm" class="text-uppercase"
-                       data-cy="reusedBadge"
-                       style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
-              </b-badge>
+          <div :data-cy="`subjectSelectionItem-${option.projectId}-${option.skillId}`">
+            <div class="h5 text-info skills-option-name" data-cy="subjSelector-name">{{ option.name }}
             </div>
             <div style="font-size: 0.8rem;">
-              <span class="skills-option-id">
-                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
-                  class="text-uppercase mr-1 font-italic">Project ID:</span><span
-                  class="font-weight-bold"
-                  data-cy="skillsSelector-projectId">{{ option.projectId }}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span
-                  class="text-uppercase mr-1 font-italic">ID:</span><span class="font-weight-bold"
-                                                                          data-cy="skillsSelector-skillId">{{
-                    removeReuseTag(option.skillId)
-                  }}</span></span>
-              </span>
+              <span class="text-uppercase mr-1 font-italic"># Skills:</span>
+              <span class="font-weight-bold" data-cy="skillsSelector-projectId">{{ option.numSkills}}</span>
               <span class="mx-2">|</span>
-              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span
-              class="font-weight-bold skills-option-subject-name"
-              data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
-              <span v-if="option.groupName">
-                <span class="mx-2">|</span>
-                <span class="text-uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
-                class="font-weight-bold skills-id"
-                data-cy="skillsSelector-groupName">{{ option.groupName }}</span>
-              </span>
+              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Points:</span>
+              <span class="font-weight-bold skills-option-subject-name" data-cy="skillsSelector-subjectName">{{ option.totalPoints | number }}</span>
             </div>
           </div>
         </slot>
@@ -70,8 +50,8 @@ limitations under the License.
             <span class="border rounded ml-1 remove-x"
                   :aria-label="`remove ${option.name} skill option button`"
                   tabindex="0"
-                  v-on:keyup.enter="considerRemoval(option)"
-                  v-on:click.stop="considerRemoval(option)">❌
+                  v-on:keyup.enter="removed(option)"
+                  v-on:click.stop="removed(option)">❌
             </span>
           </span>
         </div>
@@ -82,7 +62,7 @@ limitations under the License.
         </li>
       </template>
       <template #no-options>
-        <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for skills...</span>
+        <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span class="font-weight-bold">search</span> for subjects...</span>
         <span v-else>No elements found. Consider changing the search query</span>
       </template>
     </v-select>
@@ -91,11 +71,10 @@ limitations under the License.
 
 <script>
   import vSelect from 'vue-select';
-  import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 
   export default {
-    name: 'SkillsSelector2',
+    name: 'SubjectSelector',
     components: { vSelect },
     mixins: [MsgBoxMixin],
     props: {
@@ -104,7 +83,7 @@ limitations under the License.
         required: true,
       },
       selected: {
-        type: Array,
+        type: Object,
       },
       onlySingleSelectedValue: {
         type: Boolean,
@@ -132,7 +111,7 @@ limitations under the License.
       },
       placeholder: {
         type: String,
-        default: 'Select skill(s)...',
+        default: 'Select subject',
       },
       placeholderIcon: {
         type: String,
@@ -153,7 +132,7 @@ limitations under the License.
     },
     data() {
       return {
-        selectedInternal: [],
+        selectedInternal: {},
         optionsInternal: [],
         multipleSelection: true,
         currentSearch: '',
@@ -175,37 +154,24 @@ limitations under the License.
       },
     },
     methods: {
-      removeReuseTag(val) {
-        return SkillReuseIdUtil.removeTag(val);
-      },
       setSelectedInternal() {
         if (this.selected) {
-          this.selectedInternal = this.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+          this.selectedInternal = ({ ...this.selected });
+        } else {
+          this.selectedInternal = null;
         }
       },
       setOptionsInternal() {
         if (this.options) {
-          this.optionsInternal = this.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+          this.optionsInternal = this.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.subjectId}`, ...entry }));
           if (this.selected) {
             // removed already selected items
-            this.optionsInternal = this.optionsInternal.filter((el) => !this.selected.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
+            this.optionsInternal = this.optionsInternal.filter((el) => !this.selected.some((sel) => `${sel.projectId}_${sel.subjectId}` === el.entryId));
           }
         }
       },
-      considerRemoval(removedItem) {
-        if (this.warnBeforeRemoving) {
-          const msg = `Are you sure you want to remove "${removedItem.name}"?`;
-          this.msgConfirm(msg, 'WARNING', 'Yes, Please!')
-            .then((res) => {
-              if (res) {
-                this.removed(removedItem);
-              }
-            });
-        } else {
-          this.removed(removedItem);
-        }
-      },
       removed(removedItem) {
+        this.selectedInternal = null;
         this.$emit('removed', removedItem);
       },
       added(addedItem) {
