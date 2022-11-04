@@ -517,5 +517,39 @@ A new sentence after a few new lines
         success
         !fail
     }
+
+    def "ignore extra html markdown"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^A.*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("""A this is some normal text
+
+<em>A <del>cool</del>, not cools</em>""").valid
+
+        validator.validateDescription("""<em>A <del>cool</del>, not cools</em>""").valid
+
+        validator.validateDescription("""*A cool, not cool*""").valid
+
+        validator.validateDescription("""<em>A <strong>cool</strong>, not cools</em>""").valid
+
+        validator.validateDescription("""A ok
+
+<strong>A should ~~work~~ yes</strong>""").valid
+
+        validator.validateDescription("""A normal
+
+<em>A <del>cool</del>, not cool</em>""").valid
+
+        validator.validateDescription("""### A this is a heading""").valid
+        validator.validateDescription("""### <em>A</em> this is a heading""").valid
+        validator.validateDescription("""### <strong><em>A</em></strong> this is a heading""").valid
+        validator.validateDescription("""### <strong>A</strong> this is a heading""").valid
+        validator.validateDescription("""### <em><strong>A</strong></em> this is a heading""").valid
+    }
 }
 
