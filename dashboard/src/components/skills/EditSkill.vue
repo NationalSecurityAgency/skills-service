@@ -561,7 +561,10 @@ limitations under the License.
           .then(() => {
             setTimeout(() => {
               this.$nextTick(() => {
-                this.$refs.observer.validate({ silent: false });
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
               });
             }, 600);
           });

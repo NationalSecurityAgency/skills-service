@@ -133,7 +133,10 @@ limitations under the License.
           this.loadingDescription = false;
           setTimeout(() => {
             this.$nextTick(() => {
-              this.validateForm();
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
             });
           }, 600);
         });
@@ -163,9 +166,6 @@ limitations under the License.
       },
     },
     methods: {
-      validateForm() {
-        return this.$refs.observer.validate({ silent: false });
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -178,7 +178,7 @@ limitations under the License.
         this.publishHidden({});
       },
       updateProject() {
-        this.validateForm()
+        this.$refs.observer.validate()
           .then((res) => {
             if (res) {
               this.close();
