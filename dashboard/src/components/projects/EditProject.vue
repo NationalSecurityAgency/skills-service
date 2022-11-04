@@ -131,6 +131,14 @@ limitations under the License.
           this.internalProject.description = data.description;
         }).finally(() => {
           this.loadingDescription = false;
+          setTimeout(() => {
+            this.$nextTick(() => {
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
+            });
+          }, 600);
         });
       }
       document.addEventListener('focusin', this.trackFocus);
@@ -170,10 +178,15 @@ limitations under the License.
         this.publishHidden({});
       },
       updateProject() {
-        this.close();
-        this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
-        this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
-        this.$emit('project-saved', this.internalProject);
+        this.$refs.observer.validate()
+          .then((res) => {
+            if (res) {
+              this.close();
+              this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
+              this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
+              this.$emit('project-saved', this.internalProject);
+            }
+          });
       },
       updateProjectId() {
         if (!this.isEdit && !this.canEditProjectId) {

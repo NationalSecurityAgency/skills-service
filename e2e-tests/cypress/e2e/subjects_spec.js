@@ -1101,4 +1101,17 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=closeRemovalSafetyCheck]').click();
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').should('have.focus');
     });
+
+    it('edit subject - run validation on load in case validation improved and existing values fail to validate', () => {
+        cy.intercept('POST', '/api/validation/description', {
+            valid: false,
+            msg: 'Mocked up validation failure'
+        }).as('validateDesc');
+
+        cy.createSubject(1, 1, {description: 'Very cool project'})
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="editBtn"]').click()
+        cy.wait('@validateDesc')
+        cy.get('[data-cy="subjectDescError"]').contains('paragraphs may not contain jabberwocky')
+    });
 });

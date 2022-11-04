@@ -366,10 +366,10 @@ limitations under the License.
     },
     mounted() {
       if (this.isEdit) {
-        this.loadSkillDetails(false);
+        this.loadSkillDetailsAndValidate(false);
         this.selfReport.loading = false;
       } else if (this.isCopy) {
-        this.loadSkillDetails(true);
+        this.loadSkillDetailsAndValidate(true);
         this.selfReport.loading = false;
       } else {
         this.skillInternal = { version: 0, ...this.skillInternal };
@@ -556,8 +556,21 @@ limitations under the License.
             }
           });
       },
+      loadSkillDetailsAndValidate(isCopy) {
+        this.loadSkillDetails(isCopy)
+          .then(() => {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          });
+      },
       loadSkillDetails(isCopy) {
-        SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
+        return SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
             if (!isCopy) {
               this.skillInternal = {
@@ -569,11 +582,6 @@ limitations under the License.
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
               copy.subjectId = this.subjectId;
               this.skillInternal = { isEdit: false, ...copy };
-              const self = this;
-              setTimeout(() => {
-                // force validation so that form becomes valid, otherwise the save button never becomes enabled
-                self.$refs.observer.validate();
-              }, 0);
             }
             this.initial.skillId = this.skillInternal.skillId;
             this.initial.skillName = this.skillInternal.name;

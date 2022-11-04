@@ -188,6 +188,16 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
+      if (this.isEdit) {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const { observer } = this.$refs;
+            if (observer) {
+              observer.validate({ silent: false });
+            }
+          });
+        }, 600);
+      }
     },
     computed: {
       title() {
@@ -219,10 +229,15 @@ limitations under the License.
         this.badgeInternal.description = event;
       },
       updateBadge() {
-        this.closeMe({ updated: true });
-        this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
-        this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
-        this.$emit('badge-updated', { isEdit: this.isEdit, ...this.badgeInternal });
+        this.$refs.observer.validate()
+          .then((res) => {
+            if (res) {
+              this.closeMe({ updated: true });
+              this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
+              this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
+              this.$emit('badge-updated', { isEdit: this.isEdit, ...this.badgeInternal });
+            }
+          });
       },
       updateBadgeId() {
         if (!this.isEdit && this.canAutoGenerateId) {

@@ -126,7 +126,7 @@ limitations under the License.
     data() {
       return {
         canAutoGenerateId: true,
-        subjectInternal: { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject },
+        subjectInternal: {},
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
@@ -140,6 +140,17 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
+      this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
+      if (this.isEdit) {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const { observer } = this.$refs;
+            if (observer) {
+              observer.validate({ silent: false });
+            }
+          });
+        }, 600);
+      }
     },
     watch: {
       show(newValue) {

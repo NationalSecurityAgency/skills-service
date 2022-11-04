@@ -1446,5 +1446,32 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
   });
 
+  it('edit skill - run validation on load in case validation improved and existing values fail to validate', () => {
+    cy.intercept('POST', '/api/validation/description', {
+      valid: false,
+      msg: 'Mocked up validation failure'
+    }).as('validateDesc');
+
+    cy.createSkill(1, 1, 1, {description: 'Very cool project'})
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.wait('@validateDesc')
+    cy.get('[data-cy="skillDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+  });
+
+  it('copy skill - run validation on load in case validation improved and existing values fail to validate', () => {
+    cy.intercept('POST', '/api/validation/description', {
+      valid: false,
+      msg: 'Mocked up validation failure'
+    }).as('validateDesc');
+
+    cy.createSkill(1, 1, 1, {description: 'Very cool project'})
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="copySkillButton_skill1"]').click()
+    cy.wait('@validateDesc')
+    cy.get('[data-cy="skillDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+  });
+
+
 
 });
