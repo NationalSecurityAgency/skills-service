@@ -191,4 +191,12 @@ class InputSanitizerSpec extends Specification{
         six == "A &B"
     }
 
+    def "sanitize markdown with html"() {
+
+        when:
+        def one = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("<em><del>(U) one **two** three</del></em>"))
+
+        then:
+        one == "<em><del>(U) one **two** three</del></em>"
+    }
 }

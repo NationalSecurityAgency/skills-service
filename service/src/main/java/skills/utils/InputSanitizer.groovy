@@ -38,12 +38,14 @@ class InputSanitizer {
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
 
+    private static final SAFE_LIST = Safelist.relaxed().addTags('del')
+
     static String sanitize(String input) {
         if (!input) {
             return input;
         }
 
-        return Jsoup.clean(input, "", Safelist.basic(), print)
+        return Jsoup.clean(input, "", SAFE_LIST, print)
     }
 
     static String sanitizeUrl(String uri) {
