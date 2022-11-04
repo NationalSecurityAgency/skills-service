@@ -153,9 +153,6 @@ class CustomValidator {
 
         String toValidate = s.trim()
 
-        // remove all bold and/or italics from the beginning of a line
-        toValidate = BOLD_AND_ITALICS.matcher(toValidate).replaceAll('$1$2')
-
         // remove extra html markdown sometimes added by wysiwyg editor
         toValidate = HTML.matcher(toValidate).replaceAll("")
 
@@ -174,6 +171,10 @@ class CustomValidator {
         // ### Header
         // > quote
         toValidate = HEADER_OR_BLOCK_QUOTE.matcher(toValidate).replaceAll("")
+
+        // remove all bold and/or italics from the beginning of a line
+        toValidate = BOLD_AND_ITALICS.matcher(toValidate).replaceAll('$1$2')
+
 
         return toValidate.trim()
     }

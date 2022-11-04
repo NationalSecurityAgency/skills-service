@@ -504,6 +504,8 @@ A new sentence after a few new lines
 
 ***another***"""
 
+        String styledBlockQuote = """> **A** this is a quote<em>s</em>"""
+
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^A.*$'
         validator.paragraphValidationMessage = 'fail'
@@ -514,8 +516,10 @@ A new sentence after a few new lines
         boolean success = validator.validateDescription(text).valid
         boolean fail = validator.validateDescription(invalidText).valid
         then:
+
         success
         !fail
+        validator.validateDescription(styledBlockQuote).valid
     }
 
     def "ignore extra html markdown"() {
