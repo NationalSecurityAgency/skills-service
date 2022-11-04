@@ -37,7 +37,7 @@ limitations under the License.
             <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
           </div>
           <div class="col">
-            <b-button @click="deleteAllSkills" variant="outline-info" :disabled="table.items.length === 0"
+            <b-button @click="deleteAllSkills" variant="outline-info" :disabled="table.items.length === 0" data-cy="performedSkills-deleteAll"
                       :aria-label="`remove all skill events from user`" style="float: right; margin-right: 15px">
               <i class="fas fa-trash" aria-hidden="true"/> Delete All
             </b-button>

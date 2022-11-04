@@ -139,7 +139,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 s.enabled = 'true'
               ) and
               u.userId = ?1''')
-    List<UserPerformedSkill> findByUserIdAndProjectId(String userId, String projectId)
+    List<UserPerformedSkill> findByUserIdAndProjectId(String userId, String projectId, Pageable pageable)
 
     @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
             and p.skillRefId in (
