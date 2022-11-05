@@ -31,4 +31,6 @@ class UserRoleRes {
     RoleName roleName
 
     String email
+
+    String dn
 }
