@@ -56,6 +56,7 @@ class CustomValidator {
     private static final Pattern NEWLINE = ~/\n/
     private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^([\n]?[#>]{1,}[\s])+/
     private static final Pattern BOLD_AND_ITALICS = ~/^(\s*)[*_]{1,3}([^*_]+)[*_]{1,3}/
+    private static final Pattern HTML = ~/(<[\/]?em>|<[\/]?del>|<[\/]?strong>)/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
@@ -152,8 +153,8 @@ class CustomValidator {
 
         String toValidate = s.trim()
 
-        // remove all bold and/or italics from the beginning of a line
-        toValidate = BOLD_AND_ITALICS.matcher(toValidate).replaceAll('$1$2')
+        // remove extra html markdown sometimes added by wysiwyg editor
+        toValidate = HTML.matcher(toValidate).replaceAll("")
 
         // remove markdown bullets that start at the beginning of a line/paragraph
         toValidate = BULLET.matcher(toValidate).replaceAll("")
@@ -170,6 +171,10 @@ class CustomValidator {
         // ### Header
         // > quote
         toValidate = HEADER_OR_BLOCK_QUOTE.matcher(toValidate).replaceAll("")
+
+        // remove all bold and/or italics from the beginning of a line
+        toValidate = BOLD_AND_ITALICS.matcher(toValidate).replaceAll('$1$2')
+
 
         return toValidate.trim()
     }

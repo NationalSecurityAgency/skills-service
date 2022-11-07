@@ -23,6 +23,21 @@ import skills.storage.model.SkillDef
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
+    void "save for the description with <del> should not remove the tag"(){
+        skillsService.createProject(SkillsFactory.createProject(1))
+        skillsService.createSubject(SkillsFactory.createSubject(1, 1))
+
+        def skill = SkillsFactory.createSkill(1, 1, 1)
+        String desc = "<em><del>(U) one **two** three</del></em>"
+        skill.description = desc
+        skillsService.createSkill(skill)
+
+        when:
+        def res = skillsService.getSkill(skill)
+        then:
+        res.description == desc
+    }
+
     void "result should be empty if there are not descriptions at all"(){
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)

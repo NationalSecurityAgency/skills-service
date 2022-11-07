@@ -18,7 +18,10 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
+import spock.lang.IgnoreIf
+import spock.lang.IgnoreRest
 
 class UserRoleSpecs extends DefaultIntSpec {
 
@@ -99,6 +102,28 @@ class UserRoleSpecs extends DefaultIntSpec {
         res.get(0).userIdForDisplay.equalsIgnoreCase("$user for display")
         res.get(0).firstName == "John"
         res.get(0).lastName == "Smith"
+        res.get(0).projectId == "TestProject1"
+        res.get(0).roleName == projAdminRole
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "dn is returned in pki mode" () {
+        String user = getRandomUsers(1)[0]
+        SkillsService user1Service = createService(user, "passefeafeaef", "John", "Smith")
+        def proj = SkillsFactory.createProject(1)
+        user1Service.createProject(proj)
+        when:
+        def res = user1Service.getUserRolesForProjectAndUser(proj.projectId, user)
+
+        UserAttrs expectedAttrs = userAttrsRepo.findByUserId(user)
+        then:
+        expectedAttrs.dn
+        res.size() == 1
+        res.get(0).dn == expectedAttrs.dn
+        res.get(0).userId == expectedAttrs.userId
+        res.get(0).userIdForDisplay == expectedAttrs.userIdForDisplay
+        res.get(0).firstName == expectedAttrs.firstName
+        res.get(0).lastName == expectedAttrs.lastName
         res.get(0).projectId == "TestProject1"
         res.get(0).roleName == projAdminRole
     }
