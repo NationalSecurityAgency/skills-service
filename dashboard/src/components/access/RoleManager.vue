@@ -106,11 +106,11 @@ limitations under the License.
 
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import UserRolesUtil from '@/components/utils/UserRolesUtil';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
   import NavigationErrorMixin from '../utils/NavigationErrorMixin';
-  import UserRolesUtil from '@/components/utils/UserRolesUtil';
 
   // role constants
   const ROLE_APP_USER = 'ROLE_APP_USER';
