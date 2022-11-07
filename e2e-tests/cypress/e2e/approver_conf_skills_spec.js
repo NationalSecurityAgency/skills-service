@@ -50,15 +50,15 @@ describe('Approver Config User Tags Tests', () => {
             });
     });
 
-    it('configure approver for skills', function () {
+    it('configure approver for single skill', function () {
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
         cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
 
         cy.visit('/administrator/projects/proj1/self-report/configure');
-        // const user1 = 'user1'
-        // const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="tagKeyConfTable"]`
-        // cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
-        //
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="tagKeyConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('exist')
         // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
@@ -109,6 +109,18 @@ describe('Approver Config User Tags Tests', () => {
         // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
         // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
 
+    });
+
+
+    it('configure approver for skills', function () {
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+
+        for (let i = 5; i < 80; i++) {
+            cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })
+        }
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
     });
 
 });
