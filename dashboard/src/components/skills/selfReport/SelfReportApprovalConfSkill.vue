@@ -21,21 +21,24 @@ limitations under the License.
       </div>
     </template>
     <div class="row no-gutters mx-1">
-      <div class="col-md mx-1 mt-1 ">
-        <skills-selector2
-                      :disabled="selectedSubject !== null || loading"
-                      :options="availableSkills"
-                      :selected="selectedSkills"
-                      @added="selectSkill"
-                      @removed="selectedSkills = []"
-                      placeholder="Select skill"
-                      :onlySingleSelectedValue="true"
-                      :warnBeforeRemoving="false"/>
+      <div class="col-md mx-1 mt-1 align-self-end">
+          <div class="mb-1">Add Single Skills</div>
+          <skills-selector2
+              id='skillSelector'
+              :disabled="selectedSubject !== null || loading"
+              :options="availableSkills"
+              :selected="selectedSkills"
+              @added="selectSkill"
+              @removed="selectedSkills = []"
+              placeholder="Select skill"
+              :onlySingleSelectedValue="true"
+              :warnBeforeRemoving="false"/>
       </div>
-      <div class="col-md-auto mx-1 mt-2 text-center">
-        <span class="">OR</span>
+      <div class="col-md-auto mx-1 text-center align-self-end">
+        <span class="mt-3">OR</span>
       </div>
-      <div class="col-md mx-1 mt-1 ">
+      <div class="col-md mx-1 mt-1 align-self-end">
+        <div class="mb-1">Add <b>ALL</b> Skills under a Subject</div>
         <subject-selector
           :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
           :options="availableSubjects"
@@ -45,7 +48,7 @@ limitations under the License.
           :onlySingleSelectedValue="true"
           :warnBeforeRemoving="false"/>
       </div>
-      <div class="col-md-auto mx-1 mt-1 text-center">
+      <div class="col-md-auto mx-1 mt-1 text-center align-self-end">
         <b-button
           aria-label="Add Tag Value"
           @click="addSkillToConf"
@@ -54,6 +57,12 @@ limitations under the License.
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
       </div>
+    </div>
+
+    <div v-if="!loading && addedSubjectSkillsStats.addedSubject" class="alert alert-success mt-1 mx-2">
+      <i class="fas fa-check-double" aria-hidden="true"/>
+      Added <b-badge>{{ addedSubjectSkillsStats.numSkillsAdded }}</b-badge> skill{{ addedSubjectSkillsStats.numSkillsAdded === 1 ? '' : 's'}}.
+      <span v-if="addedSubjectSkillsStats.numSkillsAlreadyConfigured > 0"><b-badge>{{ addedSubjectSkillsStats.numSkillsAlreadyConfigured }}</b-badge> already added!</span>
     </div>
 
     <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
@@ -71,7 +80,7 @@ limitations under the License.
               <b-button title="Delete Skill"
                         variant="outline-danger"
                         :aria-label="`Remove ${data.value} tag.`"
-                        @click="removeTagConf(data.item)"
+                        @click="removeSkill(data.item)"
                         :disabled="data.item.deleteInProgress"
                         size="sm">
                 <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
@@ -136,6 +145,11 @@ limitations under the License.
         availableSubjects: [],
         selectedSkills: [],
         selectedSubject: null,
+        addedSubjectSkillsStats: {
+          addedSubject: false,
+          numSkillsAdded: 0,
+          numSkillsAlreadyConfigured: 0,
+        },
         table: {
           items: [],
           options: {
@@ -160,7 +174,7 @@ limitations under the License.
               },
             ],
             pagination: {
-              remove: true,
+              remove: false,
               server: false,
               currentPage: 1,
               totalRows: 1,
@@ -190,6 +204,10 @@ limitations under the License.
       },
     },
     methods: {
+      removeSkill(item) {
+        this.resetSubjAddedInfo();
+        this.removeTagConf(item);
+      },
       loadAvailableSkills() {
         SkillsService.getProjectSkills(this.projectId, null, false, true)
           .then((loadedSkills) => {
@@ -206,9 +224,17 @@ limitations under the License.
           });
       },
       selectSkill(newItem) {
+        this.resetSubjAddedInfo();
         this.selectedSkills = [newItem];
       },
+      resetSubjAddedInfo() {
+        this.addedSubjectSkillsStats.numSkillsAdded = 0;
+        this.addedSubjectSkillsStats.numSkillsAlreadyConfigured = 0;
+        this.addedSubjectSkillsStats.addedSubject = false;
+      },
       addSkillToConf() {
+        this.resetSubjAddedInfo();
+
         if (this.selectedSkills && this.selectedSkills.length > 0) {
           const { skillId } = this.selectedSkills[0];
           SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, skillId)
@@ -222,19 +248,19 @@ limitations under the License.
         }
         if (this.selectedSubject) {
           const existingSkills = this.table.items.map((s) => s.skillId);
-          console.log(existingSkills);
           this.loadingMeta.loadingSkillsUnderASubject = true;
           const { subjectId } = this.selectedSubject;
           this.selectedSubject = null;
           SkillsService.getSubjectSkills(this.projectId, subjectId)
             .then((subjectSkills) => {
-              const skillsToAdd = subjectSkills.filter((s) => {
-                console.log(`consider ${s.skillId}`);
-                return existingSkills.indexOf(s.skillId) < 0;
-              });
+              const skillsToAdd = subjectSkills.filter((s) => existingSkills.indexOf(s.skillId) < 0);
               const numSkillsToAdd = skillsToAdd.length;
               this.loadingMeta.numSkillsToProcess = numSkillsToAdd;
-              console.log(skillsToAdd);
+
+              this.addedSubjectSkillsStats.addedSubject = true;
+              this.addedSubjectSkillsStats.numSkillsAdded = numSkillsToAdd;
+              this.addedSubjectSkillsStats.numSkillsAlreadyConfigured = subjectSkills.length - numSkillsToAdd;
+
               skillsToAdd.forEach((sToAdd) => {
                 SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, sToAdd.skillId)
                   .then((res) => {
@@ -253,6 +279,7 @@ limitations under the License.
         }
       },
       selectSubject(newItem) {
+        this.resetSubjAddedInfo();
         this.selectedSubject = newItem;
       },
     },
