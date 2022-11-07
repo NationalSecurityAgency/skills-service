@@ -460,6 +460,7 @@ class AccessSettingsStorageService {
                 firstName: input.attrs.firstName,
                 lastName: input.attrs.lastName,
                 email: input.attrs.email,
+                dn: input.attrs.dn,
         )
         return res
     }

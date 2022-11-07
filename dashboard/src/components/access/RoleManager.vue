@@ -263,7 +263,7 @@ limitations under the License.
           });
 
           const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
-          AccessService.saveUserRole(this.projectId, { userId: userRoleToUpdate.userId }, newRole, pkiAuthenticated)
+          AccessService.saveUserRole(this.projectId, userRoleToUpdate, newRole, pkiAuthenticated)
             .then(() => {
               this.data = this.data.map((user) => {
                 if (user.isEdited) {
@@ -314,7 +314,7 @@ limitations under the License.
             this.table.options.busy = false;
             this.data = result.data;
             this.table.options.pagination.totalRows = result.totalCount;
-            this.userIds = result.data.map(({ userId }) => userId);
+            this.userIds = result.data.map((u) => [u.userId, u.userIdForDisplay]).flatten();
           });
       },
       deleteUserRoleConfirm(row) {
@@ -331,7 +331,7 @@ limitations under the License.
         AccessService.deleteUserRole(row.projectId, row.userId, row.roleName)
           .then(() => {
             this.data = this.data.filter((item) => item.userId !== row.userId);
-            this.userIds = this.userIds.filter((userId) => userId !== row.userId);
+            this.userIds = this.userIds.filter((userId) => userId !== row.userId && userId !== row.userIdForDisplay);
             this.$emit('role-deleted', { userId: row.userId, role: row.roleName });
             this.table.options.busy = false;
             this.table.options.pagination.totalRows = this.data.length;
