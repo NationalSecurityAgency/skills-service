@@ -52,8 +52,10 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
         if (!skillDef) {
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
-        List<UserEvent> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: null
+        List<String> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: null
 
-        return usersPostAchievement
+        def usersTable = usersPostAchievement.collect{ it -> ["userId": it]}
+
+        return usersTable
     }
 }

@@ -450,7 +450,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value='''
-        SELECT *
+        SELECT DISTINCT ue.user_id
         FROM user_events ue, (
             SELECT user_id, achieved_on FROM user_achievement 
             WHERE skill_ref_id = :skillRefId
@@ -459,9 +459,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             ue.skill_ref_id = :skillRefId 
             AND ue.user_id = achievements.user_id 
             AND ue.event_time > achievements.achieved_on 
-        GROUP BY ue.id, ue.user_id HAVING SUM(ue.count) >= :minEventCountThreshold LIMIT 1;
+            AND ue.count >= :minEventCountThreshold
     ''', nativeQuery = true)
-    public List<UserEvent> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
+    public List<String> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
 
     @Query(value='''
     SELECT COUNT(counts.user_id) AS count, counts.countBucket AS label 
