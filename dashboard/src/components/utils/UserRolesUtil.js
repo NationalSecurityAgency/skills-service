@@ -15,6 +15,10 @@
  */
 export default class UserRolesUtil {
   static isReadOnlyProjRole(role) {
+    return this.isApproverRole(role);
+  }
+
+  static isApproverRole(role) {
     return role && role === 'ROLE_PROJECT_APPROVER';
   }
 }

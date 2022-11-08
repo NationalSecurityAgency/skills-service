@@ -106,6 +106,7 @@ limitations under the License.
 
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import UserRolesUtil from '@/components/utils/UserRolesUtil';
   import AccessService from './AccessService';
   import ExistingUserInput from '../utils/ExistingUserInput';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
@@ -146,12 +147,9 @@ limitations under the License.
         default: 'add-user-div',
       },
       addRoleConfirmation: {
-        type: Object,
+        type: Boolean,
         required: false,
-        default: null,
-        validator(value) {
-          return value.msgText && value.titleText && value.okBtnText;
-        },
+        default: false,
       },
     },
     data() {
@@ -345,7 +343,15 @@ limitations under the License.
       },
       addUserRole() {
         if (this.addRoleConfirmation) {
-          this.msgConfirm(this.addRoleConfirmation.msgText, this.addRoleConfirmation.titleText, this.addRoleConfirmation.okBtnText).then((ok) => {
+          const role = this.isOnlyOneRole ? this.roles[0] : this.userRole.selected;
+          const isApproverRole = UserRolesUtil.isApproverRole(role);
+          const msgText = isApproverRole
+            ? 'The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.'
+            : 'The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.';
+          const titleText = isApproverRole ? 'Add Project Approver?' : 'Add Project Administrator?';
+          const okBtnText = isApproverRole ? 'Add Approver!' : 'Add Administrator!';
+
+          this.msgConfirm(msgText, titleText, okBtnText).then((ok) => {
             if (ok) {
               this.doAddUserRole();
             }
