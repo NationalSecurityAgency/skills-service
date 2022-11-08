@@ -18,7 +18,7 @@ import utcPlugin from 'dayjs/plugin/utc';
 
 dayjs.extend(utcPlugin);
 
-describe('Approver Config User Tags Tests', () => {
+describe('Approver Config Skills Tests', () => {
 
     beforeEach(() => {
         cy.createProject(1)

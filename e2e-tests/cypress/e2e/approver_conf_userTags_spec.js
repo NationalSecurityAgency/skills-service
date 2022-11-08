@@ -73,7 +73,7 @@ describe('Approver Config User Tags Tests', () => {
             }],
         ], 5);
 
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('not.have.value')
 
@@ -90,8 +90,8 @@ describe('Approver Config User Tags Tests', () => {
                 value: 'first'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: second')
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/self-report/configure');
@@ -106,8 +106,8 @@ describe('Approver Config User Tags Tests', () => {
                 value: 'first'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: second')
 
     });
 
