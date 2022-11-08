@@ -28,6 +28,7 @@ describe('Approver Config User Tags Tests', () => {
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' })
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' })
         cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' })
+        cy.createSkill(1, 1, 5, { selfReportingType: 'Approval' })
 
         cy.reportSkill(1, 1, 'userA', 'yesterday');
         cy.reportSkill(1, 1, 'userA', 'now');
@@ -48,79 +49,131 @@ describe('Approver Config User Tags Tests', () => {
                     cy.loginBySingleSignOn();
                 }
             });
+
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
     });
 
     it('configure approver for single skill', function () {
-        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
-        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
-
         cy.visit('/administrator/projects/proj1/self-report/configure');
         const user1 = 'user1'
-        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="tagKeyConfTable"]`
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
 
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('exist')
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('first');
-        //
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('not.exist')
-        // cy.validateTable(tableSelector, [
-        //     [{
-        //         colIndex: 0,
-        //         value: 'first'
-        //     }],
-        // ], 5);
-        //
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('not.have.value')
-        //
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('second');
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('have.value', 'second')
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
-        // cy.validateTable(tableSelector, [
-        //     [{
-        //         colIndex: 0,
-        //         value: 'second'
-        //     }],
-        //     [{
-        //         colIndex: 0,
-        //         value: 'first'
-        //     }],
-        // ], 5);
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
-        //
-        // // refresh and re-validate
-        // cy.visit('/administrator/projects/proj1/self-report/configure');
-        // cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
-        // cy.validateTable(tableSelector, [
-        //     [{
-        //         colIndex: 0,
-        //         value: 'second'
-        //     }],
-        //     [{
-        //         colIndex: 0,
-        //         value: 'first'
-        //     }],
-        // ], 5);
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        // cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
 
-    });
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill3"]`).click()
 
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
 
-    it('configure approver for skills', function () {
-        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
-        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('not.exist')
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 3'
+            }],
+        ], 5);
 
-        for (let i = 5; i < 80; i++) {
-            cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })
-        }
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific Skill')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).should('not.have.value')
 
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 5');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill5"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 5'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 3'
+            }],
+        ], 5);
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
+
+        // refresh and re-validate
         cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 5'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 3'
+            }],
+        ], 5);
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
     });
+
+    it('configure approver for All skill under a subject', function () {
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+        cy.createSubject(1, 4)
+        cy.createSkill(1, 2, 8)
+        cy.createSkill(1, 2, 9)
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj2"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get(`${tableSelector} tr th`).contains('Skill').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 8'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 9'
+            }],
+        ], 5);
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 2 skills')
+        cy.get('[data-cy="closeSkillsAddedAlertBtn"]').click()
+        cy.get('[data-cy="skillsAddedAlert"]').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 8'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 9'
+            }],
+        ], 5);
+    });
+
+
+    // it('configure approver for skills', function () {
+    //
+    //     for (let i = 5; i < 80; i++) {
+    //         cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })
+    //     }
+    //
+    //     cy.visit('/administrator/projects/proj1/self-report/configure');
+    // });
 
 });

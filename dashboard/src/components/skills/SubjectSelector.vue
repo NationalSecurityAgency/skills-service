@@ -27,10 +27,10 @@ limitations under the License.
               :loading="isLoading"
               :disabled="disabled"
               class="st-skills-selector"
-              data-cy="skillsSelector">
+              data-cy="subjectSelector">
       <template #option="option">
         <slot name="dropdown-item" :option="option">
-          <div :data-cy="`subjectSelectionItem-${option.projectId}-${option.skillId}`">
+          <div :data-cy="`subjectSelectionItem-${option.projectId}-${option.subjectId}`">
             <div class="h5 text-info skills-option-name" data-cy="subjSelector-name">{{ option.name }}
             </div>
             <div style="font-size: 0.8rem;">
@@ -132,7 +132,7 @@ limitations under the License.
     },
     data() {
       return {
-        selectedInternal: {},
+        selectedInternal: null,
         optionsInternal: [],
         multipleSelection: true,
         currentSearch: '',

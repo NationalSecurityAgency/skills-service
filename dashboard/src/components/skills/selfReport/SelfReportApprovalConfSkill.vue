@@ -20,9 +20,9 @@ limitations under the License.
         <i class="fas fa-graduation-cap text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By Skill</span>
       </div>
     </template>
-    <div class="row no-gutters mx-1">
+    <div v-if="!(this.loadingMeta.skills || this.loadingMeta.subjects)" class="row no-gutters mx-1">
       <div class="col-md mx-1 mt-1 align-self-end">
-          <div class="mb-1">Add Single Skills</div>
+          <div class="mb-1">Add a Single Skills</div>
           <skills-selector2
               id='skillSelector'
               :disabled="selectedSubject !== null || loading"
@@ -39,7 +39,7 @@ limitations under the License.
       </div>
       <div class="col-md mx-1 mt-1 align-self-end">
         <div class="mb-1">Add <b>ALL</b> Skills under a Subject</div>
-        <subject-selector
+        <subject-selector v-if="availableSubjects && availableSubjects.length > 0"
           :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
           :options="availableSubjects"
           :selected="selectedSubject"
@@ -52,17 +52,21 @@ limitations under the License.
         <b-button
           aria-label="Add Tag Value"
           @click="addSkillToConf"
-          data-cy="addTagKeyConfBtn"
+          data-cy="addSkillConfBtn"
           :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
       </div>
     </div>
 
-    <div v-if="!loading && addedSubjectSkillsStats.addedSubject" class="alert alert-success mt-1 mx-2">
+    <div v-if="!loading && addedSubjectSkillsStats.addedSubject" class="alert alert-success mt-1 mx-2" data-cy="skillsAddedAlert">
       <i class="fas fa-check-double" aria-hidden="true"/>
       Added <b-badge>{{ addedSubjectSkillsStats.numSkillsAdded }}</b-badge> skill{{ addedSubjectSkillsStats.numSkillsAdded === 1 ? '' : 's'}}.
       <span v-if="addedSubjectSkillsStats.numSkillsAlreadyConfigured > 0"><b-badge>{{ addedSubjectSkillsStats.numSkillsAlreadyConfigured }}</b-badge> already added!</span>
+      <button type="button" @click="addedSubjectSkillsStats.addedSubject=false" class="close" data-dismiss="alert" aria-label="Close Skill Added Alert"
+          data-cy="closeSkillsAddedAlertBtn">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
 
     <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
@@ -70,7 +74,7 @@ limitations under the License.
       <skills-b-table v-if="hadData" class="mt-3"
                       :options="table.options" :items="table.items"
                       tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                      data-cy="skillApprovalConfSpecificUsersTable">
+                      data-cy="skillApprovalSkillConfTable">
         <template v-slot:cell(skillId)="data">
           <div class="row">
             <div class="col">
@@ -97,6 +101,7 @@ limitations under the License.
       <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="p-2 py-5"
                  icon-size="fa-2x"
+                 data-cy="noSkillConf"
                  icon="fas fa-graduation-cap">
       You can split approval workload by routing approval requests for selected skills approval requests to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
     </no-content2>
@@ -157,7 +162,7 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'requestedOn',
+            sortBy: 'updated',
             sortDesc: true,
             emptyText: 'You are the only user',
             tableDescription: 'Configure Approval Workload',
@@ -189,6 +194,7 @@ limitations under the License.
       const hasConf = this.userInfo.skillConf && this.userInfo.skillConf.length > 0;
       if (hasConf) {
         this.table.items = this.userInfo.skillConf.map((u) => ({ ...u }));
+        this.updatePaging();
       }
       this.loadAvailableSkills();
     },
@@ -204,9 +210,15 @@ limitations under the License.
       },
     },
     methods: {
+      updatePaging() {
+        this.table.options.pagination.totalRows = this.table.items.length;
+      },
       removeSkill(item) {
         this.resetSubjAddedInfo();
-        this.removeTagConf(item);
+        this.removeTagConf(item)
+          .then(() => {
+            this.updatePaging();
+          });
       },
       loadAvailableSkills() {
         SkillsService.getProjectSkills(this.projectId, null, false, true)
@@ -240,6 +252,7 @@ limitations under the License.
           SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, skillId)
             .then((res) => {
               this.table.items.push(res);
+              this.updatePaging();
               this.$emit('conf-added', res);
               this.availableSkills = this.availableSkills.filter((item) => item.skillId !== skillId);
               this.selectedSkills = [];
@@ -265,6 +278,7 @@ limitations under the License.
                 SelfReportService.configureApproverForSkillId(this.projectId, this.userInfo.userId, sToAdd.skillId)
                   .then((res) => {
                     this.table.items.push(res);
+                    this.updatePaging();
                     this.$emit('conf-added', res);
                     this.availableSkills = this.availableSkills.filter((item) => item.skillId !== sToAdd.skillId);
                     this.loadingMeta.numSkillsToProcess -= 1;

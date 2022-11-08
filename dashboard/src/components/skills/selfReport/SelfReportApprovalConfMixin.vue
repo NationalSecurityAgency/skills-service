@@ -21,7 +21,7 @@ limitations under the License.
     methods: {
       removeTagConf(removedIem) {
         this.table.items = this.table.items.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));
-        SelfReportService.removeApproverConfig(this.projectId, removedIem.id)
+        return SelfReportService.removeApproverConfig(this.projectId, removedIem.id)
           .then(() => {
             this.table.items = this.table.items.filter((i) => i.id !== removedIem.id);
             this.$emit('conf-removed', removedIem);
