@@ -397,6 +397,45 @@ A new sentence after a few new lines
         A Separate me
         ***
         no go""").valid
+
+        validator.validateDescription("""A Separate me
+___
+        A Separate me
+---
+        A Separate me
+***
+        
+        
+        ___
+        
+        A Separate me
+        
+        
+---
+        
+        
+        A Separate me
+        
+        
+        ***
+A
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+
+<br>
+<br>
+<br>
+<br>
+A new sentence after a few new lines
+```""").valid
+
+        validator.validateDescription("""A this is text\n\nA\n\n***\n\n<br>\n""").valid
+        validator.validateDescription("""***""").valid
     }
 
     def "markdown Blockquotes should be considered during validation"() {
