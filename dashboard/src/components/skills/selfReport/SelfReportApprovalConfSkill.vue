@@ -75,8 +75,8 @@ limitations under the License.
                       :options="table.options" :items="table.items"
                       tableStoredStateId="skillApprovalConfSpecificUsersTable"
                       data-cy="skillApprovalSkillConfTable">
-        <template v-slot:cell(skillId)="data">
-          <div class="row">
+        <template v-slot:cell(skillName)="data">
+          <div class="row" :data-cy="`skillCell-${data.item.skillId}`">
             <div class="col">
               {{ data.item.skillName }}
             </div>
@@ -84,6 +84,7 @@ limitations under the License.
               <b-button title="Delete Skill"
                         variant="outline-danger"
                         :aria-label="`Remove ${data.value} tag.`"
+                        data-cy="deleteBtn"
                         @click="removeSkill(data.item)"
                         :disabled="data.item.deleteInProgress"
                         size="sm">
@@ -168,7 +169,7 @@ limitations under the License.
             tableDescription: 'Configure Approval Workload',
             fields: [
               {
-                key: 'skillId',
+                key: 'skillName',
                 label: 'Skill',
                 sortable: true,
               },

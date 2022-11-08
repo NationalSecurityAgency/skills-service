@@ -113,6 +113,39 @@ describe('Approver Config User Tags Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
     });
 
+    it('remove skill conf from an approver', function () {
+        cy.configureApproverForSkillId(1, 'user1', 1)
+        cy.configureApproverForSkillId(1, 'user1', 2)
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skills')
+
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"]`)
+        cy.get(`${tableSelector} [data-cy="skillCell-skill2"]`)
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"] [data-cy="deleteBtn"]`).click()
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-cy="skillCell-skill2"]`)
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific Skill')
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-cy="skillCell-skill2"]`)
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific Skill')
+
+        cy.get(`${tableSelector} [data-cy="skillCell-skill2"] [data-cy="deleteBtn"]`).click()
+        cy.get(`${tableSelector}`).should('not.exist')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+    });
+
     it('configure approver for All skill under a subject', function () {
         cy.createSubject(1, 2)
         cy.createSubject(1, 3)
@@ -166,14 +199,119 @@ describe('Approver Config User Tags Tests', () => {
         ], 5);
     });
 
+    it('configured skills are paged', function () {
+        for (let i = 5; i < 13; i++) {
+            cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })
+        }
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
 
-    // it('configure approver for skills', function () {
-    //
-    //     for (let i = 5; i < 80; i++) {
-    //         cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })
-    //     }
-    //
-    //     cy.visit('/administrator/projects/proj1/self-report/configure');
-    // });
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj1"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get(`${tableSelector} tr th`).contains('Skill').click();
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 12 skills')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+
+        // has 3 pages
+        cy.get('[data-cy="skillCell-skill1"]')
+        cy.get('[data-cy="skillCell-skill2"]')
+        cy.get('[data-cy="skillCell-skill3"]')
+        cy.get('[data-cy="skillCell-skill4"]')
+        cy.get('[data-cy="skillsBTablePaging"] [aria-label="Go to page 2"]').click()
+        cy.get('[data-cy="skillCell-skill5"]')
+        cy.get('[data-cy="skillCell-skill6"]')
+        cy.get('[data-cy="skillCell-skill7"]')
+        cy.get('[data-cy="skillCell-skill8"]')
+        cy.get('[data-cy="skillsBTablePaging"] [aria-label="Go to page 3"]').click()
+        cy.get('[data-cy="skillCell-skill9"]')
+        cy.get('[data-cy="skillCell-skill10"]')
+        cy.get('[data-cy="skillCell-skill11"]')
+        cy.get('[data-cy="skillCell-skill12"]')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('12 Specific Skill')
+    });
+
+    it('some skills in the subject already added', function () {
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill3"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+        cy.get('[data-cy="skillCell-skill3"]')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj1"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 4 skills. 1 already added')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+
+        // re-add again
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj1"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 0 skills. 5 already added')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+    });
+
+    it('added skills are not presented in the skills selector', function () {
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill3"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+        cy.get('[data-cy="skillCell-skill3"]')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
+        cy.wait(1000)
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill3"]`).should('not.exist')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).clear().type('skill 4');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill4"]`).should('exist');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill4"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get(`${tableSelector} [data-cy="skillCell-skill3"]`)
+        cy.get(`${tableSelector} [data-cy="skillCell-skill4"]`)
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj1"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 3 skills. 2 already added')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
+        cy.wait(1000)
+        cy.contains('No elements found')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill4"]`).should('not.exist');
+
+        // refresh and re-test
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
+        cy.wait(1000)
+        cy.contains('No elements found')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill4"]`).should('not.exist');
+    });
 
 });
