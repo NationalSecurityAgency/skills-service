@@ -27,11 +27,10 @@ limitations under the License.
                              v-model="currentSelectedUser"
                              :can-enter-new-user="false"
                              name="User Id"
-                             aria-errormessage="userIdInputError"
-                             aria-describedby="userIdInputError"
+                             aria-label="Select User Id"
                              :aria-invalid="errors && errors.length > 0"
                              data-cy="userIdInput"/>
-          <small role="alert" id="userIdInputError" data-cy="userIdInputErr" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+          <small role="alert" data-cy="userIdInputErr" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
         </div>
         <div class="col-auto px-1">
           <b-button

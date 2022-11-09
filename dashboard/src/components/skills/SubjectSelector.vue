@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="skills-selector" class="skills-selector">
+  <div class="skills-selector">
     <v-select :options="optionsInternal"
               v-model="selectedInternal"
               :placeholder="placeholder"

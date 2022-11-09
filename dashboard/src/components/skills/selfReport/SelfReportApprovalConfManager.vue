@@ -22,10 +22,11 @@ limitations under the License.
     <skills-spinner :is-loading="loading" class="mb-5"/>
     <div v-if="!loading">
       <skills-b-table v-if="hasMoreThanOneApprover"
-                    :options="table.options"
-                    :items="table.items"
-                    tableStoredStateId="skillApprovalConfTable"
-                    data-cy="skillApprovalConfTable">
+                      class="selfReportApprovalConfManagerTbl"
+                      :options="table.options"
+                      :items="table.items"
+                      tableStoredStateId="skillApprovalConfTable"
+                      data-cy="skillApprovalConfTable">
       <template #head(userIdForDisplay)="data">
         <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"/> {{ data.label }}</span>
       </template>
@@ -37,8 +38,10 @@ limitations under the License.
       </template>
 
       <template v-slot:cell(userIdForDisplay)="data">
-        <div :class="{'font-weight-bold text-primary' : data.detailsShowing }">{{ data.value }}</div>
-        <div v-if="data.detailsShowing"><i class="fas fa-user-edit animate__bounceIn" aria-hidden="true"/> Editing...</div>
+        <div class="p-2 pl-3">
+          <div :class="{'font-weight-bold text-primary bigger-text' : data.detailsShowing }">{{ data.value }}</div>
+          <div v-if="data.detailsShowing"><i class="fas fa-user-edit animate__bounceIn text-warning" aria-hidden="true"/> Editing...</div>
+        </div>
       </template>
 
       <template v-slot:cell(roleName)="data">
@@ -84,14 +87,15 @@ limitations under the License.
       </template>
 
       <template #row-details="row">
-        <div class="ml-5" :data-cy="`expandedChild_${row.item.userId}`">
+        <div class="py-4 px-3 pl-4"
+             :data-cy="`expandedChild_${row.item.userId}`">
           <self-report-approval-conf-user-tag v-if="userTagConfKey"
             :user-info="row.item"
             :tag-key="userTagConfKey"
             :tag-label="userTagConfLabel"
             @conf-added="updatedConf"
             @conf-removed="removeConf"
-            class="mt-3"/>
+            class=""/>
           <self-report-approval-conf-skill
             :user-info="row.item"
             @conf-added="updatedConf"
@@ -154,6 +158,7 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
+            detailsTdClass: 'p-0 m-0',
             sortBy: 'requestedOn',
             sortDesc: true,
             emptyText: 'You are the only user',
@@ -163,6 +168,7 @@ limitations under the License.
                 key: 'userIdForDisplay',
                 label: 'Approver',
                 sortable: true,
+                tdClass: 'p-0 m-0',
               },
               {
                 key: 'roleName',
@@ -302,4 +308,14 @@ limitations under the License.
 
 <style scoped>
 
+</style>
+
+<style>
+.selfReportApprovalConfManagerTbl .bigger-text {
+  font-size: 1.2rem !important;
+}
+.selfReportApprovalConfManagerTbl .b-table-has-details, .b-table-details {
+  border-left-color: #ffc42b !important;
+  border-left: 2px solid;
+}
 </style>

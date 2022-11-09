@@ -23,15 +23,13 @@ limitations under the License.
     <ValidationProvider ref="validationProvider" :name="`${tagLabel}`" v-slot="{errors}" rules="maxTagValueLengthInApprovalWorkloadConfig|alpha_num|uniqueTagConf">
     <div class="row mx-2 no-gutters">
       <div class="col px-1">
-          <b-form-input id="tagValueInput"
-                        v-model="enteredTag"
+          <b-form-input v-model="enteredTag"
                         v-on:keydown.enter="addTagConf"
                         :placeholder="`Enter ${tagLabel} value`"
                         data-cy="userTagValueInput"
                         :aria-invalid="errors && errors.length > 0"
-                        aria-describedby="tagValueInputError"
-                        aria-errormessage="tagValueInputError"></b-form-input>
-          <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="tagValueInputError" id="tagValueInputError">{{ errors[0] }}</small>
+                        :aria-label="`Enter ${tagLabel} value`"></b-form-input>
+          <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="tagValueInputError">{{ errors[0] }}</small>
       </div>
       <div class="col-auto px-1">
         <b-button
@@ -162,17 +160,20 @@ limitations under the License.
     },
     methods: {
       addTagConf() {
-        this.$refs.validationProvider.validate().then((validationRes) => {
-          if (validationRes.valid) {
-            SelfReportService.configureApproverForUserTag(this.projectId, this.userInfo.userId, this.tagKey, this.enteredTag)
-              .then((res) => {
-                this.table.items.push(res);
-                this.enteredTag = '';
-                this.$emit('conf-added', res);
-                this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.enteredTag} ${this.tagLabel}.`));
-              });
-          }
-        });
+        if (this.enteredTag && this.enteredTag !== '') {
+          this.$refs.validationProvider.validate()
+            .then((validationRes) => {
+              if (validationRes.valid) {
+                SelfReportService.configureApproverForUserTag(this.projectId, this.userInfo.userId, this.tagKey, this.enteredTag)
+                  .then((res) => {
+                    this.table.items.push(res);
+                    this.enteredTag = '';
+                    this.$emit('conf-added', res);
+                    this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.enteredTag} ${this.tagLabel}.`));
+                  });
+              }
+            });
+        }
       },
       removeTagConf(removedIem) {
         this.table.items = this.table.items.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));

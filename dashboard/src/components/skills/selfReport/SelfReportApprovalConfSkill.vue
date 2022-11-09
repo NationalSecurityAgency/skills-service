@@ -24,7 +24,6 @@ limitations under the License.
       <div class="col-md mx-1 mt-1 align-self-end">
           <div class="mb-1">Add a Single Skills</div>
           <skills-selector2
-              id='skillSelector'
               :disabled="selectedSubject !== null || loading"
               :options="availableSkills"
               :selected="selectedSkills"
