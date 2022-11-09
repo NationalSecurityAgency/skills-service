@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="mb-3">
     <sub-page-header title="Self Report">
-      <b-button v-if="!isSelfReportConfigureRoute" :to="{ name: 'SelfReportConfigure' }" variant="outline-primary" size="sm">
+      <b-button v-if="!isSelfReportConfigureRoute" :to="{ name: 'SelfReportConfigure' }" variant="outline-primary" size="sm" data-cy="confApprovalWorkloadConfBtn">
         <i class="fas fa-cogs" aria-hidden="true"/> Configure
       </b-button>
       <b-button v-if="isSelfReportConfigureRoute" :to="{ name: 'SelfReport' }" variant="outline-primary" size="sm">

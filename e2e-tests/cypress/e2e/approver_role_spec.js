@@ -469,6 +469,16 @@ describe('Approver Role Tests', () => {
         ]);
     });
 
+    it('approver role does not have settings button on self report page', function () {
+        const runCheck = (projNum, assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/self-report/`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="confApprovalWorkloadConfBtn"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'not.')
+    });
     it('navigate from project where you are an approver to Progress & Ranking page - "Manage My Project" button should be available', function () {
         cy.visit(`/administrator/projects/proj1/self-report`);
         cy.get('[data-cy="skillTreeLogo"]').click()
