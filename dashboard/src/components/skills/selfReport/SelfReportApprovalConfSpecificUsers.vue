@@ -31,11 +31,12 @@ limitations under the License.
                              aria-describedby="userIdInputError"
                              :aria-invalid="errors && errors.length > 0"
                              data-cy="userIdInput"/>
-          <small role="alert" id="userIdInputError" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
+          <small role="alert" id="userIdInputError" data-cy="userIdInputErr" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
         </div>
         <div class="col-auto px-1">
           <b-button
-            aria-label="Add Tag Value"
+            aria-label="Add Specific User"
+            data-cy="addUserConfBtn"
             @click="addConf"
             :disabled="!currentSelectedUser || (errors && errors.length > 0)"
             variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
@@ -49,7 +50,7 @@ limitations under the License.
                     tableStoredStateId="skillApprovalConfSpecificUsersTable"
                     data-cy="skillApprovalConfSpecificUsersTable">
       <template v-slot:cell(userId)="data">
-        <div class="row">
+        <div class="row" :data-cy="`userIdCell-${data.item.userId}`">
           <div class="col">
             {{ data.item.userIdForDisplay }}
           </div>
@@ -59,6 +60,7 @@ limitations under the License.
                       :aria-label="`Remove ${data.value} tag.`"
                       @click="removeTagConf(data.item)"
                       :disabled="data.item.deleteInProgress"
+                      data-cy="deleteBtn"
                       size="sm">
               <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
               <i v-else class="fas fa-trash" aria-hidden="true"/>
@@ -73,6 +75,7 @@ limitations under the License.
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="my-5"
+                 data-cy="noUserConf"
                  icon-size="fa-2x"
                  icon="fas fa-user-plus">
       You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
@@ -169,7 +172,7 @@ limitations under the License.
       assignCustomValidation() {
         const self = this;
         extend('uniqueUserConf', {
-          message: (field) => `${field} value is already taken.`,
+          message: (field) => `There is already a configuration for this ${field}.`,
           validate(value) {
             return !self.table.items.find((i) => value?.userId?.toLowerCase() === i.userId?.toLowerCase());
           },
