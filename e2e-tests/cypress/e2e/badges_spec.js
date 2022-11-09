@@ -615,9 +615,9 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.contains('.router-link-active', 'Badges')
@@ -669,9 +669,9 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.contains('.router-link-active', 'Badges')
@@ -723,9 +723,9 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.contains('.router-link-active', 'Badges')
@@ -748,7 +748,7 @@ describe('Badges Tests', () => {
             .should('exist');
     });
 
-    it('removing last skill from enabled badge does not disable badge', () => {
+    it.only('removing last skill from enabled badge does not disable badge', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -772,9 +772,9 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.validateTable(tableSelector, [

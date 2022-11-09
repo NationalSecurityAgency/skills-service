@@ -683,10 +683,10 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.contains('This is 1');
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.customA11y();
