@@ -117,7 +117,11 @@ class CustomValidator {
         // split if
         // - there is at least 2 new lines
         // - markdown separator (3 underscores, 3 dashes, 3 stars)
-        String[] paragraphs = preProcessForMarkdownSupport(description).split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
+        description = preProcessForMarkdownSupport(description)
+        if (StringUtils.isBlank(description)) {
+            return new CustomValidationResult(valid: true)
+        }
+        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
 
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
@@ -139,7 +143,7 @@ class CustomValidator {
 //        String toValidate = s.trim()
 
         // treat all linebreaks and separators as newlines
-        toValidate = toValidate.replaceAll(/(\n\s*[-_*]{3,}^)|(\n<br>)/, '\n')
+        toValidate = toValidate.replaceAll(/(?m)(^\s*[-_*]{3,}\s*$)|(^\s*<br>\s*$)/, '\n')
 
         // remove a single new line above a table and/or codeblock
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
