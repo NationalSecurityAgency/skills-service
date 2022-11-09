@@ -76,9 +76,9 @@ limitations under the License.
             <b-button size="sm"
                       :aria-label="`Edit ${data.item.userIdForDisplay} approval workload`"
                       variant="outline-primary"
-                      :disabled="data.item.isFallbackConfPresent"
+                      :disabled="data.item.isFallbackConfPresent || data.item.lastOneWithoutConf"
                       data-cy="editApprovalBtn"
-                      @click="data.toggleDetails">
+                      @click="toggleConfDetails(data)">
               <span v-if="!data.detailsShowing"><i class="fas fa-edit" aria-hidden="true" /> Edit</span>
               <span v-if="data.detailsShowing"><i class="fas fa-arrow-alt-circle-up" aria-hidden="true" /> Collapse</span>
             </b-button>
@@ -208,6 +208,10 @@ limitations under the License.
       },
     },
     methods: {
+      toggleConfDetails(data) {
+        // eslint-disable-next-line no-underscore-dangle
+        this.table.items = this.table.items.map((item) => ({ ...item, _showDetails: data.item.userId === item.userId ? !item._showDetails : false }));
+      },
       loadData() {
         const pageParams = {
           limit: 200,
@@ -237,6 +241,7 @@ limitations under the License.
       },
       updateTable(basicTableInfo) {
         let hasAnyFallbackConf = false;
+        let numConfigured = 0;
         let res = basicTableInfo.map((row) => {
           const { allConf } = row;
           const tagConf = allConf.filter((c) => c.userTagKey);
@@ -245,6 +250,10 @@ limitations under the License.
           const fallbackConf = allConf.find((c) => !c.skillId && !c.userId && !c.userTagKey);
           if (fallbackConf) {
             hasAnyFallbackConf = true;
+          }
+          const hasConf = tagConf?.length > 0 || userConf?.length > 0 || skillConf?.length > 0;
+          if (hasConf) {
+            numConfigured += 1;
           }
           return {
             ...row,
@@ -255,12 +264,16 @@ limitations under the License.
             fallbackConf,
             isFallbackConfPresent: fallbackConf !== null && fallbackConf !== undefined,
             hasAnyFallbackConf,
-            hasConf: tagConf?.length > 0 || userConf?.length > 0 || skillConf?.length > 0,
+            hasConf,
+            // eslint-disable-next-line no-underscore-dangle
+            _showDetails: !!row._showDetails,
           };
         });
-        if (hasAnyFallbackConf) {
-          res = res.map((item) => ({ ...item, hasAnyFallbackConf: true }));
-        }
+        res = res.map((item) => ({
+          ...item,
+          lastOneWithoutConf: numConfigured >= (res.length - 1) && !item.hasConf,
+          hasAnyFallbackConf,
+        }));
         this.table.items = res;
       },
       removeTagConf(removedConf) {

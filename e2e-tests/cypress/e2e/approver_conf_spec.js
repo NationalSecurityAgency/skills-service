@@ -51,7 +51,7 @@ describe('Approver Config Tests', () => {
     });
 
 
-    it('must have at least 1 admin to configure the proejct', function () {
+    it('must have at least 1 admin to configure the project', function () {
         cy.visit('/administrator/projects/proj1/self-report/configure');
 
         cy.get('[data-cy="approvalConfNotAvailable"]')
@@ -104,20 +104,71 @@ describe('Approver Config Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"]`).should('not.exist')
     });
 
-    it('configure approver for a specific user', function () {
+    it('must always have 1 fallback approver - disable edit button if only 1 fallback approver is left', function () {
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.configureApproverForSkillId(1, 'user2', 1)
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get('[data-cy="workloadCell_skills@skills.org"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]').should('be.enabled')
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userA').click({force: true});
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
+
+        cy.get('[data-cy="workloadCell_skills@skills.org"] [data-cy="editApprovalBtn"]').should('not.be.enabled')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]').should('be.enabled')
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        cy.get('[data-cy="workloadCell_skills@skills.org"] [data-cy="editApprovalBtn"]').should('not.be.enabled')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]').should('be.enabled')
+    });
+
+    it('when 2nd approver is changed to fallback edit buttons must be re-enabled', function () {
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
         cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
 
         cy.configureApproverForSkillId(1, 'user1', 1)
-        cy.configureApproverForUserTag(1, 'user1', 'tagKey', 'tagValue')
-        cy.configureApproverForUser(1, 'user1', 'userA')
-        cy.configureApproverForUser(1, 'user1', 'userB')
+        cy.configureApproverForSkillId(1, 'user2', 1)
 
         cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get('[data-cy="workloadCell_skills@skills.org"] [data-cy="editApprovalBtn"]').should('not.be.enabled')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]').should('be.enabled')
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"] [data-cy="deleteBtn"]`).click()
+        cy.get(`${tableSelector} [data-cy="skillCell-skill1"]`).should('not.exist')
 
 
-
+        cy.get('[data-cy="workloadCell_skills@skills.org"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]').should('be.enabled')
+        cy.get('[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]').should('be.enabled')
     });
 
+    it('only one row can be expanded', function () {
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
 
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const user2 = 'user2'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('exist')
+
+        cy.get(`[data-cy="workloadCell_${user2}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user2}"] [data-cy="noUserConf"]`).should('exist')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('not.exist')
+    });
 });
