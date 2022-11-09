@@ -91,14 +91,7 @@ limitations under the License.
         return (!this.$store.getters.isPkiAuthenticated);
       },
       addUserConfirmationConfig() {
-        if (this.privateProject) {
-          return {
-            msgText: 'The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.',
-            titleText: 'Add Project Administrator?',
-            okBtnText: 'Add Administrator!',
-          };
-        }
-        return null;
+        return this.privateProject;
       },
     },
     beforeRouteLeave(to, from, next) {

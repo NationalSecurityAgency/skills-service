@@ -1019,4 +1019,91 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
     });
+
+    it('warn users when admins are added', () => {
+        cy.intercept('POST', '*suggestDashboardUsers*')
+            .as('suggest');
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('.vs__dropdown-option').contains('root@skills.org')
+            .click();
+        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('[data-cy="addUserBtn"]').click();
+
+        cy.contains('Add Project Administrator?')
+        cy.contains('The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.')
+        cy.get('.modal-content .btn-danger').contains('Add Administrator!').click()
+        const tableSelector = '[data-cy=roleManagerTable]';
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
+
+    } )
+
+    it('warn users when approvers are added', () => {
+        cy.intercept('POST', '*suggestDashboardUsers*')
+            .as('suggest');
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('.vs__dropdown-option').contains('root@skills.org')
+            .click();
+        cy.get('[data-cy="userRoleSelector"]') .select('Approver');
+        cy.get('[data-cy="addUserBtn"]').click();
+
+        cy.contains('Add Project Approver?')
+        cy.contains('The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.')
+        cy.get('.modal-content .btn-danger').contains('Add Approver!').click()
+        const tableSelector = '[data-cy=roleManagerTable]';
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
+
+    } )
+
+    it('user is warned but then cancelled', () => {
+        cy.intercept('POST', '*suggestDashboardUsers*')
+            .as('suggest');
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('.vs__dropdown-option').contains('root@skills.org')
+            .click();
+        cy.get('[data-cy="userRoleSelector"]') .select('Approver');
+        cy.get('[data-cy="addUserBtn"]').click();
+
+        cy.contains('Add Project Approver?')
+        cy.contains('The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.')
+        cy.get('.modal-content .btn-secondary').contains('Cancel').click()
+        const tableSelector = '[data-cy=roleManagerTable]';
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`).should('not.exist');
+
+    } )
 });
