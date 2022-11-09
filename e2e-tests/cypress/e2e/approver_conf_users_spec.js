@@ -19,7 +19,6 @@ import utcPlugin from 'dayjs/plugin/utc';
 dayjs.extend(utcPlugin);
 
 describe('Approver Config Users Tests', () => {
-
     beforeEach(() => {
         cy.createProject(1)
         cy.enableProdMode(1);
