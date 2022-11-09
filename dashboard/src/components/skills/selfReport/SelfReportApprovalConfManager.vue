@@ -314,7 +314,7 @@ limitations under the License.
 .selfReportApprovalConfManagerTbl .bigger-text {
   font-size: 1.2rem !important;
 }
-.selfReportApprovalConfManagerTbl .b-table-has-details, .b-table-details {
+.selfReportApprovalConfManagerTbl .b-table-has-details, .selfReportApprovalConfManagerTbl .b-table-details {
   border-left-color: #ffc42b !important;
   border-left: 2px solid;
 }
