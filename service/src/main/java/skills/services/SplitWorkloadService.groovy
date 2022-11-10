@@ -37,17 +37,36 @@ class SplitWorkloadService {
 
     static class ApproverInfo {
         String approverId
-        List<SkillApprovalConfRepo.ApproverConfResult> allConfs
+        List<SkillApprovalConfRepo.ApproverConfResult> allConfs = []
         Set<String> userIds = new HashSet<>()
         Set<String> skillIds = new HashSet<>()
         Map<String, List<String>> confUserTags = [:]
         boolean isFallbackApprover = false
+
+        ApproverInfo addConf(SkillApprovalConfRepo.ApproverConfResult it) {
+            allConfs.add(it)
+
+            if (it.userId) {
+                userIds.add(it.userId)
+            }
+            if (it.skillId) {
+                skillIds.add(it.skillId)
+            }
+            if (it.userTagKey && it.userTagValue) {
+                List<String> userTagValues = confUserTags.get(it.userTagKey)
+                if (userTagValues) {
+                    userTagValues.add(it.userTagValue)
+                } else {
+                    confUserTags.put(it.userTagKey, [it.userTagValue])
+                }
+            }
+        }
     }
 
     @Profile
     List<UserRoleRes> findUsersForThisRequest(List<UserRoleRes> userRolesList, SkillDefMin skillDefinition, String userId) {
         List<UserRoleRes> res = userRolesList
-        List<ApproverInfo> configuredApprovers = loadApproverInfo(skillDefinition.projectId)
+        List<ApproverInfo> configuredApprovers = loadApproverInfo(skillDefinition.projectId, userRolesList)
         if (configuredApprovers) {
             Set<String> matchedApproverIdsByConf = matchByConf(configuredApprovers, skillDefinition, userId)
             if (!matchedApproverIdsByConf) {
@@ -100,39 +119,28 @@ class SplitWorkloadService {
         userTags
     }
 
-    private List<ApproverInfo> loadApproverInfo(String projectId) {
+    private List<ApproverInfo> loadApproverInfo(String projectId, List<UserRoleRes> allUserRoles) {
         List<ApproverInfo> res
         List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
         if (approverConfResults) {
-            res = approverConfResults.groupBy { it.approverUserId}.each {
+            res = approverConfResults.groupBy { it.approverUserId }.collect {
                 boolean isFallbackApprover = !it.value || (it.value.size() == 1 && isFallbackApproverRes(it.value.first()))
                 ApproverInfo approverInfo = new ApproverInfo(
                         approverId: it.key,
-                        allConfs: it.value,
                         isFallbackApprover: isFallbackApprover
                 )
 
                 if (!isFallbackApprover) {
                     it.value?.each {
-                        if (it.userId) {
-                            approverInfo.userIds.add(it.userId)
-                        }
-                        if (it.skillId) {
-                            approverInfo.skillIds.add(it.skillId)
-                        }
-                        if (it.userTagKey && it.userTagValue) {
-                            List<String> userTagValues = approverInfo.confUserTags.get(it.userTagKey)
-                            if (userTagValues) {
-                                userTagValues.add(it.userTagValue)
-                            } else {
-                                approverInfo.confUserTags.put(it.userTagKey, [it.userTagValue])
-                            }
-                        }
+                        approverInfo.addConf(it)
                     }
                 }
 
                 return approverInfo
             }
+            res.addAll(allUserRoles.findAll { UserRoleRes userRole -> !res.find { it.approverId == userRole.userId } }.collect {
+                new ApproverInfo(approverId: it.userId, isFallbackApprover: true)
+            })
         }
 
         return res
