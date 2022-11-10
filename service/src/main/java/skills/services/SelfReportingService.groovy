@@ -42,6 +42,7 @@ import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillApprovalConfRepo
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAttrsRepo
@@ -97,6 +98,9 @@ class SelfReportingService {
   
     @Autowired
     SkillCatalogService catalogService
+
+    @Autowired
+    SplitWorkloadService splitWorkloadService
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -183,9 +187,10 @@ class SelfReportingService {
         }
 
         List<UserRoleRes> userRoleRes =
-                accessSettingsStorageService.getUserRolesByProjectIdAndRoles(skillDefinition.projectId, [RoleName.ROLE_PROJECT_ADMIN])
+                accessSettingsStorageService.getUserRolesByProjectIdAndRoles(skillDefinition.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])
 
         String projectId = skillDefinition.projectId
+        userRoleRes = splitWorkloadService.findUsersForThisRequest(userRoleRes, skillDefinition, userId)
         userRoleRes = removeAdminsWhoHaveUnsubscribed(userRoleRes, projectId)
 
         if (!userRoleRes) {
@@ -223,6 +228,17 @@ class SelfReportingService {
         }
 
         return emailableAdmins
+    }
+
+    private List<UserRoleRes> considerApprovalConf(List<UserRoleRes> userRolesList, String projectId, String userId) {
+        List<UserRoleRes> res = userRolesList
+        List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
+        if (approverConfResults) {
+            if (approverConfResults.userId) {
+
+            }
+        }
+        return res
     }
 
     void removeRejectionFromView(String projectId, String userId, Integer approvalId) {
