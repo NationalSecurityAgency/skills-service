@@ -280,12 +280,11 @@ class InviteOnlyProjectService {
         final List<String> couldNotBeSent = []
 
         Date created = new Date()
-        emailAddresses.each {
-            if (PatternsUtil.isValidEmail(it)) {
-                ProjectAccessToken alreadyInvited = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, it.toLowerCase())
+        emailAddresses.each {String email ->
+            if (PatternsUtil.isValidEmail(email)) {
+                ProjectAccessToken alreadyInvited = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, email.toLowerCase())
                 if (!alreadyInvited) {
                     try {
-                        String email = it
                         ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
 
                         Context templateContext = new Context()
@@ -301,11 +300,13 @@ class InviteOnlyProjectService {
                         successfullySent << email
                     } catch (Exception e) {
                         log.error("Error sending project invites, [${successfullySent?.size()}] successful, [${emailAddresses.minus(successfullySent)?.size()}] unsuccessful", e)
-                        couldNotBeSent.add(it)
+                        couldNotBeSent.add(email)
                     }
                 } else {
-                    couldNotBeSent.add("${it} already has a pending invite".toString())
+                    couldNotBeSent.add("${email} already has a pending invite".toString())
                 }
+            } else {
+                couldNotBeSent.add("${email} is not a valid email".toString())
             }
         }
 
