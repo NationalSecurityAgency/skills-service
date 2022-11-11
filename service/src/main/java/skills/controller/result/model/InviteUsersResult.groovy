@@ -19,4 +19,5 @@ class InviteUsersResult {
     String projectId
     List<String> successful
     List<String> unsuccessful
+    List<String> unsuccessfulErrors
 }
