@@ -79,7 +79,14 @@ limitations under the License.
               <i class="fa fa-check" />
               {{ successMsg }}
             </span>
-      <div v-if="failedEmails" class="text-danger" role="alert" data-cy="failedEmails">Unable to send invites to: {{failedEmails}}</div>
+      <div v-if="failedEmails" class="mt-2 alert alert-danger" role="alert" data-cy="failedEmails">
+        <div>
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Unable to send invites to:
+        </div>
+        <div v-for="failedEmail in failedEmails" :key="failedEmail" class="pl-1">
+          - {{ failedEmail }}
+        </div>
+      </div>
     </div>
   </loading-container>
 
@@ -211,7 +218,7 @@ limitations under the License.
         AccessService.sendProjectInvites(this.projectId, inviteRequest).then((resp) => {
           this.inviteRecipients = [];
           if (resp.unsuccessful) {
-            this.failedEmails = resp.unsuccessful.join(', ');
+            this.failedEmails = resp.unsuccessful;
             if (this.currentEmails) {
               this.currentEmails += `\n${resp.unsuccessful.join('\n')}`;
             } else {
