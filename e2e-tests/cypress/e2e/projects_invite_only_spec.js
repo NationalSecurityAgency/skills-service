@@ -110,7 +110,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@sendInvites');
         cy.get('[data-cy=failedEmails]')
             .should('be.visible')
-            .should('include.text', 'Unable to send invites to: bsmith@fake.email');
+            .should('include.text', 'bsmith@fake.email');
         cy.logout();
         cy.wait(2000); //wait for invite only cache to clear
 
