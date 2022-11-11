@@ -1106,4 +1106,32 @@ describe('Projects Invite-Only Tests', () => {
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`).should('not.exist');
 
     } )
+
+    it('must not allow invite submission for the same email twice ', () => {
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+        cy.get('[data-cy="inviteEmailInput"]').type('email1@email.com, email2@email.com')
+        cy.get('[data-cy="addEmails"]').click()
+        cy.get('[data-cy="inviteRecipient"]').contains('email1@email.com')
+        cy.get('[data-cy="sendInvites-btn"]').click()
+        cy.get('[data-cy="projectInviteStatusTable"]').contains('email1@email.com')
+
+        // try to add again
+        cy.get('[data-cy="inviteEmailInput"]').type('email1@email.com, email2@email.com')
+        cy.get('[data-cy="addEmails"]').click()
+        cy.get('[data-cy="inviteRecipient"]').contains('email1@email.com')
+        cy.get('[data-cy="sendInvites-btn"]').click()
+        cy.get('[data-cy="projectInviteStatusTable"]').contains('email1@email.com')
+
+        cy.get('[data-cy="failedEmails"]').contains('email1@email.com already has a pending invite')
+        cy.get('[data-cy="failedEmails"]').contains('email2@email.com already has a pending invite')
+    });
+
 });

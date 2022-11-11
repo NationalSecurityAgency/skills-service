@@ -277,32 +277,39 @@ class InviteOnlyProjectService {
 
         final String url = "${publicUrl}"
         final successfullySent = []
+        final List<String> couldNotBeSent = []
 
         Date created = new Date()
         emailAddresses.each {
             if (PatternsUtil.isValidEmail(it)) {
-                try {
-                    String email = it
-                    ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
+                ProjectAccessToken alreadyInvited = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, it.toLowerCase())
+                if (!alreadyInvited) {
+                    try {
+                        String email = it
+                        ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
 
-                    Context templateContext = new Context()
-                    templateContext.setVariable("validTime", invite.validFor)
-                    templateContext.setVariable("inviteCode", invite.token)
-                    templateContext.setVariable("projectId", invite.projectId)
-                    templateContext.setVariable("projectName", invite.projectName)
-                    templateContext.setVariable("publicUrl", url)
-                    templateContext.setVariable("htmlHeader", htmlHeader)
-                    templateContext.setVariable("htmlFooter", htmlFooter)
+                        Context templateContext = new Context()
+                        templateContext.setVariable("validTime", invite.validFor)
+                        templateContext.setVariable("inviteCode", invite.token)
+                        templateContext.setVariable("projectId", invite.projectId)
+                        templateContext.setVariable("projectName", invite.projectName)
+                        templateContext.setVariable("publicUrl", url)
+                        templateContext.setVariable("htmlHeader", htmlHeader)
+                        templateContext.setVariable("htmlFooter", htmlFooter)
 
-                    emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation", email, INVITE_TEMPLATE, templateContext)
-                    successfullySent << email
-                } catch (Exception e) {
-                    log.error("Error sending project invites, [${successfullySent?.size()}] successful, [${emailAddresses.minus(successfullySent)?.size()}] unsuccessful", e)
+                        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation", email, INVITE_TEMPLATE, templateContext)
+                        successfullySent << email
+                    } catch (Exception e) {
+                        log.error("Error sending project invites, [${successfullySent?.size()}] successful, [${emailAddresses.minus(successfullySent)?.size()}] unsuccessful", e)
+                        couldNotBeSent.add(it)
+                    }
+                } else {
+                    couldNotBeSent.add("${it} already has a pending invite".toString())
                 }
             }
         }
 
-        return new InviteUsersResult(projectId: projectId, successful: successfullySent, unsuccessful: emailAddresses.minus(successfullySent))
+        return new InviteUsersResult(projectId: projectId, successful: successfullySent, unsuccessful: couldNotBeSent)
     }
 
     @Transactional
