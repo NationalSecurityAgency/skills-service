@@ -43,6 +43,7 @@ describe('Projects Invite-Only Tests', () => {
                 const result = res.body;
                 result.successful = ['abc@cba.org'];
                 result.unsuccessful = ['bsmith@fake.email'];
+                result.unsuccessfulErrors = ['bsmith@fake.email'];
                 res.send(result);
             });
         })
@@ -1122,6 +1123,8 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="inviteRecipient"]').contains('email1@email.com')
         cy.get('[data-cy="sendInvites-btn"]').click()
         cy.get('[data-cy="projectInviteStatusTable"]').contains('email1@email.com')
+        cy.get('[data-cy="failedEmails"]').should('not.exist')
+        cy.get('[data-cy="inviteEmailInput"]').should('have.value', '')
 
         // try to add again
         cy.get('[data-cy="inviteEmailInput"]').type('email1@email.com, email2@email.com')
@@ -1132,6 +1135,7 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.get('[data-cy="failedEmails"]').contains('email1@email.com already has a pending invite')
         cy.get('[data-cy="failedEmails"]').contains('email2@email.com already has a pending invite')
+        cy.get('[data-cy="inviteEmailInput"]').should('have.value', "email1@email.com\nemail2@email.com")
     });
 
 });

@@ -83,7 +83,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         result.successful.size() == 1
         result.successful[0] == "someemail@email.foo"
         result.unsuccessful.size() == 2
-        result.unsuccessful.sort() == ["numbertwo is not a valid email", "@email.baz is not a valid email"].sort()
+        result.unsuccessful.sort() == ["numbertwo", "@email.baz"].sort()
+        result.unsuccessfulErrors.sort() == ["numbertwo is not a valid email", "@email.baz is not a valid email"].sort()
     }
 
     def "invite expiration is configurable"() {

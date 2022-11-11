@@ -278,6 +278,7 @@ class InviteOnlyProjectService {
         final String url = "${publicUrl}"
         final successfullySent = []
         final List<String> couldNotBeSent = []
+        final List<String> couldNotBeSentErrors = []
 
         Date created = new Date()
         emailAddresses.each {String email ->
@@ -301,16 +302,19 @@ class InviteOnlyProjectService {
                     } catch (Exception e) {
                         log.error("Error sending project invites, [${successfullySent?.size()}] successful, [${emailAddresses.minus(successfullySent)?.size()}] unsuccessful", e)
                         couldNotBeSent.add(email)
+                        couldNotBeSentErrors.add("${email}: ${e.message}".toString())
                     }
                 } else {
-                    couldNotBeSent.add("${email} already has a pending invite".toString())
+                    couldNotBeSent.add(email)
+                    couldNotBeSentErrors.add("${email} already has a pending invite".toString())
                 }
             } else {
-                couldNotBeSent.add("${email} is not a valid email".toString())
+                couldNotBeSent.add(email)
+                couldNotBeSentErrors.add("${email} is not a valid email".toString())
             }
         }
 
-        return new InviteUsersResult(projectId: projectId, successful: successfullySent, unsuccessful: couldNotBeSent)
+        return new InviteUsersResult(projectId: projectId, successful: successfullySent, unsuccessful: couldNotBeSent, unsuccessfulErrors: couldNotBeSentErrors)
     }
 
     @Transactional
