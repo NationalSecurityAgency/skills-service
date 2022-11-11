@@ -64,7 +64,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 skill is configured for multiple approvers"() {
+    def "skills are configured for multiple approvers"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -151,7 +151,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 user is configured for multiple approvers"() {
+    def "users are configured for multiple approvers"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -265,7 +265,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 user tag is configured to match multiple approvers - match starts with"() {
+    def "user tags are configured to match multiple approvers - match starts with"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -331,6 +331,210 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
+
+    def "multiple approvers are matched based on different configs"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userA")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+
+        List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "multiple approvers are matched based on different configs where each approver matches on all the config options"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, "userA")
+        // approver 2
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[1].userName, userTagKey, "A")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[1].userName, "userA")
+        // approver 3
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[2].userName, userTagKey, "Abc")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userA")
+
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "multiple approvers are matched based on different configs - only 2 match"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userB")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "one approver is matched based on different configs"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userB")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        List<String> expectedEmails = getEmails([approvers[0]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "fallback approvers when multiple configs did not match"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userB")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        List<String> expectedEmails = getEmails([approvers[4], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
 
     private List<EmailUtils.EmailRes> waitAndCollect(int expectedNumEmails) {
         WaitFor.wait { greenMail.getReceivedMessages().size() == expectedNumEmails }
