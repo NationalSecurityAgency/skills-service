@@ -60,6 +60,8 @@ class SplitWorkloadService {
                     confUserTags.put(it.userTagKey, [it.userTagValue])
                 }
             }
+
+            return this
         }
     }
 
