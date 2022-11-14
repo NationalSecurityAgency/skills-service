@@ -47,8 +47,22 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
     ''')
     SkillApprovalConf findByProjectIdAndApproverUserIdAndRestAttributesAreNull(String projectId, String approverId)
 
+
+    @Query('''select count(sac.id) > 0 from SkillApprovalConf sac where sac.projectId = ?1''')
+    Boolean confExistForProject(String projectId)
+
     @Query('''select count(sac.id) > 0 from SkillApprovalConf sac where sac.projectId = ?1 and sac.approverUserId = ?2''')
     Boolean confExistForApprover(String projectId, String approverId)
+
+    @Nullable
+    @Query('''select sac.approverUserId from SkillApprovalConf sac 
+                where sac.projectId = ?1
+                and sac.approverUserId is not null
+                and sac.skillRefId is null
+                and sac.userTagKey is null
+                and sac.userTagValue is null
+                and sac.userId is null''')
+    List<String> getUsersConfiguredForFallback(String projectId)
 
     static interface ApproverConfResult {
         Integer getId()

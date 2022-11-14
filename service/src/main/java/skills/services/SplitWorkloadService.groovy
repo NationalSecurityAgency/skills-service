@@ -125,6 +125,7 @@ class SplitWorkloadService {
         List<ApproverInfo> res
         List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
         if (approverConfResults) {
+            boolean hasExcplicitFallback = false;
             res = approverConfResults.groupBy { it.approverUserId }.collect {
                 boolean isFallbackApprover = !it.value || (it.value.size() == 1 && isFallbackApproverRes(it.value.first()))
                 ApproverInfo approverInfo = new ApproverInfo(
@@ -136,13 +137,17 @@ class SplitWorkloadService {
                     it.value?.each {
                         approverInfo.addConf(it)
                     }
+                } else {
+                    hasExcplicitFallback = true;
                 }
 
                 return approverInfo
             }
-            res.addAll(allUserRoles.findAll { UserRoleRes userRole -> !res.find { it.approverId == userRole.userId } }.collect {
-                new ApproverInfo(approverId: it.userId, isFallbackApprover: true)
-            })
+            if (!hasExcplicitFallback) {
+                res.addAll(allUserRoles.findAll { UserRoleRes userRole -> !res.find { it.approverId == userRole.userId } }.collect {
+                    new ApproverInfo(approverId: it.userId, isFallbackApprover: true)
+                })
+            }
         }
 
         return res

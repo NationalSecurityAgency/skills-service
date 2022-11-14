@@ -46,6 +46,23 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
+    def "1 explicit fallback approver"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 3)
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        List<String> expectedEmails = getEmails([approvers[1]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
     def "1 skill is configured - notify matched approver"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

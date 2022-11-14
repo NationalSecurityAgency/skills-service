@@ -15,7 +15,7 @@
  */
 package skills.intTests.approverRole
 
-import groovy.json.JsonOutput
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -48,6 +48,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
 
         then:
         approvals_t0.count == 2
@@ -58,6 +59,9 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         approvals_t1_u2.count == 1
         approvals_t1_u2.data.userId == [users[2]]
+
+        approvals_t1_default.count == 1
+        approvals_t1_default.data.userId == [users[3]]
     }
 
     def "assign approvers to skill"() {
@@ -84,6 +88,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[1].skillId)
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
 
         then:
         approvals_t0.count == 2
@@ -94,6 +99,9 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         approvals_t1_u2.count == 1
         approvals_t1_u2.data.userId == [users[3]]
+
+        approvals_t1_default.count == 0
+        !approvals_t1_default.data
     }
 
     def "assign approvers by user tag"() {
@@ -125,6 +133,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "efgh")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
 
         then:
         approvals_t0.count == 2
@@ -135,6 +144,9 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         approvals_t1_u2.count == 1
         approvals_t1_u2.data.userId == [users[3]]
+
+        approvals_t1_default.count == 0
+        !approvals_t1_default.data
     }
 
     def "approver matches multiple ways based on the conf"() {
@@ -169,11 +181,13 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
 
         then:
         approvals_t0.data.userId == [users[3],  users[2]]
         approvals_t1.data.userId == [users[2]]
         approvals_t1_u2.data.userId == [users[2]]
+        approvals_t1_default.data.userId == [users[3]]
     }
 
     def "conf is returned after being saved"() {
@@ -536,14 +550,22 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<String> users = getRandomUsers(2, true)
+        List<String> users = getRandomUsers(4, true)
         def user1Service = createService(users[0])
         skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
 
         when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t0_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
         def approverConf = skillsService.getApproverConf(proj.projectId)
-        println JsonOutput.toJson(approverConf)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
 
         then:
         approverConf.size() == 1
@@ -554,6 +576,56 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         !approver.userTagValue
         !approver.skillName
         !approver.skillId
+
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t0_u2.count == 2
+        approvals_t0_u2.data.userId == [users[3],  users[2]]
+
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [users[3],  users[2]]
+
+        approvals_t1_u2.count == 0
+        !approvals_t1_u2.data
+    }
+
+    def "when there is no explicit fallback strategy then users without config will handle unmatched requests"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
+
+        when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t0_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[1].skillId)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t0_u2.count == 2
+        approvals_t0_u2.data.userId == [users[3],  users[2]]
+
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [users[3],  users[2]]
+
+        approvals_t1_u2.count == 0
+        !approvals_t1_u2.data
     }
 
     def "must be admin or approver of the project in order to be designated for approval fallback"() {

@@ -83,7 +83,12 @@ class EmailSendingService {
         } else {
             helper.setText(htmlBody, true)
         }
-        mailSender.send(message)
+        try {
+            mailSender.send(message)
+        } catch (Throwable t) {
+            log.error("Failed to email ${toArr}", t)
+            throw t
+        }
     }
 
     void sendEmailWithThymeleafTemplate(String subject, String to, String templateFileName, Context thymeleafContext, String plainTextBodyAlt = null) {

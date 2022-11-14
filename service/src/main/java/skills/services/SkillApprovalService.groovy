@@ -89,22 +89,58 @@ class SkillApprovalService {
     @Autowired
     UserRoleRepo userRoleRepo
 
+    static class ConfExistInfo {
+        boolean projConfExist = false;
+        boolean fallBackApprover = false
+        boolean approverHasConf = false
+    }
+
+    @Profile
+    private ConfExistInfo getConfExistForApprover(String projectId, String currentApproverId) {
+        Boolean confExistForProject = skillApprovalConfRepo.confExistForProject(projectId)
+        if (!confExistForProject) {
+            return new ConfExistInfo()
+        }
+
+        List<String> usersConfiguredForFallback = skillApprovalConfRepo.getUsersConfiguredForFallback(projectId)
+        boolean hasExplicitFallbackConfigured = usersConfiguredForFallback?.find { it.equalsIgnoreCase(currentApproverId)}
+
+        Boolean approverHasConf = hasExplicitFallbackConfigured || skillApprovalConfRepo.confExistForApprover(projectId, currentApproverId)
+
+        new ConfExistInfo(
+                projConfExist: true,
+                fallBackApprover: hasExplicitFallbackConfigured || (!approverHasConf && !usersConfiguredForFallback),
+                approverHasConf: approverHasConf,
+        )
+
+    }
+
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
         String currentApproverId = userInfoService.currentUser.username
-        Boolean confExistForApprover = skillApprovalConfRepo.confExistForApprover(projectId, currentApproverId)
+        ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
 
         return buildApprovalsResult(projectId, pageRequest, {
-            if (confExistForApprover) {
-                skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, pageRequest)
-            } else {
-                skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+            if (confExistInfo.projConfExist) {
+                List<SkillApprovalRepo.SimpleSkillApproval> res = []
+                if (confExistInfo.fallBackApprover) {
+                    res = skillApprovalRepo.findFallbackApproverConf(projectId, pageRequest)
+                } else if (confExistInfo.approverHasConf) {
+                    res = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, pageRequest)
+                }
+                return res
             }
+            return skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
         }, {
-            if (confExistForApprover) {
-                skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId)
-            } else {
-                skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+            if (confExistInfo.projConfExist) {
+                long res = 0
+                if (confExistInfo.fallBackApprover) {
+                    res = skillApprovalRepo.countFallbackApproverConf(projectId)
+                } else if (confExistInfo.approverHasConf) {
+                    res = skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId)
+                }
+                return res
             }
+            return skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
         })
     }
 
