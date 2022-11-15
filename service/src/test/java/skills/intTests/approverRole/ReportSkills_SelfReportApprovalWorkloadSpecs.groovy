@@ -40,7 +40,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails(approvers, skillsService)
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -57,7 +57,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -75,7 +75,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], approvers[3]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -93,7 +93,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -121,7 +121,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -139,7 +139,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -157,7 +157,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -177,7 +177,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -198,7 +198,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -221,7 +221,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -254,7 +254,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -277,7 +277,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -302,7 +302,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -326,7 +326,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -356,7 +356,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -385,7 +385,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -423,7 +423,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -452,7 +452,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -483,7 +483,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -513,7 +513,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -553,7 +553,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -599,7 +599,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -638,7 +638,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -677,7 +677,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[0]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -716,7 +716,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[4], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -758,7 +758,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[4], skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
@@ -800,24 +800,10 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         List<String> expectedEmails = getEmails([approvers[4]])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
-        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
-    }
-
-    private List<EmailUtils.EmailRes> waitAndCollect(int expectedNumEmails) {
-        WaitFor.wait { greenMail.getReceivedMessages().size() == expectedNumEmails }
-        if( greenMail.getReceivedMessages().size() != expectedNumEmails) {
-            String emails = greenMail.getReceivedMessages().collect {"${it.from}: ${it.subject}" }.join("\n")
-            log.error("Number of emails were different. Actual emails:\n {}", emails)
-
-            assert greenMail.getReceivedMessages().size() != expectedNumEmails
-        }
-        // wait an additional 500ms in case additional and rogue emails arrive
-        Thread.sleep(500)
-        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
-        return emails
     }
 
     private List<String> getEmails(List<SkillsService> services, SkillsService ... additionalServices) {

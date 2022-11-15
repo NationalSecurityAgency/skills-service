@@ -19,6 +19,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
 import skills.utils.WaitFor
 
 class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
@@ -48,6 +49,27 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
         def message = messages.find {it.recipients.find {it.contains(users[1])}}
         message.subj == "SkillTree - You've been added as an admin"
         message.plainText.contains("Congratulations!  You've just been added as a Project Administrator for the SkillTree project [Test Project#1](http://localhost:${localPort}/administrator/projects/TestProject1).")
+    }
+
+    def "contact user when added as approver"() {
+        def users = getRandomUsers(2, true)
+        SkillsService proj1Serv = createService(users[0])
+
+        def proj1 = SkillsFactory.createProject(1)
+
+        proj1Serv.createProject(proj1)
+        createService(users[1])
+        proj1Serv.addUserRole(users[1], proj1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
+        def messages = EmailUtils.getEmails(greenMail)
+
+        then:
+        messages.size() > 0
+        def message = messages.find {it.recipients.find {it.contains(users[1])}}
+        message.subj == "SkillTree - You've been added as an approver"
+        message.plainText.contains("Congratulations!  You've just been added as a Project Approver for the SkillTree project [Test Project#1](http://localhost:${localPort}/administrator/projects/TestProject1).")
     }
 
     def "contact user when added as root"() {

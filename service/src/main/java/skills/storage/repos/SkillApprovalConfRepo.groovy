@@ -111,4 +111,6 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
         left join SkillDef skill on s.skillRefId = skill.id
         where s.id = ?1''')
     ApproverConfResult findConfResultById(Integer id)
+
+    long deleteByProjectIdAndApproverUserId(String projectId, String approverUserId)
 }

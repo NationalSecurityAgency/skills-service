@@ -658,4 +658,80 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         true
     }
 
+    def "when approver is removed its conf is also removed"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
+
+        when:
+        def conf_t0 = skillsService.getApproverConf(proj.projectId)
+        skillsService.deleteUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def conf_t1 = skillsService.getApproverConf(proj.projectId)
+        then:
+        conf_t0.collect { it.approverUserId } == [user1Service.userName, user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
+        conf_t1.collect { it.approverUserId } == [user2Service.userName, user2Service.userName]
+    }
+
+    def "when admin is removed its conf is also removed"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
+
+        when:
+        def conf_t0 = skillsService.getApproverConf(proj.projectId)
+        skillsService.deleteUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        def conf_t1 = skillsService.getApproverConf(proj.projectId)
+        then:
+        conf_t0.collect { it.approverUserId } == [user1Service.userName, user1Service.userName, user2Service.userName, user1Service.userName, user2Service.userName]
+        conf_t1.collect { it.approverUserId } == [user2Service.userName, user2Service.userName]
+    }
+
 }

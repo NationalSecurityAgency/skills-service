@@ -460,6 +460,12 @@ class SkillApprovalService {
     }
 
     @Transactional
+    void deleteApproverForProject(String projectId, String approverUserId) {
+        long numRemoved = skillApprovalConfRepo.deleteByProjectIdAndApproverUserId(projectId, approverUserId)
+        log.info("Removed [{}]approver [{}] conf for [{}]", numRemoved, approverUserId, projectId)
+    }
+
+    @Transactional
     ApproverConfResult configureFallBackApprover(String projectId, String approverId) {
         validateApproverAccess(projectId, approverId)
         validateNotFallbackApprover(projectId, approverId)
