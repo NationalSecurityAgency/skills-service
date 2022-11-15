@@ -253,6 +253,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
   import { max_value, min_value } from 'vee-validate/dist/rules';
+  import saveState from 'vue-save-state';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from './SkillsService';
@@ -293,6 +294,7 @@ limitations under the License.
       IdInput,
       MarkdownEditor,
     },
+    mixins: [saveState],
     props: {
       projectId: {
         type: String,
@@ -414,6 +416,12 @@ limitations under the License.
       },
     },
     methods: {
+      getSaveStateConfig() {
+        return {
+          cacheKey: 'EditSkill',
+          saveProperties: ['skillInternal'],
+        };
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
