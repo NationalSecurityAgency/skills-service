@@ -121,13 +121,15 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFrom as copiedFrom,
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
+        subj1.skillId as subjectSkillId,
         pd.name as copiedFromProjectName,
         case when es is not null then true else false end as sharedToCatalog
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd, SkillDef subj1, SkillRelDef srd2
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
-              and sd1.projectId=?1 and sd1.skillId=?2''')
+              and sd1.projectId=?1 and sd1.skillId=?2
+              and subj1.type='Subject' and subj1 = srd2.parent and sd2 = srd2.child and subj1.projectId=?1''')
     List<SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select 
