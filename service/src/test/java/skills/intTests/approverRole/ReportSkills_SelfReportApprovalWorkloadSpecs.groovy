@@ -818,9 +818,9 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
             skillsService.addUserRole(userService.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
             return userService
         }
-        //  will need this once the 'emailing when approver role is added' was implemented
-        //  WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
-        //  greenMail.purgeEmailFromAllMailboxes()
+        // email is sent when approver role is added
+        WaitFor.wait { greenMail.getReceivedMessages().size() == numUsers }
+        greenMail.purgeEmailFromAllMailboxes()
         return res
     }
 
