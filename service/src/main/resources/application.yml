@@ -143,7 +143,8 @@ skills:
       enablePageVisitReporting: false
       maxProjectInviteEmails: 50
       maxContactOwnersMessageLength: 2500
-      maxTagValueLengthInApprovalWorkloadConfig: 15
+      maxTagKeyLengthInApprovalWorkloadConfig: 15
+      maxTagValueLengthInApprovalWorkloadConfig: 10
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

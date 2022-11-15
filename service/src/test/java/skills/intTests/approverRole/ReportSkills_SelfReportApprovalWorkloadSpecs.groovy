@@ -63,6 +63,24 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
+    def "2 explicit fallback approver"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 4)
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, approvers[3].userName)
+        List<String> expectedEmails = getEmails([approvers[1], approvers[3]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
     def "1 skill is configured - notify matched approver"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -127,7 +145,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 skill is configured - notify matched fallback admins and approvers"() {
+    def "1 skill is configured - notify matched implicit fallback admins and approvers"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -135,6 +153,47 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
 
         List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
         skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+
+        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "1 skill is configured - notify matched explicit fallback approvers"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+
+        List<String> expectedEmails = getEmails([approvers[1]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "1 skill is configured - notify matched explicit fallback admin and approvers"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
         when:
@@ -201,7 +260,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 user is configured - notify matched fallback admins and approvers"() {
+    def "1 user is configured - notify matched implicit fallback admins and approvers"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -223,6 +282,56 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
+
+    def "1 user is configured - notify matched explicit fallback admins and approvers"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, "userA")
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
+
+        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "1 user is configured - notify matched explicit fallback approvers"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, "userA")
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+
+        List<String> expectedEmails = getEmails([approvers[1]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
 
     def "1 user tag is configured - notify matched approver"() {
         def proj = SkillsFactory.createProject()
@@ -320,7 +429,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "1 user tag is configured - notify fallback approvers"() {
+    def "1 user tag is configured - notify implicit fallback approvers"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -341,6 +450,67 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
 
         List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "1 user tag is configured - notify explicit fallback approvers and admins"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["abcd"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
+
+        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "1 user tag is configured - notify explicit fallback admin"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["abcd"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
+
+        List<String> expectedEmails = getEmails([skillsService])
         when:
         assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userB").body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
@@ -513,7 +683,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "fallback approvers when multiple configs did not match"() {
+    def "implicit fallback approvers when multiple configs did not match"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -552,6 +722,89 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
+    def "explicit fallback multiple approvers when multiple configs did not match"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userB")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        skillsService.configureFallbackApprover(proj.projectId, approvers[4].userName)
+        skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
+
+        List<String> expectedEmails = getEmails([approvers[4], skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+
+    def "explicit fallback single approver when multiple configs did not match"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userB")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
+        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 5)
+        // approver 1
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        // approver 2
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        // approver 3
+        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, "userB")
+        // approver 4 - wont match anything
+        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, "userB")
+
+        skillsService.configureFallbackApprover(proj.projectId, approvers[4].userName)
+
+        List<String> expectedEmails = getEmails([approvers[4]])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = waitAndCollect(expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
 
     private List<EmailUtils.EmailRes> waitAndCollect(int expectedNumEmails) {
         WaitFor.wait { greenMail.getReceivedMessages().size() == expectedNumEmails }

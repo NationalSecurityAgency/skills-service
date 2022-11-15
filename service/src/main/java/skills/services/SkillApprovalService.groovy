@@ -18,6 +18,7 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,6 +47,12 @@ import java.util.stream.Stream
 @Service
 @Slf4j
 class SkillApprovalService {
+
+    @Value('#{"${skills.config.ui.maxTagValueLengthInApprovalWorkloadConfig:15}"}')
+    int maxTagValueLengthInApprovalWorkloadConfig
+
+    @Value('#{"${skills.config.ui.maxTagKeyLengthInApprovalWorkloadConfig:15}"}')
+    int maxTagKeyLengthInApprovalWorkloadConfig
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
@@ -329,6 +336,11 @@ class SkillApprovalService {
         SkillApprovalConf saved
         if (skillApproverConfRequest.userId) {
             String userId = skillApproverConfRequest.userId.toLowerCase()
+
+            if(!userAttrsRepo.findByUserId(userId)) {
+                throw new SkillException("Provided user id [${userId}] does not exist", projectId)
+            }
+
             SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
             SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userId=[${userId}] already exist.")
             SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userId: userId)
@@ -338,6 +350,10 @@ class SkillApprovalService {
         }
         else if (skillApproverConfRequest.userTagKey) {
             SkillsValidator.isNotBlank(skillApproverConfRequest.userTagValue, "userTagValue", projectId)
+            SkillsValidator.isTrue(skillApproverConfRequest.userTagKey.size() <= maxTagKeyLengthInApprovalWorkloadConfig,
+                    "userTagKey must be < $maxTagKeyLengthInApprovalWorkloadConfig")
+            SkillsValidator.isTrue(skillApproverConfRequest.userTagValue.size() <= maxTagValueLengthInApprovalWorkloadConfig,
+                "userTagValue must be < $maxTagValueLengthInApprovalWorkloadConfig")
 
             String userTagKey = skillApproverConfRequest.userTagKey.toLowerCase()
             String userTagValue = skillApproverConfRequest.userTagValue.toLowerCase()
