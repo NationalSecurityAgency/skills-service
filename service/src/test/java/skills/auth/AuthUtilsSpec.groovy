@@ -99,5 +99,33 @@ class AuthUtilsSpec extends Specification {
         false   | "/admin/projects//proj1/approverConf"
     }
 
+    def "only match email sub/unsub conf endpoint"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isSelfReportEmailSubscriptionEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/approvalEmails/unsubscribe"
+        true    | "/admin/projects/pROJ2/approvalEmails/unsubscribe"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe1"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe/"
+        false   | "/admin/projects/proj1/approvalEmails/unsubsdcribe"
+        false   | "/b/admin/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/co/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/projects//proj1/approvalEmails/unsubscribe"
+
+        true    | "/admin/projects/proj1/approvalEmails/subscribe"
+        true    | "/admin/projects/pROJ2/approvalEmails/subscribe"
+        false   | "/admin/projects/proj1/approvalEmails/subscribe1"
+        false   | "/admin/projects/proj1/approvalEmails/subscribe/"
+        false   | "/admin/projects/proj1/approvalEmails/subscdribe"
+        false   | "/b/admin/projects/proj1/approvalEmails/subscribe"
+        false   | "/admin/co/projects/proj1/approvalEmails/subscribe"
+        false   | "/admin/projects//proj1/approvalEmails/subscribe"
+    }
+
 }
 
