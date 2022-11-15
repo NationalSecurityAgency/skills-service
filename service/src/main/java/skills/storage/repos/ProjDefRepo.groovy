@@ -62,6 +62,17 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<ProjSummaryResult> getAllSummariesByProjectIdIn(List<String> projectIds)
 
+    @Query('''select p from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%'))''')
+    @Nullable
+    List<ProjDef> findAllByNameLike(@Param("query") query)
+
+    @Nullable
+    @Query("select p from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    List<ProjDef> findAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds, Pageable pageable)
+
+    @Query("select count(p.projectId) from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    Integer countAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds)
+
     @Nullable
     List<ProjDef> findAllByProjectIdIn(List<String> projectIds)
 
@@ -227,9 +238,6 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             """, nativeQuery = true)
     @Nullable
     List<ProjSummaryResult> getSummariesByNameLike(String search)
-
-    @Query("select p from ProjDef p where lower(p.name) like lower(CONCAT('%', ?1, '%'))")
-    List<ProjDef> findByNameLike(String search)
 
     @Query(value = "select count(p.id) from ProjDef p, UserRole u where p.projectId = u.projectId and u.userId=?1")
     Integer getProjectsByUserCount(String userId)

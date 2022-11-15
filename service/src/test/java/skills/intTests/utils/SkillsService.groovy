@@ -499,8 +499,8 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${props.projectId}/badges/${props.badgeId}")
     }
 
-    def getAvailableProjectsForGlobalBadge(String badgeId) {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available")
+    def getAvailableProjectsForGlobalBadge(String badgeId, String query="") {
+        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
     }
 
     def getAvailableSkillsForGlobalBadge(String badgeId, String query) {

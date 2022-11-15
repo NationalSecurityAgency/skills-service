@@ -64,8 +64,8 @@ export default {
     return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/skills/available?query=${search}`)
       .then((res) => res.data);
   },
-  getAllProjectsForBadge(badgeId) {
-    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/available`)
+  suggestProjectsForPage(badgeId, search) {
+    return axios.get(`/supervisor/badges/${encodeURIComponent(badgeId)}/projects/available?query=${search}`)
       .then((res) => res.data);
   },
   getProjectLevels(projectId) {

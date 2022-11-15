@@ -163,7 +163,7 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
 
         when:
 
-        def availableLevels = supervisorService.getAvailableProjectsForGlobalBadge(badge.badgeId)
+        def availableLevels = supervisorService.getAvailableProjectsForGlobalBadge(badge.badgeId).projects
 
         then:
         availableLevels.find {it.name == "P & B"}
