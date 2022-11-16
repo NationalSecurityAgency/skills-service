@@ -79,7 +79,14 @@ limitations under the License.
               <i class="fa fa-check" />
               {{ successMsg }}
             </span>
-      <div v-if="failedEmails" class="text-danger" role="alert" data-cy="failedEmails">Unable to send invites to: {{failedEmails}}</div>
+      <div v-if="failedEmails" class="mt-2 alert alert-danger" role="alert" data-cy="failedEmails">
+        <div>
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Unable to send invites to:
+        </div>
+        <div v-for="failedEmailError in failedEmailsErrors" :key="failedEmailError" class="pl-1">
+          - {{ failedEmailError }}
+        </div>
+      </div>
     </div>
   </loading-container>
 
@@ -116,6 +123,7 @@ limitations under the License.
         successMsg: '',
         inviteRecipients: [],
         failedEmails: '',
+        failedEmailsErrors: null,
         expirationOptions: [
           { value: 'PT30M', text: '30 minutes' },
           { value: 'PT8H', text: '8 hours' },
@@ -170,6 +178,7 @@ limitations under the License.
           });
 
           this.failedEmails = '';
+          this.failedEmailsErrors = null;
 
           if (successful > 0) {
             this.$nextTick(() => this.$announcer.polite(`added ${successful} project invite email recipients`));
@@ -201,6 +210,7 @@ limitations under the License.
       },
       sendInvites() {
         this.failedEmails = '';
+        this.failedEmailsErrors = null;
         this.sending = true;
 
         const inviteRequest = {
@@ -212,6 +222,7 @@ limitations under the License.
           this.inviteRecipients = [];
           if (resp.unsuccessful) {
             this.failedEmails = resp.unsuccessful.join(', ');
+            this.failedEmailsErrors = resp.unsuccessfulErrors;
             if (this.currentEmails) {
               this.currentEmails += `\n${resp.unsuccessful.join('\n')}`;
             } else {
