@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <router-view/>
+    <router-view id="mainContent2"/>
   </div>
 </template>
 

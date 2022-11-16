@@ -71,7 +71,7 @@ limitations under the License.
       </div>
       <div class="col-md skills-menu-content" ref="content" tabindex="-1">
         <div class="container-fluid pb-4">
-          <router-view></router-view>
+          <router-view id="mainContent2"></router-view>
         </div>
       </div>
     </div>
@@ -99,16 +99,16 @@ limitations under the License.
     destroyed() {
       window.removeEventListener('resize', this.handleResize);
     },
-    watch: {
-      $route: {
-        immediate: true,
-        handler: function routeChange() {
-          this.$nextTick(() => {
-            this.$refs.content.focus({ preventScroll: true });
-          });
-        },
-      },
-    },
+    // watch: {
+    //   $route: {
+    //     immediate: true,
+    //     handler: function routeChange() {
+    //       this.$nextTick(() => {
+    //         this.$refs.content.focus({ preventScroll: true });
+    //       });
+    //     },
+    //   },
+    // },
     methods: {
       getCollapsedFromLocalStorage() {
         const storageCollapsed = localStorage.skillsNavCollapsed;
