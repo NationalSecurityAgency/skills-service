@@ -530,6 +530,5 @@ describe('Metrics Tests - Skills', () => {
             ],
         ]);
 
-        cy.matchSnapshotImageForElement('[data-cy=postAchievementUserList]', 'postAchievementUserList');
     });
 });

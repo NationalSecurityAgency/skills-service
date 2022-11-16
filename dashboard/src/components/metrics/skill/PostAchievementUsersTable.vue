@@ -49,6 +49,16 @@ limitations under the License.
               label: 'User',
               sortable: true,
             },
+            {
+              key: 'count',
+              label: 'Times Used',
+              sortable: true,
+            },
+            {
+              key: 'date',
+              label: 'Date Last Used',
+              sortable: true,
+            },
           ],
           pagination: {
             currentPage: 1,
@@ -68,7 +78,9 @@ limitations under the License.
     methods: {
       loadData() {
         this.loading = true;
-        MetricsService.loadChart(this.$route.params.projectId, 'usagePostAchievementUsersBuilder', { skillId: this.$route.params.skillId })
+        MetricsService.loadChart(this.$route.params.projectId, 'usagePostAchievementUsersBuilder', {
+          skillId: this.$route.params.skillId, page: 1, pageSize: 5, sortDesc: false, sortBy: 'user_id',
+        })
           .then((dataFromServer) => {
             if (dataFromServer) {
               this.hasData = true;

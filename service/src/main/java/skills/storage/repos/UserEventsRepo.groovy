@@ -27,6 +27,7 @@ import skills.storage.model.EventCount
 import skills.storage.model.EventType
 import skills.storage.model.LabeledCount
 import skills.storage.model.UserEvent
+import skills.storage.model.UserMetrics
 import skills.storage.model.WeekCountItem
 
 import javax.persistence.QueryHint
@@ -450,18 +451,20 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value='''
-        SELECT DISTINCT ue.user_id
+        SELECT ue.user_id as userId, COUNT(ue.event_time) as count, MAX(ue.event_time) as date
         FROM user_events ue, (
-            SELECT user_id, achieved_on FROM user_achievement 
+            SELECT user_id, achieved_on, COUNT(id) AS counts FROM user_achievement 
             WHERE skill_ref_id = :skillRefId
+            GROUP BY user_id
         ) AS achievements 
         WHERE 
             ue.skill_ref_id = :skillRefId 
             AND ue.user_id = achievements.user_id 
             AND ue.event_time > achievements.achieved_on 
             AND ue.count >= :minEventCountThreshold
+        GROUP BY ue.user_id
     ''', nativeQuery = true)
-    public List<String> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
+    public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
 
     @Query(value='''
     SELECT COUNT(counts.user_id) AS count, counts.countBucket AS label 

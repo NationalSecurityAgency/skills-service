@@ -37,6 +37,8 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         skillsService.createSkill(skill)
 
         def users = getRandomUsers(7)
+        def date = new Date()
+        def dateFiveDaysAgo = new Date() - 5
 
         // user 1 - achieved and used after
         assert skillsService.addSkill(skill, users[0], new Date() - 4).body.skillApplied
@@ -69,7 +71,11 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result
         result.size() == 2
         result[0].userId == users[0]
+        result[0].count == 1
+        result[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
         result[1].userId == users[3]
+        result[1].count == 3
+        result[1].date.toString() == dateFiveDaysAgo.format('YYYY-MM-dd 00:00:00.0')
     }
 
 }

@@ -24,6 +24,7 @@ import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
 import skills.storage.model.UserEvent
+import skills.storage.model.UserMetrics
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
@@ -52,10 +53,8 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
         if (!skillDef) {
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
-        List<String> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: null
+        List<UserMetrics> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: null
 
-        def usersTable = usersPostAchievement.collect{ it -> ["userId": it]}
-
-        return usersTable
+        return usersPostAchievement
     }
 }
