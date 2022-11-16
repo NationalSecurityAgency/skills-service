@@ -197,7 +197,7 @@ class SelfReportingService {
             if (createProjectIssue) {
                 projectErrorService.noEmailableAdminsForSkillApprovalRequest(projectId)
             }
-            log.warn("There are no users with ROLE_PROJECT_ADMIN for project [{}] who are subscribed to skill approval request emails", projectId)
+            log.debug("There are no users for project [{}] who are subscribed to skill approval request emails", projectId)
         }
 
         if (userRoleRes) {

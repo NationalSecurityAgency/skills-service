@@ -64,7 +64,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
-    def "no conf at all - notify all admins and approvers - approver unsubscribed then resusbscribed"() {
+    def "no conf at all - notify all admins and approvers - approver unsubscribed then re-subscribed"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSelfReportSkills(5,)
@@ -81,6 +81,26 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
 
         then:
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+    def "no conf at all - all admins and approvers unsubscribed"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        approvers[0].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        skillsService.unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        Thread.sleep(1000)
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, 0 )
+
+        then:
+        !emails
     }
 
     def "1 explicit fallback approver"() {
