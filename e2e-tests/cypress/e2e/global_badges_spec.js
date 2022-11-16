@@ -294,7 +294,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getBadges');
         cy.get('[data-cy="manageBtn_a_badge"]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();
@@ -498,7 +498,7 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Global Badges');
         cy.contains('Manage')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -587,7 +587,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
         cy.contains('Manage')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -706,7 +706,7 @@ describe('Global Badges Tests', () => {
             .click();
 
         cy.wait('@availableSkills');
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -848,7 +848,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         //wahat to wait on....
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();
@@ -1824,7 +1824,7 @@ describe('Global Badges Tests', () => {
                     .eq('/administrator/globalBadges/a_new_id/');
             });
 
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();

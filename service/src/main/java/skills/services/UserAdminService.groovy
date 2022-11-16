@@ -90,7 +90,7 @@ class UserAdminService {
 
     @Transactional(readOnly = true)
     List<String> suggestUsers(String userQuery, PageRequest pageRequest) {
-        return performedSkillRepository.findDistinctUserIds(userQuery?.toLowerCase(), pageRequest)
+        return userAttrsRepo.findDistinctUserIdForDisplay(userQuery?.toLowerCase(), pageRequest)
     }
 
     @Transactional(readOnly = true)

@@ -338,7 +338,7 @@ class RootController {
     RequestResult saveTag(@PathVariable("userId") String userId, @PathVariable("tagKey") String tagKey, @RequestBody UserTagRequest userTagRequest) {
         SkillsValidator.isNotEmpty(userTagRequest?.tags, "tags")
 
-        List<UserTag> userTags = userTagRequest.tags.collect { new UserTag(userId: userId, key: tagKey, value: it)}
+        List<UserTag> userTags = userTagRequest.tags.collect { new UserTag(userId: userId?.toLowerCase(), key: tagKey, value: it)}
         userTagRepo.saveAll(userTags)
 
         return RequestResult.success()

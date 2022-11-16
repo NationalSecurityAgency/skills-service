@@ -683,10 +683,10 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.contains('This is 1');
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.customA11y();
@@ -1305,4 +1305,49 @@ describe('Accessibility Tests', () => {
             .should('have.focus');
     });
 
+    it('configure self approval workload', function () {
+        const pass = 'password';
+        cy.register('user1', pass);
+        cy.register('user2', pass);
+        cy.register('user3', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/MyNewtestProject/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/users/user2/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u1' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u2' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u3' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u4' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u5' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            userTagKey: 'tagKey',
+            userTagValue: 'tagValue'
+        });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            skillId: 'skill1'
+        });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            skillId: 'skill2'
+        });
+        cy.visit('/administrator/projects/MyNewtestProject/self-report/configure');
+        cy.injectAxe();
+
+        cy.get(`[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]`).click()
+        const tableSelector = `[data-cy="expandedChild_user1"] [data-cy="skillApprovalConfSpecificUsersTable"]`
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
+
+        cy.get(`[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_user2"] [data-cy="noUserConf"]`).should('exist')
+
+        cy.customLighthouse();
+        cy.customA11y();
+    });
 });

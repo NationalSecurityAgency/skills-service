@@ -18,28 +18,28 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.result.model.LabelCountItem
-import skills.controller.result.model.SkillApprovalResult
-import skills.controller.result.model.TableResult
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.SkillApproverConfRequest
+import skills.controller.result.model.*
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.SkillCatalogService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillApprovalRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
@@ -47,6 +47,12 @@ import java.util.stream.Stream
 @Service
 @Slf4j
 class SkillApprovalService {
+
+    @Value('#{"${skills.config.ui.maxTagValueLengthInApprovalWorkloadConfig:15}"}')
+    int maxTagValueLengthInApprovalWorkloadConfig
+
+    @Value('#{"${skills.config.ui.maxTagKeyLengthInApprovalWorkloadConfig:15}"}')
+    int maxTagKeyLengthInApprovalWorkloadConfig
 
     @Autowired
     SkillApprovalRepo skillApprovalRepo
@@ -56,6 +62,9 @@ class SkillApprovalService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    SkillDefAccessor skillDefAccessor
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -78,11 +87,67 @@ class SkillApprovalService {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Autowired
+    SkillApprovalConfRepo skillApprovalConfRepo
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    UserRoleRepo userRoleRepo
+
+    static class ConfExistInfo {
+        boolean projConfExist = false;
+        boolean fallBackApprover = false
+        boolean approverHasConf = false
+    }
+
+    @Profile
+    private ConfExistInfo getConfExistForApprover(String projectId, String currentApproverId) {
+        Boolean confExistForProject = skillApprovalConfRepo.confExistForProject(projectId)
+        if (!confExistForProject) {
+            return new ConfExistInfo()
+        }
+
+        List<String> usersConfiguredForFallback = skillApprovalConfRepo.getUsersConfiguredForFallback(projectId)
+        boolean hasExplicitFallbackConfigured = usersConfiguredForFallback?.find { it.equalsIgnoreCase(currentApproverId)}
+
+        Boolean approverHasConf = hasExplicitFallbackConfigured || skillApprovalConfRepo.confExistForApprover(projectId, currentApproverId)
+
+        new ConfExistInfo(
+                projConfExist: true,
+                fallBackApprover: hasExplicitFallbackConfigured || (!approverHasConf && !usersConfiguredForFallback),
+                approverHasConf: approverHasConf,
+        )
+
+    }
+
     TableResult getApprovals(String projectId, PageRequest pageRequest) {
+        String currentApproverId = userInfoService.currentUser.username
+        ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
+
         return buildApprovalsResult(projectId, pageRequest, {
-            skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+            if (confExistInfo.projConfExist) {
+                List<SkillApprovalRepo.SimpleSkillApproval> res = []
+                if (confExistInfo.fallBackApprover) {
+                    res = skillApprovalRepo.findFallbackApproverConf(projectId, pageRequest)
+                } else if (confExistInfo.approverHasConf) {
+                    res = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, pageRequest)
+                }
+                return res
+            }
+            return skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
         }, {
-            skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+            if (confExistInfo.projConfExist) {
+                long res = 0
+                if (confExistInfo.fallBackApprover) {
+                    res = skillApprovalRepo.countFallbackApproverConf(projectId)
+                } else if (confExistInfo.approverHasConf) {
+                    res = skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId)
+                }
+                return res
+            }
+            return skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
         })
     }
 
@@ -259,5 +324,171 @@ class SkillApprovalService {
                 ],
         )
         notifier.sendNotification(request)
+    }
+
+    @Transactional
+    ApproverConfResult configureApprover(String projectId, String approverId, SkillApproverConfRequest skillApproverConfRequest) {
+        validateParamConsistency(skillApproverConfRequest)
+        validateApproverAccess(projectId, approverId)
+        validateNotFallbackApprover(projectId, approverId)
+        validatePresenceOfFallbackApprover(approverId, projectId)
+
+        SkillApprovalConf saved
+        if (skillApproverConfRequest.userId) {
+            String userId = skillApproverConfRequest.userId.toLowerCase()
+
+            if(!userAttrsRepo.findByUserId(userId)) {
+                throw new SkillException("Provided user id [${userId}] does not exist", projectId)
+            }
+
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userId=[${userId}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userId: userId)
+            skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserId(projectId, approverId, userId)
+            assert saved
+        }
+        else if (skillApproverConfRequest.userTagKey) {
+            SkillsValidator.isNotBlank(skillApproverConfRequest.userTagValue, "userTagValue", projectId)
+            SkillsValidator.isTrue(skillApproverConfRequest.userTagKey.size() <= maxTagKeyLengthInApprovalWorkloadConfig,
+                    "userTagKey must be < $maxTagKeyLengthInApprovalWorkloadConfig")
+            SkillsValidator.isTrue(skillApproverConfRequest.userTagValue.size() <= maxTagValueLengthInApprovalWorkloadConfig,
+                "userTagValue must be < $maxTagValueLengthInApprovalWorkloadConfig")
+
+            String userTagKey = skillApproverConfRequest.userTagKey.toLowerCase()
+            String userTagValue = skillApproverConfRequest.userTagValue.toLowerCase()
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userTagKey=[${userTagKey}], userTagValue=[${userTagValue}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userTagKey: userTagKey, userTagValue: userTagValue)
+            skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            assert saved
+        }
+        else if (skillApproverConfRequest.skillId) {
+            SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillApproverConfRequest.skillId, [SkillDef.ContainerType.Skill])
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
+            SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], skillId=[${skillApproverConfRequest.skillId}] already exist.")
+            SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, skillRefId: skillDef.id)
+            skillApprovalConfRepo.save(conf)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndSkillRefId(projectId, approverId, skillDef.id)
+            assert saved
+        }
+
+        log.info("Saved {}", saved)
+        SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+        return convertToClientRes(dbRes)
+    }
+
+    private void validateParamConsistency(SkillApproverConfRequest skillApproverConfRequest) {
+        if (skillApproverConfRequest.userId) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.skillId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.skillId) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.userTagValue, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+        if (skillApproverConfRequest.userTagValue) {
+            SkillsValidator.isTrue(!skillApproverConfRequest.userId && !skillApproverConfRequest.skillId, "Must provide only one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        }
+    }
+
+    private static Closure<SkillApprovalConfRepo.ApproverConfResult> isFallBackConf = { SkillApprovalConfRepo.ApproverConfResult conf ->
+        !conf.userId && !conf.userTagValue && !conf.userTagKey && !conf.skillId
+    }
+    @Profile
+    private void validatePresenceOfFallbackApprover(String approverId, String projectId) {
+        List<ApproverConfResult> existingProjectConf = skillApprovalConfRepo.findAllByProjectId(projectId)
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE)
+        List<RoleName> roles = [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]
+        List<UserRoleRepo.UserRoleWithAttrs> userRoles = userRoleRepo.findRoleWithAttrsByProjectIdAndUserRoles(projectId, roles, pageRequest)
+        List<String> allApprovers = userRoles.collect { it.role.userId }
+        boolean hasFallBackApprover = existingProjectConf.find(isFallBackConf)
+        if (!hasFallBackApprover) {
+            // must have at 1 implicit fallback approver
+            Set<String> existingApprovers = existingProjectConf.collect { it.approverUserId }.toSet()
+            List<String> implicitFallbackApprovers = allApprovers.findAll({ !existingApprovers.contains(it) && it != approverId })
+            if (!implicitFallbackApprovers) {
+                throw new SkillException("Must have a least 1 fallback implicit or explicit approver. This operation will assign the last approver [${approverId}] away from fallback duties, which is sadly not allowed.", projectId, null, ErrorCode.BadParam)
+            }
+        }
+    }
+
+    @Profile
+    private void validateApproverAccess(String projectId, String approverId) {
+        List<UserRoleRes> requestedApproverRoles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, approverId)
+        List<RoleName> validRoleNames = [RoleName.ROLE_PROJECT_APPROVER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_SUPER_DUPER_USER]
+        boolean hasValidRole = requestedApproverRoles?.find({ validRoleNames.contains(it.roleName) })
+        if (!hasValidRole) {
+            throw new SkillException("Approver [${approverId}] does not have permission to approve for the project [${projectId}]", projectId, null, ErrorCode.AccessDenied)
+        }
+    }
+
+    List<ApproverConfResult> getProjectApproverConf(String projectId) {
+        List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
+        List<ApproverConfResult> res = approverConfResults.collect {
+            convertToClientRes(it)
+        }
+        return res?.sort({ it.id })
+    }
+
+    private ApproverConfResult convertToClientRes(SkillApprovalConfRepo.ApproverConfResult it) {
+        new ApproverConfResult(
+                id: it.getId(),
+                approverUserId: it.getApproverUserId(),
+                userIdForDisplay: it.getUserIdForDisplay(),
+                userId: it.getUserId(),
+                userTagKey: it.getUserTagKey(),
+                userTagValue: it.getUserTagValue(),
+                skillName: it.getSkillName(),
+                skillId: it.getSkillId(),
+                updated: it.getUpdated()
+        )
+    }
+
+    @Transactional
+    void deleteApproverConfId(String projectId, Integer approverConfId) {
+        Optional<SkillApprovalConf> found = skillApprovalConfRepo.findById(approverConfId)
+        if (found?.isPresent()) {
+            SkillApprovalConf approvalConf = found.get()
+            if (approvalConf.projectId != projectId) {
+                throw new SkillException("You are not authorized to delete approval with id [${approverConfId}]", projectId, null, ErrorCode.AccessDenied)
+            }
+            skillApprovalConfRepo.delete(approvalConf)
+            log.info("Removed {}", approvalConf)
+        } else {
+            log.warn("Failed to find SkillApprovalConf with id [{}]", approverConfId)
+        }
+    }
+
+    @Transactional
+    void deleteApproverForProject(String projectId, String approverUserId) {
+        long numRemoved = skillApprovalConfRepo.deleteByProjectIdAndApproverUserId(projectId, approverUserId)
+        log.info("Removed [{}]approver [{}] conf for [{}]", numRemoved, approverUserId, projectId)
+    }
+
+    @Transactional
+    ApproverConfResult configureFallBackApprover(String projectId, String approverId) {
+        validateApproverAccess(projectId, approverId)
+        validateNotFallbackApprover(projectId, approverId)
+
+        long count = skillApprovalConfRepo.countByProjectIdAndApproverUserId(projectId, approverId)
+        if (count > 0) {
+            throw new SkillException("Cannot configure fallback approver since this approver already has existing workload config. Approver Id = [${approverId}]", projectId, null, ErrorCode.BadParam)
+        }
+
+        SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId)
+        skillApprovalConfRepo.save(conf)
+        SkillApprovalConf saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId)
+        assert saved
+
+        log.info("Saved {}", saved)
+        SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+        return convertToClientRes(dbRes)
+    }
+
+    private void validateNotFallbackApprover(String projectId, String approverId) {
+        SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndRestAttributesAreNull(projectId, approverId);
+        if (found) {
+            throw new SkillException(" [${approverId}] is already a fallback approver.", projectId, null, ErrorCode.BadParam)
+        }
     }
 }

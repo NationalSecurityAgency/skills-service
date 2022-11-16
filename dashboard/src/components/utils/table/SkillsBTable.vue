@@ -31,6 +31,7 @@ limitations under the License.
              :no-sort-reset="true"
              :no-local-sorting="options.pagination.server"
              :aria-label="options.tableDescription"
+             :details-td-class="options.detailsTdClass ? options.detailsTdClass : ''"
              thead-class="accessible"
              show-empty>
       <colgroup v-if="options.rowDetailsControls"><col style="width: 2rem;"><col></colgroup>

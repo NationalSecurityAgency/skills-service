@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -32,6 +33,7 @@ import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
 import skills.services.FeatureService
+import skills.services.SkillApprovalService
 import skills.services.admin.ProjAdminService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.ProjDef
@@ -58,6 +60,9 @@ class AccessSettingsController {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    SkillApprovalService skillApprovalService
 
     @Autowired
     UserRepo userRepo
@@ -116,18 +121,22 @@ class AccessSettingsController {
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         String currentUser = userInfoService.getCurrentUser()
-        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
-            throw new SkillException("Cannot delete roles for myself. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
+        String userIdLower = userId?.toLowerCase()
+        if (currentUser?.toLowerCase() == userIdLower) {
+            throw new SkillException("Cannot delete roles for myself. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)
         }
-        accessSettingsStorageService.deleteUserRole(userId?.toLowerCase(), projectId, roleName)
+        accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName)
 
-        if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
-            User user = userRepo.findByUserId(userId.toLowerCase())
+        if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userIdLower)) {
+            User user = userRepo.findByUserId(userIdLower)
             if (!user) {
-                throw new SkillException("Failed to find user with id [${userId.toLowerCase()}]")
+                throw new SkillException("Failed to find user with id [${userIdLower}]")
             }
             projAdminService.unpinProjectForRootUser(projectId, user)
         }
+
+        skillApprovalService.deleteApproverForProject(projectId, userIdLower)
+
         return new RequestResult(success: true)
     }
 
@@ -147,18 +156,7 @@ class AccessSettingsController {
         }
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
 
-        if(roleName == RoleName.ROLE_PROJECT_ADMIN) {
-            ProjDef project = projDefAccessor.getProjDef(projectId)
-            String publicUrl = featureService.getPublicUrl()
-
-            def emailBody = "Congratulations!  You've just been added as a Project Administrator for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
-                            "The Project administrator role enables management of the training profile for this project such as creating and " +
-                            "modifying subjects, skills and badges.  Thank you for being part of the SkillTree Community!\n\n" +
-                            "Always yours,\n\n" +
-                            "-SkillTree Bot"
-
-            contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
-        }
+        handleNewRoleEmail(roleName, projectId, userId)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userId)) {
             User user = userRepo.findByUserId(userId.toLowerCase())
@@ -168,6 +166,31 @@ class AccessSettingsController {
             projAdminService.pinProjectForRootUser(projectId, user)
         }
         return new RequestResult(success: true)
+    }
+
+    @Profile
+    private void handleNewRoleEmail(RoleName roleName, String projectId, String userId) {
+        boolean willEmail = roleName == RoleName.ROLE_PROJECT_ADMIN || roleName == RoleName.ROLE_PROJECT_APPROVER
+        if (willEmail) {
+            ProjDef project = projDefAccessor.getProjDef(projectId)
+            String publicUrl = featureService.getPublicUrl()
+            if (roleName == RoleName.ROLE_PROJECT_ADMIN) {
+                def emailBody = "Congratulations!  You've just been added as a Project Administrator for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
+                        "The Project administrator role enables management of the training profile for this project such as creating and " +
+                        "modifying subjects, skills and badges.  Thank you for being part of the SkillTree Community!\n\n" +
+                        "Always yours,\n\n" +
+                        "-SkillTree Bot"
+                contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
+            } else if (roleName == RoleName.ROLE_PROJECT_APPROVER) {
+                def emailBody = "Congratulations!  You've just been added as a Project Approver for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
+                        "The Project Approver role is allowed to approve and deny Self Reporting approval requests while only getting a read-only view of the project." +
+                        " Thank you for being part of the SkillTree Community!\n\n" +
+                        "Always yours,\n\n" +
+                        "-SkillTree Bot"
+                contactUsersService.sendEmail("SkillTree - You've been added as an approver", emailBody, userId)
+            }
+        }
+
     }
 
     private String getUserId(String userKey) {

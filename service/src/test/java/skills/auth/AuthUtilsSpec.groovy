@@ -80,4 +80,52 @@ class AuthUtilsSpec extends Specification {
         true    | "/admin/projects/${URLEncoder.encode("some fancy 23 id", StandardCharsets.UTF_8.toString())}/approvals/reject"
     }
 
+    def "only match approver conf endpoint"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isSelfReportApproverConfEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/approverConf"
+        true    | "/admin/projects/pROJ2/approverConf"
+        false   | "/admin/projects/proj1/approverConf1"
+        false   | "/admin/projects/proj1/approverConf/"
+        false   | "/admin/projects/proj1/approvercConf"
+        false   | "/b/admin/projects/proj1/approverConf"
+        false   | "/admin/co/projects/proj1/approverConf"
+        false   | "/admin/projects//proj1/approverConf"
+    }
+
+    def "only match email sub/unsub conf endpoint"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isSelfReportEmailSubscriptionEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/approvalEmails/unsubscribe"
+        true    | "/admin/projects/pROJ2/approvalEmails/unsubscribe"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe1"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe/"
+        false   | "/admin/projects/proj1/approvalEmails/unsubsdcribe"
+        false   | "/b/admin/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/co/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/projects//proj1/approvalEmails/unsubscribe"
+
+        true    | "/admin/projects/proj1/approvalEmails/subscribe"
+        true    | "/admin/projects/pROJ2/approvalEmails/subscribe"
+        false   | "/admin/projects/proj1/approvalEmails/subscribe1"
+        false   | "/admin/projects/proj1/approvalEmails/subscribe/"
+        false   | "/admin/projects/proj1/approvalEmails/subscdribe"
+        false   | "/b/admin/projects/proj1/approvalEmails/subscribe"
+        false   | "/admin/co/projects/proj1/approvalEmails/subscribe"
+        false   | "/admin/projects//proj1/approvalEmails/subscribe"
+    }
+
 }
+

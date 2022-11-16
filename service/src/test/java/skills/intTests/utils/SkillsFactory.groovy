@@ -15,6 +15,8 @@
  */
 package skills.intTests.utils
 
+import skills.storage.model.SkillDef
+
 class SkillsFactory {
 
     static String DEFAULT_PROJ_NAME = "Test Project"
@@ -57,6 +59,16 @@ class SkillsFactory {
 
     static List<Map> createSkills(int numSkills, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10, int numPerformToCompletion = 1) {
         return (1..numSkills).collect { createSkill(projNumber, subjNumer, it, 0, numPerformToCompletion, 480, pointIncrement) }
+    }
+
+    static List<Map> createSelfReportSkills(int numSkills, int projNumber = 1, int subjNumer = 1l, SkillDef.SelfReportingType selfReportingType = SkillDef.SelfReportingType.Approval,
+                                            int pointIncrement = 100, int numPerformToCompletion = 5) {
+        return (1..numSkills).collect {
+            // pointIncrementInterval == 0 // ability to achieve right away
+            def skill = createSkill(projNumber, subjNumer, it, 0, numPerformToCompletion, 0, pointIncrement)
+            skill.selfReportingType = selfReportingType
+            return skill
+        }
     }
 
     static List<Map> createSkillsStartingAt(int numSkills, int startingSkillNumber, int projNumber = 1, int subjNumer = 1l, int pointIncrement = 10) {
