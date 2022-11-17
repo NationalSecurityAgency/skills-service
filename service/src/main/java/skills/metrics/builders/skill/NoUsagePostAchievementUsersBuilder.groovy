@@ -15,7 +15,6 @@
  */
 package skills.metrics.builders.skill
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
@@ -34,7 +33,7 @@ import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @Component
-class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
+class NoUsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
 
     @Autowired
     UserEventsRepo userEventsRepo
@@ -42,9 +41,12 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
+
     @Override
     String getId() {
-        return "usagePostAchievementUsersBuilder"
+        return "noUsagePostAchievementUsersBuilder"
     }
 
     @Override
@@ -55,9 +57,11 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
         PageRequest pageRequest = PageRequest.of(props.page.toInteger() - 1, props.pageSize.toInteger(), props.sortDesc.toBoolean() ? DESC : ASC, props.sortBy)
-        List<UserMetrics> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1, pageRequest) ?: null
-        def totalCount = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1)
+        List<UserMetrics> usersNotPostAchievement = userEventsRepo.getUsersNotUsingSkillAfterAchievement(skillDef.id, pageRequest) ?: null
+        Long stillUsingUsers = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: 0
+        Long allUsers = userAchievedLevelRepo.countDistinctUsersAchievingSkill(projectId, skillId) ?: 0
+        Long total = allUsers - stillUsingUsers
 
-        return [ users: usersPostAchievement, totalCount: totalCount ]
+        return [ users: usersNotPostAchievement, totalCount: total ]
     }
 }

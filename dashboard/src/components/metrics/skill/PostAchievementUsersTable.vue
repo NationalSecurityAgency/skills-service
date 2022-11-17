@@ -15,6 +15,10 @@ limitations under the License.
 */
 <template>
   <metrics-card title="Users that Achieved this Skill" data-cy="postAchievementUserList">
+    <template v-slot:afterTitle>
+      <span class="text-muted ml-2">|</span>
+      <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
+    </template>
     <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
       <skills-b-table :items="postAchievementUsers" :options="tableOptions" data-cy="postAchievementUsers-table" tableStoredStateId="postAchievementUsers-table"
                           @page-changed="pageChanged"
@@ -32,6 +36,9 @@ limitations under the License.
             </b-button>
           </b-button-group>
         </template>
+        <template v-slot:cell(date)="data">
+          <date-cell :value="data.value" />
+        </template>
       </skills-b-table>
     </metrics-overlay>
   </metrics-card>
@@ -42,14 +49,29 @@ limitations under the License.
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
+  import ModeSelector from '../common/ModeSelector';
+  import DateCell from '../../utils/table/DateCell';
 
   export default {
     name: 'PostAchievementUsersTable',
-    components: { MetricsOverlay, MetricsCard, SkillsBTable },
+    components: {
+      MetricsOverlay, MetricsCard, SkillsBTable, ModeSelector, DateCell,
+    },
     props: ['skillName'],
     data() {
       return {
         postAchievementUsers: [],
+        chartToLoad: 'usagePostAchievementUsersBuilder',
+        modeSelectorOptions: [
+          {
+            label: 'Still Using After Achievement',
+            value: 'usagePostAchievementUsersBuilder',
+          },
+          {
+            label: 'Stopped Using After Achievement',
+            value: 'noUsagePostAchievementUsersBuilder',
+          },
+        ],
         tableOptions: {
           busy: false,
           sortBy: 'userId',
@@ -92,9 +114,13 @@ limitations under the License.
       this.loadData();
     },
     methods: {
+      updateMode(mode) {
+        this.chartToLoad = mode.value;
+        this.loadData();
+      },
       loadData() {
         this.loading = true;
-        MetricsService.loadChart(this.$route.params.projectId, 'usagePostAchievementUsersBuilder', {
+        MetricsService.loadChart(this.$route.params.projectId, this.chartToLoad, {
           skillId: this.$route.params.skillId, page: this.tableOptions.pagination.currentPage, pageSize: this.tableOptions.pagination.pageSize, sortDesc: this.tableOptions.sortDesc, sortBy: this.tableOptions.sortBy,
         })
           .then((dataFromServer) => {
