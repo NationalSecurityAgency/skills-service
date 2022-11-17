@@ -64,18 +64,18 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         assert skillsService.addSkill(skill, users[6], new Date()).body.skillApplied
 
         when:
-        def props = ["skillId": skill.skillId]
+        def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "userId", "sortDesc": false]
         def result = builder.build(proj.projectId, builder.id, props)
 
         then:
         result
-        result.size() == 2
-        result[0].userId == users[0]
-        result[0].count == 1
-        result[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
-        result[1].userId == users[3]
-        result[1].count == 3
-        result[1].date.toString() == dateFiveDaysAgo.format('YYYY-MM-dd 00:00:00.0')
+        result.totalCount == 2
+        result.users[0].userId == users[0]
+        result.users[0].count == 1
+        result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+        result.users[1].userId == users[3]
+        result.users[1].count == 3
+        result.users[1].date.toString() == dateFiveDaysAgo.format('YYYY-MM-dd 00:00:00.0')
     }
 
 }
