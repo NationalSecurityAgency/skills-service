@@ -456,14 +456,14 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         FROM user_events ue, (
             SELECT user_id, achieved_on, COUNT(id) AS counts FROM user_achievement 
             WHERE skill_ref_id = :skillRefId
-            GROUP BY user_id
+            GROUP BY user_id, user_achievement.achieved_on
         ) AS achievements 
         WHERE 
             ue.skill_ref_id = :skillRefId 
             AND ue.user_id = achievements.user_id 
             AND ue.event_time > achievements.achieved_on 
             AND ue.count >= :minEventCountThreshold
-        GROUP BY ue.user_id, achievements.achieved_on
+        GROUP BY ue.user_id
     ''', nativeQuery = true)
     public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold, Pageable pageable)
 
