@@ -20,6 +20,18 @@ limitations under the License.
                           @page-changed="pageChanged"
                           @page-size-changed="pageSizeChanged"
                           @sort-changed="sortTable">
+        <template v-slot:cell(userId)="data">
+          {{ data.item.userId }}
+
+          <b-button-group class="float-right">
+            <b-button :to="calculateClientDisplayRoute(data.item)"
+                      variant="outline-info" size="sm" class="text-secondary"
+                      v-b-tooltip.hover="'View User Details'"
+                      :aria-label="`View details for user ${data.item}`"
+                      data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
+            </b-button>
+          </b-button-group>
+        </template>
       </skills-b-table>
     </metrics-overlay>
   </metrics-card>
@@ -110,6 +122,18 @@ limitations under the License.
         // set to the first page
         this.tableOptions.pagination.currentPage = 1;
         this.loadData();
+      },
+      calculateClientDisplayRoute(props) {
+        return {
+          name: 'ClientDisplayPreviewSkill',
+          params: {
+            projectId: this.$route.params.projectId,
+            subjectId: this.$route.params.subjectId,
+            skillId: this.$route.params.skillId,
+            userId: props.userId,
+            dn: props.dn,
+          },
+        };
       },
     },
   };
