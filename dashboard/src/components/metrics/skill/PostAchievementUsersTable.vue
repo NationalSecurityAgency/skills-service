@@ -14,9 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="User List" data-cy="postAchievementUserList">
+  <metrics-card title="Users that Achieved this Skill" data-cy="postAchievementUserList">
     <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-      <skills-b-table :items="postAchievementUsers" :options="tableOptions" data-cy="postAchievementUsers-table" tableStoredStateId="postAchievementUsers-table">
+      <skills-b-table :items="postAchievementUsers" :options="tableOptions" data-cy="postAchievementUsers-table" tableStoredStateId="postAchievementUsers-table"
+                          @page-changed="pageChanged"
+                          @page-size-changed="pageSizeChanged"
+                          @sort-changed="sortTable">
       </skills-b-table>
     </metrics-overlay>
   </metrics-card>
@@ -64,6 +67,7 @@ limitations under the License.
             currentPage: 1,
             totalRows: 1,
             pageSize: 5,
+            server: true,
             possiblePageSizes: [5, 10, 15, 20, 50],
           },
           tableDescription: 'Skill Metrics',
@@ -79,15 +83,33 @@ limitations under the License.
       loadData() {
         this.loading = true;
         MetricsService.loadChart(this.$route.params.projectId, 'usagePostAchievementUsersBuilder', {
-          skillId: this.$route.params.skillId, page: 1, pageSize: 5, sortDesc: false, sortBy: 'user_id',
+          skillId: this.$route.params.skillId, page: this.tableOptions.pagination.currentPage, pageSize: this.tableOptions.pagination.pageSize, sortDesc: this.tableOptions.sortDesc, sortBy: this.tableOptions.sortBy,
         })
           .then((dataFromServer) => {
             if (dataFromServer) {
               this.hasData = true;
-              this.postAchievementUsers = dataFromServer;
+              this.tableOptions.pagination.totalRows = dataFromServer.totalCount;
+              this.postAchievementUsers = dataFromServer.users;
             }
             this.loading = false;
           });
+      },
+      pageChanged(pageNum) {
+        this.tableOptions.pagination.currentPage = pageNum;
+        this.loadData();
+      },
+      pageSizeChanged(newSize) {
+        this.tableOptions.pagination.pageSize = newSize;
+        this.loadData();
+      },
+      sortTable(sortContext) {
+        const sortBy = sortContext.sortBy === 'userId' ? 'user_id' : sortContext.sortBy;
+        this.tableOptions.sortBy = sortBy;
+        this.tableOptions.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.tableOptions.pagination.currentPage = 1;
+        this.loadData();
       },
     },
   };

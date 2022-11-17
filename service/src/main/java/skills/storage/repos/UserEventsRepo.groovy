@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.QueryHints
@@ -464,7 +465,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             AND ue.count >= :minEventCountThreshold
         GROUP BY ue.user_id
     ''', nativeQuery = true)
-    public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
+    public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold, Pageable pageable)
 
     @Query(value='''
     SELECT COUNT(counts.user_id) AS count, counts.countBucket AS label 
