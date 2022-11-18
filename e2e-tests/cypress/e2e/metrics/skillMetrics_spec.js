@@ -532,7 +532,7 @@ describe('Metrics Tests - Skills', () => {
 
     });
 
-    it.only('post achievement user table has no data', () => {
+    it('post achievement user table has no data', () => {
         cy.intercept('/admin/projects/proj1/metrics/usagePostAchievementUsersBuilder**')
             .as('usagePostAchievementUsersBuilder');
 
