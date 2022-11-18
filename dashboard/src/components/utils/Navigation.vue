@@ -69,9 +69,9 @@ limitations under the License.
           </ul>
         </b-collapse>
       </div>
-      <div class="col-md skills-menu-content" ref="content" tabindex="-1">
+      <div class="col-md skills-menu-content" ref="content">
         <div class="container-fluid pb-4">
-          <router-view id="mainContent2"></router-view>
+          <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate"></router-view>
         </div>
       </div>
     </div>
@@ -99,16 +99,6 @@ limitations under the License.
     destroyed() {
       window.removeEventListener('resize', this.handleResize);
     },
-    // watch: {
-    //   $route: {
-    //     immediate: true,
-    //     handler: function routeChange() {
-    //       this.$nextTick(() => {
-    //         this.$refs.content.focus({ preventScroll: true });
-    //       });
-    //     },
-    //   },
-    // },
     methods: {
       getCollapsedFromLocalStorage() {
         const storageCollapsed = localStorage.skillsNavCollapsed;

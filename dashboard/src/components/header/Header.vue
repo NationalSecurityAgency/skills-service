@@ -20,7 +20,7 @@ limitations under the License.
       @click="focusOnMainContent"
       @keydown.prevent.enter="focusOnMainContent"
       tabindex="0"
-      data-cy="skipToCtnButton">Skip to content</a>
+      data-cy="skipToContentButton">Skip to content</a>
     <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">
       <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">
         <i class="fas fa-circle fa-stack-2x"></i>
@@ -87,12 +87,10 @@ limitations under the License.
         //  there are currently only 3 levels
         this.$nextTick(() => {
           const foundId = toSearch.find((id) => document.getElementById(id));
-          // console.log(`found main section [${foundId}]`);
           if (foundId) {
             this.$nextTick(() => {
-              const focusOn = document.querySelector(`#${foundId} button, #${foundId} a`);
+              const focusOn = document.getElementById(foundId);
               if (focusOn) {
-                // console.log(`called focus on [${focusOn.nodeName}] |||| ${focusOn.innerHTML}`);
                 focusOn.focus({});
               }
             });

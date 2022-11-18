@@ -26,7 +26,7 @@ limitations under the License.
             <div v-if="!isLoading">
               <header-view v-if="isAuthenticatedUser && !this.$store.state.showUa" role="banner"/>
               <div role="main">
-                <router-view id="mainContent1" />
+                <router-view id="mainContent1" tabindex="-1" aria-label="Main content area, click tab to navigate" />
               </div>
             </div>
           </loading-container>
