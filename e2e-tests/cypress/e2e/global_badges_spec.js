@@ -1008,6 +1008,10 @@ describe('Global Badges Tests', () => {
 
         cy.visit('/administrator/globalBadges/badge1');
 
+        cy.get(`${tableSelector} th`)
+            .contains('Skill ID')
+            .click();
+
         for (let i = 0; i < 5; i +=1) {
             cy.get(`[data-cy="manage_skill${i}"]`).should('not.exist')
             cy.get(`[data-cy="deleteSkill_skill${i}"]`).should('exist')
