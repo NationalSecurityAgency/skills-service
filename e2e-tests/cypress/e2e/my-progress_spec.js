@@ -133,7 +133,7 @@ describe('Navigation Tests', () => {
         cy.addToMyProjects(2);
     });
 
-    it.only('visit My Progress page', function () {
+    it('visit My Progress page', function () {
 
         const getIframeBody = () => {
             // get the iframe > document > body
