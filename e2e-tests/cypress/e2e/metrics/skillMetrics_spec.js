@@ -531,4 +531,88 @@ describe('Metrics Tests - Skills', () => {
         ]);
 
     });
+
+    it.only('post achievement user table has no data', () => {
+        cy.intercept('/admin/projects/proj1/metrics/usagePostAchievementUsersBuilder**')
+            .as('usagePostAchievementUsersBuilder');
+
+        cy.intercept('/admin/projects/proj1/metrics/noUsagePostAchievementUsersBuilder**')
+            .as('noUsagePostAchievementUsersBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        const numDays = 1;
+        const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+        for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
+            let numUsers = users.length;
+            for (let userCounter = 0; userCounter < numUsers; userCounter += 1) {
+                console.log(`adding skillEvent for user ${users[userCounter]} for day ${m.clone()
+                    .add(dayCounter, 'day')}`);
+                cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                    {
+                        userId: `${users[userCounter]}_achieved@skills.org`,
+                        timestamp: m.clone()
+                            .add(dayCounter, 'day')
+                            .format('x')
+                    });
+            }
+        }
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        cy.clickNav('Metrics');
+
+        cy.get('[data-cy=modeSelector]').contains('Stopped Using After Achievement').click()
+        cy.wait('@noUsagePostAchievementUsersBuilder');
+        cy.wait(8000);
+        cy.validateTable('[data-cy=postAchievementUserList]', [
+            [
+                {
+                    colIndex: 0,
+                    value: 'user5'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user4'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user3'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user2'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user1'
+                },
+            ],
+        ]);
+
+    });
 });
