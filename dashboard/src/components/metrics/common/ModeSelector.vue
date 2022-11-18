@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <span data-cy="modeSelector" class="time-length-selector">
+  <span data-cy="modeSelector" class="mode-selector">
     <b-badge v-for="(item, index) in options" :key="`${index}`"
       class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
              :variant="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
@@ -53,7 +53,7 @@ limitations under the License.
   cursor: pointer;
 }
 
-.time-length-selector {
+.mode-selector {
   padding-right: 8em;
 }
 
