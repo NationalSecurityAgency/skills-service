@@ -198,7 +198,7 @@ describe('Approver Config Users Tests', () => {
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector).contains('User').click();
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click().type('userE');
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userE').click({force: true});
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
 
