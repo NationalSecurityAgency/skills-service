@@ -56,7 +56,7 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
         }
         PageRequest pageRequest = PageRequest.of(props.page.toInteger() - 1, props.pageSize.toInteger(), props.sortDesc.toBoolean() ? DESC : ASC, props.sortBy)
         List<UserMetrics> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1, pageRequest) ?: null
-        def totalCount = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1)
+        def totalCount = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: 0
 
         return [ users: usersPostAchievement, totalCount: totalCount ]
     }

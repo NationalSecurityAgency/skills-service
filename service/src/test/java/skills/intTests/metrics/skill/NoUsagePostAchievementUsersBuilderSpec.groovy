@@ -75,4 +75,36 @@ class NoUsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
     }
 
+    def "pages appropriately"() {
+        def proj = SkillsFactory.createProject()
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 2,  )
+        skill.pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkill(skill)
+
+        def users = getRandomUsers(7)
+
+        // user 1 - achieved and used after
+        users.forEach( it -> {
+            // user 1 - achieved and used after
+            assert skillsService.addSkill(skill, it, new Date() - 4).body.skillApplied
+            assert skillsService.addSkill(skill, it, new Date() - 3).body.skillApplied
+        })
+
+        when:
+        def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "userId", "sortDesc": false]
+        def pageOne = builder.build(proj.projectId, builder.id, props)
+        props.page = 2
+        def pageTwo = builder.build(proj.projectId, builder.id, props)
+
+        then:
+        pageOne
+        pageOne.totalCount == 7
+        pageOne.users.size() == 5
+        pageTwo
+        pageTwo.totalCount == 7
+        pageTwo.users.size() == 2
+    }
 }

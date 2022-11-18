@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card title="Users that Achieved this Skill" data-cy="postAchievementUserList">
+  <metrics-card title="Users that Achieved this Skill" data-cy="postAchievementUserList" :no-padding="true">
     <template v-slot:afterTitle>
-      <span class="text-muted ml-2">|</span>
-      <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
+      <div class="d-block d-lg-inline-block">
+        <span class="text-muted ml-2 d-none d-lg-inline-block">|</span>
+        <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
+      </div>
     </template>
     <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
       <skills-b-table :items="postAchievementUsers" :options="tableOptions" data-cy="postAchievementUsers-table" tableStoredStateId="postAchievementUsers-table"
@@ -64,11 +66,11 @@ limitations under the License.
         chartToLoad: 'usagePostAchievementUsersBuilder',
         modeSelectorOptions: [
           {
-            label: 'Still Using After Achievement',
+            label: 'Still Using',
             value: 'usagePostAchievementUsersBuilder',
           },
           {
-            label: 'Stopped Using After Achievement',
+            label: 'Stopped',
             value: 'noUsagePostAchievementUsersBuilder',
           },
         ],
@@ -88,7 +90,7 @@ limitations under the License.
             },
             {
               key: 'count',
-              label: 'Times Used',
+              label: 'Times Performed',
               sortable: true,
             },
             {

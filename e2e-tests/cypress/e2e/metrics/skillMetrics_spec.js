@@ -474,11 +474,10 @@ describe('Metrics Tests - Skills', () => {
 
         const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
         const numDays = 20;
-        const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+        const users = ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8'];
         for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
-            let numUsers = (numDays + 1 - dayCounter) / 4;
-            numUsers = numUsers == 0 ? 1 : numUsers;
-            for (let userCounter = 0; userCounter <= numUsers; userCounter += 1) {
+            let numUsers = users.length;
+            for (let userCounter = 0; userCounter < numUsers; userCounter += 1) {
                 console.log(`adding skillEvent for user ${users[userCounter]} for day ${m.clone()
                     .add(dayCounter, 'day')}`);
                 cy.request('POST', `/api/projects/proj1/skills/skill1`,
@@ -495,9 +494,25 @@ describe('Metrics Tests - Skills', () => {
         cy.clickNav('Metrics');
         cy.wait('@usagePostAchievementUsersBuilder');
 
-        cy.wait(8000);
-
         cy.validateTable('[data-cy=postAchievementUserList]', [
+            [
+                {
+                    colIndex: 0,
+                    value: 'user8'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user7'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user6'
+                },
+            ],
             [
                 {
                     colIndex: 0,
@@ -559,7 +574,7 @@ describe('Metrics Tests - Skills', () => {
 
         const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
         const numDays = 1;
-        const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+        const users = ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8'];
         for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
             let numUsers = users.length;
             for (let userCounter = 0; userCounter < numUsers; userCounter += 1) {
@@ -578,10 +593,28 @@ describe('Metrics Tests - Skills', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
 
-        cy.get('[data-cy=modeSelector]').contains('Stopped Using After Achievement').click()
+        cy.get('[data-cy=modeSelector]').contains('Stopped').click()
         cy.wait('@noUsagePostAchievementUsersBuilder');
-        cy.wait(8000);
+
         cy.validateTable('[data-cy=postAchievementUserList]', [
+            [
+                {
+                    colIndex: 0,
+                    value: 'user8'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user7'
+                },
+            ],
+            [
+                {
+                    colIndex: 0,
+                    value: 'user6'
+                },
+            ],
             [
                 {
                     colIndex: 0,
