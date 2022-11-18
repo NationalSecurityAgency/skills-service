@@ -69,7 +69,7 @@ describe('Approver Config Tests', () => {
             cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
             cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
             cy.get(`[data-cy="workloadCell_${defaultUser}"]`).contains('Default Fallback - All Unmatched Requests')
             cy.get(`[data-cy="workloadCell_${defaultUser}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
 
@@ -112,7 +112,7 @@ describe('Approver Config Tests', () => {
 
             cy.configureApproverForSkillId(1, 'user2', 1)
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
             const user1 = 'user1'
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
@@ -146,7 +146,7 @@ describe('Approver Config Tests', () => {
             cy.configureApproverForSkillId(1, 'user1', 1)
             cy.configureApproverForSkillId(1, 'user2', 1)
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
             const user1 = 'user1'
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
