@@ -60,6 +60,7 @@ describe('Approver Config Tests', () => {
     });
 
     it('assign approver to handle all of the approval requests', function () {
+        cy.viewport(1200, 1200);
         cy.fixture('vars.json').then((vars) => {
             cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
             cy.visit('/administrator/projects/proj1/self-report/configure');

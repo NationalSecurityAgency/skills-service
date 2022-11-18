@@ -39,7 +39,7 @@ limitations under the License.
 
       <template v-slot:cell(userIdForDisplay)="data">
         <div class="p-2 pl-3">
-          <div :class="{'font-weight-bold text-primary bigger-text' : data.detailsShowing }">{{ data.value }}</div>
+          <div :class="{'font-weight-bold text-primary bigger-text' : data.detailsShowing }">{{ data.value }} ({{ data.item.userId }})</div>
           <div v-if="data.detailsShowing"><i class="fas fa-user-edit animate__bounceIn text-warning" aria-hidden="true"/> Editing...</div>
         </div>
       </template>
