@@ -638,9 +638,7 @@ describe('Subjects Tests', () => {
         cy.wait('@saveSubject1');
         cy.contains('Editing Existing Subject').should('not.exist');
         cy.wait(300);
-        // because the route changed due to the id being edited, focus is returned to the main content area
-        cy.get('[data-cy=btn_edit-subject]').should('not.have.focus');
-        cy.get('.skills-menu-content').should('have.focus');
+        cy.get('[data-cy=btn_edit-subject]').should('have.focus');
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
         cy.contains('ID: subj1').should('not.exist');
         cy.get('[data-cy=breadcrumb-subj1]').should('not.exist');

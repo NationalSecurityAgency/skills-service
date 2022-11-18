@@ -117,7 +117,7 @@ describe('Skip To Content Tests', () => {
 
         cy.visit('/administrator/projects/proj1/self-report/configure')
         cy.contains('The ability to split the approval workload is unavaila')
-        cy.skipToContentAndValidate('#mainContent3')
+        cy.skipToContentAndValidate('#mainContent2')
     });
 
 
