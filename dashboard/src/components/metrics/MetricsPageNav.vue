@@ -21,7 +21,7 @@ limitations under the License.
 
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
     <div style="width: 99%;">
-      <router-view></router-view>
+      <router-view id="mainContent3" tabindex="-1" aria-label="Main content area, click tab to navigate" ></router-view>
       <project-metrics-nav-cards :nav-cards="navCards"/>
     </div>
   </div>

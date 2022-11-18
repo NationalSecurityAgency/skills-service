@@ -231,9 +231,6 @@ describe('Navigation Tests', () => {
         cy.dashboardCd()
             .contains('Overall Points');
         getIframeBody()
-            .find('.skills-display-container')
-            .should('have.focus');
-        getIframeBody()
             .find('[data-cy=skillsTitle]')
             .contains('PROJECT: This is project 1')
             .should('be.visible');
