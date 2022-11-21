@@ -283,7 +283,8 @@ describe('Projects Table Tests', () => {
         /* focus is automatically getting switched back to the edit button which pre-emptively moves the cursor out of the text input field before
           before the full text has been entered depending on test timing
          */
-        cy.wait(350);
+        cy.wait(600);
+        cy.get('[data-cy="projectsTable-projectFilter"]').should('be.enabled')
         cy.get('[data-cy="projectsTable-projectFilter"]')
             .type('Changed');
         cy.get('[data-cy="projectsTable-filterBtn"]')
