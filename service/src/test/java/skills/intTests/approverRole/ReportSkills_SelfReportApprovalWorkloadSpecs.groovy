@@ -36,10 +36,10 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        List<String> expectedEmails = getEmails(approvers, skillsService)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        List<String> expectedEmails = getEmails(testUsers.approvers, skillsService)
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -52,12 +52,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        testUsers.approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
 
-        List<String> expectedEmails = getEmails([approvers[0], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -70,13 +70,13 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
-        approvers[1].subscribeToSelfApprovalRequestEmails(proj.projectId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        testUsers.approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        testUsers.approvers[1].subscribeToSelfApprovalRequestEmails(proj.projectId)
 
-        List<String> expectedEmails = getEmails(approvers, skillsService)
+        List<String> expectedEmails = getEmails(testUsers.approvers, skillsService)
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -89,13 +89,13 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        approvers[0].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
-        approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        testUsers.approvers[0].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
+        testUsers.approvers[1].unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
         skillsService.unsubscribeFromSelfApprovalRequestEmails(proj.projectId)
 
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         Thread.sleep(1000)
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, 0 )
 
@@ -109,11 +109,11 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 3)
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
-        List<String> expectedEmails = getEmails([approvers[1]])
+        TestUsers testUsers = createTestUsers(proj, 3)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
+        List<String> expectedEmails = getEmails([testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -126,12 +126,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 4)
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
-        skillsService.configureFallbackApprover(proj.projectId, approvers[3].userName)
-        List<String> expectedEmails = getEmails([approvers[1], approvers[3]])
+        TestUsers testUsers = createTestUsers(proj, 4)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[3].userName)
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], testUsers.approvers[3]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -144,12 +144,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
 
-        List<String> expectedEmails = getEmails([approvers[0]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -162,22 +162,22 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 3)
+        TestUsers testUsers = createTestUsers(proj, 3)
         // approver 1
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[1].skillId)
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[2].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[0].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[2].skillId)
         // approver 3
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[1].skillId)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[2].skillId)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[3].skillId)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[4].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[2].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[2].userName, skills[2].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[2].userName, skills[3].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[2].userName, skills[4].skillId)
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -190,12 +190,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
+        TestUsers testUsers = createTestUsers(proj, 2)
         skillsService.configureApproverForSkillId(proj.projectId, skillsService.userName, skills[0].skillId)
 
         List<String> expectedEmails = getEmails([skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -208,12 +208,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -226,14 +226,14 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
 
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
 
-        List<String> expectedEmails = getEmails([approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -246,15 +246,15 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSelfReportSkills(5,)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
 
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -271,13 +271,13 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, "userA")
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
 
-        List<String> expectedEmails = getEmails([approvers[0]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -294,25 +294,23 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB, String userC) = [randomUsers[3], randomUsers[4], randomUsers[5]]
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 3, randomUsers)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userC)
+        TestUsers testUsers = createTestUsers(proj, 3)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userC)
 
         // 1st approver
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
         // 2nd approver
-        skillsService.configureApproverForUser(proj.projectId, approvers[1].userName, userA)
-        skillsService.configureApproverForUser(proj.projectId, approvers[1].userName, userC)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[1].userName, testUsers.userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[1].userName, testUsers.userC)
         // 3rd approver
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userC)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userC)
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -329,15 +327,13 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, userA)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -354,17 +350,15 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, userA)
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -381,16 +375,14 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, userA)
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
 
-        List<String> expectedEmails = getEmails([approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -408,19 +400,20 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        TestUsers testUsers = createTestUsers(proj, 2)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
-        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2)
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "AbCd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "AbCd")
 
-        List<String> expectedEmails = getEmails([approvers[0]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -437,22 +430,19 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-
         String userTagKey = "key1"
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<String> expectedEmails = getEmails([approvers[0]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -469,28 +459,29 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], "userA")
+        TestUsers testUsers = createTestUsers(proj, 3)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag("userA", userTagKey, ["aBcD"])
-        rootUser.saveUserTag("userA", userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 3)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "efgh")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "efgh")
         // approver 2
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[1].userName, userTagKey, "aBc")
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[1].userName, userTagKey, "deaef")
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[1].userName, userTagKey, "B")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[1].userName, userTagKey, "aBc")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[1].userName, userTagKey, "deaef")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[1].userName, userTagKey, "B")
         // approver 3
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[2].userName, userTagKey, "deaef")
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[2].userName, userTagKey, "B")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[2].userName, userTagKey, "deaef")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[2].userName, userTagKey, "B")
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "userA").body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -507,22 +498,19 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["abcd"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -539,25 +527,22 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["abcd"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
-        skillsService.configureFallbackApprover(proj.projectId, approvers[1].userName)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
-        List<String> expectedEmails = getEmails([approvers[1], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -574,23 +559,20 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(6, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[2], randomUsers[3]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["abcd"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 2, randomUsers)
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
         List<String> expectedEmails = getEmails([skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userB).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -607,33 +589,30 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[0].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userA)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userA)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1], testUsers.approvers[2]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -650,39 +629,36 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[0].userName, skills[0].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[0].userName, userA)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[0].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[0].userName, testUsers.userA)
         // approver 2
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[1].userName, userTagKey, "A")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[1].userName, userA)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[1].userName, userTagKey, "A")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[1].userName, testUsers.userA)
         // approver 3
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[2].userName, userTagKey, "Abc")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[2].userName, skills[0].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userA)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[2].userName, userTagKey, "Abc")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[2].userName, skills[0].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userA)
 
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1], approvers[2]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1], testUsers.approvers[2]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -699,32 +675,29 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[0].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[0].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        List<String> expectedEmails = getEmails([approvers[0], approvers[1]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0], testUsers.approvers[1]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -741,32 +714,30 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
+        TestUsers testUsers = createTestUsers(proj, 5)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[1].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        List<String> expectedEmails = getEmails([approvers[0]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[0]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -783,32 +754,29 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "A1b")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[1].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        List<String> expectedEmails = getEmails([approvers[4], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[4], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -825,35 +793,32 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "A1b")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[1].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        skillsService.configureFallbackApprover(proj.projectId, approvers[4].userName)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[4].userName)
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
-        List<String> expectedEmails = getEmails([approvers[4], skillsService])
+        List<String> expectedEmails = getEmails([testUsers.approvers[4], skillsService])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -871,34 +836,31 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        List<String> randomUsers = getRandomUsers(8, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        def (String userA, String userB) = [randomUsers[5], randomUsers[6]]
-
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userA)
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], userB)
+        TestUsers testUsers = createTestUsers(proj, 5)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userB)
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(userA, userTagKey, ["efgh"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        List<SkillsService> approvers = createAdditionalApprovers(proj, 5, randomUsers)
         // approver 1
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[0].userName, userTagKey, "A1b")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "A1b")
         // approver 2
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[1].userName, skills[1].skillId)
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[1].userName, skills[1].skillId)
         // approver 3
-        skillsService.configureApproverForUser(proj.projectId, approvers[2].userName, userB)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[2].userName, testUsers.userB)
         // approver 4 - wont match anything
-        skillsService.configureApproverForUserTag(proj.projectId, approvers[3].userName, userTagKey, "A1b")
-        skillsService.configureApproverForSkillId(proj.projectId, approvers[3].userName, skills[1].skillId)
-        skillsService.configureApproverForUser(proj.projectId, approvers[3].userName, userB)
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[3].userName, userTagKey, "A1b")
+        skillsService.configureApproverForSkillId(proj.projectId, testUsers.approvers[3].userName, skills[1].skillId)
+        skillsService.configureApproverForUser(proj.projectId, testUsers.approvers[3].userName, testUsers.userB)
 
-        skillsService.configureFallbackApprover(proj.projectId, approvers[4].userName)
+        skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[4].userName)
 
-        List<String> expectedEmails = getEmails([approvers[4]])
+        List<String> expectedEmails = getEmails([testUsers.approvers[4]])
         when:
-        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userA).body.explanation == "Skill was submitted for approval"
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA).body.explanation == "Skill was submitted for approval"
         List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
 
         then:
@@ -910,22 +872,31 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         return all.collect { userAttrsRepo.findByUserId(it.userName).email }
     }
 
-    private List createAdditionalApprovers(def proj, int numUsers, List<String> poolOfRandomUsers = null) {
-        List<String> users
-        if (poolOfRandomUsers) {
-            users = poolOfRandomUsers[0..(numUsers-1)]
-        } else {
-            users = getRandomUsers(numUsers, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        }
+    static class TestUsers {
+        List<SkillsService> approvers
+        String userA
+        String userB
+        String userC
+    }
 
-        List res = users.collect {
+    private TestUsers createTestUsers(def proj, int numApprovers) {
+        TestUsers res = new TestUsers()
+        List<String> allUserIds = getRandomUsers(numApprovers+3, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        List<String> approverUserId = allUserIds[0..(numApprovers-1)]
+
+        res.approvers = approverUserId.collect {
             def userService = createService(it)
             skillsService.addUserRole(userService.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
             return userService
         }
         // email is sent when approver role is added
-        WaitFor.wait { greenMail.getReceivedMessages().size() == numUsers }
+        WaitFor.wait { greenMail.getReceivedMessages().size() == numApprovers }
         greenMail.purgeEmailFromAllMailboxes()
+
+        res.userA = allUserIds[numApprovers]
+        res.userB = allUserIds[numApprovers + 1]
+        res.userC = allUserIds[numApprovers + 2]
+
         return res
     }
 
