@@ -177,14 +177,12 @@ class SkillEventAdminService {
     @Profile
     @Transactional
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
-        RequestResult res = new RequestResult()
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        res.success = true
-        return res
+        return RequestResult.success()
     }
 
     @Transactional

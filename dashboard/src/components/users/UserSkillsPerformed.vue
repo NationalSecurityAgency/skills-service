@@ -36,9 +36,9 @@ limitations under the License.
             <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
             <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
           </div>
-          <div class="col">
+          <div class="col text-right mr-2">
             <b-button @click="deleteAllSkills" variant="outline-info" :disabled="table.items.length === 0" data-cy="performedSkills-deleteAll"
-                      :aria-label="`remove all skill events from user`" style="float: right; margin-right: 15px">
+                      :aria-label="`remove all skill events from user`">
               <i class="fas fa-trash" aria-hidden="true"/> Delete All
             </b-button>
           </div>
@@ -85,6 +85,12 @@ limitations under the License.
       </skills-b-table>
       </div>
     </b-card>
+
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteAllSkills">
+      <p>
+        This will delete all skill events for <span class="text-primary font-weight-bold">{{this.userId}}</span>.
+      </p>
+    </removal-validation>
   </div>
 </template>
 
@@ -101,6 +107,7 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
 
   const { mapActions } = createNamespacedHelpers('users');
 
@@ -113,6 +120,7 @@ limitations under the License.
       DateCell,
       SkillsBTable,
       SubPageHeader,
+      RemovalValidation,
     },
     data() {
       return {
@@ -144,6 +152,7 @@ limitations under the License.
         },
         projectId: null,
         userId: null,
+        showDeleteDialog: false,
       };
     },
     created() {
@@ -244,11 +253,7 @@ limitations under the License.
           });
       },
       deleteAllSkills() {
-        this.msgConfirm(`Removing all skills for [${this.userId}].  This will permanently remove all of this user's skill events and cannot be undone.`).then((res) => {
-          if (res) {
-            this.doDeleteAllSkills();
-          }
-        });
+        this.showDeleteDialog = true;
       },
       doDeleteSkill(skill) {
         this.isLoading = true;

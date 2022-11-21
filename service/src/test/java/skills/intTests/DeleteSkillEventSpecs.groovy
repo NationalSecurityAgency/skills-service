@@ -96,11 +96,13 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.updateBadge(badge, badge.badgeId)
 
         String userId = "user1"
+        String secondUserId = "user2"
         Long timestamp = new Date().time
 
         setup:
         skills.forEach { it ->
             skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date(timestamp))
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(timestamp))
         }
 
         def userInfo = skillsService.getUserStats(proj.projectId, userId)
@@ -112,17 +114,37 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert badges.size() == 1
         assert badges[0].badgeAchieved == true
 
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        assert addedSkills
+        assert addedSkills.totalCount == 30
+        def secondUserSkills = skillsService.getPerformedSkills(secondUserId, proj.projectId)
+        assert secondUserSkills.totalCount == 30
+
+        def subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        def subjectSummaryUser2 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        assert subjectSummary?.skills.size() == 30
+        assert subjectSummaryUser2?.skills.size() == 30
+
         when:
         skillsService.deleteAllSkillEvents([projectId: proj.projectId, userId: userId])
+        subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        subjectSummaryUser2 = skillsService.getSkillSummary(secondUserId, proj.projectId, subj.subjectId)
         userInfo = skillsService.getUserStats(proj.projectId, userId)
         level = skillsService.getUserLevel(proj.projectId, userId)
         badges = skillsService.getBadgesSummary(userId, proj.projectId)
+        addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        secondUserSkills = skillsService.getPerformedSkills(secondUserId, proj.projectId)
+        subjectSummary?.skills == []
+        subjectSummaryUser2.skills.size() == 30
 
         then:
         userInfo.numSkills == 0
         userInfo.userTotalPoints == 0
         level == 0
         badges[0].badgeAchieved == false
+        addedSkills.totalCount == 0
+        secondUserSkills.totalCount == 30
+
     }
 
     def "delete skill event on skill imported from the catalog should not work"() {
