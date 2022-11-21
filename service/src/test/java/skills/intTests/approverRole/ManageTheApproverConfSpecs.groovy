@@ -123,14 +123,14 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
 
         SkillsService rootUser = createRootSkillService()
-        String userTagKey = "key1"
+        String userTagKey = "KeY1"
         rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
-        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "efgh")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey.toLowerCase(), "efgh")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)

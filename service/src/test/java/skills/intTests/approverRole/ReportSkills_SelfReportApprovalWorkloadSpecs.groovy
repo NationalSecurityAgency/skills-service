@@ -405,9 +405,9 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
-        String userTagKey = "key1"
-        rootUser.saveUserTag(testUsers.userA, userTagKey, ["aBcD"])
-        rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
+        String userTagKey = "kEy1"
+        rootUser.saveUserTag(testUsers.userA, userTagKey.toLowerCase(), ["aBcD"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey.toLowerCase(), ["efgh"])
 
         skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "AbCd")
 
@@ -430,9 +430,9 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj2)
         skillsService.createSkills(subj2_skills)
 
-        String userTagKey = "key1"
+        String userTagKey = "KeY1"
         TestUsers testUsers = createTestUsers(proj, 2)
-        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "Ab")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "Ab")
 
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
@@ -502,11 +502,11 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
-        String userTagKey = "key1"
+        String userTagKey = "KeY1"
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "abcd")
 
         List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
@@ -531,12 +531,12 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], testUsers.userA)
 
         SkillsService rootUser = createRootSkillService()
-        String userTagKey = "key1"
+        String userTagKey = "KeY1"
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
 
-        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "abcd")
         skillsService.configureFallbackApprover(proj.projectId, testUsers.approvers[1].userName)
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
