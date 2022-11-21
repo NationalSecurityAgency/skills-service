@@ -114,11 +114,11 @@ class ApproverConfValidationSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
 
         SkillsService rootUser = createRootSkillService()
-        String userTagKey = "key1"
+        String userTagKey = "KeY1"
         rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "abc")
         when:
         skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
 

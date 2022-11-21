@@ -28,7 +28,7 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
     SkillApprovalConf findByProjectIdAndApproverUserIdAndUserId(String projectId, String approverId, String userId)
 
     @Nullable
-    SkillApprovalConf findByProjectIdAndApproverUserIdAndUserTagKeyAndUserTagValue(String projectId, String approverId, String userTagKey, String userTagValue)
+    SkillApprovalConf findByProjectIdAndApproverUserIdAndUserTagKeyIgnoreCaseAndUserTagValue(String projectId, String approverId, String userTagKey, String userTagValue)
 
     long countByProjectIdAndApproverUserId(String projectId, String approverId)
 

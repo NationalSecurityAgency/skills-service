@@ -120,8 +120,8 @@ describe('Approver Config User Tags Tests', () => {
         const user1 = 'user1'
         const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="tagKeyConfTable"]`
         cy.visit('/administrator/projects/proj1/self-report/configure');
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: second')
 
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
@@ -133,8 +133,8 @@ describe('Approver Config User Tags Tests', () => {
                 value: 'first'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: second').should('not.exist')
 
         // refresh and revalidate
         cy.visit('/administrator/projects/proj1/self-report/configure');
@@ -145,15 +145,15 @@ describe('Approver Config User Tags Tests', () => {
                 value: 'first'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: second').should('not.exist')
 
         // remove last one
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('not.exist')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValue_first"] [data-cy="deleteBtn"]`).click()
         cy.get(tableSelector).should('not.exist')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: first').should('not.exist')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagkey: second').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: first').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in tagKey: second').should('not.exist')
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('exist')
 

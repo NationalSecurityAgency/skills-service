@@ -91,7 +91,7 @@ class SplitWorkloadService {
             if ((!matchesSkillIdConf && !matchesUserIdConf) && userTags && it.confUserTags) {
                 checkingTagConf:
                 for (Map.Entry<String, List<String>> configuredTagConf : it.confUserTags.entrySet()) {
-                    List<String> userTagValues = userTags.get(configuredTagConf.key)
+                    List<String> userTagValues = userTags.get(configuredTagConf.key?.toLowerCase())
                     for (String userTagValue : userTagValues) {
                         boolean foundMatch = configuredTagConf.value.find { userTagValue.toLowerCase().startsWith(it.toLowerCase()) }
                         if (foundMatch) {
@@ -109,11 +109,13 @@ class SplitWorkloadService {
     @Profile
     private Map<String, List<String>> loadUserTags(List<ApproverInfo> configuredApprovers, String userId) {
         Map<String, List<String>> userTags
-        if (configuredApprovers.find { !it.confUserTags.isEmpty() }) {
-            List<UserTag> dbUserTags = userTagRepo.findAllByUserId(userId)
+        Set<String> configuredKeys = configuredApprovers.findAll { !it.confUserTags.isEmpty() }
+                ?.collect { it.confUserTags.keySet().collect { it.toLowerCase() } }?.flatten()?.unique()
+        if (configuredKeys) {
+            List<UserTag> dbUserTags = userTagRepo.findAllByUserIdAndKeyIn(userId, configuredKeys)
             if (dbUserTags) {
                 userTags = [:]
-                dbUserTags.groupBy { it.key }.each {
+                dbUserTags.groupBy { it.key?.toLowerCase() }.each {
                     userTags.put(it.key, it.value.collect { it.value })
                 }
             }
