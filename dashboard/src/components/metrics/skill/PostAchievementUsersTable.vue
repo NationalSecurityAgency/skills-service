@@ -27,13 +27,13 @@ limitations under the License.
                           @page-size-changed="pageSizeChanged"
                           @sort-changed="sortTable">
         <template v-slot:cell(userId)="data">
-          {{ data.item.userId }}
+          {{ getUserDisplay(data.item) }}
 
           <b-button-group class="float-right">
             <b-button :to="calculateClientDisplayRoute(data.item)"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'View User Details'"
-                      :aria-label="`View details for user ${data.item}`"
+                      :aria-label="`View details for user ${getUserDisplay(data.item)}`"
                       data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
             </b-button>
           </b-button-group>
@@ -53,9 +53,11 @@ limitations under the License.
   import MetricsOverlay from '../utils/MetricsOverlay';
   import ModeSelector from '../common/ModeSelector';
   import DateCell from '../../utils/table/DateCell';
+  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
 
   export default {
     name: 'PostAchievementUsersTable',
+    mixins: [UserIdForDisplayMixin],
     components: {
       MetricsOverlay, MetricsCard, SkillsBTable, ModeSelector, DateCell,
     },
