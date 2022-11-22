@@ -16,7 +16,6 @@
 package skills.intTests
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.RandomStringUtils
 import org.apache.http.ssl.SSLContextBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
@@ -51,6 +50,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
     TestUtils testUtils = new TestUtils()
     String projId = SkillsFactory.defaultProjId
+    List<String> sampleUserIds // loaded from system props
     StompSession stompSession
     List<Map> subj1, subj2, subj3
 
@@ -64,6 +64,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
     def setup() {
         skillsService.deleteProjectIfExist(projId)
+        sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
         subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
         subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
@@ -79,22 +80,21 @@ class WebsocketSpecs extends DefaultIntSpec {
 
    def "achieve subject's level - validate via websocket"(){
         given:
-        String randomUser = getRandomUser()
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 5, randomUser)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults)
 
         when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
 
         (0..4).each {
-            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], randomUser, dates.get(it))
-            subjSummaryRes << skillsService.getSkillSummary(randomUser, projId, subj1.get(it).subjectId)
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
         then:
         interaction {
             if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
@@ -106,7 +106,6 @@ class WebsocketSpecs extends DefaultIntSpec {
     def "Non-notified badge achievements are notified when user connects to websocket" () {
         given:
 
-        String randomUser = getRandomUser()
         def badge = SkillsFactory.createBadge()
         badge.enabled = false
         skillsService.createBadge(badge)
@@ -114,8 +113,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj2.get(0).skillId])
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], "${randomUser}@skills.org", new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], "${randomUser}@skills.org", new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
         }
 
         skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
@@ -123,8 +122,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         List<SkillEventResult> wsResults = []
 
         when:
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, "${randomUser}@skills.org")
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults.find{it.skillId=='badge1'}.success
@@ -137,8 +136,6 @@ class WebsocketSpecs extends DefaultIntSpec {
     def "Non-notified global badge achievements are notified when user connects to websocket" () {
         given:
 
-        String randomUser = getRandomUser()
-        String randomUser2 = getRandomUser()
         def badge = SkillsFactory.createBadge()
         badge.enabled = false
         skillsService.createGlobalBadge(badge)
@@ -152,13 +149,13 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj2.get(1).skillId])
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], randomUser, new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], randomUser, new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
         }
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], randomUser2, new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], randomUser2, new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], 'skills2@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], 'skills2@skills.org', new Date()-it)
         }
 
         skillsService.createGlobalBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
@@ -168,10 +165,10 @@ class WebsocketSpecs extends DefaultIntSpec {
         List<SkillEventResult> wsResults2 = []
 
         when:
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, randomUser)
-        CountDownLatch messagesReceived2 = setupWebsocketConnection(wsResults2, false, false, 1, randomUser2)
-        messagesReceived.await(30, TimeUnit.SECONDS)
-        messagesReceived2.await(30, TimeUnit.SECONDS)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        CountDownLatch messagesReceived2 = setupWebsocketConnection(wsResults2, false, false, 1, 'skills2@skills.org')
+        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived2.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults
@@ -191,13 +188,12 @@ class WebsocketSpecs extends DefaultIntSpec {
     }
 
     def "non-notified skill achievements are notified when user connects to websocket" () {
-        String randomUser = getRandomUser()
         def subj = SkillsFactory.createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 150)
         skillsService.createSubject(subj)
         skillsService.createSkill(skill)
 
-        skillsService.addSkill([projectId: projId, skillId: skill.skillId], randomUser, new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill.skillId], 'skills@skills.org', new Date())
 
 
         skill.numPerformToCompletion = 1
@@ -206,8 +202,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         List<SkillEventResult> wsResults = []
 
         when:
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, randomUser)
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -220,13 +216,12 @@ class WebsocketSpecs extends DefaultIntSpec {
     }
 
     def "non-notified project level achievements are notified when user connects to websocket" () {
-        String randomUser = getRandomUser()
         def subj = SkillsFactory.createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 1800)
         skillsService.createSubject(subj)
         skillsService.createSkill(skill)
 
-        skillsService.addSkill([projectId: projId, skillId: skill.skillId], randomUser, new Date())
+        skillsService.addSkill([projectId: projId, skillId: skill.skillId], 'skills@skills.org', new Date())
 
         skill.numPerformToCompletion = 1
         skillsService.updateSkill(skill, skill.skillId)
@@ -234,8 +229,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         List<SkillEventResult> wsResults = []
 
         when:
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, randomUser)
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -249,21 +244,20 @@ class WebsocketSpecs extends DefaultIntSpec {
 
    def "achieve subject's level - validate via xhr streaming"(){
         given:
-        String randomUser = getRandomUser()
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, false, 5, randomUser)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true)
 
         when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
         (0..4).each {
-            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], randomUser, dates.get(it))
-            subjSummaryRes << skillsService.getSkillSummary(randomUser, projId, subj1.get(it).subjectId)
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         interaction {
@@ -275,21 +269,20 @@ class WebsocketSpecs extends DefaultIntSpec {
 
     def "achieve subject's level - validate via xhr polling"(){
         given:
-        String randomUser = getRandomUser()
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
         boolean skillsAdded = false
-        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true, 5, randomUser)
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true)
 
         when:
         List<Date> dates = testUtils.getLastNDays(5)
         List addSkillRes = []
         (0..4).each {
-            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], randomUser, dates.get(it))
-            subjSummaryRes << skillsService.getSkillSummary(randomUser, projId, subj1.get(it).subjectId)
+            addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
+            subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         interaction {
@@ -305,8 +298,9 @@ class WebsocketSpecs extends DefaultIntSpec {
         CountDownLatch messagesReceived = new CountDownLatch(count)
         List<Transport> transports = []
 
+        // setup websocket connection for sampleUserIds[0]
         if(userId == null) {
-            userId = getRandomUser()
+            userId = sampleUserIds.get(0)
         }
 
         if (xhr) {
@@ -424,9 +418,5 @@ class WebsocketSpecs extends DefaultIntSpec {
         def userProps = [:]
         userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", builder.build())
         standardWebSocketClient.setUserProperties(userProps)
-    }
-
-    private String getRandomUser() {
-        return RandomStringUtils.randomAlphabetic(5).toLowerCase()
     }
 }
