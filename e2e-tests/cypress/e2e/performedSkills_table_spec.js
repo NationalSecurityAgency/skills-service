@@ -649,7 +649,7 @@ describe('Performed Skills Table Tests', () => {
             .should('not.exist');
     });
 
-    it('delete all skill events', () => {
+    it.only('delete all skill events', () => {
         cy.createSkills(3);
         cy.report(3, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
@@ -670,11 +670,15 @@ describe('Performed Skills Table Tests', () => {
         ], 5);
 
         cy.get('[data-cy="performedSkills-deleteAll"]').click()
-        cy.contains('Removing all skills for [user1@skills.org]');
-        cy.contains('YES, Delete It!').click();
+        cy.contains('This will delete all skill events for user1@skills.org.');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="removeButton"]').click();
+        cy.get('[data-cy="removeButton"]').should('not.exist')
 
         cy.get(tableSelector).contains('There are no records to show').should('exist')
 
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
     });
 });
 
