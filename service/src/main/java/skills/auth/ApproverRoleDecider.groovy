@@ -27,7 +27,12 @@ import javax.servlet.http.HttpServletRequest
 class ApproverRoleDecider {
 
     boolean shouldGrantApproverRole(HttpServletRequest servletRequest, UserRole userRole) {
-        return isAllowedProject(servletRequest, userRole) && (isSupportedHttpMethod(servletRequest) || isSelfReportAction(servletRequest))
+        return isAllowedProject(servletRequest, userRole) &&
+                (
+                        isSupportedHttpMethod(servletRequest)
+                        || isSelfReportAction(servletRequest)
+                        || isSelfReportEmailSubscriptionAction(servletRequest)
+                )
     }
 
     private boolean isAllowedProject(HttpServletRequest servletRequest, UserRole userRole) {
@@ -37,12 +42,19 @@ class ApproverRoleDecider {
 
     private boolean isSupportedHttpMethod(HttpServletRequest servletRequest) {
         String method = servletRequest.method
-        return method && method == HttpMethod.GET.toString()
+        boolean isGetApprovalConfEndpoint = AuthUtils.isSelfReportApproverConfEndpoint(servletRequest)
+        return method && method == HttpMethod.GET.toString() && !isGetApprovalConfEndpoint
     }
 
     private boolean isSelfReportAction(HttpServletRequest servletRequest) {
         String method = servletRequest.method
         boolean isRightMethod = method && (method == HttpMethod.POST.toString() || method == HttpMethod.PUT.toString())
         return isRightMethod && AuthUtils.isSelfReportApproveOrRejectEndpoint(servletRequest)
+    }
+
+    private boolean isSelfReportEmailSubscriptionAction(HttpServletRequest servletRequest) {
+        String method = servletRequest.method
+        boolean isRightMethod = method && (method == HttpMethod.POST.toString() || method == HttpMethod.PUT.toString())
+        return isRightMethod && AuthUtils.isSelfReportEmailSubscriptionEndpoint(servletRequest)
     }
 }

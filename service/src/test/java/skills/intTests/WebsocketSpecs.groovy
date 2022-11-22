@@ -94,7 +94,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
         then:
         interaction {
             if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
@@ -123,7 +123,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults.find{it.skillId=='badge1'}.success
@@ -167,8 +167,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
         CountDownLatch messagesReceived2 = setupWebsocketConnection(wsResults2, false, false, 1, 'skills2@skills.org')
-        messagesReceived.await(30, TimeUnit.SECONDS)
-        messagesReceived2.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived2.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults
@@ -203,7 +203,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -230,7 +230,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -257,7 +257,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         interaction {
@@ -282,7 +282,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
         skillsAdded = true
-        messagesReceived.await(30, TimeUnit.SECONDS)
+        messagesReceived.await(45, TimeUnit.SECONDS)
 
         then:
         interaction {

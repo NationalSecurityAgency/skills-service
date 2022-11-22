@@ -286,7 +286,7 @@ describe('Global Badges Tests', () => {
             .as('getBadges');
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available*')
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
@@ -294,7 +294,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getBadges');
         cy.get('[data-cy="manageBtn_a_badge"]')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();
@@ -316,7 +316,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
@@ -496,7 +498,7 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Global Badges');
         cy.contains('Manage')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -585,7 +587,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
         cy.contains('Manage')
             .click();
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -631,7 +633,7 @@ describe('Global Badges Tests', () => {
             .as('idExists');
         cy.intercept('POST', '/supervisor/badges/name/exists')
             .as('nameExists');
-        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available*')
             .as('availableProjects');
         cy.intercept('GET', '/supervisor/badges/ABadgeBadge/skills/available?query=')
             .as('availableSkills');
@@ -704,7 +706,7 @@ describe('Global Badges Tests', () => {
             .click();
 
         cy.wait('@availableSkills');
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
             .click();
@@ -728,7 +730,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@availableProjects');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@proj2Levels');
         cy.get('#level-selector')
@@ -822,7 +826,7 @@ describe('Global Badges Tests', () => {
 
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available')
+        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available*')
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
@@ -844,7 +848,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         //wahat to wait on....
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();
@@ -866,7 +870,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.get('#level-selector')
             .click()
@@ -963,6 +969,54 @@ describe('Global Badges Tests', () => {
             .click();
         cy.get('[aria-label="new global badge"]')
             .should('have.focus');
+    });
+
+    it('global badge skills table does not have manage button', () => {
+        cy.request('POST', '/app/projects/proj1', {
+             projectId: 'proj1',
+             name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        const numSkills = 8;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${i}`,
+                name: `This is ${100 - i}`,
+                type: 'Skill',
+                pointIncrement: 100,
+                numPerformToCompletion: 5,
+                pointIncrementInterval: 0,
+                numMaxOccurrencesIncrementInterval: -1,
+                version: 0,
+            });
+        }
+
+        cy.request('POST', '/supervisor/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/supervisor/badges/badge1/projects/proj1/skills/skill${i}`);
+        }
+
+        cy.visit('/administrator/globalBadges/badge1');
+
+        cy.get(`${tableSelector} th`)
+            .contains('Skill ID')
+            .click();
+
+        for (let i = 0; i < 5; i +=1) {
+            cy.get(`[data-cy="manage_skill${i}"]`).should('not.exist')
+            cy.get(`[data-cy="deleteSkill_skill${i}"]`).should('exist')
+        }
+
     });
 
     it('sort skills table', () => {
@@ -1718,7 +1772,7 @@ describe('Global Badges Tests', () => {
             .as('getBadges');
         cy.intercept('GET', '/supervisor/projects/proj2/levels')
             .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/a_new_id/projects/available')
+        cy.intercept('GET', '/supervisor/badges/a_new_id/projects/available*')
             .as('getAvailableLevels');
         cy.intercept('DELETE', '/supervisor/badges/a_new_id/projects/proj2/level/5')
             .as('removeLevel');
@@ -1774,7 +1828,7 @@ describe('Global Badges Tests', () => {
                     .eq('/administrator/globalBadges/a_new_id/');
             });
 
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill1"]')
             .click();
@@ -1787,7 +1841,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getAvailableLevels');
         cy.get('#project-selector')
             .click()
-            .type('proj2{enter}');
+            .type('proj2');
+        cy.wait('@getAvailableLevels');
+        cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
@@ -2076,6 +2132,96 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="skillsSelector"]').should('not.contain.text', 'one');
         cy.get('[data-cy="skillsSelector"]').click();
         cy.get('[role="listbox"]').children().should('have.length', 3);
+    });
+
+    it('Project selector displays message if project count exceeds displayable max', () => {
+        //proj/subj/skill1
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        //proj/subj/skill2
+        cy.request('POST', '/app/projects/proj2', {
+            projectId: 'proj2',
+            name: 'proj2'
+        });
+        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
+            projectId: 'proj2',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        [3,4,5,6,7,8,9,10,11,12,13,14].forEach((num) => {
+            cy.request('POST', `/app/projects/proj${num}`, {
+                projectId: `proj${num}`,
+                name: `proj${num}`
+            });
+        });
+
+        const badgeId = 'a_badge';
+        cy.request('PUT', `/supervisor/badges/${badgeId}`, {
+            badgeId: badgeId,
+            description: '',
+            iconClass: 'fas fa-award',
+            isEdit: false,
+            name: 'A Badge',
+            originalBadgeId: ''
+        });
+
+        cy.intercept('GET', '/supervisor/badges')
+            .as('getBadges');
+        cy.intercept('GET', '/supervisor/projects/proj2/levels')
+            .as('getLevels');
+        cy.intercept('GET', '/supervisor/badges/a_badge/projects/available*')
+            .as('getAvailableLevels');
+
+        cy.visit('/administrator/');
+        cy.clickNav('Global Badges');
+        cy.wait('@getBadges');
+        cy.get('[data-cy="manageBtn_a_badge"]')
+            .click();
+
+        cy.clickNav('Levels');
+        cy.wait('@getAvailableLevels');
+
+        cy.get('#project-selector')
+            .click()
+        cy.get('[data-cy="projectSelectorCountMsg"]').should('exist').should('contain.text', 'Showing 10 of 14 results.  Use search to narrow results.');
+
+        cy.get('#project-selector')
+            .click().type('1');
+        cy.wait('@getAvailableLevels');
+        //not displayed if results less then availableCount
+        cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
 });

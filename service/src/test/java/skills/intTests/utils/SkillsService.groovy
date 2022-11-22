@@ -499,8 +499,8 @@ class SkillsService {
         wsHelper.adminDelete("/projects/${props.projectId}/badges/${props.badgeId}")
     }
 
-    def getAvailableProjectsForGlobalBadge(String badgeId) {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available")
+    def getAvailableProjectsForGlobalBadge(String badgeId, String query="") {
+        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
     }
 
     def getAvailableSkillsForGlobalBadge(String badgeId, String query) {
@@ -578,6 +578,30 @@ class SkillsService {
 
     def approve(String projectId, List<Integer> approvalId) {
         return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
+    }
+
+    def configureApproverForUser(String projectId, String approverUserId, String userId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userId: userId])
+    }
+
+    def getApproverConf(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/approverConf")
+    }
+
+    def deleteApproverConf(String projectId, Integer approverRefId) {
+        return wsHelper.adminDelete("/projects/${projectId}/approverConf/${approverRefId}")
+    }
+
+    def configureApproverForSkillId(String projectId, String approverUserId, String skillId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [skillId: skillId])
+    }
+
+    def configureApproverForUserTag(String projectId, String approverUserId, String userTagKey, String userTagValue) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}", [userTagKey: userTagKey, userTagValue: userTagValue])
+    }
+
+    def configureFallbackApprover(String projectId, String approverUserId) {
+        return wsHelper.adminPost("/projects/${projectId}/approverConf/${approverUserId}/fallback", [])
     }
 
     def rejectSkillApprovals(String projectId, List<Integer> approvalId, String msg = null) {

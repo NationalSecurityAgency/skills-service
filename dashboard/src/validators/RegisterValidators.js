@@ -57,6 +57,8 @@ export default {
     extend('required', required);
     extend('maxSelfReportRejectionMessageLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSelfReportRejectionMessageLength));
 
+    extend('maxTagValueLengthInApprovalWorkloadConfig', ValidatorFactory.newCharLengthValidator(store.getters.config.maxTagValueLengthInApprovalWorkloadConfig));
+
     extend('maxCustomLabelLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxCustomLabelLength));
 
     localize({

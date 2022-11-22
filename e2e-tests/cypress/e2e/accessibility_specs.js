@@ -683,10 +683,10 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.get('#skills-selector')
+        cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.contains('This is 1');
-        cy.get('#skills-selector .vs__dropdown-option')
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
             .eq(0)
             .click();
         cy.customA11y();
@@ -1086,223 +1086,49 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it('skills-display content area should have focus after navigating from Progress & Ranking page', () => {
-        cy.intercept('/progress-and-rankings/projects/MyNewtestProject** ')
-            .as('load');
-        cy.visit('/progress-and-rankings/projects/MyNewtestProject');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .contains('Progress And Rankings')
-            .should('be.visible');
+    it('configure self approval workload', function () {
+        const pass = 'password';
+        cy.register('user1', pass);
+        cy.register('user2', pass);
+        cy.register('user3', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/MyNewtestProject/users/user1/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/users/user2/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u1' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u2' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u3' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u4' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, { userId: 'u5' });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            userTagKey: 'tagKey',
+            userTagValue: 'tagValue'
+        });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            skillId: 'skill1'
+        });
+        cy.request('POST', `/admin/projects/MyNewtestProject/approverConf/user1`, {
+            skillId: 'skill2'
+        });
+        cy.visit('/administrator/projects/MyNewtestProject/self-report/configure');
+        cy.injectAxe();
 
-        cy.wrapIframe()
-            .contains('Overall Points')
-            .should('exist');
-        cy.wrapIframe()
-            .find('.skills-display-container')
-            .should('have.focus');
-        cy.wrapIframe()
-            .find('[data-cy=myRank]')
-            .click();
+        cy.get(`[data-cy="workloadCell_user1"] [data-cy="editApprovalBtn"]`).click()
+        const tableSelector = `[data-cy="expandedChild_user1"] [data-cy="skillApprovalConfSpecificUsersTable"]`
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
 
-        cy.wrapIframe()
-            .contains('My Rank')
-            .should('exist');
-        cy.wrapIframe()
-            .find('.skills-display-container')
-            .should('have.focus');
+        cy.get(`[data-cy="workloadCell_user2"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_user2"] [data-cy="noUserConf"]`).should('exist')
 
-        cy.get('[data-cy="breadcrumb-MyNewtestProject"]')
-            .should('be.visible');
-        cy.get('[data-cy="breadcrumb-MyNewtestProject"]')
-            .should('be.visible')
-            .then(el => expect(Cypress.dom.isAttached(el)).to.be.true);
-        cy.wait(500);
-        cy.get$('[data-cy="breadcrumb-MyNewtestProject"]')
-            .click();
-        cy.wrapIframe()
-            .contains('Overall Points')
-            .should('exist');
-        cy.wrapIframe()
-            .find('.skills-display-container')
-            .should('have.focus');
-        cy.wrapIframe()
-            .find('[data-cy="subjectTile"]')
-            .should('be.visible');
-        cy.wrapIframe()
-            .find('[data-cy="subjectTile"]')
-            .click();
-        cy.wrapIframe()
-            .contains('Subject 1')
-            .should('exist');
-        cy.wrapIframe()
-            .find('.skills-display-container')
-            .should('have.focus');
-        cy.wrapIframe()
-            .find('[data-cy="skillProgress_index-0"]')
-            .click();
-
-        cy.wrapIframe()
-            .contains('This is 1')
-            .should('exist');
-        cy.wrapIframe()
-            .find('.skills-display-container')
-            .should('have.focus');
+        cy.customLighthouse();
+        cy.customA11y();
     });
-
-    it('content area should have focus after menu navigation', () => {
-        cy.visit('/administrator/');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects')
-            .as('loadSubjects');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/badges')
-            .as('loadBadges');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/approvals*')
-            .as('loadSelfReport');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/dependency/graph')
-            .as('loadGraph');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/exported*')
-            .as('loadCatalog');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/levels')
-            .as('loadLevels');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/users*')
-            .as('loadUsers');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/distinctUsersOverTimeForProject*')
-            .as('loadMetrics');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/errors*')
-            .as('loadErrors');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/userRoles**')
-            .as('loadAccess');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/settings')
-            .as('loadSettings');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills')
-            .as('loadSubjSkills');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/levels')
-            .as('loadSubjLevels');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/users*')
-            .as('loadSubjUsers');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills/skill4')
-            .as('loadSkill');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/skill4/dependency/graph')
-            .as('loadSkillDependencies');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/skills/skill4/users*')
-            .as('loadSkillUsers');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/metrics/skillEventsOverTimeChartBuilder*')
-            .as('loadSkillMetrics');
-
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]')
-            .click();
-        cy.wait('@loadSubjects');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Badges]')
-            .click();
-        cy.wait('@loadBadges');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Self Report"]')
-            .click();
-        cy.wait('@loadSelfReport');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Dependencies"]')
-            .click();
-        cy.wait('@loadGraph');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Skill Catalog"]')
-            .click();
-        cy.wait('@loadCatalog');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Levels]')
-            .click();
-        cy.wait('@loadLevels');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Users]')
-            .click();
-        cy.wait('@loadUsers');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Metrics]')
-            .click();
-        cy.wait('@loadMetrics');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Contact Users"]')
-            .click();
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Issues"]')
-            .click();
-        cy.wait('@loadErrors');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Access"]')
-            .click();
-        cy.wait('@loadAccess');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Settings"]')
-            .click();
-        cy.wait('@loadSettings');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Subjects]')
-            .click();
-        cy.wait('@loadSubjects');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-
-        cy.get('[data-cy=manageBtn_subj1]')
-            .click();
-        cy.wait('@loadSubjSkills');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Levels]')
-            .click();
-        cy.wait('@loadSubjLevels');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Users]')
-            .click();
-        cy.wait('@loadSubjUsers');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Metrics]')
-            .click();
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy=nav-Skills]')
-            .click();
-        cy.wait('@loadSubjSkills');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="manageSkillBtn_skill4"]')
-            .click();
-        cy.wait('@loadSkill');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Dependencies"]')
-            .click();
-        cy.wait('@loadSkillDependencies');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Users"]')
-            .click();
-        cy.wait('@loadSkillUsers');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Add Event"')
-            .click();
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-        cy.get('[data-cy="nav-Metrics"]')
-            .click();
-        cy.wait('@loadSkillMetrics');
-        cy.get('.skills-menu-content')
-            .should('have.focus');
-    });
-
 });

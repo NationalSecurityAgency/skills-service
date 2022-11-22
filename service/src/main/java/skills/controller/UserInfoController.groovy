@@ -211,9 +211,9 @@ class UserInfoController {
     }
 
     @DBUpgradeSafe
-    @RequestMapping(value = "/users/suggestClientUsers/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/users/suggestClientUsers", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     List<UserInfoRes> suggestExistingClientUsers(@RequestBody SuggestRequest suggestRequest) {
-        return userAdminService.suggestUsers(suggestRequest.suggestQuery, PageRequest.of(0, 5)).collect { new UserInfoRes(userId: it) }
+        return userAdminService.suggestUsers(suggestRequest.suggestQuery, PageRequest.of(0, 10)).collect { new UserInfoRes(userId: it) }
     }
 
     @RequestMapping(value = "/users/projects/{projectId}/validExistingClientUserId/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

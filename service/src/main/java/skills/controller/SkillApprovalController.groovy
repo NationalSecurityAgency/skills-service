@@ -21,13 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
-import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.SkillApproverConfRequest
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
-import skills.controller.request.model.UserProjectSettingsRequest
+import skills.controller.result.model.ApproverConfResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.TableResult
@@ -154,5 +154,39 @@ class SkillApprovalController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         selfReportingService.getApprovalRequestEmailSubscriptionStatus(projectId);
     }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult configureApprover(@PathVariable("projectId") String projectId,
+                                    @PathVariable("approverUserId") String approverUserId,
+                                    @RequestBody SkillApproverConfRequest approverConfRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(approverUserId, "Approver User Id")
+        SkillsValidator.isTrue(approverConfRequest.userId || approverConfRequest.skillId || approverConfRequest.userTagValue, "Must provide one of the config params -> approvalConf.userId || approvalConf.skillId || approvalConf.userTagPattern")
+        return skillApprovalService.configureApprover(projectId, approverUserId, approverConfRequest)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<ApproverConfResult>  getProjectApproverConf(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return skillApprovalService.getProjectApproverConf(projectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{aproverConfId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult deleteConfig(@PathVariable("projectId") String projectId,
+                                         @PathVariable("aproverConfId") Integer aproverConfId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(aproverConfId >= 0, "Approver Conf Id")
+        return skillApprovalService.deleteApproverConfId(projectId, aproverConfId)
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/approverConf/{approverUserId}/fallback", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    ApproverConfResult assignFallbackUser(@PathVariable("projectId") String projectId,
+                                         @PathVariable("approverUserId") String approverUserId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(approverUserId, "Approver User Id")
+        return skillApprovalService.configureFallBackApprover(projectId, approverUserId)
+    }
+
 
 }

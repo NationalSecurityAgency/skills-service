@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <router-view/>
+    <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate" />
   </div>
 </template>
 

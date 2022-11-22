@@ -55,4 +55,32 @@ export default {
   unsubscribeUserFromEmails(projectId) {
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/approvalEmails/unsubscribe`).then((response) => response.data);
   },
+  getApproverConf(projectId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
+  configureApproverForUserTag(projectId, approverId, userTagKey, userTagValue) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}`;
+    return axios.post(url, { userTagKey, userTagValue })
+      .then((response) => response.data);
+  },
+  configureApproverForSkillId(projectId, approverId, skillId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}`;
+    return axios.post(url, { skillId })
+      .then((response) => response.data);
+  },
+  configureApproverForUserId(projectId, approverId, userId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}`;
+    return axios.post(url, { userId })
+      .then((response) => response.data);
+  },
+  configureApproverForFallback(projectId, approverId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approverConf/${encodeURIComponent(approverId)}/fallback`;
+    return axios.post(url)
+      .then((response) => response.data);
+  },
+  removeApproverConfig(projectId, approverConfigID) {
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/approverConf/${approverConfigID}`).then((response) => response.data);
+  },
 };

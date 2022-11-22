@@ -15,8 +15,11 @@
  */
 package skills.utils
 
-import groovy.lang.Closure
+import com.icegreen.greenmail.util.GreenMail
+import groovy.util.logging.Slf4j
+import skills.intTests.utils.EmailUtils
 
+@Slf4j
 class WaitFor {
 
     static boolean wait(Closure closure) {
@@ -30,5 +33,19 @@ class WaitFor {
         }
 
         return closure.call()
+    }
+
+    static List<EmailUtils.EmailRes> waitAndCollectEmails(GreenMail greenMail, int expectedNumEmails) {
+        WaitFor.wait { greenMail.getReceivedMessages().size() == expectedNumEmails }
+        if( greenMail.getReceivedMessages().size() != expectedNumEmails) {
+            String emails = greenMail.getReceivedMessages().collect {"${it.from}: ${it.subject}" }.join("\n")
+            log.error("Number of emails were different. Actual emails:\n {}", emails)
+
+            assert greenMail.getReceivedMessages().size() != expectedNumEmails
+        }
+        // wait an additional 500ms in case additional and rogue emails arrive
+        Thread.sleep(500)
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+        return emails
     }
 }

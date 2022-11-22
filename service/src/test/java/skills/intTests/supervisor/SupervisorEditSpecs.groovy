@@ -545,9 +545,46 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         res.requiredProjectLevels.size() == 1
         inception
         availableProjects
-        !availableProjects.find { it.projectId == 'Inception'}
+        !availableProjects.projects.find { it.projectId == 'Inception'}
         availableSkills
         !availableSkills.suggestedSkills.find { it.projectId == "Inception" }
+
+        cleanup:
+        skillsService.deleteGlobalBadge(badgeId)
+    }
+
+    def 'global badge project lookups'() {
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createProject([projectId: "${projId}2".toString(), name: "Test Project 2"])
+        skillsService.createProject([projectId: "${projId}3".toString(), name: "Test Project 3"])
+        skillsService.createProject([projectId: "${projId}4".toString(), name: "Test Project 4"])
+        skillsService.createProject([projectId: "${projId}5".toString(), name: "Test Project 5"])
+        skillsService.createProject([projectId: "${projId}6".toString(), name: "Test Project 6"])
+        skillsService.createProject([projectId: "${projId}7".toString(), name: "Test Project 7"])
+        skillsService.createProject([projectId: "${projId}8".toString(), name: "Test Project 8"])
+        skillsService.createProject([projectId: "${projId}9".toString(), name: "Test Project 9"])
+        skillsService.createProject([projectId: "${projId}10".toString(), name: "Test Project 10"])
+        skillsService.createProject([projectId: "${projId}11".toString(), name: "Test Project 11"])
+        skillsService.createProject([projectId: "${projId}12".toString(), name: "Test Project 12"])
+        skillsService.createProject([projectId: "${projId}13".toString(), name: "Test Project 13"])
+        skillsService.createProject([projectId: "${projId}14".toString(), name: "Test Project 14"])
+        skillsService.createGlobalBadge(badge)
+
+        def availableProjects = skillsService.getAvailableProjectsForGlobalBadge(badgeId, "")
+        def filteredAvailableProjects = skillsService.getAvailableProjectsForGlobalBadge(badgeId, "3")
+
+
+        then:
+        availableProjects.totalAvailable == 14
+        availableProjects.projects.size() == 10
+        filteredAvailableProjects.totalAvailable == 2
+        filteredAvailableProjects.projects.size() == 2
+        filteredAvailableProjects.projects.find { it.name == "Test Project 3" }
+        filteredAvailableProjects.projects.find { it.name == "Test Project 13" }
 
         cleanup:
         skillsService.deleteGlobalBadge(badgeId)

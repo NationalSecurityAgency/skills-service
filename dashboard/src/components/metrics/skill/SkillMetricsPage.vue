@@ -52,6 +52,11 @@ limitations under the License.
               <binned-post-achievement-usage class="h-100"/>
             </div>
         </div>
+        <div class="row">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-3">
+            <post-achievement-users-table class="h-100" />
+          </div>
+        </div>
       </metrics-card>
     </div>
   </div>
@@ -65,6 +70,7 @@ limitations under the License.
   import MetricsService from '../MetricsService';
   import SkillsSpinner from '../../utils/SkillsSpinner';
   import PostAchievementUsersPieChart from './PostAchievementUsersPieChart';
+  import PostAchievementUsersTable from './PostAchievementUsersTable';
   import BinnedPostAchievementUsage from './BinnedPostAchievementUsage';
   import MetricsCard from '../utils/MetricsCard';
 
@@ -79,6 +85,7 @@ limitations under the License.
       PostAchievementUsersPieChart,
       BinnedPostAchievementUsage,
       MetricsCard,
+      PostAchievementUsersTable,
     },
     data() {
       return {

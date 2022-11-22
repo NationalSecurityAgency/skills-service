@@ -26,7 +26,7 @@ limitations under the License.
 
         <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"
-                             :show-project="true">
+                             :show-project="true" :hide-manage-button="true">
 
         </simple-skills-table>
 

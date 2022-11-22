@@ -225,16 +225,6 @@ limitations under the License.
           });
       },
     },
-    watch: {
-      $route: {
-        immediate: true,
-        handler: function routeChange() {
-          this.$nextTick(() => {
-            this.$refs.content.focus({ preventScroll: true });
-          });
-        },
-      },
-    },
   };
 </script>
 

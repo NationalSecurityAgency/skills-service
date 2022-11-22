@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="skills-selector" class="skills-selector">
+  <div class="skills-selector" data-cy="skillsSelector2">
     <v-select :options="optionsInternal"
               v-model="selectedInternal"
               :placeholder="placeholder"
@@ -25,6 +25,7 @@ limitations under the License.
               v-on:option:selected="added"
               v-on:option:deselecting="considerRemoval"
               :loading="isLoading"
+              :disabled="disabled"
               class="st-skills-selector"
               data-cy="skillsSelector">
       <template #option="option">
@@ -141,6 +142,14 @@ limitations under the License.
         type: String,
         default: 'Press enter to select',
       },
+      warnBeforeRemoving: {
+        type: Boolean,
+        default: true,
+      },
+      disabled: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
@@ -184,12 +193,17 @@ limitations under the License.
         }
       },
       considerRemoval(removedItem) {
-        const msg = `Are you sure you want to remove "${removedItem.name}"?`;
-        this.msgConfirm(msg, 'WARNING', 'Yes, Please!').then((res) => {
-          if (res) {
-            this.removed(removedItem);
-          }
-        });
+        if (this.warnBeforeRemoving) {
+          const msg = `Are you sure you want to remove "${removedItem.name}"?`;
+          this.msgConfirm(msg, 'WARNING', 'Yes, Please!')
+            .then((res) => {
+              if (res) {
+                this.removed(removedItem);
+              }
+            });
+        } else {
+          this.removed(removedItem);
+        }
       },
       removed(removedItem) {
         this.$emit('removed', removedItem);
@@ -212,6 +226,10 @@ limitations under the License.
 <style scoped>
   .selected-tag {
     font-size: 14px;
+  }
+
+  >>> {
+    --vs-line-height: 1.7;
   }
 
   .vs__dropdown-option--highlight .skills-option-id {

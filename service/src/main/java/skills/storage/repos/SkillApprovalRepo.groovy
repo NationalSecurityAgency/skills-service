@@ -82,6 +82,145 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
+        s.requestedOn as requestedOn,
+        s.approverActionTakenOn as approverActionTakenOn,
+        s.rejectedOn as rejectedOn,
+        s.requestMsg as requestMsg,
+        s.rejectionMsg as rejectionMsg,
+        sd.pointIncrement as points
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd
+        where 
+            subjectDef = srd.parent and 
+            sd = srd.child and
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and
+            subjectDef.type = 'Subject' and
+            s.projectId = :projectId and 
+            s.skillRefId = sd.id and 
+            s.userId = uAttrs.userId and
+            s.approverUserId is null and
+            (
+                (exists (select 1 from SkillApprovalConf sac 
+                        where sac.approverUserId = :approverId and (
+                                (sac.userId is not null and sac.userId = s.userId) OR  
+                                (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                            )
+                    )
+                ) OR 
+                (exists (select 1 from SkillApprovalConf sac, UserTag ut
+                    where ut.userId = s.userId 
+                        and lower(ut.key) = lower(sac.userTagKey)
+                        and sac.approverUserId = :approverId
+                        and sac.userTagValue is not null
+                        and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
+                    )
+                )
+            )''')
+    List<SimpleSkillApproval> findToApproveWithApproverConf(
+            @Param("projectId") String projectId,
+            @Param("approverId") String approverId,
+            Pageable pageable)
+
+
+    @Query('''SELECT
+        count(s.id)
+        from SkillApproval s
+        where 
+            s.projectId = :projectId and 
+            s.approverUserId is null and 
+            (not exists (select 1 from SkillApprovalConf sac
+                            where sac.approverUserId is not null and
+                                  (sac.userId is not null and sac.userId = s.userId) OR  
+                                  (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                        )
+            ) and 
+            (not exists (select 1 from SkillApprovalConf sac, UserTag ut
+                where sac.approverUserId is not null 
+                    and ut.userId = s.userId 
+                    and lower(ut.key) = lower(sac.userTagKey)
+                    and sac.userTagValue is not null
+                    and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
+                )
+            )            
+        ''')
+    long countFallbackApproverConf(
+            @Param("projectId") String projectId)
+
+    @Query('''SELECT
+        s.id as approvalId,
+        sd.skillId as skillId,
+        subjectDef.skillId as subjectId,
+        sd.name as skillName,
+        s.userId as userId,
+        uAttrs.userIdForDisplay as userIdForDisplay,
+        s.requestedOn as requestedOn,
+        s.approverActionTakenOn as approverActionTakenOn,
+        s.rejectedOn as rejectedOn,
+        s.requestMsg as requestMsg,
+        s.rejectionMsg as rejectionMsg,
+        sd.pointIncrement as points
+        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd
+        where 
+            subjectDef = srd.parent and 
+            sd = srd.child and
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and
+            subjectDef.type = 'Subject' and
+            s.projectId = :projectId and 
+            s.skillRefId = sd.id and
+            s.userId = uAttrs.userId and
+            s.approverUserId is null and 
+            (not exists (select 1 from SkillApprovalConf sac
+                            where sac.approverUserId is not null and
+                                  (sac.userId is not null and sac.userId = s.userId) OR  
+                                  (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                        )
+            ) and 
+            (not exists (select 1 from SkillApprovalConf sac, UserTag ut
+                where sac.approverUserId is not null 
+                    and ut.userId = s.userId 
+                    and lower(ut.key) = lower(sac.userTagKey)
+                    and sac.userTagValue is not null
+                    and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
+                )
+            )            
+        ''')
+    List<SimpleSkillApproval> findFallbackApproverConf(
+            @Param("projectId") String projectId,
+            Pageable pageable)
+
+    @Query('''SELECT
+        count(s.id)
+        from SkillApproval s
+        where 
+            s.projectId = :projectId and 
+            s.approverUserId is null and 
+            (
+                (exists (select 1 from SkillApprovalConf sac 
+                        where sac.approverUserId = :approverId and (
+                                (sac.userId is not null and sac.userId = s.userId) OR  
+                                (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                            )
+                    )
+                ) OR 
+                (exists (select 1 from SkillApprovalConf sac, UserTag ut
+                    where ut.userId = s.userId 
+                        and lower(ut.key) = lower(sac.userTagKey)
+                        and sac.approverUserId = :approverId
+                        and sac.userTagValue is not null
+                        and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
+                    )
+                )
+            )''')
+    long countToApproveWithApproverConf(
+            @Param("projectId") String projectId,
+            @Param("approverId") String approverId)
+
+    @Query('''SELECT
+        s.id as approvalId,
+        sd.skillId as skillId,
+        subjectDef.skillId as subjectId,
+        sd.name as skillName,
+        s.userId as userId,
+        uAttrs.userIdForDisplay as userIdForDisplay,
         approverUAttrs.userId as approverUserId,
         approverUAttrs.userIdForDisplay as approverUserIdForDisplay,
         s.requestedOn as requestedOn,

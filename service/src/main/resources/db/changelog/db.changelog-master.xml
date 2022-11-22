@@ -1851,7 +1851,86 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="35" author="skills team">
+        <createTable tableName="skill_approval_conf">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approver_user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
 
+            <column name="user_id" type="varchar(255)" />
+            <column name="skill_ref_id" type="int" />
+            <column name="user_tag_key" type="varchar(255)"/>
+            <column name="user_tag_value" type="varchar(255)"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_skill_approval_conf_project_id"
+                     tableName="skill_approval_conf">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_approval_conf_approver_user_id"
+                     tableName="skill_approval_conf">
+            <column name="approver_user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_approval_conf_user_id"
+                     tableName="skill_approval_conf">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_approval_conf_skill_ref_id"
+                     tableName="skill_approval_conf">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_skill_approval_conf_user_tag_key"
+                     tableName="skill_approval_conf">
+            <column name="user_tag_key" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_skill_approval_conf_user_tag_value"
+                     tableName="skill_approval_conf">
+            <column name="user_tag_value" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="skill_approval_conf"
+                                 constraintName="fk_skill_approval_conf_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+        <addForeignKeyConstraint baseColumnNames="approver_user_id"
+                                 baseTableName="skill_approval_conf"
+                                 constraintName="fk_skill_approval_conf_approver_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="skill_approval_conf"
+                                 constraintName="fk_skill_approval_conf_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="skill_approval_conf"
+                                 constraintName="fk_skill_approval_conf_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+    </changeSet>
 
 
 </databaseChangeLog>

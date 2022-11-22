@@ -14,8 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-
   <div class="bg-white header">
+    <a
+      class="skip-main btn btn-primary"
+      @click="focusOnMainContent"
+      @keydown.prevent.enter="focusOnMainContent"
+      tabindex="0"
+      data-cy="skipToContentButton">Skip to content</a>
     <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">
       <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">
         <i class="fas fa-circle fa-stack-2x"></i>
@@ -76,6 +81,23 @@ limitations under the License.
     beforeDestroy() {
       window.removeEventListener('resize', this.updateAdminStampSize);
     },
+    methods: {
+      focusOnMainContent() {
+        const toSearch = ['mainContent3', 'mainContent2', 'mainContent1'];
+        //  there are currently only 3 levels
+        this.$nextTick(() => {
+          const foundId = toSearch.find((id) => document.getElementById(id));
+          if (foundId) {
+            this.$nextTick(() => {
+              const focusOn = document.getElementById(foundId);
+              if (focusOn) {
+                focusOn.focus({});
+              }
+            });
+          }
+        });
+      },
+    },
   };
 </script>
 
@@ -129,6 +151,19 @@ limitations under the License.
     font-size: 14px;
     width: 85px;
   }
+}
+
+.skip-main {
+  position: absolute !important;
+  overflow: hidden !important;;
+  z-index: -999 !important;;
+}
+
+.skip-main:focus, .skip-main:active {
+  left: 5px !important;;
+  top: 5px !important;;
+  font-size: 1.2em !important;;
+  z-index: 999 !important;;
 }
 
 </style>

@@ -18,6 +18,9 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
@@ -289,6 +292,36 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
+    AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {
+        List<String> notThese = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
+        if (notThese == null) {
+            notThese = []
+        }
+
+        notThese << InceptionProjectService.inceptionProjectId
+
+        AvailableProjectResult available = new AvailableProjectResult()
+        int count = projDefRepo.countAllByNameLikeAndProjectIdNotIn(query, notThese)
+        if (count > 0) {
+            Integer pageNo = 0;
+            Integer pageSize = 10;
+            String sortBy = "name";
+            Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+            def byNameLike = projDefRepo.findAllByNameLikeAndProjectIdNotIn(query, notThese, paging)
+
+            def converted = byNameLike.collect { ProjDef definition ->
+                new ProjectResult(
+                        projectId: definition.projectId, name: InputSanitizer.unsanitizeName(definition.name), totalPoints: definition.totalPoints,
+                        displayOrder: 0,
+                )
+            }
+            available.totalAvailable = count
+            available.projects = converted
+        }
+        return available
+    }
+
+    @Transactional(readOnly = true)
     boolean isSkillUsedInGlobalBadge(String projectId, String skillId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         assert skillDef, "Skill [${skillId}] for project [${projectId}] does not exist"
@@ -368,5 +401,10 @@ class GlobalBadgesService {
     static class AvailableSkillsResult {
         int totalAvailable = 0
         List<SkillDefPartialRes> suggestedSkills = []
+    }
+
+    static class AvailableProjectResult {
+        int totalAvailable = 0
+        List<ProjectResult> projects = []
     }
 }

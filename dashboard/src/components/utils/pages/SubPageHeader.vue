@@ -20,7 +20,7 @@ limitations under the License.
     </div>
     <div class="col-sm-6 col-md-5 pt-0 text-sm-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
-        <slot v-if="!isReadOnlyProj">
+        <slot v-if="!isReadOnlyProjUnderAdminUrl">
           <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
                     :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
                     v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
@@ -79,6 +79,11 @@ limitations under the License.
     watch: {
       disabled() {
         this.disabledInternal = this.disabled;
+      },
+    },
+    computed: {
+      isReadOnlyProjUnderAdminUrl() {
+        return this.isReadOnlyProj && this.$route.path?.toLowerCase()?.startsWith('/administrator');
       },
     },
     methods: {
