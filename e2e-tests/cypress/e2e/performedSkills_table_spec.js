@@ -649,7 +649,7 @@ describe('Performed Skills Table Tests', () => {
             .should('not.exist');
     });
 
-    it.only('delete all skill events', () => {
+    it('delete all skill events', () => {
         cy.createSkills(3);
         cy.report(3, false);
         cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
