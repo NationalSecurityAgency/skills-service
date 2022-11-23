@@ -64,7 +64,7 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         assert skillsService.addSkill(skill, users[6], new Date()).body.skillApplied
 
         when:
-        def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "userId", "sortDesc": false]
+        def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "date", "sortDesc": true]
         def result = builder.build(proj.projectId, builder.id, props)
 
         then:
