@@ -63,7 +63,7 @@ limitations under the License.
               </b-form-checkbox>
             </div>
             <div v-if="data.item.tagConf && data.item.tagConf.length > 0">
-              <div v-for="tConf in data.item.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKey}}:</span> <span>{{tConf.userTagValue}}</span></div>
+              <div v-for="tConf in data.item.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKeyLabel}}:</span> <span>{{tConf.userTagValue}}</span></div>
             </div>
             <div v-if="data.item.userConf && data.item.userConf.length > 0" >
               <b-badge variant="success">{{data.item.userConf.length}}</b-badge> Specific User{{ data.item.userConf.length > 1 ? 's' : '' }}
@@ -244,7 +244,11 @@ limitations under the License.
         let numConfigured = 0;
         let res = basicTableInfo.map((row) => {
           const { allConf } = row;
-          const tagConf = allConf.filter((c) => c.userTagKey);
+          let tagConf = allConf.filter((c) => c.userTagKey);
+          if (tagConf && tagConf.length > 0) {
+            tagConf = tagConf.map((t) => ({ ...t, userTagKeyLabel: t.userTagKey.toLowerCase() === this.userTagConfKey?.toLowerCase() ? this.userTagConfLabel : t.userTagKey }));
+            console.log(tagConf);
+          }
           const userConf = allConf.filter((c) => c.userId);
           const skillConf = allConf.filter((c) => c.skillId);
           const fallbackConf = allConf.find((c) => !c.skillId && !c.userId && !c.userTagKey);

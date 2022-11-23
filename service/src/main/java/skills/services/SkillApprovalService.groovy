@@ -355,12 +355,12 @@ class SkillApprovalService {
                 "userTagValue must be < $maxTagValueLengthInApprovalWorkloadConfig")
 
             String userTagKey = skillApproverConfRequest.userTagKey
-            String userTagValue = skillApproverConfRequest.userTagValue.toLowerCase()
-            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyIgnoreCaseAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            String userTagValue = skillApproverConfRequest.userTagValue
+            SkillApprovalConf found = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyIgnoreCaseAndUserTagValueIgnoreCase(projectId, approverId, userTagKey, userTagValue)
             SkillsValidator.isTrue(!found, "Already exist for projectId=[${projectId}], approverId=[${approverId}], userTagKey=[${userTagKey}], userTagValue=[${userTagValue}] already exist.")
             SkillApprovalConf conf = new SkillApprovalConf(projectId: projectId, approverUserId: approverId, userTagKey: userTagKey, userTagValue: userTagValue)
             skillApprovalConfRepo.save(conf)
-            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyIgnoreCaseAndUserTagValue(projectId, approverId, userTagKey, userTagValue)
+            saved = skillApprovalConfRepo.findByProjectIdAndApproverUserIdAndUserTagKeyIgnoreCaseAndUserTagValueIgnoreCase(projectId, approverId, userTagKey, userTagValue)
             assert saved
         }
         else if (skillApproverConfRequest.skillId) {

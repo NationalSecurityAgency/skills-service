@@ -126,13 +126,13 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "KeY1"
-        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
-        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+        rootUser.saveUserTag(users[2], userTagKey, ["aBcD"])
+        rootUser.saveUserTag(users[3], userTagKey, ["EfGh"])
 
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "abc")
-        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey.toLowerCase(), "efgh")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey.toLowerCase(), "eFgH")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
@@ -180,8 +180,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
         skillsService.configureApproverForUser(proj.projectId, user2Service.userName, userIdConConf)
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
-        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "ABc")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "noMatch")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
@@ -221,7 +221,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         when:
         def forUserConf = skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2]).body
         def forSkillConf = skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId).body
-        def forTagConf = skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc").body
+        def forTagConf = skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "ABC").body
 
         then:
         forUserConf.id
@@ -247,7 +247,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         !forTagConf.userId
         !forTagConf.userIdForDisplay
         forTagConf.userTagKey == userTagKey
-        forTagConf.userTagValue == "abc"
+        forTagConf.userTagValue == "ABC"
         !forTagConf.skillName
         !forTagConf.skillId
     }
@@ -314,8 +314,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "key1"
-        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
-        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+        rootUser.saveUserTag(users[2], userTagKey, ["ABCD"])
+        rootUser.saveUserTag(users[3], userTagKey, ["EFGH"])
 
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
@@ -364,7 +364,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
         skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "Abc")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
 
         String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
@@ -381,7 +381,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approverConf.userId == [users[2], null, users[2], null, null]
         approverConf.userIdForDisplay == [user2ForDisplay, null, user2ForDisplay, null, null]
         approverConf.userTagKey == [null, null, null, userTagKey, userTagKey]
-        approverConf.userTagValue == [null, null, null, "abc", "nomatch"]
+        approverConf.userTagValue == [null, null, null, "Abc", "nomatch"]
         approverConf.skillName == [null, skills[0].name, null, null, null]
         approverConf.skillId == [null, skills[0].skillId, null, null, null]
 
@@ -389,7 +389,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approverConf_t1.userId == [users[2], users[2], null, null]
         approverConf_t1.userIdForDisplay == [user2ForDisplay, user2ForDisplay, null, null]
         approverConf_t1.userTagKey == [null, null, userTagKey, userTagKey]
-        approverConf_t1.userTagValue == [null, null, "abc", "nomatch"]
+        approverConf_t1.userTagValue == [null, null, "Abc", "nomatch"]
         approverConf_t1.skillName == [null, null, null, null]
         approverConf_t1.skillId == [null, null, null, null]
 
@@ -397,7 +397,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approverConf_t2.userId == [users[2], users[2], null]
         approverConf_t2.userIdForDisplay == [user2ForDisplay, user2ForDisplay, null]
         approverConf_t2.userTagKey == [null, null, userTagKey]
-        approverConf_t2.userTagValue == [null, null, "abc"]
+        approverConf_t2.userTagValue == [null, null, "Abc"]
         approverConf_t2.skillName == [null, null, null]
         approverConf_t2.skillId == [null, null, null]
     }
@@ -687,7 +687,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
         skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "aBC")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
 
         when:
@@ -725,7 +725,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
         skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "Abc")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
 
         when:
