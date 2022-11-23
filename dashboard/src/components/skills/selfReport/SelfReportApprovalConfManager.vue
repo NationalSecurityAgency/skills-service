@@ -247,7 +247,6 @@ limitations under the License.
           let tagConf = allConf.filter((c) => c.userTagKey);
           if (tagConf && tagConf.length > 0) {
             tagConf = tagConf.map((t) => ({ ...t, userTagKeyLabel: t.userTagKey.toLowerCase() === this.userTagConfKey?.toLowerCase() ? this.userTagConfLabel : t.userTagKey }));
-            console.log(tagConf);
           }
           const userConf = allConf.filter((c) => c.userId);
           const skillConf = allConf.filter((c) => c.skillId);
