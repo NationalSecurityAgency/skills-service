@@ -42,10 +42,12 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
 
+        // should be DN in case of pki
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
-        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, userIdConConf)
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
@@ -172,11 +174,12 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2])
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
         skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
-        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, users[2])
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, userIdConConf)
         skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
