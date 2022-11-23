@@ -78,6 +78,13 @@ limitations under the License.
                 <b-dropdown-item @click="handleSkillMoveRequest" data-cy="skillMoveBtn"><i
                   class="fas fa-shipping-fast"></i> Move Skills
                 </b-dropdown-item>
+                <b-dropdown-divider />
+                <b-dropdown-item @click="handleAddSkillTagRequest" data-cy="tagSkillBtn"><i
+                  class="fas fa-tag"></i> Tag Skills
+                </b-dropdown-item>
+                <b-dropdown-item @click="handleRemoveSkillTagRequest" data-cy="tagSkillBtn"><i
+                  class="fas fa-trash"></i> Remove Tags
+                </b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
@@ -165,7 +172,11 @@ limitations under the License.
                 </div>
               </div>
 
-              <div class="text-muted" style="font-size: 0.9rem;" data-cy="skillId"><show-more :limit="54" :containsHtml="idContainsHtml(data.item)" :text="getIdText(data.item)"/></div>
+              <div v-for="(tag) in data.item.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${data.item.skillId}-${tag}`">
+                <b-badge variant="info">
+                  <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
+                </b-badge>
+              </div>
 
               <div class="mt-1">
                 <b-button size="sm" @click="data.toggleDetails" variant="outline-info" class="mr-2 py-0 px-1"
@@ -343,6 +354,16 @@ limitations under the License.
                                 type="move"
                                 @action-success="handleSkillsAreReusedOrMoved"
                                 @hidden="handleExportModalIsClosed"/>
+    <add-skill-tag id="tagSkillsModal" v-if="tagSkillsInfo.show"
+                                v-model="tagSkillsInfo.show"
+                                :skills="tagSkillsInfo.skills"
+                                @action-success="handleSkillsTagged"
+                                @hidden="handleExportModalIsClosed"/>
+    <remove-skill-tag id="tagSkillsModal" v-if="removeTagSkillsInfo.show"
+                   v-model="removeTagSkillsInfo.show"
+                   :skills="removeTagSkillsInfo.skills"
+                   @action-success="handleSkillsTagRemoved"
+                   @hidden="handleExportModalIsClosed"/>
     <removal-validation v-if="deleteSkillInfo.show" v-model="deleteSkillInfo.show"
                         @do-remove="doDeleteSkill" @hidden="handleDeleteCancelled">
       <skill-removal-validation :delete-skill-info="deleteSkillInfo"/>
@@ -360,6 +381,8 @@ limitations under the License.
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
+  import AddSkillTag from '@/components/skills/tags/AddSkillTag';
+  import RemoveSkillTag from '@/components/skills/tags/RemoveSkillTag';
   import SettingsService from '@/components/settings/SettingsService';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
   import EditSkill from '@/components/skills/EditSkill';
@@ -432,6 +455,8 @@ limitations under the License.
     components: {
       SkillRemovalValidation,
       ReuseOrMoveSkillsModal,
+      AddSkillTag,
+      RemoveSkillTag,
       EditImportedSkill,
       RemovalValidation,
       ExportToCatalog,
@@ -475,6 +500,14 @@ limitations under the License.
           skills: [],
         },
         moveSkillsInfo: {
+          show: false,
+          skills: [],
+        },
+        tagSkillsInfo: {
+          show: false,
+          skills: [],
+        },
+        removeTagSkillsInfo: {
           show: false,
           skills: [],
         },
@@ -678,14 +711,6 @@ limitations under the License.
       nameContainsHtml(item) {
         return !!item.nameHtml;
       },
-      getIdText(item) {
-        const skillId = SkillReuseIdUtil.removeTag(item.skillId);
-        let text = `ID: ${skillId}`;
-        if (this.idContainsHtml(item)) {
-          text = `ID: ${item.skillIdHtml}`;
-        }
-        return text;
-      },
       editSkill(itemToEdit) {
         this.currentlyFocusedSkillId = itemToEdit.skillId;
         if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
@@ -777,6 +802,37 @@ limitations under the License.
                 });
               });
           });
+      },
+      handleSkillsTagged(tagResult) {
+        const { skills, tag } = tagResult;
+        this.skills = this.skills.map((skill) => {
+          const taggedSkill = skills.find((item) => item.skillId === skill.skillId);
+          if (taggedSkill) {
+            if (!taggedSkill.tags) {
+              taggedSkill.tags = [tag];
+            } else if (taggedSkill.tags.findIndex((item) => item.tagId === tag.tagId) === -1) {
+              taggedSkill.tags.push(tag);
+            }
+            return taggedSkill;
+          }
+          return skill;
+        });
+        this.$nextTick(() => this.$announcer.polite(`added tag to ${skills.length} skill${skills.length > 1 ? 's' : ''} with value ${tagResult.tagValue}`));
+      },
+      handleSkillsTagRemoved(tagResult) {
+        const { skills, tag } = tagResult;
+        this.skills = this.skills.map((skill) => {
+          const taggedSkill = skills.find((item) => item.skillId === skill.skillId);
+          if (taggedSkill && taggedSkill.tags) {
+            const tagIndex = taggedSkill.tags.findIndex((item) => item.tagId === tag.tagId);
+            if (tagIndex > -1) {
+              taggedSkill.tags.splice(tagIndex, 1);
+            }
+            return taggedSkill;
+          }
+          return skill;
+        });
+        this.$nextTick(() => this.$announcer.polite(`removed tag from ${skills.length} skill${skills.length > 1 ? 's' : ''} with value ${tagResult.tagValue}`));
       },
       updateImportedSkill(skill) {
         const item1Index = this.skills.findIndex((item) => item.skillId === skill.skillId);
@@ -1011,6 +1067,14 @@ limitations under the License.
       handleSkillMoveRequest() {
         this.moveSkillsInfo.skills = this.skills.filter((item) => item.selected);
         this.moveSkillsInfo.show = true;
+      },
+      handleAddSkillTagRequest() {
+        this.tagSkillsInfo.skills = this.skills.filter((item) => item.selected);
+        this.tagSkillsInfo.show = true;
+      },
+      handleRemoveSkillTagRequest() {
+        this.removeTagSkillsInfo.skills = this.skills.filter((item) => item.selected);
+        this.removeTagSkillsInfo.show = true;
       },
       handleDeleteCancelled() {
         if (this.deleteSkillInfo.skill) {

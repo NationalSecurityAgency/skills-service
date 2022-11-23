@@ -1484,6 +1484,22 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approvalEmails/isSubscribed")
     }
 
+    def addTagToSkills(String projectId, List<String> skillIds, String tagValue) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagValue?.toLowerCase()?.replaceAll('[\\W_]', ''), tagValue: tagValue])
+    }
+
+    def getTagsForSkills(String projectId, List<String> skillIds) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/tags", [skillIds: skillIds])
+    }
+
+    def getTagsForProject(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/tags")
+    }
+
+    def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {
+        return wsHelper.adminDelete("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId])
+    }
+
     /**
      * Invites users to join invite only project by sending an email with a one time use
      * invitation code to each user in the specified request

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,7 @@
  */
 package skills.storage.model
 
-import groovy.transform.CompileStatic
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
-
-@Entity()
-@Table(name = 'skill_definition')
-@EntityListeners(AuditingEntityListener)
-@CompileStatic
-class SkillDef extends SkillDefParent {
-    static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge, SkillsGroup, Tag
-    }
-
-    static enum SelfReportingType {
-        Approval,
-        HonorSystem,
-    }
+interface SkillTag {
+    String getTagId()
+    String getTagValue()
 }

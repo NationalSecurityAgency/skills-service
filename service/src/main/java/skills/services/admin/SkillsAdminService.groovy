@@ -30,11 +30,11 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
-import skills.controller.request.model.PointSyncPatchRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
+import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.SkillDefAccessor
@@ -111,6 +111,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
+
+    @Autowired
+    SkillTagService skillTagService
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -549,7 +552,8 @@ class SkillsAdminService {
         } else {
             res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
         }
-        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
+        Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
     /**
@@ -573,7 +577,9 @@ class SkillsAdminService {
         } else {
             res = nativeQueriesRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
         }
-        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
+
+        Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
@@ -732,7 +738,7 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
         SkillDefPartialRes res = new SkillDefPartialRes(
@@ -769,6 +775,12 @@ class SkillsAdminService {
 
         if (loadNumUsers) {
             res.numUsers = calculateDistinctUsersForSkill((SkillDefPartial)partial)
+        }
+
+        if (loadTags) {
+            skillTagService.getTagsForSkill(partial.id)?.each { tag ->
+                res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue))
+            }
         }
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {

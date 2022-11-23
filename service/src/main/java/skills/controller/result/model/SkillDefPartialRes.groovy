@@ -36,6 +36,8 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
 
     SkillDef.SelfReportingType selfReportingType
 
+    List<SkillTagRes> tags = []
+
     // SkillsGroup related props
     Integer numSkillsInGroup
     Integer numSelfReportSkills

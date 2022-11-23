@@ -368,4 +368,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sub.type = 'Subject'
     ''', nativeQuery=true)
     List<SubjectTotalPoints> getSubjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
+
+    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.type='Tag' and srd.parent.type = 'Tag' and srd.parent.skillId=?1''')
+    Integer getSkillWithTagCount(String tagId)
 }
