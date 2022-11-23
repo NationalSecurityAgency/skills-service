@@ -27,6 +27,15 @@ describe('Copy Invite URL Tests', () => {
     const proj1Share = `${proj1Url}?invited=true`
 
     it('retrieve share url', () => {
+        // this is needed to grant headless chrome permissions to copy-and-paste
+        cy.wrap(Cypress.automation('remote:debugger:protocol', {
+            command: 'Browser.grantPermissions',
+            params: {
+                permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+                origin: window.location.origin,
+            },
+        }))
+
         cy.visit('/administrator/projects/proj1')
         cy.contains('No Subjects Yet')
         cy.location().then((loc) => {
