@@ -253,7 +253,6 @@ limitations under the License.
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
   import { max_value, min_value } from 'vee-validate/dist/rules';
-  import saveState from 'vue-save-state';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from './SkillsService';
@@ -263,6 +262,7 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
   import SettingsService from '../settings/SettingsService';
   import HelpUrlInput from '../utils/HelpUrlInput';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -294,7 +294,7 @@ limitations under the License.
       IdInput,
       MarkdownEditor,
     },
-    mixins: [saveState],
+    mixins: [SaveComponentStateLocallyMixin],
     props: {
       projectId: {
         type: String,
@@ -333,6 +333,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         isLoadingSkillDetails: true,
+        saveTimer: null,
         skillInternal: {
           skillId: '',
           projectId: this.projectId,
@@ -368,7 +369,13 @@ limitations under the License.
     },
     mounted() {
       if (this.isEdit) {
-        this.loadSkillDetailsAndValidate(false);
+        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        if (savedData) {
+          this.skillInternal = savedData;
+          this.isLoadingSkillDetails = false;
+        } else {
+          this.loadSkillDetailsAndValidate(false);
+        }
         this.selfReport.loading = false;
       } else if (this.isCopy) {
         this.loadSkillDetailsAndValidate(true);
@@ -414,19 +421,20 @@ limitations under the License.
       show(newValue) {
         this.$emit('input', newValue);
       },
+      skillInternal: {
+        handler(newValue) {
+          this.saveStateToLocalStorage(this.$options.name, newValue);
+        },
+        deep: true,
+      },
     },
     methods: {
-      getSaveStateConfig() {
-        return {
-          cacheKey: 'EditSkill',
-          saveProperties: ['skillInternal'],
-        };
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       close(e) {
+        this.clearLocalStorageState(this.$options.name);
         this.show = false;
         this.publishHidden(e);
       },
