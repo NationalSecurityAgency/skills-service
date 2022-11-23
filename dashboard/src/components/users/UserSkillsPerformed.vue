@@ -19,6 +19,7 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <skills-spinner :is-loading="!table.options.fields" class="mb-5"/>
+
       <div v-if="table.options.fields">
         <div class="row px-3 pt-3">
           <div class="col-12">
@@ -34,6 +35,12 @@ limitations under the License.
           <div class="col">
             <b-button variant="outline-info" @click="applyFilters" data-cy="performedSkills-filterBtn"><i class="fa fa-filter"/> Filter</b-button>
             <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="performedSkills-resetBtn"><i class="fa fa-times"/> Reset</b-button>
+          </div>
+          <div class="col text-right mr-2">
+            <b-button @click="deleteAllSkills" variant="outline-info" :disabled="table.items.length === 0" data-cy="performedSkills-deleteAll"
+                      :aria-label="`remove all skill events from user`">
+              <i class="fas fa-trash" aria-hidden="true"/> Delete All
+            </b-button>
           </div>
         </div>
 
@@ -78,6 +85,12 @@ limitations under the License.
       </skills-b-table>
       </div>
     </b-card>
+
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteAllSkills">
+      <p>
+        This will delete all skill events for <span class="text-primary font-weight-bold">{{this.userId}}</span>.
+      </p>
+    </removal-validation>
   </div>
 </template>
 
@@ -94,6 +107,7 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
 
   const { mapActions } = createNamespacedHelpers('users');
 
@@ -106,6 +120,7 @@ limitations under the License.
       DateCell,
       SkillsBTable,
       SubPageHeader,
+      RemovalValidation,
     },
     data() {
       return {
@@ -137,6 +152,7 @@ limitations under the License.
         },
         projectId: null,
         userId: null,
+        showDeleteDialog: false,
       };
     },
     created() {
@@ -236,6 +252,9 @@ limitations under the License.
             }
           });
       },
+      deleteAllSkills() {
+        this.showDeleteDialog = true;
+      },
       doDeleteSkill(skill) {
         this.isLoading = true;
         UsersService.deleteSkillEvent(this.projectId, skill, this.userId)
@@ -248,6 +267,20 @@ limitations under the License.
             }
           })
           .finally(() => {
+            this.isLoading = false;
+          });
+      },
+      doDeleteAllSkills() {
+        this.isLoading = true;
+        UsersService.deleteAllSkillEvents(this.projectId, this.userId)
+          .then((data) => {
+            if (data.success) {
+              this.loadData();
+              this.loadUserDetailsState({ projectId: this.projectId, userId: this.userId });
+            } else {
+              this.errorToast('Unable to Remove User Skills', `Skill events were not removed.  ${data.explanation}`);
+            }
+          }).finally(() => {
             this.isLoading = false;
           });
       },

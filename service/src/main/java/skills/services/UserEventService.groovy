@@ -327,6 +327,10 @@ class UserEventService {
         }
     }
 
+    public void removeAllEvents(String projectId, String userId) {
+        userEventsRepo.deleteAllByUserIdAndProjectId(userId, projectId);
+    }
+
     private void decrementEvent(UserEvent event) {
         event.count = Math.max(0, event.count-1)
         if (event.count == 0) {

@@ -233,6 +233,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     long countByProjectIdAndSkillId(String projectId, @Nullable String skillId)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
+    void deleteAllByProjectIdAndUserId(String projectId, String userId)
 
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
