@@ -159,7 +159,7 @@ limitations under the License.
     },
     methods: {
       addConf() {
-        const currentUserId = this.currentSelectedUser.userId;
+        const currentUserId = this.currentSelectedUser.dn ? this.currentSelectedUser.dn : this.currentSelectedUser.userId;
         SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, currentUserId)
           .then((res) => {
             this.table.items.push(res);
