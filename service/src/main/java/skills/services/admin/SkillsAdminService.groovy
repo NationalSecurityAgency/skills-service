@@ -552,7 +552,8 @@ class SkillsAdminService {
         } else {
             res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
         }
-        Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
+        // global badges will have a null projectId
+        Boolean projectHasSkillTags = projectId ? skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean : false
         return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
