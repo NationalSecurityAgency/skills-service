@@ -620,40 +620,61 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it('settings', () => {
+
+    it('settings - profile', () => {
         cy.logout();
         cy.login('root@skills.org', 'password');
         cy.visit('/settings');
-        cy.contains('First Name');
         cy.injectAxe();
+        cy.get('[data-cy="generalSettingsSave"]');
         cy.customLighthouse();
         cy.customA11y();
+    })
 
-        cy.get('[data-cy="nav-Preferences"]')
-            .click();
-        cy.contains('Preferences');
+
+    it('settings - preferences', () => {
+        cy.logout();
+        cy.login('root@skills.org', 'password');
+        cy.visit('/settings/preferences');
+        cy.injectAxe();
+        cy.get('[data-cy="userPrefsSettingsSave"]');
         cy.customLighthouse();
         cy.customA11y();
+    })
 
-        cy.get('[data-cy=nav-Security]')
-            .click();
-        cy.contains('Root Users Management');
+
+    it('settings - security', () => {
+        cy.logout();
+        cy.login('root@skills.org', 'password');
+        cy.visit('/settings/security');
+        cy.injectAxe();
+        cy.get('[data-cy="addUserBtn"]')
         cy.get('[data-cy="supervisorrm"]')
             .contains('There are no records to show');
         cy.customLighthouse();
         cy.customA11y();
+    })
 
-        cy.get('[data-cy=nav-Email]')
-            .click();
+    it('settings - email', () => {
+        cy.logout();
+        cy.login('root@skills.org', 'password');
+        cy.visit('/settings/email');
+        cy.injectAxe();
         cy.contains('Email Connection Settings');
         cy.contains('TLS Disabled');
         cy.contains('Public URL');
+        cy.get('[data-cy="emailSettingsTest"]')
         cy.customLighthouse();
         cy.customA11y();
+    });
 
-        cy.get('[data-cy=nav-System]')
-            .click();
+    it('settings - system', () => {
+        cy.logout();
+        cy.login('root@skills.org', 'password');
+        cy.visit('/settings/system');
+        cy.injectAxe();
         cy.contains('Token Expiration');
+        cy.get('[data-cy="saveSystemSettings"]')
         cy.customLighthouse();
         cy.customA11y();
     });
