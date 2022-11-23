@@ -335,8 +335,7 @@ class SkillApprovalService {
 
         SkillApprovalConf saved
         if (skillApproverConfRequest.userId) {
-            String requestedUserId = skillApproverConfRequest.userId.toLowerCase()
-            String userId = userInfoService.getUserName(requestedUserId, false);
+            String userId = userInfoService.lookupUserId(skillApproverConfRequest.userId);
             if(!userAttrsRepo.findByUserId(userId)) {
                 throw new SkillException("Provided user id [${userId}] does not exist", projectId)
             }
