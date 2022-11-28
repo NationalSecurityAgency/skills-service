@@ -165,16 +165,5 @@ describe('Navigation Tests', () => {
             .should('not.visible');
     });
 
-    it('navigation menu should be right aligned on small screen', () => {
-        // exhibited bug was that collapsing the menu before resizing the screen resulted in incorrect layout of the menu button
-        cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy=navCollapseOrExpand]')
-            .click();
-        cy.viewport('iphone-6');
-        cy.get('[data-cy=nav-col]')
-            .should('be.visible');
-        cy.matchSnapshotImageForElement('[data-cy="nav-col"]', 'small-screen-nav-menu');
-    });
-
 });
 

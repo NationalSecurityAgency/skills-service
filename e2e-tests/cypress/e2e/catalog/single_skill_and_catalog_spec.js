@@ -52,8 +52,6 @@ describe('Single Skill and Catalog Tests', () => {
                             .css('height', `${$el1.height()}px`);
                     });
             });
-
-        cy.matchSnapshotImageForElement('[data-cy=subjectCards]', 'Subject Cards one with disabled skill one without');
     });
 
     it('drill down to a skill after creation', () => {
