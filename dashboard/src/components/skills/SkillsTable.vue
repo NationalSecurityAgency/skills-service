@@ -82,7 +82,7 @@ limitations under the License.
                 <b-dropdown-item @click="handleAddSkillTagRequest" data-cy="tagSkillBtn"><i
                   class="fas fa-tag"></i> Tag Skills
                 </b-dropdown-item>
-                <b-dropdown-item @click="handleRemoveSkillTagRequest" data-cy="tagSkillBtn"><i
+                <b-dropdown-item @click="handleRemoveSkillTagRequest" data-cy="untagSkillBtn"><i
                   class="fas fa-trash"></i> Remove Tags
                 </b-dropdown-item>
               </b-dropdown>
@@ -172,7 +172,7 @@ limitations under the License.
                 </div>
               </div>
 
-              <div v-for="(tag) in data.item.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${data.item.skillId}-${tag}`">
+              <div v-for="(tag) in data.item.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${data.item.skillId}-${tag.tagId}`">
                 <b-badge variant="info">
                   <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
                 </b-badge>

@@ -26,6 +26,7 @@ limitations under the License.
         <label for="existingTag">Select Existing Tag</label>
         <div id="existingTag">
           <v-select v-model="existingTagValue" :options="existingTags" label="tagValue"
+                    data-cy="existingTagDropdown"
                     placeholder="Select Tag" v-on:input="existingTagInputChanged" :loading="isLoading">
           </v-select>
         </div>
@@ -33,6 +34,7 @@ limitations under the License.
         <ValidationProvider name="Skill Tags" :debounce=500 v-slot="{errors}" rules="maxSkillTagLength">
           <label for="newTag">Create New Tag</label>
           <b-form-input id="newTag" v-model="newTagValue"
+                        data-cy="newTagInput"
                         @input="newTagInputChanged"
                         @keydown.enter="handleSubmit(tagSkills)"
           />
@@ -63,7 +65,7 @@ limitations under the License.
   import InputSanitizer from '../../utils/InputSanitizer';
 
   export default {
-    name: '',
+    name: 'AddSkillTag',
     props: {
       skills: {
         type: Array,
@@ -133,8 +135,6 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
-        // const tags = ['Beginner', 'Novice', 'Intermediate', 'Advanced', 'Expert'];
-        // return tags;
       },
       existingTagInputChanged(input) {
         this.newTagValue = null;

@@ -26,6 +26,7 @@ limitations under the License.
         <label for="existingTag">Select Tag to Remove</label>
         <div id="existingTag">
           <v-select v-model="selectedTagValue" :options="existingTags" label="tagValue"
+                    data-cy="existingTagDropdown"
                     placeholder="Select Tag" :loading="isLoading">
           </v-select>
         </div>
