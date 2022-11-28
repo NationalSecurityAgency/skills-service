@@ -62,36 +62,36 @@ describe('Approver Config User Tags Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('exist')
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('first');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('First');
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('not.exist')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'first'
+                value: 'First'
             }],
         ], 5);
 
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in Org: First')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('not.have.value')
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('second');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('have.value', 'second')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('SeCond');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).should('have.value', 'SeCond')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'second'
+                value: 'SeCond'
             }],
             [{
                 colIndex: 0,
-                value: 'first'
+                value: 'First'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: second')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in Org: First')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in Org: SeCond')
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/self-report/configure');
@@ -99,15 +99,15 @@ describe('Approver Config User Tags Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'second'
+                value: 'SeCond'
             }],
             [{
                 colIndex: 0,
-                value: 'first'
+                value: 'First'
             }],
         ], 5);
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: first')
-        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in org: second')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in Org: First')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Users in Org: SeCond')
 
     });
 
@@ -171,7 +171,7 @@ describe('Approver Config User Tags Tests', () => {
 
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
         cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
-        cy.configureApproverForUserTag(1, 'user1', 'tagKey', 'first')
+        cy.configureApproverForUserTag(1, 'user1', 'tagKey', 'fiRst')
         cy.configureApproverForUserTag(1, 'user1', 'tagKey', 'second')
         cy.visit('/administrator/projects/proj1/self-report/configure');
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
@@ -184,7 +184,7 @@ describe('Approver Config User Tags Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValueInputError"]`).should('not.be.visible')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.enabled')
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('{backspace}first');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('{backspace}FIrst');
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValueInputError"]`).should('have.text', 'There is already an entry for this Org value.')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('not.be.enabled')
     })

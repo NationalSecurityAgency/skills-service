@@ -117,16 +117,16 @@ class ApproverConfValidationSpecs extends DefaultIntSpec {
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "KeY1"
-        rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
-        rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
+        rootUser.saveUserTag(users[2], userTagKey, ["aBCd"])
+        rootUser.saveUserTag(users[3], userTagKey, ["efGh"])
 
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "Abc")
         when:
-        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "aBc")
 
         then:
         SkillsClientException e = thrown()
-        e.message.contains("exist for projectId=[${proj.projectId}], approverId=[${user1Service.userName}], userTagKey=[${userTagKey}], userTagValue=[abc] already exist.")
+        e.message.contains("exist for projectId=[${proj.projectId}], approverId=[${user1Service.userName}], userTagKey=[${userTagKey}], userTagValue=[aBc] already exist.")
     }
 
     def "can not assign bad skill id"() {

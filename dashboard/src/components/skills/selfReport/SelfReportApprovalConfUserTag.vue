@@ -189,7 +189,7 @@ limitations under the License.
         extend('uniqueTagConf', {
           message: (field) => `There is already an entry for this ${field} value.`,
           validate(value) {
-            return !self.table.items.find((i) => value.toLowerCase() === i.userTagValue);
+            return !self.table.items.find((i) => value.toLowerCase() === i.userTagValue?.toLowerCase());
           },
         });
       },
