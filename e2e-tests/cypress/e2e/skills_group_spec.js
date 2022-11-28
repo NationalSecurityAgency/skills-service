@@ -55,14 +55,14 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 1, value: '1' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
 
         cy.createGroupViaUI('another');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'another' }, { colIndex: 0,  value: 'ID: anotherGroup' }, { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'another' }, { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 1, value: '1' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
@@ -410,7 +410,6 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('ID: skill2');
         cy.acceptRemovalSafetyCheck();;
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
@@ -455,7 +454,6 @@ describe('Skills Group Tests', () => {
         cy.get('button').contains('Save').click();
 
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
 
         // navigate away and back then verify
         cy.clickNav('Levels')
@@ -463,14 +461,12 @@ describe('Skills Group Tests', () => {
 
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
 
         // refresh and verify
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
 
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
     });
 
     it('nav to skill', () => {
@@ -791,7 +787,6 @@ describe('Skills Group Tests', () => {
         cy.get('button').contains('Save').click();
 
         cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('Copy of Very Great Skill 1')
-        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('ID: copy_of_skill1')
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');

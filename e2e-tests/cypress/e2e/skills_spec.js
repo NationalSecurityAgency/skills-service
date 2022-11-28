@@ -278,8 +278,6 @@ describe('Skills Tests', () => {
 
     cy.clickSave();
     cy.wait('@postNewSkill');
-
-    cy.contains('ID: Lotsofspecial')
   });
 
   it('create skill using enter key', () => {
@@ -305,8 +303,6 @@ describe('Skills Tests', () => {
 
     cy.get('#skillName').type('{enter}');
     cy.wait('@postNewSkill');
-
-    cy.contains('ID: Lotsofspecial')
   });
 
   it('Open new skill dialog with enter key', () => {
@@ -347,7 +343,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillNameError"]').should('have.value', '');
     cy.get('[data-cy=closeSkillButton]').click();
     cy.contains('test');
-    cy.contains('ID: test');
   });
 
   it('Add Skill Event', () => {
@@ -606,8 +601,6 @@ describe('Skills Tests', () => {
     cy.clickSave();
     cy.wait('@postNewSkill');
 
-    cy.contains(`ID: ${initialId}`)
-
     const editButtonSelector = `[data-cy=editSkillButton_${initialId}]`;
     cy.get(editButtonSelector).click()
 
@@ -617,8 +610,6 @@ describe('Skills Tests', () => {
 
     cy.clickSave();
     cy.wait('@postNewSkill');
-
-    cy.contains(`ID: ${newId}`)
   });
 
   it('new skill button should retain focus after dialog closes', () => {
@@ -808,7 +799,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
 
     cy.get('[data-cy="saveSkillButton"]').click()
-    cy.contains('ID: GreatName1233Skill_blah')
   });
 
   it('skill id validation special characters can be URL encoded', () => {
@@ -840,60 +830,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
 
     cy.get('[data-cy="saveSkillButton"]').click()
-    cy.contains(`ID: ${encodeURIComponent(providedName)}_blah`)
-  });
-
-  it('very long skill id should be truncated ', () => {
-    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
-      .as('loadSubject');
-
-    cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.wait('@loadSubject');
-    cy.get('[data-cy="newSkillButton"]').click();
-
-    cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enabled');
-
-    const fiftyChars = new Array(50).join('A');
-    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
-    cy.get('[data-cy="idInputValue"]').type(fiftyChars);
-    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
-
-    cy.get('[data-cy="saveSkillButton"]').click()
-
-    const skillId = `GreatName1233Skill${fiftyChars}`
-    cy.get('[data-cy="skillId"] [data-cy=showMoreText]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('not.exist');
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').click();
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('not.exist');
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').click();
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
-
-    cy.intercept('GET', `/administrator/projects/proj1/subjects/subj1/skills/${skillId}`).as('loadSkill1');
-    cy.visit(`/administrator/projects/proj1/subjects/subj1/skills/${skillId}`);
-    cy.wait('@loadSkill1');
-
-    cy.get('[data-cy="skillId"] [data-cy=showMoreText]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('not.exist');
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').click();
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('not.exist');
-    cy.get('[data-cy="skillId"] [data-cy=showLess]').click();
-    cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('not.have.text', `ID: ${skillId}`);
-    cy.get('[data-cy="skillId"] [data-cy=smtText]').should('have.text', `ID: ${skillId.substring(0, 50)}`);
   });
 
   it('edit skill on page', () => {
