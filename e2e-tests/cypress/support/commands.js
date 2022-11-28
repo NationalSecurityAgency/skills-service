@@ -493,7 +493,7 @@ Cypress.Commands.add('customLighthouse', () => {
     cy.lighthouse({
         "performance": 0,
         "accessibility": 90,
-        "best-practices": 85,
+        "best-practices": 80,
         "seo": 0,
         "pwa": 0
     }, {}, lighthouseOptions);

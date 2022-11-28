@@ -669,12 +669,16 @@ describe('Accessibility Tests', () => {
     });
 
     it('settings - system', () => {
+        cy.intercept('GET', '/root/getSystemSettings')
+            .as('getSettings');
         cy.logout();
         cy.login('root@skills.org', 'password');
         cy.visit('/settings/system');
-        cy.injectAxe();
+        cy.wait('@getSettings')
         cy.contains('Token Expiration');
+        cy.get('[data-cy="resetTokenExpiration"]').should('have.value', '2H')
         cy.get('[data-cy="saveSystemSettings"]')
+        cy.injectAxe();
         cy.customLighthouse();
         cy.customA11y();
     });
