@@ -88,7 +88,7 @@ limitations under the License.
 
     <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteAllSkills">
       <p>
-        This will delete all skill events for <span class="text-primary font-weight-bold">{{this.userId}}</span>.
+        This will delete all skill events for <span class="text-primary font-weight-bold">{{this.getUserDisplay({ userId: this.userId, userIdForDisplay: this.userIdForDisplay})}}</span>.
       </p>
     </removal-validation>
   </div>
@@ -108,12 +108,13 @@ limitations under the License.
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import UserIdForDisplayMixin from './UserIdForDisplayMixin';
 
   const { mapActions } = createNamespacedHelpers('users');
 
   export default {
     name: 'UserSkillsPerformed',
-    mixins: [MsgBoxMixin, ToastSupport, ProjConfigMixin],
+    mixins: [MsgBoxMixin, ToastSupport, ProjConfigMixin, UserIdForDisplayMixin],
     components: {
       SkillsSpinner,
       ShowMore,
@@ -152,6 +153,7 @@ limitations under the License.
         },
         projectId: null,
         userId: null,
+        userIdForDisplay: null,
         showDeleteDialog: false,
       };
     },
@@ -215,6 +217,11 @@ limitations under the License.
         this.loadData();
       },
       loadData() {
+        UsersService.getUserInfo(this.projectId, this.userId).then((res) => {
+          if (res) {
+            this.userIdForDisplay = res.userIdForDisplay;
+          }
+        });
         this.loadTableData();
       },
       loadTableData() {
