@@ -54,14 +54,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '2,002'
@@ -85,14 +85,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '2,002'
@@ -182,14 +182,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '200'
@@ -207,14 +207,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '200'
@@ -256,14 +256,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '2,002'

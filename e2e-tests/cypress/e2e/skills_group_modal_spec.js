@@ -222,41 +222,4 @@ describe('Skills Group Modal Tests', () => {
 
     });
 
-    it('Skills Group modal - very long skill id should be truncated', () => {
-        cy.createSkillsGroup(1, 1, 1, { description: 'first group description' })
-        cy.createSkillsGroup(1, 1, 2, { description: 'second group description' })
-        cy.createSkillsGroup(1, 1, 3, { description: 'third group description' })
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-
-        const fiftyChars = new Array(50).join('A');
-        const newSkillId = `GreatName1233Skill${fiftyChars}`
-
-        cy.get('[data-cy="editSkillButton_group2"]').click();
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-        cy.get('[data-cy="idInputValue"]').should('have.value','group2');
-        cy.get('[data-cy="idInputValue"]').clear().type(newSkillId);
-        cy.get('[data-cy="saveGroupButton"]').click();
-
-        cy.get(`[data-cy="editSkillButton_${newSkillId}"]`).should('exist');
-        cy.get('[data-cy="editSkillButton_group2"]').should('not.exist');
-
-        cy.get(`[data-cy="editSkillButton_${newSkillId}"]`).click();
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-        cy.get('[data-cy="idInputValue"]').should('have.value', newSkillId);
-        cy.get('[data-cy="closeGroupButton"]').click();
-
-        cy.get('[data-cy="skillId"] [data-cy=showMoreText]').should('have.length', 3);
-        cy.get('[data-cy="skillId"] [data-cy=showLess]').should('not.exist');
-        cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-        cy.get('[data-cy="skillId"] [data-cy=smtText]').eq(1).should('not.have.text', `ID: ${newSkillId}`);
-        cy.get('[data-cy="skillId"] [data-cy=smtText]').eq(1).should('have.text', `ID: ${newSkillId.substring(0, 50)}`);
-        cy.get('[data-cy="skillId"] [data-cy=showMore]').click();
-        cy.get('[data-cy="skillId"] [data-cy=smtText]').eq(1).should('have.text', `ID: ${newSkillId}`);
-        cy.get('[data-cy="skillId"] [data-cy=showLess]').should('have.length', 1);
-        cy.get('[data-cy="skillId"] [data-cy=showMore]').should('not.exist');
-        cy.get('[data-cy="skillId"] [data-cy=showLess]').click();
-        cy.get('[data-cy="skillId"] [data-cy=showMore]').should('have.length', 1);
-        cy.get('[data-cy="skillId"] [data-cy=smtText]').eq(1).should('not.have.text', `ID: ${newSkillId}`);
-        cy.get('[data-cy="skillId"] [data-cy=smtText]').eq(1).should('have.text', `ID: ${newSkillId.substring(0, 50)}`);
-    });
 });
