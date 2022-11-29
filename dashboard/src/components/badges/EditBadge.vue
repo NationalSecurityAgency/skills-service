@@ -141,9 +141,11 @@ limitations under the License.
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
   import HelpUrlInput from '../utils/HelpUrlInput';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
 
   export default {
     name: 'EditBadge',
+    mixins: [SaveComponentStateLocallyMixin],
     components: {
       HelpUrlInput,
       InlineHelp,
@@ -197,6 +199,11 @@ limitations under the License.
             }
           });
         }, 600);
+      } else {
+        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        if (savedData) {
+          this.badgeInternal = savedData;
+        }
       }
     },
     computed: {
@@ -208,6 +215,14 @@ limitations under the License.
       show(newValue) {
         this.$emit('input', newValue);
       },
+      badgeInternal: {
+        handler(newValue) {
+          if (!this.isEdit) {
+            this.saveStateToLocalStorage(this.$options.name, newValue);
+          }
+        },
+        deep: true,
+      },
     },
     methods: {
       trackFocus() {
@@ -215,6 +230,7 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       closeMe(e) {
+        this.clearLocalStorageState(this.$options.name);
         this.show = false;
         this.publishHidden(e);
       },

@@ -92,10 +92,12 @@ limitations under the License.
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
 
   export default {
     name: 'EditProject',
     components: { IdInput, MarkdownEditor, SkillsSpinner },
+    mixins: [SaveComponentStateLocallyMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
@@ -140,6 +142,11 @@ limitations under the License.
             });
           }, 600);
         });
+      } else {
+        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        if (savedData) {
+          this.internalProject = savedData;
+        }
       }
       document.addEventListener('focusin', this.trackFocus);
     },
@@ -164,6 +171,14 @@ limitations under the License.
       show(newValue) {
         this.$emit('input', newValue);
       },
+      internalProject: {
+        handler(newValue) {
+          if (!this.isEdit) {
+            this.saveStateToLocalStorage(this.$options.name, newValue);
+          }
+        },
+        deep: true,
+      },
     },
     methods: {
       trackFocus() {
@@ -174,6 +189,7 @@ limitations under the License.
         this.canEditProjectId = canEdit;
       },
       close() {
+        this.clearLocalStorageState(this.$options.name);
         this.show = false;
         this.publishHidden({});
       },

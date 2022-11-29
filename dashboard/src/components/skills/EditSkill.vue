@@ -369,24 +369,25 @@ limitations under the License.
     },
     mounted() {
       if (this.isEdit) {
-        const savedData = this.loadStateFromLocalStorage(this.$options.name);
-        if (savedData) {
-          this.skillInternal = savedData;
-          this.isLoadingSkillDetails = false;
-        } else {
-          this.loadSkillDetailsAndValidate(false);
-        }
+        this.loadSkillDetailsAndValidate(false);
         this.selfReport.loading = false;
       } else if (this.isCopy) {
         this.loadSkillDetailsAndValidate(true);
         this.selfReport.loading = false;
       } else {
-        this.skillInternal = { version: 0, ...this.skillInternal };
-        if (this.newSkillDefaultValues) {
-          this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        if (savedData) {
+          this.skillInternal = savedData;
+          this.isLoadingSkillDetails = false;
+          this.selfReport.loading = false;
+        } else {
+          this.skillInternal = { version: 0, ...this.skillInternal };
+          if (this.newSkillDefaultValues) {
+            this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+          }
+          this.findLatestSkillVersion();
+          this.loadSelfReportProjectSetting();
         }
-        this.findLatestSkillVersion();
-        this.loadSelfReportProjectSetting();
       }
       this.setupValidation();
       document.addEventListener('focusin', this.trackFocus);
@@ -423,7 +424,9 @@ limitations under the License.
       },
       skillInternal: {
         handler(newValue) {
-          this.saveStateToLocalStorage(this.$options.name, newValue);
+          if (!this.isEdit) {
+            this.saveStateToLocalStorage(this.$options.name, newValue);
+          }
         },
         deep: true,
       },

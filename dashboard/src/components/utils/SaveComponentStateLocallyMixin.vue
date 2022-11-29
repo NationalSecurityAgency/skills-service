@@ -23,7 +23,10 @@ limitations under the License.
       },
       loadStateFromLocalStorage(key) {
         const data = localStorage.getItem(key);
-        return JSON.parse(data);
+        if (data) {
+          return JSON.parse(data);
+        }
+        return null;
       },
       clearLocalStorageState(key) {
         localStorage.removeItem(key);
