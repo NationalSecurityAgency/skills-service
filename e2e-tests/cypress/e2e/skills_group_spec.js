@@ -572,7 +572,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="copySkillButton_Skill1Skill"]').click();
         cy.get('[data-cy="saveSkillButton"]').click();
         cy.get('[data-cy="saveSkillButton"]').should('not.exist');
-        cy.contains(`copy_of_Skill1Skill`);
+        cy.get('[data-cy="manageSkillLink_copy_of_Skill1Skill"]').should('have.text', 'Copy of Skill 1');
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredAllSkills"]`).contains('all skills')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
