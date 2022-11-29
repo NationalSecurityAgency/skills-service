@@ -44,7 +44,7 @@ describe('Skills Group Tests', () => {
             cy.get('[data-cy="skillName"]').type(skillName);
             cy.get('[data-cy="saveSkillButton"]').click();
             cy.get('[data-cy="saveSkillButton"]').should('not.exist');
-            cy.contains(`Skill${skillNum}Skill`);
+            cy.get(`[data-cy="manageSkillLink_Skill${skillNum}Skill"]`).should('have.text', skillName);
         });
 
     });
@@ -434,7 +434,6 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill2"]').should('not.exist');
         cy.get('[data-cy="editSkillButton_newId"]')
-        cy.get('[data-cy="nameCell_newId"]').contains('newId')
         cy.get('[data-cy="nameCell_newId"]').contains('other')
 
         cy.get('[data-cy="skillsTable-additionalColumns"]').first().contains('Points').click();
