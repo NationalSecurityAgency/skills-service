@@ -189,7 +189,6 @@ limitations under the License.
         this.canEditProjectId = canEdit;
       },
       close() {
-        this.clearLocalStorageState(this.$options.name);
         this.show = false;
         this.publishHidden({});
       },
@@ -210,6 +209,7 @@ limitations under the License.
         }
       },
       publishHidden(e) {
+        this.clearLocalStorageState(this.$options.name);
         if (this.tooltipShowing && typeof e.preventDefault === 'function') {
           e.preventDefault();
         } else {

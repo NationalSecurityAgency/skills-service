@@ -437,11 +437,11 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       close(e) {
-        this.clearLocalStorageState(this.$options.name);
         this.show = false;
         this.publishHidden(e);
       },
       publishHidden(e) {
+        this.clearLocalStorageState(this.$options.name);
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {
