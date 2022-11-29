@@ -129,11 +129,11 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'group2' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '4' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '5' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Awesome Group 2 Subj1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '5' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 5);
 
@@ -141,20 +141,20 @@ describe('Skills Group Tests', () => {
         cy.acceptRemovalSafetyCheck();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
     });
@@ -235,30 +235,30 @@ describe('Skills Group Tests', () => {
         const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
 
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill4' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
-            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
@@ -271,9 +271,9 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
@@ -305,9 +305,9 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Version').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
-            [{ colIndex: 0,  value: 'group2' },  { colIndex: 3, value: '0from 0 skills' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 3, value: '200from 1 skill' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
+            [{ colIndex: 0,  value: 'Awesome Group 2 Subj1' },  { colIndex: 3, value: '0from 0 skills' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 3, value: '200from 1 skill' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
     });
