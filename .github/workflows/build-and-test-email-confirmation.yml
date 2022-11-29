@@ -77,6 +77,7 @@ jobs:
         tag: "${{ github.workflow }}"
         spec: cypress/e2e/verify_email_spec.js
         env: verifyEmail=true
+        browser: chrome
       env:
         # pass the Dashboard record key as an environment variable
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

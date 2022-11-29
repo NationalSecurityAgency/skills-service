@@ -17,6 +17,7 @@ package skills.storage.model
 
 public interface UserMetrics {
     String getUserId();
+    String getUserIdForDisplay();
     Integer getCount();
     Date getDate();
 }

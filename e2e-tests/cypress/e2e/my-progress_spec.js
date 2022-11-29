@@ -377,40 +377,6 @@ describe('Navigation Tests', () => {
             .should('have.text', 'Project: This is project 1');
     });
 
-    it('material icons should be proper size', () => {
-        cy.loginAsRootUser();
-        const globalBadge1 = {
-            badgeId: `globalBadge1`,
-            isEdit: false,
-            name: `Global Badge 1`,
-            originalBadgeId: '',
-            iconClass: 'mi mi-live-tv',
-            enabled: true,
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        };
-        cy.request('PUT', `/supervisor/badges/globalBadge1`, globalBadge1);
-        cy.assignSkillToGlobalBadge(1, 2);
-        cy.enableGlobalBadge(1, globalBadge1);
-
-        cy.loginAsRootUser();
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: yesterday
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: testTime
-        });
-
-        cy.loginAsProxyUser();
-
-        cy.visit('/progress-and-rankings/');
-        cy.get('[data-cy=viewBadges]')
-            .click();
-        cy.matchSnapshotImageForElement('[data-cy=myBadges]', 'my-badges-material-icon', {
-            blackout: ['[data-cy=dateBadgeAchieved]'],
-        });
-    });
 
     it('My Badges filtering', () => {
         cy.loginAsRootUser();

@@ -503,10 +503,10 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "KeY1"
-        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["Abcd"])
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "aBCD")
 
         List<String> expectedEmails = getEmails([testUsers.approvers[1], skillsService])
         when:
@@ -532,7 +532,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
 
         SkillsService rootUser = createRootSkillService()
         String userTagKey = "KeY1"
-        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd".toUpperCase()])
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
 
@@ -567,7 +567,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["abcd"])
         rootUser.saveUserTag(testUsers.userA, userTagKey, ["efgh"])
 
-        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "abcd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey, "aBCd")
         skillsService.configureFallbackApprover(proj.projectId, skillsService.userName)
 
         List<String> expectedEmails = getEmails([skillsService])

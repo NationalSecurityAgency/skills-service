@@ -177,7 +177,6 @@ describe('Projects Tests', () => {
         cy.wait(2000);
         cy.get('[data-cy="pageHeader"] .container-fluid')
             .should('have.length', 1);
-        cy.matchSnapshotImageForElement('[data-cy="pageHeader"]');
 
         cy.get('[data-cy=pageHeaderStat]')
             .first()

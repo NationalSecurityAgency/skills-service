@@ -881,7 +881,6 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=pageHeaderStat]').first().invoke('width').then((val)=>{
             cy.get('[data-cy=pageHeaderStat]').eq(1).invoke('width').should('eq', val);
         });
-        cy.matchSnapshotImageForElement('[data-cy=pageHeader]', 'No Premature Name Wrap')
     });
 
     it('subject modal shows Root Help Url when configured', () => {

@@ -80,6 +80,73 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         !addedSkills?.data?.find { it.skillId == skills[0].skillId }
     }
 
+    def "delete all skill events"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(30, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        String secondUserId = "user2"
+        Long timestamp = new Date().time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date(timestamp))
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(timestamp))
+        }
+
+        def userInfo = skillsService.getUserStats(proj.projectId, userId)
+        def level = skillsService.getUserLevel(proj.projectId, userId)
+        assert userInfo.numSkills == 30
+        assert userInfo.userTotalPoints == 300
+        assert level == 5
+        def badges = skillsService.getBadgesSummary(userId, proj.projectId)
+        assert badges.size() == 1
+        assert badges[0].badgeAchieved == true
+
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        assert addedSkills
+        assert addedSkills.totalCount == 30
+        def secondUserSkills = skillsService.getPerformedSkills(secondUserId, proj.projectId)
+        assert secondUserSkills.totalCount == 30
+
+        def subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        def subjectSummaryUser2 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        assert subjectSummary?.skills.size() == 30
+        assert subjectSummaryUser2?.skills.size() == 30
+
+        when:
+        skillsService.deleteAllSkillEvents([projectId: proj.projectId, userId: userId])
+        subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        subjectSummaryUser2 = skillsService.getSkillSummary(secondUserId, proj.projectId, subj.subjectId)
+        userInfo = skillsService.getUserStats(proj.projectId, userId)
+        level = skillsService.getUserLevel(proj.projectId, userId)
+        badges = skillsService.getBadgesSummary(userId, proj.projectId)
+        addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        secondUserSkills = skillsService.getPerformedSkills(secondUserId, proj.projectId)
+        subjectSummary?.skills == []
+        subjectSummaryUser2.skills.size() == 30
+
+        then:
+        userInfo.numSkills == 0
+        userInfo.userTotalPoints == 0
+        level == 0
+        badges[0].badgeAchieved == false
+        addedSkills.totalCount == 0
+        secondUserSkills.totalCount == 30
+
+    }
+
     def "delete skill event on skill imported from the catalog should not work"() {
         def proj2 = SkillsFactory.createProject(22)
         def subj2 = SkillsFactory.createSubject(22, 22)

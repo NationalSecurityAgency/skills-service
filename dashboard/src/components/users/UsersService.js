@@ -42,6 +42,10 @@ export default {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skill.skillId)}/users/${encodeURIComponent(userId)}/events/${timestamp}`)
       .then((res) => res.data);
   },
+  deleteAllSkillEvents(projectId, userId) {
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/events`)
+      .then((res) => res.data);
+  },
   canAccess(projectId, userId) {
     if (typeof userId === 'object' && userId !== null) {
       return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(userId.id)}/canAccess`, { params: { idType: userId.idType } }).then((response) => response.data);
