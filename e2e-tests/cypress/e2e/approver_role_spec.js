@@ -405,6 +405,11 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+
+            // metrics nav controls should always exist
+            cy.get('[data-cy="Achievements-metrics-link"]')
+            cy.get('[data-cy="Subjects-metrics-link"]')
+            cy.get('[data-cy="Skills-metrics-link"]')
         }
         runCheck(2)
         runCheck(1, 'View','not.')
@@ -485,6 +490,14 @@ describe('Approver Role Tests', () => {
         cy.get('[data-cy="manageMyProjsBtn"]').click()
         cy.get('[data-cy="backToProgressAndRankingBtn"]').click()
         cy.get('[data-cy="manageMyProjsBtn"]')
+    });
+
+    it('navigate into the project and back to projects view - Add Project button should still be present', function () {
+        cy.visit(`/administrator/projects/proj1`);
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="breadcrumb-Projects"]').click()
+        cy.get('[data-cy="projCard_proj1_manageLink"]')
+        cy.get('[data-cy="newProjectButton"]').should('be.enabled')
     });
 
 

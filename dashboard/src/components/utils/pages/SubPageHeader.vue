@@ -82,8 +82,17 @@ limitations under the License.
       },
     },
     computed: {
+      isAdminProjectsPage() {
+        return this.$route.path?.toLowerCase() === '/administrator/' || this.$route.path?.toLowerCase() === '/administrator';
+      },
+      isAdminPage() {
+        return this.$route.path?.toLowerCase()?.startsWith('/administrator');
+      },
+      isMetricsPage() {
+        return this.$route.path?.toLowerCase()?.startsWith('/administrator/projects/proj1/metrics');
+      },
       isReadOnlyProjUnderAdminUrl() {
-        return this.isReadOnlyProj && this.$route.path?.toLowerCase()?.startsWith('/administrator');
+        return this.isReadOnlyProj && this.isAdminPage && !this.isAdminProjectsPage && !this.isMetricsPage;
       },
     },
     methods: {
