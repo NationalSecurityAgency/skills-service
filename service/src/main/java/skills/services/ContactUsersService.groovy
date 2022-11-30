@@ -140,8 +140,6 @@ class ContactUsersService {
     void contactUsers(ContactUsersRequest contactUsersRequest) {
         UserInfo currentUser = userInfoService.getCurrentUser()
         String sender = currentUser.getEmail()
-        List<String> otherAdminEmails = getProjectAdminEmails(contactUsersRequest.queryCriteria.projectId)
-        otherAdminEmails?.remove(sender)
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
             def markdown = parser.parse(contactUsersRequest.emailBody)
@@ -157,7 +155,6 @@ class ContactUsersService {
                                 emailSubject: contactUsersRequest.emailSubject,
                                 rawBody     : contactUsersRequest.emailBody,
                                 replyTo     : sender,
-                                cc          : otherAdminEmails
                         ]
                 )
                 emailNotifier.sendNotification(request)

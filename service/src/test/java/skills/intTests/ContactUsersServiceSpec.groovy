@@ -24,10 +24,10 @@ import skills.controller.request.model.SubjectLevelQueryRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.ContactUsersService
 import skills.services.UserAttrsService
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 class ContactUsersServiceSpec extends DefaultIntSpec {
 
@@ -370,7 +370,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notAchievedAndAchieved.sort() == allUsers.sort()
     }
 
-    def "email should include any additional project admins as cc recipients"() {
+    def "email should be sent to only the admin that initiated contact, other admins should NOT be CCed"() {
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
         def subj2 = SkillsFactory.createSubject(1, 2)
@@ -417,12 +417,17 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         }
 
         def users = getRandomUsers(10, true)
-        createService(users[7])
-        createService(users[8])
-        createService(users[9])
+        String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
+        String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
+        String adminUser1Email = userAttrsService.findByUserId(users[7].toLowerCase()).email
+        String adminUser2Email = userAttrsService.findByUserId(users[8].toLowerCase()).email
+        String adminUser3Email = userAttrsService.findByUserId(users[8].toLowerCase()).email
+        createService(new SkillsService.UseParams(username: users[7], email:  adminUser1Email))
+        createService(new SkillsService.UseParams(username: users[8], email: adminUser2Email))
+        SkillsService user9SkillsService = createService(new SkillsService.UseParams(username: users[9], email:  adminUser3Email))
         skillsService.addProjectAdmin(proj.projectId, users[7])
         skillsService.addProjectAdmin(proj.projectId, users[8])
-        skillsService.addProjectAdmin(proj.projectId, users[9])
+        skillsService.addProjectAdmin(proj.projectId, user9SkillsService.userName)
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
         greenMail.reset();
 
@@ -454,25 +459,20 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
 * two items
         """
 
-        String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
-        String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
-        String adminUser1Email = userAttrsService.findByUserId(users[7].toLowerCase()).email
-        String adminUser2Email = userAttrsService.findByUserId(users[8].toLowerCase()).email
-        String adminUser3Email = userAttrsService.findByUserId(users[9].toLowerCase()).email
-
         when:
-        skillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
+        user9SkillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
 
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() >= 8 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() >= 2 }
+        assert greenMail.getReceivedMessages().size() >= 2
 
         def messages = EmailUtils.getEmails(greenMail)
 
         then:
-        messages.findAll { it.fromEmail.contains("skills@skills.org") }.size() == messages.size()
-        messages.findAll { it.ccRecipients.contains(adminUser1Email) &&
-                                        it.ccRecipients.contains(adminUser2Email) &&
-                                        it.ccRecipients.contains(adminUser3Email)}.size() == messages.size()
-        messages.findAll { it.ccRecipients.contains("skills@skills.org") }.size() == 0
+        messages.findAll { it.fromEmail.contains(adminUser3Email) }.size() == messages.size()
+        !messages.find { it.ccRecipients?.contains(adminUser1Email) }
+        !messages.find { it.ccRecipients?.contains(adminUser2Email) }
+        !messages.find { it.ccRecipients?.contains(skillsService.userName) }
+        messages.findAll { it.ccRecipients?.contains(adminUser3Email) }.size() == 0
         messages.find { it.recipients.contains(user2Email) }
         messages.find { it.recipients.contains(user3Email) }
         messages[0].html.replaceAll('\r\n', '\n') == '''<!--
