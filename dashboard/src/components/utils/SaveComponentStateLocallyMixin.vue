@@ -14,22 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
+  import { get, set, del } from 'idb-keyval';
+
   export default {
     name: 'SaveComponentStateLocallyMixin',
+    data() {
+      return {
+        db: null,
+        store: null,
+      };
+    },
     methods: {
-      saveStateToLocalStorage(key, data) {
-        const dataToSave = JSON.stringify(data);
-        localStorage.setItem(key, dataToSave);
+      async saveStateToLocalStorage(key, data) {
+        await set(key, data);
       },
-      loadStateFromLocalStorage(key) {
-        const data = localStorage.getItem(key);
-        if (data) {
-          return JSON.parse(data);
-        }
-        return null;
+      async loadStateFromLocalStorage(key) {
+        return get(key);
       },
-      clearLocalStorageState(key) {
-        localStorage.removeItem(key);
+      async clearLocalStorageState(key) {
+        await del(key);
       },
     },
   };

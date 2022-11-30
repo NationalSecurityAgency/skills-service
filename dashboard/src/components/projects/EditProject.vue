@@ -122,7 +122,7 @@ limitations under the License.
     created() {
       this.registerValidation();
     },
-    mounted() {
+    async mounted() {
       this.original = {
         name: this.project.name,
         projectId: this.project.projectId,
@@ -143,7 +143,7 @@ limitations under the License.
           }, 600);
         });
       } else {
-        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        const savedData = await this.loadStateFromLocalStorage(this.componentName);
         if (savedData) {
           this.internalProject = savedData;
         }
@@ -166,6 +166,9 @@ limitations under the License.
       idLabelTxt() {
         return this.isCopy ? 'New Project ID' : 'Project ID';
       },
+      componentName() {
+        return `${this.$options.name}`;
+      },
     },
     watch: {
       show(newValue) {
@@ -174,7 +177,7 @@ limitations under the License.
       internalProject: {
         handler(newValue) {
           if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.$options.name, newValue);
+            this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },
         deep: true,
@@ -209,7 +212,7 @@ limitations under the License.
         }
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.$options.name);
+        this.clearLocalStorageState(this.componentName);
         if (this.tooltipShowing && typeof e.preventDefault === 'function') {
           e.preventDefault();
         } else {

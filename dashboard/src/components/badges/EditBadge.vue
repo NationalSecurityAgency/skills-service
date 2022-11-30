@@ -188,7 +188,7 @@ limitations under the License.
     created() {
       this.assignCustomValidation();
     },
-    mounted() {
+    async mounted() {
       document.addEventListener('focusin', this.trackFocus);
       if (this.isEdit) {
         setTimeout(() => {
@@ -200,7 +200,7 @@ limitations under the License.
           });
         }, 600);
       } else {
-        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        const savedData = await this.loadStateFromLocalStorage(this.componentName);
         if (savedData) {
           this.badgeInternal = savedData;
         }
@@ -210,6 +210,10 @@ limitations under the License.
       title() {
         return this.isEdit ? 'Editing Existing Badge' : 'New Badge';
       },
+      componentName() {
+        const badgeScope = this.badgeInternal.projectId ? this.badgeInternal.projectId : 'Global';
+        return `${badgeScope}-${this.$options.name}`;
+      },
     },
     watch: {
       show(newValue) {
@@ -218,7 +222,7 @@ limitations under the License.
       badgeInternal: {
         handler(newValue) {
           if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.$options.name, newValue);
+            this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },
         deep: true,
@@ -234,7 +238,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.$options.name);
+        this.clearLocalStorageState(this.componentName);
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {

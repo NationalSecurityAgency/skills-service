@@ -367,7 +367,7 @@ limitations under the License.
         show: this.value,
       };
     },
-    mounted() {
+    async mounted() {
       if (this.isEdit) {
         this.loadSkillDetailsAndValidate(false);
         this.selfReport.loading = false;
@@ -375,7 +375,7 @@ limitations under the License.
         this.loadSkillDetailsAndValidate(true);
         this.selfReport.loading = false;
       } else {
-        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        const savedData = await this.loadStateFromLocalStorage(this.componentName);
         if (savedData) {
           this.skillInternal = savedData;
           this.isLoadingSkillDetails = false;
@@ -417,6 +417,9 @@ limitations under the License.
       maxPointIncrement() {
         return this.$store.getters.config.maxPointIncrement;
       },
+      componentName() {
+        return `${this.projectId}-${this.subjectId}-${this.$options.name}`;
+      },
     },
     watch: {
       show(newValue) {
@@ -425,7 +428,7 @@ limitations under the License.
       skillInternal: {
         handler(newValue) {
           if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.$options.name, newValue);
+            this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },
         deep: true,
@@ -441,7 +444,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.$options.name);
+        this.clearLocalStorageState(this.componentName);
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {

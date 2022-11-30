@@ -140,7 +140,7 @@ limitations under the License.
     created() {
       this.assignCustomValidation();
     },
-    mounted() {
+    async mounted() {
       document.addEventListener('focusin', this.trackFocus);
       this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
       if (this.isEdit) {
@@ -153,7 +153,7 @@ limitations under the License.
           });
         }, 600);
       } else {
-        const savedData = this.loadStateFromLocalStorage(this.$options.name);
+        const savedData = await this.loadStateFromLocalStorage(this.componentName);
         if (savedData) {
           this.subjectInternal = savedData;
         }
@@ -166,7 +166,7 @@ limitations under the License.
       subjectInternal: {
         handler(newValue) {
           if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.$options.name, newValue);
+            this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },
         deep: true,
@@ -176,6 +176,9 @@ limitations under the License.
       title() {
         return this.isEdit ? 'Editing Existing Subject' : 'New Subject';
       },
+      componentName() {
+        return `${this.subjectInternal.projectId}-${this.$options.name}`;
+      },
     },
     methods: {
       trackFocus() {
@@ -183,7 +186,7 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.$options.name);
+        this.clearLocalStorageState(this.componentName);
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {
