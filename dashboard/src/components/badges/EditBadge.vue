@@ -188,7 +188,7 @@ limitations under the License.
     created() {
       this.assignCustomValidation();
     },
-    async mounted() {
+    mounted() {
       document.addEventListener('focusin', this.trackFocus);
       if (this.isEdit) {
         setTimeout(() => {
@@ -200,10 +200,11 @@ limitations under the License.
           });
         }, 600);
       } else {
-        const savedData = await this.loadStateFromLocalStorage(this.componentName);
-        if (savedData) {
-          this.badgeInternal = savedData;
-        }
+        this.loadStateFromLocalStorage(this.componentName).then((result) => {
+          if (result) {
+            this.badgeInternal = result;
+          }
+        });
       }
     },
     computed: {

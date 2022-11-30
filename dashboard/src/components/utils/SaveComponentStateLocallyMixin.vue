@@ -25,14 +25,14 @@ limitations under the License.
       };
     },
     methods: {
-      async saveStateToLocalStorage(key, data) {
-        await set(key, data);
+      saveStateToLocalStorage(key, data) {
+        set(key, data);
       },
-      async loadStateFromLocalStorage(key) {
+      loadStateFromLocalStorage(key) {
         return get(key);
       },
-      async clearLocalStorageState(key) {
-        await del(key);
+      clearLocalStorageState(key) {
+        del(key);
       },
     },
   };

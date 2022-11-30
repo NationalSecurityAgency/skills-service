@@ -122,7 +122,7 @@ limitations under the License.
     created() {
       this.registerValidation();
     },
-    async mounted() {
+    mounted() {
       this.original = {
         name: this.project.name,
         projectId: this.project.projectId,
@@ -143,10 +143,11 @@ limitations under the License.
           }, 600);
         });
       } else {
-        const savedData = await this.loadStateFromLocalStorage(this.componentName);
-        if (savedData) {
-          this.internalProject = savedData;
-        }
+        this.loadStateFromLocalStorage(this.componentName).then((result) => {
+          if (result) {
+            this.internalProject = result;
+          }
+        });
       }
       document.addEventListener('focusin', this.trackFocus);
     },

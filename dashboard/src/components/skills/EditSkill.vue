@@ -367,7 +367,7 @@ limitations under the License.
         show: this.value,
       };
     },
-    async mounted() {
+    mounted() {
       if (this.isEdit) {
         this.loadSkillDetailsAndValidate(false);
         this.selfReport.loading = false;
@@ -375,19 +375,20 @@ limitations under the License.
         this.loadSkillDetailsAndValidate(true);
         this.selfReport.loading = false;
       } else {
-        const savedData = await this.loadStateFromLocalStorage(this.componentName);
-        if (savedData) {
-          this.skillInternal = savedData;
-          this.isLoadingSkillDetails = false;
-          this.selfReport.loading = false;
-        } else {
-          this.skillInternal = { version: 0, ...this.skillInternal };
-          if (this.newSkillDefaultValues) {
-            this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+        this.loadStateFromLocalStorage(this.componentName).then((result) => {
+          if (result) {
+            this.skillInternal = result;
+            this.selfReport.loading = false;
+            this.isLoadingSkillDetails = false;
+          } else {
+            this.skillInternal = { version: 0, ...this.skillInternal };
+            if (this.newSkillDefaultValues) {
+              this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+            }
+            this.findLatestSkillVersion();
+            this.loadSelfReportProjectSetting();
           }
-          this.findLatestSkillVersion();
-          this.loadSelfReportProjectSetting();
-        }
+        });
       }
       this.setupValidation();
       document.addEventListener('focusin', this.trackFocus);
