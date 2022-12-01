@@ -15,33 +15,7 @@
  */
 package skills.skillLoading.model
 
-import skills.storage.model.SimpleBadgeRes
-import skills.storage.model.SkillDef
-
-class SkillSummary extends SkillSummaryParent {
-
-    int pointIncrement
-    int pointIncrementInterval
-    int maxOccurrencesWithinIncrementInterval
-
-    SkillDescription description
-
-    SkillDependencySummary dependencyInfo
-
-    // null if the skill is NOT achieved
-    Date achievedOn
-
-    SelfReportingInfo selfReporting
-
-    String subjectName
-    String subjectId
-    String nextSkillId
-    String prevSkillId
-    int totalSkills
-    int orderInGroup
-    Boolean isLastViewed
-
-    List<SimpleBadgeRes> badges
-
-    List<SkillTag> tags = []
+class SkillTag {
+    String tagId
+    String tagValue
 }

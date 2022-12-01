@@ -14,89 +14,106 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
-        <div class="card-header float-left">
-            <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
-                <div class="col-md-auto text-left pr-md-0">
-                  <div class="d-flex">
-                    <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"
-                                  v-model="searchString"
-                                  :placeholder="`Search ${this.skillDisplayName.toLowerCase()}s`"
-                                  :aria-label="`Search ${this.skillDisplayName}s`"
-                                  data-cy="skillsSearchInput"></b-form-input>
-                    <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
-                              class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
-                              data-cy="clearSkillsSearchInput">
-                      <i class="fas fa-times"></i>
-                      <span class="sr-only">clear search</span>
-                    </b-button>
-                  </div>
-                </div>
-                <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
-                  <skills-filter :counts="metaCounts"
-                                 :filters="filters"
-                                 @filter-selected="filterSkills"
-                                 @clear-filter="clearFilters"/>
-                    <b-button v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill"
-                              :disabled="lastViewedButtonDisabled"
-                              @click.prevent="scrollToLastViewedSkill"
-                              class="skills-theme-btn ml-2" variant="outline-info"
-                              :aria-label="`Jump to Last Viewed Skill`"
-                              data-cy="jumpToLastViewedButton">
-                      <i class="fas fa-eye"></i>
-                      Last Viewed
-                    </b-button>
-                </div>
-                <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
-                    <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
-                    <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
-                                   :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
-                                   :aria-label="`Show ${this.skillDisplayName} Details`"
-                                   :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
-                </div>
-            </div>
+  <div class="card mt-2" data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
+    <div class="card-header float-left">
+      <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">
+        <div class="col-md-auto text-left pr-md-0">
+          <div class="d-flex">
+            <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"
+                          v-model="searchString"
+                          :placeholder="`Search ${this.skillDisplayName.toLowerCase()}s`"
+                          :aria-label="`Search ${this.skillDisplayName}s`"
+                          data-cy="skillsSearchInput"></b-form-input>
+            <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"
+                      class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
+                      data-cy="clearSkillsSearchInput">
+              <i class="fas fa-times"></i>
+              <span class="sr-only">clear search</span>
+            </b-button>
+          </div>
         </div>
-        <div class="card-body p-0">
-            <skills-spinner :loading="loading"/>
-            <div v-if="!loading">
-                <div v-if="skillsInternal && skillsInternal.length > 0">
-                  <div v-for="(skill, index) in skillsInternal"
-                       :key="`skill-${skill.skillId}`"
-                       :id="`skillRow-${skill.skillId}`"
-                       class="skills-theme-bottom-border-with-background-color"
-                       :class="{
-                         'separator-border-thick' : showDescriptionsInternal,
-                         'border-bottom' : (index + 1) !== skillsInternal.length
-                       }"
-                  >
-                    <div class="p-3 pt-4">
-                      <skill-progress2
-                          :id="`skill-${skill.skillId}`"
-                          :ref="`skillProgress${skill.skillId}`"
-                          :skill="skill"
-                          :subjectId="subject.subjectId"
-                          :badgeId="subject.badgeId"
-                          :type="type"
-                          :enable-drill-down="true"
-                          :show-description="showDescriptionsInternal"
-                          :show-group-descriptions="showGroupDescriptions"
-                          :data-cy="`skillProgress_index-${index}`"
-                          @points-earned="onPointsEarned"
-                          :child-skill-highlight-string="searchString"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && searchString" class="my-5"
-                             icon="fas fa-search-minus fa-5x" title="No results"
-                             :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
-
-                <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
-                             :title="`${this.skillDisplayName}s have not been added yet.`"
-                             :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>
-            </div>
+        <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
+          <skills-filter :counts="metaCounts"
+                         :filters="filters"
+                         @filter-selected="filterSkills"
+                         @clear-filter="clearFilters"/>
+          <b-button v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill"
+                    :disabled="lastViewedButtonDisabled"
+                    @click.prevent="scrollToLastViewedSkill"
+                    class="skills-theme-btn ml-2" variant="outline-info"
+                    :aria-label="`Jump to Last Viewed Skill`"
+                    data-cy="jumpToLastViewedButton">
+            <i class="fas fa-eye"></i>
+            Last Viewed
+          </b-button>
         </div>
+        <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">
+          <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>
+          <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"
+                         :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"
+                         :aria-label="`Show ${this.skillDisplayName} Details`"
+                         :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
+        </div>
+      </div>
+      <div v-if="selectedTagFilters" class="row mt-2">
+        <div class="col-md-auto text-left pr-md-0">
+          <b-badge v-for="(tag, index) in selectedTagFilters"
+                   :data-cy="`skillTagFilter-${index}`"
+                   :key="tag.tagId"
+                   variant="light"
+                   class="mx-1 py-1 border-info border selected-filter overflow-hidden"
+                   pill>
+            <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>
+            <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">
+              <i class="fas fa-times-circle ml-1" style="font-size: 0.9rem;"></i>
+              <span class="sr-only">clear filter</span>
+            </button>
+          </b-badge>
+        </div>
+      </div>
     </div>
+    <div class="card-body p-0">
+      <skills-spinner :loading="loading"/>
+      <div v-if="!loading">
+        <div v-if="skillsInternal && skillsInternal.length > 0">
+          <div v-for="(skill, index) in skillsInternal"
+               :key="`skill-${skill.skillId}`"
+               :id="`skillRow-${skill.skillId}`"
+               class="skills-theme-bottom-border-with-background-color"
+               :class="{
+                 'separator-border-thick' : showDescriptionsInternal,
+                 'border-bottom' : (index + 1) !== skillsInternal.length
+               }"
+          >
+            <div class="p-3 pt-4">
+              <skill-progress2
+                  :id="`skill-${skill.skillId}`"
+                  :ref="`skillProgress${skill.skillId}`"
+                  :skill="skill"
+                  :subjectId="subject.subjectId"
+                  :badgeId="subject.badgeId"
+                  :type="type"
+                  :enable-drill-down="true"
+                  :show-description="showDescriptionsInternal"
+                  :show-group-descriptions="showGroupDescriptions"
+                  :data-cy="`skillProgress_index-${index}`"
+                  @points-earned="onPointsEarned"
+                  @add-tag-filter="addTagFilter"
+                  :child-skill-highlight-string="searchString"
+              />
+            </div>
+          </div>
+        </div>
+        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && searchString" class="my-5"
+                     icon="fas fa-search-minus fa-5x" title="No results"
+                     :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
+
+        <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
+                     :title="`${this.skillDisplayName}s have not been added yet.`"
+                     :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -184,6 +201,7 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
+        selectedTagFilters: [],
         filters: [
           {
             groupId: 'progressGroup',
@@ -363,6 +381,28 @@ limitations under the License.
         }
         this.$emit('points-earned', event);
       },
+      addTagFilter(tag) {
+        const tagSearchRegex = new RegExp(`((?:^|\\s+)tag:"${tag.tagValue}")`, 'gi');
+        const hasTagSearch = this.searchString ? tagSearchRegex.test(this.searchString) : false;
+        if (!hasTagSearch) {
+          if (this.searchString) {
+            this.searchString = this.searchString.concat(` tag:"${tag.tagValue}"`);
+          } else {
+            this.searchString = `tag:"${tag.tagValue}"`;
+          }
+          this.selectedTagFilters.push(tag);
+        // } else {
+        //   tagSearchRegex.lastIndex = 0;
+        //   this.searchString = this.searchString.replaceAll(tagSearchRegex, '');
+        }
+        this.searchAndFilterSkills();
+      },
+      removeTagFilter(tag) {
+        const tagSearchRegex = new RegExp(`((?:^|\\s+)tag:"${tag.tagValue}")`, 'gi');
+        this.searchString = this.searchString.replaceAll(tagSearchRegex, '');
+        this.selectedTagFilters = this.selectedTagFilters.filter((el) => tag.tagId !== el.tagId);
+        this.searchAndFilterSkills();
+      },
       filterSkills(filterId) {
         this.filterId = filterId.id;
         this.searchAndFilterSkills();
@@ -382,7 +422,19 @@ limitations under the License.
       searchAndFilterSkills() {
         let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
         if (this.searchString && this.searchString.trim().length > 0) {
-          const searchStrNormalized = this.searchString.trim().toLowerCase();
+          let searchStrNormalized = this.searchString.trim().toLowerCase();
+          const tagSearchRegex = new RegExp('(?:^|\\s+)tag:"([^"]+)"', 'g');
+          const hasTagSearch = tagSearchRegex.test(searchStrNormalized);
+          const tagFilters = [];
+          if (hasTagSearch) {
+            tagSearchRegex.lastIndex = 0;
+            let match = tagSearchRegex.exec(searchStrNormalized);
+            while (match != null) {
+              tagFilters.push(match[1]);
+              match = tagSearchRegex.exec(searchStrNormalized);
+            }
+            searchStrNormalized = searchStrNormalized.replaceAll(tagSearchRegex, '');
+          }
 
           // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
           // group is shown when either a group name matches OR any of the skill names match the search string
@@ -391,10 +443,34 @@ limitations under the License.
               // find at least 1 item that matches the search string
               const foundChild = item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
               if (foundChild) {
+                // if filtering on tags, we need to make sure the group children (as a unit) contains *all* tags
+                if (hasTagSearch) {
+                  const tagsFound = new Set();
+                  for (let i = 0; i < item.children.length; i += 1) {
+                    const child = item.children[i];
+                    for (let j = 0; j < tagFilters.length; j += 1) {
+                      const tagFilter = tagFilters[j];
+                      if (child.tags?.find((tag) => tag?.tagValue?.trim()?.toLowerCase()?.includes(tagFilter))) {
+                        tagsFound.add(tagFilter);
+                      }
+                      if (tagsFound.size >= tagFilters.length) { break; }
+                    }
+                    if (tagsFound.size >= tagFilters.length) { break; }
+                  }
+                  return tagsFound.size >= tagFilters.length;
+                }
                 return true;
               }
             }
-            return item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
+            const foundSkill = item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
+            if (foundSkill) {
+              // if filtering on tags, we need to make sure the skill contains *all* tags
+              if (hasTagSearch) {
+                return tagFilters.every((tagFilter) => item.tags?.map((tag) => tag?.tagValue?.trim()?.toLowerCase()).includes(tagFilter));
+              }
+              return true;
+            }
+            return false;
           }).map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
 
           resultSkills = foundItems.map((item) => {
@@ -438,6 +514,10 @@ limitations under the License.
   border-radius: 11px;
   box-shadow: 1em 1em 1em rgba(0, 0, 0, 0.4) inset, 0 0 2em rgba(128, 189, 255, 0.8) !important;
   outline: none;
+}
+
+.selected-filter {
+  font-size: 0.82rem;
 }
 
 .separator-border-thick {
