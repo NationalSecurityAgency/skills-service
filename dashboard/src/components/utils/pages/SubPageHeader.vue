@@ -89,7 +89,12 @@ limitations under the License.
         return this.$route.path?.toLowerCase()?.startsWith('/administrator');
       },
       isMetricsPage() {
-        return this.$route.path?.toLowerCase()?.startsWith('/administrator/projects/proj1/metrics');
+        const projId = this.$route.params?.projectId;
+        if (!projId) {
+          return false;
+        }
+        const startsWith = `/administrator/projects/${projId}/metrics`;
+        return this.$route.path?.toLowerCase()?.startsWith(startsWith);
       },
       isReadOnlyProjUnderAdminUrl() {
         return this.isReadOnlyProj && this.isAdminPage && !this.isAdminProjectsPage && !this.isMetricsPage;
