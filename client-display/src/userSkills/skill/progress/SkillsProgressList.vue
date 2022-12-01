@@ -55,7 +55,7 @@ limitations under the License.
                          :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
         </div>
       </div>
-      <div v-if="selectedTagFilters" class="row mt-2">
+      <div v-if="selectedTagFilters.size > 0" class="row mt-2">
         <div class="col-md-auto text-left pr-md-0">
           <b-badge v-for="(tag, index) in selectedTagFilters"
                    :data-cy="`skillTagFilter-${index}`"

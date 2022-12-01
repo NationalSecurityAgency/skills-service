@@ -102,7 +102,7 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div class="row" style="padding-top:8px;">
+    <div v-if="showBadgesAndTagsRow" class="row" style="padding-top:8px;">
       <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="col-auto pr-0" style="font-size: 0.9rem" data-cy="skillBadges">
         <i class="fa fa-award"></i> Badges:
         <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
@@ -271,6 +271,9 @@ limitations under the License.
       },
       someSkillsAreOptional() {
         return this.isSkillsGroupWithChildren && this.skill.numSkillsRequired !== -1 && this.skill.numSkillsRequired < this.skill.children.length;
+      },
+      showBadgesAndTagsRow() {
+        return ((this.skill.badges && this.skill.badges.length > 0 && !this.badgeId) || (this.skill.tags && this.skill.tags.length > 0));
       },
     },
     watch: {
