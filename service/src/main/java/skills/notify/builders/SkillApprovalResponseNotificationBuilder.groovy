@@ -44,7 +44,8 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
         return new Res(
                 subject: "SkillTree Points ${parsed.approved ? 'Approved' : 'Denied'}",
                 html: htmlBody,
-                plainText: plainText
+                plainText: plainText,
+                replyToEmail: parsed.replyTo,
         )
     }
 

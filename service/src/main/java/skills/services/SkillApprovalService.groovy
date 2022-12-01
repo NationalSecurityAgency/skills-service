@@ -225,7 +225,7 @@ class SkillApprovalService {
                 skillApprovalRepo.save(it)
 
                 // send email
-                sentNotifications(it, skillDef, true)
+                sendApprovalNotifications(it, skillDef, true)
             }
         }
     }
@@ -246,7 +246,7 @@ class SkillApprovalService {
             // send email
             Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
             SkillDef skillDef = optional.get()
-            sentNotifications(it, skillDef, false, rejectionMsg)
+            sendApprovalNotifications(it, skillDef, false, rejectionMsg)
         }
     }
 
@@ -297,7 +297,7 @@ class SkillApprovalService {
         }
     }
 
-    private void sentNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved, String rejectionMsg=null) {
+    private void sendApprovalNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved, String rejectionMsg=null) {
         String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
@@ -307,6 +307,9 @@ class SkillApprovalService {
         if (!userAttrs.email) {
             return
         }
+
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        String sender = currentUser.getEmail()
 
         ProjectSummaryResult projDef = projDefRepo.getProjectName(skillDefinition.projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
@@ -321,6 +324,7 @@ class SkillApprovalService {
                         projectId    : skillDefinition.projectId,
                         rejectionMsg : rejectionMsg,
                         publicUrl    : publicUrl,
+                        replyTo     : sender,
                 ],
         )
         notifier.sendNotification(request)

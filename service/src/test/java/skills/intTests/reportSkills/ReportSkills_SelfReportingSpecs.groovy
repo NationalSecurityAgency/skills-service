@@ -22,11 +22,13 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.settings.SettingsService
 import skills.storage.model.EventType
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.utils.WaitFor
 
@@ -198,20 +200,23 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+        List<String> randomUsers = getRandomUsers(2, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        String otherAdminUser = randomUsers.first()
+        String projectUser = randomUsers[1]
 
-        createService(otherUser)
-        skillsService.addProjectAdmin(proj.projectId, otherUser)
+        createService(otherAdminUser)
+        skillsService.addProjectAdmin(proj.projectId, otherAdminUser)
 
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
         UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherAdminUser)
+        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserId(projectUser)
 
         Date date = new Date() - 60
         when:
-        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], projectUser, date, "Please approve this!")
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
@@ -219,6 +224,49 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         then:
         emails.size() == 2
         emails.collect {it.recipients[0] }.sort() == [projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
+        emails.collect { it.fromEmail[0] } == [projectUserUserAttrs.email, projectUserUserAttrs.email]
+
+        !res.body.skillApplied
+        res.body.explanation == "Skill was submitted for approval"
+    }
+
+
+    def "send email notification to each admin of the project - fallback to default reply since the user does not have an email"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> randomUsers = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        String otherAdminUser = randomUsers.first()
+        String projectUser = randomUsers[1]
+
+        createService(otherAdminUser)
+        skillsService.addProjectAdmin(proj.projectId, otherAdminUser)
+
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherAdminUser)
+        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserId(projectUser)
+
+        Date date = new Date() - 60
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], projectUser, date, "Please approve this!")
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 1 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 2
+        emails.collect {it.recipients[0] }.sort() == [projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
+        emails.collect { it.fromEmail[0] } == ["resetspec@skilltreetests", "resetspec@skilltreetests"]
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
@@ -455,6 +503,7 @@ Always yours, <br/> -SkillTree Bot
 </html>
 '''
         then:
+        emailRes.fromEmail == [projectAdminUserAttrs.email]
         emailRes.subj == "SkillTree Points Approved"
         emailRes.recipients == [userRequestingPtsAttrs.email]
 
@@ -470,6 +519,51 @@ Always yours, <br/> -SkillTree Bot
         approvalsEndpointResAfter.data.size() == 0
         approvalsEndpointResAfter.count == 0
         userEventPostApproval.count == 1
+    }
+
+    def "email is sent from the approver - report via approval"() {
+        List<String> users = getRandomUsers(2, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        String user = users[0]
+        String approver  = users[1]
+
+        def proj = SkillsFactory.createProject()
+        proj.description = 'this is an important project'
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        UserAttrs approverUserAttrs = userAttrsRepo.findByUserId(approver)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+
+        SkillsService approveService = createService(new SkillsService.UseParams(username: approverUserAttrs.userId, email:  approverUserAttrs.email))
+        skillsService.addUserRole(approveService.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
+        greenMail.getReceivedMessages()
+        greenMail.reset()
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+
+        when:
+        approveService.approve(proj.projectId, ids)
+
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        assert greenMail.getReceivedMessages().size() == 3
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.fromEmail == [approverUserAttrs.email]
+        emailRes.subj == "SkillTree Points Approved"
+        emailRes.recipients == [userRequestingPtsAttrs.email]
     }
 
     def "requesting approval for the same skill more than one time"() {
@@ -623,6 +717,7 @@ Always yours, <br/> -SkillTree Bot
 </html>
 '''
         then:
+        emailRes.fromEmail == [projectAdminUserAttrs.email]
         emailRes.subj == "SkillTree Points Denied"
         emailRes.recipients == [userRequestingPtsAttrs.email]
 
