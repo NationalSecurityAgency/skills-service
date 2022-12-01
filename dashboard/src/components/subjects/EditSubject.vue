@@ -169,7 +169,6 @@ limitations under the License.
       },
       subjectInternal: {
         handler(newValue) {
-          console.log(newValue);
           if (!this.isEdit) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
