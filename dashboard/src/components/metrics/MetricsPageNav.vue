@@ -52,7 +52,7 @@ limitations under the License.
         }, {
           title: 'Skills',
           subtitle: 'Understand Skills Usage',
-          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your applicaiton.',
+          description: 'Find top-achieved skills and overlooked skills. Learn how much each skill is utilized within your application.',
           icon: 'fa fa-graduation-cap skills-color-skills',
           pathName: 'SkillsMetricsPage',
         }],
