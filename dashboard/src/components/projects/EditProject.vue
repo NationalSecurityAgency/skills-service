@@ -180,7 +180,6 @@ limitations under the License.
       },
       internalProject: {
         handler(newValue) {
-          console.log(newValue);
           if (!this.isEdit) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
