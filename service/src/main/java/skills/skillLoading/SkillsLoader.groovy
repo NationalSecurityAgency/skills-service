@@ -1003,12 +1003,15 @@ class SkillsLoader {
     @Profile
     private Map<String, ProjDefWrapper> loadProjDefMap(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
         Map<String, ProjDefWrapper> projDefMap = [:]
-        Boolean thisProjectHasSkillTags  = skillDefRepo.doesProjectHaveSkillTags(thisProjDef.projectId) as boolean
-        projDefMap.put(thisProjDef.projectId, new ProjDefWrapper(projDef: thisProjDef, projectHasSkillTags: thisProjectHasSkillTags))
+        // global badges will have a null projDef
+        if (thisProjDef) {
+            Boolean thisProjectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(thisProjDef.projectId) as boolean
+            projDefMap.put(thisProjDef.projectId, new ProjDefWrapper(projDef: thisProjDef, projectHasSkillTags: thisProjectHasSkillTags))
+        }
         childrenWithPoints.each {
             String projectId = it.skillDef.projectId
             if (!projDefMap.containsKey(projectId)) {
-                Boolean projectHasSkillTags  = skillDefRepo.doesProjectHaveSkillTags(thisProjDef.projectId) as boolean
+                Boolean projectHasSkillTags  = projectId ? skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean : false
                 ProjDef projDef = projDefRepo.findByProjectId(projectId)
                 projDefMap.put(projectId, new ProjDefWrapper(projDef: projDef, projectHasSkillTags: projectHasSkillTags))
             }
