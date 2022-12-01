@@ -201,7 +201,7 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
-        selectedTagFilters: [],
+        selectedTagFilters: new Set(),
         filters: [
           {
             groupId: 'progressGroup',
@@ -382,25 +382,11 @@ limitations under the License.
         this.$emit('points-earned', event);
       },
       addTagFilter(tag) {
-        const tagSearchRegex = new RegExp(`((?:^|\\s+)tag:"${tag.tagValue}")`, 'gi');
-        const hasTagSearch = this.searchString ? tagSearchRegex.test(this.searchString) : false;
-        if (!hasTagSearch) {
-          if (this.searchString) {
-            this.searchString = this.searchString.concat(` tag:"${tag.tagValue}"`);
-          } else {
-            this.searchString = `tag:"${tag.tagValue}"`;
-          }
-          this.selectedTagFilters.push(tag);
-        // } else {
-        //   tagSearchRegex.lastIndex = 0;
-        //   this.searchString = this.searchString.replaceAll(tagSearchRegex, '');
-        }
+        this.selectedTagFilters.add(tag);
         this.searchAndFilterSkills();
       },
       removeTagFilter(tag) {
-        const tagSearchRegex = new RegExp(`((?:^|\\s+)tag:"${tag.tagValue}")`, 'gi');
-        this.searchString = this.searchString.replaceAll(tagSearchRegex, '');
-        this.selectedTagFilters = this.selectedTagFilters.filter((el) => tag.tagId !== el.tagId);
+        this.selectedTagFilters.delete(tag);
         this.searchAndFilterSkills();
       },
       filterSkills(filterId) {
@@ -421,20 +407,10 @@ limitations under the License.
       },
       searchAndFilterSkills() {
         let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
-        if (this.searchString && this.searchString.trim().length > 0) {
-          let searchStrNormalized = this.searchString.trim().toLowerCase();
-          const tagSearchRegex = new RegExp('(?:^|\\s+)tag:"([^"]+)"', 'g');
-          const hasTagSearch = tagSearchRegex.test(searchStrNormalized);
-          const tagFilters = [];
-          if (hasTagSearch) {
-            tagSearchRegex.lastIndex = 0;
-            let match = tagSearchRegex.exec(searchStrNormalized);
-            while (match != null) {
-              tagFilters.push(match[1]);
-              match = tagSearchRegex.exec(searchStrNormalized);
-            }
-            searchStrNormalized = searchStrNormalized.replaceAll(tagSearchRegex, '');
-          }
+        const hasTagSearch = Boolean(this.selectedTagFilters.size);
+        if (hasTagSearch || (this.searchString && this.searchString.trim().length > 0)) {
+          const searchStrNormalized = this.searchString.trim().toLowerCase();
+          const tagFilters = Array.from(this.selectedTagFilters).map((tag) => tag.tagValue.toLowerCase());
 
           // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
           // group is shown when either a group name matches OR any of the skill names match the search string
