@@ -87,6 +87,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/components/utils/MarkdownEditor';
   import ProjectService from './ProjectService';
@@ -97,7 +98,7 @@ limitations under the License.
   export default {
     name: 'EditProject',
     components: { IdInput, MarkdownEditor, SkillsSpinner },
-    mixins: [SaveComponentStateLocallyMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
@@ -107,6 +108,7 @@ limitations under the License.
           isEdit: this.isEdit,
           ...this.project,
         },
+        originalProject: {},
         canEditProjectId: false,
         overallErrMsg: '',
         original: {
@@ -150,6 +152,7 @@ limitations under the License.
         });
       }
       document.addEventListener('focusin', this.trackFocus);
+      this.originalProject = Object.assign(this.originalProject, this.internalProject);
     },
     computed: {
       title() {
@@ -177,6 +180,7 @@ limitations under the License.
       },
       internalProject: {
         handler(newValue) {
+          console.log(newValue);
           if (!this.isEdit) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
@@ -185,6 +189,13 @@ limitations under the License.
       },
     },
     methods: {
+      hasObjectChanged(newValue) {
+        if (newValue.name === this.originalProject.name
+          && newValue.description === this.originalProject.description) {
+          return false;
+        }
+        return true;
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -192,15 +203,34 @@ limitations under the License.
       handleIdToggle(canEdit) {
         this.canEditProjectId = canEdit;
       },
-      close() {
+      close(e) {
+        this.publishHidden(e);
+      },
+      publishHidden(e) {
+        if (!e.updated && this.hasObjectChanged(this.internalProject)) {
+          e.preventDefault();
+          this.msgConfirm('You have unsaved changes.  Discard?')
+            .then((res) => {
+              if (res) {
+                this.clearLocalStorageState(this.componentName);
+                this.hideModal(e);
+              }
+            });
+        } else if (this.tooltipShowing && typeof e.preventDefault === 'function') {
+          e.preventDefault();
+        } else {
+          this.hideModal(e);
+        }
+      },
+      hideModal(e) {
         this.show = false;
-        this.publishHidden({});
+        this.$emit('hidden', e);
       },
       updateProject() {
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.close();
+              this.close({ updated: true });
               this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
               this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
               this.$emit('project-saved', this.internalProject);
@@ -210,14 +240,6 @@ limitations under the License.
       updateProjectId() {
         if (!this.isEdit && !this.canEditProjectId) {
           this.internalProject.projectId = InputSanitizer.removeSpecialChars(this.internalProject.name);
-        }
-      },
-      publishHidden(e) {
-        this.clearLocalStorageState(this.componentName);
-        if (this.tooltipShowing && typeof e.preventDefault === 'function') {
-          e.preventDefault();
-        } else {
-          this.$emit('hidden', e);
         }
       },
       updateDescription(event) {

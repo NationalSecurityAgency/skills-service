@@ -255,6 +255,7 @@ limitations under the License.
   import { max_value, min_value } from 'vee-validate/dist/rules';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
@@ -294,7 +295,7 @@ limitations under the License.
       IdInput,
       MarkdownEditor,
     },
-    mixins: [SaveComponentStateLocallyMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: {
       projectId: {
         type: String,
@@ -334,6 +335,7 @@ limitations under the License.
         tooltipShowing: false,
         isLoadingSkillDetails: true,
         saveTimer: null,
+        originalSkill: {},
         skillInternal: {
           skillId: '',
           projectId: this.projectId,
@@ -391,6 +393,7 @@ limitations under the License.
         });
       }
       this.setupValidation();
+      this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
@@ -428,7 +431,7 @@ limitations under the License.
       },
       skillInternal: {
         handler(newValue) {
-          if (!this.isEdit) {
+          if (!this.isEdit && this.hasObjectChanged(newValue)) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },
@@ -436,21 +439,49 @@ limitations under the License.
       },
     },
     methods: {
+      hasObjectChanged(newValue) {
+        if (newValue.skillId === this.originalSkill.skillId
+          && newValue.name === this.originalSkill.name
+          && newValue.pointIncrement === this.originalSkill.pointIncrement
+          && newValue.numPerformToCompletion === this.originalSkill.numPerformToCompletion
+          && newValue.pointIncrementIntervalHrs === this.originalSkill.pointIncrementIntervalHrs
+          && newValue.pointIncrementIntervalMins === this.originalSkill.pointIncrementIntervalMins
+          && newValue.timeWindowEnabled === this.originalSkill.timeWindowEnabled
+          && newValue.numPointIncrementMaxOccurrences === this.originalSkill.numPointIncrementMaxOccurrences
+          && newValue.description === this.originalSkill.description
+          && newValue.helpUrl === this.originalSkill.helpUrl
+          && newValue.selfReportingType === this.originalSkill.selfReportingType
+          && newValue.type === this.originalSkill.type) {
+          return false;
+        }
+        return true;
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       close(e) {
-        this.show = false;
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.componentName);
-        if (this.tooltipShowing) {
+        if (!e.saved && this.hasObjectChanged(this.skillInternal)) {
+          e.preventDefault();
+          this.msgConfirm('You have unsaved changes.  Discard?')
+            .then((res) => {
+              if (res) {
+                this.clearLocalStorageState(this.componentName);
+                this.hideModal(e);
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', { updated: this.isEdit, ...e });
+          this.hideModal(e);
         }
+      },
+      hideModal(e) {
+        this.show = false;
+        this.$emit('hidden', { updated: this.isEdit, ...e });
       },
       updateJustificationRequired(value) {
         this.skillInternal.justificationRequired = value;

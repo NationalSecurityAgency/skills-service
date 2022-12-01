@@ -132,6 +132,7 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import dayjs from '@/common-components/DayJsCustomizer';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -145,7 +146,7 @@ limitations under the License.
 
   export default {
     name: 'EditBadge',
-    mixins: [SaveComponentStateLocallyMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     components: {
       HelpUrlInput,
       InlineHelp,
@@ -177,6 +178,7 @@ limitations under the License.
         canAutoGenerateId: true,
         canEditBadgeId: false,
         badgeInternal,
+        originalBadge: {},
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
@@ -206,6 +208,7 @@ limitations under the License.
           }
         });
       }
+      this.originalBadge = Object.assign(this.originalBadge, this.badgeInternal);
     },
     computed: {
       title() {
@@ -230,21 +233,40 @@ limitations under the License.
       },
     },
     methods: {
+      hasObjectChanged(newValue) {
+        if (newValue.name === this.originalBadge.name
+          && newValue.description === this.originalBadge.description
+          && newValue.helpUrl === this.originalBadge.helpUrl) {
+          return false;
+        }
+        return true;
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       closeMe(e) {
-        this.show = false;
         this.publishHidden(e);
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.componentName);
-        if (this.tooltipShowing) {
+        if (!e.updated && this.hasObjectChanged(this.badgeInternal)) {
+          e.preventDefault();
+          this.msgConfirm('You have unsaved changes.  Discard?')
+            .then((res) => {
+              if (res) {
+                this.clearLocalStorageState(this.componentName);
+                this.hideModal(e);
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', e);
+          this.hideModal(e);
         }
+      },
+      hideModal(e) {
+        this.show = false;
+        this.$emit('hidden', e);
       },
       updateDescription(event) {
         this.badgeInternal.description = event;

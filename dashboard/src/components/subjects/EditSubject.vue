@@ -102,6 +102,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -112,7 +113,7 @@ limitations under the License.
 
   export default {
     name: 'EditSubject',
-    mixins: [SaveComponentStateLocallyMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     components: {
       HelpUrlInput,
       IdInput,
@@ -129,6 +130,7 @@ limitations under the License.
       return {
         canAutoGenerateId: true,
         subjectInternal: {},
+        originalSubject: {},
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
@@ -159,6 +161,7 @@ limitations under the License.
           }
         });
       }
+      this.originalSubject = Object.assign(this.originalSubject, this.subjectInternal);
     },
     watch: {
       show(newValue) {
@@ -166,6 +169,7 @@ limitations under the License.
       },
       subjectInternal: {
         handler(newValue) {
+          console.log(newValue);
           if (!this.isEdit) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
@@ -182,20 +186,39 @@ limitations under the License.
       },
     },
     methods: {
+      hasObjectChanged(newValue) {
+        if (newValue.name === this.originalSubject.name
+          && newValue.description === this.originalSubject.description
+          && newValue.helpUrl === this.originalSubject.helpUrl) {
+          return false;
+        }
+        return true;
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        this.clearLocalStorageState(this.componentName);
-        if (this.tooltipShowing) {
+        if (!e.update && this.hasObjectChanged(this.subjectInternal)) {
+          e.preventDefault();
+          this.msgConfirm('You have unsaved changes.  Discard?')
+            .then((res) => {
+              if (res) {
+                this.clearLocalStorageState(this.componentName);
+                this.hideModal(e);
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', e);
+          this.hideModal(e);
         }
       },
-      close(e) {
+      hideModal(e) {
         this.show = false;
+        this.$emit('hidden', e);
+      },
+      close(e) {
         this.publishHidden(e);
       },
       updateSubject() {
