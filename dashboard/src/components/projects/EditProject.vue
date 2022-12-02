@@ -25,7 +25,9 @@ limitations under the License.
               header-text-variant="light" no-fade
               size="xl">
 
-      <b-container fluid>
+      <skills-spinner :is-loading="loadingComponent"/>
+
+      <b-container fluid v-if="!loadingComponent">
         <div class="row">
           <div class="col-12">
             <div class="form-group">
@@ -59,10 +61,9 @@ limitations under the License.
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
-              <skills-spinner :is-loading="loadingDescription"/>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
-                <markdown-editor v-if="!isEdit || !loadingDescription" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <markdown-editor v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
           </div>
@@ -118,7 +119,7 @@ limitations under the License.
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
-        loadingDescription: false,
+        loadingComponent: true,
       };
     },
     created() {
@@ -129,28 +130,31 @@ limitations under the License.
         name: this.project.name,
         projectId: this.project.projectId,
       };
-      if (this.isEdit) {
-        this.loadingDescription = true;
-        ProjectService.loadDescription(this.project.projectId).then((data) => {
-          this.internalProject.description = data.description;
-        }).finally(() => {
-          this.loadingDescription = false;
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const { observer } = this.$refs;
-              if (observer) {
-                observer.validate({ silent: false });
-              }
-            });
-          }, 600);
-        });
-      } else {
-        this.loadStateFromLocalStorage(this.componentName).then((result) => {
-          if (result) {
+      this.loadingComponent = true;
+      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+        if (result) {
+          if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
             this.internalProject = result;
           }
-        });
-      }
+        } else if (this.isEdit) {
+          ProjectService.loadDescription(this.project.projectId).then((data) => {
+            this.internalProject.description = data.description;
+          }).finally(() => {
+            this.loadingComponent = false;
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          });
+        }
+      }).finally(() => {
+        this.loadingComponent = false;
+      });
+
       document.addEventListener('focusin', this.trackFocus);
       this.originalProject = Object.assign(this.originalProject, this.internalProject);
     },

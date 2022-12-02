@@ -22,7 +22,10 @@ limitations under the License.
              header-text-variant="light"
              @hide="publishHidden"
              no-fade>
-        <b-container fluid>
+
+        <skills-spinner :is-loading="loadingComponent"/>
+
+        <b-container fluid v-if="!loadingComponent">
           <div v-if="displayIconManager === false">
               <div class="media mb-3">
                 <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
@@ -103,6 +106,7 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
@@ -118,6 +122,7 @@ limitations under the License.
       HelpUrlInput,
       IdInput,
       IconPicker,
+      SkillsSpinner,
       MarkdownEditor,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
@@ -137,6 +142,7 @@ limitations under the License.
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
+        loadingComponent: true,
       };
     },
     created() {
@@ -145,22 +151,25 @@ limitations under the License.
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
       this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
-      if (this.isEdit) {
-        setTimeout(() => {
-          this.$nextTick(() => {
-            const { observer } = this.$refs;
-            if (observer) {
-              observer.validate({ silent: false });
-            }
-          });
-        }, 600);
-      } else {
-        this.loadStateFromLocalStorage(this.componentName).then((result) => {
-          if (result) {
+      this.loadingComponent = true;
+      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+        if (result) {
+          if (!this.isEdit || (this.isEdit && result.subjectId === this.subjectInternal.subjectId)) {
             this.subjectInternal = result;
           }
-        });
-      }
+        } else if (this.isEdit) {
+          setTimeout(() => {
+            this.$nextTick(() => {
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
+            });
+          }, 600);
+        }
+      }).finally(() => {
+        this.loadingComponent = false;
+      });
       this.originalSubject = Object.assign(this.originalSubject, this.subjectInternal);
     },
     watch: {
@@ -169,9 +178,7 @@ limitations under the License.
       },
       subjectInternal: {
         handler(newValue) {
-          if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.componentName, newValue);
-          }
+          this.saveStateToLocalStorage(this.componentName, newValue);
         },
         deep: true,
       },

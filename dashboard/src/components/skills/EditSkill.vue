@@ -355,6 +355,7 @@ limitations under the License.
           helpUrl: null,
           selfReportingType: null,
           type: 'Skill',
+          loadingComponent: true,
         },
         canEditSkillId: false,
         initial: {
@@ -370,28 +371,28 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.isEdit) {
-        this.loadSkillDetailsAndValidate(false);
-        this.selfReport.loading = false;
-      } else if (this.isCopy) {
-        this.loadSkillDetailsAndValidate(true);
-        this.selfReport.loading = false;
-      } else {
-        this.loadStateFromLocalStorage(this.componentName).then((result) => {
-          if (result) {
+      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+        if (result) {
+          if (!this.isEdit || (this.isEdit && result.skillId === this.skillInternal.skillId)) {
             this.skillInternal = result;
-            this.selfReport.loading = false;
-            this.isLoadingSkillDetails = false;
-          } else {
-            this.skillInternal = { version: 0, ...this.skillInternal };
-            if (this.newSkillDefaultValues) {
-              this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
-            }
-            this.findLatestSkillVersion();
-            this.loadSelfReportProjectSetting();
           }
-        });
-      }
+        } else if (this.isEdit) {
+          this.loadSkillDetailsAndValidate(false);
+          this.selfReport.loading = false;
+        } else if (this.isCopy) {
+          this.loadSkillDetailsAndValidate(true);
+          this.selfReport.loading = false;
+        } else {
+          if (this.newSkillDefaultValues) {
+            this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+          }
+          this.findLatestSkillVersion();
+          this.loadSelfReportProjectSetting();
+        }
+      }).finally(() => {
+        this.selfReport.loading = false;
+        this.isLoadingSkillDetails = false;
+      });
       this.setupValidation();
       this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
       document.addEventListener('focusin', this.trackFocus);
@@ -431,7 +432,7 @@ limitations under the License.
       },
       skillInternal: {
         handler(newValue) {
-          if (!this.isEdit && this.hasObjectChanged(newValue)) {
+          if (this.hasObjectChanged(newValue)) {
             this.saveStateToLocalStorage(this.componentName, newValue);
           }
         },

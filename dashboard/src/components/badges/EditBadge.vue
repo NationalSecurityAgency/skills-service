@@ -20,7 +20,10 @@ limitations under the License.
              header-bg-variant="info"
              @hide="publishHidden"
              header-text-variant="light" no-fade>
-      <b-container fluid>
+
+      <skills-spinner :is-loading="loadingComponent"/>
+
+      <b-container fluid v-if="!loadingComponent">
         <div v-if="displayIconManager === false" class="text-left">
           <div class="media">
             <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)"
@@ -133,6 +136,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import dayjs from '@/common-components/DayJsCustomizer';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -153,6 +157,7 @@ limitations under the License.
       IconPicker,
       MarkdownEditor,
       Datepicker,
+      SkillsSpinner,
       IdInput,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
@@ -185,6 +190,7 @@ limitations under the License.
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
+        loadingComponent: true,
       };
     },
     created() {
@@ -192,22 +198,25 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-      if (this.isEdit) {
-        setTimeout(() => {
-          this.$nextTick(() => {
-            const { observer } = this.$refs;
-            if (observer) {
-              observer.validate({ silent: false });
-            }
-          });
-        }, 600);
-      } else {
-        this.loadStateFromLocalStorage(this.componentName).then((result) => {
-          if (result) {
+      this.loadingComponent = true;
+      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+        if (result) {
+          if (!this.isEdit || (this.isEdit && result.badgeId === this.badgeInternal.badgeId)) {
             this.badgeInternal = result;
           }
-        });
-      }
+        } else if (this.isEdit) {
+          setTimeout(() => {
+            this.$nextTick(() => {
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
+            });
+          }, 600);
+        }
+      }).finally(() => {
+        this.loadingComponent = false;
+      });
       this.originalBadge = Object.assign(this.originalBadge, this.badgeInternal);
     },
     computed: {
@@ -261,6 +270,7 @@ limitations under the License.
         } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
+          this.clearLocalStorageState(this.componentName);
           this.hideModal(e);
         }
       },
