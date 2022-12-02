@@ -30,7 +30,6 @@ import BadgePage from '@/components/badges/BadgePage';
 import SkillPage from '@/components/skills/SkillPage';
 import UserPage from '@/components/users/UserPage';
 import GlobalSettings from '@/components/settings/GlobalSettings';
-import GFMDescription from '@//components/utils/GFMDescription';
 import Subjects from '@//components/subjects/Subjects';
 import Badges from '@//components/badges/Badges';
 import Levels from '@//components/levels/Levels';
@@ -958,18 +957,6 @@ const router = new Router({
           },
         },
       }],
-    },
-    {
-      path: '/markdown',
-      name: 'MarkDownSupport',
-      component: GFMDescription,
-      meta: {
-        requiresAuth: true,
-        reportSkillId: 'VisitMarkdownDocs',
-        announcer: {
-          message: 'Markdown Help Document',
-        },
-      },
     },
     {
       path: '/administrator/skills',
