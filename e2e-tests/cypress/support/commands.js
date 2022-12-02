@@ -255,6 +255,13 @@ Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
 });
 
 
+Cypress.Commands.add("addTagToSkills", (projNum = 1, skillIds = ['skill1'], tagNum=1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/skills/tag`, Object.assign({
+        tagId: `tag${tagNum}`,
+        tagValue: `TAG ${tagNum}`,
+        skillIds: skillIds,
+    }, overrideProps));
+});
 
 const constructSkills = (projNum = 1, subjNum = 1, skillNum = 1, overrideProps = {}) => {
     const skillId = `skill${skillNum}${subjNum > 1 ? `Subj${subjNum}` : ''}`;
