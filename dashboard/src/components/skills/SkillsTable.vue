@@ -213,6 +213,7 @@ limitations under the License.
                 </b-button>
                 <b-button v-if="data.item.type === 'Skill' && !data.item.isCatalogImportedSkills"
                           @click="copySkill(data.item)"
+                          v-skills="'CopySkill'"
                           variant="outline-primary" :data-cy="`copySkillButton_${data.item.skillId}`"
                           :aria-label="'copy Skill '+data.item.name" :ref="'copy_'+data.item.skillId"
                           :disabled="addSkillDisabled"
@@ -285,12 +286,14 @@ limitations under the License.
                 </b-popover>
                 <b-button @click="moveDisplayOrderDown(data.item)" variant="outline-info" :class="{disabled:data.item.disabledDownButton}"
                           :disabled="!sortButtonEnabled || data.item.disabledDownButton" :aria-label="'move '+data.item.name+' down in the display order'"
+                          v-skills="'ChangeSkillDisplayOrder'"
                           :data-cy="`orderMoveDown_${data.item.skillId}`">
                   <i class="fas fa-arrow-circle-down"/>
                 </b-button>
                 <b-button @click="moveDisplayOrderUp(data.item)" variant="outline-info" :class="{disabled: data.item.disabledUpButton}"
                           :disabled="!sortButtonEnabled || data.item.disabledUpButton"
                           :aria-label="'move '+data.item.name+' up in the display order'"
+                          v-skills="'ChangeSkillDisplayOrder'"
                           :data-cy="`orderMoveUp_${data.item.skillId}`">
                   <i class="fas fa-arrow-circle-up"/>
                 </b-button>
@@ -661,6 +664,7 @@ limitations under the License.
             this.table.options.fields = this.table.options.fields.filter((item) => item.key !== key);
           }
         });
+        SkillsReporter.reportSkill('SkillsTableAdditionalColumns');
       },
       applyFilters() {
         if (this.table.filter.name && this.table.filter.name.length > 0) {
