@@ -51,7 +51,6 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillTags"]').should('exist');
     cy.get('[data-cy="skillTag-0"]').should('exist');
 
-
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
     cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
@@ -94,6 +93,7 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
 
     cy.get('[data-cy="skillTag-1"]').click()
+    cy.get('[data-cy="skillTag-1"]').should('exist');
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 3');
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist');
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
@@ -108,4 +108,64 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
     cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
   });
+
+  it('filter on skill tags in skill groups', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1);
+    cy.createSkillsGroup(1, 1, 1);
+    cy.addSkillToGroup(1, 1, 1, 2, {
+      pointIncrement: 10,
+      numPerformToCompletion: 5
+    });
+    cy.addSkillToGroup(1, 1, 1, 3, {
+      pointIncrement: 15,
+      numPerformToCompletion: 2
+    });
+    cy.createSkillsGroup(1, 1, 2);
+    cy.addSkillToGroup(1, 1, 2, 4, {
+      pointIncrement: 10,
+      numPerformToCompletion: 5
+    });
+    cy.addSkillToGroup(1, 1, 2, 5, {
+      pointIncrement: 15,
+      numPerformToCompletion: 2
+    });
+
+    cy.addTagToSkills(1, ['skill1', 'skill3', 'skill4'], 1);
+    cy.addTagToSkills(1, ['skill2', 'skill3'], 2);
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+
+    cy.get('[data-cy="skillTags"]').should('exist');
+    cy.get('[data-cy="skillTag-0"]').should('exist');
+
+
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
+    cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1');
+    cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2');
+
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillTag-0"]').click()
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
+    cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1');
+    cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2');
+
+    cy.get('[data-cy="skillTag-1"]').click()
+    cy.get('[data-cy="skillTag-1"]').should('exist');
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Awesome Group 1');
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist');
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
+
+    cy.get('[data-cy="clearSelectedTagFilter-tag1"]').click()
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Awesome Group 1');
+    cy.get('[data-cy="skillProgress_index-1"]').should('not.exist');
+    cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
+
+    cy.get('[data-cy="clearSelectedTagFilter-tag2"]').click()
+    cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
+    cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1');
+    cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2')
+  });
+
 });
