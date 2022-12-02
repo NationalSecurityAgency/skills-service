@@ -372,10 +372,8 @@ limitations under the License.
     },
     mounted() {
       this.loadStateFromLocalStorage(this.componentName).then((result) => {
-        if (result) {
-          if (!this.isEdit || (this.isEdit && result.skillId === this.skillInternal.skillId)) {
-            this.skillInternal = result;
-          }
+        if (result && (!this.isEdit || (this.isEdit && result.skillId === this.skillInternal.skillId))) {
+          this.skillInternal = result;
         } else if (this.isEdit) {
           this.loadSkillDetailsAndValidate(false);
           this.selfReport.loading = false;
