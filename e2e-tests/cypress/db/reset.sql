@@ -20,3 +20,7 @@ delete from GLOBAL_BADGE_LEVEL_DEFINITION;
 delete from SKILL_DEFINITION where PROJECT_ID is null;
 delete from user_achievement;
 delete from SETTINGS where setting_group <> 'project.inception' or setting_group is null;
+delete from user_points where PROJECT_ID = 'Inception';
+delete from user_achievement where PROJECT_ID = 'Inception';
+delete from user_performed_skill where PROJECT_ID = 'Inception';
+delete from user_events where PROJECT_ID = 'Inception';

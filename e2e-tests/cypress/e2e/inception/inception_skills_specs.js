@@ -1,0 +1,276 @@
+/*
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+describe('Inception Skills Tests', () => {
+
+    let defaultUser
+    beforeEach(() => {
+        cy.fixture('vars.json')
+            .then((vars) => {
+                defaultUser = Cypress.env('oauthMode') ? 'foo-hydra' : vars.defaultUser
+            })
+
+
+        Cypress.Commands.add("assertInceptionPoints", (subjectId, skillId, points, waitOnReport = true) => {
+            cy.intercept('POST', `/api/projects/Inception/skills/${skillId}`)
+                .as('reportSkill');
+
+            if (waitOnReport) {
+                cy.wait('@reportSkill')
+            }
+            const url = `/api/projects/Inception/subjects/${subjectId}/skills/${skillId}/summary`;
+            cy.request(url)
+                .then((response) => {
+                    expect(response.body).to.have.property('points', points)
+                })
+
+
+        })
+
+    });
+
+    it('copy project via card', () => {
+        cy.createProject(1);
+        cy.assertInceptionPoints('Projects', 'CopyProject', 0, false)
+        cy.visit('/administrator/');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]')
+            .click();
+        cy.get('[data-cy="projectName"]')
+            .type('New Project');
+        cy.get('[data-cy="saveProjectButton"]')
+            .click();
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
+            .contains('Project\'s training profile was successfully copied');
+        cy.get('[data-cy="allDoneBtn"]')
+            .click();
+        cy.get('[data-cy="projCard_NewProject_manageBtn"]');
+
+        cy.assertInceptionPoints('Projects', 'CopyProject', 50)
+    });
+
+    it('copy project via table', () => {
+        for (let i = 2; i <= 20; i += 1) {
+            cy.createProject(i);
+        }
+        cy.assertInceptionPoints('Projects', 'CopyProject', 0, false)
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="copyProjectIdproj19"]')
+            .click();
+        cy.get('[data-cy="projectName"]')
+            .type('New Project');
+        cy.get('[data-cy="saveProjectButton"]')
+            .click();
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
+            .contains('Project\'s training profile was successfully copied');
+        cy.get('[data-cy="allDoneBtn"]')
+            .click();
+        cy.get('[data-cy="copyProjectIdNewProject"]')
+
+        cy.assertInceptionPoints('Projects', 'CopyProject', 50)
+    });
+
+    it('share project', () => {
+        cy.assertInceptionPoints('Projects', 'ShareProject', 0, false)
+
+        cy.createProject(1);
+        cy.enableProdMode(1);
+        cy.visit('/administrator/projects/proj1')
+        cy.contains('No Subjects Yet')
+        cy.get('[data-cy="shareProjBtn"]')
+            .realClick()
+        cy.get('[data-cy="shareProjOkBtn"]')
+
+        cy.assertInceptionPoints('Projects', 'ShareProject', 50)
+    });
+
+    it('change subject display order', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1').as('subj1Async')
+        cy.assertInceptionPoints('Projects', 'ChangeSubjectDisplayOrder', 0, false)
+
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        const subj1Card = '[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]';
+        const subj2Card = '[data-cy="subjectCard-subj2"] [data-cy="sortControlHandle"]';
+
+        cy.visit('/administrator/projects/proj1')
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2']);
+        cy.get(subj1Card).dragAndDrop(subj2Card)
+        cy.wait('@subj1Async')
+        cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 1']);
+
+        cy.assertInceptionPoints('Projects', 'ChangeSubjectDisplayOrder', 25)
+    });
+
+    it('change badge display order', () => {
+        cy.assertInceptionPoints('Projects', 'ChangeBadgeDisplayOrder', 0, false)
+
+        cy.createProject(1);
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        const badge1Card = '[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]';
+        const badge2Card = '[data-cy="badgeCard-badge2"] [data-cy="sortControlHandle"]';
+
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
+        cy.get(badge1Card)
+            .dragAndDrop(badge2Card);
+        cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 1']);
+
+        cy.assertInceptionPoints('Projects', 'ChangeBadgeDisplayOrder', 25)
+    });
+
+    it('Search and Navigate directly to a skill', () => {
+        cy.assertInceptionPoints('Skills', 'SearchandNavigatedirectlytoaskill', 0, false)
+
+        cy.createProject(1);
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1);
+        cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
+        cy.get('[data-cy="skillsSelector"]').type('s')
+
+        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 1).as('skillIds');
+        cy.get('@skillIds').eq(0).click();
+        cy.get('[data-cy="pageHeader"]').contains('ID: skill1')
+
+        cy.assertInceptionPoints('Skills', 'SearchandNavigatedirectlytoaskill', 5)
+    });
+
+    it('copy skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1)
+
+        cy.assertInceptionPoints('Skills', 'CopySkill', 0, false)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="copySkillButton_skill1"]').click()
+        cy.get('[data-cy="skillName"]').should('have.value', "Copy of Very Great Skill 1")
+
+        cy.assertInceptionPoints('Skills', 'CopySkill', 10)
+    });
+
+    it('create skill group', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="newGroupButton"]')
+            .click();
+
+        cy.get('[data-cy="groupName"]')
+            .type('Group');
+
+        cy.get('[data-cy="saveGroupButton"]')
+            .click();
+        cy.get(`[data-cy="expandDetailsBtn_GroupGroup"]`)
+            .click();
+        cy.get(`[data-cy="addSkillToGroupBtn-GroupGroup"]`).click();
+        cy.get('[data-cy="skillName"]').type('Skill');
+
+        cy.assertInceptionPoints('Skills', 'CreateSkillGroup', 0, false)
+
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.get('[data-cy="saveSkillButton"]').should('not.exist');
+
+        cy.assertInceptionPoints('Skills', 'CreateSkillGroup', 25)
+    });
+
+    it('create skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="newSkillButton"]')
+            .click();
+
+        cy.get('[data-cy="skillName"]')
+            .type('Skill');
+
+        cy.assertInceptionPoints('Skills', 'CreateSkill', 0, false)
+
+        cy.get('[data-cy="saveSkillButton"]').click();
+        cy.get('[data-cy="manageSkillBtn_SkillSkill"]')
+
+        cy.assertInceptionPoints('Skills', 'CreateSkill', 10)
+        // because crate group credit is given when group's skill is saved
+        // it is wise to make sure that the credit is not given mistakenly
+        cy.assertInceptionPoints('Skills', 'CreateSkillGroup', 0, false)
+    });
+
+    it('change skill display order - move up', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        const tableSelector = '[data-cy="skillsTable"]'
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 0, false)
+
+        cy.get('[data-cy="orderMoveUp_skill2"]').click();
+
+        cy.get('[data-cy="orderMoveUp_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill1"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveUp_skill2"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
+
+        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 5)
+    })
+
+    it('change skill display order - move down', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        const tableSelector = '[data-cy="skillsTable"]'
+        cy.get(`${tableSelector} th`).contains('Display Order').click();
+        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 0, false)
+
+        cy.get('[data-cy="orderMoveDown_skill1"]').click();
+
+        cy.get('[data-cy="orderMoveUp_skill1"]').should('be.enabled');
+        cy.get('[data-cy="orderMoveDown_skill1"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveUp_skill2"]').should('be.disabled');
+        cy.get('[data-cy="orderMoveDown_skill2"]').should('be.enabled');
+
+        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 5)
+    })
+
+    it('use skill table additional columns', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 0, false)
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
+        cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 5)
+    })
+});
