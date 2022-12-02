@@ -28,11 +28,9 @@ import org.springframework.data.util.Pair
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
-import skills.auth.SkillsAuthorizationException
-import skills.auth.UserInfo
-import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
-import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
@@ -506,6 +504,9 @@ class SkillsLoader {
         if(subjectId && !isCrossProjectSkill) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
+            if (!currentSkill) {
+                throw new SkillException("Provided skill id [${skillId}] des not exist under subject [${subjectId}]", projectId, skillId, ErrorCode.BadParam)
+            }
             def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
             orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
             totalSkills = orderedGroup.size();
