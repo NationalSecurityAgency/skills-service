@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { clear } from 'idb-keyval';
+
 describe('Global Badges Tests', () => {
-    import { clear } from 'idb-keyval';
 
     const tableSelector = '[data-cy="simpleSkillsTable"]';
     const levelsTableSelector = '[data-cy="simpleLevelsTable"]';

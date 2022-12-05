@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { clear } from 'idb-keyval';
 
 describe('Copy Project Tests', () => {
 
     beforeEach(() => {
+        clear();
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSubject(1, 2);
