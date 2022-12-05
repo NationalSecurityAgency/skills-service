@@ -188,7 +188,7 @@ limitations under the License.
         return this.isEdit ? 'Editing Existing Subject' : 'New Subject';
       },
       componentName() {
-        return `${this.subjectInternal.projectId}-${this.$options.name}`;
+        return `${this.subjectInternal.projectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
     },
     methods: {

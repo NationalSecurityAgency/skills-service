@@ -175,7 +175,7 @@ limitations under the License.
         return this.isCopy ? 'New Project ID' : 'Project ID';
       },
       componentName() {
-        return `${this.$options.name}`;
+        return `${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
     },
     watch: {

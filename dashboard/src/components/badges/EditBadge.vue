@@ -225,7 +225,7 @@ limitations under the License.
       },
       componentName() {
         const badgeScope = this.badgeInternal.projectId ? this.badgeInternal.projectId : 'Global';
-        return `${badgeScope}-${this.$options.name}`;
+        return `${badgeScope}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
     },
     watch: {
