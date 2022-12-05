@@ -450,7 +450,7 @@ limitations under the License.
           }).map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }));
 
           resultSkills = foundItems.map((item) => {
-            const skillHtml = StringHighlighter.highlight(item.skill, searchStrNormalized);
+            const skillHtml = searchStrNormalized ? StringHighlighter.highlight(item.skill, searchStrNormalized) : null;
             return skillHtml ? ({ ...item, skillHtml }) : item;
           });
         }
