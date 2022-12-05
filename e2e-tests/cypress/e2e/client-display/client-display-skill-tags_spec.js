@@ -141,7 +141,6 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillTags"]').should('exist');
     cy.get('[data-cy="skillTag-0"]').should('exist');
 
-
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
     cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1');
     cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2');
@@ -166,6 +165,15 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
     cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1');
     cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2')
+
+    // tag filter and search string matching child skill
+    cy.get('[data-cy="skillTag-1"]').click()
+    cy.get('[data-cy="skillsSearchInput"]').type('Very');
+    cy.get('[data-cy="skillTag-1"]').should('exist');
+
+    // tag filter and search string matching group
+    cy.get('[data-cy="skillsSearchInput"]').clear().type('Awesome');
+    cy.get('[data-cy="skillTag-1"]').should('exist');
   });
 
 });

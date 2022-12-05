@@ -415,10 +415,11 @@ limitations under the License.
           // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
           // group is shown when either a group name matches OR any of the skill names match the search string
           const foundItems = resultSkills.filter((item) => {
+            const foundSkill = item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
             if (item.isSkillsGroupType) {
-              // find at least 1 item that matches the search string
-              const foundChild = item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
-              if (foundChild) {
+              // if the group is not a match, find at least 1 child that matches the search string
+              const foundGroup = foundSkill ? true : item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized));
+              if (foundGroup) {
                 // if filtering on tags, we need to make sure the group children (as a unit) contains *all* tags
                 if (hasTagSearch) {
                   const tagsFound = new Set();
@@ -438,7 +439,6 @@ limitations under the License.
                 return true;
               }
             }
-            const foundSkill = item.skill?.trim()?.toLowerCase().includes(searchStrNormalized);
             if (foundSkill) {
               // if filtering on tags, we need to make sure the skill contains *all* tags
               if (hasTagSearch) {
