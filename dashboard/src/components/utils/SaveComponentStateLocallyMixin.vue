@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script>
-  import { get, set, del } from 'idb-keyval';
+  import {
+    get, set, del, clear,
+  } from 'idb-keyval';
 
   export default {
     name: 'SaveComponentStateLocallyMixin',
@@ -33,6 +35,9 @@ limitations under the License.
       },
       clearLocalStorageState(key) {
         del(key);
+      },
+      clearAllStorage() {
+        clear();
       },
     },
   };

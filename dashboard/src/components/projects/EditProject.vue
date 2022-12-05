@@ -222,6 +222,7 @@ limitations under the License.
         } else if (this.tooltipShowing && typeof e.preventDefault === 'function') {
           e.preventDefault();
         } else {
+          this.clearLocalStorageState(this.componentName);
           this.hideModal(e);
         }
       },

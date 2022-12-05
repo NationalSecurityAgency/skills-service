@@ -16,10 +16,12 @@
 var moment = require('moment-timezone');
 
 import dayjs from "dayjs";
+import { clear } from 'idb-keyval';
 
 describe('Skills Tests', () => {
 
   beforeEach(() => {
+    clear();
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"
