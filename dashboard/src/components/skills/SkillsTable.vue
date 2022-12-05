@@ -917,9 +917,6 @@ limitations under the License.
         if (createdSkill.helpUrl) {
           SkillsReporter.reportSkill('CreateSkillHelpUrl');
         }
-        if (createdSkill.version > 0) {
-          SkillsReporter.reportSkill('CreateSkillVersion');
-        }
       },
       deleteSkill(row) {
         SkillsService.checkIfSkillBelongsToGlobalBadge(row.projectId, row.skillId)

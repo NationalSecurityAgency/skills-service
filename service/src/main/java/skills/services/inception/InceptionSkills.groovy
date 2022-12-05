@@ -1042,48 +1042,6 @@ If a Skill's `Help Url` is blank then no url will be displayed even if `Root Hel
 ''',
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
-                new SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 25,
-                        numPerformToCompletion: 1,
-                        description: '''Skill versioning is a mechanism that allows the addition of new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.
-
-Here are simple steps to enable Skills Versioning in your application:
-
-1. When creating a skill, specify a target version (always last deployed version + 1)
-    * Version selection can be found on the top-right in the create/edit skills dialogued
-2. When initializing the display component, provide the latest target version for that instance.
-    * Vue.Js
-    * React
-    * Angular
-    * Pure JavaScript
-
-Let's walk through a simple scenario to get a better understanding of how Skill Versioning operates.
-
-We have developed software and are releasing a `version 0` that integrates skills display and event reporting using the Vue.js library. In the initial release, all of the skills will be created with `version 0`. The integrated display component will then be initialized with `version 0`.
-
-This software instance will then get deployed and the skill profile for `version 0` is displayed.
-
-Now we are working on the next release which we will label as `version 1`. Any skill created with `version 1` will not be visible in the already deployed software, configured to visualize skills with `version 0`. The version will need to be updated in the integrated display component to use `version 1`.
-
-The updated software running the `version 1` profile will expose skills declared with both `version 0` and `version 1`. Both versions of software can then run simultaneously and each version will present its own gamification profile.
-
-> **Please Note**
-> The skills from previous versions are automatically included, so version 3 will contain skills declared with versions 3, 2, 1 and 0
-
-> **Important**
-> Conveniently, the Skills Dashboard provides a way to view the Client Display for a specific version. Navigate to `Project -> User -> Client Display` and then select a previous version on the drop-down located above the client display.
-
-Limitations:
-
-* Deletes are not directly supported. To remove a skill, please perform the following procedure:
-    1. update all the client code that is reporting events for the skill that is to be deleted
-    2. deploy the version that is not using the skill
-    3. delete the skill using the dashboard
-* Edits to skills are not versioned and will be immediately visible to any display with this or earlier versions. This is mostly likely the behavior you want as any edit to a skill is a fix or an improvement.
-* Versioning is only applicable to new skills and doesn't apply to operations done on subjects, badges or other items within the gamificiation framework.
-''',
-                        helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
-                ),
                 new SkillRequest(name: "Visit Skill Overview", skillId: "VisitSkillOverview", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
@@ -1264,16 +1222,6 @@ Project administrators can craft training profiles consisting of:
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
                         description: "Lookup:Desc_SearchandNavigatedirectlytoaskill.md",
-                ),
-                new SkillRequest(name: "Create Aesthetically Pleasing Description", skillId: "CreateVisuallyAppealingDescription", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 50,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
-                        numPerformToCompletion: 1,
-                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
-                        justificationRequired: Boolean.TRUE.toString(),
-                        description: "Lookup:Desc_CreateVisuallyAppealingDescription.md",
-                        helpUrl: "/dashboard/user-guide/rich-text-editor.html",
                 ),
                 new SkillRequest(name: "Create Aesthetically Pleasing Description", skillId: "CreateVisuallyAppealingDescription", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 50,

@@ -20,6 +20,7 @@ import skills.controller.request.model.ProjectSettingsRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.services.inception.InceptionBadges
 import skills.services.inception.InceptionProjectService
 import skills.services.inception.InceptionSkills
 import skills.services.settings.SettingsService
@@ -41,6 +42,9 @@ class InceptionSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    InceptionBadges inceptionBadges
 
     @Autowired
     SettingsService settingsService
@@ -170,15 +174,45 @@ class InceptionSpecs extends DefaultIntSpec {
         Boolean skill1Deleted = skillDefRepo.findById(skillToDelete1.id).isEmpty()
         Boolean skill2Deleted = skillDefRepo.findById(skillToDelete2.id).isEmpty()
         List<SkillDef> inceptionSkillsFromDb = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Skill)
+
+        int inceptionSkillsFromDbSize = inceptionSkillsFromDb.size()
+        int inceptionSkillsSize = inceptionSkills.getAllSkills().size()
+        boolean foundSkillToDelete1 = inceptionSkillsFromDb.find { it.skillId == skillToDelete1.skillId }
+        boolean foundSkillToDelete2 = inceptionSkillsFromDb.find { it.skillId == skillToDelete2.skillId }
+        List<String> inceptionSkillIds = inceptionSkills.getAllSkills().collect { it.skillId }
+        List<String> skillIdsFromDb = inceptionSkillsFromDb.collect {it.skillId}
+
         then:
         skill1Deleted
         skill2Deleted
-        inceptionSkillsFromDb.size() == inceptionSkills.getAllSkills().size()
-        !inceptionSkillsFromDb.find { it.skillId == skillToDelete1.skillId }
-        !inceptionSkillsFromDb.find { it.skillId == skillToDelete2.skillId }
-        inceptionSkills.getAllSkills().each { inceptionSkill ->
-            assert inceptionSkillsFromDb.find { it.skillId == inceptionSkill.skillId}
+        !inceptionSkillIds.findAll {!skillIdsFromDb.contains(it) }
+        inceptionSkillsFromDbSize == inceptionSkillsSize
+        !foundSkillToDelete1
+        !foundSkillToDelete2
+        inceptionSkillIds.each { String inceptionSkill ->
+            assert inceptionSkillsFromDb.find { it.skillId == inceptionSkill}
         }
+    }
+
+    def 'badges are created'() {
+        List<SkillDef> skills = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Badge)
+
+        List<InceptionBadges.BadgeInfo> badgeInfos = inceptionBadges.getBadges()
+        skillDefRepo.delete(skills[0])
+        List<SkillDef> badges_t1 = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Badge)
+        inceptionProjectService.init()
+        List<SkillDef> badges_t2 = skillDefRepo.findAllByProjectIdAndType(InceptionProjectService.inceptionProjectId, SkillDef.ContainerType.Badge)
+
+        when:
+        int expectedBadgeNum = badgeInfos.size()
+        int actualBadgeNum = skills.size()
+        int actualBadgeNum_t1 = badges_t1.size()
+        int actualBadgeNum_t2 = badges_t2.size()
+
+        then:
+        actualBadgeNum == expectedBadgeNum
+        actualBadgeNum_t1 == expectedBadgeNum - 1
+        actualBadgeNum_t2 == expectedBadgeNum
     }
 
 }
