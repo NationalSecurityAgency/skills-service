@@ -1501,6 +1501,8 @@ class AdminController {
         skillsTagRequest.tagId = InputSanitizer.sanitize(skillsTagRequest.tagId)?.trim()?.toLowerCase()
         skillsTagRequest.tagValue = InputSanitizer.sanitize(skillsTagRequest.tagValue)?.trim()
 
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag Value", skillsTagRequest.tagValue)
+
         skillTagService.addTag(projectId, skillsTagRequest)
 
         RequestResult success = RequestResult.success()

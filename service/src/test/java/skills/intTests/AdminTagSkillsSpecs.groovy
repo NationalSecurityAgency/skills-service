@@ -17,6 +17,7 @@ package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
@@ -95,7 +96,6 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         tagsForProject && tagsForProject.size() == 1 && tagsForProject[0].tagValue == 'New Tag'
         tagsForSkills && tagsForSkills.size() == 1 && tagsForSkills[0].tagValue == 'New Tag'
     }
-
 
     void "add multiple tags to some skills"() {
         def proj = SkillsFactory.createProject()
@@ -197,5 +197,25 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
 
         // verify the tag itself is removed since now other skills are tagged/associated with it
         !tagAfterDeletingAll
+    }
+
+    def "tag values cannot exceed maxSkillTagLength"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> skillIds = skills.collect {it.skillId}
+        String invalidTagValue = (1..51).collect{"A"}.join()
+
+        when:
+        skillsService.addTagToSkills(proj.projectId, skillIds, invalidTagValue)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("[Tag Value] must not exceed [50]")
     }
 }

@@ -289,4 +289,28 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag2"]').should('exist')
         cy.get('[data-cy="skillTag-skill3-newtag2"]').should('exist')
     });
+
+    it('tag values cannot exceed maxSkillTagLength', () => {
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillSelect-skill1"]').click({ force: true });
+        cy.get('[data-cy="skillSelect-skill3"]').click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="tagSkillBtn"]').click();
+
+        const invalidName = Array(51).fill('a').join('');
+        cy.get('[data-cy="newTagInput"]').type(invalidName)
+        cy.get('[data-cy=newTagError]').contains('Skill Tags cannot exceed 50 characters.').should('be.visible');
+        cy.get('[data-cy=addTagsButton]').should('be.disabled');
+
+        cy.get('[data-cy=newTagInput]').type('{backspace}');
+        cy.get('[data-cy="newTagError"]').should('not.be.visible');
+        cy.get('[data-cy="addTagsButton"]').should('be.enabled');
+    });
 });
