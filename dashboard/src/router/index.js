@@ -630,7 +630,6 @@ const router = new Router({
           component: UserTagMetrics,
           meta: {
             requiresAuth: true,
-            reportSkillId: 'VisitUserTagMetrics',
             announcer: {
               message: 'User Tag Metrics',
             },
