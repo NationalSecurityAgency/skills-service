@@ -273,4 +273,118 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
         cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 5)
     })
+
+
+    it('reuse skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillSelect-skill1"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillReuseBtn"]')
+            .click();
+
+        // step 1
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+
+        // step 2
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 skill will be reused in the [Subject 2] subject.');
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+
+        // step 3
+        cy.assertInceptionPoints('Skills', 'ReuseSkill', 0, false)
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully reused 1 skill');
+        cy.assertInceptionPoints('Skills', 'ReuseSkill', 25)
+    })
+
+    it('move skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillSelect-skill1"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="skillMoveBtn"]')
+            .click();
+
+        // step 1
+        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+            .click();
+
+        // step 2
+        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+            .contains('1 skill will be moved to the [Subject 2] subject.');
+
+        cy.assertInceptionPoints('Skills', 'MoveSkill', 0, false)
+        cy.get('[data-cy="reuseButton"]')
+            .click();
+
+        // step 3
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+            .contains('Successfully moved 1 skill');
+        cy.assertInceptionPoints('Skills', 'MoveSkill', 10)
+    })
+
+    it('import skill', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="importFromCatalogBtn"]')
+            .click();
+        cy.get('[data-cy="skillSelect_proj2-skill1"]')
+            .check({ force: true });
+        cy.assertInceptionPoints('Skills', 'ImportSkillfromCatalog', 0, false)
+        cy.get('[data-cy="importBtn"]')
+            .click();
+        cy.get('[data-cy="importedBadge-skill1"]');
+        cy.assertInceptionPoints('Skills', 'ImportSkillfromCatalog', 25)
+    });
+
+    it('export to catalog', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+
+        cy.createSkill(1, 1, 1);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="selectAllSkillsBtn"]')
+            .click();
+
+        cy.get('[data-cy="skillActionsBtn"] button')
+            .click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]')
+            .click();
+        cy.assertInceptionPoints('Dashboard', 'ExporttoCatalog', 0, false)
+        cy.get('[data-cy="exportToCatalogButton"]')
+            .click();
+        cy.contains('Skill [Very Great Skill 1] was successfully exported to the catalog!');
+        cy.assertInceptionPoints('Dashboard', 'ExporttoCatalog', 50)
+    });
 });

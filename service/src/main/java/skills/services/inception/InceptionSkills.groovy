@@ -846,8 +846,8 @@ To achieve this skill simply study the available percentage based and point-base
                 new SkillRequest(name: "Visit Client Display", skillId: "VisitClientDisplay", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
-                        numPerformToCompletion: 50,
+                        numMaxOccurrencesIncrementInterval: 3, // up-to 25 per day
+                        numPerformToCompletion: 5,
                         description: '''You can see what the skills profile and progress display would like for a particular user by navigating to a specific user page `Project -> Users -> Select a User -> Client Display`.
 
 This is the same view that users see via Progress and Rankings pages **OR** when using pluggable Skills Display embedded in an integrated application. It allows project administrators to see users' progress through user's eyes so to say.
@@ -893,15 +893,19 @@ If you are responsible for administering a project or two it would make sense to
 ''',
                 ),
                 new SkillRequest(name: "Share SkillTree Success Story", skillId: "ShareSkillTreeSuccessStory", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 300,
-                        numPerformToCompletion: 3,
+                        pointIncrement: 150,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                         justificationRequired: Boolean.TRUE.toString(),
                         description: "Lookup:Desc_ShareSkillTreeSuccessStory.md",
                 ),
                 new SkillRequest(name: "Spread the Word or Teach", skillId: "SpreadtheWordorTeach", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 200,
+                        pointIncrement: 100,
                         numPerformToCompletion: 3,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                         justificationRequired: Boolean.TRUE.toString(),
                         description: '''It's rewarding to help and educate other (especially when it comes to SkillTree!). But what if you could collect double the rewards? Your wait is over! You can now spread the word about SkillTree while earning SkillTree points.
@@ -915,8 +919,10 @@ The request for the points will got to the SkillTree team for approval and they 
 ''',
                 ),
                 new SkillRequest(name: "Suggest Tool Integration", skillId: "SuggestToolIntegration", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 300,
-                        numPerformToCompletion: 3,
+                        pointIncrement: 150,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                         justificationRequired: Boolean.TRUE.toString(),
                         description: "Lookup:Desc_SuggestToolIntegration.md",
@@ -925,9 +931,24 @@ The request for the points will got to the SkillTree team for approval and they 
                 new SkillRequest(name: "Suggest a Feature", skillId: "SuggestFeature", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50,
                         numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                         description: '''We are always looking to improve SkillTree platform and there is no better way to that than as a community. No matter how small or large your feature idea is please do not hesitate to reach out to the SkillTree team! 
 ''',
+                ),
+                new SkillRequest(name: "Export to Catalog", skillId: "ExporttoCatalog", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ExporttoCatalog.md",
+                        helpUrl: "/dashboard/user-guide/skills-catalog.html",
+                ),
+                new SkillRequest(name: "Project Access Options", skillId: "ProjectAccessOptions", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
+                        description: "Lookup:Desc_ProjectAccessOptions.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#access",
                 ),
         ]
     }
@@ -1293,6 +1314,26 @@ Project administrators can craft training profiles consisting of:
                         numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
                         numPerformToCompletion: 6,
                         description: "Lookup:Desc_SkillsTableAdditionalColumns.md",
+                ),
+                new SkillRequest(name: "Reuse Skill", skillId: "ReuseSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ReuseSkill.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#same-project-skill-reuse",
+                ),
+                new SkillRequest(name: "Move Skill", skillId: "MoveSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 10,
+                        numPerformToCompletion: 4,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
+                        description: "Lookup:Desc_MoveSkill.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#move-skills",
+                ),
+                new SkillRequest(name: "Import Skill from Catalog", skillId: "ImportSkillfromCatalog", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ImportSkillfromCatalog.md",
+                        helpUrl: "/dashboard/user-guide/skills-catalog.html",
                 ),
                 new SkillRequest(name: "Add or Update Skill Tags", skillId: "AddOrModifyTags", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
