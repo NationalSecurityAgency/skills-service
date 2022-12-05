@@ -200,4 +200,35 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/globalBadge/exists`)
       .then((response) => response.data);
   },
+  getTagsForProject(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/tags`)
+      .then((response) => response.data);
+  },
+  getTagsForSkills(projectId, skillIds) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tags`;
+    return axios.post(url, {
+      skillIds,
+    }).then((res) => res.data);
+  },
+  deleteTagForSkills(projectId, skillIds, tagId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tag`;
+    return axios.delete(url, {
+      data: {
+        tagId,
+        skillIds,
+      },
+    }).then((res) => res.data);
+  },
+  addTagToSkills(projectId, skillIds, tagId, tagValue) {
+    // const tagId = this.getTagIdFromValue(tagValue);
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tag`;
+    return axios.post(url, {
+      tagId,
+      tagValue,
+      skillIds,
+    }).then((res) => res.data);
+  },
+  // getTagIdFromValue(tagValue) {
+  //   return InputSanitizer.removeSpecialChars(tagValue)?.toLowerCase();
+  // },
 };

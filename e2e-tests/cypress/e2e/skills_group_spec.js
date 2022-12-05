@@ -44,7 +44,7 @@ describe('Skills Group Tests', () => {
             cy.get('[data-cy="skillName"]').type(skillName);
             cy.get('[data-cy="saveSkillButton"]').click();
             cy.get('[data-cy="saveSkillButton"]').should('not.exist');
-            cy.contains(`Skill${skillNum}Skill`);
+            cy.get(`[data-cy="manageSkillLink_Skill${skillNum}Skill"]`).should('have.text', skillName);
         });
 
     });
@@ -55,14 +55,14 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="noContent"]').contains('No Skills Yet');
         cy.createGroupViaUI('Blah');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 1, value: '1' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
 
         cy.createGroupViaUI('another');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'another' }, { colIndex: 0,  value: 'ID: anotherGroup' }, { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 0,  value: 'ID: BlahGroup' }, { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'another' }, { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Blah' }, { colIndex: 1, value: '1' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
@@ -129,11 +129,11 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'group2' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '4' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '5' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Awesome Group 2 Subj1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '5' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 5);
 
@@ -141,20 +141,20 @@ describe('Skills Group Tests', () => {
         cy.acceptRemovalSafetyCheck();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 1, value: '1' }],
-            [{ colIndex: 0,  value: 'skill1' },  { colIndex: 1, value: '2' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 1, value: '3' }],
-            [{ colIndex: 0,  value: 'skill2' },  { colIndex: 1, value: '4' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 1, value: '1' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' },  { colIndex: 1, value: '2' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 1, value: '3' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' },  { colIndex: 1, value: '4' }],
         ],  5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 4);
     });
@@ -235,30 +235,30 @@ describe('Skills Group Tests', () => {
         const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
 
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill4' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
-            [{ colIndex: 0,  value: 'skill6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').click()
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
@@ -271,9 +271,9 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
         cy.validateTable(skillsTableSelector, [
-            [{ colIndex: 0,  value: 'skill6' }],
-            [{ colIndex: 0,  value: 'skill5' }],
-            [{ colIndex: 0,  value: 'skill4' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 6' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 5' }],
+            [{ colIndex: 0,  value: 'Very Great Skill 4' }],
         ], 5, true, null, false);
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill6"]').should('be.enabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').should('be.disabled');
@@ -305,9 +305,9 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Version').click();
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'group1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
-            [{ colIndex: 0,  value: 'group2' },  { colIndex: 3, value: '0from 0 skills' }],
-            [{ colIndex: 0,  value: 'group3' },  { colIndex: 3, value: '200from 1 skill' }],
+            [{ colIndex: 0,  value: 'Awesome Group 1' },  { colIndex: 3, value: '400from 2 skills' }, { colIndex: 4, value: 'N/A' }, { colIndex: 5, value: 'N/A' }, { colIndex: 6, value: '0' }],
+            [{ colIndex: 0,  value: 'Awesome Group 2 Subj1' },  { colIndex: 3, value: '0from 0 skills' }],
+            [{ colIndex: 0,  value: 'Awesome Group 3 Subj1' },  { colIndex: 3, value: '200from 1 skill' }],
         ], 5, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
     });
@@ -410,7 +410,6 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.contains('ID: skill2');
         cy.acceptRemovalSafetyCheck();;
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
@@ -435,7 +434,6 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill2"]').should('not.exist');
         cy.get('[data-cy="editSkillButton_newId"]')
-        cy.get('[data-cy="nameCell_newId"]').contains('newId')
         cy.get('[data-cy="nameCell_newId"]').contains('other')
 
         cy.get('[data-cy="skillsTable-additionalColumns"]').first().contains('Points').click();
@@ -455,7 +453,6 @@ describe('Skills Group Tests', () => {
         cy.get('button').contains('Save').click();
 
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
 
         // navigate away and back then verify
         cy.clickNav('Levels')
@@ -463,14 +460,12 @@ describe('Skills Group Tests', () => {
 
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
 
         // refresh and verify
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
 
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
-        cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('ID: copy_of_skill2')
     });
 
     it('nav to skill', () => {
@@ -577,7 +572,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="copySkillButton_Skill1Skill"]').click();
         cy.get('[data-cy="saveSkillButton"]').click();
         cy.get('[data-cy="saveSkillButton"]').should('not.exist');
-        cy.contains(`copy_of_Skill1Skill`);
+        cy.get('[data-cy="manageSkillLink_copy_of_Skill1Skill"]').should('have.text', 'Copy of Skill 1');
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredAllSkills"]`).contains('all skills')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
@@ -791,7 +786,6 @@ describe('Skills Group Tests', () => {
         cy.get('button').contains('Save').click();
 
         cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('Copy of Very Great Skill 1')
-        cy.get('[data-cy="nameCell_copy_of_skill1"]').contains('ID: copy_of_skill1')
 
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');

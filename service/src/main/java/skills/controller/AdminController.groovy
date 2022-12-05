@@ -114,6 +114,9 @@ class AdminController {
     ShareSkillsService shareSkillsService
 
     @Autowired
+    SkillTagService skillTagService
+
+    @Autowired
     ProjectSettingsValidator projectSettingsValidator
 
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
@@ -626,7 +629,7 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/hasDependency", method = [RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<SkillDepResult> doSkillsHaveDependency(@PathVariable("projectId") String projectId,
-                                                @RequestBody CheckSkillsDepsRequest checkSkillsDepsRequest) {
+                                                @RequestBody SkillIdsRequest checkSkillsDepsRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotEmpty(checkSkillsDepsRequest?.skillIds, "Skill Ids", projectId)
 
@@ -1484,6 +1487,56 @@ class AdminController {
     RequestResult requestAccess(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, projectId)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    RequestResult addTagToSkills(@PathVariable("projectId") String projectId,
+                                 @RequestBody SkillsTagRequest skillsTagRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
+        SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        SkillsValidator.isNotBlank(skillsTagRequest.tagId, "skillsTagRequest.tagId", projectId)
+        SkillsValidator.isNotBlank(skillsTagRequest.tagValue, "skillsTagRequest.tagValue", projectId)
+
+        skillsTagRequest.tagId = InputSanitizer.sanitize(skillsTagRequest.tagId)?.trim()?.toLowerCase()
+        skillsTagRequest.tagValue = InputSanitizer.sanitize(skillsTagRequest.tagValue)?.trim()
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag Value", skillsTagRequest.tagValue)
+
+        skillTagService.addTag(projectId, skillsTagRequest)
+
+        RequestResult success = RequestResult.success()
+        success.explanation = "Successfully tagged skills"
+        return success
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/tags", method = [RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SkillTagRes> getTagsForSkills(@PathVariable("projectId") String projectId,
+                                       @RequestBody SkillIdsRequest skillsTagRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
+        SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        return skillTagService.getTagsForSkills(projectId, skillsTagRequest.skillIds)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue) }
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
+    List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return skillTagService.getTagsForProject(projectId)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue) }
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.DELETE], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult deleteTagForSkills(@PathVariable("projectId") String projectId,
+                                     @RequestBody SkillsTagRequest skillsTagRequest) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
+        SkillsValidator.isNotBlank(skillsTagRequest.tagId, "skillsTagRequest.tagId", projectId)
+        SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        skillTagService.deleteTagForSkills(projectId, skillsTagRequest)
+
+        RequestResult success = RequestResult.success()
+        success.explanation = "Successfully removed tag from skills"
+        return success
     }
 
     private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {

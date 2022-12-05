@@ -483,7 +483,15 @@ To create a skill, navigate to a subject and then click the ``Skill +`` button.'
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did it** button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue.!",
+                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did it** button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue!",
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                ),
+                new SkillRequest(name: "Add or Update Skill Tags", skillId: "AddOrModifyTags", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 3,
+                        description: "Create custom tags and attach them to skills.  Tags can be used to help organize or group multiple skills and can be useful for viewing skills in the Client Skills Display as well as metrics.",
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                 ),
         ]

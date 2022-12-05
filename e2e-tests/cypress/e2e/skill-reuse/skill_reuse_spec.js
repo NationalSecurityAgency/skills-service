@@ -32,8 +32,8 @@ describe('Skill Reuse Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.get('[data-cy="importedBadge-skill1STREUSESKILLST0"]')
             .contains('Reused');
-        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="skillId"] [data-cy="smtText"]')
-            .should('have.text', 'ID: skill1');
+        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="smtText"]')
+            .should('have.text', 'Very Great Skill 1');
 
         cy.get('[data-cy="expandDetailsBtn_skill1STREUSESKILLST0"]')
             .click();
