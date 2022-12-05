@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 describe('Global Badges Tests', () => {
+    import { clear } from 'idb-keyval';
 
     const tableSelector = '[data-cy="simpleSkillsTable"]';
     const levelsTableSelector = '[data-cy="simpleLevelsTable"]';
 
     beforeEach(() => {
         cy.logout();
+        clear();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
         cy.login('root@skills.org', 'password');

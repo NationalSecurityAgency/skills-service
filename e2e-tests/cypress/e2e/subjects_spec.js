@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 // const attachFiles = require('cypress-form-data-with-file-upload');
+import { clear } from 'idb-keyval';
 
 describe('Subjects Tests', () => {
 
     beforeEach(() => {
+        clear();
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: "proj1"
