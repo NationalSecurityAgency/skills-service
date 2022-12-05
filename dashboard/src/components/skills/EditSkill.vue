@@ -219,7 +219,7 @@ limitations under the License.
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-if="skillInternal" v-model="skillInternal.description" data-cy="skillDescription"/>
+                <markdown-editor v-if="skillInternal && (descriptionLoaded || !isEdit)" v-model="skillInternal.description" data-cy="skillDescription"/>
                 <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
@@ -368,18 +368,18 @@ limitations under the License.
         },
         overallErrMsg: '',
         show: this.value,
+        descriptionLoaded: false,
       };
     },
     mounted() {
       this.loadStateFromLocalStorage(this.componentName).then((result) => {
-        if (result && (!this.isEdit || (this.isEdit && result.skillId === this.skillInternal.skillId))) {
+        if (result && (!this.isEdit || (this.isEdit && result.skillId === this.skillId))) {
           this.skillInternal = result;
+          this.descriptionLoaded = true;
         } else if (this.isEdit) {
           this.loadSkillDetailsAndValidate(false);
-          this.selfReport.loading = false;
         } else if (this.isCopy) {
           this.loadSkillDetailsAndValidate(true);
-          this.selfReport.loading = false;
         } else {
           if (this.newSkillDefaultValues) {
             this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
@@ -388,11 +388,11 @@ limitations under the License.
           this.loadSelfReportProjectSetting();
         }
       }).finally(() => {
+        this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
         this.selfReport.loading = false;
         this.isLoadingSkillDetails = false;
       });
       this.setupValidation();
-      this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
@@ -613,6 +613,7 @@ limitations under the License.
       loadSkillDetailsAndValidate(isCopy) {
         this.loadSkillDetails(isCopy)
           .then(() => {
+            this.descriptionLoaded = true;
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;
@@ -642,6 +643,7 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoadingSkillDetails = false;
+            this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
           });
       },
       loadSelfReportProjectSetting() {

@@ -63,7 +63,7 @@ limitations under the License.
             <label>Description</label>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
-                <markdown-editor v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <markdown-editor v-if="!isEdit || descriptionLoaded" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
           </div>
@@ -120,6 +120,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         loadingComponent: true,
+        descriptionLoaded: false,
       };
     },
     created() {
@@ -131,16 +132,17 @@ limitations under the License.
         projectId: this.project.projectId,
       };
       this.loadingComponent = true;
+
       this.loadStateFromLocalStorage(this.componentName).then((result) => {
-        if (result) {
-          if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
-            this.internalProject = result;
-          }
+        if (result && (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId))) {
+          this.internalProject = result;
+          this.descriptionLoaded = true;
         } else if (this.isEdit) {
           ProjectService.loadDescription(this.project.projectId).then((data) => {
             this.internalProject.description = data.description;
           }).finally(() => {
             this.loadingComponent = false;
+            this.descriptionLoaded = true;
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;
@@ -152,11 +154,11 @@ limitations under the License.
           });
         }
       }).finally(() => {
+        this.originalProject = Object.assign(this.originalProject, this.internalProject);
         this.loadingComponent = false;
       });
 
       document.addEventListener('focusin', this.trackFocus);
-      this.originalProject = Object.assign(this.originalProject, this.internalProject);
     },
     computed: {
       title() {
@@ -184,9 +186,7 @@ limitations under the License.
       },
       internalProject: {
         handler(newValue) {
-          if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.componentName, newValue);
-          }
+          this.saveStateToLocalStorage(this.componentName, newValue);
         },
         deep: true,
       },
