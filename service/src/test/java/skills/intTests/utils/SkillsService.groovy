@@ -1484,8 +1484,8 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approvalEmails/isSubscribed")
     }
 
-    def addTagToSkills(String projectId, List<String> skillIds, String tagValue) {
-        return wsHelper.adminPost("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagValue?.toLowerCase()?.replaceAll('[\\W_]', ''), tagValue: tagValue])
+    def addTagToSkills(String projectId, List<String> skillIds, String tagValue, String tagId=null) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId ?: tagValue?.toLowerCase()?.replaceAll('[\\W_]', ''), tagValue: tagValue])
     }
 
     def getTagsForSkills(String projectId, List<String> skillIds) {

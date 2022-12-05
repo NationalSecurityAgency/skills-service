@@ -195,7 +195,7 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         !skillsAfterDeletingAll[2].tags
         !skillsAfterDeletingAll[3].tags
 
-        // verify the tag itself is removed since now other skills are tagged/associated with it
+        // verify the tag itself is removed since no other skills are tagged/associated with it
         !tagAfterDeletingAll
     }
 
@@ -217,5 +217,37 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         then:
         def ex = thrown(SkillsClientException)
         ex.message.contains("[Tag Value] must not exceed [50]")
+    }
+
+    def "validate tag id's are case insensitive on tag creation and deletion"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> skillIds = skills.collect {it.skillId}
+        String tagValue = "New Tag"
+        String tagId = 'neWtaG'
+
+        when:
+        def res = skillsService.addTagToSkills(proj.projectId, skillIds, tagValue, tagId)
+        List tagsForSkills = skillsService.getTagsForSkills(proj.projectId, skillIds)
+
+        skillsService.deleteTagForSkills(proj.projectId, skillIds, tagId)
+        List skillsAfterDeletingAll = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        def tagAfterDeletingAll = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(proj.projectId, tagId, SkillDef.ContainerType.Tag)
+
+        then:
+        res
+        res.success
+        tagsForSkills && tagsForSkills.size() == 1 && tagsForSkills[0].tagValue == 'New Tag' && tagsForSkills[0].tagId == tagId.toLowerCase()
+
+        skillsAfterDeletingAll && skillsAfterDeletingAll.size() == 1 && !skillsAfterDeletingAll[0].tags
+
+        // verify the tag itself is removed since no other skills are tagged/associated with it
+        !tagAfterDeletingAll
     }
 }
