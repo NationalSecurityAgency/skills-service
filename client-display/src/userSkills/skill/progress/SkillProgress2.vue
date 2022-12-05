@@ -114,7 +114,7 @@ limitations under the License.
       <div v-if="skill.tags && skill.tags.length > 0" class="col" style="font-size: 0.9rem" data-cy="skillTags">
         <span v-for="(tag, index) in skill.tags" :data-cy="`skillTag-${index}`" class="overflow-hidden pr-1"
               v-bind:key="tag.tagId">
-          <b-badge variant="info" href="#" @click="addTagFilter(tag)">
+          <b-badge class="py-1 px-2" variant="info" href="#" @click="addTagFilter(tag)">
               <span>{{ tag.tagValue }} <i class="fas fa-search-plus"></i></span>
             </b-badge>
         </span>
