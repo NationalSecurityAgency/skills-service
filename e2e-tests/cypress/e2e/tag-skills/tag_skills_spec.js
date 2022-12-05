@@ -184,6 +184,70 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
     });
 
+    it('selected skills are unchecked after adding and removing tags', () => {
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillSelect-skill1"]')
+          .click({ force: true });
+        cy.get('[data-cy="skillSelect-skill3"]')
+          .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="tagSkillBtn"]')
+          .click();
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('be.checked');
+
+        cy.get('[data-cy="newTagInput"]').type('New Tag 1')
+        cy.get('[data-cy="addTagsButton"]').click()
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('not.be.checked');
+
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+
+        cy.get('[data-cy="clearSelectedSkillsBtn"]')
+          .click();
+        cy.get('[data-cy="skillSelect-skill1"]')
+          .click({ force: true });
+        cy.get('[data-cy="skillSelect-skill2"]')
+          .click({ force: true });
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('not.be.checked');
+
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="untagSkillBtn"]')
+          .click();
+        cy.get('[data-cy="existingTagDropdown"]')
+          .click();
+        cy.get('[data-cy="existingTagDropdown"] .vs__dropdown-option')
+          .eq(0)
+          .click()
+        cy.get('[data-cy="deleteTagsButton"]').click()
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('not.be.checked');
+
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+    });
+
     it('tag skills with multiple tags', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');

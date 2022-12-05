@@ -817,6 +817,7 @@ limitations under the License.
           }
           return skill;
         });
+        this.changeSelectionForAll(false);
         this.$nextTick(() => this.$announcer.polite(`added tag to ${skills.length} skill${skills.length > 1 ? 's' : ''} with value ${tagResult.tagValue}`));
       },
       handleSkillsTagRemoved(tagResult) {
@@ -832,6 +833,7 @@ limitations under the License.
           }
           return skill;
         });
+        this.changeSelectionForAll(false);
         this.$nextTick(() => this.$announcer.polite(`removed tag from ${skills.length} skill${skills.length > 1 ? 's' : ''} with value ${tagResult.tagValue}`));
       },
       updateImportedSkill(skill) {
