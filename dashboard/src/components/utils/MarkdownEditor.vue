@@ -112,7 +112,7 @@ limitations under the License.
       // },
       editorOptions() {
         const options = {
-          hideModeSwitch: false,
+          hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
           toolbarItems: [
