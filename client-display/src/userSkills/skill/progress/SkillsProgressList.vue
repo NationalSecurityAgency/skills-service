@@ -61,11 +61,10 @@ limitations under the License.
                    :data-cy="`skillTagFilter-${index}`"
                    :key="tag.tagId"
                    variant="light"
-                   class="mx-1 py-1 border-info border selected-filter overflow-hidden"
-                   pill>
+                   class="mx-1 py-1 border-info border selected-filter overflow-hidden">
             <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>
             <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">
-              <i class="fas fa-times-circle ml-1" style="font-size: 0.9rem;"></i>
+              <i class="fas fa-times-circle ml-1"></i>
               <span class="sr-only">clear filter</span>
             </button>
           </b-badge>
@@ -104,9 +103,15 @@ limitations under the License.
             </div>
           </div>
         </div>
-        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && searchString" class="my-5"
-                     icon="fas fa-search-minus fa-5x" title="No results"
-                     :sub-title="`Please refine [${searchString}] search${(this.filterId) ? ' and/or clear the selected filter' : ''}`"/>
+        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && (searchString || Boolean(this.selectedTagFilters.size))" class="my-5"
+                     icon="fas fa-search-minus fa-5x" title="No results">
+          <span v-if="searchString">
+            Please refine [{{searchString}}] search  <span v-if="filterId || Boolean(this.selectedTagFilters.size)">and/or clear the selected filter</span>
+          </span>
+          <span v-if="!searchString">
+           Please clear selected filters
+          </span>
+        </no-data-yet>
 
         <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"
                      :title="`${this.skillDisplayName}s have not been added yet.`"
@@ -193,6 +198,7 @@ limitations under the License.
           inProgress: 0,
           belongsToBadge: 0,
           pendingApproval: 0,
+          hasTag: 0,
         },
         loading: false,
         showDescriptionsInternal: false,
@@ -300,6 +306,12 @@ limitations under the License.
             html: 'Pending Approval',
             count: 0,
           },
+          {
+            icon: 'fas fa-tag',
+            id: 'hasTag',
+            html: 'Has a <b>Tag</b>',
+            count: 0,
+          },
         ];
         if (this.type === 'subject') {
           res.push({
@@ -341,6 +353,9 @@ limitations under the License.
         }
         if (meta.pendingApproval) {
           this.metaCounts.pendingApproval += 1;
+        }
+        if (meta.hasTag) {
+          this.metaCounts.hasTag += 1;
         }
       },
       onDetailsToggle() {
