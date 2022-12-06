@@ -15,10 +15,8 @@
  */
 package skills.utils
 
-
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class InputSanitizerSpec extends Specification{
@@ -193,10 +191,12 @@ class InputSanitizerSpec extends Specification{
 
     def "sanitize markdown with html"() {
 
+        String text = '<skills-display version="0"></skills-display>\n<em><del>(U) one **two** three</del></em>'
+
         when:
-        def one = InputSanitizer.unsanitizeName(InputSanitizer.sanitize("<em><del>(U) one **two** three</del></em>"))
+        def one = InputSanitizer.unsanitizeName(InputSanitizer.sanitize(text))
 
         then:
-        one == "<em><del>(U) one **two** three</del></em>"
+        one == text
     }
 }
