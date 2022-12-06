@@ -39,6 +39,8 @@ describe('User Agreement Specs', ()=> {
        cy.intercept('GET', '/admin/projects/projBanana').as('loadProject');
        cy.intercept('POST', '/app/userInfo/settings').as('acknowledgeUa');
        cy.intercept('POST', '/logout').as('logout');
+       cy.intercept('POST', '/performLogin').as('performLogin');
+       cy.intercept('GET', '/api/myProgressSummary').as('progressSummary');
        cy.logout();
        cy.visit('/administrator/projects/projBanana');
        cy.get('#username').type('user1@fake.fake');
@@ -61,6 +63,8 @@ describe('User Agreement Specs', ()=> {
        cy.get('#username').type('user1@fake.fake');
        cy.get('#inputPassword').type('password1');
        cy.get('[data-cy=login]').click();
+       cy.wait('@performLogin');
+       cy.wait('@progressSummary');
        cy.visit('/administrator/projects/projBanana');
        cy.wait('@loadProject');
 
