@@ -23,27 +23,41 @@ limitations under the License.
              role="dialog"
              aria-label="'Remove Tag from Skills in this project'">
       <b-container fluid>
-        <label for="existingTag">Select Tag to Remove</label>
-        <div id="existingTag">
-          <v-select v-model="selectedTagValue" :options="existingTags" label="tagValue"
-                    data-cy="existingTagDropdown"
-                    placeholder="Select Tag" :loading="isLoading">
-          </v-select>
+        <div v-if="hasExistingTags">
+          <label for="existingTag">Select Tag to Remove</label>
+          <div id="existingTag">
+            <v-select v-model="selectedTagValue" :options="existingTags" label="tagValue"
+                      data-cy="existingTagDropdown"
+                      placeholder="Select Tag" :loading="isLoading">
+            </v-select>
+          </div>
+        </div>
+        <div v-else>
+          <div>
+            The selected skills do not have any tags.
+          </div>
         </div>
       </b-container>
       <div slot="modal-footer" class="w-100">
-        <b-button variant="success"
-                  size="sm"
-                  class="float-right"
-                  @click="handleSubmit(deleteTagForSkills)"
-                  :disabled="invalid || !selectedTagValue"
-                  v-skills="'AddOrModifyTags'"
-                  data-cy="deleteTagsButton">
-          Delete
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="cancel" data-cy="cancelDeleteTagsButton">
-          Cancel
-        </b-button>
+        <div v-if="hasExistingTags">
+          <b-button variant="success"
+                    size="sm"
+                    class="float-right"
+                    @click="handleSubmit(deleteTagForSkills)"
+                    :disabled="invalid || !selectedTagValue"
+                    v-skills="'AddOrModifyTags'"
+                    data-cy="deleteTagsButton">
+            Delete
+          </b-button>
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="cancel" data-cy="cancelDeleteTagsButton">
+            Cancel
+          </b-button>
+        </div>
+        <div v-else>
+          <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="cancelDeleteTagsButton">
+            OK
+          </b-button>
+        </div>
       </div>
     </b-modal>
   </ValidationObserver>
@@ -71,8 +85,6 @@ limitations under the License.
         isLoading: false,
         show: this.value,
         selectedTagValue: null,
-        // tagId: null,
-        // tagValue: null,
         existingTags: [],
       };
     },
@@ -87,6 +99,9 @@ limitations under the License.
     computed: {
       projectId() {
         return this.$route.params.projectId;
+      },
+      hasExistingTags() {
+        return this.existingTags && this.existingTags.length;
       },
     },
     methods: {
@@ -107,6 +122,10 @@ limitations under the License.
         this.show = false;
         this.publishHidden(e, true);
       },
+      close(e) {
+        this.show = false;
+        this.publishHidden(e, false);
+      },
       publishHidden(e, cancelled) {
         this.$emit('hidden', {
           ...e,
@@ -123,14 +142,7 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
-        // const tags = ['Beginner', 'Novice', 'Intermediate', 'Advanced', 'Expert'];
-        // return tags;
       },
-      // existingTagInputChanged(input) {
-      //   this.newTagValue = null;
-      //   this.tagId = input?.tagId;
-      //   this.tagValue = input?.tagValue;
-      // },
     },
   };
 </script>
