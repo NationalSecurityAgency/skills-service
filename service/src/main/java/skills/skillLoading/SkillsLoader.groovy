@@ -575,6 +575,7 @@ class SkillsLoader {
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
+                tags: loadSkillTags(skillDef.id),
         )
     }
 
@@ -1020,9 +1021,9 @@ class SkillsLoader {
     }
 
     @Profile
-    List<SkillTag> loadSkillTags(SkillDef skillDef) {
+    List<SkillTag> loadSkillTags(Integer skillRefId) {
         List<SkillTag> tags = []
-        skillTagService.getTagsForSkill(skillDef.id)?.each { tag ->
+        skillTagService.getTagsForSkill(skillRefId)?.each { tag ->
             tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
         }
         return tags
@@ -1107,7 +1108,7 @@ class SkillsLoader {
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
                         isLastViewed: skillDefAndUserPoints.isLastViewed,
                         badges: skillDefAndUserPoints.badges,
-                        tags: projectHasSkillTags ? loadSkillTags(skillDef) : null,
+                        tags: projectHasSkillTags ? loadSkillTags(skillDef.id) : null,
                 )
             }
         }
