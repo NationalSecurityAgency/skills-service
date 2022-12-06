@@ -635,7 +635,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         def subject = skillsService.getSubject([subjectId: 'mySubj', projectId: proj1.projectId])
         then:
-        subject.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+        subject.description == 'this is a description <a href="http://somewhere">I\'m a link</a>'
     }
 
     def "Prevent injection in Skill description"(){
@@ -652,7 +652,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         def skill = skillsService.getSkill([skillId: 'mySkill', subjectId: subj.subjectId, projectId: proj1.projectId])
         then:
-        skill.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+        skill.description == 'this is a description <a href="http://somewhere">I\'m a link</a>'
     }
 
     def "Prevent injection in Badge description"(){
@@ -667,7 +667,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         badge = skillsService.getBadge([badgeId: 'myBadge', projectId: proj1.projectId])
         then:
-        badge.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>'
+        badge.description == 'this is a description <a href="http://somewhere">I\'m a link</a>'
     }
 
     def "increasing skill point increment post achievement causes user points to be updated"() {
@@ -739,7 +739,7 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         def projDescription = skillsService.getProjectDescription(proj1.projectId)
         then:
-        projDescription.description == 'this is a description <a href="http://somewhere" rel="nofollow">I\'m a link</a>\n> this is a quote'
+        projDescription.description == 'this is a description <a href="http://somewhere">I\'m a link</a>\n> this is a quote'
     }
 
     def "decreasing skill point increment post achievement causes user points to be updated"() {
