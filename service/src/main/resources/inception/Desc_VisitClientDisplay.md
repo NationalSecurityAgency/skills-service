@@ -1,0 +1,3 @@
+You can see what the skills profile and progress display would like for a particular user by navigating to a specific user page `Project -> Users -> Select a User -> Client Display`.
+
+This is the same view that users see via Progress and Rankings pages **OR** when using pluggable Skills Display embedded in an integrated application. It allows project administrators to see users' progress through user's eyes so to say.
