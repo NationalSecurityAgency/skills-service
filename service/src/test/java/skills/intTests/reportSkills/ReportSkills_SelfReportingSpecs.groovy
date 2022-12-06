@@ -541,13 +541,15 @@ Always yours, <br/> -SkillTree Bot
 
         UserAttrs approverUserAttrs = userAttrsRepo.findByUserId(approver)
         UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+        UserAttrs skillsServiceUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
 
         SkillsService approveService = createService(new SkillsService.UseParams(username: approverUserAttrs.userId, email:  approverUserAttrs.email))
         skillsService.addUserRole(approveService.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
-        WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
-        greenMail.getReceivedMessages()
+        WaitFor.wait { greenMail.getReceivedMessages().length >= 1 }
+        assert greenMail.getReceivedMessages().size() == 1
         greenMail.reset()
 
+        // this will send 2 emails - 1 to each approver
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
         def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
@@ -555,15 +557,20 @@ Always yours, <br/> -SkillTree Bot
         when:
         approveService.approve(proj.projectId, ids)
 
-        WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
         assert greenMail.getReceivedMessages().size() == 3
-        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
-        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+        List<EmailUtils.EmailRes> allEmails = EmailUtils.getEmails(greenMail)
 
         then:
-        emailRes.fromEmail == [approverUserAttrs.email]
-        emailRes.subj == "SkillTree Points Approved"
-        emailRes.recipients == [userRequestingPtsAttrs.email]
+        EmailUtils.EmailRes approvedEmail = allEmails.find { it.subj.contains("Approved")}
+        approvedEmail.fromEmail == [approverUserAttrs.email]
+        approvedEmail.subj == "SkillTree Points Approved"
+        approvedEmail.recipients == [userRequestingPtsAttrs.email]
+
+        List<EmailUtils.EmailRes> pointsRequestEmail = allEmails.findAll { it.subj.contains("Requested")}
+        pointsRequestEmail.subj == ["SkillTree Points Requested", "SkillTree Points Requested"]
+        pointsRequestEmail.fromEmail.flatten().sort() == [userRequestingPtsAttrs.email, userRequestingPtsAttrs.email].sort()
+        pointsRequestEmail.recipients.flatten().sort() == [approverUserAttrs.email, skillsServiceUserAttrs.email].sort()
     }
 
     def "requesting approval for the same skill more than one time"() {

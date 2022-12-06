@@ -17,6 +17,7 @@ package skills.intTests.utils
 
 import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.GreenMailUtil
+import groovy.transform.ToString
 
 import javax.mail.BodyPart
 import javax.mail.Message
@@ -25,6 +26,7 @@ import javax.mail.internet.MimeMultipart
 
 class EmailUtils {
 
+    @ToString(includeNames = true)
     static class EmailRes {
         String subj
         List<String> recipients
