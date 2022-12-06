@@ -55,7 +55,7 @@ limitations under the License.
                          :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>
         </div>
       </div>
-      <div v-if="selectedTagFilters.size > 0" class="row mt-2">
+      <div v-if="selectedTagFilters.length > 0" class="row mt-2">
         <div class="col-md-auto text-left pr-md-0">
           <b-badge v-for="(tag, index) in selectedTagFilters"
                    :data-cy="`skillTagFilter-${index}`"
@@ -201,7 +201,7 @@ limitations under the License.
         descriptionsLoaded: false,
         skillsInternal: [],
         skillsInternalOrig: [],
-        selectedTagFilters: new Set(),
+        selectedTagFilters: [],
         filters: [
           {
             groupId: 'progressGroup',
@@ -382,11 +382,13 @@ limitations under the License.
         this.$emit('points-earned', event);
       },
       addTagFilter(tag) {
-        this.selectedTagFilters.add(tag);
-        this.searchAndFilterSkills();
+        if (!this.selectedTagFilters.find((elem) => elem.tagId === tag.tagId)) {
+          this.selectedTagFilters.push(tag);
+          this.searchAndFilterSkills();
+        }
       },
       removeTagFilter(tag) {
-        this.selectedTagFilters.delete(tag);
+        this.selectedTagFilters = this.selectedTagFilters.filter((elem) => elem.tagId !== tag.tagId);
         this.searchAndFilterSkills();
       },
       filterSkills(filterId) {
@@ -407,7 +409,7 @@ limitations under the License.
       },
       searchAndFilterSkills() {
         let resultSkills = this.skillsInternalOrig.map((item) => ({ ...item }));
-        const hasTagSearch = Boolean(this.selectedTagFilters.size);
+        const hasTagSearch = Boolean(this.selectedTagFilters.length);
         if (hasTagSearch || (this.searchString && this.searchString.trim().length > 0)) {
           const searchStrNormalized = this.searchString.trim().toLowerCase();
           const tagFilters = Array.from(this.selectedTagFilters).map((tag) => tag.tagValue.toLowerCase());
