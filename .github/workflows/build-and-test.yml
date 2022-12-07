@@ -62,7 +62,7 @@ jobs:
           java-version: '18' # The JDK version to make available on the path.
 
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1
+        uses: s4u/setup-maven-action@v1.6.0
 
       - name: Print Versions
         run: |
