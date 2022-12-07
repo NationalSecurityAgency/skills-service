@@ -63,6 +63,8 @@ jobs:
 
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.6.0
+        with:
+          java-version: '18'
 
       - name: Print Versions
         run: |
