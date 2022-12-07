@@ -59,15 +59,12 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-          .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill3"]')
-          .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-          .click();
-        cy.get('[data-cy="tagSkillBtn"]')
-          .click();
+        cy.get('[data-cy="skillSelect-skill1"]') .click({ force: true });
+        cy.get('[data-cy="skillSelect-skill3"]') .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]') .click();
+        cy.get('[data-cy="tagSkillBtn"]').click();
 
+        cy.get('[data-cy="existingTagDropdown"]').should('not.exist')
         cy.get('[data-cy="newTagInput"]').type('New Tag 1')
         cy.get('[data-cy="addTagsButton"]').click()
 
@@ -75,18 +72,13 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="clearSelectedSkillsBtn"]')
-          .click();
-        cy.get('[data-cy="skillSelect-skill2"]')
-          .click({ force: true });
+        cy.get('[data-cy="clearSelectedSkillsBtn"]').click();
+        cy.get('[data-cy="skillSelect-skill2"]').click({ force: true });
 
-        cy.get('[data-cy="skillActionsBtn"]')
-          .click();
-        cy.get('[data-cy="tagSkillBtn"]')
-          .click();
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="tagSkillBtn"]').click();
 
-        cy.get('[data-cy="existingTagDropdown"]')
-          .click();
+        cy.get('[data-cy="existingTagDropdown"]').click();
         cy.get('[data-cy="existingTagDropdown"] .vs__dropdown-option')
           .eq(0)
           .click()
@@ -312,5 +304,33 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy=newTagInput]').type('{backspace}');
         cy.get('[data-cy="newTagError"]').should('not.be.visible');
         cy.get('[data-cy="addTagsButton"]').should('be.enabled');
+    });
+
+    it('attempt to remove a tag from a skill with no tags', () => {
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillSelect-skill1"]').click({ force: true });
+        cy.get('[data-cy="skillSelect-skill3"]').click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="tagSkillBtn"]').click();
+
+        cy.get('[data-cy="newTagInput"]').type('New Tag 1')
+        cy.get('[data-cy="addTagsButton"]').click()
+
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+
+        cy.get('[data-cy="clearSelectedSkillsBtn"]').click();
+        cy.get('[data-cy="skillSelect-skill2"]').click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="untagSkillBtn"]').click();
+        cy.contains('The selected skills do not have any tags.')
     });
 });

@@ -23,14 +23,16 @@ limitations under the License.
              role="dialog"
              aria-label="'Tag Skills in this project'">
       <b-container fluid>
-        <label for="existingTag">Select Existing Tag</label>
-        <div id="existingTag">
-          <v-select v-model="existingTagValue" :options="existingTags" label="tagValue"
-                    data-cy="existingTagDropdown"
-                    placeholder="Select Tag" v-on:input="existingTagInputChanged" :loading="isLoading">
-          </v-select>
+        <div v-if="hasExistingTags">
+          <label for="existingTag">Select Existing Tag</label>
+          <div id="existingTag">
+            <v-select v-model="existingTagValue" :options="existingTags" label="tagValue"
+                      data-cy="existingTagDropdown"
+                      placeholder="Select Tag" v-on:input="existingTagInputChanged" :loading="isLoading">
+            </v-select>
+          </div>
+          <div class="mt-3" aria-hidden="true"/>
         </div>
-        <div class="mt-3" aria-hidden="true"/>
         <ValidationProvider name="Skill Tags" :debounce=500 v-slot="{errors}" rules="maxSkillTagLength">
           <label for="newTag">Create New Tag</label>
           <b-form-input id="newTag" v-model="newTagValue"
@@ -99,6 +101,12 @@ limitations under the License.
     computed: {
       projectId() {
         return this.$route.params.projectId;
+      },
+      hasExistingTags() {
+        return this.existingTags && this.existingTags.length > 0;
+      },
+      placeHolder() {
+        return this.hasExistingTags ? 'Select Tag' : 'There are no existing tags yet. Please create a new one.';
       },
     },
     methods: {
