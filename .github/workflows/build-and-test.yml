@@ -83,7 +83,10 @@ jobs:
 
   ui-tests-against-h2:
     runs-on: ubuntu-22.04
+    container:
+      image: cypress/browsers:node18.12.0-chrome107
     needs: [build-skills-service-for-ui-tests]
+    name: UI tests against H2
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
