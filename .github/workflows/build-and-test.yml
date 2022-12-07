@@ -61,8 +61,7 @@ jobs:
           distribution: 'temurin'
           java-version: '18' # The JDK version to make available on the path.
 
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.6.0
+      - uses: s4u/setup-maven-action@v1.6.0
         with:
           java-version: '18'
 
@@ -70,19 +69,7 @@ jobs:
         run: |
           mvn --version
           java -version
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: service jar
-          path: ./service/target/
-
-      - name: Prep Services for Cypress tests
-        run: |
-          cd e2e-tests
-          ls
-          npm install
-          npm run cyServices:start
-          cd ..    
+      
 
   build-skills-service-for-ui-tests:
     needs: [pre_job, try-container]
@@ -152,6 +139,10 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '18' # The JDK version to make available on the path.
+
+    - uses: s4u/setup-maven-action@v1.6.0
+      with:
+        java-version: '18'
 
     - name: Print Versions
       run: |
