@@ -28,7 +28,7 @@ limitations under the License.
         </div>
         <div class="w-100"></div>
         <div class="col">
-            {{ subTitle }}
+            <slot>{{ subTitle }}</slot>
         </div>
 
     </div>
