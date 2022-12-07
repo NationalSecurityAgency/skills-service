@@ -82,9 +82,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-h2:
-    runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node18.12.0-chrome107
+    runs-on: ubuntu-20.04
     needs: [build-skills-service-for-ui-tests]
     name: UI tests against H2
     strategy:
@@ -99,7 +97,7 @@ jobs:
 
     steps:
     - name: Install Emoji Support
-      run: apt-get install fonts-noto-color-emoji
+      run: sudo apt-get install fonts-noto-color-emoji
 
     - uses: actions/checkout@v3
 
