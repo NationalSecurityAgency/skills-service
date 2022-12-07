@@ -594,7 +594,6 @@ Badges add another facet to the overall gamification profile and allows you to f
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
                         description: "Create custom tags and attach them to skills.  Tags can be used to help organize or group multiple skills and can be useful for viewing skills in the Client Skills Display as well as metrics.",
-                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
                 ),
         ]
     }
