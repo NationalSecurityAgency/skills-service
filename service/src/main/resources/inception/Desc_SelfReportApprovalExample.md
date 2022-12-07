@@ -1,4 +1,4 @@
-This Skill is an example of the `Self Reporting` feature. Click **I did it** button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue!
+This Skill is an example of the `Self Reporting` feature. Click the `I did it` button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue!
 
 Self Report is a feature that empowers users to mark skills as completed directly in the SkillTree dashboard OR through the embedded Skills Display component. A project administrator can enable `Self Reporting` for a skill, set of skills or even all the skills in a project. Skills that have been configured with Self Reporting expose an `I did it` button, allowing users to self report completion of those skills.
 
@@ -6,7 +6,7 @@ Self Report is a feature that empowers users to mark skills as completed directl
 
 If a skill is configured with Self Reporting type of the `Approval Queue` then points will not be awarded right away but rather go through the simple approval workflow:
 
-1. User click `I did it` button and requests points
+1. User clicks the `I did it` button and requests points
 2. Request appears on the project's Self Report page (see the Screenshot below)
 3. Project administrator approves or reject requests
 
@@ -18,7 +18,7 @@ Approval History tracks:
 * Skill name and skill id
 * Whether request was approved or rejected
 * Requester's and approver's user ids
-* requested and approved/rejected dates
+* Requested and approved/rejected dates
 
 The `Approval History` table can be sorted by all of its columns or filtered by `Skill Name`, `User Id` and/or `Approver Id`.
 

@@ -1,4 +1,4 @@
-Skill Groups is a way to group/organize skills under a subject. Projects are composed of Subjects which are made of either Skills or Skill Groups. A group is a collection of 2 or more skills that you want to keep and achieve together. A group is achieved when all of its skills are fully completed. Alternatively, a group can be configured to only require `N` number of the group's skills.
+Skill Groups are a way to group/organize skills under a subject. Projects are composed of Subjects which are made of either Skills or Skill Groups. A group is a collection of 2 or more skills that you want to keep and achieve together. A group is achieved when all of its skills are fully completed. Alternatively, a group can be configured to only require `N` number of the group's skills.
 
 > **Partial Requirement Example**
 > If let's say a group has `5` skills, you can configure it to only require `3` skills. In this case, when any of the `3` skills under that group are completed then the group achievement is awarded!

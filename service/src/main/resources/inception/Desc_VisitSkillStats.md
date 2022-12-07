@@ -1,12 +1,12 @@
 To earn points please navigate to `Project -> Subject -> Skill -> Metrics`.
 
-Skill Metrics page depicts several metrics and charts including:
+The Skill Metrics page depicts several metrics and charts including:
 
 * **Achieved** \- Number of users that achieved this skill
 * **In Progress** \- Number of Users with some points earned toward the skill
-* **Last Achieved** \- The last time skill was achieved by a user
+* **Last Achieved** \- The last time the skill was achieved by a user
 * **Achievements over time chart** \- number of total users that achieved this skill plotted over time
-* **Skill events time-chart** \- shows number of reported and applied events over time
+* **Skill events time-chart** \- shows the number of reported and applied events over time
     * Only 'applied' events contribute to users' points and achievements.
     * An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.
 

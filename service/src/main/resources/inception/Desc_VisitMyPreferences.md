@@ -1,4 +1,4 @@
-On the Preferences page you can customize you personal dashboard preferences. To navigate to the page
+On the Preferences page you can customize your personal dashboard preferences. To navigate to the page
 
 * Click on the `User Settings` button on the top right
 * Click on the `Settings` option

@@ -1,6 +1,6 @@
 To earn points simply navigate to `Project -> Levels`.
 
-Levels are users' achievement path - the overall goal of the gameified training profile is to encourage users to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
+Levels are users' achievement path - the overall goal of the gamified training profile is to encourage users to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
 
 The Skills dashboard supports two flexible ways to manage levels:
 
@@ -37,11 +37,11 @@ Please Note
 
 > A project must have at least 100 total points defined before this setting can be enabled.
 
-**Empty Project and Subject** \- In the event that a project is switched to points based levels\, any **empty** subjects (subjects with no skills) will have levels defined based on a theoretical points maximum of 1000 e.g., "Level 1" at 100-250 points, "Level 2" at 250-450 points, "Level 3" at 450-670, etc. These values can be easily edited after the configuration change if desired.
+**Empty Project and Subject** - In the event that a project is switched to points based levels\, any **empty** subjects (subjects with no skills) will have levels defined based on a theoretical points maximum of 1000 e.g., "Level 1" at 100-250 points, "Level 2" at 250-450 points, "Level 3" at 450-670, etc. These values can be easily edited after the configuration change if desired.
 
 ## Percentage Based vs. Points Based
 
-So which strategy is right for your application? As always the answer is... it depends 😃!
+So which strategy is right for your application? As always, the answer is... it depends 😃!
 
 The percentage based approach is the easiest to manage - the points are always calculated (and re-calculated) based on the defined percentages. As skills are added, and therefore the overall amount of points goes up, the point requirements for levels are re-calculated.
 

@@ -394,7 +394,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
-                        description: '''We are always looking to improve SkillTree platform and there is no better way to that than as a community. No matter how small or large your feature idea is please do not hesitate to reach out to the SkillTree team! 
+                        description: '''We are always looking to improve SkillTree platform and there is no better way to do that than as a community. No matter how small or large your feature idea is please do not hesitate to reach out to the SkillTree team! 
 ''',
                 ),
                 new SkillRequest(name: "Export to Catalog", skillId: "ExporttoCatalog", subjectId: subjectDashboardId, projectId: inceptionProjectId,

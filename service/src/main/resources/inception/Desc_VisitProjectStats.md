@@ -1,6 +1,6 @@
 To earn points please navigate to `Project -> Metrics`.
 
-Project metrics landing page features high level metrics and the links to specific metrics broken down by users' achievements, subject's insight and skills utilization:
+The project metrics landing page features high level metrics and the links to specific metrics broken down by users' achievements, subject's insight and skills utilization:
 
 * **Achievements** \- browse users' achieved overall levels\, subject level achievements as well as earned badges
 * **Subjects** \- detailed breakdown how users are earning skills under each subject

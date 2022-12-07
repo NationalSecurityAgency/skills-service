@@ -7,12 +7,12 @@ The following training profile elements are copied into the new project:
 * Subjects and their attributes (description, help url, etc..)
 * Skills definitions and their attributes (description, points, self-reporting, etc...)
 * Skill Groups
-* Configured display order subjects and skills is preserved in the copied project
+* Configured display order of subjects and skills is preserved in the copied project
 * Levels
 * Badges
 * Project-Based Dependencies
 * Re-used Skills
-* Project's Settings are copied with the exception of the exclusions specified below
+* Project Settings are copied with the exception of the exclusions specified below
 
 The following training profile elements are **NOT** copied into a new project:
 

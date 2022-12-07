@@ -1,6 +1,6 @@
 SkillTree is a micro-learning gamification platform. It supports an innovative approach to adding *self-directed* gamified training to **an existing web-based application** (or a new application if you are building one now)!
 
-SkillTree Platform enables system owners and developers to:
+The SkillTree Platform enables system owners and developers to:
 
 * Implement gamification training with minimal time and effort (we are talking days!)
 * It provides consistent and innovative solution and it takes the guesswork and maintenance out of implementing gamified user training
