@@ -42,37 +42,9 @@ jobs:
           github_token: ${{ github.token }}
           paths_ignore: '["**/README.md"]'
 
-  try-container:
-    runs-on: ubuntu-22.04
-    container:
-        image: cypress/browsers:node18.12.0-chrome107
-    steps:
-      - name: Install Emoji Support
-        run: apt-get install fonts-noto-color-emoji
-
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '18' # The JDK version to make available on the path.
-
-      - uses: s4u/setup-maven-action@v1.6.0
-        with:
-          java-version: '18'
-
-      - name: Print Versions
-        run: |
-          mvn --version
-          java -version
-      
 
   build-skills-service-for-ui-tests:
-    needs: [pre_job, try-container]
+    needs: [pre_job]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
 
@@ -193,7 +165,7 @@ jobs:
         npm run verifyThatNewSnapshotsAreNotCreated
 
   service-against-postgresql:
-    needs: [pre_job, try-container]
+    needs: [pre_job]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     strategy:
