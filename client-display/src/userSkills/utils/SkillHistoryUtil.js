@@ -18,6 +18,6 @@ import store from '@/store/store';
 
 export default {
     updateSkillHistory(projectId, skillId) {
-        return axios.post(`${store.state.serviceUrl}/api/projects/${projectId}/skills/visited/${skillId}`).then((res) => res.data);
+        return axios.post(`${store.state.serviceUrl}/api/projects/${encodeURIComponent(projectId)}/skills/visited/${encodeURIComponent(skillId)}`).then((res) => res.data);
     },
 };
