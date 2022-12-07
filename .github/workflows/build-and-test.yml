@@ -82,7 +82,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-h2:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
