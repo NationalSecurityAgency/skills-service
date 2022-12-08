@@ -103,10 +103,10 @@ limitations under the License.
             </div>
           </div>
         </div>
-        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && (searchString || Boolean(this.selectedTagFilters.size))" class="my-5"
+        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && (searchString || Boolean(this.selectedTagFilters.length))" class="my-5"
                      icon="fas fa-search-minus fa-5x" title="No results">
           <span v-if="searchString">
-            Please refine [{{searchString}}] search  <span v-if="filterId || Boolean(this.selectedTagFilters.size)">and/or clear the selected filter</span>
+            Please refine [{{searchString}}] search  <span v-if="filterId || Boolean(this.selectedTagFilters.length)">and/or clear the selected filter</span>
           </span>
           <span v-if="!searchString">
            Please clear selected filters
