@@ -1002,48 +1002,21 @@ class SkillsLoader {
     }
 
     @Profile
-    private Map<String, ProjDefWrapper> loadProjDefMap(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints) {
-        Map<String, ProjDefWrapper> projDefMap = [:]
-        // global badges will have a null projDef
-        if (thisProjDef) {
-            Boolean thisProjectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(thisProjDef.projectId) as boolean
-            projDefMap.put(thisProjDef.projectId, new ProjDefWrapper(projDef: thisProjDef, projectHasSkillTags: thisProjectHasSkillTags))
-        }
-        childrenWithPoints.each {
-            String projectId = it.skillDef.projectId
-            if (!projDefMap.containsKey(projectId)) {
-                Boolean projectHasSkillTags  = projectId ? skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean : false
-                ProjDef projDef = projDefRepo.findByProjectId(projectId)
-                projDefMap.put(projectId, new ProjDefWrapper(projDef: projDef, projectHasSkillTags: projectHasSkillTags))
-            }
-        }
-        return projDefMap
-    }
-
-    @Profile
-    List<SkillTag> loadSkillTags(SkillDef skillDef) {
-        List<SkillTag> tags = []
-        skillTagService.getTagsForSkill(skillDef.id)?.each { tag ->
-            tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
-        }
-        return tags
-    }
-
-    @Profile
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
         List<SkillSummaryParent> skillsRes = []
 
-        Map<String, ProjDefWrapper> projDefMap = loadProjDefMap(thisProjDef, childrenWithPoints)
+        Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
             SkillDef skillDef = skillDefAndUserPoints.skillDef
             int points = skillDefAndUserPoints.points
             int todayPoints = skillDefAndUserPoints.todaysPoints
 
             // support skill summaries from other projects
-            ProjDefWrapper projDefWrapper = projDefMap.get(skillDef.projectId)
-            assert projDefWrapper
-            ProjDef projDef = projDefWrapper.projDef
-            Boolean projectHasSkillTags = projDefWrapper.projectHasSkillTags
+            ProjDef projDef = thisProjDef && thisProjDef.projectId == skillDef.projectId ? thisProjDef : projDefMap[skillDef.projectId]
+            if(!projDef){
+                projDef = projDefRepo.findByProjectId(skillDef.projectId)
+                projDefMap[skillDef.projectId] = projDef
+            }
 
             String subjectName = "";
             String subjectId = "";
@@ -1108,7 +1081,7 @@ class SkillsLoader {
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
                         isLastViewed: skillDefAndUserPoints.isLastViewed,
                         badges: skillDefAndUserPoints.badges,
-                        tags: projectHasSkillTags ? loadSkillTags(skillDef) : null,
+                        tags: skillDefAndUserPoints.tags,
                 )
             }
         }
