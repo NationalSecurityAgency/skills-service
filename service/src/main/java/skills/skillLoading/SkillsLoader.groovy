@@ -1003,6 +1003,15 @@ class SkillsLoader {
     }
 
     @Profile
+    List<SkillTag> loadSkillTags(Integer skillRefId) {
+        List<SkillTag> tags = []
+        skillTagService.getTagsForSkill(skillRefId)?.each { tag ->
+            tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
+        }
+        return tags
+    }
+
+    @Profile
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
         List<SkillSummaryParent> skillsRes = []
 
