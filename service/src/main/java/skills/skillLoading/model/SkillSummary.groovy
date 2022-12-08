@@ -42,6 +42,5 @@ class SkillSummary extends SkillSummaryParent {
     Boolean isLastViewed
 
     List<SimpleBadgeRes> badges
-
     List<SkillTag> tags = []
 }

@@ -200,6 +200,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
   import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
@@ -393,6 +394,11 @@ limitations under the License.
       handleActionCompleting() {
         this.state.reUseInProgress = false;
         this.state.reUseComplete = true;
+        if (this.isMoveType) {
+          SkillsReporter.reportSkill('MoveSkill');
+        } else {
+          SkillsReporter.reportSkill('ReuseSkill');
+        }
       },
       selectDestination(selection) {
         this.loading.reusedSkills = true;

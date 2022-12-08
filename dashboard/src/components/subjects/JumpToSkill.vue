@@ -32,6 +32,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SkillsService from '../skills/SkillsService';
   import SkillsSelector2 from '../skills/SkillsSelector2';
 
@@ -63,6 +64,7 @@ limitations under the License.
           name: 'SkillOverview',
           params: { projectId: selectedItem.projectId, subjectId: selectedItem.subjectId, skillId: selectedItem.skillId },
         });
+        SkillsReporter.reportSkill('SearchandNavigatedirectlytoaskill');
       },
     },
   };

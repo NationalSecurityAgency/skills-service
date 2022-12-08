@@ -53,6 +53,7 @@ limitations under the License.
                     @click="copyAndDisplayShareProjInfo"
                     data-cy="shareProjBtn"
                     variant="outline-primary"
+                    v-skills="'ShareProject'"
                     :aria-label="`Share ${project.name} with new users`">
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
