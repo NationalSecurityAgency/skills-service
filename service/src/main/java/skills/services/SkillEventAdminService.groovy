@@ -180,6 +180,8 @@ class SkillEventAdminService {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        def globalBadges = achievedLevelRepo.getAchievedGlobalBadgeForUserIntersectingProjectId(userId, projectId)
+        achievedLevelRepo.deleteAllById(globalBadges)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         return RequestResult.success()
@@ -211,6 +213,11 @@ class SkillEventAdminService {
             related?.each {
                 updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
             }
+        }
+
+        def badges = achievedLevelRepo.getAchievedGlobalBadgeForUserAndSkillIntersectingProjectId(userId, projectId, skillId, new Date(timestamp))
+        if (badges) {
+            achievedLevelRepo.deleteAllById(badges)
         }
 
         RequestResult res = new RequestResult()
