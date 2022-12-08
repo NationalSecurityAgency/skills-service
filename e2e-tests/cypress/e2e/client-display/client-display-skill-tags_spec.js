@@ -221,4 +221,21 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillTagFilter-1"]').should('not.exist');
   });
 
+  it('show tag on skill page', () => {
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1);
+    cy.createSkill(1, 1, 2);
+    cy.createSkill(1, 1, 3);
+
+    cy.addTagToSkills();
+
+    cy.cdVisit('/');
+    cy.cdClickSubj(0);
+    cy.cdClickSkill(0);
+
+    cy.get('[data-cy="skillTags"]').should('exist');
+    cy.get('[data-cy="skillTag-0"]').should('exist');
+  });
+
 });

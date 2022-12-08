@@ -576,6 +576,7 @@ class SkillsLoader {
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
+                tags: loadSkillTags(skillDef.id),
         )
     }
 
@@ -999,6 +1000,15 @@ class SkillsLoader {
     @Profile
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo=false, String userId) {
         return createSkillSummaries(thisProjDef, childrenWithPoints, populateSubjectInfo, userId, null)
+    }
+
+    @Profile
+    List<SkillTag> loadSkillTags(Integer skillRefId) {
+        List<SkillTag> tags = []
+        skillTagService.getTagsForSkill(skillRefId)?.each { tag ->
+            tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
+        }
+        return tags
     }
 
     @Profile

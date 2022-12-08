@@ -81,6 +81,11 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         List tagsForSkills = skillsService.getTagsForSkills(proj.projectId, skillIds)
         List tagsForProject = skillsService.getTagsForProject(proj.projectId)
 
+        def skillWithTag = skillsService.getSingleSkillSummary("user1", proj.projectId, skillIds[1])
+        def skillWithSubjWithTag = skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subj.subjectId, skillIds[1])
+        def skillWithoutTag = skillsService.getSingleSkillSummary("user1", proj.projectId, skillIds[0])
+        def skillWithSubjWithoutTag = skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subj.subjectId, skillIds[0])
+
         then:
         res
         res.success
@@ -95,6 +100,11 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
 
         tagsForProject && tagsForProject.size() == 1 && tagsForProject[0].tagValue == 'New Tag'
         tagsForSkills && tagsForSkills.size() == 1 && tagsForSkills[0].tagValue == 'New Tag'
+
+        skillWithTag.tags.tagValue == [tagValue]
+        skillWithSubjWithTag.tags.tagValue == [tagValue]
+        !skillWithoutTag.tags.tagValue
+        !skillWithSubjWithoutTag.tags.tagValue
     }
 
     void "add multiple tags to some skills"() {
