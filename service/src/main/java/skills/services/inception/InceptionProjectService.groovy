@@ -21,20 +21,24 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
+import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.admin.BadgeAdminService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.SubjAdminService
 import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.storage.model.ProjDef
+import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 
@@ -49,6 +53,12 @@ class InceptionProjectService {
 
     @Autowired
     SubjAdminService subjAdminService
+
+    @Autowired
+    BadgeAdminService badgeAdminService
+
+    @Autowired
+    InceptionBadges inceptionBadges
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -78,6 +88,7 @@ class InceptionProjectService {
         log.info("Context initialized [${event}], checking if Inception skills need to be updated")
         updateSkillsIfNeeded()
         deleteSkillsIfNeeded()
+        createBadgesIfNeeded()
     }
 
     /**
@@ -144,6 +155,7 @@ class InceptionProjectService {
         }
 
         saveSkills()
+        createBadgesIfNeeded()
     }
 
     private void saveSkills() {
@@ -153,6 +165,29 @@ class InceptionProjectService {
         }
 
         saveSkillsMd5Setting()
+    }
+
+    private createBadgesIfNeeded() {
+        ProjDef projDef = projDefRepo.findByProjectId(inceptionProjectId)
+
+        if (projDef) {
+            List<BadgeResult> existingBadges = badgeAdminService.getBadges(inceptionProjectId)
+
+            List<InceptionBadges.BadgeInfo> configuredBadges = inceptionBadges.getBadges()
+            List<InceptionBadges.BadgeInfo> badgesToCreate = configuredBadges.findAll { InceptionBadges.BadgeInfo badgeToConsider ->
+                return !existingBadges.find({ it.badgeId?.equalsIgnoreCase(badgeToConsider.badgeRequest.badgeId) })
+            }
+            badgesToCreate.each {
+                BadgeRequest badgeRequest = it.badgeRequest
+                log.info("Creating badge [{}]", badgeRequest.badgeId)
+                badgeAdminService.saveBadge(inceptionProjectId, badgeRequest.badgeId, badgeRequest,  SkillDef.ContainerType.Badge, false)
+                it.skillIds.each { String skillId ->
+                    badgeAdminService.addSkillToBadge(inceptionProjectId, badgeRequest.badgeId, skillId)
+                }
+                badgeRequest.enabled = Boolean.TRUE.toString()
+                badgeAdminService.saveBadge(inceptionProjectId, badgeRequest.badgeId, badgeRequest,  SkillDef.ContainerType.Badge, false)
+            }
+        }
     }
 
     private void updateSkillsIfNeeded() {

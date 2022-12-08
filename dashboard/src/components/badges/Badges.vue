@@ -255,6 +255,7 @@ limitations under the License.
         BadgesService.updateBadgeDisplaySortOrder(this.projectId, id, updateEvent.newIndex)
           .finally(() => {
             this.sortOrder.loading = false;
+            SkillsReporter.reportSkill('ChangeBadgeDisplayOrder');
           });
       },
     },

@@ -104,6 +104,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import CatalogService from './CatalogService';
 
@@ -176,6 +177,7 @@ limitations under the License.
         CatalogService.bulkExport(this.$route.params.projectId, this.skillsFiltered.map((skill) => skill.skillId))
           .then(() => {
             this.state.exported = true;
+            SkillsReporter.reportSkill('ExporttoCatalog');
           })
           .finally(() => {
             this.state.exporting = false;
