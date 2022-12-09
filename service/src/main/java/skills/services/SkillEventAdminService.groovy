@@ -218,7 +218,7 @@ class SkillEventAdminService {
             }
         }
 
-        def badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
+        ArrayList<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
         if (badgesSkillIsUsedIn) {
             // do a delete
             badgesSkillIsUsedIn.forEach{ it ->
