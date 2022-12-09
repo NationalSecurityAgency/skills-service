@@ -36,6 +36,7 @@ limitations under the License.
           aria-label="Add Tag Value"
           @click="addTagConf"
           data-cy="addTagKeyConfBtn"
+          v-skills="'ConfigureSelfApprovalWorkload'"
           :disabled="!enteredTag || (errors && errors.length > 0)"
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
