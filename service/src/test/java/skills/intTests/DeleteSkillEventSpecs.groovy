@@ -351,7 +351,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         addedSkills?.count == 3
     }
 
-    def "deleting all skill event tied to a global badge will remove the global badges"() {
+    def "deleting a skill event tied to a global badge will remove the global badges"() {
         SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date date = new Date()
@@ -419,10 +419,10 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
 
         then:
         badgesSummary.badgeId == 'badge1'
-        badgesSummary.badgeAchieved == false
         badgesSummary.numSkillsAchieved == 3
         badgesSummary.numTotalSkills == 4
-        addedSkills?.count == 0
+        badgesSummary.badgeAchieved == false
+        addedSkills?.count == 2
     }
 
     def "deleting all skill events will remove any achieved global badges"() {

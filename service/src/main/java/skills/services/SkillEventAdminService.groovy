@@ -89,6 +89,9 @@ class SkillEventAdminService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
 
@@ -215,9 +218,12 @@ class SkillEventAdminService {
             }
         }
 
-        def badges = achievedLevelRepo.getAchievedGlobalBadgeForUserAndSkillIntersectingProjectId(userId, projectId, skillId, new Date(timestamp))
-        if (badges) {
-            achievedLevelRepo.deleteAllById(badges)
+        def badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
+        if (badgesSkillIsUsedIn) {
+            // do a delete
+            badgesSkillIsUsedIn.forEach{ it ->
+                achievedLevelRepo.deleteAllBySkillRefId(it)
+            }
         }
 
         RequestResult res = new RequestResult()
