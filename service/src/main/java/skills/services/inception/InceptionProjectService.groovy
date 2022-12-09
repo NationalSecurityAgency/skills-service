@@ -212,7 +212,7 @@ class InceptionProjectService {
             log.info("Deleting the follow removed Inception skills from the database [{}]", skillIdsToDelete)
             skillIdsToDelete.each { skillIdToDelete ->
                 SkillDefSkinnyRes skillToDelete = existingSkills.find { it.skillId == skillIdToDelete }
-                skillsAdminService.deleteSkill(inceptionProjectId, skillToDelete.subjectId, skillToDelete.skillId)
+                skillsAdminService.deleteSkill(inceptionProjectId, skillToDelete.skillId)
             }
         }
     }

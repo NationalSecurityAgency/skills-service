@@ -234,8 +234,7 @@ class SkillCatalogService {
         ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
         List<SkillDef> related = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
         related?.each {
-            SkillDef subject = relationshipService.getParentSkill(it)
-            skillsAdminService.deleteSkill(it.projectId, subject.skillId, it.skillId)
+            skillsAdminService.deleteSkill(it.projectId, it.skillId)
         }
         exportedSkillRepo.delete(es)
     }
