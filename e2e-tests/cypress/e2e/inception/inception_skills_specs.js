@@ -396,4 +396,157 @@ describe('Inception Skills Tests', () => {
         cy.contains('Skill [Very Great Skill 1] was successfully exported to the catalog!');
         cy.assertInceptionPoints('Dashboard', 'ExporttoCatalog', 50)
     });
+
+    it('configure self report skill - fallback user', () => {
+        const pass = 'password';
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.register('user1', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click({force: true})
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 25)
+    });
+
+    it('configure self report skill - add skill', () => {
+        const pass = 'password';
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.register('user1', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 1');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill1"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
+
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 25)
+    });
+
+    it('configure self report skill - add user', () => {
+        const pass = 'password';
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.reportSkill(1, 1, 'userA', 'now');
+
+        cy.register('user1', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('exist')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userA').click({force: true});
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
+
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 25)
+    });
+
+    it('configure self report skill - add user tag conf', () => {
+        const pass = 'password';
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.reportSkill(1, 1, 'userA', 'now');
+
+        cy.register('user1', pass);
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+
+        const user1 = 'user1'
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noTagKeyConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('First');
+
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 25)
+    });
+
+    it('tag skills', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillSelect-skill1"]')
+            .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"]')
+            .click();
+        cy.get('[data-cy="tagSkillBtn"]')
+            .click();
+
+        cy.get('[data-cy="newTagInput"]').type('New Tag 1')
+
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0, false)
+        cy.get('[data-cy="addTagsButton"]').click()
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
+    });
+
 });

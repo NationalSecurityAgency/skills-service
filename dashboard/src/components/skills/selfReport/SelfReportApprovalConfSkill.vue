@@ -52,6 +52,7 @@ limitations under the License.
           aria-label="Add Tag Value"
           @click="addSkillToConf"
           data-cy="addSkillConfBtn"
+          v-skills="'ConfigureSelfApprovalWorkload'"
           :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
