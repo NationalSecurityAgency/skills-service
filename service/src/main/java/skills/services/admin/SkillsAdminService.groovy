@@ -425,23 +425,16 @@ class SkillsAdminService {
     }
 
     @Transactional
-    void deleteSkill(String projectId, String subjectId, String skillId) {
-        log.debug("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
+    void deleteSkill(String projectId, String skillId) {
+        log.debug("Deleting skill with project id [{}] and skill id [{}]", projectId, skillId)
         SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-        assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
+        assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], skillId=[$skillId]"
 
         if (globalBadgesService.isSkillUsedInGlobalBadge(skillDefinition)) {
             throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
-        SkillDef subject
-        if (parentSkill.type == SkillDef.ContainerType.Subject) {
-            subject = parentSkill
-        } else if (parentSkill.type == SkillDef.ContainerType.SkillsGroup) {
-            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
-        } else {
-            throw new SkillException("Unexpected parent type [${parentSkill.type}]")
-        }
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillDefinition.id)
         if (skillDefinition.type == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> childSkills = ruleSetDefGraphService.getChildrenSkills(skillDefinition, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
             childSkills.each {
@@ -496,8 +489,7 @@ class SkillsAdminService {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
         log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
         related?.each {
-            SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
-            deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
+            deleteSkill(it.projectId, it.skillId)
         }
     }
 
