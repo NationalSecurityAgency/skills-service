@@ -216,6 +216,7 @@ limitations under the License.
         SubjectsService.updateSubjectsDisplaySortOrder(this.projectId, id, updateEvent.newIndex)
           .finally(() => {
             this.sortOrder.loading = false;
+            SkillsReporter.reportSkill('ChangeSubjectDisplayOrder');
           });
       },
     },

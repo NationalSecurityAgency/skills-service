@@ -109,7 +109,7 @@ limitations under the License.
             fields,
             pagination: {
               currentPage: 1,
-              totalRows: 1,
+              totalRows: this.skills.length,
               pageSize: 5,
               possiblePageSizes: [5, 10, 15, 20],
             },

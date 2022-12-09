@@ -725,7 +725,7 @@ class AdminController {
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
-        skillsAdminService.deleteSkill(projectId, subjectId, skillId)
+        skillsAdminService.deleteSkill(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/events", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

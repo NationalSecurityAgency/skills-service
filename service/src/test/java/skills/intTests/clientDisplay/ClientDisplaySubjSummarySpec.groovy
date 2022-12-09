@@ -509,4 +509,49 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         summary.skills[0].badges.size() == 1
 
     }
+
+    def "skill tags are returned for skills and groups"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+        then:
+        summary.skillsLevel == 0
+        summary.skills.size() == 4
+        summary.skills[0..2].every { it.tags.collect { it.tagValue}.contains('A Skill') }
+        summary.skills[0..2].every { it.tags.collect { it.tagValue}.contains('Regular Skill') }
+        !summary.skills[0..2].any { it.tags.collect { it.tagValue}.contains('Group Child Skill') }
+        summary.skills[3].type == 'SkillsGroup'
+        summary.skills[3].children
+        summary.skills[3].children.size() == 3
+        summary.skills[3].children.every { it.tags.collect { it.tagValue}.contains('A Skill') }
+        summary.skills[3].children.every { it.tags.collect { it.tagValue}.contains('Group Child Skill') }
+        !summary.skills[3].children.any { it.tags.collect { it.tagValue}.contains('Regular Skill') }
+    }
 }

@@ -71,6 +71,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import SkillsTable from '@/components/skills/SkillsTable';
@@ -176,6 +177,7 @@ limitations under the License.
             this.loadSkills(true);
             this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
             this.loadFinalizeInfo({ projectId: this.projectId });
+            SkillsReporter.reportSkill('ImportSkillfromCatalog');
           });
       },
       skillsChanged(skill, deleted = false) {

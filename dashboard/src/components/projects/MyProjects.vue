@@ -234,6 +234,7 @@ limitations under the License.
             this.copyProgressModal.copiedProjectId = projectInfo.newProject.projectId;
             this.copyProgressModal.isComplete = true;
             this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
+            SkillsReporter.reportSkill('CopyProject');
           });
       },
       loadProjectsAfterCopy() {

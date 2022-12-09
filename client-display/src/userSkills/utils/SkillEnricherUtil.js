@@ -71,6 +71,7 @@ export default {
             inProgress: skill.points > 0 && skill.points < skill.totalPoints,
             pendingApproval: skill.selfReporting && skill.selfReporting.requestedOn && !skill.selfReporting.rejectedOn,
             belongsToBadge: skill.badges && skill.badges.length > 0,
+            hasTag: skill.tags && skill.tags.length > 0,
         };
         return copy;
     },

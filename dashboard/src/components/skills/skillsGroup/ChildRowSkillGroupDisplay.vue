@@ -107,6 +107,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import SkillsService from '../SkillsService';
   import EditSkill from '../EditSkill';
@@ -292,6 +293,8 @@ limitations under the License.
       saveSkill(skill) {
         const copy = { groupId: this.group.skillId, ...skill };
         this.$refs[`groupSkills_${this.group.skillId}`].skillCreatedOrUpdated(copy);
+        // credit is only given if skill is added to a group
+        SkillsReporter.reportSkill('CreateSkillGroup');
       },
       refreshSubjectState(forceRefresh = false) {
         if (this.group.enabled || forceRefresh) {

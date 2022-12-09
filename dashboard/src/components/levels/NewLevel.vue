@@ -125,7 +125,6 @@ limitations under the License.
                     class="float-right"
                     @click="handleSubmit(saveLevel)"
                     :disabled="invalid"
-                    v-skills="'AddOrModifyLevels'"
                     data-cy="saveLevelButton">
             Save
           </b-button>

@@ -49,11 +49,10 @@ limitations under the License.
       <b-badge v-if="selectedFilter"
                variant="light"
                class="mx-1 py-1 border-info border selected-filter"
-               data-cy="selectedFilter"
-               pill>
+               data-cy="selectedFilter">
         <i :class="selectedFilter.icon" class="ml-1"></i> <span v-html="selectedFilter.html"></span>
         <button type="button" class="btn btn-link p-0" @click="clearSelection" data-cy="clearSelectedFilter">
-          <i class="fas fa-times-circle ml-1" style="font-size: 0.9rem;"></i>
+          <i class="fas fa-times-circle ml-1"></i>
           <span class="sr-only">clear filter</span>
         </button>
       </b-badge>
