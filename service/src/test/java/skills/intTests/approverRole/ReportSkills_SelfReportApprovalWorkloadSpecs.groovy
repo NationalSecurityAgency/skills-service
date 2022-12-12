@@ -517,6 +517,43 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
         emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
     }
 
+    def "1 user tag is configured - reject skill then ask for approval again - notify implicit fallback approver"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSelfReportSkills(5,)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def subj2_skills = SkillsFactory.createSkills(3, 1, 2, 100)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+
+        TestUsers testUsers = createTestUsers(proj, 2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userA)
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.rejectSkillApprovals(proj.projectId, approvals1.data.id, 'This is a rejection message')
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "KeY1"
+        rootUser.saveUserTag(testUsers.userA, userTagKey, ["ABC1"])
+
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[0].userName, userTagKey.toLowerCase(), "abd")
+        skillsService.configureApproverForUserTag(proj.projectId, testUsers.approvers[1].userName, userTagKey.toLowerCase(), "abd")
+
+        List<String> expectedEmails = getEmails([skillsService])
+        when:
+        assert skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], testUsers.userB).body.explanation == "Skill was submitted for approval"
+        List<EmailUtils.EmailRes> emails = WaitFor.waitAndCollectEmails(greenMail, expectedEmails.size() )
+
+        then:
+        emails.collect {it.recipients[0] }.sort() == expectedEmails.sort()
+    }
+
+
     def "1 user tag is configured - notify explicit fallback approvers and admins"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
