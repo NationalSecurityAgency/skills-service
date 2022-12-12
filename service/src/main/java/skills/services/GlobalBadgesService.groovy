@@ -322,9 +322,9 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
-    ArrayList<Integer> globalBadgesSkillIsUsedIn(String projectId, String skillId) {
+    List<Integer> globalBadgesSkillIsUsedIn(String projectId, String skillId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-        ArrayList<Integer> globalBadgeIds = skillRelDefRepo.getGlobalBadgeIdsForSkill(skillDef.id)
+        List<Integer> globalBadgeIds = skillRelDefRepo.getGlobalBadgeIdsForSkill(skillDef.id)
         globalBadgeIds.addAll(skillRelDefRepo.getGlobalBadgeLevelIdsForSkill(projectId))
         return globalBadgeIds
     }
