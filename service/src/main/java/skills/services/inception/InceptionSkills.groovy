@@ -101,7 +101,7 @@ class InceptionSkills {
                 new SkillRequest(name: "Add Project Administrator", skillId: "AddAdmin", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, numPerformToCompletion: 1,
                         description: "Lookup:Desc_AddAdmin.md",
-                        helpUrl: "/dashboard/user-guide/access-management.html"
+                        helpUrl: "/dashboard/user-guide/projects.html#access"
                 ),
                 new SkillRequest(name: "Create Badge", skillId: "CreateBadge", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
@@ -176,6 +176,7 @@ Projects are composed of Subjects which are made of Skills (or Skill Groups) and
                         numPerformToCompletion: 20,
                         description: "Badges add another facet to the overall gamification profile and allow you to further reward your users by awarding these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned." +
                                 "\n\nNavigate to ``Project -> Badges``",
+                        helpUrl: "/dashboard/user-guide/badges.html",
                 ),
                 new SkillRequest(name: "Visit Badge Page", skillId: "VisitSingleBadgePage", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
@@ -201,6 +202,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
                         numPerformToCompletion: 6,
                         description: "Lookup:Desc_VisitProjectDependencies.md",
+                        helpUrl: "/dashboard/user-guide/dependencies.html",
                 ),
                 new SkillRequest(name: "Visit Project Levels", skillId: "VisitProjectLevels", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 10,
@@ -274,12 +276,12 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_VisitProjectErrors.md",
                         helpUrl: "/dashboard/user-guide/issues.html",
                 ),
-                new SkillRequest(name: "Preview Client Display for Project", skillId: "PreviewProjectClientDisplay", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Preview Skills Display for Project", skillId: "PreviewProjectClientDisplay", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         numPerformToCompletion: 4,
                         pointIncrementInterval : 60 * 12,
                         numMaxOccurrencesIncrementInterval: 1,
-                        description: '''The Project Client Display Preview allows a Project Administrator to preview what their training profile will look like to a user. The Project Client Display Preview button is located directly below the Project ID, on the top left when viewing a specific Project in the Dashboard.'''
+                        description: "Lookup:Desc_PreviewProjectClientDisplay.md",
                 ),
                 new SkillRequest(name: 'Visit Contact Users Page', skillId: 'VisitContactUsers', subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,

@@ -137,8 +137,8 @@ class InceptionProjectService {
             ProjectSettingsRequest docRootRequest = new ProjectSettingsRequest()
             docRootRequest.projectId = inceptionProjectId
             docRootRequest.setting = CommonSettings.HELP_URL_ROOT
-            docRootRequest.settingGroup = CommonSettings.INCEPTION_SETTING_GROUP
             docRootRequest.value = docsRootHost
+            docRootRequest.settingGroup = null
             settingsService.saveSetting(docRootRequest)
         }
 
