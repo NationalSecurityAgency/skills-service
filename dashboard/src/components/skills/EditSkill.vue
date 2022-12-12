@@ -372,7 +372,7 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+      this.loadComponentState(this.componentName).then((result) => {
         if (result && (!this.isEdit || (this.isEdit && result.skillId === this.skillId))) {
           this.skillInternal = result;
           this.descriptionLoaded = true;
@@ -431,7 +431,7 @@ limitations under the License.
       skillInternal: {
         handler(newValue) {
           if (this.hasObjectChanged(newValue)) {
-            this.saveStateToLocalStorage(this.componentName, newValue);
+            this.saveComponentState(this.componentName, newValue);
           }
         },
         deep: true,
@@ -468,14 +468,14 @@ limitations under the License.
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
               if (res) {
-                this.clearLocalStorageState(this.componentName);
+                this.clearComponentState(this.componentName);
                 this.hideModal(e);
               }
             });
         } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.clearLocalStorageState(this.componentName);
+          this.clearComponentState(this.componentName);
           this.hideModal(e);
         }
       },

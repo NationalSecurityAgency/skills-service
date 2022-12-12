@@ -199,7 +199,7 @@ limitations under the License.
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
       this.loadingComponent = true;
-      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+      this.loadComponentState(this.componentName).then((result) => {
         if (result) {
           if (!this.isEdit || (this.isEdit && result.badgeId === this.badgeInternal.badgeId)) {
             this.badgeInternal = result;
@@ -234,9 +234,7 @@ limitations under the License.
       },
       badgeInternal: {
         handler(newValue) {
-          if (!this.isEdit) {
-            this.saveStateToLocalStorage(this.componentName, newValue);
-          }
+          this.saveComponentState(this.componentName, newValue);
         },
         deep: true,
       },
@@ -263,14 +261,14 @@ limitations under the License.
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
               if (res) {
-                this.clearLocalStorageState(this.componentName);
+                this.clearComponentState(this.componentName);
                 this.hideModal(e);
               }
             });
         } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.clearLocalStorageState(this.componentName);
+          this.clearComponentState(this.componentName);
           this.hideModal(e);
         }
       },

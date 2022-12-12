@@ -133,7 +133,7 @@ limitations under the License.
       };
       this.loadingComponent = true;
 
-      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+      this.loadComponentState(this.componentName).then((result) => {
         if (result && (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId))) {
           this.internalProject = result;
           this.descriptionLoaded = true;
@@ -186,7 +186,7 @@ limitations under the License.
       },
       internalProject: {
         handler(newValue) {
-          this.saveStateToLocalStorage(this.componentName, newValue);
+          this.saveComponentState(this.componentName, newValue);
         },
         deep: true,
       },
@@ -215,14 +215,14 @@ limitations under the License.
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
               if (res) {
-                this.clearLocalStorageState(this.componentName);
+                this.clearComponentState(this.componentName);
                 this.hideModal(e);
               }
             });
         } else if (this.tooltipShowing && typeof e.preventDefault === 'function') {
           e.preventDefault();
         } else {
-          this.clearLocalStorageState(this.componentName);
+          this.clearComponentState(this.componentName);
           this.hideModal(e);
         }
       },

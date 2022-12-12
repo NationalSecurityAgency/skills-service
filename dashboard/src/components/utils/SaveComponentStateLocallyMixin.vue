@@ -27,13 +27,13 @@ limitations under the License.
       };
     },
     methods: {
-      saveStateToLocalStorage(key, data) {
+      saveComponentState(key, data) {
         set(key, data);
       },
-      loadStateFromLocalStorage(key) {
+      loadComponentState(key) {
         return get(key);
       },
-      clearLocalStorageState(key) {
+      clearComponentState(key) {
         del(key);
       },
       clearAllStorage() {

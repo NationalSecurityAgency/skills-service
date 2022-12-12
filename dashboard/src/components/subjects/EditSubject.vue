@@ -152,7 +152,7 @@ limitations under the License.
       document.addEventListener('focusin', this.trackFocus);
       this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
       this.loadingComponent = true;
-      this.loadStateFromLocalStorage(this.componentName).then((result) => {
+      this.loadComponentState(this.componentName).then((result) => {
         if (result) {
           if (!this.isEdit || (this.isEdit && result.subjectId === this.subjectInternal.subjectId)) {
             this.subjectInternal = result;
@@ -178,7 +178,7 @@ limitations under the License.
       },
       subjectInternal: {
         handler(newValue) {
-          this.saveStateToLocalStorage(this.componentName, newValue);
+          this.saveComponentState(this.componentName, newValue);
         },
         deep: true,
       },
@@ -210,14 +210,14 @@ limitations under the License.
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
               if (res) {
-                this.clearLocalStorageState(this.componentName);
+                this.clearComponentState(this.componentName);
                 this.hideModal(e);
               }
             });
         } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.clearLocalStorageState(this.componentName);
+          this.clearComponentState(this.componentName);
           this.hideModal(e);
         }
       },
