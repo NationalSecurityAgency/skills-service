@@ -137,17 +137,14 @@ limitations under the License.
                   v-on:input="updateActionsDisableStatus"
                   :data-cy="`skillSelect-${data.item.skillId}`"
                 >
-                    <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                    params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
-                               :aria-label="`Manage skill ${data.item.name}  via link`">
-                    <div class="h5 d-inline-block"><show-more :text="data.item.nameHtml ? data.item.nameHtml : data.item.name" :limit="45" :contains-html="!!data.item.nameHtml" /></div>
-                  </router-link>
+                  <skill-name-router-link :skill="data.item" :subject-id="subjectId"/>
                   <div v-if="data.item.sharedToCatalog" class="h6 ml-2 d-inline-block" :data-cy="`exportedBadge-${data.item.skillId}`">
                     <b-badge variant="secondary" class="text-uppercase">
                       <span><i class="fas fa-book"></i> Exported</span>
                     </b-badge>
                   </div>
                 </b-form-checkbox>
+                <skill-name-router-link v-if="!data.item.isCatalogImportedSkills && isReadOnlyProj" :skill="data.item" :subject-id="subjectId"/>
                 <div class="d-inline-block" v-if="data.item.isCatalogImportedSkills">
                   <router-link :data-cy="`manageSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
                                       params: { projectId: data.item.projectId, subjectId: subjectId, skillId: data.item.skillId }}"
@@ -402,6 +399,7 @@ limitations under the License.
   import ShowMore from '@/components/skills/selfReport/ShowMore';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import TableStateUtil from '@/components/utils/TableStateUtil';
+  import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink';
 
   const subjects = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
@@ -456,6 +454,7 @@ limitations under the License.
       },
     },
     components: {
+      SkillNameRouterLink,
       SkillRemovalValidation,
       ReuseOrMoveSkillsModal,
       AddSkillTag,

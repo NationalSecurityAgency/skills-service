@@ -215,9 +215,27 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="orderMoveUp_skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="orderMoveUp_skill2"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="orderMoveUp_skill3"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1')
         }
         runCheck(2)
         runCheck(1, 'View','not.')
+    });
+
+    it('name link from skills page down to skill page works', function () {
+        const runCheck = () => {
+            cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1')
+            cy.get('[data-cy="nameCell_skill2"]').contains('Very Great Skill 2')
+            cy.get('[data-cy="nameCell_skill3"]').contains('Very Great Skill 3')
+            cy.get('[data-cy="manageSkillLink_skill2"]').click();
+            cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').should('have.text', 'ID: skill2');
+        };
+
+        cy.visit(`/administrator/projects/proj1/subjects/subj1`);
+        runCheck()
+
+        cy.visit(`/administrator/projects/proj2/subjects/subj1`);
+        runCheck()
     });
 
     it('/subj/users page - approver role has no mutation controls', function () {
