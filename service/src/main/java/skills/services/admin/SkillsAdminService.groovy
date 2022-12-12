@@ -564,12 +564,10 @@ class SkillsAdminService {
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefPartial> res
-        if (!includeGroupChildren) {
-            res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
-        } else {
-            res = nativeQueriesRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
-        }
+        List<SkillRelDef.RelationshipType> relationshipTypes = includeGroupChildren ?
+                [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject] :
+                [SkillRelDef.RelationshipType.RuleSetDefinition]
+        List<SkillDefPartial> res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId, relationshipTypes)
 
         Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
         return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })

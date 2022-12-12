@@ -476,8 +476,8 @@ class SkillsService {
         wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 
-    def getSkillsForSubject(String projectId, String subjectId) {
-        wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills")
+    def getSkillsForSubject(String projectId, String subjectId, boolean includeGroupSkills = false) {
+        wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills?includeGroupSkills=${includeGroupSkills}")
     }
 
     def getSkillsForGroup(String projectId, String groupId) {
