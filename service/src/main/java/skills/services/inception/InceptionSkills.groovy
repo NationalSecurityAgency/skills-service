@@ -593,7 +593,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "Create custom tags and attach them to skills.  Tags can be used to help organize or group multiple skills and can be useful for viewing skills in the Client Skills Display as well as metrics.",
+                        description: "Lookup:Desc_AddOrModifyTags.md",
                         helpUrl: "/dashboard/user-guide/skills.html#skill-tags",
                 ),
                 new SkillRequest(name: "Configure Self Approval Workload", skillId: "ConfigureSelfApprovalWorkload", subjectId: subjectSkillsId, projectId: inceptionProjectId,
