@@ -215,7 +215,8 @@ class SelfReportingService {
                             requestMsg    : requestMsg,
                             projectId     : skillDefinition.projectId,
                             publicUrl     : publicUrl,
-                            projectName   : projDef.name
+                            projectName   : projDef.name,
+                            replyTo       : userAttrs?.email,
                     ],
             )
             notifier.sendNotification(request)

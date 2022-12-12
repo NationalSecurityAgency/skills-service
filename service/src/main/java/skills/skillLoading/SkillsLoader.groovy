@@ -28,11 +28,9 @@ import org.springframework.data.util.Pair
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
-import skills.auth.SkillsAuthorizationException
-import skills.auth.UserInfo
-import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
-import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
@@ -40,6 +38,7 @@ import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
+import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.ClientPrefKey
@@ -143,6 +142,9 @@ class SkillsLoader {
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
+
+    @Autowired
+    SkillTagService skillTagService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -502,6 +504,9 @@ class SkillsLoader {
         if(subjectId && !isCrossProjectSkill) {
             List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
             def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
+            if (!currentSkill) {
+                throw new SkillException("Provided skill id [${skillId}] des not exist under subject [${subjectId}]", projectId, skillId, ErrorCode.BadParam)
+            }
             def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
             orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
             totalSkills = orderedGroup.size();
@@ -571,6 +576,7 @@ class SkillsLoader {
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
+                tags: loadSkillTags(skillDef.id),
         )
     }
 
@@ -997,6 +1003,15 @@ class SkillsLoader {
     }
 
     @Profile
+    List<SkillTag> loadSkillTags(Integer skillRefId) {
+        List<SkillTag> tags = []
+        skillTagService.getTagsForSkill(skillRefId)?.each { tag ->
+            tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
+        }
+        return tags
+    }
+
+    @Profile
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
         List<SkillSummaryParent> skillsRes = []
 
@@ -1076,6 +1091,7 @@ class SkillsLoader {
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,
                         isLastViewed: skillDefAndUserPoints.isLastViewed,
                         badges: skillDefAndUserPoints.badges,
+                        tags: skillDefAndUserPoints.tags,
                 )
             }
         }
@@ -1161,6 +1177,11 @@ class SkillsLoader {
                     .build()
         }
         return skillDef
+    }
+
+    static class ProjDefWrapper {
+        ProjDef projDef
+        Boolean projectHasSkillTags
     }
 
 }

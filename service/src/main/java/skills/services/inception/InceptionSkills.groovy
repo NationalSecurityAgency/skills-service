@@ -15,7 +15,11 @@
  */
 package skills.services.inception
 
-
+import groovy.util.logging.Slf4j
+import org.apache.commons.io.IOUtils
+import org.springframework.core.io.Resource
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import org.springframework.core.io.support.ResourcePatternResolver
 import org.springframework.stereotype.Component
 import skills.controller.request.model.SkillRequest
 import skills.storage.model.SkillDef
@@ -23,7 +27,20 @@ import skills.storage.model.SkillDef
 import static skills.services.inception.InceptionProjectService.*
 
 @Component
+@Slf4j
 class InceptionSkills {
+
+    private Map<String,String> loadDescFileLookup() {
+        ResourcePatternResolver scanner = new PathMatchingResourcePatternResolver()
+        Resource[] resources = scanner.getResources("classpath*:/inception/*.md")
+        log.debug("Found [{}] inception descriptions", resources)
+        Map<String,String> descLookup = [:]
+        for (Resource r : resources) {
+            String desc = IOUtils.toString(r.getInputStream(), "UTF-8")
+            descLookup[r.filename] = desc
+        }
+        return descLookup;
+    }
 
     List<SkillRequest> getAllSkills() {
         List<SkillRequest> res = []
@@ -33,6 +50,25 @@ class InceptionSkills {
 
         res.each {
             it.enabled = "true"
+        }
+
+        Map<String,String> descLookup = loadDescFileLookup()
+        List<String> mappedDescriptions = []
+        res.each {
+            if (it.description?.startsWith("Lookup:")) {
+                String fileToLookup = it.description.split(":")[1]
+                String desc = descLookup.get(fileToLookup)
+                if (!desc) {
+                    throw new IllegalStateException("The following file must exist in src/main/resources/inception/${fileToLookup}")
+                }
+                it.description = desc
+                log.info("Assigned description for skill [{}] from file [{}]", it.skillId, fileToLookup)
+                mappedDescriptions.add(fileToLookup)
+            }
+        }
+        Set<String> descFilesNotMapped = descLookup.findAll { !mappedDescriptions.contains(it.key)}.keySet()
+        if (descFilesNotMapped) {
+            throw new IllegalStateException("There are files that are NOT mapped to a description in ${this.class.simpleName}: ${descFilesNotMapped}")
         }
 
         return res
@@ -47,36 +83,31 @@ class InceptionSkills {
         return [
                 new SkillRequest(name: "Create Project", skillId: "CreateProject", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20, numPerformToCompletion: 2,
-                        description: "Project is an overall container that represents skills' ruleset for a single application with gamified training. " +
-                                "Project's administrator(s) manage training skills definitions, subjects, levels, dependencies and other attributes " +
-                                "that make up an application's training profile. To create a project click the 'Project +' button.",
+                        description: "Lookup:Desc_CreateProject.md",
                         helpUrl: "/dashboard/user-guide/projects.html"
                 ),
                 new SkillRequest(name: "Create Subject", skillId: "CreateSubject", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 0, // disable Time Window
                         numPerformToCompletion: 3,
-                        description: "Subjects are a way to group and organize skill definitions within a training profile. To create a subject navigate to ``Project -> Subjects`` and then click the ``Subject +`` button.",
+                        description: "Lookup:Desc_CreateSubject.md",
                         helpUrl: "/dashboard/user-guide/subjects.html"
                 ),
                 new SkillRequest(name: "Configure Root Help Url", skillId: "ConfigureProjectRootHelpUrl", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
-                        description: "Configure project's 'Root Help Url' by navigating to ``Project -> Settings```. " +
-                                "Skill definition's `Help Url/Path` will be treated as relative to this `Root Help Url`.",
+                        description: "Lookup:Desc_ConfigureProjectRootHelpUrl.md",
                         helpUrl: "/dashboard/user-guide/projects.html#settings"
                 ),
                 new SkillRequest(name: "Add Project Administrator", skillId: "AddAdmin", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, numPerformToCompletion: 1,
-                        description: "Add another project administrator under ``Project -> Access`` so you don't get too lonely.",
+                        description: "Lookup:Desc_AddAdmin.md",
                         helpUrl: "/dashboard/user-guide/access-management.html"
                 ),
                 new SkillRequest(name: "Create Badge", skillId: "CreateBadge", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 0, // disable Time Window
                         numPerformToCompletion: 5,
-                        description: "Badges add another facet to the overall gamificaiton profile and provide a mechanism to further reward your users by awarding these prestigious symbols. " +
-                                "Badges are a collection of skills and when all of the skills are accomplished that badge is earned. " +
-                                "To create a badge navigate to ``Project -> Badges`` and then click  ``Badge +`` button.",
+                        description: "Lookup:Desc_CreateBadge.md",
                         helpUrl: "/dashboard/user-guide/badges.html"
                 ),
                 new SkillRequest(name: "Create Gem", skillId: "CreateGem", subjectId: subjectProjectId, projectId: inceptionProjectId,
@@ -103,37 +134,40 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "A Project is composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. Subjects are a way to group and organize skill definitions within a gamified training profile. " +
-                                "\n\nNavigate to ``Project -> Subjects``",
+                        description: "Lookup:Desc_VisitSubjects.md",
+                        helpUrl: "/dashboard/user-guide/subjects.html"
                 ),
                 new SkillRequest(name: "Visit Subject's Skills", skillId: "VisitSkillsForASubject", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 30,
-                        description: "Navigate to ``Project -> Subjects -> Subject``",
-                        helpUrl: "/dashboard/user-guide/subjects.html"
+                        description: '''Navigate to `Project -> Subjects -> Subject`
+
+Projects are composed of Subjects which are made of Skills (or Skill Groups) and a single skill defines a training unit within the gamification framework. To complete a skill, users may need to perform the same action multiple times - repetition is important for retention after all. A Skill definition specifies how many times a skill has to be performed. Each occurrence is called a Skill Event.''',
+                        helpUrl: "/dashboard/user-guide/subjects.html",
                 ),
                 new SkillRequest(name: "Visit Subject Levels", skillId: "VisitSubjectLevels", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
                         numPerformToCompletion: 2,
-                        description: "Navigate to ``Project -> Subjects -> Subject -> Levels``",
+                        description: "Lookup:Desc_VisitSubjectLevels.md",
+                        helpUrl: "/dashboard/user-guide/levels.html",
                 ),
                 new SkillRequest(name: "Visit Subject Users", skillId: "VisitSubjectUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
                         numPerformToCompletion: 2,
-                        description: "Navigate to ``Project -> Subjects -> Subject -> Users``",
+                        description: "Lookup:Desc_VisitSubjectUsers.md",
                 ),
                 new SkillRequest(name: "Visit Subject Metrics", skillId: "VisitSubjectMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 4 per day
                         numPerformToCompletion: 2,
-                        description: "Navigate to ``Project -> Subjects -> Subejct -> Metrics``",
+                        description: "Lookup:Desc_VisitSubjectMetrics.md",
                 ),
                 new SkillRequest(name: "Visit Badges", skillId: "VisitBadges", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
@@ -148,139 +182,97 @@ class InceptionSkills {
                         pointIncrementInterval: 60 * 24, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "Navigate to ``Project -> Badges -> Badge``",
+                        description: '''To earn points please navigate to `Project -> Badges -> Badge`.
+
+Badges add another facet to the overall gamification profile and allows you to further reward your users by providing these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned.
+''',
+                        helpUrl: "/dashboard/user-guide/badges.html",
                 ),
                 new SkillRequest(name: "Visit Badge Users", skillId: "VisitBadgeUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 20,
-                        description: "Navigate to ``Project -> Badges -> Badge -> Users``",
+                        description: "Lookup:Desc_VisitBadgeUsers.md",
                 ),
                 new SkillRequest(name: "Visit Project Dependencies", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
                         numPerformToCompletion: 6,
-                        description: '''## Project Dependencies
-
-Dependencies add another facet to the overall gamification profile, which forces users to complete skills in a specified order. If you set up `Skill A` to depend on the completion of `Skill B` then no points will be awarded toward `Skill A` until `Skill B` is fully accomplished.
-
-![image.png](data:image/png;base64,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)
-Keep in mind that `Skill B` must be *fully* completed first before *any* points will be awarded toward `Skill A`.
-
-To add a dependency navigate to `Project -> Subject -> Skill -> Dependencies`
-
-## Cross-Project Dependencies
-
-Dependencies Page also hosts Cross-Project Dependencies management which facilitates cross-application training and enables users to become domain experts across several applications. These dependencies are critical when actions are required to be performed in more than one tool in order to complete a task.
-
-Navigate to `Project -> Dependencies`
-
-To create a cross-project skill:
-
-1. In `Project A` navigate to `Project -> Dependencies`
-2. Scroll down to the `Can be added as dependencies in other Projects` section
-3. Select skill to share with other projects, for example, `Skill A` is selected
-4. Select which project to share the skill with *OR* share will all projects, click `Share` button
-    * for example, `Skill A` is shared with `Project B`
-5. In `Project B` navigate to `Project -> Dependencies`, you will see that `Skill A` was shared with this project under `Can be added as dependencies to your Skills` section
-6. Now in `Project B` `Skill A` can be added as a dependency to any local skills using `Project -> Subject -> Skill -> Dependencies`
-
-## Best practices
-
-* Do not create very complex dependency chains - a simple, direct and shallow dependency chain/tree is the best approach.
-* Use dependencies sparingly, they complicate the training profile and may confuse users.
-''',
+                        description: "Lookup:Desc_VisitProjectDependencies.md",
                 ),
                 new SkillRequest(name: "Visit Project Levels", skillId: "VisitProjectLevels", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: '''Levels are users' achievement path - the overall goal of the gamified training profile is to encourage users to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
-
-The Skills dashboard supports two flexible ways to manage levels:
-
-- **Percentage Based (default)**: Each level is defined as a percentage of overall points and the actual level's point range is calculated based on that percentage.
-- **Point based**: Level's from and to points are configured explicitly.
-
-To achieve these points navigate to ``Project -> Levels``''',
+                        description: "Lookup:Desc_VisitProjectLevels.md",
                 ),
                 new SkillRequest(name: "Visit Project Users", skillId: "VisitProjectUsers", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
                         numPerformToCompletion: 5,
-                        description: "Navigate to ``Project -> Users``",
+                        description: "Lookup:Desc_VisitProjectUsers.md",
                 ),
                 new SkillRequest(name: "Visit Project Metrics", skillId: "VisitProjectStats", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
                         numPerformToCompletion: 5,
-                        description: "Navigate to ``Project -> Metrics``",
+                        description: "Lookup:Desc_VisitProjectStats.md",
                 ),
-
-
                 new SkillRequest(name: "Visit Project's Achievements Metrics", skillId: "VisitProjectUserAchievementMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
                         numPerformToCompletion: 5,
-                        description: "Explore metrics about achievements such as skills, levels and badges. Navigate to ``Project -> Metrics -> Achievements``",
+                        description: "Lookup:Desc_VisitProjectUserAchievementMetrics.md",
                 ),
                 new SkillRequest(name: "Visit Project's Subjects Metrics", skillId: "VisitProjectSubjectMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
                         numPerformToCompletion: 5,
-                        description: "View and compare usage pivoted by subjects. Navigate to ``Project -> Metrics -> Subjects``",
+                        description: "Lookup:Desc_VisitProjectSubjectMetrics.md",
                 ),
                 new SkillRequest(name: "Visit Project's Skill Metrics", skillId: "VisitProjectSkillMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
                         numPerformToCompletion: 5,
-                        description: "Provide skills metrics at the project level. Highlights overlooked skills and skills with high utilization. To earn points please navigate to ``Project -> Metrics -> Skills``",
+                        description: "Lookup:Desc_VisitProjectSkillMetrics.md",
                 ),
-                new SkillRequest(name: "Visit Project's User Tag Metrics", skillId: "VisitUserTagMetrics", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 5,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 2, // up-to 2 per day
-                        numPerformToCompletion: 5,
-                        description: "View user metrics for a specific user tag value. To earn points please navigate to ``Project -> Metrics -> then click on a user tag value``",
-                ),
-
                 new SkillRequest(name: "Visit Project Settings", skillId: "VisitProjectSettings", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: "Navigate to ``Project -> Settings``",
+                        description: "Lookup:Desc_VisitProjectSettings.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#settings",
                 ),
                 new SkillRequest(name: "Visit Project Access Management", skillId: "VisitProjectAccessManagement", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         numPerformToCompletion: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
-                        description: "Navigate to ``Project -> Settings``",
+                        description: "Lookup:Desc_VisitProjectAccessManagement.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#access",
                 ),
                 new SkillRequest(name: "Visit Self Report Approval Page", skillId: "VisitSelfReport", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         numPerformToCompletion: 1,
-                        description: '''Project administrators can enable self-reporting when creating or editing a skill. Self reporting can be configured as either:
-- `Honor System`: Points are awarded immediately
-- `Approval`: Approval is required - a project admin can either approve or reject point requests
-                        
-Approval requests can be located on the ``Self Report`` page, navigate to ``Project -> Self Report`` ''',
+                        description: "Lookup:Desc_VisitSelfReport.md",
+                        helpUrl: "/dashboard/user-guide/self-reporting.html#self-reporting",
                 ),
                 new SkillRequest(name: "Visit Project Issues Page", skillId: "VisitProjectErrors", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
                         numPerformToCompletion: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
-                        description: '''Issues page documents any errors or warnings that require a project administrator's attention. Navigate to ``Project -> Issues`` ''',
+                        description: "Lookup:Desc_VisitProjectErrors.md",
+                        helpUrl: "/dashboard/user-guide/issues.html",
                 ),
                 new SkillRequest(name: "Preview Client Display for Project", skillId: "PreviewProjectClientDisplay", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 15,
@@ -294,8 +286,35 @@ Approval requests can be located on the ``Self Report`` page, navigate to ``Proj
                         numPerformToCompletion: 2,
                         pointIncrementInterval: 60 * 12,
                         numMaxOccurrencesIncrementInterval: 1,
-                        description: '''The Contact Users Page allows a Project Administrator to email the users of a Project by employing a variety of different filters to select all or some of the Project users.'''
-                )
+                        description: "Lookup:Desc_VisitContactUsers.md",
+                        helpUrl: "/dashboard/user-guide/contact-project-users.html"
+                ),
+                new SkillRequest(name: 'Copy Project', skillId: 'CopyProject', subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_CopyProject.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#copy-project"
+                ),
+                new SkillRequest(name: 'Share Project', skillId: 'ShareProject', subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ShareProject.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#share-project"
+                ),
+                new SkillRequest(name: 'Change Subject Display Order', skillId: 'ChangeSubjectDisplayOrder', subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12,
+                        numMaxOccurrencesIncrementInterval: 1,
+                        description: "Lookup:Desc_ChangeSubjectDisplayOrder.md",
+                ),
+                new SkillRequest(name: 'Change Badge Display Order', skillId: 'ChangeBadgeDisplayOrder', subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12,
+                        numMaxOccurrencesIncrementInterval: 1,
+                        description: "Lookup:Desc_ChangeBadgeDisplayOrder.md",
+                ),
 
         ]
     }
@@ -307,19 +326,13 @@ Approval requests can be located on the ``Self Report`` page, navigate to ``Proj
                         pointIncrementInterval: 60*12,
                         numMaxOccurrencesIncrementInterval: 5,
                         numPerformToCompletion: 20,
-                        description: "The SkillTree dashboard gamifies training for the dashboard itself and we call it **Inception**. " +
-                                "All the dashboard users will have a button on the top right of the application which navigates to your skills profile. " +
-                                "This button will also display your current level standing.",
+                        description: "Lookup:Desc_VisitDashboardSkills.md",
                         helpUrl: "/dashboard/user-guide/inception.html"
                 ),
-                new SkillRequest(name: "Add or Modify Levels", skillId: "AddOrModifyLevels", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Learn About Level Management", skillId: "AddOrModifyLevels", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50, numPerformToCompletion: 1,
-                        description: '''Levels are users' achievement path - the overall goal of application usage is to achieve the highest level. Levels are tracked for the entire project as well as for each subject which provides users many ways to progress forward.
-Skills dashboard supports two flexible ways to manage levels:
-* `Percentage Based (default)`: Each level is defined as a percentage of overall points and the actual level's point range is calculated based on the percentage.
-* `Point based`: Level's from and to points are configured explicitly.
-
-To achieve this skill simply study the available percentage based and point-based strategy and make modifications to levels as needed.'''.toString(),
+                        description: "Lookup:Desc_AddOrModifyLevels.md",
+                        selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
                         helpUrl: "/dashboard/user-guide/levels.html",
                 ),
                 new SkillRequest(name: "Visit User Settings", skillId: "VisitUserSettings", subjectId: subjectDashboardId, projectId: inceptionProjectId,
@@ -329,42 +342,73 @@ To achieve this skill simply study the available percentage based and point-base
                 new SkillRequest(name: "Visit Client Display", skillId: "VisitClientDisplay", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
-                        numPerformToCompletion: 50,
-                        description: '''You can see what the skills profile and progress display would like for a particular user by navigating to a specific user page ``Project -> Users -> Select a User -> Client Display``. 
-This is the same exact pluggable Skills Display that you would be embedding into your application so it can serve as a preview of what the user will see.  
-
-Client display will depict project skills profile and users points at that exact moment. We suggest you often visit the Skills Display view while building a skill profile to better understand what the gamificaiton profile and progress will look like to your users. 
-'''.toString(),
+                        numMaxOccurrencesIncrementInterval: 3, // up-to 25 per day
+                        numPerformToCompletion: 5,
+                        description: "Lookup:Desc_VisitClientDisplay.md",
                         helpUrl: "/dashboard/user-guide/users.html#skills-display-client-display"
-                ),
-                new SkillRequest(name: "Visit Client Display for Earlier Version", skillId: "VisitClientDisplayForEarlierVersion", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 20,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
-                        numPerformToCompletion: 1,
-                        description: "If your gamification profile is utilizing Skills Versioning then you can view what the Skills Display would look like for a specific version by selecting a different version in the drop-down located on the top-right of the page.",
-                        helpUrl: "/dashboard/user-guide/users.html#skills-display-client-display",
                 ),
                 new SkillRequest(name: "Visit User Performed Skills", skillId: "VisitUserPerformedSkills", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
                         numPerformToCompletion: 2,
-                        description: "To see a history of user's performed skill events please visit ``Project -> Users -> Select a User -> Performed Skills``. Furthermore you have the ability to remove individual skill events if needed.",
+                        description: "Lookup:Desc_VisitUserPerformedSkills.md",
                         helpUrl: "/dashboard/user-guide/users.html#performed-skills"
-                ),
-                new SkillRequest(name: "Visit Markdown Documentation", skillId: "VisitMarkdownDocs", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 10,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 25 per day
-                        numPerformToCompletion: 2,
-                        description: "Descriptions support markdown for subjects and skills. When creating a subject or a skill, the description field has a link to the markdown documentation.",
                 ),
                 new SkillRequest(name: "Visit My Preferences Page", skillId: "VisitMyPreferences", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 10,
                         numPerformToCompletion: 1,
-                        description: "On the Preferences page you can customize you personal dashboard preferences. To navigate to the page\n\n- Click on the ``User Settings`` button on the top right\n- Click on the ``Settings`` option\n- Navigate to the ``Preferences`` tab",
+                        description: "Lookup:Desc_VisitMyPreferences.md",
+                ),
+                new SkillRequest(name: "Share SkillTree Success Story", skillId: "ShareSkillTreeSuccessStory", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 150,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        justificationRequired: Boolean.TRUE.toString(),
+                        description: "Lookup:Desc_ShareSkillTreeSuccessStory.md",
+                ),
+                new SkillRequest(name: "Spread the Word or Teach", skillId: "SpreadtheWordorTeach", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 100,
+                        numPerformToCompletion: 3,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        justificationRequired: Boolean.TRUE.toString(),
+                        description: "Lookup:Desc_SpreadtheWordorTeach.md",
+                ),
+                new SkillRequest(name: "Suggest Tool Integration", skillId: "SuggestToolIntegration", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 150,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        justificationRequired: Boolean.TRUE.toString(),
+                        description: "Lookup:Desc_SuggestToolIntegration.md",
+                        helpUrl: "/skills-client/"
+                ),
+                new SkillRequest(name: "Suggest a Feature", skillId: "SuggestFeature", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        description: '''We are always looking to improve SkillTree platform and there is no better way to do that than as a community. No matter how small or large your feature idea is please do not hesitate to reach out to the SkillTree team! 
+''',
+                ),
+                new SkillRequest(name: "Export to Catalog", skillId: "ExporttoCatalog", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ExporttoCatalog.md",
+                        helpUrl: "/dashboard/user-guide/skills-catalog.html",
+                ),
+                new SkillRequest(name: "Project Access Options", skillId: "ProjectAccessOptions", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
+                        description: "Lookup:Desc_ProjectAccessOptions.md",
+                        helpUrl: "/dashboard/user-guide/projects.html#access",
                 ),
         ]
     }
@@ -376,44 +420,35 @@ Client display will depict project skills profile and users points at that exact
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 25, // up-to 25 per day
                         numPerformToCompletion: 50,
-                        description: '''Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework. 
-To complete a skill users may need to perform the same action multiple times - repetition is important for retention after all. 
-A Skill definition specifies how many times a skill has to be performed and each occurrence is called a Skill Event. 
-To create a skill, navigate to a subject and then click the ``Skill +`` button.''',
+                        description: "Lookup:Desc_CreateSkill.md",
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         numPerformToCompletion: 5,
-                        description: "When `Time Window` is disabled skill events are applied immediately.",
-                        helpUrl: "/dashboard/user-guide/skills.html"
+                        description: "Lookup:Desc_CreateSkillDisabledTimeWindow.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#time-window"
                 ),
                 new SkillRequest(name: "Create Skill with Max Occurrences Within Time Window", skillId: "CreateSkillMaxOccurrencesWithinTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         numPerformToCompletion: 5,
-                        description: "Used in conjunction with the `Time Window` property; Once this `Max Occurrences` is reached, points will not be incremented until outside of the configured `Time Window`.",
-                        helpUrl: "/dashboard/user-guide/skills.html"
+                        description: "Lookup:Desc_CreateSkillMaxOccurrencesWithinTimeWindow.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#time-window",
                 ),
                 new SkillRequest(name: "Create Skill with Help Url", skillId: "CreateSkillHelpUrl", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 5, // up-to 1 per day
                         numPerformToCompletion: 10,
-                        description: "URL pointing to a help article providing further information about this skill or capability. Please note that this property works in conjunction with the Root Help Url project setting.",
+                        description: "Lookup:Desc_CreateSkillHelpUrl.md",
                         helpUrl: "/dashboard/user-guide/skills.html"
-                ),
-                new SkillRequest(name: "Create Skills with multiple versions", skillId: "CreateSkillVersion", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 25,
-                        numPerformToCompletion: 1,
-                        description: "Skill versioning is a mechanism that allows the addition of new skills without affecting existing software running with an older skill profile. Versioning is mostly pertinent to the Display Libraries that visualize the skill profile for the version they were declared with.",
-                        helpUrl: "/dashboard/user-guide/skills.html#skills-versioning"
                 ),
                 new SkillRequest(name: "Visit Skill Overview", skillId: "VisitSkillOverview", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 2,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
                         numPerformToCompletion: 30,
-                        description: "Visit ``Skill Overview``. Navigate to ``Project -> Subject -> Skill -> Overview``",
+                        description: "Lookup:Desc_VisitSkillOverview.md",
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
                 new SkillRequest(name: "Visit Skill Dependencies", skillId: "VisitSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -421,7 +456,7 @@ To create a skill, navigate to a subject and then click the ``Skill +`` button.'
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
                         numPerformToCompletion: 6,
-                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished. Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. Navigate to ``Project -> Subject -> Skill -> Dependencies``",
+                        description: "Lookup:Desc_VisitSkillDependencies.md",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
                 new SkillRequest(name: "Visit Skill Users", skillId: "VisitSkillUsers", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -429,31 +464,28 @@ To create a skill, navigate to a subject and then click the ``Skill +`` button.'
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
-                        description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Users``",
-                        helpUrl: "/dashboard/user-guide/users.html"
+                        description: "Lookup:Desc_VisitSkillUsers.md",
                 ),
                 new SkillRequest(name: "Create Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
                         numPerformToCompletion: 6,
-                        description: "Dependencies add another facet to the overall gamification profile which forces users to complete skills in the specified order. If you set up Skill A to depend on the completion of Skill B then no points will be awarded toward Skill A until Skill B is fully accomplished.Keep in mind that Skill B must be fully completed first before any points will be awarded toward Skill A. To add a dependency navigate to ``Project -> Subject -> Skill -> Dependencies``",
+                        description: "Lookup:Desc_CreateSkillDependencies.md",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
-
                 new SkillRequest(name: "Create Cross-Project Skill Dependencies", skillId: "CreateCrossProjectSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
-                        description: "Cross-Project Dependencies facilitate cross-application training and enable users to become domain experts across several applications. These dependencies are critical when actions are required to be performed in more than one tool in order to complete a task.",
+                        description: "Lookup:Desc_CreateCrossProjectSkillDependencies.md",
                         helpUrl: "/dashboard/user-guide/dependencies.html#cross-project-dependencies"
                 ),
-
                 new SkillRequest(name: "Manually Add Skill Event", skillId: "ManuallyAddSkillEvent", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 2,
-                        description: "Manually Add Skill Events. Navigate to ``Project -> Subject -> Skill -> Add Event``",
+                        description: "Lookup:Desc_ManuallyAddSkillEvent.md",
                         helpUrl: "/dashboard/user-guide/skills.html#manually-add-skill-event"
                 ),
                 new SkillRequest(name: "Visit Skill Metrics", skillId: "VisitSkillStats", subjectId: subjectSkillsId, projectId: inceptionProjectId,
@@ -461,30 +493,116 @@ To create a skill, navigate to a subject and then click the ``Skill +`` button.'
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
-                        description: "Visit ``Skill Dependencies``. Navigate to ``Project -> Subject -> Skill -> Metrics``",
+                        description: "Lookup:Desc_VisitSkillStats.md",
                 ),
                 new SkillRequest(name: "Expand Skill Details on Skills Page", skillId: "ExpandSkillDetailsSkillsPage", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 5,
-                        description: "On the Skills Page click on ``+`` to expand a single row. ",
+                        description: "Lookup:Desc_ExpandSkillDetailsSkillsPage.md",
+                        helpUrl: "/dashboard/user-guide/skills.html",
                 ),
                 new SkillRequest(name: "Self Reporting with Honor", skillId: "SelfReportHonorExample", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "This Skill is an example of the `Self Reporting` feature. Click the **I did it** button below to receive points. The skill is configured under the 'Honor' system and the points will be awarded immediately. Enjoy!",
+                        description: "Lookup:Desc_SelfReportHonorExample.md",
                         selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
+                        helpUrl: "/dashboard/user-guide/self-reporting.html",
                 ),
                 new SkillRequest(name: "Self Reporting with Approval", skillId: "SelfReportApprovalExample", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
                         numPerformToCompletion: 3,
-                        description: "This Skill is an example of the `Self Reporting` feature. Click **I did it** button below to request points. The skill is configured under the 'Approval' system and a request will be placed into the project administrators Approval Queue.!",
+                        description: "Lookup:Desc_SelfReportApprovalExample.md",
                         selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        helpUrl: "/dashboard/user-guide/self-reporting.html",
+                ),
+                new SkillRequest(name: "Search and Navigate directly to a skill", skillId: "SearchandNavigatedirectlytoaskill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 5,
+                        description: "Lookup:Desc_SearchandNavigatedirectlytoaskill.md",
+                ),
+                new SkillRequest(name: "Create Aesthetically Pleasing Description", skillId: "CreateVisuallyAppealingDescription", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 1,
+                        selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                        justificationRequired: Boolean.TRUE.toString(),
+                        description: "Lookup:Desc_CreateVisuallyAppealingDescription.md",
+                        helpUrl: "/dashboard/user-guide/rich-text-editor.html",
+                ),
+                new SkillRequest(name: "Copy Skill", skillId: "CopySkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 10,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_CopySkill.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#copy-skill",
+                ),
+                new SkillRequest(name: "Create Skill Group", skillId: "CreateSkillGroup", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_CreateSkillGroup.md",
+                        helpUrl: "/dashboard/user-guide/skills-groups.html",
+                ),
+                new SkillRequest(name: "Change Skill Display Order", skillId: "ChangeSkillDisplayOrder", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
+                        numPerformToCompletion: 6,
+                        description: "Lookup:Desc_ChangeSkillDisplayOrder.md",
+                ),
+                new SkillRequest(name: "Use Skills Table Additional Columns", skillId: "SkillsTableAdditionalColumns", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
+                        numPerformToCompletion: 6,
+                        description: "Lookup:Desc_SkillsTableAdditionalColumns.md",
+                ),
+                new SkillRequest(name: "Reuse Skill", skillId: "ReuseSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ReuseSkill.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#same-project-skill-reuse",
+                ),
+                new SkillRequest(name: "Move Skill", skillId: "MoveSkill", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 10,
+                        numPerformToCompletion: 4,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
+                        description: "Lookup:Desc_MoveSkill.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#move-skills",
+                ),
+                new SkillRequest(name: "Import Skill from Catalog", skillId: "ImportSkillfromCatalog", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_ImportSkillfromCatalog.md",
+                        helpUrl: "/dashboard/user-guide/skills-catalog.html",
+                ),
+                new SkillRequest(name: "Add or Update Skill Tags", skillId: "AddOrModifyTags", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 10,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numPerformToCompletion: 3,
+                        description: "Lookup:Desc_AddOrModifyTags.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#skill-tags",
+                ),
+                new SkillRequest(name: "Configure Self Approval Workload", skillId: "ConfigureSelfApprovalWorkload", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        description: "Lookup:Desc_ConfigureSelfApprovalWorkload.md",
+                        helpUrl: "/dashboard/user-guide/self-reporting.html#split-approval-workload",
                 ),
         ]
     }

@@ -342,8 +342,6 @@ describe('Global Badges Tests', () => {
 
         cy.get('[data-label=Level]')
             .contains('5');
-        cy.intercept('/api/projects/Inception/skills/AddOrModifyLevels')
-            .as('modifyLevel');
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .should('be.visible')
             .click();
@@ -369,7 +367,6 @@ describe('Global Badges Tests', () => {
             .should('be.enabled');
         cy.get('[data-cy=saveLevelButton]')
             .click();
-        cy.wait('@modifyLevel');
         cy.validateTable(levelsTableSelector, [
             [{
                 colIndex: 0,

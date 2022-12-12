@@ -1287,4 +1287,60 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] .card-header');
     });
 
+    it('filter on has tag', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.addTagToSkills(1, ['skill1', 'skill3'], 1);
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
+        cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
+
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_hasTag"] [data-cy="filterCount"]').should('have.text', '2');
+        cy.get('[data-cy="filter_hasTag"]').click();
+        cy.get('[data-cy="selectedFilter"]').contains('Has a Tag');
+
+        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 3');
+        cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
+    });
+
+    it('no results because of the filters', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+        cy.createBadge(1, 1, { enabled: true});
+
+        cy.addTagToSkills(1, ['skill1'], 1);
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
+        cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
+
+        cy.get('[data-cy="skillTag-0"]').click()
+        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]').should('have.text', '1')
+        cy.get('[data-cy="filter_belongsToBadge"]').click();
+
+        cy.get('[data-cy="selectedFilter"]').contains('Belongs to a Badge');
+        cy.get('[data-cy="clearSelectedTagFilter-tag1"]')
+
+        cy.get('[data-cy="skillProgress_index-0"]').should('not.exist');
+        cy.get('[data-cy="skillProgress_index-1"]').should('not.exist');
+        cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
+
+    });
+
 });

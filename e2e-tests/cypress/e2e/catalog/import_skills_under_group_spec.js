@@ -125,14 +125,14 @@ describe('Import Skills under a Group Tests', () => {
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '200'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '200'
@@ -150,14 +150,14 @@ describe('Import Skills under a Group Tests', () => {
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }, {
                 colIndex: 3,
                 value: '66'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }, {
                 colIndex: 3,
                 value: '200'
@@ -192,11 +192,11 @@ describe('Import Skills under a Group Tests', () => {
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }],
             [{
                 colIndex: 0,
-                value: 'skill1'
+                value: 'Very Great Skill 1'
             }],
         ], 5, true, null, false);
 
@@ -209,7 +209,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 0,
-                value: 'skill2'
+                value: 'Very Great Skill 2'
             }],
         ], 5, true, null, false);
     });

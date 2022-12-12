@@ -44,7 +44,8 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
         return new Res(
                 subject: "SkillTree Points Requested",
                 html: htmlBody,
-                plainText: plainText
+                plainText: plainText,
+                replyToEmail: parsed.replyTo,
         )
     }
 

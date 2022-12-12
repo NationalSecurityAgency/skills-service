@@ -56,6 +56,7 @@ limitations under the License.
                   :name="`Enable and disable fallback for ${data.item.userId} approver`"
                   @change="handleFallback($event, data.item)"
                   data-cy="fallbackSwitch"
+                  v-skills="'ConfigureSelfApprovalWorkload'"
                   :checked="data.item.isFallbackConfPresent" switch>
                 <span v-if="!data.item.hasAnyFallbackConf">Default Fallback - All Unmatched Requests</span>
                 <span v-if="data.item.hasAnyFallbackConf && !data.item.fallbackConf">Not Handling Approval Workload</span>

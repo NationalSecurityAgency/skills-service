@@ -60,6 +60,7 @@ export default {
     extend('maxTagValueLengthInApprovalWorkloadConfig', ValidatorFactory.newCharLengthValidator(store.getters.config.maxTagValueLengthInApprovalWorkloadConfig));
 
     extend('maxCustomLabelLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxCustomLabelLength));
+    extend('maxSkillTagLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSkillTagLength));
 
     localize({
       en: {

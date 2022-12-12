@@ -52,6 +52,7 @@ limitations under the License.
           aria-label="Add Tag Value"
           @click="addSkillToConf"
           data-cy="addSkillConfBtn"
+          v-skills="'ConfigureSelfApprovalWorkload'"
           :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
           variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
         </b-button>
@@ -264,9 +265,9 @@ limitations under the License.
           this.loadingMeta.loadingSkillsUnderASubject = true;
           const { subjectId } = this.selectedSubject;
           this.selectedSubject = null;
-          SkillsService.getSubjectSkills(this.projectId, subjectId)
+          SkillsService.getSubjectSkills(this.projectId, subjectId, true)
             .then((subjectSkills) => {
-              const skillsToAdd = subjectSkills.filter((s) => existingSkills.indexOf(s.skillId) < 0);
+              const skillsToAdd = subjectSkills.filter((s) => s.type === 'Skill' && existingSkills.indexOf(s.skillId) < 0);
               const numSkillsToAdd = skillsToAdd.length;
               this.loadingMeta.numSkillsToProcess = numSkillsToAdd;
 

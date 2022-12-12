@@ -186,6 +186,30 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills.get(2).totalPoints == proj1_skills.get(2).pointIncrement * proj1_skills.get(2).numPerformToCompletion
     }
 
+    def "get all skills for a subject - ability to retrieve skills under groups"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj2_subj = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        def group = SkillsFactory.createSkillsGroup(1, 1, 10)
+        List<Map> proj1_skills_subj2 = SkillsFactory.createSkills(3, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills([proj1_skills[0..2], group].flatten())
+        skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[3])
+        skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[4])
+        skillsService.createSkills(proj1_skills_subj2)
+
+        when:
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        def skillsWithGroupSkills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId, true)
+        then:
+        skills.skillId.sort() == [proj1_skills[0].skillId, proj1_skills[1].skillId, proj1_skills[2].skillId, group.skillId].sort()
+        skillsWithGroupSkills.skillId.sort() == [proj1_skills.skillId, group.skillId].flatten().sort()
+    }
+
     def "skills are always enabled and cannot be disabled"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

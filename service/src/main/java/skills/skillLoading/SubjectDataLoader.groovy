@@ -25,14 +25,8 @@ import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
-import skills.storage.model.ClientPref
-import skills.storage.model.SimpleBadgeRes
-import skills.storage.model.SkillApproval
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefParent
-import skills.storage.model.SkillRelDef
-import skills.storage.model.UserPoints
-import skills.storage.repos.SettingRepo
+import skills.skillLoading.model.SkillTag
+import skills.storage.model.*
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -77,6 +71,7 @@ class SubjectDataLoader {
         List<SkillsAndPoints> children = []
         SkillApproval approval
         List<SimpleBadgeRes> badges = []
+        List<SkillTag> tags = []
     }
 
     static class SkillsData {
@@ -130,6 +125,7 @@ class SubjectDataLoader {
         skillsAndPoints = handleGroupSkills(skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleBadges(projectId, skillsAndPoints)
+        skillsAndPoints = handleSkillTags(projectId, skillsAndPoints)
 
         new SkillsData(childrenWithPoints: skillsAndPoints)
     }
@@ -149,18 +145,7 @@ class SubjectDataLoader {
     @Profile
     private List<SkillsAndPoints> handleBadges(String projectId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
-            List<String> skillIds = []
-            skillsAndPoints.forEach{ it ->
-                if(it.skillDef.type == SkillDef.ContainerType.SkillsGroup) {
-                    if(it.children) {
-                        skillIds.addAll(it.children.collect{ child -> child.skillDef.skillId })
-                    }
-                }
-                else if(it.skillDef.type == SkillDef.ContainerType.Skill) {
-                    skillIds.add(it.skillDef.skillId)
-                }
-            }
-
+            List<String> skillIds = collectSkillIds(skillsAndPoints)
             def badges = skillDefRepo.findAllBadgesForSkill(skillIds, projectId);
             def badgesById = badges.groupBy{ it.skillId }
             skillsAndPoints.forEach{ it ->
@@ -171,6 +156,37 @@ class SubjectDataLoader {
             }
         }
         return skillsAndPoints;
+    }
+
+    @Profile
+    private List<SkillsAndPoints> handleSkillTags(String projectId, List<SkillsAndPoints> skillsAndPoints) {
+        if(projectId) {
+            List<String> skillIds = collectSkillIds(skillsAndPoints)
+            def tagWithSkillIds = skillDefRepo.getTagsForSkillsWithSkillId(projectId, skillIds);
+            def tagsById = tagWithSkillIds.groupBy{ it.skillId }
+            skillsAndPoints.forEach{ it ->
+                it.tags = tagsById[it.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}
+                it.children.forEach{ child ->
+                    child.tags = tagsById[child.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}
+                }
+            }
+        }
+        return skillsAndPoints;
+    }
+
+    private List<String> collectSkillIds(List<SkillsAndPoints> skillsAndPoints) {
+        List<String> skillIds = []
+        skillsAndPoints.forEach { it ->
+            if(it.skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+                if(it.children) {
+                    skillIds.addAll(it.children.collect{ child -> child.skillDef.skillId })
+                }
+            }
+            else if(it.skillDef.type == SkillDef.ContainerType.Skill) {
+                skillIds.add(it.skillDef.skillId)
+            }
+        }
+        return skillIds
     }
 
     private List<SkillsAndPoints> handleGroupDescriptions(String projectId, List<SkillsAndPoints> skillsAndPoints, List<SkillRelDef.RelationshipType> relationshipTypes) {

@@ -102,13 +102,21 @@ limitations under the License.
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
     </div>
-    <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="row" style="padding-top:8px;">
-      <div class="col" style="font-size: 0.9rem" data-cy="skillBadges">
+    <div v-if="showBadgesAndTagsRow" class="row" style="padding-top:8px;">
+      <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="col-auto pr-0" style="font-size: 0.9rem" data-cy="skillBadges">
         <i class="fa fa-award"></i> Badges:
         <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
               v-bind:key="badge.badgeId">
           <router-link :to="genLink(badge)" class="skills-theme-primary-color" style="text-decoration:underline;">{{ badge.name }}</router-link>
           <span v-if="index != (skill.badges.length - 1)">, </span>
+        </span>
+      </div>
+      <div v-if="skill.tags && skill.tags.length > 0" class="col" style="font-size: 0.9rem" data-cy="skillTags">
+        <span v-for="(tag, index) in skill.tags" :data-cy="`skillTag-${index}`" class="overflow-hidden pr-1"
+              v-bind:key="tag.tagId">
+          <b-badge class="py-1 px-2" variant="info" :href="enableDrillDown ? '#' : ''" @click="addTagFilter(tag)">
+              <span>{{ tag.tagValue }} <i class="fas fa-search-plus"></i></span>
+            </b-badge>
         </span>
       </div>
     </div>
@@ -164,6 +172,7 @@ limitations under the License.
             :show-group-descriptions="showGroupDescriptions"
             :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
             @points-earned="onChildSkillPointsEarned"
+            @add-tag-filter="addTagFilter"
         ></skill-progress2>
 
         <hr v-if="index < (childSkillsInternal.length - 1)"/>
@@ -263,6 +272,9 @@ limitations under the License.
       someSkillsAreOptional() {
         return this.isSkillsGroupWithChildren && this.skill.numSkillsRequired !== -1 && this.skill.numSkillsRequired < this.skill.children.length;
       },
+      showBadgesAndTagsRow() {
+        return ((this.skill.badges && this.skill.badges.length > 0 && !this.badgeId) || (this.skill.tags && this.skill.tags.length > 0));
+      },
     },
     watch: {
       'skill.children': function updateChildSkills() {
@@ -271,6 +283,9 @@ limitations under the License.
       },
     },
     methods: {
+      addTagFilter(tag) {
+        this.$emit('add-tag-filter', tag);
+      },
       initChildSkills() {
         if (this.isSkillsGroupWithChildren) {
           this.childSkillsInternal = this.skill.children.map((item) => ({ ...item, childSkill: true }));

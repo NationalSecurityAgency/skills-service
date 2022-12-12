@@ -36,6 +36,7 @@ limitations under the License.
           <b-button
             aria-label="Add Specific User"
             data-cy="addUserConfBtn"
+            v-skills="'ConfigureSelfApprovalWorkload'"
             @click="addConf"
             :disabled="!currentSelectedUser || (errors && errors.length > 0)"
             variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />

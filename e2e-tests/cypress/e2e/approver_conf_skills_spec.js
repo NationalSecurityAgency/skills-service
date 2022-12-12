@@ -199,6 +199,60 @@ describe('Approver Config Skills Tests', () => {
         ], 5);
     });
 
+    it('configure approver for All skill under a subject where some skills are under a group', function () {
+        cy.createSubject(1, 2)
+        cy.createSubject(1, 3)
+        cy.createSubject(1, 4)
+        cy.createSkill(1, 2, 8)
+        cy.createSkillsGroup(1, 2, 5);
+        cy.addSkillToGroup(1, 2, 5, 9);
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).type('s');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelectionItem-proj1-subj2"]`).click()
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get(`${tableSelector} tr th`).contains('Skill').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 8'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 9'
+            }],
+        ], 5);
+        cy.get('[data-cy="skillsAddedAlert"]').contains('Added 2 skills')
+        cy.get('[data-cy="closeSkillsAddedAlertBtn"]').click()
+        cy.get('[data-cy="skillsAddedAlert"]').should('not.exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Skill')
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Skill 8'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Skill 9'
+            }],
+        ], 5);
+    });
+
     it('configured skills are paged', function () {
         for (let i = 5; i < 13; i++) {
             cy.createSkill(1, 1, i, { selfReportingType: 'Approval' })

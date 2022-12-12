@@ -616,6 +616,46 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
     ''', nativeQuery = true)
     List<String> getSkillIdsOfReusedSkillsForAGivenSkill(String projectId, Integer originalSkillRef)
 
+    @Nullable
+    @Query('''select distinct 'true' from SkillDef sd where sd.projectId = ?1 and sd.type = 'Tag' 
+    ''')
+    Boolean doesProjectHaveSkillTags(String projectId)
+
+    @Query(value='''select distinct sd.skill_id as tagId, sd.name as tagValue
+                    from skill_definition sd, skill_relationship_definition srd
+                    where srd.child_ref_id=?1 and sd.id = srd.parent_ref_id and srd.type = 'Tag'
+    ''', nativeQuery = true)
+    List<SkillTag> getTagsForSkill(Integer childSkillRefId)
+
+    @Query(value='''select distinct tag.skill_id as tagId, tag.name as tagValue
+                    from skill_definition tag, skill_definition sd1, skill_relationship_definition srd
+                    where tag.project_id=?1 and sd1.project_id=?1 and sd1.skill_id in (?2) and sd1.id = srd.child_ref_id and tag.id = srd.parent_ref_id and srd.type = 'Tag'
+    ''', nativeQuery = true)
+    List<SkillTag> getTagsForSkills(String projectId, List<String> skillIds)
+
+    @Query(value='''select distinct sd.skill_id as tagId, sd.name as tagValue
+                    from skill_definition sd
+                    where sd.project_id=?1 and sd.type = 'Tag'
+    ''', nativeQuery = true)
+    List<SkillTag> getTagsForProject(String projectId)
+
+    @Query(value='''select tag.skill_id as tagId, tag.name as tagValue, skill.skill_id as skillId
+                    from skill_definition tag, skill_relationship_definition srd, skill_definition skill
+                    where srd.child_ref_id = skill.id and tag.id = srd.parent_ref_id and srd.type = 'Tag'
+                      and tag.type = 'Tag' and tag.project_id = ?1
+                      and skill.skill_id in (?2)
+                      and skill.type = 'Skill' and skill.project_id = ?1
+    ''', nativeQuery = true)
+    List<SkillTagWithSkillId> getTagsForSkillsWithSkillId(String projectId, List<String> skillIds)
+
+    @Modifying
+    @Query(value='''delete from skill_definition sd where sd.id in (
+                        select distinct tag.id
+                        from skill_definition tag, skill_definition sd1, skill_relationship_definition srd
+                        where tag.project_id=?1 and sd1.project_id=?1 and tag.skill_id=?2 and sd1.skill_id in (?3) and sd1.id = srd.child_ref_id and tag.id = srd.parent_ref_id and srd.type = 'Tag'
+                    )
+    ''', nativeQuery = true)
+    void deleteTagsForSkills(String projectId, String tagId, List<String> skillIds)
 
     @Query('''SELECT
         s.id as id,

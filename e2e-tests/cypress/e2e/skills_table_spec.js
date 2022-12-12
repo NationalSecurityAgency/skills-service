@@ -442,9 +442,9 @@ describe('Skills Table Tests', () => {
         cy.get(`${tableSelector} th`).contains('Display Order').click();
         cy.get('[data-cy="orderMoveUp_skill3"]').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'skill1' }, { colIndex: 1,  value: 1 }],
-            [{ colIndex: 0,  value: 'skill3' }, { colIndex: 1,  value: 2 }],
-            [{ colIndex: 0,  value: 'skill2' }, { colIndex: 1,  value: 3 }],
+            [{ colIndex: 0,  value: 'Very Great Skill 1' }, { colIndex: 1,  value: 1 }],
+            [{ colIndex: 0,  value: 'Very Great Skill 3' }, { colIndex: 1,  value: 2 }],
+            [{ colIndex: 0,  value: 'Very Great Skill 2' }, { colIndex: 1,  value: 3 }],
         ], 10, false, null, false);
         cy.get(`${tableSelector} tbody tr`).should('have.length', 3);
 

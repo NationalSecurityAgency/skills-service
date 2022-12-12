@@ -18,6 +18,6 @@ package skills.controller.request.model
 import groovy.transform.Canonical
 
 @Canonical
-class CheckSkillsDepsRequest {
+class SkillIdsRequest {
     List<String> skillIds
 }

@@ -30,11 +30,11 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
-import skills.controller.request.model.PointSyncPatchRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
 import skills.controller.result.model.SkillDefSkinnyRes
+import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.SkillDefAccessor
@@ -111,6 +111,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
+
+    @Autowired
+    SkillTagService skillTagService
 
     @Autowired
     ProjDefRepo projDefRepo
@@ -422,23 +425,16 @@ class SkillsAdminService {
     }
 
     @Transactional
-    void deleteSkill(String projectId, String subjectId, String skillId) {
-        log.debug("Deleting skill with project id [{}] and subject id [{}] and skill id [{}]", projectId, subjectId, skillId)
+    void deleteSkill(String projectId, String skillId) {
+        log.debug("Deleting skill with project id [{}] and skill id [{}]", projectId, skillId)
         SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-        assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], subjectId=[$subjectId], skillId=[$skillId]"
+        assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], skillId=[$skillId]"
 
         if (globalBadgesService.isSkillUsedInGlobalBadge(skillDefinition)) {
             throw new SkillException("Skill with id [${skillId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
         SkillDef parentSkill = ruleSetDefGraphService.getParentSkill(skillDefinition)
-        SkillDef subject
-        if (parentSkill.type == SkillDef.ContainerType.Subject) {
-            subject = parentSkill
-        } else if (parentSkill.type == SkillDef.ContainerType.SkillsGroup) {
-            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
-        } else {
-            throw new SkillException("Unexpected parent type [${parentSkill.type}]")
-        }
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillDefinition.id)
         if (skillDefinition.type == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> childSkills = ruleSetDefGraphService.getChildrenSkills(skillDefinition, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
             childSkills.each {
@@ -493,8 +489,7 @@ class SkillsAdminService {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
         log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
         related?.each {
-            SkillDef subjectParent = ruleSetDefGraphService.getMySubjectParent(it.id)
-            deleteSkill(it.projectId, subjectParent.skillId, it.skillId)
+            deleteSkill(it.projectId, it.skillId)
         }
     }
 
@@ -549,7 +544,9 @@ class SkillsAdminService {
         } else {
             res = skillRelDefRepo.getChildrenPartial(parent.projectId, parent.skillId, relationshipType)
         }
-        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
+        // global badges will have a null projectId
+        Boolean projectHasSkillTags = projectId ? skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean : false
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
     /**
@@ -567,13 +564,13 @@ class SkillsAdminService {
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefPartial> res
-        if (!includeGroupChildren) {
-            res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId)
-        } else {
-            res = nativeQueriesRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subject.skillId)
-        }
-        return res.collect { convertToSkillDefPartialRes(it) }.sort({ it.displayOrder })
+        List<SkillRelDef.RelationshipType> relationshipTypes = includeGroupChildren ?
+                [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject] :
+                [SkillRelDef.RelationshipType.RuleSetDefinition]
+        List<SkillDefPartial> res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId, relationshipTypes)
+
+        Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
@@ -732,7 +729,7 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadNumUsers = false) {
+    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
         SkillDefPartialRes res = new SkillDefPartialRes(
@@ -769,6 +766,12 @@ class SkillsAdminService {
 
         if (loadNumUsers) {
             res.numUsers = calculateDistinctUsersForSkill((SkillDefPartial)partial)
+        }
+
+        if (loadTags) {
+            skillTagService.getTagsForSkill(partial.id)?.each { tag ->
+                res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue))
+            }
         }
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {

@@ -85,6 +85,12 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     Integer getSkillUsedInGlobalBadgeCount(String skillId)
 
+    @Query(value = '''select srd.parent.id from SkillRelDef srd where srd.child.id=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
+    List<Integer> getGlobalBadgeIdsForSkill(Integer id)
+
+    @Query(value = '''select gbld.skill_ref_id from global_badge_level_definition gbld where gbld.project_id = ?1 ''', nativeQuery = true)
+    List<Integer> getGlobalBadgeLevelIdsForSkill(String projectId)
+
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' and srd.parent.skillId=?1''')
     Integer getGlobalBadgeSkillCount(String badgeId)
 
@@ -157,10 +163,10 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
-        where sd1 = srd.parent and sd2 = srd.child and srd.type='RuleSetDefinition' 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2
     ''')
-    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId)
+    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes)
 
     @Query(value='''
         WITH RECURSIVE subj_skills (parentId, childId) AS (
@@ -368,4 +374,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sub.type = 'Subject'
     ''', nativeQuery=true)
     List<SubjectTotalPoints> getSubjectTotalPointsIncPendingFinalization(@Param("projectId") String projectId)
+
+    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.type='Tag' and srd.parent.type = 'Tag' and srd.parent.skillId=?1''')
+    Integer getSkillWithTagCount(String tagId)
 }

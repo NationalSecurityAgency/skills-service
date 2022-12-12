@@ -660,7 +660,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId, [SkillRelDef.RelationshipType.RuleSetDefinition])
         List<String> subjectSkillIds = []
         skills?.each {
             subjectSkillIds.add(it.skillId)
@@ -681,7 +681,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId, [SkillRelDef.RelationshipType.RuleSetDefinition])
         List<String> subjectSkillIds = []
         skills?.each {
             subjectSkillIds.add(it.skillId)
@@ -702,7 +702,7 @@ class H2NativeRepo implements NativeQueriesRepo {
             throw new SkillException("Subject [${subjectId}] doesn't exist.", projectId, null, code)
         }
 
-        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId)
+        List<SkillDefPartial> skills = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subjectId, [SkillRelDef.RelationshipType.RuleSetDefinition])
         List<SkillDefPartial> all = []
         skills?.each {
             all.add(it)

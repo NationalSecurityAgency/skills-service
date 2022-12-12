@@ -2074,4 +2074,130 @@ describe('Badges Tests', () => {
         cy.wait('@validateDesc')
         cy.get('[data-cy="badgeDescriptionError"]').contains('paragraphs may not contain jabberwocky')
     });
+
+
+    it('rows per page control is enabled once # of skills is greater than page size', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+
+        const numSkills = 6;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${i}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${i}`,
+                name: `Skill ${i}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '5'
+            });
+
+            if (i < numSkills-1) {
+                cy.request('POST', `/admin/projects/proj1/badge/badge1/skills/skill${i}`);
+            }
+        }
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get(`${tableSelector} th`)
+          .contains('Skill ID')
+          .click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill4'
+            }],
+        ], 5);
+        cy.get('[data-cy="skillsBTablePageSize"]').should('be.disabled');
+
+        // add one more skill to the badge to make 6 skills total
+        // cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill5');
+        cy.get('[data-cy="skillsSelector2"]')
+          .click();
+        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
+          .eq(0)
+          .click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill4'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill5'
+            }],
+        ], 5, true);
+        cy.get('[data-cy="skillsBTablePageSize"]').should('be.enabled');
+
+        // now delete a skill to go back to 5 skills total
+        cy.get('[data-cy="deleteSkill_skill2"]')
+          .click();
+        cy.contains('YES, Delete It')
+          .click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill4'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill5'
+            }],
+        ], 5);
+        cy.get('[data-cy="skillsBTablePageSize"]').should('be.disabled');
+    });
 });
