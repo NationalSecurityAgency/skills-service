@@ -284,7 +284,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         response.body.explanation == 'You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete the performed skills for the parent dependencies: [TestProject1:skill2].'
     }
 
-    def "deleting skill event required for a badge will removed the achieved badge"() {
+    def "deleting skill event required for a badge will remove the achieved badge"() {
         String userId = "user1"
         Date date = new Date()
 
@@ -296,7 +296,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
                       pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
         Map skill4 = [projectId: projId, subjectId: subj, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
-                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1, dependentSkillsIds: [skill1.skillId, skill2.skillId, skill3.skillId]]
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
 
         Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Badge 1']
         List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId, skill4.skillId]
@@ -349,6 +349,286 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         badgesSummary.numSkillsAchieved == 3
         badgesSummary.numTotalSkills == 4
         addedSkills?.count == 3
+    }
+
+    def "deleting a skill event tied to a global badge will remove the global badges"() {
+        SkillsService supervisorService = createSupervisor()
+        String userId = "user1"
+        Date date = new Date()
+
+        String subj = "testSubj"
+        String subj2 = "testSubj2"
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: "proj2", subjectId: subj2, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 200, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Global Badge 1']
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId]
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createProject([projectId: "proj2", name: "Test Project 2"])
+        skillsService.createSubject([projectId: "proj2", subjectId: subj2, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        supervisorService.createGlobalBadge(badge)
+        requiredSkillsIds.each { skillId ->
+            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'true'
+
+        supervisorService.createGlobalBadge(badge)
+
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
+        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+
+        assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
+        assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
+        assert resSkill3.skillApplied && !resSkill3.completed.find { it.id == 'badge1'}
+        assert resSkill4.skillApplied && resSkill4.completed.find { it.id == 'badge1'}
+
+        when:
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        def proj2AddedSkills = skillsService.getPerformedSkills(userId, "proj2")
+        assert addedSkills?.count == 3
+        assert proj2AddedSkills?.count == 1
+        def badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        assert badgesSummary.badgeId == 'badge1'
+        assert badgesSummary.badgeAchieved == true
+        assert badgesSummary.numSkillsAchieved == 4
+        assert badgesSummary.numTotalSkills == 4
+
+        skillsService.deleteSkillEvent([projectId: projId, userId: userId, timestamp: date.time, skillId: skill2.skillId])
+        addedSkills = skillsService.getPerformedSkills(userId, projId)
+        badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+
+        then:
+        badgesSummary.badgeId == 'badge1'
+        badgesSummary.numSkillsAchieved == 3
+        badgesSummary.numTotalSkills == 4
+        badgesSummary.badgeAchieved == false
+        addedSkills?.count == 2
+    }
+
+    def "deleting a skill event tied to a global badge that uses levels will remove the global badges"() {
+        SkillsService supervisorService = createSupervisor()
+        String userId = "user1"
+        Date date = new Date()
+
+        String subj = "testSubj"
+        String subj2 = "testSubj2"
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: "proj2", subjectId: subj2, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 200, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Global Badge 1']
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId]
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createProject([projectId: "proj2", name: "Test Project 2"])
+        skillsService.createSubject([projectId: "proj2", subjectId: subj2, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'true'
+        supervisorService.updateGlobalBadge(badge)
+        supervisorService.createGlobalBadge(badge)
+
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
+        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+
+        when:
+        def level = skillsService.getUserLevel(projId, userId)
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        def proj2AddedSkills = skillsService.getPerformedSkills(userId, "proj2")
+        assert addedSkills?.count == 3
+        assert proj2AddedSkills?.count == 1
+        def badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        assert badgesSummary.badgeId == 'badge1'
+        assert badgesSummary.badgeAchieved == true
+        assert level > 0
+
+        skillsService.deleteSkillEvent([projectId: projId, userId: userId, timestamp: date.time, skillId: skill1.skillId])
+        skillsService.deleteSkillEvent([projectId: projId, userId: userId, timestamp: date.time, skillId: skill2.skillId])
+        skillsService.deleteSkillEvent([projectId: projId, userId: userId, timestamp: date.time, skillId: skill3.skillId])
+        badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        level = skillsService.getUserLevel(projId, userId)
+        assert level == 0
+
+        then:
+
+        badgesSummary.badgeId == 'badge1'
+        badgesSummary.badgeAchieved == false
+    }
+
+    def "deleting all skill events will remove any achieved global badges"() {
+        SkillsService supervisorService = createSupervisor()
+        String userId = "user1"
+        Date date = new Date()
+
+        String subj = "testSubj"
+        String subj2 = "testSubj2"
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: "proj2", subjectId: subj2, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 200, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Global Badge 1']
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId]
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createProject([projectId: "proj2", name: "Test Project 2"])
+        skillsService.createSubject([projectId: "proj2", subjectId: subj2, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        supervisorService.createGlobalBadge(badge)
+        requiredSkillsIds.each { skillId ->
+            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+        }
+        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'true'
+
+        supervisorService.createGlobalBadge(badge)
+
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
+        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+
+        assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
+        assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
+        assert resSkill3.skillApplied && !resSkill3.completed.find { it.id == 'badge1'}
+        assert resSkill4.skillApplied && resSkill4.completed.find { it.id == 'badge1'}
+
+        when:
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        def proj2AddedSkills = skillsService.getPerformedSkills(userId, "proj2")
+        assert addedSkills?.count == 3
+        assert proj2AddedSkills?.count == 1
+        def badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        assert badgesSummary.badgeId == 'badge1'
+        assert badgesSummary.badgeAchieved == true
+        assert badgesSummary.numSkillsAchieved == 4
+        assert badgesSummary.numTotalSkills == 4
+
+        skillsService.deleteAllSkillEvents([projectId: projId, userId: userId])
+        addedSkills = skillsService.getPerformedSkills(userId, projId)
+        badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+
+        then:
+        badgesSummary.badgeId == 'badge1'
+        badgesSummary.badgeAchieved == false
+        badgesSummary.numSkillsAchieved == 1
+        badgesSummary.numTotalSkills == 4
+        addedSkills?.count == 0
+    }
+
+    def "deleting all skill events tied to a global badge that uses levels will remove the global badges"() {
+        SkillsService supervisorService = createSupervisor()
+        String userId = "user1"
+        Date date = new Date()
+
+        String subj = "testSubj"
+        String subj2 = "testSubj2"
+        Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
+                      pointIncrement: 25, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill2 = [projectId: projId, subjectId: subj, skillId: "skill2", name  : "Test Skill 2", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill3 = [projectId: projId, subjectId: subj, skillId: "skill3", name  : "Test Skill 3", type: "Skill",
+                      pointIncrement: 50, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+        Map skill4 = [projectId: "proj2", subjectId: subj2, skillId: "skill4", name  : "Test Skill 4", type: "Skill",
+                      pointIncrement: 200, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
+
+        Map badge = [projectId: projId, badgeId: 'badge1', name: 'Test Global Badge 1']
+        List<String> requiredSkillsIds = [skill1.skillId, skill2.skillId, skill3.skillId]
+
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
+        skillsService.createProject([projectId: "proj2", name: "Test Project 2"])
+        skillsService.createSubject([projectId: "proj2", subjectId: subj2, name: "Test Subject"])
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+        skillsService.createSkill(skill4)
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        badge.enabled = 'true'
+        supervisorService.updateGlobalBadge(badge)
+        supervisorService.createGlobalBadge(badge)
+
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
+        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+
+        when:
+        def level = skillsService.getUserLevel(projId, userId)
+        def addedSkills = skillsService.getPerformedSkills(userId, projId)
+        def proj2AddedSkills = skillsService.getPerformedSkills(userId, "proj2")
+        assert addedSkills?.count == 3
+        assert proj2AddedSkills?.count == 1
+        def badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        assert badgesSummary.badgeId == 'badge1'
+        assert badgesSummary.badgeAchieved == true
+        assert level > 0
+
+        skillsService.deleteAllSkillEvents([projectId: projId, userId: userId])
+        badgesSummary = skillsService.getBadgesSummary(userId, projId)
+        assert badgesSummary.size() == 1
+        badgesSummary = badgesSummary.first()
+        level = skillsService.getUserLevel(projId, userId)
+        assert level == 0
+
+        then:
+
+        badgesSummary.badgeId == 'badge1'
+        badgesSummary.badgeAchieved == false
     }
 
     def "incrementally achieve a single skill, then delete one event and validate level, achievements and points are properly decremented"(){

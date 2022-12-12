@@ -89,6 +89,9 @@ class SkillEventAdminService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
 
@@ -180,6 +183,8 @@ class SkillEventAdminService {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        def globalBadges = achievedLevelRepo.getAchievedGlobalBadgeForUserIntersectingProjectId(userId, projectId)
+        achievedLevelRepo.deleteAllById(globalBadges)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         return RequestResult.success()
@@ -210,6 +215,14 @@ class SkillEventAdminService {
             log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
             related?.each {
                 updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
+            }
+        }
+
+        ArrayList<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
+        if (badgesSkillIsUsedIn) {
+            // do a delete
+            badgesSkillIsUsedIn.forEach{ it ->
+                achievedLevelRepo.deleteAllBySkillRefId(it)
             }
         }
 

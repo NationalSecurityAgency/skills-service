@@ -322,6 +322,14 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
+    ArrayList<Integer> globalBadgesSkillIsUsedIn(String projectId, String skillId) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        ArrayList<Integer> globalBadgeIds = skillRelDefRepo.getGlobalBadgeIdsForSkill(skillDef.id)
+        globalBadgeIds.addAll(skillRelDefRepo.getGlobalBadgeLevelIdsForSkill(projectId))
+        return globalBadgeIds
+    }
+
+    @Transactional(readOnly = true)
     boolean isSkillUsedInGlobalBadge(String projectId, String skillId) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         assert skillDef, "Skill [${skillId}] for project [${projectId}] does not exist"

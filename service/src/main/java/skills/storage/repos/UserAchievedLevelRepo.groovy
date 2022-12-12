@@ -174,6 +174,28 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             )''', nativeQuery = true)
     int countAchievedGlobalBadgeForUserIntersectingProjectId(String userId, String projectId)
 
+    @Query(value='''
+        SELECT ua.id FROM user_achievement ua
+        JOIN skill_definition skillDef on ua.skill_ref_id = skillDef.id
+        WHERE
+            ua.level IS null AND
+            ua.user_id = ?1 AND (
+                skillDef.type='GlobalBadge'
+                AND (
+                     exists (
+                         SELECT true
+                         FROM global_badge_level_definition gbld
+                         WHERE gbld.skill_ref_id = skillDef.id AND gbld.project_id = ?2
+                     )
+                OR (
+                        skillDef.id IN (
+                         SELECT srd.parent_ref_id FROM skill_relationship_definition srd JOIN skill_definition ssd ON srd.child_ref_id = ssd.id AND ssd.project_id = ?2
+                        )
+                     )
+                )
+            )''', nativeQuery = true)
+    List<Integer> getAchievedGlobalBadgeForUserIntersectingProjectId(String userId, String projectId)
+
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where 
