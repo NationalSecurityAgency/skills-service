@@ -57,8 +57,9 @@ export default {
 
     return copy;
   },
-  getSubjectSkills(projectId, subjectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills`)
+  getSubjectSkills(projectId, subjectId, includeGroupSkills = false) {
+    const queryParam = includeGroupSkills ? '?includeGroupSkills=true' : '';
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`)
       .then((response) => response.data);
   },
   getProjectSkills(projectId, skillNameQuery = null, includeDisabled = true, excludeReusedSkills = false) {

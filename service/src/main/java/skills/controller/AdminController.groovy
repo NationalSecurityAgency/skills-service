@@ -487,11 +487,14 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SkillDefPartialRes> getSkills(
-            @PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {
+            @PathVariable("projectId") String projectId,
+            @PathVariable("subjectId") String subjectId,
+            @RequestParam(required = false, value = "includeGroupSkills", defaultValue = 'false') Boolean includeGroupSkillsStr) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
-        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId)
+        Boolean includeGroupSkills = Boolean.valueOf(includeGroupSkillsStr)
+        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId, includeGroupSkills)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

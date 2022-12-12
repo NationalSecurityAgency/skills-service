@@ -163,10 +163,10 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
-        where sd1 = srd.parent and sd2 = srd.child and srd.type='RuleSetDefinition' 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2
     ''')
-    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId)
+    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes)
 
     @Query(value='''
         WITH RECURSIVE subj_skills (parentId, childId) AS (
