@@ -126,7 +126,6 @@ limitations under the License.
     data() {
       return {
         displayName: 'Skills Performed Table',
-        isLoading: true,
         data: [],
         filters: {
           skillId: '',
@@ -263,7 +262,7 @@ limitations under the License.
         this.showDeleteDialog = true;
       },
       doDeleteSkill(skill) {
-        this.isLoading = true;
+        this.table.options.busy = true;
         UsersService.deleteSkillEvent(this.projectId, skill, this.userId)
           .then((data) => {
             if (data.success) {
@@ -274,11 +273,11 @@ limitations under the License.
             }
           })
           .finally(() => {
-            this.isLoading = false;
+            this.table.options.busy = false;
           });
       },
       doDeleteAllSkills() {
-        this.isLoading = true;
+        this.table.options.busy = true;
         UsersService.deleteAllSkillEvents(this.projectId, this.userId)
           .then((data) => {
             if (data.success) {
@@ -288,7 +287,7 @@ limitations under the License.
               this.errorToast('Unable to Remove User Skills', `Skill events were not removed.  ${data.explanation}`);
             }
           }).finally(() => {
-            this.isLoading = false;
+            this.table.options.busy = false;
           });
       },
       setSkillFilter(filterValue) {
