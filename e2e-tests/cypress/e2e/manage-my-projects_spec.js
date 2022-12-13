@@ -283,6 +283,13 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="projectsTableTotalRows"]')
             .contains(3);
 
+        // verify there is no padding added to the highlighted text
+        cy.get('[data-cy="discoverProjectsTable"] tbody tr')
+          .eq(2)
+          .find('td mark')
+          .eq(0)
+          .should('have.css', 'padding', '0px');
+
         cy.get('[data-cy="searchInput"]')
             .type('{backspace}{backspace}{backspace}');
         cy.containsCellValue(5, 0, 'This is project 6');
