@@ -42,7 +42,7 @@ $grid-breakpoints: (
     xxxl: 1600px
 );
 
-$mark-padding: 0px !default;
+$mark-padding: 0px;
 
 // Bootstrap and its default variables
 @import '../../node_modules/bootstrap/scss/bootstrap';
