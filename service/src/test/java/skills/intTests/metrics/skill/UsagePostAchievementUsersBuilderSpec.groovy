@@ -111,4 +111,35 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         pageTwo.totalCount == 7
         pageTwo.users.size() == 2
     }
+
+    def "events on the same day are counted appropriately"() {
+        //simple case, not taking into account event compaction boundaries
+        def proj = SkillsFactory.createProject()
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 2, 0)
+        skill.pointIncrement = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkill(skill)
+
+        def users = getRandomUsers(1)
+        def date = new Date()
+
+        assert skillsService.addSkill(skill, users[0], new Date() - 5).body.skillApplied
+        assert skillsService.addSkill(skill, users[0], new Date() - 4).body.skillApplied
+        for(def x = 0; x < 15; x++) {
+            assert !skillsService.addSkill(skill, users[0], date).body.skillApplied
+        }
+
+        when:
+        def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "date", "sortDesc": true]
+        def result = builder.build(proj.projectId, builder.id, props)
+
+        then:
+        result
+        result.totalCount == 1
+        result.users[0].userId == users[0]
+        result.users[0].count == 15
+        result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+    }
 }
