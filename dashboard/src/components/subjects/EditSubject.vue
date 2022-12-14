@@ -134,8 +134,17 @@ limitations under the License.
     data() {
       return {
         canAutoGenerateId: true,
-        subjectInternal: {},
-        originalSubject: {},
+        subjectInternal: {
+          originalSubjectId: this.subject.subjectId,
+          isEdit: this.isEdit,
+          ...this.subject,
+        },
+        originalSubject: {
+          subjectId: this.subject.subjectId,
+          name: this.subject.name,
+          helpUrl: this.subject.helpUrl,
+          description: this.subject.description,
+        },
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
@@ -150,27 +159,30 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-      this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
+
       this.loadingComponent = true;
+
       this.loadComponentState(this.componentName).then((result) => {
         if (result) {
           if (!this.isEdit || (this.isEdit && result.subjectId === this.subjectInternal.subjectId)) {
             this.subjectInternal = result;
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          } else {
+            this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
           }
-        } else if (this.isEdit) {
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const { observer } = this.$refs;
-              if (observer) {
-                observer.validate({ silent: false });
-              }
-            });
-          }, 600);
+        } else {
+          this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
         }
       }).finally(() => {
         this.loadingComponent = false;
       });
-      this.originalSubject = Object.assign(this.originalSubject, this.subjectInternal);
     },
     watch: {
       show(newValue) {
@@ -192,10 +204,11 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged(newValue) {
-        if (newValue.name === this.originalSubject.name
-          && newValue.description === this.originalSubject.description
-          && newValue.helpUrl === this.originalSubject.helpUrl) {
+      hasObjectChanged() {
+        if (this.subjectInternal.name === this.originalSubject.name
+          && this.subjectInternal.description === this.originalSubject.description
+          && this.subjectInternal.helpUrl === this.originalSubject.helpUrl
+          && this.subjectInternal.subjectId === this.originalSubject.subjectId) {
           return false;
         }
         return true;
@@ -205,7 +218,7 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        if (!e.update && this.hasObjectChanged(this.subjectInternal)) {
+        if (!e.update && this.hasObjectChanged()) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

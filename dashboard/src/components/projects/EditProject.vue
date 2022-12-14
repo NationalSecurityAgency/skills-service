@@ -109,13 +109,13 @@ limitations under the License.
           isEdit: this.isEdit,
           ...this.project,
         },
-        originalProject: {},
-        canEditProjectId: false,
-        overallErrMsg: '',
-        original: {
+        originalProject: {
           name: '',
+          description: '',
           projectId: '',
         },
+        canEditProjectId: false,
+        overallErrMsg: '',
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
@@ -127,36 +127,14 @@ limitations under the License.
       this.registerValidation();
     },
     mounted() {
-      this.original = {
-        name: this.project.name,
-        projectId: this.project.projectId,
-      };
       this.loadingComponent = true;
+      this.descriptionLoaded = false;
 
-      this.loadComponentState(this.componentName).then((result) => {
-        if (result && (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId))) {
-          this.internalProject = result;
-          this.descriptionLoaded = true;
-        } else if (this.isEdit) {
-          ProjectService.loadDescription(this.project.projectId).then((data) => {
-            this.internalProject.description = data.description;
-          }).finally(() => {
-            this.loadingComponent = false;
-            this.descriptionLoaded = true;
-            setTimeout(() => {
-              this.$nextTick(() => {
-                const { observer } = this.$refs;
-                if (observer) {
-                  observer.validate({ silent: false });
-                }
-              });
-            }, 600);
-          });
-        }
-      }).finally(() => {
-        this.originalProject = Object.assign(this.originalProject, this.internalProject);
-        this.loadingComponent = false;
-      });
+      if (this.isEdit) {
+        this.startLoadingFromDescription();
+      } else {
+        this.startLoadingFromState();
+      }
 
       document.addEventListener('focusin', this.trackFocus);
     },
@@ -192,9 +170,46 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged(newValue) {
-        if (newValue.name === this.originalProject.name
-          && newValue.description === this.originalProject.description) {
+      startLoadingFromDescription() {
+        this.originalProject = {
+          name: this.project.name,
+          projectId: this.project.projectId,
+        };
+
+        ProjectService.loadDescription(this.project.projectId).then((data) => {
+          this.originalProject.description = data.description;
+          this.startLoadingFromState();
+        });
+      },
+      startLoadingFromState() {
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
+              this.internalProject = result;
+
+              setTimeout(() => {
+                this.$nextTick(() => {
+                  const { observer } = this.$refs;
+                  if (observer) {
+                    observer.validate({ silent: false });
+                  }
+                });
+              }, 600);
+            } else {
+              this.internalProject = Object.assign(this.internalProject, this.originalProject);
+            }
+          } else {
+            this.internalProject = Object.assign(this.internalProject, this.originalProject);
+          }
+        }).finally(() => {
+          this.loadingComponent = false;
+          this.descriptionLoaded = true;
+        });
+      },
+      hasObjectChanged() {
+        if (this.internalProject.name === this.originalProject.name
+          && this.internalProject.description === this.originalProject.description
+          && this.internalProject.projectId === this.originalProject.projectId) {
           return false;
         }
         return true;
@@ -210,7 +225,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.updated && this.hasObjectChanged(this.internalProject)) {
+        if (!e.updated && this.hasObjectChanged()) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
@@ -254,7 +269,7 @@ limitations under the License.
         extend('uniqueName', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
+            if (self.isEdit && (self.originalProject.name === value || self.originalProject.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return ProjectService.checkIfProjectNameExist(value)
@@ -265,7 +280,7 @@ limitations under the License.
         extend('uniqueId', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.original.projectId === value) {
+            if (self.isEdit && self.originalProject.projectId === value) {
               return true;
             }
             return ProjectService.checkIfProjectIdExist(value)

@@ -183,7 +183,14 @@ limitations under the License.
         canAutoGenerateId: true,
         canEditBadgeId: false,
         badgeInternal,
-        originalBadge: {},
+        originalBadge: {
+          badgeId: this.badge.badgeId,
+          name: this.badge.name,
+          description: this.badge.description,
+          helpUrl: this.badge.helpUrl,
+          startDate: this.toDate(this.badge.startDate),
+          endDate: this.toDate(this.badge.endDate),
+        },
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
@@ -199,25 +206,29 @@ limitations under the License.
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
       this.loadingComponent = true;
+
       this.loadComponentState(this.componentName).then((result) => {
         if (result) {
           if (!this.isEdit || (this.isEdit && result.badgeId === this.badgeInternal.badgeId)) {
             this.badgeInternal = result;
+            this.limitTimeframe = !!(this.badgeInternal.startDate && this.badgeInternal.endDate);
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          } else {
+            this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
           }
         } else if (this.isEdit) {
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const { observer } = this.$refs;
-              if (observer) {
-                observer.validate({ silent: false });
-              }
-            });
-          }, 600);
+          this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
         }
       }).finally(() => {
         this.loadingComponent = false;
       });
-      this.originalBadge = Object.assign(this.originalBadge, this.badgeInternal);
     },
     computed: {
       title() {
@@ -240,10 +251,11 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged(newValue) {
-        if (newValue.name === this.originalBadge.name
-          && newValue.description === this.originalBadge.description
-          && newValue.helpUrl === this.originalBadge.helpUrl) {
+      hasObjectChanged() {
+        if (this.badgeInternal.name === this.originalBadge.name
+          && this.badgeInternal.description === this.originalBadge.description
+          && this.badgeInternal.helpUrl === this.originalBadge.helpUrl
+          && this.badgeInternal.badgeId === this.originalBadge.badgeId) {
           return false;
         }
         return true;
@@ -256,7 +268,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.updated && this.hasObjectChanged(this.badgeInternal)) {
+        if (!e.updated && this.hasObjectChanged()) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
