@@ -242,7 +242,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        List<String> randomUsers = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        List<String> randomUsers = getRandomUsers(2, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
         String otherAdminUser = randomUsers.first()
         String projectUser = randomUsers[1]
 
@@ -266,7 +266,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         then:
         emails.size() == 2
         emails.collect {it.recipients[0] }.sort() == [projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
-        emails.collect { it.fromEmail[0] } == ["resetspec@skilltreetests", "resetspec@skilltreetests"]
+        emails.collect { it.fromEmail[0] } == [projectUserUserAttrs.email, projectUserUserAttrs.email]
 
         !res.body.skillApplied
         res.body.explanation == "Skill was submitted for approval"
