@@ -28,6 +28,7 @@ import skills.intTests.utils.SkillsService
 import skills.services.ContactUsersService
 import skills.services.UserAttrsService
 import skills.utils.WaitFor
+import spock.lang.IgnoreIf
 
 class ContactUsersServiceSpec extends DefaultIntSpec {
 
@@ -370,6 +371,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
         notAchievedAndAchieved.sort() == allUsers.sort()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "email should be sent to only the admin that initiated contact, other admins should NOT be CCed"() {
         def proj = SkillsFactory.createProject(1)
         def subj = SkillsFactory.createSubject(1, 1)
@@ -416,7 +418,7 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
             skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, it)
         }
 
-        def users = getRandomUsers(10, true)
+        def users = getRandomUsers(10, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
         String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
         String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
         String adminUser1Email = userAttrsService.findByUserId(users[7].toLowerCase()).email
