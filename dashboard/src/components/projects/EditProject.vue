@@ -186,15 +186,6 @@ limitations under the License.
           if (result) {
             if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
               this.internalProject = result;
-
-              setTimeout(() => {
-                this.$nextTick(() => {
-                  const { observer } = this.$refs;
-                  if (observer) {
-                    observer.validate({ silent: false });
-                  }
-                });
-              }, 600);
             } else {
               this.internalProject = Object.assign(this.internalProject, this.originalProject);
             }
@@ -204,6 +195,16 @@ limitations under the License.
         }).finally(() => {
           this.loadingComponent = false;
           this.descriptionLoaded = true;
+          if (this.isEdit) {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          }
         });
       },
       hasObjectChanged() {

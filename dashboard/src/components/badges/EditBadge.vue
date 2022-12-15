@@ -212,14 +212,6 @@ limitations under the License.
           if (!this.isEdit || (this.isEdit && result.badgeId === this.badgeInternal.badgeId)) {
             this.badgeInternal = result;
             this.limitTimeframe = !!(this.badgeInternal.startDate && this.badgeInternal.endDate);
-            setTimeout(() => {
-              this.$nextTick(() => {
-                const { observer } = this.$refs;
-                if (observer) {
-                  observer.validate({ silent: false });
-                }
-              });
-            }, 600);
           } else {
             this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
           }
@@ -228,6 +220,16 @@ limitations under the License.
         }
       }).finally(() => {
         this.loadingComponent = false;
+        if (this.isEdit) {
+          setTimeout(() => {
+            this.$nextTick(() => {
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
+            });
+          }, 600);
+        }
       });
     },
     computed: {

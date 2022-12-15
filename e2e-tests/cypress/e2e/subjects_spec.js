@@ -399,7 +399,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
         cy.get('[data-cy="btn_Subjects"]').click();
-        cy.get('body').type('{esc}');
+        cy.get('body').type('{esc}{esc}');
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
         cy.get('[data-cy="btn_Subjects"]').click();
@@ -913,6 +913,7 @@ describe('Subjects Tests', () => {
 
         // now test edit
         cy.get('[data-cy="closeSubjectButton"]').click();
+        cy.discardChanges();
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
         cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);

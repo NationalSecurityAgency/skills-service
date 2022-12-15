@@ -137,6 +137,7 @@ limitations under the License.
         subjectInternal: {
           originalSubjectId: this.subject.subjectId,
           isEdit: this.isEdit,
+          helpUrl: this.subject.helpUrl,
           ...this.subject,
         },
         originalSubject: {
@@ -166,14 +167,6 @@ limitations under the License.
         if (result) {
           if (!this.isEdit || (this.isEdit && result.subjectId === this.subjectInternal.subjectId)) {
             this.subjectInternal = result;
-            setTimeout(() => {
-              this.$nextTick(() => {
-                const { observer } = this.$refs;
-                if (observer) {
-                  observer.validate({ silent: false });
-                }
-              });
-            }, 600);
           } else {
             this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
           }
@@ -182,6 +175,16 @@ limitations under the License.
         }
       }).finally(() => {
         this.loadingComponent = false;
+        if (this.isEdit) {
+          setTimeout(() => {
+            this.$nextTick(() => {
+              const { observer } = this.$refs;
+              if (observer) {
+                observer.validate({ silent: false });
+              }
+            });
+          }, 600);
+        }
       });
     },
     watch: {
