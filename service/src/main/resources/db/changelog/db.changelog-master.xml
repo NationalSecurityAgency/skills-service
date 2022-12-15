@@ -1973,6 +1973,9 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="quiz_id"
                                  referencedTableName="quiz_definition"/>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="quizDefs_lock"/>
+        </insert>
     </changeSet>
 
 

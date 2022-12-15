@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.utils.InputSanitizer
@@ -85,6 +86,10 @@ class CustomValidator {
 
     CustomValidationResult validate(SubjectRequest subjectRequest) {
         return validateDescriptionAndName(subjectRequest.description, subjectRequest.name)
+    }
+
+    CustomValidationResult validate(QuizDefRequest quizDefRequest) {
+        return validateDescriptionAndName(quizDefRequest.description, quizDefRequest.name)
     }
 
     @Profile

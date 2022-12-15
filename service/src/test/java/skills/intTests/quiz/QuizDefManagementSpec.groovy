@@ -17,6 +17,7 @@ package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 
 @Slf4j
 class QuizDefManagementSpec extends DefaultIntSpec {
@@ -27,6 +28,22 @@ class QuizDefManagementSpec extends DefaultIntSpec {
 
         then:
         !quizDefs
+    }
+
+    def "create quiz definition"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+
+        when:
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def quizDefs = skillsService.getQuizDefs()
+
+        then:
+        newQuiz.body.quizId == quiz.quizId
+        newQuiz.body.name == quiz.name
+
+        quizDefs.quizId == [quiz.quizId]
+        quizDefs.name == [quiz.name]
     }
 
 }

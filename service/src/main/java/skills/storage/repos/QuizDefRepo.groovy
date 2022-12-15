@@ -25,7 +25,11 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
     @Nullable
     QuizDef findByQuizIdIgnoreCase(String projectId)
 
+    @Nullable
+    QuizDef findByNameIgnoreCase(String quizName)
 
+    @Query(value = "select count(q.id) from QuizDef q, UserRole u where q.quizId = u.quizId and u.userId=?1")
+    Integer getQuizCountByUserId(String userId)
 
     static interface QuizDefSummaryResult {
         String getQuizId();

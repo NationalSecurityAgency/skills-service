@@ -22,7 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import javax.persistence.*
 
 @Entity
-@Table(name = 'test_definition')
+@Table(name = 'quiz_definition')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
 @ToString(includeNames = true)

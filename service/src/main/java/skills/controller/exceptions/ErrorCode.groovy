@@ -40,6 +40,7 @@ enum ErrorCode {
     ExportToCatalogNotAllowed,
     DependenciesNotAllowed,
     MaxProjectsThreshold,
+    MaxQuizDefThreshold,
     MaxBadgesThreshold,
     MaxSkillsThreshold,
     MaxSubjectsThreshold,

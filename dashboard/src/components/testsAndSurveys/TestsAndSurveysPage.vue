@@ -18,10 +18,12 @@ limitations under the License.
   <sub-page-header title="Tests And Surveys" action="Test" @add-action="openNewTestModal"/>
 
   <b-card body-class="p-0">
-    <configured-tests />
+    <configured-tests ref="configuredTests"/>
   </b-card>
 
-  <edit-test v-if="newTest.show" v-model="newTest.show" :test="newTest.test" />
+  <edit-test v-if="newTest.show" v-model="newTest.show"
+             :test="newTest.test"
+             @quiz-saved="saveQuiz" />
 </div>
 </template>
 
@@ -54,6 +56,9 @@ limitations under the License.
             description: '',
           },
         };
+      },
+      saveQuiz(quizDef) {
+        this.$refs.configuredTests.saveQuiz(quizDef);
       },
     },
   };

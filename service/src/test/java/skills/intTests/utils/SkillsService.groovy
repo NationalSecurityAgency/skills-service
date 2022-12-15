@@ -1587,7 +1587,14 @@ class SkillsService {
     }
 
     def getQuizDefs() {
-        wsHelper.appGet("/quizDefs")
+        wsHelper.appGet("/quiz-definitions")
+    }
+    def createQuizDef(Map props, String originalQuizId = null) {
+        wsHelper.appPost(getQuizDefUrl(originalQuizId ?: props.quizId), props)
+    }
+
+    private String getQuizDefUrl(String quizId) {
+        return "/quiz-definitions/${quizId}".toString()
     }
 
     private String getProjectUrl(String project) {

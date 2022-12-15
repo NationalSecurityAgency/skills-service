@@ -23,5 +23,5 @@ class QuizDefResult {
 
     Date created
     int displayOrder
-
+    int numQuestions
 }

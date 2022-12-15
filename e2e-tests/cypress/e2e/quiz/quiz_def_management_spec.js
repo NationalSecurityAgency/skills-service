@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+import dayjs from 'dayjs';
+import utcPlugin from 'dayjs/plugin/utc';
 
-import groovy.transform.Canonical
-import groovy.transform.ToString
+dayjs.extend(utcPlugin);
 
-import jakarta.persistence.*
+describe('Quiz Tests', () => {
 
-@ToString(includeNames = true)
-@Entity
-@Table(name = 'user_roles')
-@Canonical
-class UserRole implements Serializable {
+    beforeEach(() => {
 
-    private static final long serialVersionUID = 1L;
+    });
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
+    it('create quiz', function () {
+        cy.visit('/administrator/tests-and-surveys');
+    });
 
-    Integer userRefId
-    String userId
 
-    String projectId
-    String quizId
 
-    @Enumerated(EnumType.STRING)
-    RoleName roleName
-}
+});

@@ -24,9 +24,11 @@ import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizDefRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.InviteTokenValidationResponse
 import skills.controller.result.model.ProjectResult
@@ -55,7 +57,7 @@ class ProjectController {
     ProjAdminService projAdminService
 
     @Autowired
-    QuizDefService testDefService
+    QuizDefService quizDefService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -83,10 +85,10 @@ class ProjectController {
         return projAdminService.getProjects()
     }
 
-    @RequestMapping(value = "/quizDefs", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/quiz-definitions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<QuizDefResult> getTestDefs() {
-        return testDefService.getCurrentUsersTestDefs()
+    List<QuizDefResult> getQuizDefs() {
+        return quizDefService.getCurrentUsersTestDefs()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -125,6 +127,43 @@ class ProjectController {
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/quiz-definitions/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
+        // project id is optional
+        if (quizDefRequest.quizId && quizId != quizDefRequest.quizId) {
+            throw new SkillQuizException("Quiz id in the request doesn't equal to quiz id in the URL [${quizDefRequest?.quizId}]<>[${quizId}]. Cannot edit quiz id using /app/quiz-definitions/{id} endpoint. Please use /admin/quiz-definitions/{id}", quizId, ErrorCode.AccessDenied)
+        }
+        IdFormatValidator.validate(quizId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId Id", quizId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "QuizId Id", quizId)
+
+        if (!quizDefRequest.quizId) {
+            quizDefRequest.quizId = quizId
+        } else {
+            IdFormatValidator.validate(quizDefRequest.quizId)
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Quiz Id", quizDefRequest.quizId)
+            propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Quiz Id", quizDefRequest.quizId)
+        }
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxQuizNameLength, "Quiz Name", quizDefRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Quiz Name", quizDefRequest.name)
+
+        if (quizDefRequest.quizId == RESERVERED_PROJECT_ID) {
+            throw new SkillQuizException("Quiz Id uses a reserved id, please choose a different Quiz Id.", quizDefRequest.quizId, ErrorCode.BadParam)
+        }
+        if (!quizDefRequest?.name) {
+            throw new SkillQuizException("Quiz name was not provided.", quizId, ErrorCode.BadParam)
+        }
+
+        quizDefRequest.quizId = InputSanitizer.sanitize(quizDefRequest.quizId)
+        quizDefRequest.name = InputSanitizer.sanitize(quizDefRequest.name)?.trim()
+        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(quizDefRequest.description))
+
+        return quizDefService.saveQuizDef(null, quizDefRequest)
     }
 
     @RequestMapping(value = "/projects/{id}/join/{invite_code}", method = RequestMethod.POST, produces = "application/json")

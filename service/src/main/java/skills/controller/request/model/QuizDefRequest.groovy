@@ -13,31 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.controller.request.model
 
 import groovy.transform.Canonical
-import groovy.transform.ToString
 
-import jakarta.persistence.*
-
-@ToString(includeNames = true)
-@Entity
-@Table(name = 'user_roles')
 @Canonical
-class UserRole implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id
-
-    Integer userRefId
-    String userId
-
-    String projectId
+class QuizDefRequest {
     String quizId
-
-    @Enumerated(EnumType.STRING)
-    RoleName roleName
+    String name
+    String description
 }

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/admin")
 @Slf4j
 @skills.profile.EnableCallStackProf
-class TestsAndSurveysController {
+class QuizController {
 
 
 }

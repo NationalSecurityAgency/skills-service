@@ -33,6 +33,10 @@ class DataIntegrityViolationExceptionHandler {
     }
 
     Object handle(String projectId, String skillId, Closure closure) {
+        return handle(projectId, null, null, closure)
+    }
+
+    Object handle(String projectId, String skillId, String quizId, Closure closure) {
         try {
             return closure.call()
         } catch (DataIntegrityViolationException violationException) {

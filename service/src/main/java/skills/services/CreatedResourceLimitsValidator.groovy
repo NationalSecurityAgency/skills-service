@@ -25,6 +25,7 @@ import skills.controller.exceptions.SkillException
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.SkillDefRepo
 
 @Service
@@ -36,8 +37,14 @@ class CreatedResourceLimitsValidator {
     @Autowired
     ProjDefRepo projDefRepo
 
+    @Autowired
+    QuizDefRepo quizDefRepo
+
     @Value('#{"${skills.config.ui.maxProjectsPerAdmin}"}')
     int maxProjectsPerUser
+
+    @Value('#{"${skills.config.ui.maxQuizDefsPerAdmin}"}')
+    int maxQuizDefsPerAdmin
 
     @Value('#{"${skills.config.ui.maxSubjectsPerProject}"}')
     int maxSubjectsPerProject
@@ -52,6 +59,13 @@ class CreatedResourceLimitsValidator {
         Integer projectsByUserCount = projDefRepo.getProjectsByUserCount(userId)
         if(projectsByUserCount >= maxProjectsPerUser) {
             throw new SkillException("Each user is limited to [${maxProjectsPerUser}] Projects", ErrorCode.MaxProjectsThreshold)
+        }
+    }
+
+    void validateNumQuizDefsCreated(String userId) {
+        Integer numQuizDefs = quizDefRepo.getQuizCountByUserId(userId)
+        if(numQuizDefs >= maxQuizDefsPerAdmin) {
+            throw new SkillException("Each user is limited to [${maxQuizDefsPerAdmin}] quiz definitions", ErrorCode.MaxQuizDefThreshold)
         }
     }
 
