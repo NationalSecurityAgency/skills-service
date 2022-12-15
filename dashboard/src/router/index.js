@@ -17,7 +17,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
-import TestsAndSurveysPage from '@/components/testsAndSurveys/TestsAndSurveysPage';
+import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
@@ -87,9 +87,9 @@ import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage';
 import ProjectErrorsPage from '@/components/projects/ProjectErrors';
 import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav';
 import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage';
-import TestPage from '@/components/testsAndSurveys/TestPage';
-import Questions from '@/components/testsAndSurveys/testCreation/Questions';
-import TestMetrics from '@/components/testsAndSurveys/metrics/TestMetrics';
+import QuizPage from '@/components/quiz/QuizPage';
+import Questions from '@/components/quiz/testCreation/Questions';
+import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
 
 Vue.use(Router);
 
@@ -118,7 +118,7 @@ const router = new Router({
       }, {
         name: 'TestAndSurveys',
         path: 'tests-and-surveys',
-        component: TestsAndSurveysPage,
+        component: QuizDefinitionsPage,
         meta: {
           requiresAuth: true,
           announcer: {
@@ -904,8 +904,8 @@ const router = new Router({
       }],
     },
     {
-      path: '/administrator/tests-and-surveys/:testId',
-      component: TestPage,
+      path: '/administrator/tests-and-surveys/:quizId',
+      component: QuizPage,
       meta: {
         requiresAuth: true,
         announcer: {
@@ -923,9 +923,9 @@ const router = new Router({
           },
         },
       }, {
-        name: 'TestMetrics',
+        name: 'QuizMetrics',
         path: 'metrics',
-        component: TestMetrics,
+        component: QuizMetrics,
         meta: {
           requiresAuth: true,
           announcer: {

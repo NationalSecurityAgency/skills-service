@@ -31,7 +31,7 @@ limitations under the License.
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import QuestionCard from '@/components/testsAndSurveys/testCreation/QuestionCard';
+  import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
 
   export default {
     name: 'Questions',

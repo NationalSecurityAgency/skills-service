@@ -81,10 +81,10 @@ limitations under the License.
   import ProjectService from '@/components/projects/ProjectService';
 
   export default {
-    name: 'EditTest',
+    name: 'EditQuiz',
     components: { MarkdownEditor, IdInput },
     props: {
-      test: Object,
+      quiz: Object,
       isEdit: {
         type: Boolean,
         default: false,
@@ -93,9 +93,9 @@ limitations under the License.
     },
     data() {
       const quizInternal = {
-        originalQuizId: this.test.quizId,
+        originalQuizId: this.quiz.quizId,
         isEdit: this.isEdit,
-        ...this.test,
+        ...this.quiz,
       };
       return {
         show: this.value,

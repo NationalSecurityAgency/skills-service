@@ -23,7 +23,7 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
 
   export default {
-    name: 'TestMetrics',
+    name: 'QuizMetrics',
     components: { SubPageHeader },
   };
 </script>

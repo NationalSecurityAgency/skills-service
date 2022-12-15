@@ -47,7 +47,7 @@ limitations under the License.
           </div>
           <div class="col-auto text-right">
             <router-link :data-cy="`managesQuizBtn_${data.item.quizId}`"
-                         :to="{ name:'Questions', params: { testId: data.item.quizId }}"
+                         :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
                          :aria-label="`Manage Quiz ${data.item.name}`"
                          class="btn btn-outline-primary btn-sm">
               <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"
@@ -80,10 +80,10 @@ limitations under the License.
 <script>
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
-  import QuizService from '@/components/testsAndSurveys/QuizService';
+  import QuizService from '@/components/quiz/QuizService';
 
   export default {
-    name: 'ConfiguredTests',
+    name: 'QuizDefinitions',
     components: {
       DateCell,
       SkillsBTable,

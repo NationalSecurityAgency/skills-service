@@ -18,39 +18,39 @@ limitations under the License.
   <sub-page-header title="Tests And Surveys" action="Test" @add-action="openNewTestModal"/>
 
   <b-card body-class="p-0">
-    <configured-tests ref="configuredTests"/>
+    <quiz-definitions ref="configuredTests"/>
   </b-card>
 
-  <edit-test v-if="newTest.show" v-model="newTest.show"
-             :test="newTest.test"
+  <edit-test v-if="newQuiz.show" v-model="newTest.show"
+             :test="newQuiz.quiz"
              @quiz-saved="saveQuiz" />
 </div>
 </template>
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import ConfiguredTests from '@/components/testsAndSurveys/ConfiguredTests';
-  import EditTest from '@/components/testsAndSurveys/testCreation/EditTest';
+  import QuizDefinitions from '@/components/quiz/QuizDefinitions';
+  import EditTest from '@/components/quiz/testCreation/EditQuiz';
 
   export default {
     name: 'TestsAndSurveys',
-    components: { EditTest, ConfiguredTests, SubPageHeader },
+    components: { EditTest, QuizDefinitions, SubPageHeader },
     data() {
       return {
         showNewTestModal: false,
-        newTest: {
+        newQuiz: {
           show: false,
           isEdit: false,
-          test: {},
+          quiz: {},
         },
       };
     },
     methods: {
       openNewTestModal() {
-        this.newTest = {
+        this.newQuiz = {
           show: true,
           isEdit: false,
-          test: {
+          quiz: {
             name: '',
             testId: '',
             description: '',
