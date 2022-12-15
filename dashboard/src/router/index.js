@@ -17,6 +17,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
+import TestsAndSurveysPage from '@/components/testsAndSurveys/TestsAndSurveysPage';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
@@ -86,6 +87,9 @@ import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage';
 import ProjectErrorsPage from '@/components/projects/ProjectErrors';
 import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav';
 import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage';
+import TestPage from '@/components/testsAndSurveys/TestPage';
+import Questions from '@/components/testsAndSurveys/testCreation/Questions';
+import TestMetrics from '@/components/testsAndSurveys/metrics/TestMetrics';
 
 Vue.use(Router);
 
@@ -109,6 +113,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Project Administrator',
+          },
+        },
+      }, {
+        name: 'TestAndSurveys',
+        path: 'tests-and-surveys',
+        component: TestsAndSurveysPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Tests and Surveys',
           },
         },
       }, {
@@ -885,6 +899,37 @@ const router = new Router({
           reportSkillId: 'VisitUserPerformedSkills',
           announcer: {
             message: 'User\'s Performed Skill EVents for Badge',
+          },
+        },
+      }],
+    },
+    {
+      path: '/administrator/tests-and-surveys/:testId',
+      component: TestPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Manage Test',
+        },
+      },
+      children: [{
+        name: 'Questions',
+        path: '',
+        component: Questions,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Test or Survey',
+          },
+        },
+      }, {
+        name: 'TestMetrics',
+        path: 'metrics',
+        component: TestMetrics,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Test Metrics',
           },
         },
       }],

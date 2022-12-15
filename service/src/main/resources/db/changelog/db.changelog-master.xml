@@ -1932,6 +1932,49 @@
                                  referencedTableName="project_definition"/>
     </changeSet>
 
+    <changeSet id="36" author="skills team">
+        <createTable tableName="quiz_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_quiz_definition_quiz_id"
+                     tableName="quiz_definition" unique="true">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_quiz_definition_name"
+                     tableName="quiz_definition" unique="true">
+            <column name="name" type="varchar(255)"/>
+        </createIndex>
+
+        <addColumn tableName="user_roles">
+            <!-- optional -->
+            <column name="quiz_id" type="varchar(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+    </changeSet>
+
 
     <changeSet id="36" author="skills team">
         <createTable tableName="attachments">

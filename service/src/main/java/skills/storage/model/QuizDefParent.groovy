@@ -13,14 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.storage.model
 
-enum RoleName {
-    ROLE_APP_USER,
-    ROLE_PRIVATE_PROJECT_USER,
-    ROLE_PROJECT_ADMIN,
-    ROLE_SUPERVISOR,
-    ROLE_SUPER_DUPER_USER,
-    ROLE_PROJECT_APPROVER,
-    ROLE_QUIZ_ADMIN,
+import groovy.transform.CompileStatic
+import org.springframework.data.annotation.LastModifiedDate
+
+import javax.persistence.*
+
+@CompileStatic
+@MappedSuperclass
+class QuizDefParent implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id
+
+    String quizId
+
+    String name
+
+    @Column(name="created", updatable = false, insertable = false)
+    Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
+
 }

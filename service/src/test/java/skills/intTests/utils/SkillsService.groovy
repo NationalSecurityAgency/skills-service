@@ -1586,6 +1586,10 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/invites/extend", body)
     }
 
+    def getQuizDefs() {
+        wsHelper.appGet("/quizDefs")
+    }
+
     private String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }

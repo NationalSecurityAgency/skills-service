@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.storage.model
 
-enum RoleName {
-    ROLE_APP_USER,
-    ROLE_PRIVATE_PROJECT_USER,
-    ROLE_PROJECT_ADMIN,
-    ROLE_SUPERVISOR,
-    ROLE_SUPER_DUPER_USER,
-    ROLE_PROJECT_APPROVER,
-    ROLE_QUIZ_ADMIN,
+import groovy.transform.CompileStatic
+import groovy.transform.ToString
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+
+import javax.persistence.*
+
+@Entity
+@Table(name = 'test_definition')
+@EntityListeners(AuditingEntityListener)
+@CompileStatic
+@ToString(includeNames = true)
+class QuizDefWithDescription extends QuizDefParent {
+
+    @Lob
+    @Column(columnDefinition = "text")
+    String description
+
 }

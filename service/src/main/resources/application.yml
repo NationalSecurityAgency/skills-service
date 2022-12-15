@@ -132,6 +132,7 @@ skills:
       minNameLength: 3
       maxBadgeNameLength: 50
       maxProjectNameLength: 50
+      maxTestNameLength: 75
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
       maxLevelNameLength: 50

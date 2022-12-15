@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.controller.result.model
 
-enum RoleName {
-    ROLE_APP_USER,
-    ROLE_PRIVATE_PROJECT_USER,
-    ROLE_PROJECT_ADMIN,
-    ROLE_SUPERVISOR,
-    ROLE_SUPER_DUPER_USER,
-    ROLE_PROJECT_APPROVER,
-    ROLE_QUIZ_ADMIN,
+class QuizDefResult {
+
+    String quizId
+    String name
+    String description
+
+    Date created
+    int displayOrder
+
 }

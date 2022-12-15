@@ -31,6 +31,7 @@ import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.InviteTokenValidationResponse
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.QuizDefResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
@@ -39,6 +40,7 @@ import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
+import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
 
 import jakarta.servlet.http.HttpServletResponse
@@ -51,6 +53,9 @@ class ProjectController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    QuizDefService testDefService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -76,6 +81,12 @@ class ProjectController {
     @ResponseBody
     List<ProjectResult> getProjects() {
         return projAdminService.getProjects()
+    }
+
+    @RequestMapping(value = "/quizDefs", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<QuizDefResult> getTestDefs() {
+        return testDefService.getCurrentUsersTestDefs()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

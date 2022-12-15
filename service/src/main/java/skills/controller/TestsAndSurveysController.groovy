@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.controller
 
-enum RoleName {
-    ROLE_APP_USER,
-    ROLE_PRIVATE_PROJECT_USER,
-    ROLE_PROJECT_ADMIN,
-    ROLE_SUPERVISOR,
-    ROLE_SUPER_DUPER_USER,
-    ROLE_PROJECT_APPROVER,
-    ROLE_QUIZ_ADMIN,
+import groovy.util.logging.Slf4j
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+
+@RestController
+@RequestMapping("/admin")
+@Slf4j
+@skills.profile.EnableCallStackProf
+class TestsAndSurveysController {
+
+
 }
