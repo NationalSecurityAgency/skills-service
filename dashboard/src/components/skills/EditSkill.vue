@@ -372,26 +372,12 @@ limitations under the License.
       };
     },
     mounted() {
-      this.loadComponentState(this.componentName).then((result) => {
-        if (result && (!this.isEdit || (this.isEdit && result.skillId === this.skillId))) {
-          this.skillInternal = result;
-          this.descriptionLoaded = true;
-        } else if (this.isEdit) {
-          this.loadSkillDetailsAndValidate(false);
-        } else if (this.isCopy) {
-          this.loadSkillDetailsAndValidate(true);
-        } else {
-          if (this.newSkillDefaultValues) {
-            this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
-          }
-          this.findLatestSkillVersion();
-          this.loadSelfReportProjectSetting();
-        }
-      }).finally(() => {
-        this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
-        this.selfReport.loading = false;
-        this.isLoadingSkillDetails = false;
-      });
+      if (this.isEdit || this.isCopy) {
+        this.loadSkillDetailsAndValidate(this.isCopy);
+      } else {
+        this.startLoadingFromState();
+      }
+
       this.setupValidation();
       document.addEventListener('focusin', this.trackFocus);
     },
@@ -610,10 +596,34 @@ limitations under the License.
             }
           });
       },
-      loadSkillDetailsAndValidate(isCopy) {
-        this.loadSkillDetails(isCopy)
-          .then(() => {
-            this.descriptionLoaded = true;
+      startLoadingFromState() {
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.skillId === this.originalSkill.skillId)) {
+              this.skillInternal = result;
+            } else {
+              if (this.newSkillDefaultValues) {
+                this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+              } else {
+                this.skillInternal = Object.assign(this.skillInternal, this.originalSkill);
+              }
+              this.findLatestSkillVersion();
+              this.loadSelfReportProjectSetting();
+            }
+          } else {
+            if (this.newSkillDefaultValues) {
+              this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
+            } else {
+              this.skillInternal = Object.assign(this.skillInternal, this.originalSkill);
+            }
+            this.findLatestSkillVersion();
+            this.loadSelfReportProjectSetting();
+          }
+        }).finally(() => {
+          this.selfReport.loading = false;
+          this.isLoadingSkillDetails = false;
+          this.descriptionLoaded = true;
+          if (this.isEdit) {
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;
@@ -622,13 +632,17 @@ limitations under the License.
                 }
               });
             }, 600);
-          });
+          }
+        });
+      },
+      loadSkillDetailsAndValidate(isCopy) {
+        this.loadSkillDetails(isCopy);
       },
       loadSkillDetails(isCopy) {
         return SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
             if (!isCopy) {
-              this.skillInternal = {
+              this.originalSkill = {
                 originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill, subjectId: this.subjectId,
               };
             } else {
@@ -636,14 +650,13 @@ limitations under the License.
               copy.name = `Copy of ${loadedSkill.name}`;
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
               copy.subjectId = this.subjectId;
-              this.skillInternal = { isEdit: false, ...copy };
+              this.originalSkill = { isEdit: false, ...copy };
             }
-            this.initial.skillId = this.skillInternal.skillId;
-            this.initial.skillName = this.skillInternal.name;
+            this.initial.skillId = this.originalSkill.skillId;
+            this.initial.skillName = this.originalSkill.name;
           })
           .finally(() => {
-            this.isLoadingSkillDetails = false;
-            this.originalSkill = Object.assign(this.originalSkill, this.skillInternal);
+            this.startLoadingFromState();
           });
       },
       loadSelfReportProjectSetting() {
