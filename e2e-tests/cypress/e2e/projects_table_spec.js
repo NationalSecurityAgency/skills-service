@@ -542,7 +542,6 @@ describe('Projects Table Tests', () => {
             .click();
         cy.get('[data-cy="closeProjectButton"]')
             .click();
-        cy.discardChanges();
         cy.get('[data-cy="editProjectIdproj10"]')
             .should('have.focus');
 

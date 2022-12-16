@@ -69,7 +69,6 @@ describe('Skills Tests', () => {
 
       cy.get('[data-cy="newSkillButton"]').click();
       cy.get('[data-cy=closeSkillButton]').click();
-      cy.discardChanges();
       cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
@@ -627,7 +626,6 @@ describe('Skills Tests', () => {
 
     cy.get('[aria-label="new skill"]').click();
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.discardChanges();
     cy.get('[aria-label="new skill"]').should('have.focus');
 
     cy.get('[aria-label="new skill"]').click();
