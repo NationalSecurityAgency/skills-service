@@ -19,7 +19,8 @@ import groovy.transform.Canonical
 
 @Canonical
 class QuizDefRequest {
-    String quizId
     String name
     String description
+    // this only considered in the update to support updating id
+    String quizId
 }

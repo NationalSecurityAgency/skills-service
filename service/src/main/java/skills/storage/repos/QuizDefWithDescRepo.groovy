@@ -22,5 +22,5 @@ import skills.storage.model.QuizDefWithDescription
 interface QuizDefWithDescRepo extends CrudRepository<QuizDefWithDescription, Long> {
 
     @Nullable
-    QuizDefWithDescription findByQuizIdIgnoreCase(String projectId)
+    QuizDefWithDescription findByQuizIdIgnoreCase(String quizId)
 }

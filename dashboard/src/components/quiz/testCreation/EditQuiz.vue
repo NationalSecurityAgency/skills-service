@@ -20,7 +20,8 @@ limitations under the License.
              header-bg-variant="info"
              @hide="publishHidden"
              header-text-variant="light" no-fade>
-      <b-container fluid>
+      <skills-spinner :is-loading="loading"/>
+      <b-container v-if="!loading" fluid>
         <div class="form-group">
           <label for="projectIdInput">* Name</label>
           <ValidationProvider
@@ -29,7 +30,7 @@ limitations under the License.
             name="Test Name">
             <input class="form-control" type="text" v-model="quizInternal.name"
                    v-on:input="updateQuizId"
-                   v-on:keydown.enter="handleSubmit(updateProject)"
+                   v-on:keydown.enter="handleSubmit(saveQuiz)"
                    v-focus
                    data-cy="testName"
                    id="testNameInput"
@@ -49,10 +50,12 @@ limitations under the License.
                   @hidden="tooltipShowing=false"/>
 
         <label>Description</label>
-        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
+        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250"
+                            v-slot="{errors}"
                             name="Badge Description">
           <markdown-editor v-model="quizInternal.description"></markdown-editor>
-          <small role="alert" class="form-text text-danger mb-3" data-cy="badgeDescriptionError">{{ errors[0] }}</small>
+          <small role="alert" class="form-text text-danger mb-3"
+                 data-cy="badgeDescriptionError">{{ errors[0] }}</small>
         </ValidationProvider>
 
         <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite">
@@ -60,12 +63,14 @@ limitations under the License.
       </b-container>
 
       <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(saveQuiz)"
+        <b-button v-if="!loading" variant="success" size="sm" class="float-right"
+                  @click="handleSubmit(saveQuiz)"
                   :disabled="invalid"
                   data-cy="saveQuizButton">
-          <span>Save Quiz</span>
+          <span>Save</span>
         </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe" data-cy="closeQuizButton">
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe"
+                  data-cy="closeQuizButton">
           Cancel
         </b-button>
       </div>
@@ -79,10 +84,16 @@ limitations under the License.
   import IdInput from '@/components/utils/inputForm/IdInput';
   import MarkdownEditor from '@/components/utils/MarkdownEditor';
   import ProjectService from '@/components/projects/ProjectService';
+  import QuizService from '@/components/quiz/QuizService';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
     name: 'EditQuiz',
-    components: { MarkdownEditor, IdInput },
+    components: {
+      SkillsSpinner,
+      MarkdownEditor,
+      IdInput,
+    },
     props: {
       quiz: Object,
       isEdit: {
@@ -92,14 +103,10 @@ limitations under the License.
       value: Boolean,
     },
     data() {
-      const quizInternal = {
-        originalQuizId: this.quiz.quizId,
-        isEdit: this.isEdit,
-        ...this.quiz,
-      };
       return {
+        loading: false,
         show: this.value,
-        quizInternal,
+        quizInternal: {},
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
@@ -112,14 +119,24 @@ limitations under the License.
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
       if (this.isEdit) {
-        setTimeout(() => {
-          this.$nextTick(() => {
-            const { observer } = this.$refs;
-            if (observer) {
-              observer.validate({ silent: false });
-            }
+        this.loading = true;
+        QuizService.getQuizDef(this.quiz.quizId)
+          .then((resQuizDef) => {
+            this.setInternalQuizDef(resQuizDef);
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+            this.loading = false;
           });
-        }, 600);
+      } else {
+        this.setInternalQuizDef(this.quiz);
       }
     },
     watch: {
@@ -133,6 +150,13 @@ limitations under the License.
       },
     },
     methods: {
+      setInternalQuizDef(quizDef) {
+        this.quizInternal = {
+          originalQuizId: quizDef.quizId,
+          isEdit: this.isEdit,
+          ...quizDef,
+        };
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -145,7 +169,7 @@ limitations under the License.
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', e);
+          this.$emit('hidden', this.quizInternal);
         }
       },
       updateQuizId() {
@@ -157,10 +181,10 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.closeMe();
               this.quizInternal.name = InputSanitizer.sanitize(this.quizInternal.name);
               this.quizInternal.quizId = InputSanitizer.sanitize(this.quizInternal.quizId);
               this.$emit('quiz-saved', this.quizInternal);
+              this.closeMe();
             }
           });
       },
@@ -169,7 +193,7 @@ limitations under the License.
         extend('uniqueName', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
+            if (self.isEdit && (self.quizInternal.name === value || self.quizInternal.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return ProjectService.checkIfProjectNameExist(value)
@@ -180,7 +204,7 @@ limitations under the License.
         extend('uniqueId', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.original.projectId === value) {
+            if (self.isEdit && self.quizInternal.projectId === value) {
               return true;
             }
             return ProjectService.checkIfProjectIdExist(value)

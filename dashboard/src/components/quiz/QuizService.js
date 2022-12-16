@@ -20,8 +20,18 @@ export default {
     return axios.get('/app/quiz-definitions')
       .then((response) => response.data);
   },
-  createQuizDef(quizDef) {
-    return axios.post(`/app/quiz-definitions/${quizDef.quizId}`, quizDef)
+  updateQuizDef(quizDef) {
+    const quizId = quizDef.originalQuizId ? quizDef.originalQuizId : quizDef.quizId;
+    const opType = quizDef.originalQuizId ? 'admin' : 'app';
+    return axios.post(`/${opType}/quiz-definitions/${quizId}`, quizDef)
+      .then((response) => response.data);
+  },
+  deleteQuizId(quizId) {
+    return axios.delete(`/admin/quiz-definitions/${quizId}`)
+      .then((response) => response.data);
+  },
+  getQuizDef(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}`)
       .then((response) => response.data);
   },
 };

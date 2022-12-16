@@ -1590,7 +1590,13 @@ class SkillsService {
         wsHelper.appGet("/quiz-definitions")
     }
     def createQuizDef(Map props, String originalQuizId = null) {
-        wsHelper.appPost(getQuizDefUrl(originalQuizId ?: props.quizId), props)
+        if (originalQuizId) {
+            return wsHelper.adminPost(getQuizDefUrl(originalQuizId), props)
+        }
+        return wsHelper.appPost(getQuizDefUrl(props.quizId), props)
+    }
+    def removeQuizDef(String quizId) {
+        wsHelper.adminDelete(getQuizDefUrl(quizId))
     }
 
     private String getQuizDefUrl(String quizId) {

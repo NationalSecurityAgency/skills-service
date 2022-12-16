@@ -16,8 +16,20 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
+import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizDefRequest
+import skills.controller.result.model.QuizDefResult
+import skills.controller.result.model.RequestResult
+import skills.services.quiz.QuizDefService
 
 
 @RestController
@@ -26,5 +38,25 @@ import org.springframework.web.bind.annotation.RestController
 @skills.profile.EnableCallStackProf
 class QuizController {
 
+    @Autowired
+    QuizDefService quizDefService
+
+    @RequestMapping(value = "/quiz-definitions/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
+        return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
+    }
+
+    @RequestMapping(value = "/quiz-definitions/{id}", method = RequestMethod.DELETE)
+    void deleteProject(@PathVariable("id") String quizId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        quizDefService.deleteQuiz(quizId)
+    }
+
+    @RequestMapping(value = "/quiz-definitions/{id}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    QuizDefResult getQuizDef(@PathVariable("id") String quizId) {
+        return quizDefService.getQuizDef(quizId)
+    }
 
 }

@@ -54,16 +54,17 @@ limitations under the License.
                                                                  aria-hidden="true"/>
             </router-link>
             <b-button-group size="sm" class="ml-1">
-              <b-button @click="editSkill(data.item)"
-                        variant="outline-primary" :data-cy="`editSkillButton_${data.item.skillId}`"
-                        :aria-label="'edit Skill '+data.item.name" :ref="'edit_'+data.item.skillId"
-                        title="Edit Skill">
+              <b-button @click="showUpdateModal(data.item)"
+                        variant="outline-primary" :data-cy="`editSkillButton_${data.item.quizId}`"
+                        :aria-label="'edit Quiz '+data.item.name" :ref="'edit_'+data.item.quizId"
+                        title="Edit Quiz">
                 <i class="fas fa-edit" aria-hidden="true"/>
               </b-button>
-              <b-button @click="deleteSkill(data.item)" variant="outline-primary"
-                        :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                        :aria-label="'delete Skill '+data.item.name"
-                        title="Delete Skill">
+              <b-button @click="showDeleteWarningModal(data.item)" variant="outline-primary"
+                        :data-cy="`deleteQuizButton_${data.item.quizId}`"
+                        :aria-label="'delete Quiz '+data.item.name"
+                        :ref="`delete_${data.item.quizId}`"
+                        title="Delete Quiz">
                 <i class="text-warning fas fa-trash" aria-hidden="true"/>
               </b-button>
             </b-button-group>
@@ -74,6 +75,23 @@ limitations under the License.
         <date-cell :value="data.value"/>
       </template>
     </skills-b-table>
+
+    <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
+               :quiz="editQuizInfo.quizDef"
+               :is-edit="editQuizInfo.isEdit"
+               @quiz-saved="updateQuizDef"
+               @hidden="focusOnRefId(`edit_${$event.quizId}`)"/>
+    <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
+                        @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
+      <p>
+        This will remove <span
+        class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> test.
+      </p>
+      <div>
+        Deletion can not be undone and permanently removes all of the test's underlying configuration
+        as well as users' test achievements, stats and metrics.
+      </div>
+    </removal-validation>
   </div>
 </template>
 
@@ -81,12 +99,16 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import QuizService from '@/components/quiz/QuizService';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
 
   export default {
     name: 'QuizDefinitions',
     components: {
+      RemovalValidation,
       DateCell,
       SkillsBTable,
+      EditQuiz,
     },
     data() {
       return {
@@ -122,6 +144,15 @@ limitations under the License.
             possiblePageSizes: [5, 10, 15, 20],
           },
         },
+        deleteQuizInfo: {
+          showDialog: false,
+          quizDef: {},
+        },
+        editQuizInfo: {
+          showDialog: false,
+          isEdit: false,
+          quizDef: {},
+        },
       };
     },
     mounted() {
@@ -134,14 +165,35 @@ limitations under the License.
       reset() {
         this.quizzes = this.quizzes.map((q) => ({ ...q }));
       },
-      saveQuiz(quizDef) {
+      showUpdateModal(quizDef, isEdit = true) {
+        this.editQuizInfo.quizDef = quizDef;
+        this.editQuizInfo.isEdit = isEdit;
+        this.editQuizInfo.showDialog = true;
+      },
+      updateQuizDef(quizDef) {
         this.options.busy = true;
-        QuizService.createQuizDef(quizDef)
+        const isNewQuizDef = !quizDef.originalQuizId;
+        QuizService.updateQuizDef(quizDef)
           .then((updatedQuizDef) => {
-            this.quizzes.push(updatedQuizDef);
+            // presence of the originalQuizId indicates edit operation
+            if (isNewQuizDef) {
+              this.quizzes.push(updatedQuizDef);
+            } else {
+              this.quizzes = this.quizzes.map((q) => {
+                if (q.quizId === quizDef.originalQuizId) {
+                  return updatedQuizDef;
+                }
+                return q;
+              });
+            }
           })
           .finally(() => {
             this.options.busy = false;
+            if (isNewQuizDef) {
+              this.$emit('focus-on-new-button');
+            } else {
+              this.focusOnRefId(`edit_${quizDef.quizId}`);
+            }
           });
       },
       loadData() {
@@ -153,6 +205,31 @@ limitations under the License.
           .finally(() => {
             this.options.busy = false;
           });
+      },
+      showDeleteWarningModal(quizDef) {
+        this.deleteQuizInfo.quizDef = quizDef;
+        this.deleteQuizInfo.showDialog = true;
+      },
+      deleteQuiz() {
+        this.options.busy = true;
+        const { quizDef } = this.deleteQuizInfo;
+        this.deleteQuizInfo.quizDef = {};
+        QuizService.deleteQuizId(quizDef.quizId)
+          .then(() => {
+            this.quizzes = this.quizzes.filter((q) => q.quizId !== quizDef.quizId);
+          })
+          .finally(() => {
+            this.options.busy = false;
+            this.$emit('focus-on-new-button');
+          });
+      },
+      focusOnRefId(refId) {
+        this.$nextTick(() => {
+          const ref = this.$refs[refId];
+          if (ref) {
+            ref.focus();
+          }
+        });
       },
     },
   };

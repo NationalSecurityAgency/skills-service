@@ -31,6 +31,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.repos.ClientPrefRepo
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -107,6 +108,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     LockingService lockingService
 
+    @Autowired
+    QuizDefRepo quizDefRepo
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -128,6 +132,7 @@ class DefaultIntSpec extends Specification {
          * deleting projects and users will wipe the entire db clean due to cascading
          */
         projDefRepo.deleteAll()
+        quizDefRepo.deleteAll()
         userAttrsRepo.deleteAll()
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()

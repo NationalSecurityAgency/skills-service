@@ -66,6 +66,7 @@ class PortalWebSecurityHelper {
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset",
                     "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
+                .requestMatchers('/admin/quiz-definitions/**').hasAnyAuthority(RoleName.ROLE_QUIZ_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name())
                 .requestMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))

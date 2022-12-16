@@ -18,32 +18,25 @@ package skills.intTests.quiz
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 
 @Slf4j
-class QuizDefManagementSpec extends DefaultIntSpec {
+class QuizDefValidationSpecs extends DefaultIntSpec {
 
-    def "no quiz definitions"() {
+    def "only quiz admin can remove quiz"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+        // create project where projectId = quizId
+        skillsService.createProject([projectId: quiz1.quizId, name: "Some Project Name"])
         when:
-        def quizDefs = skillsService.getQuizDefs()
-
+        otherUser.removeQuizDef(quiz1.quizId)
         then:
-        !quizDefs
-    }
-
-    def "create quiz definition"() {
-        def quiz = QuizDefFactory.createQuiz(1)
-
-        when:
-        def newQuiz = skillsService.createQuizDef(quiz)
-
-        def quizDefs = skillsService.getQuizDefs()
-
-        then:
-        newQuiz.body.quizId == quiz.quizId
-        newQuiz.body.name == quiz.name
-
-        quizDefs.quizId == [quiz.quizId]
-        quizDefs.name == [quiz.name]
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("code=403 FORBIDDEN")
     }
 
 }

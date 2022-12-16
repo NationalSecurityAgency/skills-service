@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -23,7 +24,10 @@ import skills.storage.model.QuizDef
 interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
 
     @Nullable
-    QuizDef findByQuizIdIgnoreCase(String projectId)
+    QuizDef findByQuizIdIgnoreCase(String quizId)
+
+    @Modifying
+    int deleteByQuizIdIgnoreCase(String quizId)
 
     @Nullable
     QuizDef findByNameIgnoreCase(String quizName)

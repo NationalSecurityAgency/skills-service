@@ -193,12 +193,19 @@ class UserAuthService {
         if (userRole.roleName == RoleName.ROLE_PROJECT_ADMIN) {
             shouldAddRole = false
             String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
-            if (projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
+            if (projectId && userRole.projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
                 shouldAddRole = true
             }
         }
         if (userRole.roleName == RoleName.ROLE_PROJECT_APPROVER) {
             shouldAddRole = approverRoleDecider.shouldGrantApproverRole(servletRequest, userRole)
+        }
+        if (userRole.roleName == RoleName.ROLE_QUIZ_ADMIN) {
+            shouldAddRole = false
+            String quizId = AuthUtils.getQuizIdFromRequest(servletRequest)
+            if (quizId && userRole.quizId && quizId.equalsIgnoreCase(userRole.quizId)) {
+                shouldAddRole = true
+            }
         }
         return shouldAddRole
     }

@@ -15,26 +15,21 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header title="Tests And Surveys" action="Test" @add-action="openNewTestModal"/>
+  <sub-page-header ref="quizDefPageSubPageHeader" title="Tests And Surveys" action="Test" @add-action="openNewTestModal"/>
 
   <b-card body-class="p-0">
-    <quiz-definitions ref="configuredTests"/>
+    <quiz-definitions ref="configuredTests" @focus-on-new-button="focusOnNewButton"/>
   </b-card>
-
-  <edit-test v-if="newQuiz.show" v-model="newTest.show"
-             :test="newQuiz.quiz"
-             @quiz-saved="saveQuiz" />
 </div>
 </template>
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuizDefinitions from '@/components/quiz/QuizDefinitions';
-  import EditTest from '@/components/quiz/testCreation/EditQuiz';
 
   export default {
     name: 'TestsAndSurveys',
-    components: { EditTest, QuizDefinitions, SubPageHeader },
+    components: { QuizDefinitions, SubPageHeader },
     data() {
       return {
         showNewTestModal: false,
@@ -47,18 +42,14 @@ limitations under the License.
     },
     methods: {
       openNewTestModal() {
-        this.newQuiz = {
-          show: true,
-          isEdit: false,
-          quiz: {
-            name: '',
-            testId: '',
-            description: '',
-          },
-        };
+        this.$refs.configuredTests.showUpdateModal({
+          name: '',
+          testId: '',
+          description: '',
+        }, false);
       },
-      saveQuiz(quizDef) {
-        this.$refs.configuredTests.saveQuiz(quizDef);
+      focusOnNewButton() {
+        this.$refs.quizDefPageSubPageHeader.focusOnActionBtn();
       },
     },
   };
