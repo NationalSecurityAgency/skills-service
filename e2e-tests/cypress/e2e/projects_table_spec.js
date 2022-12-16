@@ -15,6 +15,7 @@
  */
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
+import { clear } from 'idb-keyval';
 
 dayjs.extend(utcPlugin);
 
@@ -22,6 +23,7 @@ describe('Projects Table Tests', () => {
     const tableSelector = '[data-cy=projectsTable]';
     const numProjCreated = 10;
     beforeEach(() => {
+        clear();
         cy.intercept('GET', '/app/projects')
             .as('getProjects');
         cy.intercept('GET', '/api/icons/customIconCss')
@@ -540,6 +542,7 @@ describe('Projects Table Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy="editProjectIdproj10"]')
             .click();
+
         cy.get('[data-cy="closeProjectButton"]')
             .click();
         cy.get('[data-cy="editProjectIdproj10"]')
@@ -547,6 +550,7 @@ describe('Projects Table Tests', () => {
 
         cy.get('[data-cy="editProjectIdproj9"]')
             .click();
+        cy.wait(250);
         cy.get('body')
             .type('{esc}{esc}');
         cy.get('[data-cy="editProjectIdproj9"]')
@@ -554,6 +558,7 @@ describe('Projects Table Tests', () => {
 
         cy.get('[data-cy="editProjectIdproj8"]')
             .click();
+
         cy.get('[aria-label=Close]')
             .click();
         cy.get('[data-cy="editProjectIdproj8"]')
