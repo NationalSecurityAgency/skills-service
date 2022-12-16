@@ -623,7 +623,7 @@ limitations under the License.
           this.selfReport.loading = false;
           this.isLoadingSkillDetails = false;
           this.descriptionLoaded = true;
-          if (this.isEdit) {
+          if (this.isEdit || this.isCopy) {
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;

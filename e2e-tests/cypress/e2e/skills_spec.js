@@ -69,6 +69,7 @@ describe('Skills Tests', () => {
 
       cy.get('[data-cy="newSkillButton"]').click();
       cy.get('[data-cy=closeSkillButton]').click();
+      cy.discardChanges();
       cy.get('[data-cy=closeSkillButton]').should('not.exist');
     });
 
@@ -626,6 +627,7 @@ describe('Skills Tests', () => {
 
     cy.get('[aria-label="new skill"]').click();
     cy.get('[data-cy=closeSkillButton]').click();
+    cy.discardChanges();
     cy.get('[aria-label="new skill"]').should('have.focus');
 
     cy.get('[aria-label="new skill"]').click();
@@ -694,6 +696,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[data-cy=closeSkillButton]').click();
+    cy.discardChanges();
     cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
 
     cy.get('[data-cy=editSkillButton_skill2]').click();
@@ -1056,6 +1059,7 @@ describe('Skills Tests', () => {
 
     // now test edit
     cy.get('[data-cy="closeSkillButton"]').click();
+    cy.discardChanges();
     cy.get('[data-cy="editSkillButton_skill1"]').click();
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
     cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);
