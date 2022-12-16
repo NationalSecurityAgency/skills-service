@@ -28,6 +28,7 @@ import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizDefExistsRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.InviteTokenValidationResponse
@@ -167,6 +168,23 @@ class ProjectController {
         }
 
         return projAdminService.existsByProjectName(InputSanitizer.sanitize(projectName))
+    }
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/quizDefExist", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    boolean doesQuizExist(@RequestBody QuizDefExistsRequest existsRequest) {
+        String quizId = existsRequest.quizId?.trim()
+        String name = existsRequest.name?.trim()
+
+        SkillsValidator.isTrue((quizId || name), "One of Quiz Id or Quiz Name must be provided.")
+        SkillsValidator.isTrue(!(quizId && name), "Only Quiz Id or Quiz Name may be provided, not both.")
+
+        if (quizId) {
+            return quizDefService.existsByQuizId(InputSanitizer.sanitize(quizId))
+        }
+
+        return quizDefService.existsByQuizName(InputSanitizer.sanitize(name))
     }
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")

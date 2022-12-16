@@ -177,6 +177,17 @@ class QuizDefService {
         log.debug("Deleted project with id [{}]. Removed [{}] record", quizId, numRemoved)
     }
 
+    @Transactional(readOnly = true)
+    boolean existsByQuizId(String quizId) {
+        return quizDefRepo.existsByQuizIdIgnoreCase(quizId)
+    }
+
+    @Transactional(readOnly = true)
+    boolean existsByQuizName(String quizName) {
+        return quizDefRepo.existsByNameIgnoreCase(quizName)
+    }
+
+
     private void validateQuizDefRequest(String quizId, QuizDefRequest quizDefRequest) {
         IdFormatValidator.validate(quizId)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId Id", quizId)

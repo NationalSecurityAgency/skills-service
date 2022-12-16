@@ -35,6 +35,9 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
     @Query(value = "select count(q.id) from QuizDef q, UserRole u where q.quizId = u.quizId and u.userId=?1")
     Integer getQuizCountByUserId(String userId)
 
+    Boolean existsByQuizIdIgnoreCase(String quizId)
+    Boolean existsByNameIgnoreCase(String quizName)
+
     static interface QuizDefSummaryResult {
         String getQuizId();
 

@@ -16,6 +16,7 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
+import skills.auth.AuthUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 
@@ -98,6 +99,46 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         then:
         quizDefs.quizId == [quiz1.quizId, originalQuizId]
         quizDefsAfter.quizId == [quiz1.quizId, "newid"]
+    }
+
+    def "quiz id exist"() {
+        def quiz1 = QuizDefFactory.createQuiz(1, "Import Desc 1")
+        def quiz2 = QuizDefFactory.createQuiz(2, "Import Desc 2")
+        skillsService.createQuizDef(quiz1)
+        skillsService.createQuizDef(quiz2)
+
+
+        expect:
+        Boolean.valueOf(skillsService.quizIdExist(quizId).body) == quizIdExist
+
+        where:
+        quizId        | quizIdExist
+        "TestQuiz1"   | true
+        "tEsTqUiz1"   | true
+        " TestQuiz1 " | true
+        "TestQuiz"    | false
+        "TestQuiz2"   | true
+        "TestQuiz3"   | false
+    }
+
+    def "quiz name exist"() {
+        def quiz1 = QuizDefFactory.createQuiz(1, "Import Desc 1")
+        def quiz2 = QuizDefFactory.createQuiz(2, "Import Desc 2")
+        skillsService.createQuizDef(quiz1)
+        skillsService.createQuizDef(quiz2)
+
+
+        expect:
+        Boolean.valueOf(skillsService.quizNameExist(quizName).body) == quizNmeExist
+
+        where:
+        quizName         | quizNmeExist
+        "Test Quiz #1"   | true
+        "tESt qUiz #1"   | true
+        " Test Quiz #1 " | true
+        "Test Quiz #"    | false
+        "Test Quiz #2"   | true
+        "Test Quiz #3"   | false
     }
 
 }

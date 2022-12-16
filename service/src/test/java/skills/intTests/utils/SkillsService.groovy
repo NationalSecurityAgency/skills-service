@@ -1599,6 +1599,13 @@ class SkillsService {
         wsHelper.adminDelete(getQuizDefUrl(quizId))
     }
 
+    def quizIdExist(String quizId) {
+        wsHelper.appPost("/quizDefExist", [quizId: quizId])
+    }
+    def quizNameExist(String quizName) {
+        wsHelper.appPost("/quizDefExist", [name: quizName])
+    }
+
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()
     }

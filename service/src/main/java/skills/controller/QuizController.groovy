@@ -26,14 +26,16 @@ import org.springframework.web.bind.annotation.RestController
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
+import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizDefResult
 import skills.controller.result.model.RequestResult
 import skills.services.quiz.QuizDefService
 
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/quiz-definitions")
 @Slf4j
 @skills.profile.EnableCallStackProf
 class QuizController {
@@ -41,22 +43,30 @@ class QuizController {
     @Autowired
     QuizDefService quizDefService
 
-    @RequestMapping(value = "/quiz-definitions/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
         return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
     }
 
-    @RequestMapping(value = "/quiz-definitions/{id}", method = RequestMethod.DELETE)
-    void deleteProject(@PathVariable("id") String quizId) {
+    @RequestMapping(value = "/{quizId}", method = RequestMethod.DELETE)
+    void deleteProject(@PathVariable("quizId") String quizId) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         quizDefService.deleteQuiz(quizId)
     }
 
-    @RequestMapping(value = "/quiz-definitions/{id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{quizId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    QuizDefResult getQuizDef(@PathVariable("id") String quizId) {
+    QuizDefResult getQuizDef(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuizDef(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizDefResult saveQuestionDef(@PathVariable("quizId") String quizId,
+                                  @PathVariable("questionId") String questionId,
+                                  @RequestBody QuizQuestionDefRequest questionDefRequest) {
+        return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
     }
 
 }

@@ -1976,6 +1976,88 @@
         <insert tableName="skills_db_locks">
             <column name="lock" type="varchar(255)" value="quizDefs_lock"/>
         </insert>
+
+        <createTable tableName="quiz_question_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_quiz_question_definition_quiz_id"
+                     tableName="quiz_question_definition" unique="false">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="quiz_question_definition"
+                                 constraintName="fk_quiz_question_definition_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+
+        <createTable tableName="quiz_answer_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="answer" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_correct_answer" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_quiz_answer_definition_quiz_id"
+                     tableName="quiz_answer_definition" unique="false">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="question_ref_id"
+                                 baseTableName="quiz_answer_definition"
+                                 constraintName="fk_quiz_answer_definition_question_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_question_definition"/>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="quiz_answer_definition"
+                                 constraintName="fk_quiz_answer_definition_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+
     </changeSet>
 
 
