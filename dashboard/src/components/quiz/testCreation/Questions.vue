@@ -15,7 +15,11 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header ref="subPageHeader" title="Questions" action="Question" aria-label="new question"/>
+    <sub-page-header ref="subPageHeader"
+                     title="Questions"
+                     action="Question"
+                     @add-action="openNewAnswerModal"
+                     aria-label="new question"/>
 
     <b-card body-class="p-0">
       <div class="p-2 text-right">
@@ -26,16 +30,22 @@ limitations under the License.
         <!--        <hr v-if="index + 1 < questions.length"/>-->
       </div>
     </b-card>
+
+    <edit-question v-if="editQuestionInfo.showDialog" v-model="editQuestionInfo.showDialog"
+                   :is-edit="editQuestionInfo.isEdit"
+                   @question-saved="questionDefSaved"
+                   :question-def="editQuestionInfo.questionDef"/>
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
+  import EditQuestion from '@/components/quiz/testCreation/EditQuestion';
 
   export default {
     name: 'Questions',
-    components: { QuestionCard, SubPageHeader },
+    components: { EditQuestion, QuestionCard, SubPageHeader },
     data() {
       return {
         isLoading: false,
@@ -48,7 +58,35 @@ limitations under the License.
           ask: 'What fruit do kids traditionally give to teachers?',
           answers: ['Banana', 'Pineapple', 'Apple', 'Pear'],
         }],
+        editQuestionInfo: {
+          showDialog: false,
+          isEdit: false,
+          questionDef: {},
+        },
       };
+    },
+    methods: {
+      questionDefSaved(questionDef) {
+        console.log(JSON.stringify(questionDef, null, 2));
+      },
+      openNewAnswerModal() {
+        this.editQuestionInfo.questionDef = {
+          id: null,
+          question: '',
+          type: 'MultipleChoice',
+          graded: true,
+          answers: [{
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }, {
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }],
+        };
+        this.editQuestionInfo.showDialog = true;
+      },
     },
   };
 </script>

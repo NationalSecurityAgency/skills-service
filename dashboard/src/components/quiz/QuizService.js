@@ -34,4 +34,12 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}`)
       .then((response) => response.data);
   },
+  checkIfQuizIdExist(quizId) {
+    return axios.post('/app/quizDefExist', { quizId })
+      .then((response) => response.data);
+  },
+  checkIfQuizNameExist(name) {
+    return axios.post('/app/quizDefExist', { name })
+      .then((response) => response.data);
+  },
 };

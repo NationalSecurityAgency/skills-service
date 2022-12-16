@@ -83,7 +83,6 @@ limitations under the License.
   import InputSanitizer from '@/components/utils/InputSanitizer';
   import IdInput from '@/components/utils/inputForm/IdInput';
   import MarkdownEditor from '@/components/utils/MarkdownEditor';
-  import ProjectService from '@/components/projects/ProjectService';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
@@ -196,7 +195,7 @@ limitations under the License.
             if (self.isEdit && (self.quizInternal.name === value || self.quizInternal.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
-            return ProjectService.checkIfProjectNameExist(value)
+            return QuizService.checkIfQuizNameExist(value)
               .then((remoteRes) => !remoteRes);
           },
         });
@@ -207,7 +206,7 @@ limitations under the License.
             if (self.isEdit && self.quizInternal.projectId === value) {
               return true;
             }
-            return ProjectService.checkIfProjectIdExist(value)
+            return QuizService.checkIfQuizIdExist(value)
               .then((remoteRes) => !remoteRes);
           },
         });
