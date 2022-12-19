@@ -115,6 +115,8 @@ skills:
       docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
       maxQuizDefsPerAdmin: 100
+      maxQuestionsPerQuiz: 100
+      maxAnswersPerQuizQuestion: 20
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0">
+  <div v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0" aria-label="Select as the correct answer">
     <i v-if="!selected" class="far fa-square"></i>
     <i v-if="selected" class="far fa-check-square text-success"></i>
   </div>
@@ -39,6 +39,7 @@ limitations under the License.
     methods: {
       flipSelected() {
         this.selected = !this.selected;
+        this.$emit('selected', this.selected);
       },
     },
   };

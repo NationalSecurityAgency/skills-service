@@ -43,6 +43,7 @@ limitations under the License.
         <div class="row mb-2 no-gutters">
           <div class="col">
             <vue-select :options="questionType.options"
+                        :clearable="false"
                         v-model="questionType.selectedType">
               <template v-slot:option="option">
                 <div class="p-1">
@@ -67,23 +68,49 @@ limitations under the License.
           <div v-for="(answer, index) in questionDefInternal.answers" :key="index">
             <div class="row no-gutters mt-2">
               <div class="col-auto">
-                <select-correct-answer v-model="answer.isCorrect" class="mr-2"/>
+                <select-correct-answer v-model="answer.isCorrect" class="mr-2" @selected="updateNumQuestionWithContent"/>
               </div>
               <div class="col">
-                <input class="form-control" type="text" v-model="answer.answerText"
-                       placeholder="Enter an answer"
-                       data-cy="testName"
-                       id="testNameInput"
-                       aria-errormessage="testNameError"
-                       aria-describedby="testNameError"/>
+                  <input class="form-control" type="text" v-model="answer.answer"
+                         placeholder="Enter an answer"
+                         data-cy="testName"
+                         id="testNameInput"
+                         aria-errormessage="testNameError"
+                         aria-describedby="testNameError"/>
               </div>
               <b-button-group class="ml-2">
-                <b-button variant="outline-info" @click="addNewAnswer"><i class="fas fa-plus"></i></b-button>
-                <b-button variant="outline-info" :disabled="twoOrLessQuestions"><i class="fas fa-minus"></i></b-button>
+                <b-button variant="outline-info"
+                          :disabled="noMoreAnswers"
+                          :aria-label="`Add New Answer at index ${index}`"
+                          @click="addNewAnswer(index)">
+                  <i class="fas fa-plus"></i>
+                </b-button>
+                <b-button variant="outline-info"
+                          :disabled="twoOrLessQuestions"
+                          :aria-label="`Delete Answer at index ${index}`"
+                          @click="removeAnswer(index)">
+                  <i class="fas fa-minus"></i>
+                </b-button>
               </b-button-group>
             </div>
           </div>
+          <div v-if="noMoreAnswers" class="alert alert-warning mt-2">
+            <i class="fas fa-exclamation-triangle" /> Cannot exceed maximum of <b-badge>{{ maxAnswersAllowed }}</b-badge> answers per question.
+            <b-button variant="outline-info" :disabled="true" size="sm" aria-label="Add New Answer"><i class="fas fa-plus"></i></b-button> button was disabled.
+          </div>
+          <div v-if="customValidation.show" class="alert alert-warning mt-2">
+            <div v-if="customValidation.numAnswersWithContent < 2">
+              <i class="fas fa-exclamation-triangle" /> Must enter at least <b-badge>2</b-badge> answers.
+            </div>
+            <div v-if="!customValidation.atLeastOneCorrectAnswerSelected" class="mt-2">
+              <i class="fas fa-exclamation-triangle" /> Must select at least <b-badge>1</b-badge> correct answer!
+            </div>
+            <div v-if="customValidation.emptyQuestionSetToBeCorrect" class="mt-2">
+              <i class="fas fa-exclamation-triangle" /> Empty question <b>cannot</b> be a correct selection.
+            </div>
+          </div>
         </div>
+
       </b-container>
 
       <div slot="modal-footer" class="w-100">
@@ -103,7 +130,6 @@ limitations under the License.
 </template>
 
 <script>
-  import { extend } from 'vee-validate';
   import VueSelect from 'vue-select';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
@@ -131,7 +157,6 @@ limitations under the License.
         loading: false,
         show: this.value,
         questionDefInternal: {},
-        overallErrMsg: '',
         questionType: {
           options: [{
             label: 'Multiple Choice',
@@ -148,10 +173,14 @@ limitations under the License.
             icon: 'fas fa-tasks',
           },
         },
+        customValidation: {
+          show: false,
+          startUpdatingShowFlag: false,
+          numAnswersWithContent: 0,
+          atLeastOneCorrectAnswerSelected: false,
+          emptyQuestionSetToBeCorrect: false,
+        },
       };
-    },
-    created() {
-      this.registerValidation();
     },
     mounted() {
       if (this.isEdit) {
@@ -172,13 +201,27 @@ limitations under the License.
       show(newValue) {
         this.$emit('input', newValue);
       },
+      'questionDefInternal.answers': {
+        handler: function updateNumQuestionWithContent() {
+          this.updateNumQuestionWithContent();
+        },
+        deep: true,
+      },
     },
     computed: {
       title() {
         return this.isEdit ? 'Editing Existing Question' : 'New Question';
       },
       twoOrLessQuestions() {
-        return !this.questionDef?.answers || !this.questionDef?.answers?.length <= 2;
+        const { answers } = this.questionDefInternal;
+        return !answers || answers?.length <= 2;
+      },
+      maxAnswersAllowed() {
+        return this.$store.getters.config.maxAnswersPerQuizQuestion;
+      },
+      noMoreAnswers() {
+        const { answers } = this.questionDefInternal;
+        return answers && answers?.length >= this.maxAnswersAllowed;
       },
     },
     methods: {
@@ -188,12 +231,36 @@ limitations under the License.
           ...questionDef,
         };
       },
-      addNewAnswer() {
-        this.questionDefInternal.answers.push({
+      addNewAnswer(index) {
+        const newQuestion = {
           id: null,
           answer: '',
           isCorrect: false,
-        });
+        };
+        this.questionDefInternal.answers.splice(index + 1, 0, newQuestion);
+      },
+      removeAnswer(index) {
+        this.questionDefInternal.answers = this.questionDefInternal.answers.filter((item, arrIndex) => arrIndex !== index);
+      },
+      updateNumQuestionWithContent() {
+        let numAnswersWithContent = 0;
+        let atLeastOneCorrectAnswerSelected = false;
+        let emptyQuestionSetToBeCorrect = false;
+        const { answers } = this.questionDefInternal;
+        if (answers) {
+          numAnswersWithContent = answers.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
+          atLeastOneCorrectAnswerSelected = answers.find((a) => a.isCorrect) !== undefined;
+          emptyQuestionSetToBeCorrect = answers.find((a) => a.isCorrect && (!a.answer || a.answer.trim().length === 0)) !== undefined;
+        }
+        this.customValidation.numAnswersWithContent = numAnswersWithContent;
+        this.customValidation.atLeastOneCorrectAnswerSelected = atLeastOneCorrectAnswerSelected;
+        this.customValidation.emptyQuestionSetToBeCorrect = emptyQuestionSetToBeCorrect;
+        if (this.customValidation.startUpdatingShowFlag) {
+          this.customValidation.show = !this.isCustomValidationValid();
+        }
+      },
+      isCustomValidationValid() {
+        return this.customValidation.numAnswersWithContent >= 2 && this.customValidation.atLeastOneCorrectAnswerSelected && !this.customValidation.emptyQuestionSetToBeCorrect;
       },
       closeMe(e) {
         this.show = false;
@@ -210,34 +277,17 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.$emit('question-saved', this.questionDefInternal);
-              this.closeMe();
+              if (!this.isCustomValidationValid()) {
+                this.customValidation.show = true;
+                this.customValidation.startUpdatingShowFlag = true;
+              } else {
+                const { answers } = this.questionDefInternal;
+                const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
+                this.$emit('question-saved', removeEmptyQuestions);
+                this.closeMe();
+              }
             }
           });
-      },
-      registerValidation() {
-        const self = this;
-        extend('uniqueName', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && (self.quizInternal.name === value || self.quizInternal.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
-              return true;
-            }
-            return QuizService.checkIfQuizNameExist(value)
-              .then((remoteRes) => !remoteRes);
-          },
-        });
-
-        extend('uniqueId', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && self.quizInternal.projectId === value) {
-              return true;
-            }
-            return QuizService.checkIfQuizIdExist(value)
-              .then((remoteRes) => !remoteRes);
-          },
-        });
       },
     },
     performValidation() {
