@@ -226,7 +226,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.updated && this.hasObjectChanged()) {
+        if (!e.updated && this.hasObjectChanged() && !this.loadingComponent) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

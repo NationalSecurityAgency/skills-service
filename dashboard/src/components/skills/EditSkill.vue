@@ -465,7 +465,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.saved && this.hasObjectChanged(this.skillInternal)) {
+        if (!e.saved && this.hasObjectChanged(this.skillInternal) && !this.isLoading) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

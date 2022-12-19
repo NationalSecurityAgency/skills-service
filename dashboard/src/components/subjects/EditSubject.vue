@@ -221,7 +221,7 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        if (!e.update && this.hasObjectChanged()) {
+        if (!e.update && this.hasObjectChanged() && !this.loadingComponent) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
