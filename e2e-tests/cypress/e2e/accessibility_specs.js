@@ -277,6 +277,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy=closeSubjectButton]')
             .click();
+        cy.discardChanges();
 
         cy.get('[data-cy=nav-Badges]')
             .click();
@@ -290,6 +291,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy=closeBadgeButton]')
             .click();
+        cy.discardChanges();
 
         // --- Self Report Page ----
         cy.get('[data-cy="nav-Self Report"]')
@@ -606,6 +608,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy=closeBadgeButton]')
             .click();
+        cy.discardChanges();
 
         cy.get('[data-cy=manageBtn_badge1]')
             .click();
