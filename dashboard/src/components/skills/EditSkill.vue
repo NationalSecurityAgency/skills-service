@@ -380,7 +380,7 @@ limitations under the License.
           latestVersion: 0,
         },
         selfReport: {
-          loading: true,
+          loading: false,
         },
         overallErrMsg: '',
         show: this.value,
@@ -389,7 +389,7 @@ limitations under the License.
     },
     mounted() {
       if (this.isEdit || this.isCopy) {
-        this.loadSkillDetailsAndValidate(this.isCopy);
+        this.loadSkillDetails(this.isCopy);
       } else {
         this.startLoadingFromState();
       }
@@ -614,29 +614,17 @@ limitations under the License.
       },
       startLoadingFromState() {
         this.loadComponentState(this.componentName).then((result) => {
-          if (result) {
-            if (!this.isEdit || (this.isEdit && result.skillId === this.originalSkill.skillId)) {
-              this.skillInternal = result;
-            } else {
-              if (this.newSkillDefaultValues) {
-                this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
-              } else {
-                this.skillInternal = Object.assign(this.skillInternal, this.originalSkill);
-              }
-              this.findLatestSkillVersion();
-              this.loadSelfReportProjectSetting();
-            }
-          } else {
-            if (this.newSkillDefaultValues) {
-              this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
-            } else {
-              this.skillInternal = Object.assign(this.skillInternal, this.originalSkill);
-            }
+          if (result && (!this.isEdit || (this.isEdit && result.skillId === this.originalSkill.skillId))) {
+            this.skillInternal = result;
+          } else if (!this.isEdit && !this.isCopy) {
             this.findLatestSkillVersion();
             this.loadSelfReportProjectSetting();
+          } else if (this.newSkillDefaultValues) {
+            Object.assign(this.skillInternal, this.newSkillDefaultValues);
+          } else {
+            Object.assign(this.skillInternal, this.originalSkill);
           }
         }).finally(() => {
-          this.selfReport.loading = false;
           this.isLoadingSkillDetails = false;
           this.descriptionLoaded = true;
           if (this.isEdit || this.isCopy) {
@@ -650,9 +638,6 @@ limitations under the License.
             }, 600);
           }
         });
-      },
-      loadSkillDetailsAndValidate(isCopy) {
-        this.loadSkillDetails(isCopy);
       },
       loadSkillDetails(isCopy) {
         return SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
@@ -676,17 +661,24 @@ limitations under the License.
           });
       },
       loadSelfReportProjectSetting() {
+        this.selfReport.loading = true;
         SettingsService.getSettingsForProject(this.projectId)
           .then((response) => {
             if (response) {
               const selfReportingTypeSetting = response.find((item) => item.setting === 'selfReport.type');
               if (selfReportingTypeSetting) {
-                this.skillInternal.selfReportingType = selfReportingTypeSetting.value;
+                this.originalSkill.selfReportingType = selfReportingTypeSetting.value;
               }
               const selfReportingJustificationSetting = response.find((item) => item.setting === 'selfReport.justificationRequired');
               if (selfReportingJustificationSetting) {
-                this.skillInternal.justificationRequired = selfReportingJustificationSetting.value;
+                this.originalSkill.justificationRequired = selfReportingJustificationSetting.value;
               }
+            }
+          }).finally(() => {
+            if (this.newSkillDefaultValues) {
+              Object.assign(this.skillInternal, this.newSkillDefaultValues);
+            } else {
+              Object.assign(this.skillInternal, this.originalSkill);
             }
             this.selfReport.loading = false;
           });
