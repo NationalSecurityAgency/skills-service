@@ -694,7 +694,6 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=editSkillButton_skill2]').click();
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.discardChanges();
     cy.get('[data-cy=editSkillButton_skill2]').should('have.focus');
 
     cy.get('[data-cy=editSkillButton_skill2]').click();
