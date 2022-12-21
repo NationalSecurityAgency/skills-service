@@ -1,0 +1,334 @@
+/*
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { get, clear } from 'idb-keyval';
+
+describe('Save State Tests', () => {
+
+  beforeEach(() => {
+    clear();
+    cy.request('POST', '/app/projects/proj1', {
+      projectId: 'proj1',
+      name: "proj1"
+    })
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      name: "Subject 1"
+    })
+  });
+
+  it('Saves and discards new badge state', () => {
+    cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+    cy.clickButton('Badge');
+
+    cy.get('#badgeName').type('New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+    cy.clickButton('Badge');
+
+    cy.get('#badgeName').should('have.value', 'New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy=closeBadgeButton]').click();
+    cy.discardChanges();
+
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+    cy.clickButton('Badge');
+
+    cy.get('#badgeName').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards edit badge state', () => {
+    cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+    cy.clickButton('Badge');
+
+    cy.intercept('POST', '/admin/projects/proj1/badges/NewBadgeBadge').as('saveBadge');
+
+    cy.get('#badgeName').type('New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.get('[data-cy=saveBadgeButton]').click();
+    cy.wait('@saveBadge');
+
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+
+    cy.get('[data-cy="editBtn"]').click()
+    cy.get('#badgeName').should('have.value', 'New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('#badgeName').type(' Edit');
+    cy.get('[data-cy="markdownEditorInput"]').type(' edit');
+
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+
+    cy.get('[data-cy="editBtn"]').click()
+    cy.get('#badgeName').should('have.value', 'New Badge Edit');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description edit');
+    cy.get('[data-cy=closeBadgeButton]').click();
+    cy.discardChanges();
+
+    cy.visit('/administrator/projects/proj1/badges');
+    cy.wait('@loadBadges');
+
+    cy.get('[data-cy="editBtn"]').click()
+    cy.get('#badgeName').should('have.value', 'New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'test description');
+  })
+
+  it('Saves and discards new project state', () => {
+    cy.intercept('GET', '/app/projects')
+       .as('loadProjects');
+    cy.visit('/administrator/projects/');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="newProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').type('Test Project')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="newProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', 'Test Project');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy="newProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards edit project state', () => {
+    cy.intercept('GET', '/app/projects')
+       .as('loadProjects');
+    cy.visit('/administrator/projects/');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="editProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').type(' With Edits')
+    cy.get('[data-cy="markdownEditorInput"]').type('description with edits');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="editProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', 'proj1 With Edits');
+    cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy="editProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', 'proj1');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards copy project state', () => {
+    cy.intercept('GET', '/app/projects')
+       .as('loadProjects');
+    cy.visit('/administrator/projects/');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').type('Copy Proj With Edits')
+    cy.get('[data-cy="markdownEditorInput"]').type('description with edits');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', 'Copy Proj With Edits');
+    cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
+    cy.get('[data-cy=closeProjectButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards new skill state', () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').type('Skill One')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards edit skill state', () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/SkillOneSkill').as('saveSkill');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').type('Skill One')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
+    cy.get('[data-cy="skillName"]').type(' Two Three')
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy="markdownEditorInput"]').type(' for storage');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Skill One Two Three');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
+
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+  })
+
+  it('Saves and discards copy skill state', () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/SkillOneSkill').as('saveSkill');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').type('Skill One')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.get('[data-cy=saveSkillButton]').click();
+    cy.wait('@saveSkill');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=copySkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One');
+    cy.get('[data-cy="skillName"]').type(' Two Three')
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy="markdownEditorInput"]').type(' for storage');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=copySkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One Two Three');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
+
+    cy.get('[data-cy=closeSkillButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy=copySkillButton_SkillOneSkill]').click();
+    cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+  })
+
+  it('Saves and discards new subject state', () => {
+    cy.visit('/administrator/projects/proj1/');
+
+    cy.get('[data-cy=btn_Subjects]').click();
+    cy.get('[data-cy="subjectNameInput"]').type('Subject One')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+
+    cy.visit('/administrator/projects/proj1/');
+
+    cy.get('[data-cy=btn_Subjects]').click();
+    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject One');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy=closeSubjectButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy=btn_Subjects]').click();
+    cy.get('[data-cy="subjectNameInput"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+  it('Saves and discards edit subject state', () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1'
+    }).as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=btn_edit-subject]').click();
+    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1');
+    cy.get('[data-cy="subjectNameInput"]').type(' Two Three')
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').type('test description for storage');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+
+    cy.get('[data-cy=btn_edit-subject]').click();
+    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1 Two Three');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
+
+    cy.get('[data-cy=closeSubjectButton]').click();
+    cy.discardChanges();
+
+    cy.get('[data-cy=btn_edit-subject]').click();
+    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1');
+    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+  })
+
+});
