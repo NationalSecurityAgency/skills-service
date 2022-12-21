@@ -186,7 +186,31 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         questions[0].answers.isCorrect == question1.answers.isCorrect
     }
 
+    def "change quiz questions display order"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
 
+        when:
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes[2].id, 4)
+        def qRes1 = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes[1].id, 0)
+        def qRes2 = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        qRes.id == qRes.id
+        qRes.displayOrder == [0, 1, 2, 3, 4]
+
+        qRes1.id == [qRes[0].id, qRes[1].id, qRes[3].id, qRes[4].id, qRes[2].id]
+        qRes1.displayOrder == [0, 1, 2, 3, 4]
+
+        qRes2.id == [qRes[1].id, qRes[0].id, qRes[3].id, qRes[4].id, qRes[2].id]
+        qRes2.displayOrder == [0, 1, 2, 3, 4]
+    }
 
 }
 

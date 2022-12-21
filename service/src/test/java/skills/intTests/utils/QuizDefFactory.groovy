@@ -34,9 +34,15 @@ class QuizDefFactory {
         return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), description: description]
     }
 
-    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswer = 2) {
+    static createMultipleChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2) {
+        return (1..numberOfQuestions).collect {
+            createMultipleChoiceQuestion(quizNumber, it, numberOfAnswers)
+        }
+    }
+
+    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
         String question = "This is questions #${questionsNumber}".toString()
-        List answers = (1..numberOfAnswer).collect {
+        List answers = (1..numberOfAnswers).collect {
             return [
                     answer: "Answer #${it}".toString(),
                     isCorrect: it == 1 ? true : false,

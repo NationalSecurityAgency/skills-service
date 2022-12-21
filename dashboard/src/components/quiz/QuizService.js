@@ -50,4 +50,10 @@ export default {
     return axios.post(`/admin/quiz-definitions/${quizId}/questions/create`, newQuestionDef)
       .then((response) => response.data);
   },
+  updateQuizQuestionDisplaySortOrder(quizId, questionId, newDisplayOrderIndex) {
+    return axios.patch(`/admin/quiz-definitions/${quizId}/questions/${questionId}`, {
+      action: 'NewDisplayOrderIndex',
+      newDisplayOrderIndex,
+    });
+  },
 };

@@ -16,6 +16,8 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizQuestionDef
 
@@ -23,4 +25,22 @@ interface QuizQuestionRepo extends JpaRepository<QuizQuestionDef, Long> {
 
     @Nullable
     List<QuizQuestionDef> findAllByQuizIdIgnoreCase(String quizId)
+
+    @Nullable
+    @Query('''select max(displayOrder) from QuizQuestionDef where quizId = ?1''')
+    Integer getMaxQuestionDisplayOrderByQuizId(String quizId)
+
+
+    static interface DisplayOrder {
+        Integer getId()
+        Integer getDisplayOrder()
+    }
+
+    @Nullable
+    @Query('''select q.id as id, q.displayOrder as displayOrder from QuizQuestionDef q where q.quizId = ?1''')
+    List<DisplayOrder> getQuestionsDisplayOrder(String quizId)
+
+    @Modifying
+    @Query('''update QuizQuestionDef set displayOrder = ?2 where id = ?1''')
+    void updateDisplayOrder(Integer id, Integer newDisplayOrder)
 }

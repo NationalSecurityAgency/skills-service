@@ -81,9 +81,15 @@ class LockingService {
     }
 
     @Profile
-    ProjDef lockProject(String projectId) {
+    Integer lockProject(String projectId) {
         assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
+    }
+
+    @Profile
+    Integer lockQuizDef(String quizId) {
+        assert quizId
+        return skillsDBLockRepo.findByQuizDefIdIgnoreCase(quizId)
     }
 
     /**

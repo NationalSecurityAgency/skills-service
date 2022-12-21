@@ -26,12 +26,23 @@ limitations under the License.
       <div v-if="!isLoading">
         <no-content2 v-if="!hasData" class="my-5"
                      title="No Questions Yet..." message="Create a question to get started."/>
-        <div v-if="hasData">
+        <div v-if="hasData" id="questionsCard">
 <!--          <div class="p-2 text-right">-->
 <!--            <b-button variant="outline-info"><i class="far fa-minus-square"></i> Collapse All</b-button>-->
 <!--          </div>-->
-          <div v-for="(q, index) in questions" :key="q.questionId">
-            <question-card :question="q" :question-num="index+1"></question-card>
+          <div v-for="(q, index) in questions" :key="q.id" :id="q.id">
+            <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
+              <template #overlay>
+                <div class="text-center" :data-cy="`${q.id}_overlayShown`">
+                  <div v-if="q.id.toString()===sortOrder.loadingQuestionId"
+                       data-cy="updatingSortMsg">
+                    <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                    <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                  </div>
+                </div>
+              </template>
+              <question-card :question="q" :question-num="index+1"></question-card>
+            </b-overlay>
             <!--        <hr v-if="index + 1 < questions.length"/>-->
           </div>
         </div>
@@ -54,6 +65,7 @@ limitations under the License.
 </template>
 
 <script>
+  import Sortable from 'sortablejs';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
   import EditQuestion from '@/components/quiz/testCreation/EditQuestion';
@@ -75,19 +87,14 @@ limitations under the License.
         isLoading: false,
         quizId: this.$route.params.quizId,
         questions: [],
-        questionsOld: [{
-          questionId: 'question1',
-          ask: 'How many legs does a spider have?',
-          answers: ['Seven', 'Eight', 'Two', 'Four'],
-        }, {
-          questionId: 'question2',
-          ask: 'What fruit do kids traditionally give to teachers?',
-          answers: ['Banana', 'Pineapple', 'Apple', 'Pear'],
-        }],
         editQuestionInfo: {
           showDialog: false,
           isEdit: false,
           questionDef: {},
+        },
+        sortOrder: {
+          loading: false,
+          loadingQuestionId: -1,
         },
       };
     },
@@ -133,6 +140,36 @@ limitations under the License.
           })
           .finally(() => {
             this.isLoading = false;
+            this.enableDropAndDrop();
+          });
+      },
+      enableDropAndDrop() {
+        if (this.hasData && this.questions.length > 0) {
+          const self = this;
+          this.$nextTick(() => {
+            const cards = document.getElementById('questionsCard');
+            // need to check for null because this logic is within nextTick method
+            // an may actually run after the user moved onto another page
+            if (cards) {
+              Sortable.create(cards, {
+                handle: '.sort-control',
+                animation: 150,
+                ghostClass: 'skills-sort-order-ghost-class',
+                onUpdate(event) {
+                  self.sortOrderUpdate(event);
+                },
+              });
+            }
+          });
+        }
+      },
+      sortOrderUpdate(updateEvent) {
+        const { id } = updateEvent.item;
+        this.sortOrder.loadingQuestionId = id;
+        this.sortOrder.loading = true;
+        QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrder.loading = false;
           });
       },
     },

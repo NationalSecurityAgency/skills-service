@@ -19,10 +19,13 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizDefResult
 import skills.controller.result.model.QuizQuestionDefResult
+import skills.controller.result.model.RequestResult
 import skills.services.quiz.QuizDefService
 
 @RestController
@@ -57,6 +60,20 @@ class QuizController {
     QuizQuestionDefResult saveQuestionDef(@PathVariable("quizId") String quizId,
                                           @RequestBody QuizQuestionDefRequest questionDefRequest) {
         return quizDefService.saveQuestion(quizId, questionDefRequest)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}", method = RequestMethod.PATCH)
+    @ResponseBody
+    RequestResult updateSkillDisplayOrder(@PathVariable("quizId") String quizId,
+                                          @PathVariable("questionId") Integer questionId,
+                                          @RequestBody ActionPatchRequest patchRequest) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
+        QuizValidator.isNotNull(questionId, "Question Id", quizId)
+        QuizValidator.isNotNull(patchRequest.action, "Action must be provided", quizId)
+        QuizValidator.isNotNull(patchRequest.newDisplayOrderIndex, "newDisplayOrderIndex must be provided", quizId)
+
+        quizDefService.setDisplayOrder(quizId, questionId, patchRequest)
+        return RequestResult.success()
     }
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")

@@ -26,9 +26,9 @@ limitations under the License.
 <!--            <div class="h5 mt-2 d-inline-block"><b-badge pill variant="info">{{questionNum}}</b-badge></div>-->
 <!--          </b-col>-->
           <b-col class="">
-            <div class="mt-2">Question <span class="font-weight-bold">#{{questionNum}}</span></div>
+<!--            <div class="mt-2">Question <span class="font-weight-bold">#{{question.displayOrder + 1}}</span></div>-->
 
-            <div class="px-2 pb-1">
+            <div class="px-2 py-1">
               <markdown-text :text="question.question"/>
 
               <div class="mt-1 pl-1">

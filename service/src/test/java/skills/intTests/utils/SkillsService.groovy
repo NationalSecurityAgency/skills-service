@@ -21,6 +21,7 @@ import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
+import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
 
@@ -1608,6 +1609,21 @@ class SkillsService {
     def createQuizQuestionDef(Map props) {
         String url = "${getQuizDefUrl(props.quizId)}/questions/create"
         return wsHelper.adminPost(url, props)
+    }
+    def createQuizQuestionDefs(List<Map> questions) {
+        questions.each {
+            createQuizQuestionDef(it)
+        }
+    }
+
+    def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
+        assert quizId
+        assert questionId
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionId}"
+        wsHelper.adminPatch(url, [
+                action: ActionPatchRequest.ActionType.NewDisplayOrderIndex.toString(),
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
     }
 
     def getQuizQuestionDefs(String quizId) {

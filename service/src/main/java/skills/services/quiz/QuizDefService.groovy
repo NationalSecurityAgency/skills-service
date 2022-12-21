@@ -28,7 +28,9 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizAnswerDefResult
@@ -48,6 +50,7 @@ import skills.storage.model.QuizAnswerDef
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizDefWithDescription
 import skills.storage.model.QuizQuestionDef
+import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizAnswerRepo
 import skills.storage.repos.QuizDefRepo
@@ -190,26 +193,50 @@ class QuizDefService {
         validate(quizId, questionDefRequest)
         QuizDef quizDef = findQuizDef(quizId)
 
+        lockingService.lockQuizDef(quizDef.quizId)
+
+        Integer maxExistingDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(quizDef.quizId)
+        int displayOrder = maxExistingDisplayOrder != null ? maxExistingDisplayOrder + 1 : 0
+
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
                 question: questionDefRequest.question,
                 type: questionDefRequest.questionType,
-                displayOrder: 0,
+                displayOrder: displayOrder,
         )
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
 
-        List<QuizAnswerDef> answerDefs = questionDefRequest.answers.collect {
+        List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
             new QuizAnswerDef(
                     quizId: quizDef.quizId,
                     questionRefId: savedQuestion.id,
-                    answer: it.answer,
-                    isCorrectAnswer: it.isCorrect,
-                    displayOrder: 0,
+                    answer: answerDefRequest.answer,
+                    isCorrectAnswer: answerDefRequest.isCorrect,
+                    displayOrder: index + 1,
             )
         }
         List<QuizAnswerDef> savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
 
         return convert(savedQuestion, savedAnswers)
+    }
+
+    @Transactional
+    void setDisplayOrder(String quizId, Integer questionId,  ActionPatchRequest patchRequest) {
+        QuizDef quizDef = findQuizDef(quizId)
+        lockingService.lockQuizDef(quizDef.quizId)
+        if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == patchRequest.action) {
+            List<QuizQuestionRepo.DisplayOrder> currentDisplayOrder = quizQuestionRepo.getQuestionsDisplayOrder(quizDef.quizId)
+            QuizQuestionRepo.DisplayOrder theItemToMove = currentDisplayOrder.find { it.getId() == questionId }
+            QuizValidator.isTrue(theItemToMove != null, "Provide question id [${questionId}] is not valid", quizId)
+            List<QuizQuestionRepo.DisplayOrder> mutableDisplayOrder = currentDisplayOrder.findAll { it.getId() != questionId }.sort { it.getDisplayOrder() }
+
+            int newIndex = Math.min(patchRequest.newDisplayOrderIndex, currentDisplayOrder.size() - 1)
+            mutableDisplayOrder.add(newIndex, theItemToMove)
+
+            mutableDisplayOrder.eachWithIndex{ QuizQuestionRepo.DisplayOrder entry, int i ->
+                quizQuestionRepo.updateDisplayOrder(entry.getId(), i)
+            }
+        }
     }
 
     List<QuizQuestionDefResult> getQuestionDefs(String quizId) {
@@ -224,7 +251,7 @@ class QuizDefService {
         return dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[quizQuestionDef.id]
             convert(quizQuestionDef, quizAnswerDefs)
-        }
+        }.sort({ it.displayOrder })
     }
 
     private QuizQuestionDefResult convert(QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers) {
@@ -232,7 +259,8 @@ class QuizDefService {
                 id: savedQuestion.id,
                 question: savedQuestion.question,
                 questionType: QuizQuestionType.valueOf(savedQuestion.type),
-                answers: savedAnswers.collect { convert (it)}
+                answers: savedAnswers.collect { convert (it)},
+                displayOrder: savedQuestion.displayOrder,
         )
     }
 
@@ -240,7 +268,8 @@ class QuizDefService {
         new QuizAnswerDefResult(
                 id: savedAnswer.id,
                 answer: savedAnswer.answer,
-                isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer)
+                isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
+                displayOrder: savedAnswer.displayOrder,
         )
     }
 
