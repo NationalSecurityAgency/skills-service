@@ -239,6 +239,7 @@ class QuizDefService {
         }
     }
 
+    @Transactional
     List<QuizQuestionDefResult> getQuestionDefs(String quizId) {
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         if (!dbQuestionDefs){

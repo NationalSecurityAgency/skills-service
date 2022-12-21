@@ -26,7 +26,7 @@ limitations under the License.
                     :aria-label="'edit Quiz '+ quiz.quizId">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
-          <b-button target="_blank" :to="{ name:'MyProjectSkills', params: { quiz: quiz.quizId } }"
+          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
                     data-cy="quizPreview"
                     variant="outline-primary" :aria-label="'preview client display for project'+quiz.name">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
@@ -56,6 +56,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
+        quizId: this.$route.params.quizId,
         quiz: {
           name: 'My First Cool Quiz',
           quizId: 'myFirstCoolQuiz',

@@ -90,6 +90,7 @@ import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportCo
 import QuizPage from '@/components/quiz/QuizPage';
 import Questions from '@/components/quiz/testCreation/Questions';
 import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
+import QuizRun from '@/common-components/quiz/QuizRun';
 
 Vue.use(Router);
 
@@ -387,6 +388,17 @@ const router = new Router({
           nonAdmin: true,
           announcer: {
             message: 'My Progress Project',
+          },
+        },
+      }, {
+        name: 'QuizRun',
+        path: 'tests/:quizId',
+        component: QuizRun,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Test Run',
           },
         },
       }, {
