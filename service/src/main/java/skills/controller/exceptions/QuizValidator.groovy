@@ -25,11 +25,11 @@ class QuizValidator {
         }
     }
 
-//    static void isNotNull(Object value, String attrName, String projectId = null, String skillId = null) {
-//        if (value == null) {
-//            throw new SkillException("${attrName} was not provided.".toString(), projectId, skillId, ErrorCode.BadParam)
-//        }
-//    }
+    static void isNotNull(Object value, String attrName, String quizId = null) {
+        if (value == null) {
+            throw new SkillQuizException("${attrName} was not provided.".toString(), quizId, ErrorCode.BadParam)
+        }
+    }
 //
 //    static void isFirstOrMustEqualToSecond(String first, String second, String attrName) {
 //        if (first && second != first) {
@@ -37,11 +37,11 @@ class QuizValidator {
 //        }
 //    }
 //
-//    static void isTrue(boolean condition, String msg, String projectId = null, String skillId = null) {
-//        if (!condition) {
-//            throw new SkillException(msg, projectId, skillId, ErrorCode.BadParam)
-//        }
-//    }
+    static void isTrue(boolean condition, String msg, String quizId = null) {
+        if (!condition) {
+            throw new SkillQuizException(msg, quizId, ErrorCode.BadParam)
+        }
+    }
 //
 //    static void isNotEmpty(List values, String attrName, String projectId = null, String skillId = null) {
 //        if (!values) {

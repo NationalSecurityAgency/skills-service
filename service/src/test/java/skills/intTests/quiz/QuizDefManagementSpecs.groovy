@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import skills.auth.AuthUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.services.quiz.QuizQuestionType
 
 @Slf4j
 class QuizDefManagementSpecs extends DefaultIntSpec {
@@ -140,6 +141,52 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         "Test Quiz #2"   | true
         "Test Quiz #3"   | false
     }
+
+    def "add question to quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createMultipleChoiceQuestion(1, 1, 2)
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.questionType == QuizQuestionType.MultipleChoice.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers[0].id
+        newQuestion.body.answers[1].id
+        newQuestion.body.answers.answer == question.answers.answer
+        newQuestion.body.answers.isCorrect == [true, false]
+    }
+
+    def "get quiz questions"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question1 = QuizDefFactory.createMultipleChoiceQuestion(1, 1, 2)
+        skillsService.createQuizQuestionDef(question1)
+        def question2 = QuizDefFactory.createMultipleChoiceQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDef(question2)
+
+        when:
+        def questions = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        questions.size() == 2
+        questions[0].id
+        questions[1].id
+        questions.question == [question1.question, question2.question]
+        questions.questionType == [QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
+
+        questions[0].answers[0].id
+        questions[0].answers[1].id
+        questions[0].answers.answer == question1.answers.answer
+        questions[0].answers.isCorrect == question1.answers.isCorrect
+    }
+
+
 
 }
 

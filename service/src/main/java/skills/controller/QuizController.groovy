@@ -17,22 +17,13 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
-import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizDefResult
-import skills.controller.result.model.RequestResult
+import skills.controller.result.model.QuizQuestionDefResult
 import skills.services.quiz.QuizDefService
-
 
 @RestController
 @RequestMapping("/admin/quiz-definitions")
@@ -61,12 +52,17 @@ class QuizController {
         return quizDefService.getQuizDef(quizId)
     }
 
-    @RequestMapping(value = "/{quizId}/questions/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/{quizId}/questions/create", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    QuizDefResult saveQuestionDef(@PathVariable("quizId") String quizId,
-                                  @PathVariable("questionId") String questionId,
-                                  @RequestBody QuizQuestionDefRequest questionDefRequest) {
-        return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
+    QuizQuestionDefResult saveQuestionDef(@PathVariable("quizId") String quizId,
+                                          @RequestBody QuizQuestionDefRequest questionDefRequest) {
+        return quizDefService.saveQuestion(quizId, questionDefRequest)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    List<QuizQuestionDefResult> getQuestionDefs(@PathVariable("quizId") String quizId) {
+        return quizDefService.getQuestionDefs(quizId)
     }
 
 }

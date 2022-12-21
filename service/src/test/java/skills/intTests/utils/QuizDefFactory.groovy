@@ -15,6 +15,8 @@
  */
 package skills.intTests.utils
 
+import skills.services.quiz.QuizQuestionType
+
 class QuizDefFactory {
 
     static String DEFAULT_QUIZ_NAME = "Test Quiz"
@@ -28,7 +30,23 @@ class QuizDefFactory {
         DEFAULT_QUIZ_NAME + " #${projNum}"
     }
 
-    static createQuiz(int projNumber = 1, String description = null) {
-        return [quizId: getDefaultQuizId(projNumber), name: getDefaultQuizName(projNumber), description: description]
+    static createQuiz(int quizNumber = 1, String description = null) {
+        return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), description: description]
+    }
+
+    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswer = 2) {
+        String question = "This is questions #${questionsNumber}".toString()
+        List answers = (1..numberOfAnswer).collect {
+            return [
+                    answer: "Answer #${it}".toString(),
+                    isCorrect: it == 1 ? true : false,
+            ]
+        }
+        return [
+                quizId  : getDefaultQuizId(quizNumber),
+                question: question,
+                questionType: QuizQuestionType.MultipleChoice.toString(),
+                answers: answers,
+        ]
     }
 }

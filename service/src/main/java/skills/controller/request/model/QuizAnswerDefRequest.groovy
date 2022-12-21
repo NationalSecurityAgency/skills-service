@@ -20,8 +20,6 @@ import skills.services.quiz.QuizQuestionType
 
 @Canonical
 class QuizAnswerDefRequest {
-    String quizId
-    String question
-    QuizQuestionType questionType
-    List<QuizQuestionDefRequest> questionDefs
+    String answer
+    Boolean isCorrect
 }

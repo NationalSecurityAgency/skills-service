@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.request.model
+package skills.storage.repos
 
-import groovy.transform.Canonical
-import skills.services.quiz.QuizQuestionType
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.lang.Nullable
+import skills.storage.model.QuizQuestionDef
 
-@Canonical
-class QuizQuestionDefRequest {
-    String question
-    QuizQuestionType questionType
+interface QuizQuestionRepo extends JpaRepository<QuizQuestionDef, Long> {
 
-    List<QuizAnswerDefRequest> answers
+    @Nullable
+    List<QuizQuestionDef> findAllByQuizIdIgnoreCase(String quizId)
 }

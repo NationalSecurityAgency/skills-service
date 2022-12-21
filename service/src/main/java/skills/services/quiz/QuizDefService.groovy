@@ -25,11 +25,15 @@ import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.QuizDefRequest
+import skills.controller.request.model.QuizQuestionDefRequest
+import skills.controller.result.model.QuizAnswerDefResult
 import skills.controller.result.model.QuizDefResult
+import skills.controller.result.model.QuizQuestionDefResult
 import skills.services.AccessSettingsStorageService
 import skills.services.CreatedResourceLimitsValidator
 import skills.services.CustomValidationResult
@@ -40,11 +44,15 @@ import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjDefWithDescription
+import skills.storage.model.QuizAnswerDef
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizDefWithDescription
+import skills.storage.model.QuizQuestionDef
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.QuizAnswerRepo
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizDefWithDescRepo
+import skills.storage.repos.QuizQuestionRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -58,6 +66,12 @@ class QuizDefService {
 
     @Autowired
     QuizDefRepo quizDefRepo
+
+    @Autowired
+    QuizQuestionRepo quizQuestionRepo
+
+    @Autowired
+    QuizAnswerRepo quizAnswerRepo
 
     @Autowired
     LockingService lockingService
@@ -170,6 +184,85 @@ class QuizDefService {
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
     }
+
+    @Transactional()
+    QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest) {
+        validate(quizId, questionDefRequest)
+        QuizDef quizDef = findQuizDef(quizId)
+
+        QuizQuestionDef questionDef = new QuizQuestionDef(
+                quizId: quizDef.quizId,
+                question: questionDefRequest.question,
+                type: questionDefRequest.questionType,
+                displayOrder: 0,
+        )
+        QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
+
+        List<QuizAnswerDef> answerDefs = questionDefRequest.answers.collect {
+            new QuizAnswerDef(
+                    quizId: quizDef.quizId,
+                    questionRefId: savedQuestion.id,
+                    answer: it.answer,
+                    isCorrectAnswer: it.isCorrect,
+                    displayOrder: 0,
+            )
+        }
+        List<QuizAnswerDef> savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
+
+        return convert(savedQuestion, savedAnswers)
+    }
+
+    List<QuizQuestionDefResult> getQuestionDefs(String quizId) {
+        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
+        if (!dbQuestionDefs){
+            return []
+        }
+
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
+        Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy {it.questionRefId }
+
+        return dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
+            List<QuizAnswerDef> quizAnswerDefs = byQuizId[quizQuestionDef.id]
+            convert(quizQuestionDef, quizAnswerDefs)
+        }
+    }
+
+    private QuizQuestionDefResult convert(QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers) {
+        new QuizQuestionDefResult(
+                id: savedQuestion.id,
+                question: savedQuestion.question,
+                questionType: QuizQuestionType.valueOf(savedQuestion.type),
+                answers: savedAnswers.collect { convert (it)}
+        )
+    }
+
+    private QuizAnswerDefResult convert(QuizAnswerDef savedAnswer) {
+        new QuizAnswerDefResult(
+                id: savedAnswer.id,
+                answer: savedAnswer.answer,
+                isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer)
+        )
+    }
+
+    private QuizDef findQuizDef(String quizId) {
+        QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
+        if (!updatedDef) {
+            throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
+        }
+        return updatedDef
+    }
+    private void validate(String quizId, QuizQuestionDefRequest questionDefRequest) {
+        QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
+        QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
+        QuizValidator.isNotNull(questionDefRequest.answers, "questions", quizId)
+        QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least answer", quizId)
+        questionDefRequest.answers.each {
+            QuizValidator.isNotBlank(it.answer, "questions.answer", quizId)
+        }
+        QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) != null, "Must set isCorrect=true on at least 1 question", quizId)
+
+    }
+
 
     @Transactional()
     void deleteQuiz(String quizId) {

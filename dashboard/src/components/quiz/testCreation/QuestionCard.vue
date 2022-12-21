@@ -18,19 +18,28 @@ limitations under the License.
     <div class="row">
       <div class="col">
 
-        <b-row :no-gutters="true">
+        <b-row :no-gutters="true" class="mb-3">
           <b-col cols="auto">
-            <span class="sort-control mr-3"><i class="fas fa-arrows-alt"/></span>
-            <b-badge>{{questionNum}}.</b-badge>
+            <div class="sort-control mr-3"><i class="fas fa-arrows-alt"/></div>
           </b-col>
-          <b-col class="ml-2">
-            <div class="mt-2">
-              <span class="h5 font-weight-bold text-secondary">{{ question.ask }}</span>
-            </div>
+<!--          <b-col cols="auto">-->
+<!--            <div class="h5 mt-2 d-inline-block"><b-badge pill variant="info">{{questionNum}}</b-badge></div>-->
+<!--          </b-col>-->
+          <b-col class="">
+            <div class="mt-2">Question <span class="font-weight-bold">#{{questionNum}}</span></div>
 
-            <div class="mt-1">
-              <div v-for="(a, index) in question.answers" :key="a" class=" my-1">
-                <span class="border rounded p-1 mr-2">{{ String.fromCharCode(97 + index).toUpperCase() }}.</span> {{ a }}
+            <div class="px-2 pb-1">
+              <markdown-text :text="question.question"/>
+
+              <div class="mt-1 pl-1">
+                <div v-for="(a) in question.answers" :key="a.id" class="row no-gutters">
+                  <div class="col-auto">
+                    <select-correct-answer :value="a.isCorrect" :read-only="true"
+                                           font-size="1.5rem"/>
+                  </div>
+                  <div class="col pt-1 ml-2"><span class="mt-1 answerText">{{ a.answer }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </b-col>
@@ -52,15 +61,19 @@ limitations under the License.
           </b-button>
         </b-button-group>
 
-        <span class="expand-collapse-control"><i class="far fa-minus-square"></i></span>
+<!--        <span class="expand-collapse-control" v-b-toggle="`collapse-${question.id}`"><i class="far fa-minus-square"></i></span>-->
       </div>
     </div>
   </div>
 </template>
 
 <script>
+  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
+
   export default {
     name: 'QuestionCard',
+    components: { MarkdownText, SelectCorrectAnswer },
     props: {
       question: Object,
       questionNum: Number,
@@ -83,15 +96,20 @@ limitations under the License.
   border-bottom-right-radius: .25rem !important
 }
 
-.expand-collapse-control i {
-  padding: 0.5rem;
-  font-size: 1.3rem;
-  color: map_get($theme-colors, info) !important;;
-  top: 0rem;
-  left: 0rem;
-  border-bottom: 1px solid #e8e8e8;
-  border-left: 1px solid #e8e8e8;
-  background-color: #fbfbfb !important;
-  border-bottom-left-radius: .25rem !important
+//.expand-collapse-control i {
+//  padding: 0.5rem;
+//  font-size: 1.3rem;
+//  color: map_get($theme-colors, info) !important;;
+//  top: 0rem;
+//  left: 0rem;
+//  border-bottom: 1px solid #e8e8e8;
+//  border-left: 1px solid #e8e8e8;
+//  background-color: #fbfbfb !important;
+//  border-bottom-left-radius: .25rem !important
+//}
+
+.answerText {
+  font-size: 0.8rem;
 }
+
 </style>

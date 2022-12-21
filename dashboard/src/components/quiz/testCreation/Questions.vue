@@ -21,14 +21,29 @@ limitations under the License.
                      @add-action="openNewAnswerModal"
                      aria-label="new question"/>
 
-    <b-card body-class="p-0">
-      <div class="p-2 text-right">
-        <b-button variant="outline-info"><i class="far fa-minus-square"></i> Collapse All</b-button>
+    <b-card body-class="p-0" footer-bg-variant="white">
+      <skills-spinner :is-loading="isLoading" />
+      <div v-if="!isLoading">
+        <no-content2 v-if="!hasData" class="my-5"
+                     title="No Questions Yet..." message="Create a question to get started."/>
+        <div v-if="hasData">
+<!--          <div class="p-2 text-right">-->
+<!--            <b-button variant="outline-info"><i class="far fa-minus-square"></i> Collapse All</b-button>-->
+<!--          </div>-->
+          <div v-for="(q, index) in questions" :key="q.questionId">
+            <question-card :question="q" :question-num="index+1"></question-card>
+            <!--        <hr v-if="index + 1 < questions.length"/>-->
+          </div>
+        </div>
       </div>
-      <div v-for="(q, index) in questions" :key="q.questionId">
-        <question-card :question="q" :question-num="index+1"></question-card>
-        <!--        <hr v-if="index + 1 < questions.length"/>-->
-      </div>
+
+      <template #footer>
+        <div class="text-right">
+          <b-button variant="outline-primary" size="sm" @click="openNewAnswerModal">
+            Question <i class="fas fa-plus-circle"/>
+          </b-button>
+        </div>
+      </template>
     </b-card>
 
     <edit-question v-if="editQuestionInfo.showDialog" v-model="editQuestionInfo.showDialog"
@@ -42,14 +57,25 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
   import EditQuestion from '@/components/quiz/testCreation/EditQuestion';
+  import QuizService from '@/components/quiz/QuizService';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'Questions',
-    components: { EditQuestion, QuestionCard, SubPageHeader },
+    components: {
+      NoContent2,
+      SkillsSpinner,
+      EditQuestion,
+      QuestionCard,
+      SubPageHeader,
+    },
     data() {
       return {
         isLoading: false,
-        questions: [{
+        quizId: this.$route.params.quizId,
+        questions: [],
+        questionsOld: [{
           questionId: 'question1',
           ask: 'How many legs does a spider have?',
           answers: ['Seven', 'Eight', 'Two', 'Four'],
@@ -65,9 +91,21 @@ limitations under the License.
         },
       };
     },
+    mounted() {
+      this.loadQuestions();
+    },
+    computed: {
+      hasData() {
+        return this.questions && this.questions.length > 0;
+      },
+    },
     methods: {
       questionDefSaved(questionDef) {
-        console.log(JSON.stringify(questionDef, null, 2));
+        const questionDefWithQuizId = ({ ...questionDef, quizId: this.quizId });
+        QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
+          .then((res) => {
+            this.questions.push(res);
+          });
       },
       openNewAnswerModal() {
         this.editQuestionInfo.questionDef = {
@@ -86,6 +124,16 @@ limitations under the License.
           }],
         };
         this.editQuestionInfo.showDialog = true;
+      },
+      loadQuestions() {
+        this.isLoading = true;
+        QuizService.getQuizQuestionDefs(this.quizId)
+          .then((res) => {
+            this.questions = res;
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
       },
     },
   };

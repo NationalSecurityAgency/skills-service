@@ -283,7 +283,12 @@ limitations under the License.
               } else {
                 const { answers } = this.questionDefInternal;
                 const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
-                this.$emit('question-saved', removeEmptyQuestions);
+                const questionDefRes = {
+                  question: this.questionDefInternal.question,
+                  questionType: this.questionType.selectedType.id,
+                  answers: removeEmptyQuestions,
+                };
+                this.$emit('question-saved', questionDefRes);
                 this.closeMe();
               }
             }

@@ -1991,6 +1991,10 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>

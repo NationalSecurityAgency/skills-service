@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.request.model
+package skills.controller.result.model
 
-import groovy.transform.Canonical
 import skills.services.quiz.QuizQuestionType
 
-@Canonical
-class QuizQuestionDefRequest {
+class QuizQuestionDefResult {
+    Integer id
     String question
     QuizQuestionType questionType
 
-    List<QuizAnswerDefRequest> answers
+    List<QuizAnswerDefResult> answers
+    int displayOrder
 }

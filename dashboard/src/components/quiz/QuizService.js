@@ -42,4 +42,12 @@ export default {
     return axios.post('/app/quizDefExist', { name })
       .then((response) => response.data);
   },
+  getQuizQuestionDefs(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/questions`)
+      .then((response) => response.data);
+  },
+  saveQuizQuestionDef(quizId, newQuestionDef) {
+    return axios.post(`/admin/quiz-definitions/${quizId}/questions/create`, newQuestionDef)
+      .then((response) => response.data);
+  },
 };

@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0" aria-label="Select as the correct answer">
-    <i v-if="!selected" class="far fa-square"></i>
-    <i v-if="selected" class="far fa-check-square text-success"></i>
-  </div>
+  <span v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0"
+        aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}">
+    <i v-if="!selected" class="far fa-square" :style="{ 'font-size': fontSize }"></i>
+    <i v-if="selected" class="far fa-check-square text-success" :style="{ 'font-size': fontSize }"></i>
+  </span>
 </template>
 
 <script>
@@ -25,6 +26,14 @@ limitations under the License.
     name: 'SelectCorrectAnswer',
     props: {
       value: Boolean,
+      readOnly: {
+        type: Boolean,
+        default: false,
+      },
+      fontSize: {
+        type: String,
+        default: '2.1rem',
+      },
     },
     data() {
       return {
@@ -38,8 +47,10 @@ limitations under the License.
     },
     methods: {
       flipSelected() {
-        this.selected = !this.selected;
-        this.$emit('selected', this.selected);
+        if (!this.readOnly) {
+          this.selected = !this.selected;
+          this.$emit('selected', this.selected);
+        }
       },
     },
   };
@@ -47,8 +58,9 @@ limitations under the License.
 
 <style scoped>
 i {
-  font-size: 2.1rem;
   color: #b6b5b5;
+}
+.cursorPointer {
   cursor: pointer;
 }
 </style>
