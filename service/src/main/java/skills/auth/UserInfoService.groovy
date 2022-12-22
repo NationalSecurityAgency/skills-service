@@ -28,6 +28,7 @@ import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.utils.RetryUtil
 
@@ -63,6 +64,12 @@ class UserInfoService {
             }
         }
         return currentUser
+    }
+
+    @Profile
+    UserAttrs getCurrentUserAttrs() {
+        String userId = getCurrentUser().username
+        return userAttrsService.findByUserId(userId)
     }
 
     @Profile

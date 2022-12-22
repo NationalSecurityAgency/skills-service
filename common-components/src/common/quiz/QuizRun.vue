@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div class="container-fluid">
+<div class="container-fluid pb-5">
   <skills-spinner :is-loading="isLoading" class="mt-3"/>
   <div v-if="!isLoading">
     <div class="row bg-white border-bottom py-2 mb-3 pt-4" data-cy="subPageHeader">
@@ -26,13 +26,52 @@ limitations under the License.
       </div>
     </div>
 
-    <b-card body-class="pl-5">
+    <b-card v-if="quizResult" class="mb-3" body-class="text-center">
+      <div>Thank you completing <span class="text-primary font-weight-bold">{{ quizInfo.name }}</span> test!</div>
+      <div class="h2 mt-4 mb-3 text-uppercase">
+        <span v-if="quizResult.gradedRes.passed" class="text-success"><i class="fas fa-check-double"></i> Passed</span>
+        <span v-else class="text-danger"><i class="far fa-times-circle"></i> Failed</span>
+      </div>
+      <b-card-group deck>
+        <b-card bg-variant="light" class="text-center">
+          <b-card-text>
+            <div class="h3">
+              {{ quizResult.percentCorrect }}%
+            </div>
+            <div class="text-secondary mt-2">
+              <b>100%</b> is required to pass
+            </div>
+          </b-card-text>
+        </b-card>
+
+        <b-card bg-variant="light" class="text-center">
+          <b-card-text>
+            <div class="h3">
+              <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
+            </div>
+            <div class="text-secondary mt-2">
+              <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> questions</span>
+              <span v-else>Well done!</span>
+            </div>
+          </b-card-text>
+        </b-card>
+      </b-card-group>
+
+      <div v-if="!quizResult.gradedRes.passed" class="mt-3">
+        <span class="text-info">No worries!</span> Would you like to try again? <b-button variant="outline-primary" size="sm" @click="tryAgain"><i class="fas fa-redo"></i> Try Again</b-button>
+      </div>
+    </b-card>
+
+    <b-card body-class="pl-5" class="mb-4">
       <div v-for="(q, index) in quizInfo.questions" :key="q.id">
-        <quiz-run-question :q="q" :num="index" />
+        <quiz-run-question :q="q" :num="index" @selected-answer="updateSelectedAnswers"/>
       </div>
 
-      <div class="text-center">
-        <b-button variant="success">Done</b-button>
+      <div v-if="notEveryQuestionHasAnAnswer" class="alert alert-danger text-center">
+        <i class="fas fa-exclamation-triangle"></i> Not every question has an answer!
+      </div>
+      <div v-if="!quizResult" class="text-center">
+        <b-button variant="success" @click="completeTestRun"><i class="fas fa-check-double"></i> Done</b-button>
       </div>
     </b-card>
 
@@ -53,6 +92,9 @@ limitations under the License.
         isLoading: true,
         quizId: this.$route.params.quizId,
         quizInfo: null,
+        selectedAnswers: [],
+        notEveryQuestionHasAnAnswer: false,
+        quizResult: null,
       };
     },
     mounted() {
@@ -60,6 +102,7 @@ limitations under the License.
     },
     methods: {
       loadData() {
+        this.isLoading = true;
         QuizRunService.getQuizInfo(this.quizId)
           .then((res) => {
             const copy = ({ ...res });
@@ -75,6 +118,55 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
+      },
+      updateSelectedAnswers(questionSelectedAnswer) {
+        const res = this.selectedAnswers.filter((q) => q.questionId !== questionSelectedAnswer.questionId);
+        if (questionSelectedAnswer && questionSelectedAnswer.selectedAnswerIds && questionSelectedAnswer.selectedAnswerIds.length > 0) {
+          res.push(questionSelectedAnswer);
+          this.notEveryQuestionHasAnAnswer = false;
+        }
+        this.selectedAnswers = res;
+      },
+      completeTestRun() {
+        const everyQuestionHasAnswer = this.selectedAnswers.length === this.quizInfo.questions.length;
+        if (!everyQuestionHasAnswer) {
+          this.notEveryQuestionHasAnAnswer = true;
+        } else {
+          this.isLoading = true;
+          QuizRunService.reportQuizAttempt(this.quizId, { questionAnswers: this.selectedAnswers })
+            .then((gradedRes) => {
+              const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
+              const numTotal = gradedRes.gradedQuestions.length;
+              const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+              this.quizResult = {
+                gradedRes,
+                numCorrect,
+                numTotal,
+                percentCorrect,
+                missedBy: numTotal - numCorrect,
+              };
+
+              const updatedQuizInfo = ({ ...this.quizInfo });
+              updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
+                const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
+
+                const answerOptions = q.answerOptions.map((a) => ({
+                  ...a,
+                  selected: gradedQuestion.selectedAnswerIds.includes(a.id),
+                  isGraded: true,
+                  isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
+                }));
+                return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
+              });
+              this.quizInfo = updatedQuizInfo;
+            }).finally(() => {
+              this.isLoading = false;
+            });
+        }
+      },
+      tryAgain() {
+        this.quizResult = null;
+        this.loadData();
       },
     },
   };

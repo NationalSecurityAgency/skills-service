@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+package skills.storage.repos
 
-export default {
-  getQuizInfo(quizId) {
-    return axios.get(`/api/quizzes/${quizId}`)
-      .then((response) => response.data);
-  },
-  reportQuizAttempt(quizId, quizAttemptReq) {
-    return axios.post(`/api/quizzes/${quizId}/attempt`, quizAttemptReq)
-        .then((response) => response.data);
-  },
-};
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.lang.Nullable
+import skills.storage.model.QuizAttempt
+import skills.storage.model.QuizQuestionDef
+
+interface QuizAttemptRepo extends JpaRepository<QuizAttempt, Long> {
+
+}

@@ -13,6 +13,7 @@
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
 delete from project_definition;
+delete from quiz_definition;
 delete from user_attrs;
 delete from user_roles;
 delete from global_badge_level_definition;

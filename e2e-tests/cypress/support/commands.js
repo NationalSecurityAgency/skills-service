@@ -180,6 +180,32 @@ Cypress.Commands.add("resetEmail", () => {
     });
 });
 
+Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/app/quiz-definitions/quiz${quizNum}/`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        name: `This is quiz ${quizNum}`,
+        description: `What a cool quiz #${quizNum}this is! Thank you for taking it!`
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${quizNum}`,
+        questionType: 'MultipleChoice',
+        answers: [{
+            answer: 'First Answer',
+            isCorrect: true,
+        }, {
+            answer: 'Second Answer',
+            isCorrect: false,
+        }, {
+            answer: 'Third Answer',
+            isCorrect: false,
+        }],
+    }, overrideProps));
+});
+
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
     cy.request('POST', `/app/projects/proj${projNum}`, Object.assign({

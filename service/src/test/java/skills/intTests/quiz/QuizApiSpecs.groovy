@@ -35,4 +35,58 @@ class QuizApiSpecs extends DefaultIntSpec {
         then:
         qRes.name == quiz.name
     }
+
+    def "report quiz attempt - pass quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizInfo))
+        when:
+        def qRes = skillsService.reportQuizAttempt(quiz.quizId, [
+                questionAnswers: [[
+                        questionId: quizInfo.questions[0].id,
+                        selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
+                ], [
+                        questionId: quizInfo.questions[1].id,
+                        selectedAnswerIds: [quizInfo.questions[1].answerOptions[0].id]
+                ]]
+        ])
+        println JsonOutput.prettyPrint(JsonOutput.toJson(qRes))
+        then:
+        qRes.body.passed == true
+        qRes.body.gradedQuestions.questionId == quizInfo.questions.id
+        qRes.body.gradedQuestions.isCorrect == [true, true]
+        qRes.body.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        qRes.body.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
+    }
+
+    def "report quiz attempt - fail quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizInfo))
+        when:
+        def qRes = skillsService.reportQuizAttempt(quiz.quizId, [
+                questionAnswers: [[
+                                          questionId: quizInfo.questions[0].id,
+                                          selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
+                                  ], [
+                                          questionId: quizInfo.questions[1].id,
+                                          selectedAnswerIds: [quizInfo.questions[1].answerOptions[1].id]
+                                  ]]
+        ])
+        println JsonOutput.prettyPrint(JsonOutput.toJson(qRes))
+        then:
+        qRes.body.passed == false
+        qRes.body.gradedQuestions.questionId == quizInfo.questions.id
+        qRes.body.gradedQuestions.isCorrect == [true, false]
+        qRes.body.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        qRes.body.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+    }
 }

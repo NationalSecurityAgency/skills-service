@@ -25,6 +25,54 @@ describe('Quiz Tests', () => {
     });
 
     it('create quiz', function () {
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createQuizQuestionDef(1, 1, {question: 'What word completes the phrase: ``Everything but the kitchen``?', answers: [{
+                answer: 'Sink',
+                isCorrect: true,
+            }, {
+                answer: 'Kaleidoscope',
+                isCorrect: false,
+            }, {
+                answer: 'Hogwash',
+                isCorrect: false,
+            }]})
+        cy.createQuizQuestionDef(1, 2, {question: 'Traditionally, an ``amuse-bouche`` arrives right before what part of the meal?', answers: [{
+                answer: 'Appetizers',
+                isCorrect: true,
+            }, {
+                answer: 'Entrée',
+                isCorrect: false,
+            }, {
+                answer: 'Dessert',
+                isCorrect: false,
+            }]})
+        cy.createQuizQuestionDef(1, 3, {question: 'Which one of these are Batman\'s villains?', answers: [{
+                answer: 'Darkseid',
+                isCorrect: false,
+            }, {
+                answer: 'Ra\'s al Ghul',
+                isCorrect: true,
+            }, {
+                answer: 'Mongul',
+                isCorrect: false,
+            }, {
+                answer: 'Poison Ivy',
+                isCorrect: true,
+            }, {
+                answer: 'Mr. Mxyzptlk',
+                isCorrect: false,
+            }]})
+        cy.createQuizQuestionDef(1, 4, {question: 'In the game of Candy Land, which player goes first?', answers: [{
+                answer: 'Blue token holder',
+                isCorrect: false,
+            }, {
+                answer: 'The youngest',
+                isCorrect: true,
+            }, {
+                answer: 'First to draw a red card',
+                isCorrect: false,
+            }]})
+        // What word completes the phrase: “Everything but the kitchen”?
         cy.visit('/administrator/tests-and-surveys');
     });
 

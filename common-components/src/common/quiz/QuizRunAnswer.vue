@@ -18,19 +18,27 @@ limitations under the License.
        v-on:keydown.space="flipSelected"
        @click="flipSelected"
        tabindex="0"
-       :class="{ 'selected-answer': selected }"
+       :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable' : !a.isGraded }"
        aria-label="Select as the correct answer">
       <div class="row no-gutters">
         <div class="col-auto">
-          <span class="checkmark">
-            <i :class="{
-              'text-success' : selected,
-              'far fa-square' : canSelectMoreThanOne && !selected,
-              'far fa-check-square' : canSelectMoreThanOne && selected,
-              'far fa-circle' : !canSelectMoreThanOne && !selected,
-              'far fa-check-circle' : !canSelectMoreThanOne && selected,
-            }" />
-          </span>
+<!--          <div v-if="a.isGraded && a.selected !== a.isCorrect" class="fa-stack">-->
+<!--            <i class="fa-stack-1x" :class="selectionIconObject" />-->
+<!--            <i class="fa fa-ban text-danger"></i>-->
+<!--          </div>-->
+          <b-overlay v-if="a.isGraded && a.selected !== a.isCorrect" show variant="transparent"
+                     opacity="0">
+            <template #overlay>
+              <i v-if="a.selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;"></i>
+              <i v-else class="fa fa-check text-danger" style="font-size: 1rem;"></i>
+            </template>
+            <span class="checkmark">
+               <i :class="selectionIconObject" />
+            </span>
+          </b-overlay>
+          <span v-else class="checkmark">
+               <i :class="selectionIconObject" />
+            </span>
         </div>
         <div class="col ml-2">
           <span class="answerText">{{ a.answerOption }}</span>
@@ -46,10 +54,6 @@ limitations under the License.
     props: {
       a: Object,
       value: Boolean,
-      readOnly: {
-        type: Boolean,
-        default: false,
-      },
       canSelectMoreThanOne: {
         type: Boolean,
         default: true,
@@ -57,7 +61,7 @@ limitations under the License.
     },
     data() {
       return {
-        selected: this.value,
+        selected: this.a.selected ? this.a.selected : this.value,
       };
     },
     watch: {
@@ -65,12 +69,26 @@ limitations under the License.
         this.selected = newValue;
       },
     },
+    computed: {
+      selectionIconObject() {
+        return {
+          'text-success': this.selected,
+          'far fa-square': this.canSelectMoreThanOne && !this.selected,
+          'far fa-check-square': this.canSelectMoreThanOne && this.selected,
+          'far fa-circle': !this.canSelectMoreThanOne && !this.selected,
+          'far fa-check-circle': !this.canSelectMoreThanOne && this.selected,
+        };
+      },
+    },
     methods: {
       flipSelected() {
-        if (!this.readOnly) {
+        if (!this.a.isGraded) {
           this.selected = !this.selected;
           this.$emit('input', this.selected);
-          this.$emit('selection-changed', this.a.id);
+          this.$emit('selection-changed', {
+            id: this.a.id,
+            selected: this.selected,
+          });
         }
       },
     },
@@ -84,9 +102,12 @@ limitations under the License.
   border: 1px dotted transparent;
 }
 
-.answer-row:hover {
+.answer-row-editable:hover {
   border: 1px dotted #007c49;
   border-radius: 5px;
+}
+
+.point-cursor {
   cursor: pointer;
 }
 

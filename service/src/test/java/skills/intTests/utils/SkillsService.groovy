@@ -1636,6 +1636,11 @@ class SkillsService {
         return wsHelper.apiGet(url)
     }
 
+    def reportQuizAttempt(String quizId, def quizAttemptReq) {
+        String url = "/quizzes/${quizId}/attempt"
+        return wsHelper.apiPost(url, quizAttemptReq)
+    }
+
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()
     }
