@@ -550,7 +550,7 @@ describe('Projects Table Tests', () => {
 
         cy.get('[data-cy="editProjectIdproj9"]')
             .click();
-
+        cy.wait(250);
         cy.get('body')
             .type('{esc}{esc}');
         cy.get('[data-cy="editProjectIdproj9"]')
