@@ -174,7 +174,9 @@ limitations under the License.
       },
     },
     data() {
-      const badgeInternal = { originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', ...this.badge };
+      const badgeInternal = {
+        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', ...this.badge,
+      };
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
       badgeInternal.endDate = this.toDate(this.badge.endDate);
