@@ -92,7 +92,7 @@ describe('Save State Tests', () => {
 
     cy.get('[data-cy="editBtn"]').click()
     cy.get('#badgeName').should('have.value', 'New Badge');
-    cy.get('[data-cy="markdownEditorInput"]').should('have.value', 'test description');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
   })
 
   it('Saves and discards new project state', () => {
