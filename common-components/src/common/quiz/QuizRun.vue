@@ -1,10 +1,28 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
 <div class="container-fluid">
   <skills-spinner :is-loading="isLoading" class="mt-3"/>
   <div v-if="!isLoading">
-    <div class="row bg-white border-bottom py-2 mb-3 pt-4 text-center" data-cy="subPageHeader">
-      <div class="col-sm-6 col-md-7 text-sm-left">
-        <h1 class="h4">{{ quizInfo.name }}</h1>
+    <div class="row bg-white border-bottom py-2 mb-3 pt-4" data-cy="subPageHeader">
+      <div class="col">
+        <div class="h4 text-success">{{ quizInfo.name }}</div>
+      </div>
+      <div class="col-auto text-right text-muted">
+        <b-badge variant="success">{{quizInfo.questions.length}}</b-badge> <span class="text-uppercase">questions</span>
       </div>
     </div>
 
@@ -44,7 +62,15 @@
       loadData() {
         QuizRunService.getQuizInfo(this.quizId)
           .then((res) => {
-            this.quizInfo = res;
+            const copy = ({ ...res });
+            copy.questions = res.questions.map((q) => {
+              const answerOptions = q.answerOptions.map((a) => ({
+                ...a,
+                selected: false,
+              }));
+              return ({ ...q, answerOptions });
+            });
+            this.quizInfo = copy;
           })
           .finally(() => {
             this.isLoading = false;

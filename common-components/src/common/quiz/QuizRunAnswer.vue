@@ -1,19 +1,34 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <template>
-    <div class="answer-row"
-         v-on:keydown.space="flipSelected"
-         @click="flipSelected"
-         tabindex="0"
-         :class="{ 'selected-answer': selected }"
-         aria-label="Select as the correct answer">
+  <div class="answer-row"
+       v-on:keydown.space="flipSelected"
+       @click="flipSelected"
+       tabindex="0"
+       :class="{ 'selected-answer': selected }"
+       aria-label="Select as the correct answer">
       <div class="row no-gutters">
         <div class="col-auto">
           <span class="checkmark">
             <i :class="{
               'text-success' : selected,
-              'far fa-square' : squareSelector && !selected,
-              'far fa-check-square' : squareSelector && selected,
-              'far fa-circle' : !squareSelector && !selected,
-              'far fa-check-circle' : !squareSelector && selected,
+              'far fa-square' : canSelectMoreThanOne && !selected,
+              'far fa-check-square' : canSelectMoreThanOne && selected,
+              'far fa-circle' : !canSelectMoreThanOne && !selected,
+              'far fa-check-circle' : !canSelectMoreThanOne && selected,
             }" />
           </span>
         </div>
@@ -30,11 +45,12 @@
     name: 'QuizRunAnswer',
     props: {
       a: Object,
+      value: Boolean,
       readOnly: {
         type: Boolean,
         default: false,
       },
-      squareSelector: {
+      canSelectMoreThanOne: {
         type: Boolean,
         default: true,
       },
@@ -45,15 +61,16 @@
       };
     },
     watch: {
-      selected(newValue) {
-        this.$emit('input', newValue);
+      'a.selected': function handleSelected(newValue) {
+        this.selected = newValue;
       },
     },
     methods: {
       flipSelected() {
         if (!this.readOnly) {
           this.selected = !this.selected;
-          this.$emit('selected', this.selected);
+          this.$emit('input', this.selected);
+          this.$emit('selection-changed', this.a.id);
         }
       },
     },
