@@ -235,7 +235,7 @@ describe('Projects Modal Management Tests', () => {
             .should('have.focus');
     });
 
-    it.only('focus should be returned to project edit button', () => {
+    it('focus should be returned to project edit button', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
