@@ -66,6 +66,65 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approvals_t1_default.data.userId == [users[3]]
     }
 
+    def "assign approvers to user - 2 projects should not interfere"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(5, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "1. Please approve ${users[2]} request!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "2. Please approve ${users[2]} request!")
+
+        // should be DN in case of pki
+        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[3]).dn : users[3]
+
+        def user4Service = createService(users[4])
+        skillsService.addUserRole(user4Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        // other project
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        skillsService.addUserRole(user1Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user2Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user4Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.configureApproverForUser(proj2.projectId, user4Service.userName, user1IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user4Service.userName, user2IdConConf)
+
+        when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, user1IdConConf)
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, user2IdConConf)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u4 = user4Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [users[3], users[2]]
+
+        approvals_t1_u2.count == 0
+        !approvals_t1_u2.data
+
+        approvals_t1_default.count == 0
+        !approvals_t1_default.data
+
+        approvals_t1_u4.count == 0
+        !approvals_t1_u4.data
+    }
+
     def "assign approvers to skill"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -143,6 +202,61 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         approvals_t1.count == 1
         approvals_t1.data.userId == [users[2]]
+
+        approvals_t1_u2.count == 1
+        approvals_t1_u2.data.userId == [users[3]]
+
+        approvals_t1_default.count == 0
+        !approvals_t1_default.data
+    }
+
+    def "assign approvers by user tag - 2 projects should not interfere"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills.each {
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "KeY1"
+        rootUser.saveUserTag(users[2], userTagKey, ["aBcD"])
+        rootUser.saveUserTag(users[3], userTagKey, ["EfGh"])
+
+        // other project
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        skillsService.addUserRole(user1Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user2Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.configureApproverForUserTag(proj2.projectId, user1Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj2.projectId, user1Service.userName, userTagKey.toLowerCase(), "eFgH")
+        skillsService.configureApproverForUserTag(proj2.projectId, user2Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj2.projectId, user2Service.userName, userTagKey.toLowerCase(), "eFgH")
+
+        when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey.toLowerCase(), "eFgH")
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t1.data.userId == [users[2]]
+        approvals_t1.count == 1
 
         approvals_t1_u2.count == 1
         approvals_t1_u2.data.userId == [users[3]]
@@ -497,6 +611,150 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         !approvals_t1_u2.data
     }
 
+    def "explicitly designate user to catch all unmatched requests - 2 projects should not interfere with each other - tag conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(5, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user5Service = createService(users[4])
+        skillsService.addUserRole(user5Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "KeY1"
+        rootUser.saveUserTag(users[2], userTagKey, ["aBcD"])
+        rootUser.saveUserTag(users[3], userTagKey, ["EfGh"])
+        // other project
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        skillsService.addUserRole(user1Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user2Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user5Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.configureApproverForUserTag(proj2.projectId, user1Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj2.projectId, user1Service.userName, userTagKey.toLowerCase(), "eFgH")
+        skillsService.configureApproverForUserTag(proj2.projectId, user2Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj2.projectId, user2Service.userName, userTagKey.toLowerCase(), "eFgH")
+        skillsService.configureApproverForUserTag(proj2.projectId, user5Service.userName, userTagKey.toLowerCase(), "AbC")
+        skillsService.configureApproverForUserTag(proj2.projectId, user5Service.userName, userTagKey.toLowerCase(), "eFgH")
+
+        when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t0_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        def approverConf = skillsService.getApproverConf(proj.projectId)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u5 = user5Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        approverConf.size() == 1
+        def approver = approverConf[0]
+        approver.approverUserId == user1Service.userName
+        !approver.userId
+        !approver.userId
+        !approver.userTagValue
+        !approver.skillName
+        !approver.skillId
+
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t0_u2.count == 2
+        approvals_t0_u2.data.userId == [users[3],  users[2]]
+
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [users[3],  users[2]]
+
+        approvals_t1_u2.count == 0
+        !approvals_t1_u2.data
+
+        approvals_t1_u5.count == 0
+        !approvals_t1_u5.data
+    }
+
+    def "explicitly designate user to catch all unmatched requests - 2 projects should not interfere with each other - user conf"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(5, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user5Service = createService(users[4])
+        skillsService.addUserRole(user5Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "KeY1"
+        rootUser.saveUserTag(users[2], userTagKey, ["aBcD"])
+        rootUser.saveUserTag(users[3], userTagKey, ["EfGh"])
+        // other project
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+        skillsService.addUserRole(user1Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user2Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        skillsService.addUserRole(user5Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[3]).dn : users[3]
+        skillsService.configureApproverForUser(proj2.projectId, user1Service.userName, user1IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user1Service.userName, user2IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user2Service.userName, user1IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user2Service.userName, user2IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user5Service.userName, user1IdConConf)
+        skillsService.configureApproverForUser(proj2.projectId, user5Service.userName, user2IdConConf)
+
+        when:
+        def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t0_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        skillsService.configureFallbackApprover(proj.projectId, user1Service.userName)
+        def approverConf = skillsService.getApproverConf(proj.projectId)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u5 = user5Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+
+        then:
+        approverConf.size() == 1
+        def approver = approverConf[0]
+        approver.approverUserId == user1Service.userName
+        !approver.userId
+        !approver.userId
+        !approver.userTagValue
+        !approver.skillName
+        !approver.skillId
+
+        approvals_t0.count == 2
+        approvals_t0.data.userId == [users[3],  users[2]]
+
+        approvals_t0_u2.count == 2
+        approvals_t0_u2.data.userId == [users[3],  users[2]]
+
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [users[3],  users[2]]
+
+        approvals_t1_u2.count == 0
+        !approvals_t1_u2.data
+
+        approvals_t1_u5.count == 0
+        !approvals_t1_u5.data
+    }
+
     def "when there is no explicit fallback strategy then users without config will handle unmatched requests"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -639,7 +897,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         e.message.contains("This operation will assign the last approver [${skillsService.userName}] away from fallback duties, which is sadly not allowed")
     }
 
-    def "there must be 1 implicit or explicit fallback approver - explit fallback conf present so no error"() {
+    def "there must be 1 implicit or explicit fallback approver - explicit fallback conf present so no error"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(1,)

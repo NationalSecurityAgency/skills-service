@@ -454,7 +454,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value='''
-        SELECT ue.user_id as userId, ua.user_id_for_display as userIdForDisplay, COUNT(ue.event_time) as count, MAX(ue.event_time) as date
+        SELECT ue.user_id as userId, ua.user_id_for_display as userIdForDisplay, SUM(ue.count) as count, MAX(ue.event_time) as date
         FROM user_events ue, user_attrs ua, (
             SELECT user_id, achieved_on, COUNT(id) AS counts FROM user_achievement 
             WHERE skill_ref_id = :skillRefId

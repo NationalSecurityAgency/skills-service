@@ -100,7 +100,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.approverUserId is null and
             (
                 (exists (select 1 from SkillApprovalConf sac 
-                        where sac.approverUserId = :approverId and (
+                        where sac.approverUserId = :approverId
+                            and sac.projectId = :projectId
+                            and (
                                 (sac.userId is not null and sac.userId = s.userId) OR  
                                 (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
                             )
@@ -109,6 +111,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                 (exists (select 1 from SkillApprovalConf sac, UserTag ut
                     where ut.userId = s.userId 
                         and lower(ut.key) = lower(sac.userTagKey)
+                        and sac.projectId = :projectId
                         and sac.approverUserId = :approverId
                         and sac.userTagValue is not null
                         and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
@@ -128,15 +131,19 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = :projectId and 
             s.approverUserId is null and 
             (not exists (select 1 from SkillApprovalConf sac
-                            where sac.approverUserId is not null and
+                            where sac.approverUserId is not null
+                                and sac.projectId = :projectId 
+                                and (
                                   (sac.userId is not null and sac.userId = s.userId) OR  
                                   (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                                  )
                         )
             ) and 
             (not exists (select 1 from SkillApprovalConf sac, UserTag ut
                 where sac.approverUserId is not null 
                     and ut.userId = s.userId 
                     and lower(ut.key) = lower(sac.userTagKey)
+                    and sac.projectId = :projectId
                     and sac.userTagValue is not null
                     and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
                 )
@@ -169,13 +176,17 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId is null and 
             (not exists (select 1 from SkillApprovalConf sac
-                            where sac.approverUserId is not null and
+                            where sac.approverUserId is not null
+                                and sac.projectId = :projectId 
+                                and (
                                   (sac.userId is not null and sac.userId = s.userId) OR  
                                   (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
+                                  )
                         )
             ) and 
             (not exists (select 1 from SkillApprovalConf sac, UserTag ut
-                where sac.approverUserId is not null 
+                where sac.approverUserId is not null
+                    and sac.projectId = :projectId 
                     and ut.userId = s.userId 
                     and lower(ut.key) = lower(sac.userTagKey)
                     and sac.userTagValue is not null
@@ -195,7 +206,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.approverUserId is null and 
             (
                 (exists (select 1 from SkillApprovalConf sac 
-                        where sac.approverUserId = :approverId and (
+                        where sac.approverUserId = :approverId
+                            and sac.projectId = :projectId
+                            and (
                                 (sac.userId is not null and sac.userId = s.userId) OR  
                                 (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
                             )
@@ -204,6 +217,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                 (exists (select 1 from SkillApprovalConf sac, UserTag ut
                     where ut.userId = s.userId 
                         and lower(ut.key) = lower(sac.userTagKey)
+                        and sac.projectId = :projectId
                         and sac.approverUserId = :approverId
                         and sac.userTagValue is not null
                         and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
