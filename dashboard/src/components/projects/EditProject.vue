@@ -107,6 +107,7 @@ limitations under the License.
         internalProject: {
           originalProjectId: this.project.projectId,
           isEdit: this.isEdit,
+          description: '',
           ...this.project,
         },
         originalProject: {
