@@ -16,6 +16,7 @@
 package skills.controller;
 
 import callStack.profiler.Profile;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -23,16 +24,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import skills.PublicProps;
 import skills.auth.UserInfoService;
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied;
+import skills.controller.exceptions.AttachmentValidator;
+import skills.controller.exceptions.SkillException;
 import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
+import skills.controller.result.model.UploadAttachmentResult;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
+import skills.services.AttachmentService;
 import skills.services.SelfReportingService;
 import skills.services.VersionService;
 import skills.services.events.SkillEventResult;
@@ -40,9 +49,13 @@ import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
 import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.model.*;
+import skills.storage.model.Attachment;
 import skills.utils.MetricsLogger;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -90,6 +103,12 @@ class UserSkillsController {
 
     @Autowired
     VersionService versionService;
+
+    @Value("${skills.config.allowedAttachmentMimeTypes}")
+    List<MediaType> allowedAttachmentMimeTypes;
+
+    @Value("${skills.config.maxAttachmentSize:10MB}")
+    DataSize maxAttachmentSize;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -437,4 +456,71 @@ class UserSkillsController {
         skillsLoader.documentLastViewedSkillId(projectId, skillId);
         return RequestResult.success();
     }
+
+    @Autowired
+    AttachmentService attachmentService;
+
+    @RequestMapping(value = "/upload", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public UploadAttachmentResult uploadFile(@RequestParam("file") MultipartFile file) {
+        AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
+        AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
+        return attachmentService.saveAttachment(file);
+    }
+
+    @RequestMapping(value = "/download/{uuid}/{filename}", method = RequestMethod.GET)
+    @Transactional(readOnly = true)
+    public void download(@PathVariable("uuid") String uuid,
+                         @PathVariable("filename") String filename,
+                         HttpServletResponse response) {
+        Attachment attachment = attachmentService.getAttachment(uuid, filename);
+        try (InputStream inputStream = attachment.getContent().getBinaryStream();
+             OutputStream outputStream = response.getOutputStream()) {
+            IOUtils.copy(inputStream, outputStream);
+            response.setContentType(attachment.getContentType());
+        } catch (Exception e) {
+            throw new SkillException("Error closing stream resources", e);
+        }
+    }
+
+//    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @RequestMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+//    @ResponseBody
+//    @Profile
+//    public UploadAttachmentResult upload(HttpServletRequest request) throws Exception {
+//        if(!ServletFileUpload.isMultipartContent(request)) {
+//            throw new SkillException("Multipart request expected", ErrorCode.BadParam);
+//        }
+//
+////        service.upload(new ServletFileUpload().getItemIterator(request));
+////        FileItemIterator iter = new ServletFileUpload().getItemIterator(request);
+//        FileItemStream fileItemStream = getFileItemStream(request);
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Location", "/");
+//        UploadAttachmentResult result = new UploadAttachmentResult();
+//
+////        attachmentService.saveAttachment(file.getOriginalFilename(), file.getContentType(), "href", file.getSize(), file.getInputStream());
+////        result.setFilename();
+//        return result;
+//    }
+//
+//    private FileItemStream getFileItemStream(HttpServletRequest request) {
+//        try {
+//            FileItemIterator iter = new ServletFileUpload().getItemIterator(request);
+//            FileItemStream fileItemStream = null;
+//            if (iter.hasNext()) {
+//                fileItemStream = iter.next();
+//                if (iter.hasNext()) {
+//                    throw new SkillException("Only one file item expected.", ErrorCode.BadParam);
+//                }
+//            } else {
+//                throw new SkillException("No file item found.", ErrorCode.BadParam);
+//            }
+//            return fileItemStream;
+//        } catch (IOException e) {
+//            throw new SkillException("Error get file item.", e);
+//        }
+//    }
+
 }

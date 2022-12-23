@@ -54,6 +54,12 @@ spring:
     "change-log": "classpath:db/changelog/db.changelog-master.xml"
   session:
     store-type: none
+  servlet:
+    multipart:
+      enabled: true
+      location: ${java.io.tmpdir}
+      max-file-size: ${skills.config.maxAttachmentSize}
+      max-request-size: ${skills.config.maxAttachmentSize}
 management:
   server:
     port: 8808
@@ -95,6 +101,9 @@ skills:
     expirationGracePeriod: 7
     projectExpirationSchedule: "0 4 0 * * *"
     taskSchedulingDelayInSeconds: 5
+    maxAttachmentSize: 10MB
+    allowedAttachmentMimeTypes: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, application/msword, application/vnd.oasis.opendocument.presentation, application/vnd.oasis.opendocument.spreadsheet, application/vnd.oasis.opendocument.text, application/pdf, application/vnd.ms-powerpoint, application/vnd.ms-excel"
+    allowedAttachmentFileTypes: ".xlsx, .docx, .pptx, .doc, .odp, .ods, .odt, .pdf, .ppt, .xls"
     ui:
       dashboardVersion: @pom.version@
       buildTimestamp: @maven.build.timestamp@

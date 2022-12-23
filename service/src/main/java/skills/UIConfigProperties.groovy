@@ -18,6 +18,8 @@ package skills
 import groovy.util.logging.Slf4j
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.MediaType
+import org.springframework.util.unit.DataSize
 
 import javax.annotation.PostConstruct
 
@@ -32,10 +34,17 @@ class UIConfigProperties {
 
     String dbUpgradeInProgress
 
+    DataSize maxAttachmentSize
+    List<String> allowedAttachmentFileTypes
+    List<MediaType> allowedAttachmentMimeTypes;
+
     @PostConstruct
-    public void copyConfigToUi() {
+    void copyConfigToUi() {
         ui.put("maxDailyUserEvents", compactDailyEventsOlderThan)
         ui.put("dbUpgradeInProgress", dbUpgradeInProgress)
+        ui.put("maxAttachmentSize", maxAttachmentSize.toBytes().toString())
+        ui.put("allowedAttachmentFileTypes", allowedAttachmentFileTypes)
+        ui.put("allowedAttachmentMimeTypes", allowedAttachmentMimeTypes.collect {it.toString()})
     }
 
     @PostConstruct
