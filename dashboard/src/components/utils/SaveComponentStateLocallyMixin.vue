@@ -39,6 +39,15 @@ limitations under the License.
       clearAllStorage() {
         clear();
       },
+      hasObjectChanged(firstObject, secondObject) {
+        let hasChanged = false;
+        this.keysToWatch.forEach((key) => {
+          if (firstObject[key] === secondObject[key]) {
+            hasChanged = true;
+          }
+        });
+        return hasChanged;
+      },
     },
   };
 </script>

@@ -350,7 +350,6 @@ limitations under the License.
           helpUrl: null,
           selfReportingType: null,
           type: 'Skill',
-          loadingComponent: true,
         },
         skillInternal: {
           skillId: '',
@@ -385,6 +384,11 @@ limitations under the License.
         overallErrMsg: '',
         show: this.value,
         descriptionLoaded: false,
+        keysToWatch: [
+          'name', 'description', 'skillId', 'helpUrl', 'pointIncrement', 'numPerformToCompletion',
+          'pointIncrementIntervalHrs', 'pointIncrementIntervalMins', 'timeWindowEnabled',
+          'numPointIncrementMaxOccurrences', 'selfReportingType', 'type',
+        ],
       };
     },
     mounted() {
@@ -440,23 +444,6 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged(newValue) {
-        if (newValue.skillId === this.originalSkill.skillId
-          && newValue.name === this.originalSkill.name
-          && newValue.pointIncrement === this.originalSkill.pointIncrement
-          && newValue.numPerformToCompletion === this.originalSkill.numPerformToCompletion
-          && newValue.pointIncrementIntervalHrs === this.originalSkill.pointIncrementIntervalHrs
-          && newValue.pointIncrementIntervalMins === this.originalSkill.pointIncrementIntervalMins
-          && newValue.timeWindowEnabled === this.originalSkill.timeWindowEnabled
-          && newValue.numPointIncrementMaxOccurrences === this.originalSkill.numPointIncrementMaxOccurrences
-          && newValue.description === this.originalSkill.description
-          && newValue.helpUrl === this.originalSkill.helpUrl
-          && newValue.selfReportingType === this.originalSkill.selfReportingType
-          && newValue.type === this.originalSkill.type) {
-          return false;
-        }
-        return true;
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -465,7 +452,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.saved && this.hasObjectChanged(this.skillInternal) && !this.isLoading) {
+        if (!e.saved && this.hasObjectChanged(this.skillInternal, this.originalSkill) && !this.isLoading) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

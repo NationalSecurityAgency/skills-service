@@ -122,6 +122,7 @@ limitations under the License.
         tooltipShowing: false,
         loadingComponent: true,
         descriptionLoaded: false,
+        keysToWatch: ['name', 'description', 'projectId'],
       };
     },
     created() {
@@ -188,10 +189,10 @@ limitations under the License.
             if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
               this.internalProject = result;
             } else {
-              this.internalProject = Object.assign(this.internalProject, this.originalProject);
+              Object.assign(this.internalProject, this.originalProject);
             }
           } else {
-            this.internalProject = Object.assign(this.internalProject, this.originalProject);
+            Object.assign(this.internalProject, this.originalProject);
           }
         }).finally(() => {
           this.loadingComponent = false;
@@ -208,14 +209,6 @@ limitations under the License.
           }
         });
       },
-      hasObjectChanged() {
-        if (this.internalProject.name === this.originalProject.name
-          && this.internalProject.description === this.originalProject.description
-          && this.internalProject.projectId === this.originalProject.projectId) {
-          return false;
-        }
-        return true;
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -227,7 +220,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.updated && this.hasObjectChanged() && !this.loadingComponent) {
+        if (!e.updated && this.hasObjectChanged(this.internalProject, this.originalProject) && !this.loadingComponent) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

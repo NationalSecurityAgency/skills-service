@@ -175,7 +175,7 @@ limitations under the License.
     },
     data() {
       const badgeInternal = {
-        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', ...this.badge,
+        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', startDate: null, endDate: null, ...this.badge,
       };
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
@@ -200,6 +200,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         loadingComponent: true,
+        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate'],
       };
     },
     created() {
@@ -255,15 +256,6 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged() {
-        if (this.badgeInternal.name === this.originalBadge.name
-          && this.badgeInternal.description === this.originalBadge.description
-          && this.badgeInternal.helpUrl === this.originalBadge.helpUrl
-          && this.badgeInternal.badgeId === this.originalBadge.badgeId) {
-          return false;
-        }
-        return true;
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -272,7 +264,7 @@ limitations under the License.
         this.publishHidden(e);
       },
       publishHidden(e) {
-        if (!e.updated && this.hasObjectChanged() && !this.loadingComponent) {
+        if (!e.updated && this.hasObjectChanged(this.badgeInternal, this.originalBadge) && !this.loadingComponent) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {

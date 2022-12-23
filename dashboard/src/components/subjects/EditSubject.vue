@@ -153,6 +153,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         loadingComponent: true,
+        keysToWatch: ['name', 'description', 'subjectId', 'helpUrl'],
       };
     },
     created() {
@@ -207,21 +208,12 @@ limitations under the License.
       },
     },
     methods: {
-      hasObjectChanged() {
-        if (this.subjectInternal.name === this.originalSubject.name
-          && this.subjectInternal.description === this.originalSubject.description
-          && this.subjectInternal.helpUrl === this.originalSubject.helpUrl
-          && this.subjectInternal.subjectId === this.originalSubject.subjectId) {
-          return false;
-        }
-        return true;
-      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        if (!e.update && this.hasObjectChanged() && !this.loadingComponent) {
+        if (!e.update && this.hasObjectChanged(this.subjectInternal, this.originalSubject) && !this.loadingComponent) {
           e.preventDefault();
           this.msgConfirm('You have unsaved changes.  Discard?')
             .then((res) => {
