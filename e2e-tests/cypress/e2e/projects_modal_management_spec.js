@@ -250,7 +250,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get(proj1EditBtn)
             .click();
-        cy.wait(250);
+
         cy.get('[data-cy=projectName]')
             .should('be.visible');
         cy.get('body')
