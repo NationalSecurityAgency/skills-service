@@ -436,7 +436,7 @@ limitations under the License.
       },
       skillInternal: {
         handler(newValue) {
-          if (this.hasObjectChanged(newValue)) {
+          if (this.hasObjectChanged(newValue, this.originalSkill)) {
             this.saveComponentState(this.componentName, newValue);
           }
         },
