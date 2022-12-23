@@ -1631,6 +1631,11 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
+    def getQuizMetrics(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/metrics"
+        return wsHelper.adminGet(url)
+    }
+
     def getQuizInfo(String quizId) {
         String url = "/quizzes/${quizId}"
         return wsHelper.apiGet(url)

@@ -23,6 +23,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizDefResult
+import skills.controller.result.model.QuizMetrics
 import skills.controller.result.model.QuizQuestionDefResult
 import skills.controller.result.model.RequestResult
 import skills.services.quiz.QuizDefService
@@ -36,9 +37,9 @@ class QuizController {
     @Autowired
     QuizDefService quizDefService
 
-    @RequestMapping(value = "/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
+    QuizDefResult saveQuizDef(@PathVariable("quizId") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
         return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
     }
 
@@ -79,6 +80,12 @@ class QuizController {
     @ResponseBody
     List<QuizQuestionDefResult> getQuestionDefs(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuestionDefs(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
+        return quizDefService.getMetrics(quizId);
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package skills.quizLoading
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections4.ListUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,6 +75,7 @@ class QuizRunService {
     @Autowired
     UserInfoService userInfoService
 
+    @Transactional
     QuizInfo loadQuizInfo(String quizId) {
         QuizDefWithDescription updatedDef = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         if (!updatedDef) {
@@ -111,13 +113,39 @@ class QuizRunService {
         return questions
     }
 
+    static class GradedResultInfo {
+        QuizGradedResult gradedResult
+        QuizDef quizDef
+
+        List<QuizQuestionDef> dbQuestionDefs
+        List<QuizAnswerDef> dbAnswersDefs
+
+        Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId
+        Map<Integer, List<QuizQuestionAttemptReq>> selectedAnswersByQuestion
+    }
+
     @Transactional
     QuizGradedResult reportQuizAttempt(String quizId, QuizAttemptReq quizAttemptReq) {
+        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
+        return this.reportQuizAttempt(currentUserAttrs.userId, quizId, quizAttemptReq)
+    }
+
+    @Transactional
+    @Profile
+    QuizGradedResult reportQuizAttempt(String userId, String quizId, QuizAttemptReq quizAttemptReq) {
+        GradedResultInfo gradedResultInfo = loadDataAndGradeAttempt(quizId, quizAttemptReq)
+        persistUserQuizAttempt(gradedResultInfo, userId)
+
+        return gradedResultInfo.gradedResult
+    }
+
+    @Profile
+    private GradedResultInfo loadDataAndGradeAttempt(String quizId, QuizAttemptReq quizAttemptReq) {
         QuizDef quizDef = getQuizDef(quizId)
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
-        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
-        Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDef.groupBy {it.questionRefId }
+        List<QuizAnswerDef> dbAnswersDefs = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
+        Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
         Map<Integer, List<QuizQuestionAttemptReq>> selectedAnswersByQuestion = quizAttemptReq.questionAnswers.groupBy { it.questionId }
 
         List<QuizQuestionGradedResult> gradedQuestions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
@@ -134,41 +162,53 @@ class QuizRunService {
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
         boolean quizPassed = !gradedQuestions.find { !it.isCorrect }
+        QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, gradedQuestions: gradedQuestions)
 
-        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
+        return new GradedResultInfo(
+                gradedResult: gradedResult,
+                quizDef: quizDef,
+                dbQuestionDefs: dbQuestionDefs,
+                dbAnswersDefs: dbAnswersDefs,
+                answerDefByQuestionId: answerDefByQuestionId,
+                selectedAnswersByQuestion: selectedAnswersByQuestion,
+        )
+    }
+
+    @Profile
+    private void persistUserQuizAttempt(GradedResultInfo gradedResultInfo, String userId) {
+        QuizGradedResult gradedResult = gradedResultInfo.gradedResult
+
         UserQuizAttempt quizAttempt = new UserQuizAttempt(
-                quizDefinitionRefId: quizDef.id,
-                userId: currentUserAttrs.userId,
-                status: quizPassed ? UserQuizAttempt.QuizAttemptStatus.SUCCESS : UserQuizAttempt.QuizAttemptStatus.FAILED)
+                quizDefinitionRefId: gradedResultInfo.quizDef.id,
+                userId: userId,
+                status: gradedResult.passed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED)
         UserQuizAttempt savedQuizAttempt = quizAttemptRepo.saveAndFlush(quizAttempt)
 
-        Map<Integer, List<QuizQuestionGradedResult>> gradedQuestionsByQuestionId = gradedQuestions.groupBy { it.questionId }
-        dbQuestionDefs.each { QuizQuestionDef quizQuestionDef ->
+        Map<Integer, List<QuizQuestionGradedResult>> gradedQuestionsByQuestionId = gradedResult.gradedQuestions.groupBy { it.questionId }
+        gradedResultInfo.dbQuestionDefs.each { QuizQuestionDef quizQuestionDef ->
             QuizQuestionGradedResult quizQuestionGradedResult = gradedQuestionsByQuestionId[quizQuestionDef.id].first()
             UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
                     userQuizAttemptRefId: savedQuizAttempt.id,
                     quizQuestionDefinitionRefId: quizQuestionDef.id,
-                    userId: currentUserAttrs.userId,
+                    userId: userId,
                     status: quizQuestionGradedResult.isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG,
             )
             UserQuizQuestionAttempt savedUserQuizQuestionAttempt = quizQuestionAttemptRepo.saveAndFlush(userQuizQuestionAttempt)
 
-            List<QuizAnswerDef> answers = answerDefByQuestionId[quizQuestionDef.id]
-            List<Integer> selectedAnswerIds = selectedAnswersByQuestion[quizQuestionDef.id].first().selectedAnswerIds
+            List<QuizAnswerDef> answers = gradedResultInfo.answerDefByQuestionId[quizQuestionDef.id]
+            List<Integer> selectedAnswerIds = gradedResultInfo.selectedAnswersByQuestion[quizQuestionDef.id].first().selectedAnswerIds
             List<UserQuizAnswerAttempt> userQuizAnswerAttempts = answers.collect { QuizAnswerDef quizAnswerDef ->
                 boolean isSelected = selectedAnswerIds.contains(quizAnswerDef.id)
                 boolean isCorrect = (quizAnswerDef.isCorrectAnswer && isSelected) || (!quizAnswerDef.isCorrectAnswer && !isSelected)
                 new UserQuizAnswerAttempt(
                         userQuizQuestionAttemptRefId: savedUserQuizQuestionAttempt.id,
                         quizAnswerDefinitionRefId: quizAnswerDef.id,
-                        userId: currentUserAttrs.userId,
+                        userId: userId,
                         status: isCorrect ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
                 )
             }
             quizAttemptAnswerRepo.saveAll(userQuizAnswerAttempts)
         }
-
-        return new QuizGradedResult(passed: quizPassed, gradedQuestions: gradedQuestions)
     }
 
     private QuizDef getQuizDef(String quizId) {

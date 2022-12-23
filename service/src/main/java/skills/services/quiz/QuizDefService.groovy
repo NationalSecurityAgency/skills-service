@@ -33,6 +33,7 @@ import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.result.model.QuizAnswerDefResult
 import skills.controller.result.model.QuizDefResult
+import skills.controller.result.model.QuizMetrics
 import skills.controller.result.model.QuizQuestionDefResult
 import skills.services.AccessSettingsStorageService
 import skills.services.CreatedResourceLimitsValidator
@@ -46,11 +47,13 @@ import skills.storage.model.QuizAnswerDef
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizDefWithDescription
 import skills.storage.model.QuizQuestionDef
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizAnswerDefRepo
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizDefWithDescRepo
 import skills.storage.repos.QuizQuestionDefRepo
+import skills.storage.repos.UserQuizAttemptRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -66,6 +69,9 @@ class QuizDefService {
 
     @Autowired
     QuizQuestionDefRepo quizQuestionRepo
+
+    @Autowired
+    UserQuizAttemptRepo quizAttemptRepo
 
     @Autowired
     QuizAnswerDefRepo quizAnswerRepo
@@ -247,6 +253,22 @@ class QuizDefService {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[quizQuestionDef.id]
             convert(quizQuestionDef, quizAnswerDefs)
         }.sort({ it.displayOrder })
+    }
+
+    @Transactional
+    QuizMetrics getMetrics(String quizId) {
+        List<UserQuizAttemptRepo.StatusCounts> quizCounts = quizAttemptRepo.getUserQuizAttemptCounts(quizId)
+
+        int total = quizCounts.collect { it.getCount() }.sum()
+        UserQuizAttemptRepo.StatusCounts numPassedCount = quizCounts.find{
+            UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getStatus())
+        }
+        int numPassed = numPassedCount ? numPassedCount.getCount() : 0
+        return new QuizMetrics(
+                numTaken: total,
+                numPassed: numPassed,
+                numFailed: total - numPassed,
+        )
     }
 
     private QuizQuestionDefResult convert(QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers) {

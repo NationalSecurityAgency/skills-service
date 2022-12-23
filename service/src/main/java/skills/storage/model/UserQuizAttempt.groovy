@@ -30,7 +30,7 @@ import javax.persistence.*
 class UserQuizAttempt {
 
     static enum QuizAttemptStatus {
-        STARTED, SUCCESS, FAILED,
+        PASSED, FAILED,
     }
 
     @Id
