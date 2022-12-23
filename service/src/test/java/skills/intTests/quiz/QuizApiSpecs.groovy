@@ -16,10 +16,32 @@
 package skills.intTests.quiz
 
 import groovy.json.JsonOutput
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.storage.repos.QuizAnswerDefRepo
+import skills.storage.repos.QuizQuestionDefRepo
+import skills.storage.repos.UserQuizAnswerAttemptRepo
+import skills.storage.repos.UserQuizAttemptRepo
+import skills.storage.repos.UserQuizQuestionAttemptRepo
+import spock.lang.IgnoreRest
 
 class QuizApiSpecs extends DefaultIntSpec {
+
+    @Autowired
+    QuizQuestionDefRepo quizQuestionDefRepo
+
+    @Autowired
+    QuizAnswerDefRepo quizAnswerDefRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
+    UserQuizQuestionAttemptRepo userQuizQuestionAttemptRepo
+
+    @Autowired
+    UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
 
     def "change quiz questions display order"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
@@ -88,5 +110,33 @@ class QuizApiSpecs extends DefaultIntSpec {
         qRes.body.gradedQuestions.isCorrect == [true, false]
         qRes.body.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
         qRes.body.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+    }
+
+    def "removing quiz definition removes questions and answers definitions and attempts"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        skillsService.reportQuizAttempt(quiz.quizId, [
+                questionAnswers: [[
+                                          questionId: quizInfo.questions[0].id,
+                                          selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
+                                  ], [
+                                          questionId: quizInfo.questions[1].id,
+                                          selectedAnswerIds: [quizInfo.questions[1].answerOptions[0].id]
+                                  ]]
+        ])
+
+        when:
+        quizDefRepo.deleteAll()
+        then:
+        quizQuestionDefRepo.findAll() == []
+        quizAnswerDefRepo.findAll() == []
+        userQuizAttemptRepo.findAll() == []
+        userQuizQuestionAttemptRepo.findAll() == []
+        userQuizAnswerAttemptRepo.findAll() == []
     }
 }

@@ -21,7 +21,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizQuestionDef
 
-interface QuizQuestionRepo extends JpaRepository<QuizQuestionDef, Long> {
+interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
 
     @Nullable
     List<QuizQuestionDef> findAllByQuizIdIgnoreCase(String quizId)

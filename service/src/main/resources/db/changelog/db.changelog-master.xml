@@ -2062,7 +2062,7 @@
                                  referencedColumnNames="quiz_id"
                                  referencedTableName="quiz_definition"/>
 
-        <createTable tableName="quiz_attempt">
+        <createTable tableName="user_quiz_attempt">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -2085,34 +2085,33 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="quiz_definition_ref_id"
-                                 baseTableName="quiz_attempt"
-                                 constraintName="fk_quiz_quiz_attempt_quiz_definition_ref_id"
+                                 baseTableName="user_quiz_attempt"
+                                 constraintName="fk_quiz_user_quiz_attempt_quiz_definition_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="quiz_definition"/>
         <addForeignKeyConstraint baseColumnNames="user_id"
-                                 baseTableName="quiz_attempt"
-                                 constraintName="fk_quiz_attempt_user_id"
+                                 baseTableName="user_quiz_attempt"
+                                 constraintName="fk_user_quiz_attempt_user_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="user_id"
                                  referencedTableName="user_attrs"/>
 
-        <createTable tableName="quiz_attempt_answer">
+        <createTable tableName="user_quiz_question_attempt">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="quiz_attempt_ref_id" type="int">
+            <column name="user_quiz_attempt_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
             <column name="quiz_question_definition_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="quiz_answer_definition_ref_id" type="int">
+            <column name="status" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -2125,30 +2124,71 @@
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseColumnNames="quiz_attempt_ref_id"
-                                 baseTableName="quiz_attempt_answer"
-                                 constraintName="fk_quiz_quiz_attempt_answer_quiz_attempt_ref_id"
+        <addForeignKeyConstraint baseColumnNames="user_quiz_attempt_ref_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_user_quiz_attempt_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
-                                 referencedTableName="quiz_attempt"/>
+                                 referencedTableName="user_quiz_attempt"/>
         <addForeignKeyConstraint baseColumnNames="quiz_question_definition_ref_id"
-                                 baseTableName="quiz_attempt_answer"
-                                 constraintName="fk_quiz_quiz_attempt_quiz_question_definition_ref_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_quiz_question_definition_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="quiz_question_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createTable tableName="user_quiz_answer_attempt">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_quiz_question_attempt_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quiz_answer_definition_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="user_quiz_question_attempt_ref_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_user_quiz_question_attempt_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_quiz_question_attempt"/>
         <addForeignKeyConstraint baseColumnNames="quiz_answer_definition_ref_id"
-                                 baseTableName="quiz_attempt_answer"
-                                 constraintName="fk_quiz_quiz_attempt_quiz_answer_definition_ref_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_quiz_answer_definition_ref_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="quiz_answer_definition"/>
         <addForeignKeyConstraint baseColumnNames="user_id"
-                                 baseTableName="quiz_attempt_answer"
-                                 constraintName="fk_quiz_attempt_answer_user_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_user_id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"
                                  referencedColumnNames="user_id"

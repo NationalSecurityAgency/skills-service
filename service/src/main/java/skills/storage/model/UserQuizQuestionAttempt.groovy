@@ -23,24 +23,25 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import javax.persistence.*
 
 @Entity
-@Table(name = 'quiz_attempt')
+@Table(name = 'user_quiz_question_attempt')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
 @ToString(includeNames = true)
-class QuizAttempt {
+class UserQuizQuestionAttempt {
 
-    static enum QuizAttemptStatus {
-        STARTED, SUCCESS, FAILED,
+    static enum QuizQuestionStatus {
+        CORRECT, WRONG
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
-    Integer quizDefinitionRefId
-    QuizAttemptStatus status
+    Integer userQuizAttemptRefId
+    Integer quizQuestionDefinitionRefId
 
     String userId
+    QuizQuestionStatus status
 
     @Column(name="created", updatable = false, insertable = false)
     Date created

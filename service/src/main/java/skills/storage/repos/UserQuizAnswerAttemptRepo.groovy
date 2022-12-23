@@ -16,11 +16,8 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.lang.Nullable
-import skills.storage.model.QuizAnswerDef
+import skills.storage.model.UserQuizAnswerAttempt
 
-interface QuizAnswerRepo extends JpaRepository<QuizAnswerDef, Long> {
+interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
 
-    @Nullable
-    List<QuizAnswerDef> findAllByQuizIdIgnoreCase(String quizId)
 }

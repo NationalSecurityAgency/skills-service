@@ -16,12 +16,8 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
-import org.springframework.lang.Nullable
-import skills.storage.model.QuizAttemptAnswer
-import skills.storage.model.QuizQuestionDef
+import skills.storage.model.UserQuizQuestionAttempt
 
-interface QuizAttemptAnswerRepo extends JpaRepository<QuizAttemptAnswer, Long> {
+interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAttempt, Long> {
 
 }

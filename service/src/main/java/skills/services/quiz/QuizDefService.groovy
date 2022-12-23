@@ -26,10 +26,8 @@ import skills.auth.UserInfoService
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
-import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
@@ -44,19 +42,15 @@ import skills.services.IdFormatValidator
 import skills.services.LockingService
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
-import skills.storage.model.ProjDef
-import skills.storage.model.ProjDefWithDescription
 import skills.storage.model.QuizAnswerDef
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizDefWithDescription
 import skills.storage.model.QuizQuestionDef
-import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.QuizAnswerRepo
+import skills.storage.repos.QuizAnswerDefRepo
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizDefWithDescRepo
-import skills.storage.repos.QuizQuestionRepo
-import skills.utils.ClientSecretGenerator
+import skills.storage.repos.QuizQuestionDefRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -71,10 +65,10 @@ class QuizDefService {
     QuizDefRepo quizDefRepo
 
     @Autowired
-    QuizQuestionRepo quizQuestionRepo
+    QuizQuestionDefRepo quizQuestionRepo
 
     @Autowired
-    QuizAnswerRepo quizAnswerRepo
+    QuizAnswerDefRepo quizAnswerRepo
 
     @Autowired
     LockingService lockingService
@@ -225,15 +219,15 @@ class QuizDefService {
         QuizDef quizDef = findQuizDef(quizId)
         lockingService.lockQuizDef(quizDef.quizId)
         if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == patchRequest.action) {
-            List<QuizQuestionRepo.DisplayOrder> currentDisplayOrder = quizQuestionRepo.getQuestionsDisplayOrder(quizDef.quizId)
-            QuizQuestionRepo.DisplayOrder theItemToMove = currentDisplayOrder.find { it.getId() == questionId }
+            List<QuizQuestionDefRepo.DisplayOrder> currentDisplayOrder = quizQuestionRepo.getQuestionsDisplayOrder(quizDef.quizId)
+            QuizQuestionDefRepo.DisplayOrder theItemToMove = currentDisplayOrder.find { it.getId() == questionId }
             QuizValidator.isTrue(theItemToMove != null, "Provide question id [${questionId}] is not valid", quizId)
-            List<QuizQuestionRepo.DisplayOrder> mutableDisplayOrder = currentDisplayOrder.findAll { it.getId() != questionId }.sort { it.getDisplayOrder() }
+            List<QuizQuestionDefRepo.DisplayOrder> mutableDisplayOrder = currentDisplayOrder.findAll { it.getId() != questionId }.sort { it.getDisplayOrder() }
 
             int newIndex = Math.min(patchRequest.newDisplayOrderIndex, currentDisplayOrder.size() - 1)
             mutableDisplayOrder.add(newIndex, theItemToMove)
 
-            mutableDisplayOrder.eachWithIndex{ QuizQuestionRepo.DisplayOrder entry, int i ->
+            mutableDisplayOrder.eachWithIndex{ QuizQuestionDefRepo.DisplayOrder entry, int i ->
                 quizQuestionRepo.updateDisplayOrder(entry.getId(), i)
             }
         }
