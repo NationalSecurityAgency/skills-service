@@ -42,7 +42,7 @@ limitations under the License.
       hasObjectChanged(firstObject, secondObject) {
         let hasChanged = false;
         this.keysToWatch.forEach((key) => {
-          if (firstObject[key] === secondObject[key]) {
+          if (firstObject[key] !== secondObject[key]) {
             hasChanged = true;
           }
         });
