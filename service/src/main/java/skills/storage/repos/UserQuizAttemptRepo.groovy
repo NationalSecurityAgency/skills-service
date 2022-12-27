@@ -17,22 +17,18 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import skills.storage.model.LabeledCount
 import skills.storage.model.UserQuizAttempt
 
 interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
-    static interface StatusCounts {
-        String getStatus()
-        Integer getCount()
-    }
-
     @Query('''select
-        quizAttempt.status as status, count(quizAttempt.id) as count
+        quizAttempt.status as label, count(quizAttempt.id) as count
         from UserQuizAttempt quizAttempt, QuizDef quizDef
         where quizAttempt.quizDefinitionRefId = quizDef.id
             and quizDef.quizId = ?1
         group by quizAttempt.status
     
      ''')
-    List<StatusCounts> getUserQuizAttemptCounts(String quizId)
+    List<LabeledCount> getUserQuizAttemptCounts(String quizId)
 }

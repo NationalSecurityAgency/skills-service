@@ -16,8 +16,26 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import skills.storage.model.UserQuizQuestionAttempt
 
 interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAttempt, Long> {
+
+    interface QuestionIdAndStatusCount {
+        Integer getQuestionId()
+        String getStatus()
+        Long getCount()
+    }
+
+    @Query('''select
+        questionAttempt.id as questionId, questionAttempt.status as status, count(quizAttempt.id) as count
+        from QuizDef quizDef, UserQuizAttempt quizAttempt, UserQuizQuestionAttempt questionAttempt
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizAttempt.id = questionAttempt.userQuizAttemptRefId
+            and quizDef.quizId = ?1
+        group by questionAttempt.id, questionAttempt.status
+    
+     ''')
+    List<QuestionIdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
 
 }

@@ -2083,7 +2083,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-
+        <createIndex indexName="user_quiz_attempt_status"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="quiz_definition_ref_id"
                                  baseTableName="user_quiz_attempt"
                                  constraintName="fk_quiz_user_quiz_attempt_quiz_definition_ref_id"
@@ -2124,6 +2127,10 @@
             </column>
         </createTable>
 
+        <createIndex indexName="user_quiz_question_attempt_status"
+                     tableName="user_quiz_question_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="user_quiz_attempt_ref_id"
                                  baseTableName="user_quiz_question_attempt"
                                  constraintName="fk_user_quiz_question_attempt_user_quiz_attempt_ref_id"
@@ -2172,6 +2179,10 @@
             </column>
         </createTable>
 
+        <createIndex indexName="user_quiz_answer_attempt_status"
+                     tableName="user_quiz_answer_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="user_quiz_question_attempt_ref_id"
                                  baseTableName="user_quiz_answer_attempt"
                                  constraintName="fk_user_quiz_answer_attempt_user_quiz_question_attempt_ref_id"

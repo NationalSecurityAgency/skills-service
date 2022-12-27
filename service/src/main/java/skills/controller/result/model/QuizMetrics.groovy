@@ -19,4 +19,6 @@ class QuizMetrics {
     Integer numTaken
     Integer numPassed
     Integer numFailed
+
+    List<QuizQuestionDefResult> questionDefResults
 }

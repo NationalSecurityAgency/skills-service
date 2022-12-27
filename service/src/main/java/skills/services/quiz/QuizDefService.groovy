@@ -43,6 +43,7 @@ import skills.services.IdFormatValidator
 import skills.services.LockingService
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
+import skills.storage.model.LabeledCount
 import skills.storage.model.QuizAnswerDef
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizDefWithDescription
@@ -53,7 +54,9 @@ import skills.storage.repos.QuizAnswerDefRepo
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizDefWithDescRepo
 import skills.storage.repos.QuizQuestionDefRepo
+import skills.storage.repos.UserQuizAnswerAttemptRepo
 import skills.storage.repos.UserQuizAttemptRepo
+import skills.storage.repos.UserQuizQuestionAttemptRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -71,7 +74,13 @@ class QuizDefService {
     QuizQuestionDefRepo quizQuestionRepo
 
     @Autowired
-    UserQuizAttemptRepo quizAttemptRepo
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
+    UserQuizQuestionAttemptRepo userQuizQuestionAttemptRepo
+
+    @Autowired
+    UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
 
     @Autowired
     QuizAnswerDefRepo quizAnswerRepo
@@ -257,17 +266,22 @@ class QuizDefService {
 
     @Transactional
     QuizMetrics getMetrics(String quizId) {
-        List<UserQuizAttemptRepo.StatusCounts> quizCounts = quizAttemptRepo.getUserQuizAttemptCounts(quizId)
+        List<LabeledCount> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
 
         int total = quizCounts.collect { it.getCount() }.sum()
-        UserQuizAttemptRepo.StatusCounts numPassedCount = quizCounts.find{
-            UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getStatus())
+        LabeledCount numPassedCount = quizCounts.find{
+            UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getLabel())
         }
         int numPassed = numPassedCount ? numPassedCount.getCount() : 0
+
+        List<QuizQuestionDefResult> questionDefResults = getQuestionDefs(quizId)
+        List<UserQuizQuestionAttemptRepo.QuestionIdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId)
+
         return new QuizMetrics(
                 numTaken: total,
                 numPassed: numPassed,
                 numFailed: total - numPassed,
+                questionDefResults: questionDefResults,
         )
     }
 
