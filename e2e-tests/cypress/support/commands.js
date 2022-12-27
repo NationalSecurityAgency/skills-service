@@ -255,7 +255,7 @@ Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
 });
 
 Cypress.Commands.add("discardChanges", () => {
-    cy.contains('YES, Delete It!').click();
+    cy.contains('Discard Changes').click();
 });
 
 Cypress.Commands.add("addTagToSkills", (projNum = 1, skillIds = ['skill1'], tagNum=1, overrideProps = {}) => {
