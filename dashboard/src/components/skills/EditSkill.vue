@@ -219,7 +219,7 @@ limitations under the License.
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-if="skillInternal && (descriptionLoaded || !isEdit)" v-model="skillInternal.description" data-cy="skillDescription"/>
+                <markdown-editor v-model="skillInternal.description" data-cy="skillDescription"/>
                 <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
@@ -371,7 +371,6 @@ limitations under the License.
           helpUrl: null,
           selfReportingType: null,
           type: 'Skill',
-          loadingComponent: true,
         },
         canEditSkillId: false,
         initial: {
@@ -384,7 +383,6 @@ limitations under the License.
         },
         overallErrMsg: '',
         show: this.value,
-        descriptionLoaded: false,
         keysToWatch: [
           'name', 'description', 'skillId', 'helpUrl', 'pointIncrement', 'numPerformToCompletion',
           'pointIncrementIntervalHrs', 'pointIncrementIntervalMins', 'timeWindowEnabled',
@@ -615,7 +613,6 @@ limitations under the License.
           }
         }).finally(() => {
           this.isLoadingSkillDetails = false;
-          this.descriptionLoaded = true;
           if (this.isEdit || this.isCopy) {
             setTimeout(() => {
               this.$nextTick(() => {
