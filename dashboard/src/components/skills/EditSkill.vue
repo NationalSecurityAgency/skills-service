@@ -21,6 +21,7 @@ limitations under the License.
              :aria-label="isEdit?'Edit Skill':'New Skill'">
       <skills-spinner :is-loading="isLoading" />
       <b-container v-if="!isLoading" fluid>
+          <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
           <div class="row">
             <div class="col-12 col-lg">
               <div class="form-group">
@@ -264,6 +265,7 @@ limitations under the License.
   import SettingsService from '../settings/SettingsService';
   import HelpUrlInput from '../utils/HelpUrlInput';
   import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -294,6 +296,7 @@ limitations under the License.
       InlineHelp,
       IdInput,
       MarkdownEditor,
+      ReloadMessage,
     },
     mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: {
@@ -388,14 +391,11 @@ limitations under the License.
           'pointIncrementIntervalHrs', 'pointIncrementIntervalMins', 'timeWindowEnabled',
           'numPointIncrementMaxOccurrences', 'selfReportingType', 'type',
         ],
+        restoredFromStorage: false,
       };
     },
     mounted() {
-      if (this.isEdit || this.isCopy) {
-        this.loadSkillDetails(this.isCopy);
-      } else {
-        this.startLoadingFromState();
-      }
+      this.loadComponent();
 
       this.setupValidation();
       document.addEventListener('focusin', this.trackFocus);
@@ -443,6 +443,22 @@ limitations under the License.
       },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.isLoadingSkillDetails = true;
+
+        if (this.isEdit || this.isCopy) {
+          this.loadSkillDetails(this.isCopy);
+        } else {
+          this.startLoadingFromState();
+        }
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -607,6 +623,7 @@ limitations under the License.
         this.loadComponentState(this.componentName).then((result) => {
           if (result && (!this.isEdit || (this.isEdit && result.originalSkillId === this.originalSkill.skillId))) {
             this.skillInternal = result;
+            this.restoredFromStorage = true;
           } else if (!this.isEdit && !this.isCopy) {
             this.findLatestSkillVersion();
             this.loadSelfReportProjectSetting();

@@ -26,6 +26,7 @@ limitations under the License.
         <skills-spinner :is-loading="loadingComponent"/>
 
         <b-container fluid v-if="!loadingComponent">
+          <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
           <div v-if="displayIconManager === false">
               <div class="media mb-3">
                 <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
@@ -114,6 +115,7 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
   import HelpUrlInput from '../utils/HelpUrlInput';
   import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   export default {
     name: 'EditSubject',
@@ -124,6 +126,7 @@ limitations under the License.
       IconPicker,
       SkillsSpinner,
       MarkdownEditor,
+      ReloadMessage,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
@@ -155,6 +158,7 @@ limitations under the License.
         tooltipShowing: false,
         loadingComponent: true,
         keysToWatch: ['name', 'description', 'subjectId', 'helpUrl'],
+        restoredFromStorage: false,
       };
     },
     created() {
@@ -162,32 +166,7 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-
-      this.loadingComponent = true;
-
-      this.loadComponentState(this.componentName).then((result) => {
-        if (result) {
-          if (!this.isEdit || (this.isEdit && result.originalSubjectId === this.originalSubject.subjectId)) {
-            this.subjectInternal = result;
-          } else {
-            this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
-          }
-        } else {
-          this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
-        }
-      }).finally(() => {
-        this.loadingComponent = false;
-        if (this.isEdit) {
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const { observer } = this.$refs;
-              if (observer) {
-                observer.validate({ silent: false });
-              }
-            });
-          }, 600);
-        }
-      });
+      this.loadComponent();
     },
     watch: {
       show(newValue) {
@@ -209,6 +188,41 @@ limitations under the License.
       },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loadingComponent = true;
+
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.originalSubjectId === this.originalSubject.subjectId)) {
+              this.subjectInternal = result;
+              this.restoredFromStorage = true;
+            } else {
+              this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
+            }
+          } else {
+            this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
+          }
+        }).finally(() => {
+          this.loadingComponent = false;
+          if (this.isEdit) {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          }
+        });
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;

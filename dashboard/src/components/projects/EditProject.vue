@@ -28,6 +28,7 @@ limitations under the License.
       <skills-spinner :is-loading="loadingComponent"/>
 
       <b-container fluid v-if="!loadingComponent">
+        <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div class="row">
           <div class="col-12">
             <div class="form-group">
@@ -95,10 +96,16 @@ limitations under the License.
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
   import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   export default {
     name: 'EditProject',
-    components: { IdInput, MarkdownEditor, SkillsSpinner },
+    components: {
+      IdInput,
+      MarkdownEditor,
+      SkillsSpinner,
+      ReloadMessage,
+    },
     mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
@@ -124,20 +131,14 @@ limitations under the License.
         loadingComponent: true,
         descriptionLoaded: false,
         keysToWatch: ['name', 'description', 'projectId'],
+        restoredFromStorage: false,
       };
     },
     created() {
       this.registerValidation();
     },
     mounted() {
-      this.loadingComponent = true;
-      this.descriptionLoaded = false;
-
-      if (this.isEdit) {
-        this.startLoadingFromDescription();
-      } else {
-        this.startLoadingFromState();
-      }
+      this.loadComponent();
 
       document.addEventListener('focusin', this.trackFocus);
     },
@@ -173,6 +174,23 @@ limitations under the License.
       },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loadingComponent = true;
+        this.descriptionLoaded = false;
+
+        if (this.isEdit) {
+          this.startLoadingFromDescription();
+        } else {
+          this.startLoadingFromState();
+        }
+      },
       startLoadingFromDescription() {
         this.originalProject = {
           name: this.project.name,
@@ -189,6 +207,7 @@ limitations under the License.
           if (result) {
             if (!this.isEdit || (this.isEdit && result.originalProjectId === this.originalProject.projectId)) {
               this.internalProject = result;
+              this.restoredFromStorage = true;
             } else {
               Object.assign(this.internalProject, this.originalProject);
             }
