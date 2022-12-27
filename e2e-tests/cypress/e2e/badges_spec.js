@@ -1908,7 +1908,6 @@ describe('Badges Tests', () => {
         // now test edit
         cy.get('[data-cy="closeBadgeButton"]')
             .click();
-        cy.discardChanges();
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="editBtn"]')
             .click();
         cy.get('[data-cy="rootHelpUrlSetting"]')

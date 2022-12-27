@@ -1054,7 +1054,6 @@ describe('Skills Tests', () => {
 
     // now test edit
     cy.get('[data-cy="closeSkillButton"]').click();
-    cy.discardChanges();
     cy.get('[data-cy="editSkillButton_skill1"]').click();
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
     cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.css', 'text-decoration', textDecorationMatch);

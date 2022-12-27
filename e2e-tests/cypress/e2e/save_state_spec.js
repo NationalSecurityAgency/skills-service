@@ -43,7 +43,6 @@ describe('Save State Tests', () => {
     cy.get('#badgeName').should('have.value', 'New Badge');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy=closeBadgeButton]').click();
-    cy.discardChanges();
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
@@ -82,7 +81,6 @@ describe('Save State Tests', () => {
     cy.get('#badgeName').should('have.value', 'New Badge Edit');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description edit');
     cy.get('[data-cy=closeBadgeButton]').click();
-    cy.discardChanges();
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
@@ -111,7 +109,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectName"]').should('have.value', 'Test Project');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy="newProjectButton"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', '');
@@ -137,7 +134,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectName"]').should('have.value', 'proj1 With Edits');
     cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy="editProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'proj1');
@@ -163,7 +159,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectName"]').should('have.value', 'Copy Proj With Edits');
     cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
     cy.get('[data-cy=closeProjectButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', '');
@@ -190,7 +185,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', '');
@@ -231,7 +225,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
@@ -271,7 +264,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
     cy.get('[data-cy=closeSkillButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy=copySkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One');
@@ -291,7 +283,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy=closeSubjectButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy=btn_Subjects]').click();
     cy.get('[data-cy="subjectNameInput"]').should('have.value', '');
@@ -321,7 +312,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
     cy.get('[data-cy=closeSubjectButton]').click();
-    cy.discardChanges();
 
     cy.get('[data-cy=btn_edit-subject]').click();
     cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1');
