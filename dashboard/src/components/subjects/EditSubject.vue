@@ -215,7 +215,7 @@ limitations under the License.
       publishHidden(e) {
         if (!e.update && this.hasObjectChanged(this.subjectInternal, this.originalSubject) && !this.loadingComponent) {
           e.preventDefault();
-          this.msgConfirm('You have unsaved changes.  Discard?')
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
             .then((res) => {
               if (res) {
                 this.clearComponentState(this.componentName);
@@ -234,7 +234,8 @@ limitations under the License.
         this.$emit('hidden', e);
       },
       close(e) {
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       updateSubject() {
         this.$refs.observer.validate()
@@ -242,7 +243,7 @@ limitations under the License.
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              this.close({ update: true });
+              this.publishHidden({ update: true });
               this.subjectInternal.subjectName = InputSanitizer.sanitize(this.subjectInternal.subjectName);
               this.subjectInternal.subjectId = InputSanitizer.sanitize(this.subjectInternal.subjectId);
               this.$emit('subject-saved', this.subjectInternal);

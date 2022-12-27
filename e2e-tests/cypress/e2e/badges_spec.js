@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { clear } from 'idb-keyval';
-
 describe('Badges Tests', () => {
 
     const tableSelector = '[data-cy="simpleSkillsTable"]';
     const makdownDivSelector = '#markdown-editor div.toastui-editor-main.toastui-editor-ww-mode > div > div.toastui-editor-ww-container > div > div'
     beforeEach(() => {
-        clear();
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'

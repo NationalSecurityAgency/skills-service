@@ -15,13 +15,11 @@
  */
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
-import { clear } from 'idb-keyval';
 
 dayjs.extend(utcPlugin);
 
 describe('Projects Modal Management Tests', () => {
     beforeEach(() => {
-        clear();
         cy.intercept('GET', '/app/projects')
             .as('getProjects');
         cy.intercept('GET', '/api/icons/customIconCss')

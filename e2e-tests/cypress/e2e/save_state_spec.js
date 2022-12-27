@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { get, clear } from 'idb-keyval';
-
 describe('Save State Tests', () => {
 
   beforeEach(() => {
-    clear();
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
       name: "proj1"

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script>
   import {
-    get, set, del, clear,
+    get, set, del,
   } from 'idb-keyval';
 
   export default {
@@ -35,9 +35,6 @@ limitations under the License.
       },
       clearComponentState(key) {
         del(key);
-      },
-      clearAllStorage() {
-        clear();
       },
       hasObjectChanged(firstObject, secondObject) {
         let hasChanged = false;

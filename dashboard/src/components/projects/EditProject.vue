@@ -217,12 +217,13 @@ limitations under the License.
         this.canEditProjectId = canEdit;
       },
       close(e) {
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
         if (!e.updated && this.hasObjectChanged(this.internalProject, this.originalProject) && !this.loadingComponent) {
           e.preventDefault();
-          this.msgConfirm('You have unsaved changes.  Discard?')
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
             .then((res) => {
               if (res) {
                 this.clearComponentState(this.componentName);
@@ -244,7 +245,7 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.close({ updated: true });
+              this.publishHidden({ updated: true });
               this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
               this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
               this.$emit('project-saved', this.internalProject);

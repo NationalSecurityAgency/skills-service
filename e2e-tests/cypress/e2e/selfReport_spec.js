@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 var moment = require('moment-timezone');
-import { clear } from 'idb-keyval';
 
 describe('Self Report Skills Management Tests', () => {
 
     beforeEach(() => {
-        clear();
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'

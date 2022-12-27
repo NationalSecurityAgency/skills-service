@@ -261,12 +261,13 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       closeMe(e) {
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
         if (!e.updated && this.hasObjectChanged(this.badgeInternal, this.originalBadge) && !this.loadingComponent) {
           e.preventDefault();
-          this.msgConfirm('You have unsaved changes.  Discard?')
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
             .then((res) => {
               if (res) {
                 this.clearComponentState(this.componentName);
@@ -291,7 +292,7 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.closeMe({ updated: true });
+              this.publishHidden({ updated: true });
               this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
               this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
               this.$emit('badge-updated', { isEdit: this.isEdit, ...this.badgeInternal });

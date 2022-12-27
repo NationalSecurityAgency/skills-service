@@ -449,12 +449,13 @@ limitations under the License.
         this.currentFocus = document.activeElement;
       },
       close(e) {
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
         if (!e.saved && this.hasObjectChanged(this.skillInternal, this.originalSkill) && !this.isLoading) {
           e.preventDefault();
-          this.msgConfirm('You have unsaved changes.  Discard?')
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
             .then((res) => {
               if (res) {
                 this.clearComponentState(this.componentName);
@@ -595,7 +596,7 @@ limitations under the License.
                 numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
               };
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
-              this.close({ saved: true });
+              this.publishHidden({ saved: true });
             }
           });
       },

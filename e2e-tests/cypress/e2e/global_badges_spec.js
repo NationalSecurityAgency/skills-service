@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { clear } from 'idb-keyval';
-
 describe('Global Badges Tests', () => {
 
     const tableSelector = '[data-cy="simpleSkillsTable"]';
@@ -22,7 +20,6 @@ describe('Global Badges Tests', () => {
 
     beforeEach(() => {
         cy.logout();
-        clear();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
         cy.login('root@skills.org', 'password');
