@@ -224,11 +224,15 @@ limitations under the License.
       publishHidden(e) {
         if (!e.updated && this.hasObjectChanged(this.internalProject, this.originalProject) && !this.loadingComponent) {
           e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
           this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
             .then((res) => {
               if (res) {
                 this.clearComponentState(this.componentName);
                 this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
               }
             });
         } else if (this.tooltipShowing && typeof e.preventDefault === 'function') {
