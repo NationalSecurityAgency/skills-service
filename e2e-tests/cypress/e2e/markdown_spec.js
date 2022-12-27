@@ -23,7 +23,7 @@ describe('Markdown Tests', () => {
         capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
     };
 
-    const markdownInput = '[data-cy=markdownEditorInput]';
+    const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
 
     Cypress.Commands.add('clickToolbarButton', (buttonName) => {
         cy.get(`button.${buttonName}`).click({force: true})
@@ -72,6 +72,109 @@ describe('Markdown Tests', () => {
             .click();
         cy.get('a[href="https://google.com"]')
             .should('have.attr', 'target', '_blank');
+    });
+
+    it('upload an attachment', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.clickToolbarButton('attachment-button')
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+
+        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+          .should('have.attr', 'target', '_blank');
+        cy.clickSave();
+        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+          .click();
+        cy.get('a[href$="test-pdf.pdf"]')
+          .should('have.attr', 'target', '_blank');
+    });
+
+    it('drag-drop upload an attachment', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.get(markdownInput).focus().selectFile('cypress/attachments/test-pdf.pdf', { action: 'drag-drop' })
+
+        cy.get('a[href$="test-pdf.pdf"]')
+          .should('have.attr', 'target', '_blank');
+        cy.clickSave();
+        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+          .click();
+        cy.get('a[href$="test-pdf.pdf"]')
+          .should('have.attr', 'target', '_blank');
+    });
+
+    it('attempt to upload an attachment that is too large', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxAttachmentSize = 5;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.clickToolbarButton('attachment-button')
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+          .should('not.exist');
+        cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7424] exceeds maximum file size [5]');
+    });
+
+    it('attempt to upload an attachment that is not an accepted mime-type', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.clickToolbarButton('attachment-button')
+        cy.get('input[type=file]').selectFile([{
+            contents: 'cypress/attachments/test-pdf.pdf',
+            mimeType: 'invalid/type'  // assign invalid mime-type
+        }], { force: true })
+
+        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+          .should('not.exist');
+        cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - Invalid file type [invalid/type]');
+    });
+
+    it('upload valid mime-types', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        const attachmentFiles = cy.task('getFilesFromDir', { directory: 'cypress/attachments/', ignore: 'invalid' });
+        attachmentFiles.each((file) => {
+            cy.get('input[type=file]').selectFile(`cypress/attachments/${file}`, {force: true})
+            cy.get(markdownInput).get(`a[href$="/${file}"]`).should('exist');
+            cy.get(markdownInput).type('\n\n')
+        });
+        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+        cy.get('[data-cy=attachmentError]').scrollIntoView().should('not.be.visible');
+        cy.clickSave();
+        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
+
+        attachmentFiles.each((file) => {
+            cy.get('[data-cy="skillOverviewDescription"]').get(`a[href$="/${file}"]`).should('exist');
+        });
     });
 
     it('keyboard navigation', () => {

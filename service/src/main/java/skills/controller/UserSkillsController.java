@@ -484,43 +484,4 @@ class UserSkillsController {
         }
     }
 
-//    @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @RequestMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
-//    @ResponseBody
-//    @Profile
-//    public UploadAttachmentResult upload(HttpServletRequest request) throws Exception {
-//        if(!ServletFileUpload.isMultipartContent(request)) {
-//            throw new SkillException("Multipart request expected", ErrorCode.BadParam);
-//        }
-//
-////        service.upload(new ServletFileUpload().getItemIterator(request));
-////        FileItemIterator iter = new ServletFileUpload().getItemIterator(request);
-//        FileItemStream fileItemStream = getFileItemStream(request);
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Location", "/");
-//        UploadAttachmentResult result = new UploadAttachmentResult();
-//
-////        attachmentService.saveAttachment(file.getOriginalFilename(), file.getContentType(), "href", file.getSize(), file.getInputStream());
-////        result.setFilename();
-//        return result;
-//    }
-//
-//    private FileItemStream getFileItemStream(HttpServletRequest request) {
-//        try {
-//            FileItemIterator iter = new ServletFileUpload().getItemIterator(request);
-//            FileItemStream fileItemStream = null;
-//            if (iter.hasNext()) {
-//                fileItemStream = iter.next();
-//                if (iter.hasNext()) {
-//                    throw new SkillException("Only one file item expected.", ErrorCode.BadParam);
-//                }
-//            } else {
-//                throw new SkillException("No file item found.", ErrorCode.BadParam);
-//            }
-//            return fileItemStream;
-//        } catch (IOException e) {
-//            throw new SkillException("Error get file item.", e);
-//        }
-//    }
-
 }

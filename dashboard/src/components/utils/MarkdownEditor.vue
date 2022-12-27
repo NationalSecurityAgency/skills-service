@@ -50,7 +50,7 @@ limitations under the License.
              aria-describedby="attachmentError"
              :accept="allowedAttachmentFileTypes"
              hidden/>
-      <small role="alert" class="form-text text-danger" id="attachmentError">{{errors[0]}}</small>
+      <small role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{errors[0]}}</small>
     </ValidationProvider>
   </div>
 </template>
