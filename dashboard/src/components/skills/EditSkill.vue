@@ -353,6 +353,7 @@ limitations under the License.
         },
         skillInternal: {
           skillId: '',
+          originalSkillId: this.skillId,
           projectId: this.projectId,
           subjectId: this.subjectId,
           name: '',
@@ -602,7 +603,7 @@ limitations under the License.
       },
       startLoadingFromState() {
         this.loadComponentState(this.componentName).then((result) => {
-          if (result && (!this.isEdit || (this.isEdit && result.skillId === this.originalSkill.skillId))) {
+          if (result && (!this.isEdit || (this.isEdit && result.originalSkillId === this.originalSkill.skillId))) {
             this.skillInternal = result;
           } else if (!this.isEdit && !this.isCopy) {
             this.findLatestSkillVersion();

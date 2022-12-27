@@ -138,6 +138,7 @@ limitations under the License.
           originalSubjectId: this.subject.subjectId,
           isEdit: this.isEdit,
           helpUrl: this.subject.helpUrl,
+          subjectId: this.subject.subjectId,
           ...this.subject,
         },
         originalSubject: {
@@ -166,7 +167,7 @@ limitations under the License.
 
       this.loadComponentState(this.componentName).then((result) => {
         if (result) {
-          if (!this.isEdit || (this.isEdit && result.subjectId === this.subjectInternal.subjectId)) {
+          if (!this.isEdit || (this.isEdit && result.originalSubjectId === this.originalSubject.subjectId)) {
             this.subjectInternal = result;
           } else {
             this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);

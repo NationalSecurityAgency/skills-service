@@ -106,6 +106,7 @@ limitations under the License.
         show: this.value,
         internalProject: {
           originalProjectId: this.project.projectId,
+          projectId: this.project.projectId,
           isEdit: this.isEdit,
           description: '',
           ...this.project,
@@ -186,7 +187,7 @@ limitations under the License.
       startLoadingFromState() {
         this.loadComponentState(this.componentName).then((result) => {
           if (result) {
-            if (!this.isEdit || (this.isEdit && result.projectId === this.internalProject.projectId)) {
+            if (!this.isEdit || (this.isEdit && result.originalProjectId === this.originalProject.projectId)) {
               this.internalProject = result;
             } else {
               Object.assign(this.internalProject, this.originalProject);

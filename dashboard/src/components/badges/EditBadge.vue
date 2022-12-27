@@ -175,7 +175,7 @@ limitations under the License.
     },
     data() {
       const badgeInternal = {
-        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', startDate: null, endDate: null, ...this.badge,
+        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', startDate: null, endDate: null, badgeId: this.badge.badgeId, ...this.badge,
       };
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
@@ -212,7 +212,7 @@ limitations under the License.
 
       this.loadComponentState(this.componentName).then((result) => {
         if (result) {
-          if (!this.isEdit || (this.isEdit && result.badgeId === this.badgeInternal.badgeId)) {
+          if (!this.isEdit || (this.isEdit && result.originalBadgeId === this.originalBadge.badgeId)) {
             this.badgeInternal = result;
             this.limitTimeframe = !!(this.badgeInternal.startDate && this.badgeInternal.endDate);
           } else {
