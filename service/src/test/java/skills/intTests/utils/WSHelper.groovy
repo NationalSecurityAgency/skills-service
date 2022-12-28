@@ -149,6 +149,12 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
+    def apiUpload(String endpoint, Map params = null) {
+        String url = "${skillsService}/api${endpoint}"
+        log.info("MULTIPART POST: {}", url)
+        return multipartPost(url, params)
+    }
+
     def supervisorUpload(String endpoint, Map params = null) {
         String url = "${skillsService}/supervisor${endpoint}"
         log.info("MULTIPART POST: {}", url)
@@ -255,6 +261,12 @@ class WSHelper {
         ResponseEntity<OAuth2Response> responseEntity = oAuthRestTemplate.postForEntity(tokenUrl, new HttpEntity<>(body, headers), OAuth2Response)
 
         return responseEntity.body.accessToken
+    }
+
+    ResponseEntity<Resource> getResource(String endpoint) {
+        String url = "${skillsService}/${endpoint}"
+        ResponseEntity<Resource> responseEntity = restTemplateWrapper.getForEntity(url, Resource)
+        return responseEntity
     }
 
     public ResponseEntity<String> rawGet(String endpoint, def params) {
@@ -367,7 +379,11 @@ class WSHelper {
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>()
         params.each { key, val ->
-            body.add(key.toString(), new FileSystemResource(val))
+            if (val instanceof File) {
+                body.add(key.toString(), new FileSystemResource(val))
+            } else {
+                body.add(key.toString(), val)
+            }
         }
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers)

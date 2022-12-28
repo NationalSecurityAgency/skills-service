@@ -17,20 +17,16 @@ package skills.storage.repos
 
 import groovy.util.logging.Slf4j
 import org.hibernate.engine.jdbc.BlobProxy
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import skills.storage.model.Attachment
 
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
+import javax.persistence.Query
 
 @Service
 @Slf4j
 class AttachmentRepo {
-
-    @Autowired
-    JdbcTemplate jdbcTemplate
 
     @PersistenceContext
     EntityManager entityManager;
@@ -43,10 +39,9 @@ class AttachmentRepo {
 
     Attachment getAttachmentByUuidAndFilename(String uuid, String filename) {
         String query = "SELECT a from Attachment a where a.uuid = :uuid AND a.filename = :filename"
-        javax.persistence.Query getAttachment = entityManager.createQuery(query, Attachment)
+        Query getAttachment = entityManager.createQuery(query, Attachment)
         getAttachment.setParameter('uuid', uuid)
         getAttachment.setParameter('filename', filename)
         return getAttachment.getSingleResult()
     }
-
 }

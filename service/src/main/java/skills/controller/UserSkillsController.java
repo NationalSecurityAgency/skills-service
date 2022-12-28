@@ -104,6 +104,9 @@ class UserSkillsController {
     @Autowired
     VersionService versionService;
 
+    @Autowired
+    AttachmentService attachmentService;
+
     @Value("${skills.config.allowedAttachmentMimeTypes}")
     List<MediaType> allowedAttachmentMimeTypes;
 
@@ -456,9 +459,6 @@ class UserSkillsController {
         skillsLoader.documentLastViewedSkillId(projectId, skillId);
         return RequestResult.success();
     }
-
-    @Autowired
-    AttachmentService attachmentService;
 
     @RequestMapping(value = "/upload", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody

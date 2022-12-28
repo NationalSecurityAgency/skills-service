@@ -20,6 +20,8 @@ import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
+import org.springframework.util.StreamUtils
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
 
@@ -884,6 +886,26 @@ class SkillsService {
         Map body = [:]
         body.put("customIcon", icon)
         wsHelper.supervisorUpload("/icons/upload", body)
+    }
+    def uploadAttachment(Resource attachment){
+        Map body = [:]
+        body.put("file", attachment)
+        wsHelper.apiUpload("/upload", body)
+    }
+    // note - not supported, used for testing purposes only
+    def uploadAttachments(List<Resource> attachments){
+        Map body = [:]
+        attachments.each { attachment ->
+            body.put("file", attachment)
+        }
+        wsHelper.apiUpload("/upload", body)
+    }
+
+    File downloadAttachment(String downloadUrl) {
+        ResponseEntity<Resource> responseEntity = wsHelper.getResource(downloadUrl)
+        File file = File.createTempFile('download', 'tmp')
+        StreamUtils.copy(responseEntity.getBody().getInputStream(), new FileOutputStream(file))
+        return file
     }
 
     def deleteIcon(Map props){
