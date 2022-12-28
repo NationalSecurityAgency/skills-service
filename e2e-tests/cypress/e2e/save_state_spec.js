@@ -177,6 +177,12 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.get('[data-cy="skillPointIncrement"]').type('{selectall}11');
+    cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
+    cy.get('[data-cy="timeWindowHours"]').type('{selectall}11');
+    cy.get('[data-cy="timeWindowMinutes"]').type('{selectall}11');
+    cy.get('[data-cy="maxOccurrences"]').type('{selectall}11');
+    cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
@@ -184,11 +190,23 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '11');
+    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '11');
+    cy.get('[data-cy="timeWindowHours"]').should('have.value', '11');
+    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '11');
+    cy.get('[data-cy="maxOccurrences"]').should('have.value', '11');
+    cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
     cy.get('[data-cy=closeSkillButton]').click();
 
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '10');
+    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '5');
+    cy.get('[data-cy="timeWindowHours"]').should('have.value', '8');
+    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '0');
+    cy.get('[data-cy="maxOccurrences"]').should('have.value', '1');
+    cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
   })
 
   it('Saves and discards edit skill state', () => {
@@ -205,6 +223,12 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.get('[data-cy="skillPointIncrement"]').type('{selectall}11');
+    cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
+    cy.get('[data-cy="timeWindowHours"]').type('{selectall}11');
+    cy.get('[data-cy="timeWindowMinutes"]').type('{selectall}11');
+    cy.get('[data-cy="maxOccurrences"]').type('{selectall}11');
+    cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
     cy.get('[data-cy=saveSkillButton]').click();
     cy.wait('@saveSkill');
 
@@ -216,6 +240,11 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="skillName"]').type(' Two Three')
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy="markdownEditorInput"]').type(' for storage');
+    cy.get('[data-cy="skillPointIncrement"]').type('22');
+    cy.get('[data-cy="numPerformToCompletion"]').type('22');
+    cy.get('[data-cy="timeWindowHours"]').type('22');
+    cy.get('[data-cy="timeWindowMinutes"]').type('22');
+    cy.get('[data-cy="maxOccurrences"]').type('22');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
@@ -223,12 +252,22 @@ describe('Save State Tests', () => {
     cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One Two Three');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
+    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '1122');
+    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '1122');
+    cy.get('[data-cy="timeWindowHours"]').should('have.value', '1122');
+    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '1122');
+    cy.get('[data-cy="maxOccurrences"]').should('have.value', '1122');
 
     cy.get('[data-cy=closeSkillButton]').click();
 
     cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '11');
+    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '11');
+    cy.get('[data-cy="timeWindowHours"]').should('have.value', '11');
+    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '11');
+    cy.get('[data-cy="maxOccurrences"]').should('have.value', '11');
   })
 
   it('Saves and discards copy skill state', () => {
