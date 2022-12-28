@@ -444,6 +444,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('body').type('{esc}{esc}');
+        cy.wait(250);
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
