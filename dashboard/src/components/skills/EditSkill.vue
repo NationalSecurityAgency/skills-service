@@ -658,6 +658,7 @@ limitations under the License.
               copy.name = `Copy of ${loadedSkill.name}`;
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
               copy.subjectId = this.subjectId;
+              copy.originalSkillId = `copy_of_${loadedSkill.skillId}`;
               this.originalSkill = { isEdit: false, ...copy };
             }
             this.initial.skillId = this.originalSkill.skillId;
