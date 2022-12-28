@@ -357,4 +357,26 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
 
+  it('Redirect to error page does not show discard popup', () => {
+    cy.intercept('GET', '/app/projects')
+       .as('loadProjects');
+    cy.visit('/administrator/projects/');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="newProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').type('Test Project')
+    cy.get('[data-cy="markdownEditorInput"]').type('test description');
+
+    cy.visit('/administrator/');
+    cy.wait('@loadProjects');
+
+    cy.get('[data-cy="newProjectButton"]').click();
+    cy.get('[data-cy="projectName"]').should('have.value', 'Test Project');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
+    cy.visit('/error');
+
+    cy.contains('Discard Changes').should('not.exist');
+  })
 });
