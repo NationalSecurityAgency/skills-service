@@ -56,6 +56,9 @@ class PublicProps {
         maxNumPointIncrementMaxOccurrences,
         maxSelfReportMessageLength,
         maxSelfReportRejectionMessageLength,
+        allowedAttachmentMimeTypes,
+        allowedAttachmentFileTypes,
+        maxAttachmentSize,
     }
 
     @Autowired

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div id="markdown-editor">
+  <div id="markdown-editor" @drop="attachFile">
     <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
       class="markdown"
       data-cy="markdownEditorInput"
@@ -41,13 +41,26 @@ limitations under the License.
         </div>
       </div>
     </div>
+
+    <ValidationProvider
+      rules="attachmentValidator" ref="provider" v-slot="{ errors }" name="Attachment">
+      <input @change="attachFile" type="file" ref="fileInputRef"
+             :aria-invalid="errors && errors.length > 0"
+             aria-errormessage="attachmentError"
+             aria-describedby="attachmentError"
+             :accept="allowedAttachmentFileTypes"
+             hidden/>
+      <small role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{errors[0]}}</small>
+    </ValidationProvider>
   </div>
 </template>
 
 <script>
+  import { extend } from 'vee-validate';
   import '@toast-ui/editor/dist/toastui-editor.css';
   import { Editor } from '@toast-ui/vue-editor';
   import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
+  import FileUploadService from './upload/FileUploadService';
 
   export default {
     name: 'MarkdownEditor',
@@ -58,6 +71,10 @@ limitations under the License.
       resizable: {
         type: Boolean,
         default: false,
+      },
+      allowAttachments: {
+        type: Boolean,
+        default: true,
       },
       name: {
         type: String,
@@ -74,7 +91,21 @@ limitations under the License.
         intervalId: null,
         intervalRuns: 0,
         maxIntervalAttempts: 8,
+        attachmentError: '',
       };
+    },
+    created() {
+      const self = this;
+      extend('attachmentValidator', {
+        message: () => this.attachmentError,
+        validate() {
+          return {
+            required: false,
+            valid: !self.attachmentError,
+          };
+        },
+        computesRequired: true,
+      });
     },
     mounted() {
       this.intervalId = setInterval(() => {
@@ -86,6 +117,11 @@ limitations under the License.
         }
       }, 250);
       this.setLabelForMoreButton();
+      if (this.allowAttachments) {
+        this.$refs.toastuiEditor.invoke('addCommand', 'wysiwyg', 'attachFile', () => {
+          this.$refs.fileInputRef.click();
+        });
+      }
     },
     computed: {
       markdownText() {
@@ -93,6 +129,15 @@ limitations under the License.
       },
       editorFeaturesUrl() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
+      },
+      maxAttachmentSize() {
+        return this.$store.getters.config.maxAttachmentSize;
+      },
+      allowedAttachmentFileTypes() {
+        return this.$store.getters.config.allowedAttachmentFileTypes;
+      },
+      allowedAttachmentMimeTypes() {
+        return this.$store.getters.config.allowedAttachmentMimeTypes;
       },
       // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
       // emojiWidgetRule() {
@@ -111,18 +156,28 @@ limitations under the License.
       //   };
       // },
       editorOptions() {
+        const toolbarItems = [
+          ['heading', 'bold', 'italic', 'strike'],
+          ['hr', 'quote'],
+          ['ul', 'ol', 'indent', 'outdent'],
+          ['table', 'image', 'link'],
+          ['code', 'codeblock'],
+          ['scrollSync'],
+        ];
+        if (this.allowAttachments) {
+          toolbarItems[3].splice(3, 0, {
+            name: 'attachFile',
+            tooltip: 'Attach files',
+            command: 'attachFile',
+            className: 'attachment-button toastui-editor-toolbar-icons fa fa-paperclip',
+            style: { backgroundImage: 'none' },
+          });
+        }
         const options = {
           hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
-          toolbarItems: [
-            ['heading', 'bold', 'italic', 'strike'],
-            ['hr', 'quote'],
-            ['ul', 'ol', 'indent', 'outdent'],
-            ['table', 'image', 'link'],
-            ['code', 'codeblock'],
-            ['scrollSync'],
-          ],
+          toolbarItems,
           // widgetRules: [this.emojiWidgetRule],
         };
         return Object.assign(this.markdownOptions, options);
@@ -149,6 +204,41 @@ limitations under the License.
           }
         }
       },
+      attachFile(event) {
+        const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files;
+        if (files && files.length > 0) {
+          const file = [...files].find((el) => this.allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1));
+          if (file) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.attachmentError = ''; // reset any previous error
+            if (file.size <= this.maxAttachmentSize) {
+              const data = new FormData();
+              data.append('file', file);
+              FileUploadService.upload('/api/upload', data, (response) => {
+                this.$refs.toastuiEditor.invoke('exec', 'addLink', {
+                  linkUrl: response.data.href,
+                  linkText: response.data.filename,
+                });
+                this.$refs.fileInputRef.value = '';
+              }, (err) => {
+                const explanation = err?.response?.data?.explanation;
+                if (explanation) {
+                  this.attachmentError = `Error uploading file [${file.name}] - ${err?.response?.data?.explanation}`;
+                } else {
+                  this.attachmentError = `Error uploading file [${file.name}] - ${err?.message}`;
+                }
+                this.$refs.provider.validate(event);
+              });
+            } else {
+              this.attachmentError = `Unable to upload attachment - File size [${file.size}] exceeds maximum file size [${this.maxAttachmentSize}]`;
+            }
+          } else {
+            this.attachmentError = `Unable to upload attachment - Invalid file type [${[...files][0].type}]`;
+          }
+          this.$refs.provider.validate(event);
+        }
+      },
     },
   };
 </script>
@@ -172,5 +262,10 @@ limitations under the License.
   }
   div.toastui-editor-ww-code-block:after {
     content: none !important;
+  }
+  .attachment-button {
+    font-size: 1.1rem !important;
+    color: #6c6c6c !important;
+    background-image: none !important;
   }
 </style>

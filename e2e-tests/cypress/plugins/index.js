@@ -149,6 +149,15 @@ module.exports = (on, config) => {
             // needs to return something
             return null
         },
+        getFilesFromDir({ directory, ignore }) {
+            let files = fs.readdirSync(directory);
+            if (ignore) {
+                files = files.filter((file) => {
+                    return !file.toLowerCase().includes(ignore.toLowerCase())
+                });
+            }
+            return files;
+        },
     });
 };
 
