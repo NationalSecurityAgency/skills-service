@@ -420,4 +420,26 @@ describe('Markdown Tests', () => {
         cy.clickSave();
     });
 
+    it('enter a block quote', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get(markdownInput).clear()
+        cy.focused().type('this is some text');
+        cy.focused().type('{selectAll}');
+        cy.get('button').contains('F').click({force: true})
+        cy.get('div.drop-down-item').contains('24px').click({force: true})
+        cy.get('span').contains('this is some text')
+          .should('have.attr', 'style', 'font-size: 24px;');
+        cy.clickSave();
+    });
+
 });

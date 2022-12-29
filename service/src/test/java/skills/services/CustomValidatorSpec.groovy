@@ -580,6 +580,8 @@ A new sentence after a few new lines
 
         validator.validateDescription("""<em>A <strong>cool</strong>, not cools</em>""").valid
 
+        validator.validateDescription("""<span style="font-size: 24px;">A this is some text</span>""").valid
+
         validator.validateDescription("""A ok
 
 <strong>A should ~~work~~ yes</strong>""").valid
