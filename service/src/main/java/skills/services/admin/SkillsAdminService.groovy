@@ -702,6 +702,9 @@ class SkillsAdminService {
         res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
         res.name = SkillReuseIdUtil.removeTag(res.name)
 
+        skillTagService.getTagsForSkill(skillDef.id)?.each { tag ->
+            res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue))
+        }
         return res
     }
 

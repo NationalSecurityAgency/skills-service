@@ -333,4 +333,13 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="untagSkillBtn"]').click();
         cy.contains('The selected skills do not have any tags.')
     });
+
+    it('skills tags are displayed on admin skill page', () => {
+        cy.addTagToSkills();
+        cy.addTagToSkills(1, ['skill1'], 2);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="skillTag-skill1-tag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-tag2"]').should('exist')
+    });
 });
