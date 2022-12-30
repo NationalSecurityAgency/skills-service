@@ -190,17 +190,10 @@ limitations under the License.
         }
       },
       canPublish() {
-        if (this.global) {
-          return this.badge.numSkills > 0 || this.badge.requiredProjectLevels.length > 0;
-        }
-
         return this.badge.numSkills > 0;
       },
       getNoPublishMsg() {
         let msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
-        if (this.global) {
-          msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
-        }
 
         return msg;
       },
