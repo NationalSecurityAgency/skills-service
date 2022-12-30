@@ -2221,7 +2221,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
-    it.only('global badge details has go live button', () => {
+    it('global badge details has go live button', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
