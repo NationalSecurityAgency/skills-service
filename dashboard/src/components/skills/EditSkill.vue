@@ -256,9 +256,9 @@ limitations under the License.
   import { max_value, min_value } from 'vee-validate/dist/rules';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsService from './SkillsService';
-  import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';
   import InputSanitizer from '../utils/InputSanitizer';

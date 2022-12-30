@@ -92,10 +92,10 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import IdInput from '../../utils/inputForm/IdInput';
   import InputSanitizer from '../../utils/InputSanitizer';
   import SkillsService from '../SkillsService';
-  import MarkdownEditor from '../../utils/MarkdownEditor';
   import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
