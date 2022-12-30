@@ -2221,7 +2221,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
-    it('global badge details has go live button', () => {
+    it('global badge details has go live button and can go live', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -2269,6 +2269,23 @@ describe('Global Badges Tests', () => {
         cy.wait('@nameExists');
         cy.clickSave();
         cy.wait('@postGlobalBadge');
+
+        cy.clickNav('Global Badges');
+        cy.contains('Manage')
+            .click();
+        cy.get('[data-cy="skillsSelector2"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
+            .click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'This is 1'
+            }],
+        ], 5);
 
         cy.visit('/administrator/globalBadges/TestBadgeBadge');
 

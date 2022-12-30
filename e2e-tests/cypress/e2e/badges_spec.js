@@ -2198,7 +2198,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="skillsBTablePageSize"]').should('be.disabled');
     });
 
-    it('badge details has go live button', () => {
+    it('badge details has go live button and can go live', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
