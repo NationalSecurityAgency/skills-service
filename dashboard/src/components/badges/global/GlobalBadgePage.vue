@@ -195,7 +195,7 @@ limitations under the License.
         return this.badge.numSkills > 0 || this.badge.requiredProjectLevels.length > 0;
       },
       getNoPublishMsg() {
-        let msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
+        const msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
 
         return msg;
       },

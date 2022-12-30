@@ -193,7 +193,7 @@ limitations under the License.
         return this.badge.numSkills > 0;
       },
       getNoPublishMsg() {
-        let msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
+        const msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
 
         return msg;
       },
