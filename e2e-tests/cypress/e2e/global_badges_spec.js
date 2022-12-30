@@ -2221,4 +2221,71 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
+    it.only('global badge details has go live button', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 100,
+            numPerformToCompletion: 5,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        const expectedId = 'TestBadgeBadge';
+        cy.intercept('GET', `/supervisor/badges`)
+            .as('getGlobalBadges');
+        cy.intercept('PUT', `/supervisor/badges/${expectedId}`)
+            .as('postGlobalBadge');
+        cy.intercept('GET', `/supervisor/badges/id/${expectedId}/exists`)
+            .as('idExists');
+        cy.intercept('POST', '/supervisor/badges/name/exists')
+            .as('nameExists');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR')
+            .as('checkSupervisorRole');
+        cy.intercept('GET', `/supervisor/badges/${expectedId}`)
+            .as('getExpectedBadge');
+
+        cy.visit('/administrator/globalBadges');
+        cy.wait('@getGlobalBadges');
+        cy.wait('@checkSupervisorRole');
+
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName')
+            .type('Test Badge');
+        cy.wait('@nameExists');
+        cy.clickSave();
+        cy.wait('@postGlobalBadge');
+
+        cy.visit('/administrator/globalBadges/TestBadgeBadge');
+
+        cy.contains('Test Badge')
+            .should('exist');
+        cy.get('[data-cy=badgeStatus]')
+            .contains('Status: Disabled')
+            .should('exist');
+        cy.get('[data-cy=goLive]')
+            .click();
+        cy.contains('Please Confirm!')
+            .should('exist');
+        cy.contains('Yes, Go Live!')
+            .click();
+
+        cy.get('[data-cy=badgeStatus]')
+            .contains('Status: Live')
+            .should('exist');
+    });
 });

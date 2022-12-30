@@ -2253,8 +2253,6 @@ describe('Badges Tests', () => {
         cy.contains('Yes, Go Live!')
             .click();
 
-        cy.wait('@loadBadges');
-        cy.contains('Test Badge');
         cy.get('[data-cy=badgeStatus]')
             .contains('Status: Live')
             .should('exist');
