@@ -38,7 +38,10 @@ class InputSanitizer {
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
 
-    private static final SAFE_LIST = Safelist.relaxed().addTags('del', 'skills-display').addAttributes('skills-display', 'version')
+    private static final SAFE_LIST = Safelist.relaxed()
+            .addTags('del', 'skills-display')
+            .addAttributes('skills-display', 'version')
+            .addAttributes('span', 'style')
 
     static String sanitize(String input) {
         if (!input) {

@@ -59,6 +59,8 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import '@toast-ui/editor/dist/toastui-editor.css';
   import { Editor } from '@toast-ui/vue-editor';
+  import fontSize from 'tui-editor-plugin-font-size';
+  import 'tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css';
   import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
   import FileUploadService from './upload/FileUploadService';
 
@@ -178,6 +180,7 @@ limitations under the License.
           usageStatistics: false,
           autofocus: false,
           toolbarItems,
+          plugins: [fontSize],
           // widgetRules: [this.emojiWidgetRule],
         };
         return Object.assign(this.markdownOptions, options);

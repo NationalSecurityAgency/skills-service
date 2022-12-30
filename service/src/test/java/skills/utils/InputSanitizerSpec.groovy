@@ -191,10 +191,10 @@ class InputSanitizerSpec extends Specification{
 
     def "sanitize markdown with html"() {
 
-        String text = '<skills-display version="0"></skills-display>\n<em><del>(U) one **two** three</del></em>'
+        String text = '<skills-display version="0"></skills-display>\n<em><del>(U) one **two** three</del></em><span style="font-size: 24px;">(U) this is some text</span>'
 
         when:
-        def one = InputSanitizer.unsanitizeName(InputSanitizer.sanitize(text))
+        def one = InputSanitizer.sanitize(text)
 
         then:
         one == text
