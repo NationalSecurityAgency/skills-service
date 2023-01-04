@@ -20,15 +20,36 @@ limitations under the License.
         <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </span>
       <div slot="subSubTitle" v-if="badge && !isReadOnlyProj">
-        <b-button @click="displayEditBadge"
-                  ref="editBadgeButton"
-                  class="btn btn-outline-primary mr-1"
-                  size="sm"
-                  variant="outline-primary"
-                  data-cy="btn_edit-badge"
-                  :aria-label="'edit Badge '+badge.badgeId">
-          <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-        </b-button>
+        <b-button-group v-if="!isReadOnlyProj" class="mb-3" size="sm">
+          <b-button @click="displayEditBadge"
+                    ref="editBadgeButton"
+                    class="btn btn-outline-primary"
+                    size="sm"
+                    variant="outline-primary"
+                    data-cy="btn_edit-badge"
+                    :aria-label="'edit Badge '+badge.badgeId">
+            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
+          </b-button>
+          <b-button :disabled="badge.enabled === 'true'"
+                    @click.stop="handlePublish"
+                    class="btn btn-outline-primary"
+                    size="sm"
+                    variant="outline-primary"
+                    aria-label="Go Live"
+                    data-cy="goLive">Go Live
+          </b-button>
+        </b-button-group>
+        <div style="height: 2rem;">
+          <div class="col">
+            <div v-if="badge.enabled === 'false'" data-cy="badgeStatus" style="">
+              <span class="text-secondary font-italic small">Status: </span>
+              <span class="text-secondary small text-uppercase">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span>
+            </div>
+            <div v-else data-cy="badgeStatus" style="">
+              <span class="text-secondary font-italic small">Status: </span> <span class="small text-primary text-uppercase align-middle">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
+            </div>
+          </div>
+        </div>
       </div>
     </page-header>
 
@@ -50,12 +71,13 @@ limitations under the License.
   import EditBadge from '@/components/badges/EditBadge';
   import BadgesService from '@/components/badges/BadgesService';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('badges');
 
   export default {
     name: 'BadgePage',
-    mixins: [ProjConfigMixin],
+    mixins: [ProjConfigMixin, MsgBoxMixin],
     components: {
       PageHeader,
       Navigation,
@@ -145,6 +167,42 @@ limitations under the License.
             ref.focus();
           }
         });
+      },
+      handlePublish() {
+        if (this.canPublish()) {
+          const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
+        Please note that once the badge is live, it cannot be disabled.`;
+          this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
+            .then((res) => {
+              if (res) {
+                this.badge.enabled = 'true';
+                const toSave = { ...this.badge };
+                if (!toSave.originalBadgeId) {
+                  toSave.originalBadgeId = toSave.badgeId;
+                }
+                toSave.startDate = this.toDate(toSave.startDate);
+                toSave.endDate = this.toDate(toSave.endDate);
+                this.badgeEdited(toSave);
+              }
+            });
+        } else {
+          this.msgOk(this.getNoPublishMsg(), 'Empty Badge!');
+        }
+      },
+      canPublish() {
+        return this.badge.numSkills > 0;
+      },
+      getNoPublishMsg() {
+        const msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
+
+        return msg;
+      },
+      toDate(value) {
+        let dateVal = value;
+        if (value && !(value instanceof Date)) {
+          dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
+        }
+        return dateVal;
       },
     },
   };
