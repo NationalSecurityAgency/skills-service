@@ -33,6 +33,8 @@ limitations under the License.
 
   import debounce from 'lodash/debounce';
 
+  import { extend } from 'vee-validate';
+  import ValidatorFactory from '@/common-components/validators/ValidatorFactory';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store/store';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
@@ -168,6 +170,9 @@ limitations under the License.
         return store.dispatch('loadConfigState')
           .finally(() => {
             this.loadingConfig = false;
+            // eslint-disable-next-line global-require
+            require('@/common-components/validators/CustomDescriptionValidator');
+            extend('maxDescriptionLength', ValidatorFactory.newCharLengthValidator(store.getters.config.descriptionMaxLength));
           });
       },
       handleTheming(theme) {

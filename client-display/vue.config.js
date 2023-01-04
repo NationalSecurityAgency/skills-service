@@ -28,6 +28,7 @@ exportObject.devServer = {
   overlay: true,
   proxy: {
     '/admin': proxyConf,
+    '^/api/': proxyConf,
   },
 };
 

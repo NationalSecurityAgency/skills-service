@@ -100,8 +100,8 @@ limitations under the License.
   import enquire from 'enquire.js';
   import { extend } from 'vee-validate';
   import { image } from 'vee-validate/dist/rules';
+  import FileUploadService from '@/common-components/utilities/FileUploadService';
   import FileUpload from '../upload/FileUpload';
-  import FileUploadService from '../upload/FileUploadService';
   import fontAwesomeIconsCanonical from './font-awesome-index';
   import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';

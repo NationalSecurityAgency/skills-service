@@ -62,7 +62,7 @@ limitations under the License.
   import fontSize from 'tui-editor-plugin-font-size';
   import 'tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css';
   import MarkdownMixin from './MarkdownMixin';
-  import FileUploadService from '../../components/utils/upload/FileUploadService';
+  import FileUploadService from './FileUploadService';
 
   export default {
     name: 'MarkdownEditor',
@@ -85,6 +85,10 @@ limitations under the License.
       markdownHeight: {
         type: String,
         default: '300px',
+      },
+      placeholder: {
+        type: String,
+        default: '',
       },
     },
     data() {
@@ -179,6 +183,7 @@ limitations under the License.
           hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
+          placeholder: this.placeholder,
           toolbarItems,
           plugins: [fontSize],
           // widgetRules: [this.emojiWidgetRule],

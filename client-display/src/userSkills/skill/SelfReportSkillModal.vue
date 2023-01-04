@@ -14,54 +14,68 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <b-modal id="reportSkillModal"
-           :title="`REPORT ${this.skillDisplayName.toUpperCase()}`"
-           ok-title="Submit"
-           :no-close-on-backdrop="true"
-           v-model="modalVisible">
-    <modal-positioner :y-offset="modalYOffset"/>
-    <div id="reportSkillMsg" class="row p-2" data-cy="selfReportSkillMsg">
-      <div class="col-auto text-center">
-        <i v-if="isHonorSystem" class="fas fa-chess-knight text-success" style="font-size: 3rem"></i>
-        <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
+  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+    <b-modal id="reportSkillModal"
+             :title="`REPORT ${skillDisplayName.toUpperCase()}`"
+             ok-title="Submit"
+             size="xl"
+             :no-close-on-backdrop="true"
+             v-model="modalVisible"
+             @hide="cancel">
+      <modal-positioner :y-offset="modalYOffset"/>
+      <div id="reportSkillMsg" class="row p-2" data-cy="selfReportSkillMsg">
+        <div class="col-auto text-center">
+          <i v-if="isHonorSystem" class="fas fa-chess-knight text-success" style="font-size: 3rem"></i>
+          <i v-if="isApprovalRequired" class="fas fa-thumbs-up text-info" style="font-size: 3rem"></i>
+        </div>
+        <div class="col">
+          <p class="h5" v-if="isHonorSystem">This {{ skillDisplayName.toLowerCase() }} can be submitted under the <b class="text-success">Honor
+            System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
+          </p>
+          <p class="h5" v-if="isApprovalRequired">This {{ skillDisplayName.toLowerCase() }} requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
+            <span v-if="!isJustitificationRequired" class="text-muted">optional</span> message and it will enter an approval queue.</p>
+        </div>
       </div>
-      <div class="col">
-        <p class="h5" v-if="isHonorSystem">This {{ skillDisplayName.toLowerCase() }} can be submitted under the <b class="text-success">Honor
-          System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
-        </p>
-        <p class="h5" v-if="isApprovalRequired">This {{ skillDisplayName.toLowerCase() }} requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
-          <span v-if="!isJustitificationRequired" class="text-muted">optional</span> message and it will enter an approval queue.</p>
+      <div class="row">
+        <div class="col-12">
+          <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Approval Message">
+            <markdown-editor v-if="showDescription" class="form-text"
+                             id="approvalRequiredMsg"
+                             v-model="approvalRequestedMsg"
+                             data-cy="selfReportMsgInput"
+                             aria-describedby="reportSkillMsg"
+                             :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
+                             :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"
+                             :resizable="true"
+                             aria-errormessage="approvalMessageError"
+                             :aria-invalid="errors && errors.length > 0"/>
+            <small role="alert" id="approvalMessageError" class="form-text text-danger" data-cy="selfReportMsgInput_errMsg">{{ errors[0] }}</small>
+          </ValidationProvider>
+        </div>
       </div>
-    </div>
-    <b-form-textarea type="text" id="approvalRequiredMsg" @input="validate"
-           v-if="isApprovalRequired" v-model="approvalRequestedMsg"
-           rows="2"
-           data-cy="selfReportMsgInput"
-           aria-describedby="reportSkillMsg"
-           :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
-           class="form-control" :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"/>
-    <div v-if="isApprovalRequired" :class="{ 'float-right':true, 'text-small': true, 'text-danger': charactersRemaining < 0 }" data-cy="charactersRemaining">{{ charactersRemaining | number }} characters remaining <i v-if="charactersRemaining < 0" class="fas fa-exclamation-circle"/></div>
-    <span v-if="inputInvalid" class="text-small text-danger" data-cy="selfReportMsgInput_errMsg"><i class="fas fa-exclamation-circle"/> {{ inputInvalidExplanation }}</span>
-    <template #modal-footer>
-      <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
-        <i class="fas fa-times-circle"></i> Cancel
-      </button>
-      <button type="button" class="btn btn-outline-success text-uppercase" @click="reportSkill"
-              data-cy="selfReportSubmitBtn" :disabled="!messageValid">
-        <i class="fas fa-arrow-alt-circle-right"></i> Submit
-      </button>
-    </template>
-  </b-modal>
+
+      <template #modal-footer>
+        <button type="button" class="btn btn-outline-danger text-uppercase" @click="cancel">
+          <i class="fas fa-times-circle"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-success text-uppercase" @click="handleSubmit(reportSkill)"
+                data-cy="selfReportSubmitBtn" :disabled="invalid">
+          <i class="fas fa-arrow-alt-circle-right"></i> Submit
+        </button>
+      </template>
+    </b-modal>
+  </ValidationObserver>
 </template>
 
 <script>
   import debounce from 'lodash/debounce';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import UserSkillsService from '../service/UserSkillsService';
   import ModalPositioner from './ModalPositioner';
 
   export default {
     name: 'SelfReportSkillModal',
-    components: { ModalPositioner },
+    components: { ModalPositioner, MarkdownEditor },
     props: {
       isHonorSystem: Boolean,
       isApprovalRequired: Boolean,
@@ -72,26 +86,36 @@ limitations under the License.
       return {
         modalVisible: true,
         approvalRequestedMsg: '',
-        inputInvalid: false,
-        inputInvalidExplanation: '',
+        inputInvalid: false, // TODO - remove?
+        inputInvalidExplanation: '', // TODO - remove?
         modalYOffset: 0,
+        showDescription: false,
       };
+    },
+    mounted() {
+      setTimeout(() => {
+        // this.showDescription = true;
+      }, '100');
     },
     computed: {
       messageValid() {
+        // TODO - remove?
         if (this.inputInvalid) {
           return false;
         }
 
+        // TODO - leave this and add `&& !messageValid` to disabled attribute on Submit button?
         if (this.isJustitificationRequired && (!this.approvalRequestedMsg || this.approvalRequestedMsg.length <= 0)) {
           return false;
         }
 
+        // TODO - remove?
         const maxLength = this.$store.getters.config ? this.$store.getters.config.maxSelfReportMessageLength : -1;
         if (maxLength === -1) {
           return true;
         }
 
+        // TODO - remove?
         return this.charactersRemaining >= 0;
       },
       charactersRemaining() {
@@ -116,6 +140,9 @@ limitations under the License.
       },
       updatePosition(yOffset) {
         this.modalYOffset = yOffset;
+        this.$nextTick(() => {
+          this.showDescription = true;
+        });
       },
     },
   };
