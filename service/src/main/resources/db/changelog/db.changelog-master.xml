@@ -1933,6 +1933,32 @@
     </changeSet>
 
     <changeSet id="36" author="skills team">
+        <createTable tableName="attachments">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uuid" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="filename" type="varchar(255)" />
+            <column name="content" type="blob" />
+            <column name="content_type" type="varchar(255)" />
+            <column name="size" type="bigint" />
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_attachments_filename"
+                     tableName="attachments">
+            <column name="filename" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="37" author="skills team">
         <createTable tableName="quiz_definition">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -2206,33 +2232,6 @@
                                  referencedTableName="user_attrs"/>
 
 
-    </changeSet>
-
-
-    <changeSet id="36" author="skills team">
-        <createTable tableName="attachments">
-            <column name="id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="uuid" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="filename" type="varchar(255)" />
-            <column name="content" type="blob" />
-            <column name="content_type" type="varchar(255)" />
-            <column name="size" type="bigint" />
-            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <createIndex indexName="index_attachments_filename"
-                     tableName="attachments">
-            <column name="filename" type="varchar(255)"/>
-        </createIndex>
     </changeSet>
 
 </databaseChangeLog>
