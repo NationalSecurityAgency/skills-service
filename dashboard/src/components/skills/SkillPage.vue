@@ -16,7 +16,12 @@ limitations under the License.
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="subTitle">
+      <div slot="subTitle" v-if="skill">
+        <div v-for="(tag) in skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${skill.skillId}-${tag.tagId}`">
+          <b-badge variant="info">
+            <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
+          </b-badge>
+        </div>
         <div class="h5 text-muted" data-cy="skillId">
           <show-more :limit="54" :text="getSkillId(skill)"></show-more>
         </div>
