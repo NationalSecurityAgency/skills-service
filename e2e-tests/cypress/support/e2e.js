@@ -34,6 +34,7 @@ import 'cypress-axe';
 import 'cypress-plugin-tab';
 import "cypress-real-events/support";
 import moment from 'moment-timezone';
+import { clear } from 'idb-keyval';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
@@ -71,6 +72,8 @@ beforeEach(function () {
             win.location.href = 'about:blank'
         }
     })
+
+    clear();
 
     let disable = Cypress.env('disableResetDb');
 

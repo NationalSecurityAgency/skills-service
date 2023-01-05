@@ -25,7 +25,10 @@ limitations under the License.
               header-text-variant="light" no-fade
               size="xl">
 
-      <b-container fluid>
+      <skills-spinner :is-loading="loadingComponent"/>
+
+      <b-container fluid v-if="!loadingComponent">
+        <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div class="row">
           <div class="col-12">
             <div class="form-group">
@@ -59,10 +62,9 @@ limitations under the License.
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
-              <skills-spinner :is-loading="loadingDescription"/>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
-                <markdown-editor v-if="!isEdit || !loadingDescription" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <markdown-editor v-if="!isEdit || descriptionLoaded" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
           </div>
@@ -87,60 +89,57 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/components/utils/MarkdownEditor';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   export default {
     name: 'EditProject',
-    components: { IdInput, MarkdownEditor, SkillsSpinner },
+    components: {
+      IdInput,
+      MarkdownEditor,
+      SkillsSpinner,
+      ReloadMessage,
+    },
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
         show: this.value,
         internalProject: {
           originalProjectId: this.project.projectId,
+          projectId: this.project.projectId,
           isEdit: this.isEdit,
+          description: '',
           ...this.project,
+        },
+        originalProject: {
+          name: '',
+          description: '',
+          projectId: '',
         },
         canEditProjectId: false,
         overallErrMsg: '',
-        original: {
-          name: '',
-          projectId: '',
-        },
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
-        loadingDescription: false,
+        loadingComponent: true,
+        descriptionLoaded: false,
+        keysToWatch: ['name', 'description', 'projectId'],
+        restoredFromStorage: false,
       };
     },
     created() {
       this.registerValidation();
     },
     mounted() {
-      this.original = {
-        name: this.project.name,
-        projectId: this.project.projectId,
-      };
-      if (this.isEdit) {
-        this.loadingDescription = true;
-        ProjectService.loadDescription(this.project.projectId).then((data) => {
-          this.internalProject.description = data.description;
-        }).finally(() => {
-          this.loadingDescription = false;
-          setTimeout(() => {
-            this.$nextTick(() => {
-              const { observer } = this.$refs;
-              if (observer) {
-                observer.validate({ silent: false });
-              }
-            });
-          }, 600);
-        });
-      }
+      this.loadComponent();
+
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
@@ -159,13 +158,77 @@ limitations under the License.
       idLabelTxt() {
         return this.isCopy ? 'New Project ID' : 'Project ID';
       },
+      componentName() {
+        return `${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+      },
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
       },
+      internalProject: {
+        handler(newValue) {
+          this.saveComponentState(this.componentName, newValue);
+        },
+        deep: true,
+      },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loadingComponent = true;
+        this.descriptionLoaded = false;
+
+        if (this.isEdit) {
+          this.startLoadingFromDescription();
+        } else {
+          this.startLoadingFromState();
+        }
+      },
+      startLoadingFromDescription() {
+        this.originalProject = {
+          name: this.project.name,
+          projectId: this.project.projectId,
+        };
+
+        ProjectService.loadDescription(this.project.projectId).then((data) => {
+          this.originalProject.description = data.description;
+          this.startLoadingFromState();
+        });
+      },
+      startLoadingFromState() {
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.originalProjectId === this.originalProject.projectId)) {
+              this.internalProject = result;
+              this.restoredFromStorage = true;
+            } else {
+              Object.assign(this.internalProject, this.originalProject);
+            }
+          } else {
+            Object.assign(this.internalProject, this.originalProject);
+          }
+        }).finally(() => {
+          this.loadingComponent = false;
+          this.descriptionLoaded = true;
+          if (this.isEdit) {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          }
+        });
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
@@ -173,15 +236,40 @@ limitations under the License.
       handleIdToggle(canEdit) {
         this.canEditProjectId = canEdit;
       },
-      close() {
+      close(e) {
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
+      },
+      publishHidden(e) {
+        if (!e.updated && this.hasObjectChanged(this.internalProject, this.originalProject) && !this.loadingComponent) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.clearComponentState(this.componentName);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing && typeof e.preventDefault === 'function') {
+          e.preventDefault();
+        } else {
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
+        }
+      },
+      hideModal(e) {
         this.show = false;
-        this.publishHidden({});
+        this.$emit('hidden', e);
       },
       updateProject() {
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.close();
+              this.publishHidden({ updated: true });
               this.internalProject.name = InputSanitizer.sanitize(this.internalProject.name);
               this.internalProject.projectId = InputSanitizer.sanitize(this.internalProject.projectId);
               this.$emit('project-saved', this.internalProject);
@@ -193,13 +281,6 @@ limitations under the License.
           this.internalProject.projectId = InputSanitizer.removeSpecialChars(this.internalProject.name);
         }
       },
-      publishHidden(e) {
-        if (this.tooltipShowing && typeof e.preventDefault === 'function') {
-          e.preventDefault();
-        } else {
-          this.$emit('hidden', e);
-        }
-      },
       updateDescription(event) {
         this.internalProject.description = event;
       },
@@ -208,7 +289,7 @@ limitations under the License.
         extend('uniqueName', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
+            if (self.isEdit && (self.originalProject.name === value || self.originalProject.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
               return true;
             }
             return ProjectService.checkIfProjectNameExist(value)
@@ -219,7 +300,7 @@ limitations under the License.
         extend('uniqueId', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.original.projectId === value) {
+            if (self.isEdit && self.originalProject.projectId === value) {
               return true;
             }
             return ProjectService.checkIfProjectIdExist(value)

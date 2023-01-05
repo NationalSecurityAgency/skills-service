@@ -254,6 +254,10 @@ Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
     cy.get('[data-cy="removeButton"]').should('not.exist')
 });
 
+Cypress.Commands.add("discardChanges", () => {
+    cy.contains('Discard Changes').click();
+});
+
 Cypress.Commands.add("addTagToSkills", (projNum = 1, skillIds = ['skill1'], tagNum=1, overrideProps = {}) => {
     cy.request('POST', `/admin/projects/proj${projNum}/skills/tag`, Object.assign({
         tagId: `tag${tagNum}`,

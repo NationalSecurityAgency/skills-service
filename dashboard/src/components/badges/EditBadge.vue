@@ -20,7 +20,11 @@ limitations under the License.
              header-bg-variant="info"
              @hide="publishHidden"
              header-text-variant="light" no-fade>
-      <b-container fluid>
+
+      <skills-spinner :is-loading="loadingComponent"/>
+
+      <b-container fluid v-if="!loadingComponent">
+        <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div v-if="displayIconManager === false" class="text-left">
           <div class="media">
             <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)"
@@ -132,6 +136,8 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import dayjs from '@/common-components/DayJsCustomizer';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IconPicker from '../utils/iconPicker/IconPicker';
@@ -141,16 +147,21 @@ limitations under the License.
   import GlobalBadgeService from './global/GlobalBadgeService';
   import InputSanitizer from '../utils/InputSanitizer';
   import HelpUrlInput from '../utils/HelpUrlInput';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   export default {
     name: 'EditBadge',
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     components: {
       HelpUrlInput,
       InlineHelp,
       IconPicker,
       MarkdownEditor,
       Datepicker,
+      SkillsSpinner,
       IdInput,
+      ReloadMessage,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
@@ -166,7 +177,9 @@ limitations under the License.
       },
     },
     data() {
-      const badgeInternal = { originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, ...this.badge };
+      const badgeInternal = {
+        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', startDate: null, endDate: null, badgeId: this.badge.badgeId, ...this.badge,
+      };
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
       badgeInternal.endDate = this.toDate(this.badge.endDate);
@@ -175,12 +188,23 @@ limitations under the License.
         canAutoGenerateId: true,
         canEditBadgeId: false,
         badgeInternal,
+        originalBadge: {
+          badgeId: this.badge.badgeId,
+          name: this.badge.name,
+          description: this.badge.description,
+          helpUrl: this.badge.helpUrl,
+          startDate: this.toDate(this.badge.startDate),
+          endDate: this.toDate(this.badge.endDate),
+        },
         limitTimeframe: limitedTimeframe,
         show: this.value,
         displayIconManager: false,
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
+        loadingComponent: true,
+        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate'],
+        restoredFromStorage: false,
       };
     },
     created() {
@@ -188,42 +212,96 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-      if (this.isEdit) {
-        setTimeout(() => {
-          this.$nextTick(() => {
-            const { observer } = this.$refs;
-            if (observer) {
-              observer.validate({ silent: false });
-            }
-          });
-        }, 600);
-      }
+      this.loadComponent();
     },
     computed: {
       title() {
         return this.isEdit ? 'Editing Existing Badge' : 'New Badge';
+      },
+      componentName() {
+        const badgeScope = this.badgeInternal.projectId ? this.badgeInternal.projectId : 'Global';
+        return `${badgeScope}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
       },
+      badgeInternal: {
+        handler(newValue) {
+          this.saveComponentState(this.componentName, newValue);
+        },
+        deep: true,
+      },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loadingComponent = true;
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.originalBadgeId === this.originalBadge.badgeId)) {
+              this.badgeInternal = result;
+              this.limitTimeframe = !!(this.badgeInternal.startDate && this.badgeInternal.endDate);
+              this.restoredFromStorage = true;
+            } else {
+              this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
+            }
+          } else if (this.isEdit) {
+            this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
+          }
+        }).finally(() => {
+          this.loadingComponent = false;
+          if (this.isEdit) {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          }
+        });
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       closeMe(e) {
-        this.show = false;
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (!e.updated && this.hasObjectChanged(this.badgeInternal, this.originalBadge) && !this.loadingComponent) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.discardChanges(false);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', e);
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
         }
+      },
+      hideModal(e) {
+        this.show = false;
+        this.$emit('hidden', e);
       },
       updateDescription(event) {
         this.badgeInternal.description = event;
@@ -232,7 +310,7 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              this.closeMe({ updated: true });
+              this.publishHidden({ updated: true });
               this.badgeInternal.badgeId = InputSanitizer.sanitize(this.badgeInternal.badgeId);
               this.badgeInternal.name = InputSanitizer.sanitize(this.badgeInternal.name);
               this.$emit('badge-updated', { isEdit: this.isEdit, ...this.badgeInternal });

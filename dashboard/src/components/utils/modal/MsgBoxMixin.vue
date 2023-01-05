@@ -17,14 +17,14 @@ limitations under the License.
   export default {
     name: 'MsgBoxMixin',
     methods: {
-      msgConfirm(msg, overallTitle = 'Please Confirm!', okButtonTitle = 'YES, Delete It!') {
+      msgConfirm(msg, overallTitle = 'Please Confirm!', okButtonTitle = 'YES, Delete It!', cancelButtonTitle = 'Cancel') {
         return this.$bvModal.msgBoxConfirm(msg, {
           title: overallTitle,
           size: 'md',
           buttonSize: 'sm',
           okVariant: 'danger',
           okTitle: okButtonTitle,
-          cancelTitle: 'Cancel',
+          cancelTitle: cancelButtonTitle,
           footerClass: 'p-2',
           hideHeaderClose: false,
           centered: true,

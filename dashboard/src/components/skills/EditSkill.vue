@@ -21,6 +21,7 @@ limitations under the License.
              :aria-label="isEdit?'Edit Skill':'New Skill'">
       <skills-spinner :is-loading="isLoading" />
       <b-container v-if="!isLoading" fluid>
+          <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
           <div class="row">
             <div class="col-12 col-lg">
               <div class="form-group">
@@ -219,7 +220,7 @@ limitations under the License.
             <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-if="skillInternal" v-model="skillInternal.description" data-cy="skillDescription"/>
+                <markdown-editor v-model="skillInternal.description" data-cy="skillDescription"/>
                 <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>
@@ -255,6 +256,7 @@ limitations under the License.
   import { max_value, min_value } from 'vee-validate/dist/rules';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsService from './SkillsService';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
@@ -262,6 +264,8 @@ limitations under the License.
   import InputSanitizer from '../utils/InputSanitizer';
   import SettingsService from '../settings/SettingsService';
   import HelpUrlInput from '../utils/HelpUrlInput';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   extend('min_value', {
     // eslint-disable-next-line camelcase
@@ -292,7 +296,9 @@ limitations under the License.
       InlineHelp,
       IdInput,
       MarkdownEditor,
+      ReloadMessage,
     },
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: {
       projectId: {
         type: String,
@@ -331,8 +337,26 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         isLoadingSkillDetails: true,
+        saveTimer: null,
+        originalSkill: {
+          skillId: '',
+          projectId: this.projectId,
+          subjectId: this.subjectId,
+          name: '',
+          pointIncrement: 10,
+          numPerformToCompletion: 5,
+          pointIncrementIntervalHrs: 8,
+          pointIncrementIntervalMins: 0,
+          timeWindowEnabled: true,
+          numPointIncrementMaxOccurrences: 1,
+          description: null,
+          helpUrl: null,
+          selfReportingType: null,
+          type: 'Skill',
+        },
         skillInternal: {
           skillId: '',
+          originalSkillId: this.skillId,
           projectId: this.projectId,
           subjectId: this.subjectId,
           name: '',
@@ -358,27 +382,21 @@ limitations under the License.
           latestVersion: 0,
         },
         selfReport: {
-          loading: true,
+          loading: false,
         },
         overallErrMsg: '',
         show: this.value,
+        keysToWatch: [
+          'name', 'description', 'skillId', 'helpUrl', 'pointIncrement', 'numPerformToCompletion',
+          'pointIncrementIntervalHrs', 'pointIncrementIntervalMins', 'timeWindowEnabled',
+          'numPointIncrementMaxOccurrences', 'selfReportingType', 'type',
+        ],
+        restoredFromStorage: false,
       };
     },
     mounted() {
-      if (this.isEdit) {
-        this.loadSkillDetailsAndValidate(false);
-        this.selfReport.loading = false;
-      } else if (this.isCopy) {
-        this.loadSkillDetailsAndValidate(true);
-        this.selfReport.loading = false;
-      } else {
-        this.skillInternal = { version: 0, ...this.skillInternal };
-        if (this.newSkillDefaultValues) {
-          this.skillInternal = Object.assign(this.skillInternal, this.newSkillDefaultValues);
-        }
-        this.findLatestSkillVersion();
-        this.loadSelfReportProjectSetting();
-      }
+      this.loadComponent();
+
       this.setupValidation();
       document.addEventListener('focusin', this.trackFocus);
     },
@@ -407,27 +425,72 @@ limitations under the License.
       maxPointIncrement() {
         return this.$store.getters.config.maxPointIncrement;
       },
+      componentName() {
+        return `${this.projectId}-${this.subjectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+      },
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
       },
+      skillInternal: {
+        handler(newValue) {
+          if (this.hasObjectChanged(newValue, this.originalSkill)) {
+            this.saveComponentState(this.componentName, newValue);
+          }
+        },
+        deep: true,
+      },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.isLoadingSkillDetails = true;
+
+        if (this.isEdit || this.isCopy) {
+          this.loadSkillDetails(this.isCopy);
+        } else {
+          this.startLoadingFromState();
+        }
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       close(e) {
-        this.show = false;
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (!e.saved && this.hasObjectChanged(this.skillInternal, this.originalSkill) && !this.isLoading) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.clearComponentState(this.componentName);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', { updated: this.isEdit, ...e });
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
         }
+      },
+      hideModal(e) {
+        this.show = false;
+        this.$emit('hidden', { updated: this.isEdit, ...e });
       },
       updateJustificationRequired(value) {
         this.skillInternal.justificationRequired = value;
@@ -552,13 +615,26 @@ limitations under the License.
                 numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
               };
               this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
-              this.close({ saved: true });
+              this.publishHidden({ saved: true });
             }
           });
       },
-      loadSkillDetailsAndValidate(isCopy) {
-        this.loadSkillDetails(isCopy)
-          .then(() => {
+      startLoadingFromState() {
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result && (!this.isEdit || (this.isEdit && result.originalSkillId === this.originalSkill.skillId))) {
+            this.skillInternal = result;
+            this.restoredFromStorage = true;
+          } else if (!this.isEdit && !this.isCopy) {
+            this.findLatestSkillVersion();
+            this.loadSelfReportProjectSetting();
+          } else if (this.newSkillDefaultValues) {
+            Object.assign(this.skillInternal, this.newSkillDefaultValues);
+          } else {
+            Object.assign(this.skillInternal, this.originalSkill);
+          }
+        }).finally(() => {
+          this.isLoadingSkillDetails = false;
+          if (this.isEdit || this.isCopy) {
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;
@@ -567,13 +643,14 @@ limitations under the License.
                 }
               });
             }, 600);
-          });
+          }
+        });
       },
       loadSkillDetails(isCopy) {
         return SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
           .then((loadedSkill) => {
             if (!isCopy) {
-              this.skillInternal = {
+              this.originalSkill = {
                 originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill, subjectId: this.subjectId,
               };
             } else {
@@ -581,27 +658,35 @@ limitations under the License.
               copy.name = `Copy of ${loadedSkill.name}`;
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
               copy.subjectId = this.subjectId;
-              this.skillInternal = { isEdit: false, ...copy };
+              copy.originalSkillId = `copy_of_${loadedSkill.skillId}`;
+              this.originalSkill = { isEdit: false, ...copy };
             }
-            this.initial.skillId = this.skillInternal.skillId;
-            this.initial.skillName = this.skillInternal.name;
+            this.initial.skillId = this.originalSkill.skillId;
+            this.initial.skillName = this.originalSkill.name;
           })
           .finally(() => {
-            this.isLoadingSkillDetails = false;
+            this.startLoadingFromState();
           });
       },
       loadSelfReportProjectSetting() {
+        this.selfReport.loading = true;
         SettingsService.getSettingsForProject(this.projectId)
           .then((response) => {
             if (response) {
               const selfReportingTypeSetting = response.find((item) => item.setting === 'selfReport.type');
               if (selfReportingTypeSetting) {
-                this.skillInternal.selfReportingType = selfReportingTypeSetting.value;
+                this.originalSkill.selfReportingType = selfReportingTypeSetting.value;
               }
               const selfReportingJustificationSetting = response.find((item) => item.setting === 'selfReport.justificationRequired');
               if (selfReportingJustificationSetting) {
-                this.skillInternal.justificationRequired = selfReportingJustificationSetting.value;
+                this.originalSkill.justificationRequired = selfReportingJustificationSetting.value;
               }
+            }
+          }).finally(() => {
+            if (this.newSkillDefaultValues) {
+              Object.assign(this.skillInternal, this.newSkillDefaultValues);
+            } else {
+              Object.assign(this.skillInternal, this.originalSkill);
             }
             this.selfReport.loading = false;
           });

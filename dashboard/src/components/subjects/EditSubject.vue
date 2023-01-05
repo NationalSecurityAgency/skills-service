@@ -22,7 +22,11 @@ limitations under the License.
              header-text-variant="light"
              @hide="publishHidden"
              no-fade>
-        <b-container fluid>
+
+        <skills-spinner :is-loading="loadingComponent"/>
+
+        <b-container fluid v-if="!loadingComponent">
+          <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
           <div v-if="displayIconManager === false">
               <div class="media mb-3">
                 <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"
@@ -102,20 +106,27 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SubjectsService from './SubjectsService';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import MarkdownEditor from '../utils/MarkdownEditor';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
   import HelpUrlInput from '../utils/HelpUrlInput';
+  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../utils/ReloadMessage';
 
   export default {
     name: 'EditSubject',
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     components: {
       HelpUrlInput,
       IdInput,
       IconPicker,
+      SkillsSpinner,
       MarkdownEditor,
+      ReloadMessage,
       'icon-manager': () => import(/* webpackChunkName: 'iconManager' */'../utils/iconPicker/IconManager'),
     },
     props: {
@@ -126,13 +137,28 @@ limitations under the License.
     data() {
       return {
         canAutoGenerateId: true,
-        subjectInternal: {},
+        subjectInternal: {
+          originalSubjectId: this.subject.subjectId,
+          isEdit: this.isEdit,
+          helpUrl: this.subject.helpUrl,
+          subjectId: this.subject.subjectId,
+          ...this.subject,
+        },
+        originalSubject: {
+          subjectId: this.subject.subjectId,
+          name: this.subject.name,
+          helpUrl: this.subject.helpUrl,
+          description: this.subject.description,
+        },
         overallErrMsg: '',
         show: this.value,
         displayIconManager: false,
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
+        loadingComponent: true,
+        keysToWatch: ['name', 'description', 'subjectId', 'helpUrl'],
+        restoredFromStorage: false,
       };
     },
     created() {
@@ -140,43 +166,95 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-      this.subjectInternal = { originalSubjectId: this.subject.subjectId, isEdit: this.isEdit, ...this.subject };
-      if (this.isEdit) {
-        setTimeout(() => {
-          this.$nextTick(() => {
-            const { observer } = this.$refs;
-            if (observer) {
-              observer.validate({ silent: false });
-            }
-          });
-        }, 600);
-      }
+      this.loadComponent();
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
+      },
+      subjectInternal: {
+        handler(newValue) {
+          this.saveComponentState(this.componentName, newValue);
+        },
+        deep: true,
       },
     },
     computed: {
       title() {
         return this.isEdit ? 'Editing Existing Subject' : 'New Subject';
       },
+      componentName() {
+        return `${this.subjectInternal.projectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+      },
     },
     methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loadingComponent = true;
+
+        this.loadComponentState(this.componentName).then((result) => {
+          if (result) {
+            if (!this.isEdit || (this.isEdit && result.originalSubjectId === this.originalSubject.subjectId)) {
+              this.subjectInternal = result;
+              this.restoredFromStorage = true;
+            } else {
+              this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
+            }
+          } else {
+            this.subjectInternal = Object.assign(this.subjectInternal, this.originalSubject);
+          }
+        }).finally(() => {
+          this.loadingComponent = false;
+          if (this.isEdit) {
+            setTimeout(() => {
+              this.$nextTick(() => {
+                const { observer } = this.$refs;
+                if (observer) {
+                  observer.validate({ silent: false });
+                }
+              });
+            }, 600);
+          }
+        });
+      },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (!e.update && this.hasObjectChanged(this.subjectInternal, this.originalSubject) && !this.loadingComponent) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.clearComponentState(this.componentName);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', e);
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
         }
       },
-      close(e) {
+      hideModal(e) {
         this.show = false;
-        this.publishHidden(e);
+        this.$emit('hidden', e);
+      },
+      close(e) {
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       updateSubject() {
         this.$refs.observer.validate()
@@ -184,7 +262,7 @@ limitations under the License.
             if (!res) {
               this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
             } else {
-              this.close({ update: true });
+              this.publishHidden({ update: true });
               this.subjectInternal.subjectName = InputSanitizer.sanitize(this.subjectInternal.subjectName);
               this.subjectInternal.subjectId = InputSanitizer.sanitize(this.subjectInternal.subjectId);
               this.$emit('subject-saved', this.subjectInternal);
