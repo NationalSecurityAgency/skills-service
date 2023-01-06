@@ -429,45 +429,6 @@ class SkillsLoader {
         Integer points
     }
 
-    private DisplayOrderRes getNextSkill(List<DisplayOrderRes> skills, Boolean prev, int displayOrder, String groupId) {
-        def skill
-        // There is no next element - i.e. the start/end of the group has been reached, so exit the group
-
-        def isGroupNext = skills.findAll({ it.groupId != groupId && it.getSkillGroupDisplayOrder() == displayOrder})?.sort({a, b -> a.displayOrder <=> b.displayOrder})
-        if(isGroupNext.size() > 0) {
-            // Next item in the row is a group, so grab the first / last element
-            skill = prev ? isGroupNext.last() : isGroupNext.first()
-        }
-        else {
-            skill = skills.find({it -> it.groupId == null && it.displayOrder == displayOrder})
-        }
-
-        return skill
-    }
-
-    private String getAdjacentSkillId(Boolean withinSkillGroup, DisplayOrderRes currentSkill, List<DisplayOrderRes> skills, Boolean prev) {
-        def skill
-        def displayOrder = prev ? currentSkill.displayOrder - 1 : currentSkill.displayOrder + 1;
-
-        if(withinSkillGroup) {
-            // Navigating within a group, so try to find the next element
-            List <DisplayOrderRes> currentGroup = skills.findAll({it.groupId == currentSkill.groupId});
-            skill = currentGroup.find({ it -> it.displayOrder == displayOrder })
-
-            if(!skill) {
-                // There is no next element - i.e. the start/end of the group has been reached, so exit the group
-                displayOrder = prev ? currentSkill.skillGroupDisplayOrder - 1 : currentSkill.skillGroupDisplayOrder + 1;
-                skill = getNextSkill(skills, prev, displayOrder, currentSkill.groupId)
-            }
-        }
-        else {
-            // Not within a group, so navigate to the next element
-            skill = getNextSkill(skills, prev, displayOrder, currentSkill.groupId)
-        }
-
-        return skill?.skillId
-    }
-
     int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
         if( a.groupId != null || b.groupId != null ) {
             if( a.groupId != null && b.groupId != null) {
@@ -495,8 +456,8 @@ class SkillsLoader {
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
 
-        String nextSkillId;
-        String prevSkillId;
+        String nextSkillId = null;
+        String prevSkillId = null;
         int totalSkills = 0;
         int orderInGroup = 0;
 
@@ -512,10 +473,13 @@ class SkillsLoader {
             totalSkills = orderedGroup.size();
 
             if (currentSkill) {
-                def withinSkillGroup = currentSkill.groupId != null ? true : false;
-
-                prevSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, true)
-                nextSkillId = getAdjacentSkillId(withinSkillGroup, currentSkill, skills, false)
+                def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
+                if(currentIndex > 0) {
+                    prevSkillId = skills[currentIndex - 1]?.skillId
+                }
+                if(currentIndex < totalSkills - 1) {
+                    nextSkillId = skills[currentIndex + 1]?.skillId
+                }
             }
         }
 
