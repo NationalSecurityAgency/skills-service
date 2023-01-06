@@ -15,10 +15,12 @@
  */
 package skills.controller.result.model
 
-class QuizMetrics {
-    Integer numTaken
-    Integer numPassed
-    Integer numFailed
+class QuizAnswerMetricsResult {
+    Integer id
+    String answer
+    Boolean isCorrect
 
-    List<QuizQuestionMetricsResult> questions
+    int numAnswered
+    int numAnsweredCorrect
+    int numAnsweredWrong
 }

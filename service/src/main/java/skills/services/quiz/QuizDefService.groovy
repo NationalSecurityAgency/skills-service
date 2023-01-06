@@ -31,32 +31,13 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
-import skills.controller.result.model.QuizAnswerDefResult
-import skills.controller.result.model.QuizDefResult
-import skills.controller.result.model.QuizMetrics
-import skills.controller.result.model.QuizQuestionDefResult
-import skills.services.AccessSettingsStorageService
-import skills.services.CreatedResourceLimitsValidator
-import skills.services.CustomValidationResult
-import skills.services.CustomValidator
-import skills.services.IdFormatValidator
-import skills.services.LockingService
+import skills.controller.result.model.*
+import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
-import skills.storage.model.LabeledCount
-import skills.storage.model.QuizAnswerDef
-import skills.storage.model.QuizDef
-import skills.storage.model.QuizDefWithDescription
-import skills.storage.model.QuizQuestionDef
-import skills.storage.model.UserQuizAttempt
+import skills.storage.model.*
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.QuizAnswerDefRepo
-import skills.storage.repos.QuizDefRepo
-import skills.storage.repos.QuizDefWithDescRepo
-import skills.storage.repos.QuizQuestionDefRepo
-import skills.storage.repos.UserQuizAnswerAttemptRepo
-import skills.storage.repos.UserQuizAttemptRepo
-import skills.storage.repos.UserQuizQuestionAttemptRepo
+import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -275,13 +256,44 @@ class QuizDefService {
         int numPassed = numPassedCount ? numPassedCount.getCount() : 0
 
         List<QuizQuestionDefResult> questionDefResults = getQuestionDefs(quizId)
-        List<UserQuizQuestionAttemptRepo.QuestionIdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId)
+        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId)
+        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizAnswerAttemptCounts(quizId)
+
+        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byQuestionId = questionIdAndStatusCounts.groupBy { it.getId()}
+        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byAnswerId = answerIdAndStatusCounts.groupBy { it.getId()}
+
+        List<QuizQuestionMetricsResult> questions = questionDefResults.collect { QuizQuestionDefResult questionDefResult ->
+            List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionStatusCounts = byQuestionId[questionDefResult.id]
+            UserQuizQuestionAttemptRepo.IdAndStatusCount questionCorrectCounts = questionStatusCounts?.find { it.getStatus() == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT.toString() }
+            UserQuizQuestionAttemptRepo.IdAndStatusCount questionWrongCounts = questionStatusCounts?.find { it.getStatus() == UserQuizQuestionAttempt.QuizQuestionStatus.WRONG.toString() }
+            return new QuizQuestionMetricsResult(
+                    id: questionDefResult.id,
+                    question: questionDefResult.question,
+                    questionType: questionDefResult.questionType,
+                    numAnsweredCorrect: questionCorrectCounts?.getCount() ?: 0,
+                    numAnsweredWrong: questionWrongCounts?.getCount() ?: 0,
+
+                    answers: questionDefResult.answers.collect { QuizAnswerDefResult quizAnswerDefResult ->
+                        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerStatusCounts = byAnswerId[quizAnswerDefResult.id]
+                        UserQuizQuestionAttemptRepo.IdAndStatusCount answerCorrectCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString() }
+                        UserQuizQuestionAttemptRepo.IdAndStatusCount answerWrongCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG.toString() }
+                        new QuizAnswerMetricsResult(
+                                id: quizAnswerDefResult.id,
+                                answer: quizAnswerDefResult.answer,
+                                isCorrect: quizAnswerDefResult.isCorrect,
+                                numAnswered: answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0,
+                                numAnsweredCorrect: answerCorrectCount?.getCount() ?: 0,
+                                numAnsweredWrong: answerWrongCount?.getCount() ?: 0,
+                        )
+                    }
+            )
+        }
 
         return new QuizMetrics(
                 numTaken: total,
                 numPassed: numPassed,
                 numFailed: total - numPassed,
-                questionDefResults: questionDefResults,
+                questions: questions,
         )
     }
 

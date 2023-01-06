@@ -21,21 +21,28 @@ import skills.storage.model.UserQuizQuestionAttempt
 
 interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAttempt, Long> {
 
-    interface QuestionIdAndStatusCount {
-        Integer getQuestionId()
+    interface IdAndStatusCount {
+        Integer getId()
         String getStatus()
         Long getCount()
     }
 
     @Query('''select
-        questionAttempt.id as questionId, questionAttempt.status as status, count(quizAttempt.id) as count
-        from QuizDef quizDef, UserQuizAttempt quizAttempt, UserQuizQuestionAttempt questionAttempt
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizAttempt.id = questionAttempt.userQuizAttemptRefId
-            and quizDef.quizId = ?1
-        group by questionAttempt.id, questionAttempt.status
-    
+        questionAttempt.quizQuestionDefinitionRefId as id, questionAttempt.status as status, count(questionAttempt.userId) as count
+        from QuizQuestionDef questionDef, UserQuizQuestionAttempt questionAttempt
+        where questionAttempt.quizQuestionDefinitionRefId = questionDef.id
+            and questionDef.quizId = ?1
+        group by questionAttempt.quizQuestionDefinitionRefId, questionAttempt.status
      ''')
-    List<QuestionIdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
+    List<IdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
+
+    @Query('''select
+        answerAttempt.quizAnswerDefinitionRefId as id, answerAttempt.status as status, count(answerAttempt.userId) as count
+        from QuizAnswerDef answerDef, UserQuizAnswerAttempt answerAttempt
+        where answerAttempt.quizAnswerDefinitionRefId = answerDef.id
+            and answerDef.quizId = ?1
+        group by answerAttempt.quizAnswerDefinitionRefId, answerAttempt.status
+     ''')
+    List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId)
 
 }

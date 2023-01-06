@@ -26,6 +26,9 @@ import skills.controller.result.model.QuizDefResult
 import skills.controller.result.model.QuizMetrics
 import skills.controller.result.model.QuizQuestionDefResult
 import skills.controller.result.model.RequestResult
+import skills.quizLoading.QuizRunService
+import skills.quizLoading.model.QuizAttemptReq
+import skills.quizLoading.model.QuizGradedResult
 import skills.services.quiz.QuizDefService
 
 @RestController
@@ -36,6 +39,9 @@ class QuizController {
 
     @Autowired
     QuizDefService quizDefService
+
+    @Autowired
+    QuizRunService quizRunService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -86,6 +92,14 @@ class QuizController {
     @ResponseBody
     QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
         return quizDefService.getMetrics(quizId);
+    }
+
+    @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizGradedResult reportQuizAttempt(@PathVariable("quizId") String quizId,
+                                       @PathVariable("userId") String userId,
+                                       @RequestBody QuizAttemptReq quizAttemptReq) {
+        return quizRunService.reportQuizAttempt(userId, quizId, quizAttemptReq);
     }
 
 }

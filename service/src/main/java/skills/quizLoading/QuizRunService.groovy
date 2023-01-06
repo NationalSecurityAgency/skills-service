@@ -197,9 +197,8 @@ class QuizRunService {
 
             List<QuizAnswerDef> answers = gradedResultInfo.answerDefByQuestionId[quizQuestionDef.id]
             List<Integer> selectedAnswerIds = gradedResultInfo.selectedAnswersByQuestion[quizQuestionDef.id].first().selectedAnswerIds
-            List<UserQuizAnswerAttempt> userQuizAnswerAttempts = answers.collect { QuizAnswerDef quizAnswerDef ->
-                boolean isSelected = selectedAnswerIds.contains(quizAnswerDef.id)
-                boolean isCorrect = (quizAnswerDef.isCorrectAnswer && isSelected) || (!quizAnswerDef.isCorrectAnswer && !isSelected)
+            List<UserQuizAnswerAttempt> userQuizAnswerAttempts = answers.findAll({ selectedAnswerIds.contains(it.id) }).collect { QuizAnswerDef quizAnswerDef ->
+                boolean isCorrect = Boolean.valueOf(quizAnswerDef.isCorrectAnswer)
                 new UserQuizAnswerAttempt(
                         userQuizQuestionAttemptRefId: savedUserQuizQuestionAttempt.id,
                         quizAnswerDefinitionRefId: quizAnswerDef.id,

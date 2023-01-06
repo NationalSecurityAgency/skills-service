@@ -1600,6 +1600,11 @@ class SkillsService {
         wsHelper.adminDelete(getQuizDefUrl(quizId))
     }
 
+    def reportQuizAttemptForUser(String userId, String quizId, def attemptInfo) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
+        wsHelper.adminPost(url, attemptInfo)
+    }
+
     def quizIdExist(String quizId) {
         wsHelper.appPost("/quizDefExist", [quizId: quizId])
     }

@@ -16,17 +16,12 @@
 package skills.intTests.quiz
 
 import groovy.json.JsonOutput
-import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptReq
 import skills.quizLoading.model.QuizQuestionAttemptReq
 
 class QuizMetricsSpecs extends DefaultIntSpec {
-
-    @Autowired
-    QuizRunService quizRunService
 
     def "load metrics"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
@@ -47,9 +42,25 @@ class QuizMetricsSpecs extends DefaultIntSpec {
                 ]
         )
 
+        QuizAttemptReq quizAttempReqFailed = new QuizAttemptReq(
+                questionAnswers: [
+                        new QuizQuestionAttemptReq(
+                                questionId: quizInfo.questions[0].id,
+                                selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
+                        ), new QuizQuestionAttemptReq(
+                        questionId: quizInfo.questions[1].id,
+                        selectedAnswerIds: [quizInfo.questions[1].answerOptions[1].id]
+                )
+                ]
+        )
+
         List<String> users = getRandomUsers(5, true)
-        users.each {
-            quizRunService.reportQuizAttempt(it, quiz.quizId, quizAttempReq)
+        users.eachWithIndex { it, index ->
+            if (index == 1) {
+                skillsService.reportQuizAttemptForUser(it, quiz.quizId, quizAttempReqFailed)
+            } else {
+                skillsService.reportQuizAttemptForUser(it, quiz.quizId, quizAttempReq)
+            }
         }
 
         when:

@@ -56,4 +56,8 @@ export default {
       newDisplayOrderIndex,
     });
   },
+  getQuizMetrics(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/metrics`)
+      .then((response) => response.data);
+  },
 };
