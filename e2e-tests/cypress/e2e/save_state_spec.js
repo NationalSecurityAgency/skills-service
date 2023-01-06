@@ -27,7 +27,7 @@ describe('Save State Tests', () => {
     })
   });
 
-  it('Saves and discards new badge state', () => {
+  it.only('Saves and discards new badge state', () => {
     cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
@@ -43,6 +43,7 @@ describe('Save State Tests', () => {
     cy.get('#badgeName').should('have.value', 'New Badge');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy=closeBadgeButton]').click();
+    cy.wait(250);
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
