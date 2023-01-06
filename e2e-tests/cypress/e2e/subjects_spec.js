@@ -409,7 +409,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
     });
 
-    it.only('focus should be returned to subject edit button', () => {
+    it('focus should be returned to subject edit button', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
