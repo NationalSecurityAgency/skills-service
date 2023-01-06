@@ -18,8 +18,6 @@ package skills.intTests.quiz
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.quizLoading.model.QuizAttemptReq
-import skills.quizLoading.model.QuizQuestionAttemptReq
 
 class QuizMetricsSpecs extends DefaultIntSpec {
 
@@ -30,37 +28,10 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-        QuizAttemptReq quizAttempReq = new QuizAttemptReq(
-                questionAnswers: [
-                    new QuizQuestionAttemptReq(
-                        questionId: quizInfo.questions[0].id,
-                         selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
-                    ), new QuizQuestionAttemptReq(
-                        questionId: quizInfo.questions[1].id,
-                        selectedAnswerIds: [quizInfo.questions[1].answerOptions[0].id]
-                    )
-                ]
-        )
-
-        QuizAttemptReq quizAttempReqFailed = new QuizAttemptReq(
-                questionAnswers: [
-                        new QuizQuestionAttemptReq(
-                                questionId: quizInfo.questions[0].id,
-                                selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
-                        ), new QuizQuestionAttemptReq(
-                        questionId: quizInfo.questions[1].id,
-                        selectedAnswerIds: [quizInfo.questions[1].answerOptions[1].id]
-                )
-                ]
-        )
 
         List<String> users = getRandomUsers(5, true)
         users.eachWithIndex { it, index ->
-            if (index == 1) {
-                skillsService.reportQuizAttemptForUser(it, quiz.quizId, quizAttempReqFailed)
-            } else {
-                skillsService.reportQuizAttemptForUser(it, quiz.quizId, quizAttempReq)
-            }
+            runQuiz(it, quiz, quizInfo, index != 1)
         }
 
         when:
@@ -68,6 +39,13 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         println JsonOutput.prettyPrint(JsonOutput.toJson(metrics))
         then:
         metrics
+    }
+
+    void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {
+        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[pass ? 0 : 1].id, userId)
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
     }
 
 }

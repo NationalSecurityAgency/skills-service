@@ -30,7 +30,7 @@ import javax.persistence.*
 class UserQuizAttempt {
 
     static enum QuizAttemptStatus {
-        PASSED, FAILED,
+        INPROGRESS, PASSED, FAILED,
     }
 
     @Id
@@ -41,6 +41,9 @@ class UserQuizAttempt {
     QuizAttemptStatus status
 
     String userId
+
+    Date started
+    Date completed
 
     @Column(name="created", updatable = false, insertable = false)
     Date created

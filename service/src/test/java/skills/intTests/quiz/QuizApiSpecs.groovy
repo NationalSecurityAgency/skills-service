@@ -65,24 +65,18 @@ class QuizApiSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizInfo))
         when:
-        def qRes = skillsService.reportQuizAttempt(quiz.quizId, [
-                questionAnswers: [[
-                        questionId: quizInfo.questions[0].id,
-                        selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
-                ], [
-                        questionId: quizInfo.questions[1].id,
-                        selectedAnswerIds: [quizInfo.questions[1].answerOptions[0].id]
-                ]]
-        ])
-        println JsonOutput.prettyPrint(JsonOutput.toJson(qRes))
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(gradedQuizAttempt))
         then:
-        qRes.body.passed == true
-        qRes.body.gradedQuestions.questionId == quizInfo.questions.id
-        qRes.body.gradedQuestions.isCorrect == [true, true]
-        qRes.body.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        qRes.body.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
     }
 
     def "report quiz attempt - fail quiz"() {
@@ -94,22 +88,16 @@ class QuizApiSpecs extends DefaultIntSpec {
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         println JsonOutput.prettyPrint(JsonOutput.toJson(quizInfo))
         when:
-        def qRes = skillsService.reportQuizAttempt(quiz.quizId, [
-                questionAnswers: [[
-                                          questionId: quizInfo.questions[0].id,
-                                          selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
-                                  ], [
-                                          questionId: quizInfo.questions[1].id,
-                                          selectedAnswerIds: [quizInfo.questions[1].answerOptions[1].id]
-                                  ]]
-        ])
-        println JsonOutput.prettyPrint(JsonOutput.toJson(qRes))
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         then:
-        qRes.body.passed == false
-        qRes.body.gradedQuestions.questionId == quizInfo.questions.id
-        qRes.body.gradedQuestions.isCorrect == [true, false]
-        qRes.body.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        qRes.body.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, false]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
     }
 
     def "removing quiz definition removes questions and answers definitions and attempts"() {

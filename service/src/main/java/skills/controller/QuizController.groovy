@@ -28,6 +28,7 @@ import skills.controller.result.model.QuizQuestionDefResult
 import skills.controller.result.model.RequestResult
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptReq
+import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.services.quiz.QuizDefService
 
@@ -96,10 +97,27 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
-    QuizGradedResult reportQuizAttempt(@PathVariable("quizId") String quizId,
-                                       @PathVariable("userId") String userId,
-                                       @RequestBody QuizAttemptReq quizAttemptReq) {
-        return quizRunService.reportQuizAttempt(userId, quizId, quizAttemptReq);
+    QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
+                                            @PathVariable("userId") String userId) {
+        return quizRunService.startQuizAttempt(userId, quizId);
+    }
+
+    @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    RequestResult reportQuizAnswer(@PathVariable("quizId") String quizId,
+                                   @PathVariable("userId") String userId,
+                                   @PathVariable("attemptId") Integer attemptId,
+                                   @PathVariable("answerId") Integer answerId) {
+        quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId);
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{quizAttempId}/complete", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizGradedResult completeQuizAttempt(@PathVariable("quizId") String quizId,
+                                         @PathVariable("userId") String userId,
+                                         @PathVariable("quizAttempId") Integer quizAttemptId) {
+        return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
     }
 
 }

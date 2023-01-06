@@ -70,7 +70,9 @@ limitations under the License.
           };
         });
         const selectedAnswerIds = this.answerOptions.filter((a) => a.selected).map((a) => a.id);
-        const currentAnswer = { questionId: this.q.id, selectedAnswerIds };
+        const currentAnswer = {
+          questionId: this.q.id, selectedAnswerIds, changedAnswerId: selectedStatus.id, changedAnswerIdSelected: selectedStatus.selected,
+        };
         this.$emit('selected-answer', currentAnswer);
       },
     },

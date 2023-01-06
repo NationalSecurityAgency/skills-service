@@ -1646,9 +1646,36 @@ class SkillsService {
         return wsHelper.apiGet(url)
     }
 
+    @Deprecated
     def reportQuizAttempt(String quizId, def quizAttemptReq) {
         String url = "/quizzes/${quizId}/attempt"
         return wsHelper.apiPost(url, quizAttemptReq)
+    }
+
+    def startQuizAttempt(String quizId) {
+        String url = "/quizzes/${quizId}/attempt"
+        return wsHelper.apiPost(url, [])
+    }
+    def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId) {
+        String url = "/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}"
+        return wsHelper.apiPost(url, [])
+    }
+    def completeQuizAttempt(String quizId, Integer attemptId) {
+        String url = "/quizzes/${quizId}/attempt/${attemptId}/complete"
+        return wsHelper.apiPost(url, [])
+    }
+
+    def startQuizAttemptForUserId(String quizId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
+        return wsHelper.adminPost(url, [])
+    }
+    def reportQuizAnswerForUserId(String quizId, Integer attemptId, Integer answerId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}"
+        return wsHelper.adminPost(url, [])
+    }
+    def completeQuizAttemptForUserId(String quizId, Integer attemptId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete"
+        return wsHelper.adminPost(url, [])
     }
 
     private String getQuizDefUrl(String quizId) {

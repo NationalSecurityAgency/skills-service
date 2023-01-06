@@ -95,6 +95,8 @@ limitations under the License.
         selectedAnswers: [],
         notEveryQuestionHasAnAnswer: false,
         quizResult: null,
+        quizAttemptId: null,
+        reportAnswerPromises: [],
       };
     },
     mounted() {
@@ -114,9 +116,13 @@ limitations under the License.
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
-          })
-          .finally(() => {
-            this.isLoading = false;
+
+            QuizRunService.startQuizAttempt(this.quizId)
+              .then((startQuizAttemptRes) => {
+                this.quizAttemptId = startQuizAttemptRes.id;
+              }).finally(() => {
+                this.isLoading = false;
+              });
           });
       },
       updateSelectedAnswers(questionSelectedAnswer) {
@@ -126,6 +132,7 @@ limitations under the License.
           this.notEveryQuestionHasAnAnswer = false;
         }
         this.selectedAnswers = res;
+        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId));
       },
       completeTestRun() {
         const everyQuestionHasAnswer = this.selectedAnswers.length === this.quizInfo.questions.length;
@@ -133,34 +140,37 @@ limitations under the License.
           this.notEveryQuestionHasAnAnswer = true;
         } else {
           this.isLoading = true;
-          QuizRunService.reportQuizAttempt(this.quizId, { questionAnswers: this.selectedAnswers })
-            .then((gradedRes) => {
-              const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
-              const numTotal = gradedRes.gradedQuestions.length;
-              const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
-              this.quizResult = {
-                gradedRes,
-                numCorrect,
-                numTotal,
-                percentCorrect,
-                missedBy: numTotal - numCorrect,
-              };
+          Promise.all(this.reportAnswerPromises)
+            .then(() => {
+              QuizRunService.completeQuizAttempt(this.quizId, this.quizAttemptId)
+                .then((gradedRes) => {
+                  const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
+                  const numTotal = gradedRes.gradedQuestions.length;
+                  const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+                  this.quizResult = {
+                    gradedRes,
+                    numCorrect,
+                    numTotal,
+                    percentCorrect,
+                    missedBy: numTotal - numCorrect,
+                  };
 
-              const updatedQuizInfo = ({ ...this.quizInfo });
-              updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
-                const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
+                  const updatedQuizInfo = ({ ...this.quizInfo });
+                  updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
+                    const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
 
-                const answerOptions = q.answerOptions.map((a) => ({
-                  ...a,
-                  selected: gradedQuestion.selectedAnswerIds.includes(a.id),
-                  isGraded: true,
-                  isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
-                }));
-                return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
-              });
-              this.quizInfo = updatedQuizInfo;
-            }).finally(() => {
-              this.isLoading = false;
+                    const answerOptions = q.answerOptions.map((a) => ({
+                          ...a,
+                          selected: gradedQuestion.selectedAnswerIds.includes(a.id),
+                          isGraded: true,
+                          isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
+                    }));
+                    return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
+                  });
+                  this.quizInfo = updatedQuizInfo;
+                }).finally(() => {
+                  this.isLoading = false;
+                });
             });
         }
       },

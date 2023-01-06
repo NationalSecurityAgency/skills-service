@@ -20,8 +20,16 @@ export default {
     return axios.get(`/api/quizzes/${quizId}`)
       .then((response) => response.data);
   },
-  reportQuizAttempt(quizId, quizAttemptReq) {
-    return axios.post(`/api/quizzes/${quizId}/attempt`, quizAttemptReq)
+  startQuizAttempt(quizId) {
+    return axios.post(`/api/quizzes/${quizId}/attempt`)
+        .then((response) => response.data);
+  },
+  reportAnswer(quizId, attemptId, answerId) {
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`)
+        .then((response) => response.data);
+  },
+  completeQuizAttempt(quizId, attemptId) {
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/complete`)
         .then((response) => response.data);
   },
 };

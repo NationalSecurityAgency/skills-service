@@ -188,11 +188,17 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
     }, overrideProps));
 });
 
-Cypress.Commands.add("reportQuizAttemptForUser", (quizNum = 1, userNum = 1, quizAttemptInfo) => {
+Cypress.Commands.add("runQuizForUser", (quizNum = 1, userNum = 1, quizAttemptInfo) => {
+
     const quizId = `quiz${quizNum}`;
 
     const userId = `user${userNum}`;
     cy.register(userId, 'password');
+
+    const waitConf = {
+        timeout: 60000, // waits up to 1 minutes
+        interval: 500 // performs the check every 500 ms, default to 200
+    };
 
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
@@ -212,36 +218,27 @@ Cypress.Commands.add("reportQuizAttemptForUser", (quizNum = 1, userNum = 1, quiz
                         // cy.log(JSON.stringify(foundAnswer, null, 2));
                         return foundAnswer.id;
                     });
-                    // cy.log(selectedAnswerIds);
-                    return {
-                        questionId: qDef.id,
-                        selectedAnswerIds,
-                    };
-                });
+                    return selectedAnswerIds;
+                }).flat();
 
                 cy.log(JSON.stringify(questionAnswers, null, 2));
 
-                const url = `/admin/quiz-definitions/quiz${quizNum}/users/${userId}/attempt`
-                const reportObject = { questionAnswers };
-                cy.request('POST', url, reportObject);
+                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt`)
+                    .then((response) => {
+                        const attemptId = response.body.id
+
+
+                        const allRequests = questionAnswers.map((answerId) => {
+                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`);
+                        });
+                        Promise.all(allRequests).then(() => {
+                            cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
+                        })
+                    });
+
             });
     });
-
-    // const url = `/admin/quiz-definitions/quiz${quizNum}/users/user${userNum}/attempt`
-    // const reportObject = {
-    //     questionAnswers: [
-    //         {
-    //             questionId: 1,
-    //             selectedAnswerIds: [0],
-    //         }
-    //     ]
-    // };
-    // cy.request('POST', url, Object.assign({
-    //     quizId: `quizId${quizNum}`,
-    //     name: `This is quiz ${quizNum}`,
-    //     description: `What a cool quiz #${quizNum}this is! Thank you for taking it!`
-    // }, overrideProps));
-});
+})
 
 Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({

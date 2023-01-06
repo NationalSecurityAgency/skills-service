@@ -73,10 +73,15 @@ describe('Quiz Metrics Tests', () => {
                 isCorrect: false,
             }]})
 
-        cy.reportQuizAttemptForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
-        cy.reportQuizAttemptForUser(1, 2, [{selectedIndex: [1]}, {selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
-        cy.reportQuizAttemptForUser(1, 2, [{selectedIndex: [1]}, {selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
-        cy.reportQuizAttemptForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [1]}, {selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}, {selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]} ]);
+        cy.runQuizForUser(1, 4, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 5, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 6, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 7, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 8, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
+        cy.runQuizForUser(1, 9, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
 
         cy.visit('/administrator/tests-and-surveys');
     });

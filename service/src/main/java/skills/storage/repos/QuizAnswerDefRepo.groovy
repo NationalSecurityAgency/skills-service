@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizAnswerDef
 
@@ -23,4 +24,13 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
 
     @Nullable
     List<QuizAnswerDef> findAllByQuizIdIgnoreCase(String quizId)
+
+    static interface AnswerDefPartialInfo {
+        String getIsCorrectAnswer()
+        String getQuizId()
+    }
+    @Nullable
+    @Query(value = "select q.isCorrectAnswer as isCorrectAnswer, q.quizId as quizId from QuizAnswerDef q where q.id = ?1")
+    AnswerDefPartialInfo getPartialDefByAnswerDefId(Integer id)
+
 }

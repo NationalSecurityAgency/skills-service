@@ -16,8 +16,23 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.lang.Nullable
 import skills.storage.model.UserQuizAnswerAttempt
 
 interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
+
+
+    @Query('''select answerDef.id
+        from QuizAnswerDef answerDef, UserQuizAnswerAttempt answerAttempt
+        where answerAttempt.quizAnswerDefinitionRefId = answerDef.id
+            and answerAttempt.userId = ?1
+            and answerDef.quizId = ?2
+     ''')
+    List<Integer> getSelectedAnswerIds(String userId, String quizId)
+
+    boolean existsByUserIdAndQuizAnswerDefinitionRefId(String userId, Integer quizAnswerDefinitionRefId)
+
+    void deleteByQuizAnswerDefinitionRefId(Integer quizAnswerDefinitionRefId)
 
 }

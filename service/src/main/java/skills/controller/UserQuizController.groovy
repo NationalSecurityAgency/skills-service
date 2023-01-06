@@ -29,8 +29,10 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import skills.auth.UserInfoService
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
+import skills.controller.result.model.RequestResult
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptReq
+import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizInfo
 import skills.skillLoading.model.OverallSkillSummary
@@ -55,11 +57,34 @@ class UserQuizController {
         return quizRunService.loadQuizInfo(quizId);
     }
 
-    @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @RequestMapping(value = "/quizzes/{quizId}/attempt/old", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
+    @Deprecated
     QuizGradedResult reportQuizAttempt(@PathVariable("quizId") String quizId,
                                        @RequestBody QuizAttemptReq quizAttemptReq) {
         return quizRunService.reportQuizAttempt(quizId, quizAttemptReq);
+    }
+
+    @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId) {
+        return quizRunService.startQuizAttempt(quizId);
+    }
+
+    @RequestMapping(value = "/quizzes/{quizId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    RequestResult reportQuizAnswer(@PathVariable("quizId") String quizId,
+                                            @PathVariable("attemptId") Integer attemptId,
+                                            @PathVariable("answerId") Integer answerId) {
+        quizRunService.reportQuestionAnswer(quizId, attemptId, answerId);
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/quizzes/{quizId}/attempt/{quizAttempId}/complete", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizGradedResult completeQuizAttempt(@PathVariable("quizId") String quizId,
+                                         @PathVariable("quizAttempId") Integer quizAttemptId) {
+        return quizRunService.completeQuizAttempt(quizId, quizAttemptId);
     }
 
 }

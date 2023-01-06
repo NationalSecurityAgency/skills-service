@@ -37,7 +37,9 @@ class UserQuizAnswerAttempt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
-    Integer userQuizQuestionAttemptRefId
+    // link it back to the quiz rather than question
+    // to document user's current progress answers will exist before a question is completed
+    Integer userQuizAttemptRefId
     Integer quizAnswerDefinitionRefId
 
     String userId
