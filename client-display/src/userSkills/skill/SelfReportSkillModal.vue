@@ -33,19 +33,19 @@ limitations under the License.
             System</b> and <b class="text-success">{{ skill.pointIncrement }}</b> points will be awarded right away!
           </p>
           <p class="h5" v-if="isApprovalRequired">This {{ skillDisplayName.toLowerCase() }} requires <b class="text-info">approval</b>. Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
-            <span v-if="!isJustitificationRequired" class="text-muted">optional</span> message and it will enter an approval queue.</p>
+            <span v-if="!isJustitificationRequired" class="text-muted">optional</span> justification and it will enter an approval queue.</p>
         </div>
       </div>
       <div class="row">
         <div class="col-12">
-          <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Approval Message">
+          <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Approval Justification">
             <markdown-editor v-if="showDescription" class="form-text"
                              id="approvalRequiredMsg"
                              v-model="approvalRequestedMsg"
                              data-cy="selfReportMsgInput"
                              aria-describedby="reportSkillMsg"
-                             :aria-label="isJustitificationRequired ? 'Optional request approval message' : 'Required request approval message'"
-                             :placeholder="`Message (${isJustitificationRequired ? 'required' : 'optional'})`"
+                             :aria-label="isJustitificationRequired ? 'Optional request approval justification' : 'Required request approval justification'"
+                             :placeholder="`Justification (${isJustitificationRequired ? 'required' : 'optional'})`"
                              :resizable="true"
                              aria-errormessage="approvalMessageError"
                              :aria-invalid="errors && errors.length > 0"/>
@@ -59,7 +59,7 @@ limitations under the License.
           <i class="fas fa-times-circle"></i> Cancel
         </button>
         <button type="button" class="btn btn-outline-success text-uppercase" @click="handleSubmit(reportSkill)"
-                data-cy="selfReportSubmitBtn" :disabled="invalid">
+                data-cy="selfReportSubmitBtn" :disabled="invalid || !messageValid">
           <i class="fas fa-arrow-alt-circle-right"></i> Submit
         </button>
       </template>
@@ -86,8 +86,6 @@ limitations under the License.
       return {
         modalVisible: true,
         approvalRequestedMsg: '',
-        inputInvalid: false, // TODO - remove?
-        inputInvalidExplanation: '', // TODO - remove?
         modalYOffset: 0,
         showDescription: false,
       };
@@ -99,24 +97,10 @@ limitations under the License.
     },
     computed: {
       messageValid() {
-        // TODO - remove?
-        if (this.inputInvalid) {
-          return false;
-        }
-
-        // TODO - leave this and add `&& !messageValid` to disabled attribute on Submit button?
         if (this.isJustitificationRequired && (!this.approvalRequestedMsg || this.approvalRequestedMsg.length <= 0)) {
           return false;
         }
-
-        // TODO - remove?
-        const maxLength = this.$store.getters.config ? this.$store.getters.config.maxSelfReportMessageLength : -1;
-        if (maxLength === -1) {
-          return true;
-        }
-
-        // TODO - remove?
-        return this.charactersRemaining >= 0;
+        return true;
       },
       charactersRemaining() {
         return this.$store.getters.config.maxSelfReportMessageLength - this.approvalRequestedMsg.length;
@@ -141,7 +125,7 @@ limitations under the License.
       updatePosition(yOffset) {
         this.modalYOffset = yOffset;
         this.$nextTick(() => {
-          this.showDescription = true;
+          // this.showDescription = true;
         });
       },
     },

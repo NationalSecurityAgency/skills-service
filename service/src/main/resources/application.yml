@@ -146,7 +146,7 @@ skills:
       pointHistoryInDays: 1825
       rankingAndProgressViewsEnabled: true
       defaultLandingPage: "admin"
-      maxSelfReportMessageLength: 250
+      maxSelfReportMessageLength: ${skills.config.ui.descriptionMaxLength}
       maxSelfReportRejectionMessageLength: 250
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50

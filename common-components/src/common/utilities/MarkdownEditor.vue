@@ -276,4 +276,7 @@ limitations under the License.
     color: #6c6c6c !important;
     background-image: none !important;
   }
+  span.placeholder.ProseMirror-widget {
+    color: #687278 !important;
+  }
 </style>
