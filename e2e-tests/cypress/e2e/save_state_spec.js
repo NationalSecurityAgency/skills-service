@@ -27,7 +27,7 @@ describe('Save State Tests', () => {
     })
   });
 
-  it.only('Saves and discards new badge state', () => {
+  it('Saves and discards new badge state', () => {
     cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
