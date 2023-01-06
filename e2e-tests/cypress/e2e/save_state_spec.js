@@ -70,9 +70,10 @@ describe('Save State Tests', () => {
 
     cy.get('[data-cy="editBtn"]').click()
     cy.get('#badgeName').should('have.value', 'New Badge');
-    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('#badgeName').type(' Edit');
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy="markdownEditorInput"]').type(' edit');
+    cy.wait(250);
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
@@ -81,6 +82,7 @@ describe('Save State Tests', () => {
     cy.get('#badgeName').should('have.value', 'New Badge Edit');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description edit');
     cy.get('[data-cy=closeBadgeButton]').click();
+    cy.wait(250);
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');

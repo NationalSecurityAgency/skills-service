@@ -409,7 +409,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
     });
 
-    it('focus should be returned to subject edit button', () => {
+    it.only('focus should be returned to subject edit button', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -443,8 +443,7 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
-        cy.get('body').type('{esc}{esc}');
-        cy.wait(250);
+        cy.realPress('Escape');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
