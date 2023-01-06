@@ -30,7 +30,7 @@ limitations under the License.
                     :aria-label="'edit Badge '+badge.badgeId">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
-          <b-button :disabled="badge.enabled === 'true'"
+          <b-button v-if="badge.enabled !== 'true'"
                     @click.stop="handlePublish"
                     class="btn btn-outline-primary"
                     size="sm"
@@ -39,17 +39,6 @@ limitations under the License.
                     data-cy="goLive">Go Live
           </b-button>
         </b-button-group>
-        <div style="height: 2rem;">
-          <div class="col">
-            <div v-if="badge.enabled === 'false'" data-cy="badgeStatus" style="">
-              <span class="text-secondary font-italic small">Status: </span>
-              <span class="text-secondary small text-uppercase">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span>
-            </div>
-            <div v-else data-cy="badgeStatus" style="">
-              <span class="text-secondary font-italic small">Status: </span> <span class="small text-primary text-uppercase align-middle">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
-            </div>
-          </div>
-        </div>
       </div>
     </page-header>
 
@@ -108,6 +97,10 @@ limitations under the License.
           title: `BADGE: ${this.badge.name}`,
           subTitle: `ID: ${this.badge.badgeId}`,
           stats: [{
+            label: 'Status',
+            icon: (this.badge.enabled === 'true' ? 'far fa-check-circle text-success' : 'far fa-stop-circle text-warning'),
+            preformatted: `<div class="h5 font-weight-bold mb-0">${this.badge.enabled === 'true' ? 'Live' : 'Disabled'}</div>`,
+          }, {
             label: 'Skills',
             count: this.badge.numSkills,
             icon: 'fas fa-graduation-cap skills-color-skills',
