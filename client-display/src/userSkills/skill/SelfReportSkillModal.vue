@@ -92,7 +92,7 @@ limitations under the License.
     },
     mounted() {
       setTimeout(() => {
-        // this.showDescription = true;
+        this.showDescription = true;
       }, '100');
     },
     computed: {
