@@ -35,6 +35,7 @@ import skills.quizLoading.model.QuizAttemptReq
 import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizInfo
+import skills.quizLoading.model.QuizReportAnswerReq
 import skills.skillLoading.model.OverallSkillSummary
 
 import javax.servlet.http.HttpServletRequest
@@ -74,9 +75,10 @@ class UserQuizController {
     @RequestMapping(value = "/quizzes/{quizId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     RequestResult reportQuizAnswer(@PathVariable("quizId") String quizId,
-                                            @PathVariable("attemptId") Integer attemptId,
-                                            @PathVariable("answerId") Integer answerId) {
-        quizRunService.reportQuestionAnswer(quizId, attemptId, answerId);
+                                   @PathVariable("attemptId") Integer attemptId,
+                                   @PathVariable("answerId") Integer answerId,
+                                   @RequestBody QuizReportAnswerReq quizReportAnswerReq) {
+        quizRunService.reportQuestionAnswer(quizId, attemptId, answerId, quizReportAnswerReq)
         return RequestResult.success()
     }
 

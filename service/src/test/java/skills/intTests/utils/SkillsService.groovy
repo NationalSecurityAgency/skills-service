@@ -1656,9 +1656,9 @@ class SkillsService {
         String url = "/quizzes/${quizId}/attempt"
         return wsHelper.apiPost(url, [])
     }
-    def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId) {
+    def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId, Map params = [isSelected:true]) {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}"
-        return wsHelper.apiPost(url, [])
+        return wsHelper.apiPost(url, params)
     }
     def completeQuizAttempt(String quizId, Integer attemptId) {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/complete"
@@ -1669,9 +1669,9 @@ class SkillsService {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
         return wsHelper.adminPost(url, [])
     }
-    def reportQuizAnswerForUserId(String quizId, Integer attemptId, Integer answerId, String userId) {
+    def reportQuizAnswerForUserId(String quizId, Integer attemptId, Integer answerId, String userId, Map params = [isSelected:true]) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}"
-        return wsHelper.adminPost(url, [])
+        return wsHelper.adminPost(url, params)
     }
     def completeQuizAttemptForUserId(String quizId, Integer attemptId, String userId) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete"

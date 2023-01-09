@@ -44,12 +44,4 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     @Query('''update QuizQuestionDef set displayOrder = ?2 where id = ?1''')
     void updateDisplayOrder(Integer id, Integer newDisplayOrder)
 
-    @Query('''select answerUnderThisQuestion.id
-            from QuizQuestionDef q, QuizAnswerDef providedAnswer, QuizAnswerDef answerUnderThisQuestion
-            where q.id = providedAnswer.questionRefId
-                  and providedAnswer.id = ?1
-                  and q.id = answerUnderThisQuestion.questionRefId
-                  and answerUnderThisQuestion.isCorrectAnswer in ('true', 'TRUE')
-        ''')
-    List<Integer> getAllCorrectAnswerDefIdsByAnswerDefId(Integer answerDefId)
 }

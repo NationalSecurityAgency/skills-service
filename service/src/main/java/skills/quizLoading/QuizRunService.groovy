@@ -32,6 +32,7 @@ import skills.quizLoading.model.QuizInfo
 import skills.quizLoading.model.QuizQuestionAttemptReq
 import skills.quizLoading.model.QuizQuestionGradedResult
 import skills.quizLoading.model.QuizQuestionInfo
+import skills.quizLoading.model.QuizReportAnswerReq
 import skills.storage.model.QuizAnswerDef
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAnswerAttempt
@@ -78,6 +79,12 @@ class QuizRunService {
 
     @Transactional
     QuizInfo loadQuizInfo(String quizId) {
+        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
+        return this.loadQuizInfo(currentUserAttrs.userId, quizId)
+    }
+
+    @Transactional
+    QuizInfo loadQuizInfo(String userId, String quizId) {
         QuizDefWithDescription updatedDef = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         if (!updatedDef) {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
@@ -85,10 +92,13 @@ class QuizRunService {
 
         List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId)
 
+        Boolean isAttemptAlreadyInProgress = quizAttemptRepo.existsByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+
         return new QuizInfo(
                 name: updatedDef.name,
                 description: updatedDef.description,
                 questions: questions,
+                isAttemptAlreadyInProgress: isAttemptAlreadyInProgress,
         )
     }
 
@@ -136,7 +146,7 @@ class QuizRunService {
     QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
         if (inProgressAttempt) {
-            List<Integer> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIds(userId, quizId)
+            List<Integer> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIds(inProgressAttempt.id)
             log.info("Continued existing quiz attempt {}", inProgressAttempt)
             return new QuizAttemptStartResult(
                     id: inProgressAttempt.id,
@@ -156,13 +166,13 @@ class QuizRunService {
     }
 
     @Transactional
-    void reportQuestionAnswer(String quizId, Integer attemptId, Integer answerDefId) {
+    void reportQuestionAnswer(String quizId, Integer attemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
-        this.reportQuestionAnswer(currentUserAttrs.userId, quizId, attemptId, answerDefId)
+        this.reportQuestionAnswer(currentUserAttrs.userId, quizId, attemptId, answerDefId, quizReportAnswerReq)
     }
 
     @Transactional
-    void reportQuestionAnswer(String userId, String quizId, Integer attemptId, Integer answerDefId) {
+    void reportQuestionAnswer(String userId, String quizId, Integer attemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         if (!quizAttemptRepo.existsByUserIdAndIdAndQuizId(userId, attemptId, quizId)) {
             throw new SkillQuizException("Provided attempt id [${attemptId}] does not exist for [${userId}] user and [${quizId}] quiz", ErrorCode.BadParam)
         }
@@ -175,27 +185,31 @@ class QuizRunService {
             throw new SkillQuizException("Supplied quizId of [${quizId}] does not match answer's quiz id  of [${answerDefPartialInfo.getQuizId()}]", ErrorCode.BadParam)
         }
 
-        boolean isCorrectChoice = Boolean.valueOf(answerDefPartialInfo.getIsCorrectAnswer())
-        boolean answerAttemptAlreadyDocumented = quizAttemptAnswerRepo.existsByUserIdAndQuizAnswerDefinitionRefId(userId, answerDefId)
-        if (!answerAttemptAlreadyDocumented) {
-            UserQuizAnswerAttempt answerAttempt = new UserQuizAnswerAttempt(
-                    userQuizAttemptRefId: attemptId,
-                    quizAnswerDefinitionRefId: answerDefId,
-                    userId: userId,
-                    status: isCorrectChoice ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
-            )
-            quizAttemptAnswerRepo.save(answerAttempt)
+        if (!quizReportAnswerReq.isSelected) {
+            quizAttemptAnswerRepo.deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, answerDefId)
         } else {
-            log.warn("Answer was already persisted for user [{}] for answerDefId of [{}]", userId, answerDefId)
-        }
+            boolean isCorrectChoice = Boolean.valueOf(answerDefPartialInfo.getIsCorrectAnswer())
+            boolean answerAttemptAlreadyDocumented = quizAttemptAnswerRepo.existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, answerDefId)
+            if (!answerAttemptAlreadyDocumented) {
+                UserQuizAnswerAttempt answerAttempt = new UserQuizAnswerAttempt(
+                        userQuizAttemptRefId: attemptId,
+                        quizAnswerDefinitionRefId: answerDefId,
+                        userId: userId,
+                        status: isCorrectChoice ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
+                )
+                quizAttemptAnswerRepo.save(answerAttempt)
+            } else {
+                log.warn("Answer was already persisted for user [{}] for answerDefId of [{}]", userId, answerDefId)
+            }
 
-        List<Integer> correctAnswerDefId = quizQuestionRepo.getAllCorrectAnswerDefIdsByAnswerDefId(answerDefId)
-        assert correctAnswerDefId
-        boolean isMultipleChoice = correctAnswerDefId.size() > 1
-        if (!isMultipleChoice) {
-            List<Integer> toRemove = correctAnswerDefId.findAll{ it != answerDefId }
-            toRemove.each {
-                quizAttemptAnswerRepo.deleteByQuizAnswerDefinitionRefId(it)
+            List<QuizAnswerDefRepo.AnswerIdAndCorrectness> questions = quizAnswerRepo.getAnswerIdsAndCorrectnessIndicator(answerDefPartialInfo.getQuestionRefId())
+            assert questions
+            boolean isMultipleChoice = questions.count { Boolean.valueOf(it.getIsCorrectAnswer()) } > 1
+            if (!isMultipleChoice) {
+                List<Integer> toRemove = questions.findAll { it.getAnswerRefId() != answerDefId }.collect { it.getAnswerRefId() }
+                toRemove.each {
+                    quizAttemptAnswerRepo.deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, it)
+                }
             }
         }
     }
@@ -225,7 +239,7 @@ class QuizRunService {
         List<QuizAnswerDef> dbAnswersDefs = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
 
-        Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(userId, quizId).toSet()
+        Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(quizAttemptId).toSet()
 
         List<QuizQuestionGradedResult> gradedQuestions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = answerDefByQuestionId[quizQuestionDef.id]

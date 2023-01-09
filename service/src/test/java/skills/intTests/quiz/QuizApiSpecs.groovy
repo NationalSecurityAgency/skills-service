@@ -86,7 +86,6 @@ class QuizApiSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizInfo))
         when:
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
@@ -100,7 +99,39 @@ class QuizApiSpecs extends DefaultIntSpec {
         gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
     }
 
-    def "removing quiz definition removes questions and answers definitions and attempts"() {
+    def "report quiz attempt - failed attempt followed by passed attempt"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def quizAttempt1 =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt1 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
+
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, false]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+
+        gradedQuizAttempt1.passed == true
+        gradedQuizAttempt1.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt1.gradedQuestions.isCorrect == [true, true]
+        gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt1.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
+    }
+
+    def "answer is updated when reporting a different answer for a single-choice answer"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
@@ -108,15 +139,114 @@ class QuizApiSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
 
-        skillsService.reportQuizAttempt(quiz.quizId, [
-                questionAnswers: [[
-                                          questionId: quizInfo.questions[0].id,
-                                          selectedAnswerIds: [quizInfo.questions[0].answerOptions[0].id]
-                                  ], [
-                                          questionId: quizInfo.questions[1].id,
-                                          selectedAnswerIds: [quizInfo.questions[1].answerOptions[0].id]
-                                  ]]
-        ])
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+
+        when:
+        def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+
+        def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
+
+        then:
+        quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        quizAttemptAfterApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
+    }
+
+    def "answer is added when reporting a different answer for a multiple-choice answer"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 4)
+        questions[0].answers[2].isCorrect = true
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+
+        when:
+        def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+
+        def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
+
+        then:
+        quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        quizAttemptAfterApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id]
+    }
+
+    def "answer is removed when reporting same answer for a multiple-choice answer with isSelected=false"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 4)
+        questions[0].answers[2].isCorrect = true
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
+
+        when:
+        def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id, [isSelected: false])
+
+        def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
+
+        then:
+        quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id, quizInfo.questions[0].answerOptions[2].id]
+        quizAttemptAfterApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[2].id]
+    }
+
+    def "previous quiz attempts do not affect follow-on attempts"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        when:
+        def quizAttempt1_t0 =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1_t0.id, quizInfo.questions[0].answerOptions[1].id)
+        def quizAttempt1_t1 =  skillsService.startQuizAttempt(quiz.quizId).body
+        then:
+        quizAttempt1_t0.id != quizAttempt.id
+        !quizAttempt1_t0.selectedAnswerIds
+        quizAttempt1_t1.selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
+        quizAttempt1_t0.id == quizAttempt1_t1.id
+        // make sure old runs answer were not removed
+        userQuizAnswerAttemptRepo.findAll().findAll({ it.userQuizAttemptRefId == quizAttempt.id }).collect { it.quizAnswerDefinitionRefId } == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[1].answerOptions[1].id]
+    }
+
+    def "removing quiz definition removes questions and answers definitions and attempts"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.gradedQuestions
 
         when:
         quizDefRepo.deleteAll()

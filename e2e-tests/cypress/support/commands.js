@@ -229,7 +229,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userNum = 1, quizAttemptInf
 
 
                         const allRequests = questionAnswers.map((answerId) => {
-                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`);
+                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {isSelected: true});
                         });
                         Promise.all(allRequests).then(() => {
                             cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);

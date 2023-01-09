@@ -23,16 +23,14 @@ import skills.storage.model.UserQuizAnswerAttempt
 interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
 
 
-    @Query('''select answerDef.id
-        from QuizAnswerDef answerDef, UserQuizAnswerAttempt answerAttempt
-        where answerAttempt.quizAnswerDefinitionRefId = answerDef.id
-            and answerAttempt.userId = ?1
-            and answerDef.quizId = ?2
+    @Query('''select answerAttempt.quizAnswerDefinitionRefId
+        from UserQuizAnswerAttempt answerAttempt
+        where answerAttempt.userQuizAttemptRefId = ?1
      ''')
-    List<Integer> getSelectedAnswerIds(String userId, String quizId)
+    List<Integer> getSelectedAnswerIds(Integer attemptId)
 
-    boolean existsByUserIdAndQuizAnswerDefinitionRefId(String userId, Integer quizAnswerDefinitionRefId)
+    boolean existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
-    void deleteByQuizAnswerDefinitionRefId(Integer quizAnswerDefinitionRefId)
+    void deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
 }

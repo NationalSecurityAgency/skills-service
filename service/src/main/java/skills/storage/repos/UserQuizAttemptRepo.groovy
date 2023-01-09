@@ -44,6 +44,17 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''')
     UserQuizAttempt getByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
 
+    @Nullable
+    @Query('''select count(quizAttempt.id) > 0      
+        from UserQuizAttempt quizAttempt, QuizDef quizDef
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizAttempt.userId = ?1
+            and quizDef.quizId = ?2
+            and quizAttempt.status = ?3
+     ''')
+    boolean existsByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
+
+
     @Query('''select count(quizAttempt.id) > 0      
         from UserQuizAttempt quizAttempt, QuizDef quizDef
         where quizAttempt.quizDefinitionRefId = quizDef.id

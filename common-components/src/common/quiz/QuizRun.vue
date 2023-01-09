@@ -26,7 +26,40 @@ limitations under the License.
       </div>
     </div>
 
-    <b-card v-if="quizResult" class="mb-3" body-class="text-center">
+    <b-card v-if="splashScreen.show" body-class="text-center pt-5">
+      <p class="h5">
+        You are about to begin <span class="font-weight-bold text-info">{{ quizInfo.name }}</span> test!
+      </p>
+
+      <div class="row">
+        <div class="col"></div>
+        <div class="col-auto">
+          <b-card class="text-center" body-class="pt-2 pb-1">
+            <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
+            <span class="text-secondary font-italic ml-1">Time Limit:</span>
+            <span class="text-uppercase ml-1 font-weight-bold">None</span>
+          </b-card>
+        </div>
+        <div class="col-auto">
+          <b-card class="text-center" body-class="pt-2 pb-1">
+            <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;"></i>
+            <span class="text-secondary font-italic ml-1">Attempts:</span>
+            <span class="text-uppercase ml-1 font-weight-bold">Unlimited</span>
+          </b-card>
+        </div>
+        <div class="col"></div>
+      </div>
+
+      <p class="mt-3">
+        <markdown-text :text="quizInfo.description" />
+      </p>
+
+      <p class="mt-5">
+        <b-button variant="outline-info" @click="startQuizAttempt">Start Test <i class="fas fa-play-circle"></i></b-button>
+      </p>
+    </b-card>
+
+    <b-card v-if="quizResult && !splashScreen.show" class="mb-3" body-class="text-center">
       <div>Thank you completing <span class="text-primary font-weight-bold">{{ quizInfo.name }}</span> test!</div>
       <div class="h2 mt-4 mb-3 text-uppercase">
         <span v-if="quizResult.gradedRes.passed" class="text-success"><i class="fas fa-check-double"></i> Passed</span>
@@ -62,7 +95,7 @@ limitations under the License.
       </div>
     </b-card>
 
-    <b-card body-class="pl-5" class="mb-4">
+    <b-card v-if="!splashScreen.show" body-class="pl-5" class="mb-4">
       <div v-for="(q, index) in quizInfo.questions" :key="q.id">
         <quiz-run-question :q="q" :num="index" @selected-answer="updateSelectedAnswers"/>
       </div>
@@ -83,20 +116,24 @@ limitations under the License.
   import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsSpinner from '@/common-components/utilities/SkillsSpinner';
   import QuizRunQuestion from '@/common-components/quiz/QuizRunQuestion';
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
 
   export default {
     name: 'QuizRun',
-    components: { SkillsSpinner, QuizRunQuestion },
+    components: { MarkdownText, SkillsSpinner, QuizRunQuestion },
     data() {
       return {
         isLoading: true,
         quizId: this.$route.params.quizId,
         quizInfo: null,
-        selectedAnswers: [],
+        questionsWithAnswersSelected: [],
         notEveryQuestionHasAnAnswer: false,
         quizResult: null,
         quizAttemptId: null,
         reportAnswerPromises: [],
+        splashScreen: {
+          show: false,
+        },
       };
     },
     mounted() {
@@ -106,36 +143,48 @@ limitations under the License.
       loadData() {
         this.isLoading = true;
         QuizRunService.getQuizInfo(this.quizId)
-          .then((res) => {
-            const copy = ({ ...res });
-            copy.questions = res.questions.map((q) => {
+          .then((quizInfo) => {
+            this.quizInfo = quizInfo;
+            if (quizInfo.isAttemptAlreadyInProgress) {
+              this.startQuizAttempt();
+            } else {
+              this.splashScreen.show = true;
+              this.isLoading = false;
+            }
+          });
+      },
+      startQuizAttempt() {
+        this.isLoading = true;
+        this.splashScreen.show = false;
+        QuizRunService.startQuizAttempt(this.quizId)
+          .then((startQuizAttemptRes) => {
+            this.quizAttemptId = startQuizAttemptRes.id;
+            const { selectedAnswerIds } = startQuizAttemptRes;
+            const copy = ({ ...this.quizInfo });
+            copy.questions = this.quizInfo.questions.map((q) => {
               const answerOptions = q.answerOptions.map((a) => ({
-                ...a,
-                selected: false,
+                  ...a,
+                  selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
               }));
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
-
-            QuizRunService.startQuizAttempt(this.quizId)
-              .then((startQuizAttemptRes) => {
-                this.quizAttemptId = startQuizAttemptRes.id;
-              }).finally(() => {
-                this.isLoading = false;
-              });
+            this.questionsWithAnswersSelected = copy.questions.filter((q) => q.answerOptions.map((a) => a.selected).indexOf(true) >= 0);
+          }).finally(() => {
+            this.isLoading = false;
           });
       },
       updateSelectedAnswers(questionSelectedAnswer) {
-        const res = this.selectedAnswers.filter((q) => q.questionId !== questionSelectedAnswer.questionId);
+        const res = this.questionsWithAnswersSelected.filter((q) => q.questionId !== questionSelectedAnswer.questionId);
         if (questionSelectedAnswer && questionSelectedAnswer.selectedAnswerIds && questionSelectedAnswer.selectedAnswerIds.length > 0) {
           res.push(questionSelectedAnswer);
           this.notEveryQuestionHasAnAnswer = false;
         }
-        this.selectedAnswers = res;
-        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId));
+        this.questionsWithAnswersSelected = res;
+        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId, questionSelectedAnswer.changedAnswerIdSelected));
       },
       completeTestRun() {
-        const everyQuestionHasAnswer = this.selectedAnswers.length === this.quizInfo.questions.length;
+        const everyQuestionHasAnswer = this.questionsWithAnswersSelected.length === this.quizInfo.questions.length;
         if (!everyQuestionHasAnswer) {
           this.notEveryQuestionHasAnAnswer = true;
         } else {

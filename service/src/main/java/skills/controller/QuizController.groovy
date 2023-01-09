@@ -30,6 +30,7 @@ import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptReq
 import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
+import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 
 @RestController
@@ -107,8 +108,9 @@ class QuizController {
     RequestResult reportQuizAnswer(@PathVariable("quizId") String quizId,
                                    @PathVariable("userId") String userId,
                                    @PathVariable("attemptId") Integer attemptId,
-                                   @PathVariable("answerId") Integer answerId) {
-        quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId);
+                                   @PathVariable("answerId") Integer answerId,
+                                   @RequestBody QuizReportAnswerReq quizReportAnswerReq) {
+        quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId, quizReportAnswerReq);
         return RequestResult.success()
     }
 

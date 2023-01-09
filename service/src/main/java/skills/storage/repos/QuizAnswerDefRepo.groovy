@@ -28,9 +28,25 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
     static interface AnswerDefPartialInfo {
         String getIsCorrectAnswer()
         String getQuizId()
+        Integer getQuestionRefId()
     }
     @Nullable
-    @Query(value = "select q.isCorrectAnswer as isCorrectAnswer, q.quizId as quizId from QuizAnswerDef q where q.id = ?1")
+    @Query(value = '''select answer.isCorrectAnswer as isCorrectAnswer, answer.quizId as quizId, question.id as questionRefId
+            from QuizAnswerDef answer, QuizQuestionDef question 
+            where answer.id = ?1
+                and question.id=answer.questionRefId''')
     AnswerDefPartialInfo getPartialDefByAnswerDefId(Integer id)
+
+    static interface AnswerIdAndCorrectness {
+        Integer getAnswerRefId()
+        String getIsCorrectAnswer()
+    }
+
+    @Query('''select a.id as answerRefId, a.isCorrectAnswer as isCorrectAnswer
+            from QuizQuestionDef q, QuizAnswerDef a
+            where q.id = a.questionRefId
+                  and q.id = ?1
+        ''')
+    List<AnswerIdAndCorrectness> getAnswerIdsAndCorrectnessIndicator(Integer questionDefId)
 
 }

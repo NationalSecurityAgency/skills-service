@@ -15,10 +15,6 @@
  */
 package skills.quizLoading.model
 
-class QuizInfo {
-    String name
-    String description
-    Boolean isAttemptAlreadyInProgress
-
-    List<QuizQuestionInfo> questions
+class QuizReportAnswerReq {
+    Boolean isSelected = true
 }
