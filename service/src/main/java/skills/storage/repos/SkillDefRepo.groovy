@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import org.springframework.transaction.annotation.Transactional
 import skills.storage.model.*
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -709,4 +710,8 @@ interface SkillDefRepo extends PagingAndSortingRepository<SkillDef, Integer> {
             join LevelDef ld on ld.skillRefId = sd.id and ld.pointsFrom > sd.totalPoints''')
     List<UnachievableSubjectLevel> findUnachievableSubjectLevels()
 
+    @Modifying
+    @Transactional
+    @Query('''update SkillDef set displayOrder=?2 where skillId=?1''')
+    void setSkillDisplayOrder(String skillId, Integer displayOrder)
 }

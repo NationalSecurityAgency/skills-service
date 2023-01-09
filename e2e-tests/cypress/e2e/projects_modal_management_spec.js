@@ -251,8 +251,7 @@ describe('Projects Modal Management Tests', () => {
         cy.wait(250);
         cy.get('[data-cy=projectName]')
             .should('be.visible');
-        cy.get('body')
-            .type('{esc}{esc}');
+        cy.realPress('Escape');
         cy.get(proj1EditBtn)
             .should('have.focus');
 
@@ -282,10 +281,10 @@ describe('Projects Modal Management Tests', () => {
         //project 2
         cy.get(proj2EditBtn)
             .click();
+        cy.wait(250);
         cy.get('[data-cy=projectName]')
             .should('be.visible');
-        cy.get('body')
-            .type('{esc}{esc}');
+        cy.realPress('Escape');
         cy.get(proj2EditBtn)
             .should('have.focus');
 
