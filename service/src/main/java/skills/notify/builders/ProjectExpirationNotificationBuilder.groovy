@@ -72,7 +72,7 @@ class ProjectExpirationNotificationBuilder implements NotificationEmailBuilder {
     private String buildPlainText(Object parsed, Formatting formatting) {
 
         String pt = "Your SkillTree Project ${parsed.projectName}, created on ${parsed.createdOn} hasn't been used in at least ${parsed.unusedProjectExpirationInDays} days.\n" +
-                "\nIf you take no action, Project ${parsed.projectName} will be deleted in ${parsed.expiringIn} (${parsed.expiresOn})." +
+                "\nIf you take no action, Project ${parsed.projectName} will be deleted ${parsed.expiringIn} (${parsed.expiresOn})." +
                 "\n" +
                 "\nIf you wish to stop receiving these emails, visit ${parsed.publicUrl}administrator/projects/${parsed.projectId} in the SkillTree dashboard and click the 'Keep' button or delete your Project." +
                 "\n\n" +

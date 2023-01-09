@@ -25,7 +25,7 @@ limitations under the License.
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>Your SkillTree Project Isn't Being Used!</h1>
 <p>Your SkillTree Project [[${projectName}]], created on [[${createdOn}]] hasn't been used in at least [[${unusedProjectExpirationInDays}]] days.</p>
-<p>If you take no action, Project [[${projectName}]] will be deleted in [[${expiringIn}]] ([[${expiresOn}]]).</p>
+<p>If you take no action, Project [[${projectName}]] will be deleted [[${expiringIn}]] ([[${expiresOn}]]).</p>
 
 <p>If you wish to stop receiving these emails, visit <a th:href="@{${publicUrl}+'administrator/projects/'+${projectId}}">[[${projectName}]]</a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.</p>
 
