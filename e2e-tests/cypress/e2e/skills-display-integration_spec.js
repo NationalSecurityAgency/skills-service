@@ -63,7 +63,7 @@ describe('Navigation Tests', () => {
             .find('[data-cy="selfReportSkillMsg"]')
             .contains('This skill requires approval');
         cy.get('iframe');
-        cy.wait(8000);
+        cy.wait(10000);
         cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', { blackout: ['#point-progress-container'] });
     });
 
