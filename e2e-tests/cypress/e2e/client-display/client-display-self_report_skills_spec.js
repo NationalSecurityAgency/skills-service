@@ -280,7 +280,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="selfReportBtn"]')
             .click();
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.');
+            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
 
@@ -528,7 +528,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .click();
 
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.');
+            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
 
@@ -576,7 +576,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .click();
 
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional message and it will enter an approval queue.');
+            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
 
