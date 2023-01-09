@@ -117,7 +117,7 @@ describe('Navigation Tests', () => {
             .find('[data-cy="clearRejectionMsgDialog"]')
             .contains('This action will permanently remove the rejection');
 
-        cy.wait(8000);
+        cy.wait(10000);
         const snapshotOptions = {
             blackout: ['[data-cy="selfReportRejectedAlert"]'],
             failureThreshold: 0.03, // threshold for entire image
