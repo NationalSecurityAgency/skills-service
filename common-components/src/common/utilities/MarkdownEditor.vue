@@ -282,4 +282,7 @@ limitations under the License.
   span.placeholder.ProseMirror-widget {
     color: #687278 !important;
   }
+  div.toastui-editor-contents {
+    font-size: 0.9rem !important;
+  }
 </style>
