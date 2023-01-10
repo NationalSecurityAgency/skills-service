@@ -59,6 +59,7 @@ class PublicProps {
         allowedAttachmentMimeTypes,
         allowedAttachmentFileTypes,
         maxAttachmentSize,
+        attachmentWarningMessage,
     }
 
     @Autowired
