@@ -52,4 +52,7 @@ export default {
     }
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(userId)}/canAccess`).then((response) => response.data);
   },
+  getUserTags(userId) {
+    return axios.get(`/app/userInfo/userTags/${userId}`).then((response) => response.data);
+  },
 };

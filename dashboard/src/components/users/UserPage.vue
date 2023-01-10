@@ -42,7 +42,15 @@ limitations under the License.
         userTitle: '',
         userIdForDisplay: '',
         isLoading: true,
+        tags: '',
       };
+    },
+    mounted() {
+      if (this.showUserTags) {
+        UsersService.getUserTags(this.$route.params.userId).then((response) => {
+          this.tags = this.processUserTags(response);
+        });
+      }
     },
     created() {
       this.userTitle = this.$route.params.userId;
@@ -64,11 +72,14 @@ limitations under the License.
         'numSkills',
         'userTotalPoints',
       ]),
+      showUserTags() {
+        return !!this.$store.getters.config.userPageTagsToDisplay;
+      },
       headerOptions() {
         return {
           icon: 'fas fa-user skills-color-users',
           title: `USER: ${this.userTitle}`,
-          subTitle: `ID: ${this.userIdForDisplay}`,
+          subTitle: `ID: ${this.userIdForDisplay}${this.tags}`,
           stats: [{
             label: 'Skills',
             count: this.numSkills,
@@ -91,6 +102,28 @@ limitations under the License.
           .finally(() => {
             this.isLoading = false;
           });
+      },
+      processUserTags(userTags) {
+        const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
+        const tags = [];
+        let formattedTagString = '';
+        if (userPageTags) {
+          const tagSections = userPageTags.split('|');
+          tagSections.forEach((section) => {
+            const [key, label] = section.split('/');
+            tags.push({
+              key, label,
+            });
+          });
+        }
+
+        tags.forEach((tag) => {
+          const userTag = userTags.find((ut) => ut.key === tag.key);
+          if (userTag) {
+            formattedTagString += `, ${tag.label}: ${userTag.value}`;
+          }
+        });
+        return formattedTagString;
       },
       getNavItems() {
         const hasSubject = this.$route.params.subjectId || false;
