@@ -294,7 +294,7 @@ class SkillsAdminService {
         }
 
         if (selfReportingType == SkillDef.SelfReportingType.Quiz) {
-            quizToSkillService.saveQuizToSkillAssignment(savedSkill.id, skillRequest.quizId)
+            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId)
         }
 
         if (!isEdit) {

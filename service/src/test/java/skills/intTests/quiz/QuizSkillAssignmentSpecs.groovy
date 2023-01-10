@@ -55,5 +55,44 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills[0].quizName == quiz.body.name
     }
 
+    def "update quiz for an existing skill"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        def quiz1 = skillsService.createQuizDef(QuizDefFactory.createQuiz(2))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        when:
+        def skill_before = skillsService.getSkill(skillWithQuiz)
+        def skills_before = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        skillWithQuiz.quizId = quiz1.body.quizId
+        skillsService.createSkill(skillWithQuiz)
+        def skill_after = skillsService.getSkill(skillWithQuiz)
+        def skills_after = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        then:
+        skill_before.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill_before.quizId == quiz.body.quizId
+        skill_before.quizName == quiz.body.name
+
+        skills_before[0].selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skills_before[0].quizId == quiz.body.quizId
+        skills_before[0].quizName == quiz.body.name
+
+        skill_after.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill_after.quizId == quiz1.body.quizId
+        skill_after.quizName == quiz1.body.name
+
+        skills_after[0].selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skills_after[0].quizId == quiz1.body.quizId
+        skills_after[0].quizName == quiz1.body.name
+    }
+
 }
 

@@ -15,21 +15,19 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizToSkillDef
 
-interface QuizToSkillDefRepo extends CrudRepository<QuizToSkillDef, Long> {
-
-    @Nullable
-    QuizToSkillDef findByQuizRefIdAndSkillRefId(Integer quizIdRef, Integer skillIdRef)
+interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     static interface QuizNameAndId {
         String getQuizName()
         String getQuizId()
     }
 
+    @Nullable
     @Query('''select q.quizId as quizId, q.name as quizName
             from QuizToSkillDef qToS, QuizDef q 
             where qToS.skillRefId = ?1
@@ -46,6 +44,8 @@ interface QuizToSkillDefRepo extends CrudRepository<QuizToSkillDef, Long> {
             where qToS.skillRefId in ?1
                 and q.id = qToS.quizRefId''')
     List<SkillToQuiz> getSkillToQuizAssociations(List<Integer> skillRefIds)
+
+    void deleteBySkillRefId(Integer skillRefId)
 
 }
 

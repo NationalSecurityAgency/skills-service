@@ -23,6 +23,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillQuizException
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
+import skills.storage.model.SkillDef
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
 
@@ -37,13 +38,19 @@ class QuizToSkillService {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Transactional
-    void saveQuizToSkillAssignment(Integer skillRef, String quizId) {
+    void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId) {
+        Integer skillRef = savedSkill.id
         QuizDef quizDef = getQuizDef(quizId)
 
-        QuizToSkillDef quizToSkillDef = quizToSkillDefRepo.findByQuizRefIdAndSkillRefId(quizDef.id, skillRef)
-        if (!quizToSkillDef) {
-            quizToSkillDef = new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef)
-            quizToSkillDefRepo.save(quizToSkillDef)
+        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(skillRef)
+        boolean quizIdUpdated = quizNameAndId && quizNameAndId.getQuizId() != quizDef.quizId
+        if (quizIdUpdated) {
+            quizToSkillDefRepo.deleteBySkillRefId(skillRef)
+            quizToSkillDefRepo.flush()
+        }
+
+        if (!quizNameAndId || quizIdUpdated) {
+            quizToSkillDefRepo.save(new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef))
         }
     }
 
