@@ -91,7 +91,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import MarkdownEditor from '@/components/utils/MarkdownEditor';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import ProjectService from './ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';

@@ -61,8 +61,8 @@ limitations under the License.
   import { Editor } from '@toast-ui/vue-editor';
   import fontSize from 'tui-editor-plugin-font-size';
   import 'tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css';
-  import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
-  import FileUploadService from './upload/FileUploadService';
+  import MarkdownMixin from './MarkdownMixin';
+  import FileUploadService from './FileUploadService';
 
   export default {
     name: 'MarkdownEditor',
@@ -85,6 +85,10 @@ limitations under the License.
       markdownHeight: {
         type: String,
         default: '300px',
+      },
+      placeholder: {
+        type: String,
+        default: '',
       },
     },
     data() {
@@ -179,6 +183,7 @@ limitations under the License.
           hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
+          placeholder: this.placeholder,
           toolbarItems,
           plugins: [fontSize],
           // widgetRules: [this.emojiWidgetRule],
@@ -270,5 +275,8 @@ limitations under the License.
     font-size: 1.1rem !important;
     color: #6c6c6c !important;
     background-image: none !important;
+  }
+  span.placeholder.ProseMirror-widget {
+    color: #687278 !important;
   }
 </style>
