@@ -30,7 +30,7 @@ limitations under the License.
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
         <div class="col">
-          Insert images by pasting, dragging & dropping, or selecting from toolbar.
+          Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="col-auto">
           <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
@@ -239,13 +239,16 @@ limitations under the License.
                 this.$refs.provider.validate(event);
               });
             } else {
-              this.attachmentError = `Unable to upload attachment - File size [${file.size}] exceeds maximum file size [${this.maxAttachmentSize}]`;
+              this.attachmentError = `Unable to upload attachment - File size [${this.prettyBytes(file.size)}] exceeds maximum file size [${this.prettyBytes(this.maxAttachmentSize)}]`;
             }
           } else {
-            this.attachmentError = `Unable to upload attachment - Invalid file type [${[...files][0].type}]`;
+            this.attachmentError = `Unable to upload attachment - File type is not supported. Supported file types are [${this.allowedAttachmentFileTypes}]`;
           }
           this.$refs.provider.validate(event);
         }
+      },
+      prettyBytes(bytes) {
+        return this.$options.filters.prettyBytes(bytes);
       },
     },
   };

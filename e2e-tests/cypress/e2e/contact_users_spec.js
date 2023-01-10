@@ -517,4 +517,36 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy=emailSent]')
             .should('be.visible');
     });
+
+    it('attachments are not enabled', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        })
+          .as('createProject');
+
+        cy.intercept('POST', '/admin/projects/proj1/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+          .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/contactUsersCount')
+          .as('updateCount');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels')
+          .as('getSubjectLevels');
+
+        cy.visit('/administrator/projects/proj1/contact-users');
+
+        cy.get('[data-cy="nav-Contact Users"]')
+          .click();
+        cy.wait('@emailSupported');
+
+        cy.get(`button.bold`).should('exist');
+        cy.get(`button.attachment-button`).should('not.exist');
+    });
+
 });
