@@ -2235,6 +2235,42 @@
                                  referencedColumnNames="user_id"
                                  referencedTableName="user_attrs"/>
 
+        <createTable tableName="quiz_to_skill_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="quiz_ref_id"
+                                 baseTableName="quiz_to_skill_definition"
+                                 constraintName="fk_quiz_to_skill_definition_quiz_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_definition"/>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="quiz_to_skill_definition"
+                                 constraintName="fk_quiz_to_skill_definition_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+        <createIndex indexName="index_quiz_to_skill_definition_quiz_ref_id_skill_ref_id"
+                     tableName="quiz_to_skill_definition" unique="true">
+            <column name="quiz_ref_id" type="int"/>
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
 
     </changeSet>
 

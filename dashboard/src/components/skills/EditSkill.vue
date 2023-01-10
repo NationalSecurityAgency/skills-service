@@ -212,6 +212,8 @@ limitations under the License.
                                        @shown="tooltipShowing=true"
                                        @hidden="tooltipShowing=false"
                                        @justificationRequiredChanged="updateJustificationRequired"
+                                       @quizIdChanged="updateQuizId"
+                                       @quizIdCleared="clearQuizId"
             />
 
             <hr class="mt-0"/>
@@ -352,6 +354,8 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          justificationRequired: false,
+          quizId: null,
           type: 'Skill',
         },
         skillInternal: {
@@ -373,6 +377,8 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          justificationRequired: false,
+          quizId: null,
           type: 'Skill',
         },
         canEditSkillId: false,
@@ -495,6 +501,12 @@ limitations under the License.
       updateJustificationRequired(value) {
         this.skillInternal.justificationRequired = value;
       },
+      updateQuizId(quizId) {
+        this.skillInternal.quizId = quizId;
+      },
+      clearQuizId() {
+        this.skillInternal.quizId = null;
+      },
       setupValidation() {
         const self = this;
         extend('uniqueName', {
@@ -554,6 +566,16 @@ limitations under the License.
           message: () => `Version ${self.initial.latestVersion} is the latest; max supported version is ${self.initial.latestVersion + 1} (latest + 1)`,
           validate(value) {
             if (parseInt(value, 10) > (self.initial.latestVersion + 1)) {
+              return false;
+            }
+            return true;
+          },
+        });
+
+        extend('selfReportQuiz', {
+          message: (field) => `Test was not selected for the ${field}`,
+          validate() {
+            if (self.skillInternal.selfReportingType === 'Quiz' && !self.skillInternal.quizId) {
               return false;
             }
             return true;

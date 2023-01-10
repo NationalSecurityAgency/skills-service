@@ -56,4 +56,8 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Boolean sharedToCatalog
     @Convert(converter=BooleanConverter)
     Boolean reusedSkill
+
+    // utilized when selfReportingType=quiz
+    String quizId
+    String quizName
 }

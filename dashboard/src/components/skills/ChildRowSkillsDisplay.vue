@@ -71,6 +71,11 @@ limitations under the License.
           <div v-if="skillInfo.selfReportingType">Users can <i>self report</i> this skill
             <span v-if="skillInfo.selfReportingType === 'Approval'">and will go into an <b class="text-primary">approval</b> queue.</span>
             <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
+            <span v-if="skillInfo.selfReportingType === 'Quiz'">and points will be awarded after
+              <router-link
+                :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
+                tag="a">{{ skillInfo.quizName }}</router-link> test is passed!
+            </span>
           </div>
           <div v-else>
             Self reporting is <b class="text-primary">disabled</b> for this skill.
@@ -195,6 +200,10 @@ limitations under the License.
       selfReportingTitle() {
         if (!this.skillInfo.selfReportingType) {
           return 'Disabled';
+        }
+
+        if (this.skillInfo.selfReportingType === 'Quiz') {
+          return 'Test Validation';
         }
 
         if (this.skillInfo.selfReportingType === 'HonorSystem') {

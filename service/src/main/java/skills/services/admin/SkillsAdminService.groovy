@@ -37,18 +37,11 @@ import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.quiz.QuizToSkillService
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.SkillDef
+import skills.storage.model.*
 import skills.storage.model.SkillDef.SelfReportingType
-import skills.storage.model.SkillDefPartial
-import skills.storage.model.SkillDefSkinny
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -73,6 +66,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
+    QuizToSkillService quizToSkillService
 
     @Autowired
     GlobalBadgesService globalBadgesService
@@ -295,6 +291,10 @@ class SkillsAdminService {
         validateThatSkillWasSaved(skillDefinition, savedSkill)
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
+        }
+
+        if (selfReportingType == SkillDef.SelfReportingType.Quiz) {
+            quizToSkillService.saveQuizToSkillAssignment(savedSkill.id, skillRequest.quizId)
         }
 
         if (!isEdit) {
@@ -694,6 +694,11 @@ class SkillsAdminService {
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
         }
+        if (skillDef.selfReportingType == SelfReportingType.Quiz) {
+            QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.id)
+            res.quizId = quizIdAndName.getQuizId()
+            res.quizName = quizIdAndName.getQuizName()
+        }
         res.name = InputSanitizer.unsanitizeName(res.name)
         res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
         res.name = SkillReuseIdUtil.removeTag(res.name)
@@ -755,6 +760,8 @@ class SkillsAdminService {
                 copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
                 sharedToCatalog: partial.sharedToCatalog,
                 reusedSkill: reusedSkill,
+                quizId: partial.getQuizId(),
+                quizName: partial.getQuizName(),
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

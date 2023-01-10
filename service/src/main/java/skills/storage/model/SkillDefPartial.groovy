@@ -30,4 +30,6 @@ interface SkillDefPartial extends SkillDefSkinny{
     Boolean getReadOnly()
     String getCopiedFromProjectName()
     Boolean getSharedToCatalog()
+    String getQuizId()
+    String getQuizName()
 }

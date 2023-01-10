@@ -308,8 +308,25 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(selfReportingType)="data">
-          <span v-if="data.item.isSkillType">{{ getSelfReportingTypePretty(data.item.selfReportingType) }}</span>
-          <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
+          <div v-if="data.item.selfReportingType === 'Quiz'">
+            <div>
+              Test-Based Validation
+            </div>
+            <div class="text-secondary">
+              via
+            </div>
+            <div>
+              <router-link
+                :to="{ name:'Questions', params: { quizId: data.item.quizId } }"
+                tag="a">
+                {{ data.item.quizName }}
+              </router-link>
+            </div>
+          </div>
+          <div v-else>
+            <span v-if="data.item.isSkillType">{{ getSelfReportingTypePretty(data.item.selfReportingType) }}</span>
+            <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
+          </div>
         </template>
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"

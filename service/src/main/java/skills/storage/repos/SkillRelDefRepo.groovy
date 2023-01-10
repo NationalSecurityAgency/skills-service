@@ -161,12 +161,16 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
         pd.name as copiedFromProjectName,
+        qDef.quizId as quizId,
+        qDef.name as quizName,
         case when es is not null then true else false end as sharedToCatalog
     from SkillRelDef srd
         join SkillDef sd1 on sd1.id = srd.parent.id
         join SkillDef sd2 on sd2.id = srd.child.id
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
+        left join QuizToSkillDef qToSkill on qToSkill.skillRefId = sd2.id
+        left join QuizDef qDef on qDef.id = qToSkill.quizRefId
     where sd1.projectId=?1 and sd1.skillId=?2 and srd.type in ?3
     ''')
     List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes)

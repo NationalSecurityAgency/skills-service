@@ -16,24 +16,31 @@
 package skills.storage.model
 
 import groovy.transform.CompileStatic
+import groovy.transform.ToString
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.Table
+import javax.persistence.*
 
-@Entity()
-@Table(name = 'skill_definition')
+@Entity
+@Table(name = 'quiz_to_skill_definition')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
-class SkillDef extends SkillDefParent {
-    public static enum ContainerType {
-        Subject, Skill, Badge, GlobalBadge, SkillsGroup, Tag
-    }
+@ToString(includeNames = true)
+class QuizToSkillDef {
 
-    public static enum SelfReportingType {
-        Approval,
-        HonorSystem,
-        Quiz,
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Integer id
+
+    Integer quizRefId
+    Integer skillRefId
+
+    @Column(name="created", updatable = false, insertable = false)
+    Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
+
 }
