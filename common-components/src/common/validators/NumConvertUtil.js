@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { extend } from 'vee-validate';
-import store from '../store/store';
-import CustomValidatorService from './CustomValidatorsService';
-
-const validator = {
-  message: (field) => `${field} - ${store.getters.config.paragraphValidationMessage}.`,
-  validate(value) {
-    if (!store.getters.config.paragraphValidationRegex) {
-      return true;
+export default {
+  toInt(value) {
+    let numValue = value;
+    if (typeof (value) === 'string' || value instanceof String) {
+      numValue = parseInt(value, 10);
     }
-
-    return CustomValidatorService.validateDescription(value).then((result) => result.valid);
+    return numValue;
   },
 };
-
-extend('customDescriptionValidator', validator);
-
-export default validator;

@@ -1192,73 +1192,6 @@ describe('Self Report Skills Management Tests', () => {
             .should('be.disabled');
     });
 
-    it('show skill details', () => {
-        cy.createSkill(1, 1, 1, {
-            selfReportingType: 'Approval',
-            description: 'This is skill 1'
-        });
-        cy.createSkill(1, 1, 2, {
-            selfReportingType: 'Approval',
-            description: 'very cool skill 2'
-        });
-        cy.createSkill(1, 1, 3, {
-            selfReportingType: 'Approval',
-            description: 'last but not least'
-        });
-        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
-        cy.reportSkill(1, 1, 'user5', '2020-09-12 11:00');
-        cy.reportSkill(1, 3, 'user4', '2020-09-13 11:00');
-
-        cy.visit('/administrator/projects/proj1/self-report');
-
-        cy.get('[data-cy="childRowDisplay_skill1"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill2"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill3"]')
-            .should('not.exist');
-
-        // open
-        cy.get('[data-cy="expandDetailsBtn_skill1"]')
-            .click();
-        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]')
-            .contains('This is skill 1');
-        cy.get('[data-cy="childRowDisplay_skill2"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill3"]')
-            .should('not.exist');
-
-        // open
-        cy.get('[data-cy="expandDetailsBtn_skill3"]')
-            .click();
-        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]')
-            .contains('This is skill 1');
-        cy.get('[data-cy="childRowDisplay_skill2"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill3"] [data-cy="skillOverviewDescription"]')
-            .contains('last but not least');
-
-        // close
-        cy.get('[data-cy="expandDetailsBtn_skill1"]')
-            .click();
-        cy.get('[data-cy="childRowDisplay_skill1"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill2"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill3"] [data-cy="skillOverviewDescription"]')
-            .contains('last but not least');
-
-        // close
-        cy.get('[data-cy="expandDetailsBtn_skill3"]')
-            .click();
-        cy.get('[data-cy="childRowDisplay_skill1"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill2"]')
-            .should('not.exist');
-        cy.get('[data-cy="childRowDisplay_skill3"]')
-            .should('not.exist');
-    });
-
     it('request message should be truncated by default', () => {
         cy.createSkill(1, 1, 1, {
             selfReportingType: 'Approval',
@@ -1299,38 +1232,55 @@ describe('Self Report Skills Management Tests', () => {
 
         cy.visit('/administrator/projects/proj1/self-report');
 
-        cy.get('[data-cy=showMoreText]')
-            .should('have.length', 3);
-        cy.get('[data-cy=showLess]')
-            .should('not.exist');
-        cy.get('[data-cy=showMore]')
-            .should('have.length', 2);
-        cy.get('[data-cy=smtText]')
-            .eq(1)
-            .should('not.have.text', msgExpandBtn1);
-        cy.get('[data-cy=smtText]')
-            .eq(1)
-            .should('have.text', `${msgExpandBtn1.substring(0, 50)}`);
-        cy.get('[data-cy=showMore]')
-            .eq(1)
-            .click();
-        cy.get('[data-cy=smtText]')
-            .eq(1)
-            .should('have.text', msgExpandBtn1);
-        cy.get('[data-cy=showLess]')
-            .should('have.length', 1);
-        cy.get('[data-cy=showMore]')
-            .should('have.length', 1);
-        cy.get('[data-cy=showLess]')
-            .click();
-        cy.get('[data-cy=showMore]')
-            .should('have.length', 2);
-        cy.get('[data-cy=smtText]')
-            .eq(1)
-            .should('not.have.text', msgExpandBtn1);
-        cy.get('[data-cy=smtText]')
-            .eq(1)
-            .should('have.text', `${msgExpandBtn1.substring(0, 50)}`);
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+          .contains('Requested points with the following justification:')
+          .should('not.exist');
+        cy.get('[data-cy="approvalMessage"]').should('not.exist');
+
+        // open
+        cy.get('[data-cy="expandDetailsBtn_skill1"]')
+          .click();
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+          .contains('Requested points with the following justification:')
+          .should('exist');
+        cy.get('[data-cy="approvalMessage"]')
+          .should('have.length', 1)
+          .eq(0)
+          .should('contain.text', msgExpandBtn1);
+
+        // open
+        cy.get('[data-cy="expandDetailsBtn_skill3"]')
+          .click();
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+          .contains('Requested points with the following justification:')
+          .should('exist');
+        cy.get('[data-cy="approvalMessage"]')
+          .should('have.length', 2)
+          .eq(0)
+          .should('contain.text', msgExpandBtn2);
+        cy.get('[data-cy="approvalMessage"]')
+          .should('have.length', 2)
+          .eq(1)
+          .should('contain.text', msgExpandBtn1);
+
+        // close
+        cy.get('[data-cy="expandDetailsBtn_skill1"]')
+          .click();
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+          .contains('Requested points with the following justification:')
+          .should('exist');
+        cy.get('[data-cy="approvalMessage"]')
+          .should('have.length', 1)
+          .eq(0)
+          .should('contain.text', msgExpandBtn2);
+
+        // close
+        cy.get('[data-cy="expandDetailsBtn_skill3"]')
+          .click();
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+          .contains('Requested points with the following justification:')
+          .should('not.exist');
+        cy.get('[data-cy="approvalMessage"]').should('not.exist');
     });
 
     it('rejection message is limited to configure max size', () => {

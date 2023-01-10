@@ -84,31 +84,24 @@ limitations under the License.
               <span>{{ data.item.skillName }}</span>
             <b-badge class="ml-2">+ {{ data.item.points }} Points</b-badge>
           </b-form-checkbox>
-
-        </div>
-        <div class="mt-2" style="font-size: 0.9rem;"><span class="text-muted">Note:</span>
-          <show-more v-if="data.item.requestMsg && data.item.requestMsg.length > 0"
-                     :text="data.item.requestMsg"
-                     :is-inline="true"
-                     class="ml-1" />
-          <span v-else class="text-muted"> Not supplied</span>
         </div>
 
         <b-button size="sm" variant="outline-info"
                   class="mr-2 py-0 px-1 mt-1"
                   @click="data.toggleDetails"
-                  :aria-label="`Expand details for ${data.item.name}`"
+                  :aria-label="`Show Justification for ${data.item.name}`"
                   :data-cy="`expandDetailsBtn_${data.item.skillId}`">
           <i v-if="data.detailsShowing" class="fa fa-minus-square" />
           <i v-else class="fa fa-plus-square" />
-          Skill Details
+          Justification
         </b-button>
-
         <b-button size="sm" variant="outline-info"
                   class="py-0 px-1 mt-1"
                   :data-cy="`viewSkillLink_${data.item.skillId}`"
                   :to="{ name:'SkillOverview',
-                                  params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                         params: { projectId: data.item.projectId,
+                                   subjectId: data.item.subjectId,
+                                   skillId: data.item.skillId }}"
                   :aria-label="`View skill ${data.item.skillName}  via link`"
                   target="_blank">
           View Skill <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
@@ -120,9 +113,12 @@ limitations under the License.
       </template>
 
       <template #row-details="row">
-        <child-row-skills-display :project-id="row.item.projectId" :subject-id="row.item.subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"
-                               :parent-skill-id="row.item.skillId" :refresh-counter="row.item.refreshCounter"
-                               class="mr-3 ml-5 mb-3"></child-row-skills-display>
+        <div>
+          <b-card v-if="row.item.requestMsg && row.item.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
+            <markdown-text class="d-inline-block" :text="row.item.requestMsg" data-cy="approvalMessage"/>
+          </b-card>
+          <b-card v-else class="ml-4" header="No Justification supplied" no-body/>
+        </div>
       </template>
 
     </skills-b-table>
@@ -172,21 +168,19 @@ limitations under the License.
 </template>
 
 <script>
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import DateCell from '../../utils/table/DateCell';
   import SelfReportService from './SelfReportService';
-  import ChildRowSkillsDisplay from '../ChildRowSkillsDisplay';
-  import ShowMore from './ShowMore';
   import InlineHelp from '../../utils/InlineHelp';
 
   export default {
     name: 'SelfReportApproval',
     components: {
-      ChildRowSkillsDisplay,
       DateCell,
       SkillsBTable,
-      ShowMore,
       InlineHelp,
+      MarkdownText,
     },
     props: {
       emailEnabled: {

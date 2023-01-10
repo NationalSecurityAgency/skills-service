@@ -206,7 +206,7 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('h5.modal-title')
             .contains('REPORT COURSE');
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This course requires approval. Submit with an optional message and it will enter an approval queue.');
+            .contains('This course requires approval. Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
         cy.get('[data-cy="selfReportAlert"]')
@@ -223,7 +223,7 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('h5.modal-title')
             .contains('REPORT COURSE');
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This course requires approval. Submit with a message and it will enter an approval queue.');
+            .contains('This course requires approval. Submit with a justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('some val');
         cy.get('[data-cy="selfReportSubmitBtn"]')

@@ -102,7 +102,7 @@ const router = new VueRouter({
       component: SkillDetails,
       name: 'skillDetails',
       meta: {
-        title: `${skillPlaceholder}} Details`,
+        title: `${skillPlaceholder} Details`,
       },
     },
     {

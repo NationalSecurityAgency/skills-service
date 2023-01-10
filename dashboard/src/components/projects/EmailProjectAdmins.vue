@@ -56,8 +56,8 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SubPageHeader from '../utils/pages/SubPageHeader';
-  import MarkdownEditor from '../utils/MarkdownEditor';
   import ProjectService from './ProjectService';
   import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
 

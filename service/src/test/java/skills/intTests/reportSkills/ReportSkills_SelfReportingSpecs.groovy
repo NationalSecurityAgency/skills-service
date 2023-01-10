@@ -127,7 +127,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
         Date date = new Date() - 60
         when:
-        def request = "lorem " * 50
+        def request = "lorem " * 500
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, request)
 
         then:

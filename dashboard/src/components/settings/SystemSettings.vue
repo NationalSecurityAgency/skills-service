@@ -89,11 +89,11 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import { email, max } from 'vee-validate/dist/rules';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SettingsService from './SettingsService';
   import ToastSupport from '../utils/ToastSupport';
   import InlineHelp from '../utils/InlineHelp';
-  import MarkdownEditor from '../utils/MarkdownEditor';
 
   extend('email', email);
   extend('max', max);

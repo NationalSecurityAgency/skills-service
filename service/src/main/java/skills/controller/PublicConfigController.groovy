@@ -103,6 +103,12 @@ class PublicConfigController {
         Map<String,String> res = new HashMap<>()
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
+        res["allowedAttachmentFileTypes"] = uiConfigProperties.ui.allowedAttachmentFileTypes
+        res["allowedAttachmentMimeTypes"] = uiConfigProperties.ui.allowedAttachmentMimeTypes
+        res["maxAttachmentSize"] = uiConfigProperties.ui.maxAttachmentSize
+        res["descriptionMaxLength"] = uiConfigProperties.ui.descriptionMaxLength
+        res["paragraphValidationRegex"] = uiConfigProperties.ui.paragraphValidationRegex
+        res["paragraphValidationMessage"] = uiConfigProperties.ui.paragraphValidationMessage
         res["projectDisplayName"] = 'Project'
         res["subjectDisplayName"] = 'Subject'
         res["groupDisplayName"] = 'Group'
