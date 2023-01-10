@@ -42,38 +42,12 @@ describe('Navigation Tests', () => {
 
     });
 
-    it('self report modals must render at the same level of the button that initiated the modal', function () {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
-
-        cy.viewport(1200, 1000);
-        cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
-        cy.dashboardCd()
-            .find('[data-cy="toggleSkillDetails"]')
-            .click();
-        cy.dashboardCd()
-            .find('[data-cy="selfReportBtn"]')
-            .should('have.length', 4);
-        cy.dashboardCd()
-            .find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.dashboardCd()
-            .find('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval');
-        cy.get('iframe');
-        cy.wait(10000);
-        cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', { blackout: ['#point-progress-container'] });
-    });
-
-    // it('self report rejection modals must render at the same level of the button that initiated the modal', () => {
+    // it('self report modals must render at the same level of the button that initiated the modal', function () {
     //     cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
     //     cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
     //     cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
     //     cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
     //
-    //     // request
     //     cy.viewport(1200, 1000);
     //     cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
     //     cy.dashboardCd()
@@ -86,47 +60,73 @@ describe('Navigation Tests', () => {
     //         .find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]')
     //         .click();
     //     cy.dashboardCd()
-    //         .find('[data-cy="selfReportSubmitBtn"]')
-    //         .click();
-    //     cy.dashboardCd()
-    //         .find('[data-cy="selfReportAlert"]')
+    //         .find('[data-cy="selfReportSkillMsg"]')
     //         .contains('This skill requires approval');
-    //
-    //     cy.visit('/administrator/projects/proj1/self-report');
-    //     cy.get('[data-cy="expandDetailsBtn_skill4"]').should('exist')
-    //     cy.get('[data-cy="selectPageOfApprovalsBtn"]')
-    //         .click();
-    //     cy.get('[data-cy="rejectBtn"]').should('be.enabled')
-    //     cy.get('[data-cy="rejectBtn"]')
-    //         .click();
-    //     cy.get('[data-cy="rejectionTitle"]')
-    //         .contains('This will reject user\'s request(s) to get points');
-    //     cy.get('[data-cy="confirmRejectionBtn"]')
-    //         .click();
-    //     cy.get('[data-cy="skillsReportApprovalTable"]')
-    //         .contains('Nothing to approve');
-    //
-    //     cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
-    //     cy.dashboardCd()
-    //         .find('[data-cy="toggleSkillDetails"]')
-    //         .click();
-    //     cy.dashboardCd()
-    //         .find('[data-cy="clearRejectionMsgBtn"]')
-    //         .click();
-    //     cy.dashboardCd()
-    //         .find('[data-cy="clearRejectionMsgDialog"]')
-    //         .contains('This action will permanently remove the rejection');
-    //
+    //     cy.get('iframe');
     //     cy.wait(10000);
-    //     const snapshotOptions = {
-    //         blackout: ['[data-cy="selfReportRejectedAlert"]'],
-    //         failureThreshold: 0.03, // threshold for entire image
-    //         failureThresholdType: 'percent', // percent of image or number of pixels
-    //         customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-    //         capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    //     };
-    //     cy.matchSnapshotImageForElement('iframe', 'self reporting rejection modal positioning', snapshotOptions);
+    //     cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', { blackout: ['#point-progress-container'] });
     // });
+
+    it('self report rejection modals must render at the same level of the button that initiated the modal', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+
+        // request
+        cy.viewport(1200, 1000);
+        cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
+        cy.dashboardCd()
+            .find('[data-cy="toggleSkillDetails"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="selfReportBtn"]')
+            .should('have.length', 4);
+        cy.dashboardCd()
+            .find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="selfReportSubmitBtn"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="selfReportAlert"]')
+            .contains('This skill requires approval');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="expandDetailsBtn_skill4"]').should('exist')
+        cy.get('[data-cy="selectPageOfApprovalsBtn"]')
+            .click();
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled')
+        cy.get('[data-cy="rejectBtn"]')
+            .click();
+        cy.get('[data-cy="rejectionTitle"]')
+            .contains('This will reject user\'s request(s) to get points');
+        cy.get('[data-cy="confirmRejectionBtn"]')
+            .click();
+        cy.get('[data-cy="skillsReportApprovalTable"]')
+            .contains('Nothing to approve');
+
+        cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
+        cy.dashboardCd()
+            .find('[data-cy="toggleSkillDetails"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="clearRejectionMsgBtn"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="clearRejectionMsgDialog"]')
+            .contains('This action will permanently remove the rejection');
+
+        cy.wait(10000);
+        const snapshotOptions = {
+            blackout: ['[data-cy="selfReportRejectedAlert"]'],
+            failureThreshold: 0.03, // threshold for entire image
+            failureThresholdType: 'percent', // percent of image or number of pixels
+            customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
+            capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
+        };
+        cy.matchSnapshotImageForElement('iframe', 'self reporting rejection modal positioning', snapshotOptions);
+    });
 
     it('ability to enable theme on project Skills Display', function () {
         cy.visit('/progress-and-rankings/projects/proj1?enableTheme=true');
