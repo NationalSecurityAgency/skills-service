@@ -60,6 +60,7 @@ import VueApexCharts from 'vue-apexcharts';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import dayjs from '@/common-components/DayJsCustomizer';
+import '@/common-components/filter/ByteFilter';
 import PageVisitService from '@/components/PageVisitService';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';

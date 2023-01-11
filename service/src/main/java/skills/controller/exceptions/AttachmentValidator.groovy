@@ -15,7 +15,7 @@
  */
 package skills.controller.exceptions
 
-
+import org.apache.commons.io.FileUtils
 import org.springframework.http.MediaType
 import org.springframework.util.unit.DataSize
 
@@ -23,7 +23,7 @@ class AttachmentValidator {
 
     static void isWithinMaxAttachmentSize(Long fileSize, DataSize maxAttachmentSize) {
         if (fileSize > maxAttachmentSize.toBytes()) {
-            throw new SkillException("File size [${fileSize}] exceeds maximum file size [${maxAttachmentSize}]", ErrorCode.BadParam)
+            throw new SkillException("File size [${FileUtils.byteCountToDisplaySize(fileSize)}] exceeds maximum file size [${FileUtils.byteCountToDisplaySize(maxAttachmentSize)}]", ErrorCode.BadParam)
         }
     }
 
