@@ -34,18 +34,6 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                 and q.id = qToS.quizRefId''')
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
-    static interface SkillToQuiz {
-        Integer getSkillRefId()
-        String getQuizId()
-    }
-
-    @Query('''select q.quizId as quizId, qToS.skillRefId as skillRefId
-            from QuizToSkillDef qToS, QuizDef q 
-            where qToS.skillRefId in ?1
-                and q.id = qToS.quizRefId''')
-    List<SkillToQuiz> getSkillToQuizAssociations(List<Integer> skillRefIds)
-
     void deleteBySkillRefId(Integer skillRefId)
-
 }
 

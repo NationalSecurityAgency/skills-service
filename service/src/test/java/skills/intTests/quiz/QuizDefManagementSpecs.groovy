@@ -41,7 +41,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         def quizDefs = skillsService.getQuizDefs()
 
         then:
-        c == quiz.quizId
+        newQuiz.body.quizId == quiz.quizId
         newQuiz.body.name == quiz.name
 
         quizDefs.quizId == [quiz.quizId]
