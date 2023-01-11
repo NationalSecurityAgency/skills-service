@@ -15,13 +15,13 @@
  */
 import { extend, localize } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
+import ValidatorFactory from '@/common-components/validators/ValidatorFactory';
+import '@/common-components/validators/CustomDescriptionValidator';
 import './OptionalNumericValidator';
-import './CustomDescriptionValidator';
 import './CustomNameValidator';
 import './IdValidator';
 import './SkillIdValidator';
 import './UrlValidator';
-import ValidatorFactory from './ValidatorFactory';
 import store from '../store/store';
 
 export default {

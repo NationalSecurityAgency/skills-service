@@ -28,7 +28,12 @@ import {
     TooltipPlugin,
     FormTextareaPlugin,
 } from 'bootstrap-vue';
+import {
+  localize, ValidationProvider, ValidationObserver, setInteractionMode,
+} from 'vee-validate';
+import en from 'vee-validate/dist/locale/en.json';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
+import '@/common-components/filter/ByteFilter';
 import App from '@/App';
 import router from '@/router';
 import store from '@/store/store';
@@ -37,6 +42,9 @@ import '@/common/filter/DayJsFilters';
 import DevModeUtil from '@/dev/DevModeUtil';
 
 Vue.config.productionTip = false;
+
+Vue.component('ValidationProvider', ValidationProvider);
+Vue.component('ValidationObserver', ValidationObserver);
 
 Vue.use(VueApexCharts);
 Vue.use(ModalPlugin);
@@ -50,6 +58,11 @@ Vue.use(SpinnerPlugin);
 Vue.use(TooltipPlugin);
 Vue.use(FormTextareaPlugin);
 Vue.use(FiltersPlugin);
+
+localize({
+  en,
+});
+setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
 
 require('@/common/interceptors/softwareVersionInterceptor');
 require('@/common/interceptors/upgradeInProgressInterceptor');

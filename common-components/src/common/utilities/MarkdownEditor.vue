@@ -30,7 +30,7 @@ limitations under the License.
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
         <div class="col">
-          Insert images by pasting, dragging & dropping, or selecting from toolbar.
+          Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="col-auto">
           <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
@@ -61,8 +61,8 @@ limitations under the License.
   import { Editor } from '@toast-ui/vue-editor';
   import fontSize from 'tui-editor-plugin-font-size';
   import 'tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css';
-  import MarkdownMixin from '@/common-components/utilities/MarkdownMixin';
-  import FileUploadService from './upload/FileUploadService';
+  import MarkdownMixin from './MarkdownMixin';
+  import FileUploadService from './FileUploadService';
 
   export default {
     name: 'MarkdownEditor',
@@ -85,6 +85,10 @@ limitations under the License.
       markdownHeight: {
         type: String,
         default: '300px',
+      },
+      placeholder: {
+        type: String,
+        default: '',
       },
     },
     data() {
@@ -179,6 +183,7 @@ limitations under the License.
           hideModeSwitch: true,
           usageStatistics: false,
           autofocus: false,
+          placeholder: this.placeholder,
           toolbarItems,
           plugins: [fontSize],
           // widgetRules: [this.emojiWidgetRule],
@@ -234,13 +239,16 @@ limitations under the License.
                 this.$refs.provider.validate(event);
               });
             } else {
-              this.attachmentError = `Unable to upload attachment - File size [${file.size}] exceeds maximum file size [${this.maxAttachmentSize}]`;
+              this.attachmentError = `Unable to upload attachment - File size [${this.prettyBytes(file.size)}] exceeds maximum file size [${this.prettyBytes(this.maxAttachmentSize)}]`;
             }
           } else {
-            this.attachmentError = `Unable to upload attachment - Invalid file type [${[...files][0].type}]`;
+            this.attachmentError = `Unable to upload attachment - File type is not supported. Supported file types are [${this.allowedAttachmentFileTypes}]`;
           }
           this.$refs.provider.validate(event);
         }
+      },
+      prettyBytes(bytes) {
+        return this.$options.filters.prettyBytes(bytes);
       },
     },
   };
@@ -270,5 +278,8 @@ limitations under the License.
     font-size: 1.1rem !important;
     color: #6c6c6c !important;
     background-image: none !important;
+  }
+  span.placeholder.ProseMirror-widget {
+    color: #687278 !important;
   }
 </style>

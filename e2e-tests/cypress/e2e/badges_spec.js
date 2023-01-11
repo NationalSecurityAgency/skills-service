@@ -2224,15 +2224,15 @@ describe('Badges Tests', () => {
 
         cy.visit('/administrator/projects/proj1/badges/badge1');
 
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Disabled')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Disabled')
             .should('exist');
         cy.get('[data-cy=goLive]')
             .click();
         cy.contains('This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.')
             .should('be.visible');
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Disabled')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Disabled')
             .should('exist');
 
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1');
@@ -2243,8 +2243,8 @@ describe('Badges Tests', () => {
 
         cy.visit('/administrator/projects/proj1/badges/badge1');
 
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Disabled')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Disabled')
             .should('exist');
         cy.get('[data-cy=goLive]')
             .click();
@@ -2253,8 +2253,8 @@ describe('Badges Tests', () => {
         cy.contains('Yes, Go Live!')
             .click();
 
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Live')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Live')
             .should('exist');
 
     });

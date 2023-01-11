@@ -132,7 +132,7 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7424] exceeds maximum file size [5]');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7.25 KB] exceeds maximum file size [5 B]');
     });
 
     it('attempt to upload an attachment that is not an accepted mime-type', () => {
@@ -151,7 +151,7 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - Invalid file type [invalid/type]');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File type is not supported. Supported file types are [.xlsx,.docx,.pptx,.doc,.odp,.ods,.odt,.pdf,.ppt,.xls]');
     });
 
     it('upload valid mime-types', () => {

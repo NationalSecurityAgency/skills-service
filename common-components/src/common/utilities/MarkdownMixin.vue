@@ -30,9 +30,10 @@ limitations under the License.
               const { origin, entering } = context;
               const result = origin();
               if (!entering) {
+                const faIcon = node?.destination?.startsWith('/api/download/') ? 'fas fa-download' : 'fas fa-external-link-alt';
                 return {
                   type: 'html',
-                  content: ' <span class="fas fa-external-link-alt" style="font-size: 0.8rem"></span></a>',
+                  content: ` <span class="${faIcon}" style="font-size: 0.8rem"></span></a>`,
                 };
               }
               return result;

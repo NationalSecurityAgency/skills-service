@@ -2291,8 +2291,8 @@ describe('Global Badges Tests', () => {
 
         cy.contains('Test Badge')
             .should('exist');
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Disabled')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Disabled')
             .should('exist');
         cy.get('[data-cy=goLive]')
             .click();
@@ -2301,8 +2301,8 @@ describe('Global Badges Tests', () => {
         cy.contains('Yes, Go Live!')
             .click();
 
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Live')
+        cy.get('[data-cy=statPreformatted]')
+            .contains('Live')
             .should('exist');
     });
 });

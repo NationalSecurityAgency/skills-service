@@ -477,8 +477,11 @@ class UserSkillsController {
         Attachment attachment = attachmentService.getAttachment(uuid, filename);
         try (InputStream inputStream = attachment.getContent().getBinaryStream();
              OutputStream outputStream = response.getOutputStream()) {
-            IOUtils.copy(inputStream, outputStream);
             response.setContentType(attachment.getContentType());
+            if (!StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
+            }
+            IOUtils.copy(inputStream, outputStream);
         } catch (Exception e) {
             throw new SkillException("Error closing stream resources", e);
         }

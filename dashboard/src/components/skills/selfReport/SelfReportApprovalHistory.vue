@@ -81,7 +81,15 @@ limitations under the License.
         </div>
         <div class="text-primary">by</div>
         <div class="font-italic"><span v-if="data.item.userIdHtml" v-html="data.item.userIdHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span></div>
-        <div v-if="data.item.requestMsg"><span class="text-secondary text-break">Request Note:</span> <show-more :text="data.item.requestMsg"/></div>
+        <b-button size="sm" variant="outline-info"
+                  class="mr-2 py-0 px-1"
+                  @click="data.toggleDetails"
+                  :aria-label="`Show Justification for ${data.item.name}`"
+                  :data-cy="`expandDetailsBtn_${data.item.skillId}`">
+          <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
+          <i v-else class="fa fa-plus-square"/>
+          Justification
+        </b-button>
       </template>
 
       <template v-slot:cell(requestedOn)="data">
@@ -99,12 +107,22 @@ limitations under the License.
         <div v-if="data.item.rejectionMsg"><span class="text-primary text-break">Explanation:</span> <show-more :text="data.item.rejectionMsg"/></div>
       </template>
 
+      <template #row-details="row">
+        <div>
+          <b-card v-if="row.item.requestMsg && row.item.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
+            <markdown-text class="d-inline-block" :text="row.item.requestMsg" data-cy="approvalMessage"/>
+          </b-card>
+          <b-card v-else class="ml-4" header="No Justification supplied" no-body/>
+        </div>
+      </template>
+
     </skills-b-table>
 
   </b-card>
 </template>
 
 <script>
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import SkillsBTable from '../../utils/table/SkillsBTable';
   import DateCell from '../../utils/table/DateCell';
   import SelfReportService from './SelfReportService';
@@ -112,7 +130,12 @@ limitations under the License.
 
   export default {
     name: 'SelfReportApprovalHistory',
-    components: { DateCell, SkillsBTable, ShowMore },
+    components: {
+      DateCell,
+      SkillsBTable,
+      ShowMore,
+      MarkdownText,
+    },
     data() {
       return {
         projectId: this.$route.params.projectId,
