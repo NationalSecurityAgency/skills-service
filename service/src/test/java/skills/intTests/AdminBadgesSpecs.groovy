@@ -136,7 +136,6 @@ class AdminBadgesSpecs extends DefaultIntSpec {
 
         when:
         def u1Summary_t0 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
-        skillsService.getBadge
         skillsService.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
         def u1Summary_t1 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
         def u2Summary_t1 = skillsService.getBadgeSummary(users[1], proj.projectId, badge.badgeId)
