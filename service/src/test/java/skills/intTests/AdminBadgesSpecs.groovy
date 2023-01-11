@@ -111,6 +111,99 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         resAfterDeletion.requiredSkills.collect { it.skillId }.sort() == ["skill1"]
     }
 
+    void "removing last unachieved skill from a badge achieves that badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4, 1, 1, 100)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(2).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        List<String> users = getRandomUsers(2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(2).skillId], users[0], new Date())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+
+        when:
+        def u1Summary_t0 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
+        skillsService.getBadge
+        skillsService.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        def u1Summary_t1 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
+        def u2Summary_t1 = skillsService.getBadgeSummary(users[1], proj.projectId, badge.badgeId)
+        then:
+        u1Summary_t0.skills.size() == 3
+        u1Summary_t0.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u1Summary_t0.skills[1].points < u1Summary_t0.skills[1].totalPoints
+        u1Summary_t0.skills[2].points == u1Summary_t0.skills[2].totalPoints
+        !u1Summary_t0.badgeAchieved
+
+        u1Summary_t1.skills.size() == 2
+        u1Summary_t1.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u1Summary_t1.skills[1].points == u1Summary_t0.skills[1].totalPoints
+        u1Summary_t1.badgeAchieved
+
+        u2Summary_t1.skills.size() == 2
+        u2Summary_t1.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u2Summary_t1.skills[1].points < u1Summary_t0.skills[1].totalPoints
+        !u2Summary_t1.badgeAchieved
+    }
+
+    void "delete last unachieved skill that was assigned to a badge - achieves that badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4, 1, 1, 100)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(2).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        List<String> users = getRandomUsers(2)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(2).skillId], users[0], new Date())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], new Date())
+
+        when:
+        def u1Summary_t0 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
+        skillsService.deleteSkill(skills.get(1))
+        def u1Summary_t1 = skillsService.getBadgeSummary(users[0], proj.projectId, badge.badgeId)
+        def u2Summary_t1 = skillsService.getBadgeSummary(users[1], proj.projectId, badge.badgeId)
+        then:
+        u1Summary_t0.skills.size() == 3
+        u1Summary_t0.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u1Summary_t0.skills[1].points < u1Summary_t0.skills[1].totalPoints
+        u1Summary_t0.skills[2].points == u1Summary_t0.skills[2].totalPoints
+        !u1Summary_t0.badgeAchieved
+
+        u1Summary_t1.skills.size() == 2
+        u1Summary_t1.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u1Summary_t1.skills[1].points == u1Summary_t0.skills[1].totalPoints
+        u1Summary_t1.badgeAchieved
+
+        u2Summary_t1.skills.size() == 2
+        u2Summary_t1.skills[0].points == u1Summary_t0.skills[0].totalPoints
+        u2Summary_t1.skills[1].points < u1Summary_t0.skills[1].totalPoints
+        !u2Summary_t1.badgeAchieved
+    }
+
     void "remove badge"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
