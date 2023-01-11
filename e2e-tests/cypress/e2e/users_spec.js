@@ -732,6 +732,89 @@ describe('Users Tests', () => {
         cy.get(`${tableSelector} th`).should('have.length', 3)
         cy.get(`${tableSelector}`).should('not.contain', 'Org');
     });
+
+    it('show user tag on users page', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagA"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagB"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagC"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        const tagRes = `
+            [
+                {"id":1,"userId":"skills@evoforge.org","key":"dutyOrganization","value":"tagA"}
+            ]
+        `
+        cy.intercept('/app/userInfo/userTags/*', {
+            statusCode: 200,
+            body: tagRes,
+        }).as('getUserTags')
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.userPageTagsToDisplay = 'dutyOrganization/Org'
+                res.send(conf);
+            });
+        }).as('loadConfig');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.wait('@loadConfig')
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.get(`${tableSelector} th`).should('have.length', 4)
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.wait('@getUserTags')
+        cy.contains("Client Display");
+        cy.contains("ID: skills@evoforge.org, Org: tagA");
+    });
+
+    it('do not show user tag on users page if not enabled', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagA"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagB"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00","userTag":"tagC"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                delete conf.userPageTagsToDisplay
+                res.send(conf);
+            });
+        }).as('loadConfig');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.wait('@loadConfig')
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.get(`${tableSelector} th`).should('have.length', 4)
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.contains("Client Display");
+        cy.get('.h5').should('not.have.text', "Org: tagA");
+    });
 })
 
 
