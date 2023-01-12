@@ -40,6 +40,11 @@ limitations under the License.
           </a>
         </div>
       </div>
+      <div v-if="attachmentWarningMessage && hasNewAttachment" class="row">
+        <div class="col">
+          <span data-cy="attachmentWarningMessage" class="text-danger" style="font-size: .9rem">{{ attachmentWarningMessage }}</span>
+        </div>
+      </div>
     </div>
 
     <ValidationProvider
@@ -97,6 +102,7 @@ limitations under the License.
         intervalId: null,
         intervalRuns: 0,
         maxIntervalAttempts: 8,
+        hasNewAttachment: false,
         attachmentError: '',
       };
     },
@@ -144,6 +150,9 @@ limitations under the License.
       },
       allowedAttachmentMimeTypes() {
         return this.$store.getters.config.allowedAttachmentMimeTypes;
+      },
+      attachmentWarningMessage() {
+        return this.$store.getters.config.attachmentWarningMessage;
       },
       // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
       // emojiWidgetRule() {
@@ -216,9 +225,10 @@ limitations under the License.
         const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files;
         if (files && files.length > 0) {
           const file = [...files].find((el) => this.allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1));
+          event.preventDefault();
+          event.stopPropagation();
           if (file) {
-            event.preventDefault();
-            event.stopPropagation();
+            this.hasNewAttachment = true;
             this.attachmentError = ''; // reset any previous error
             if (file.size <= this.maxAttachmentSize) {
               const data = new FormData();
