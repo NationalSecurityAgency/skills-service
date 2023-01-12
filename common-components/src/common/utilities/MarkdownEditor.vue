@@ -137,7 +137,7 @@ limitations under the License.
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
       },
       maxAttachmentSize() {
-        return this.$store.getters.config.maxAttachmentSize;
+        return this.$store.getters.config.maxAttachmentSize ? Number(this.$store.getters.config.maxAttachmentSize) : 0;
       },
       allowedAttachmentFileTypes() {
         return this.$store.getters.config.allowedAttachmentFileTypes;
