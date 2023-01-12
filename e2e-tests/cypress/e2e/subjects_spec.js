@@ -396,7 +396,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
         cy.get('[data-cy="btn_Subjects"]').click();
-        cy.get('body').type('{esc}{esc}');
+        cy.get('[data-cy="closeSubjectButton"]').click()
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
         cy.get('[data-cy="btn_Subjects"]').click();
@@ -443,7 +443,7 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
-        cy.realPress('Escape');
+        cy.get('[data-cy="closeSubjectButton"]').click()
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
