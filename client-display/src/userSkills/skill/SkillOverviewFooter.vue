@@ -34,10 +34,12 @@ limitations under the License.
       <div v-if="isQuizSkill" class="col text-right">
         <div class="font-italic text-secondary">
           <i class="fas fa-user-edit text-info" style="font-size: 1.2rem;"></i>
-          Quiz Completion Required:
+          Quiz Completion<span v-if="!selfReportDisabled"> Required</span>:
         </div>
         <div>
-          <b-button variant="link"
+          <span v-if="selfReportDisabled"
+              class="font-weight-bold text-primary"  style="font-size: 1rem;">{{ skillInternal.selfReporting.quizName }}</span>
+          <b-button v-else variant="link"
                     tag="a"
                     class="p-0"
                   @click="showSelfReportModal"
@@ -133,7 +135,7 @@ limitations under the License.
           <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem"></i>
         </div>
         <div class="col">
-          This action will <b  class="text-danger">permanently</b> remove the rejection and its message. <span class="text-danger">Are you sure</span>?
+          This action will <b class="text-danger">permanently</b> remove the rejection and its message. <span class="text-danger">Are you sure</span>?
         </div>
       </div>
       <template #modal-footer>
@@ -268,10 +270,7 @@ limitations under the License.
               if (!this.isAlreadyPerformed() && this.isApprovalRequired) {
                 this.skillInternal.selfReporting.requestedOn = new Date();
               }
-              if (res.pointsEarned > 0) {
-                this.skillInternal.points += res.pointsEarned;
-                this.$emit('points-earned', res.pointsEarned);
-              }
+              this.updateEarnedPoints(res);
             }
           }).catch((e) => {
             if (e.response.data && e.response.data.errorCode
@@ -295,9 +294,13 @@ limitations under the License.
         const { gradedRes } = testResult;
         if (gradedRes && gradedRes.passed && gradedRes.associatedSkillResults) {
           const skill = gradedRes.associatedSkillResults.find((e) => e.projectId === this.skillInternal.projectId && e.skillId === this.skillInternal.skillId);
-          if (skill.pointsEarned > 0) {
-            this.$emit('points-earned', skill.pointsEarned);
-          }
+          this.updateEarnedPoints(skill);
+        }
+      },
+      updateEarnedPoints(res) {
+        if (res.pointsEarned > 0) {
+          this.skillInternal.points += res.pointsEarned;
+          this.$emit('points-earned', res.pointsEarned);
         }
       },
     },
