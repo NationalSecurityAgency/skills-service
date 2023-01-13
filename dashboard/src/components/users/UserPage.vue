@@ -15,7 +15,11 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="componentIsLoading" :options="headerOptions">
+      <div slot="subSubTitle" v-if="tags">
+        {{tags}}
+      </div>
+    </page-header>
 
     <navigation v-if="userIdForDisplay" :nav-items="getNavItems()">
     </navigation>
@@ -43,12 +47,14 @@ limitations under the License.
         userIdForDisplay: '',
         isLoading: true,
         tags: '',
+        tagsLoading: true,
       };
     },
     mounted() {
-      if (this.showUserTags) {
+      if (this.$store.getters.config.userPageTagsToDisplay) {
         UsersService.getUserTags(this.$route.params.userId).then((response) => {
           this.tags = this.processUserTags(response);
+          this.tagsLoading = false;
         });
       }
     },
@@ -72,14 +78,14 @@ limitations under the License.
         'numSkills',
         'userTotalPoints',
       ]),
-      showUserTags() {
-        return !!this.$store.getters.config.userPageTagsToDisplay;
+      componentIsLoading() {
+        return this.isLoading || this.tagsLoading;
       },
       headerOptions() {
         return {
           icon: 'fas fa-user skills-color-users',
           title: `USER: ${this.userTitle}`,
-          subTitle: `ID: ${this.userIdForDisplay}${this.tags}`,
+          subTitle: `ID: ${this.userIdForDisplay}`,
           stats: [{
             label: 'Skills',
             count: this.numSkills,
@@ -106,7 +112,6 @@ limitations under the License.
       processUserTags(userTags) {
         const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
         const tags = [];
-        let formattedTagString = '';
         if (userPageTags) {
           const tagSections = userPageTags.split('|');
           tagSections.forEach((section) => {
@@ -117,13 +122,14 @@ limitations under the License.
           });
         }
 
+        const tagStrings = [];
         tags.forEach((tag) => {
           const userTag = userTags.find((ut) => ut.key === tag.key);
           if (userTag) {
-            formattedTagString += `, ${tag.label}: ${userTag.value}`;
+            tagStrings.push(`${tag.label}: ${userTag.value}`);
           }
         });
-        return formattedTagString;
+        return tagStrings.join(', ');
       },
       getNavItems() {
         const hasSubject = this.$route.params.subjectId || false;
