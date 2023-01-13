@@ -42,30 +42,30 @@ describe('Navigation Tests', () => {
 
     });
 
-    // it('self report modals must render at the same level of the button that initiated the modal', function () {
-    //     cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-    //     cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-    //     cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-    //     cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
-    //
-    //     cy.viewport(1200, 1000);
-    //     cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
-    //     cy.dashboardCd()
-    //         .find('[data-cy="toggleSkillDetails"]')
-    //         .click();
-    //     cy.dashboardCd()
-    //         .find('[data-cy="selfReportBtn"]')
-    //         .should('have.length', 4);
-    //     cy.dashboardCd()
-    //         .find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]')
-    //         .click();
-    //     cy.dashboardCd()
-    //         .find('[data-cy="selfReportSkillMsg"]')
-    //         .contains('This skill requires approval');
-    //     cy.get('iframe');
-    //     cy.wait(10000);
-    //     cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', { blackout: ['#point-progress-container'] });
-    // });
+    it('self report modals must render at the same level of the button that initiated the modal', function () {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+
+        cy.viewport(1200, 1000);
+        cy.visit('/progress-and-rankings/projects/proj1/?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
+        cy.dashboardCd()
+            .find('[data-cy="toggleSkillDetails"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="selfReportBtn"]')
+            .should('have.length', 4);
+        cy.dashboardCd()
+            .find('[data-cy="skillProgress_index-3"] [data-cy="selfReportBtn"]')
+            .click();
+        cy.dashboardCd()
+            .find('[data-cy="selfReportSkillMsg"]')
+            .contains('This skill requires approval');
+        cy.get('iframe');
+        cy.wait(10000);
+        cy.matchSnapshotImageForElement('iframe', 'self reporting modal positioning', { blackout: ['#point-progress-container'] });
+    });
 
     it('self report rejection modals must render at the same level of the button that initiated the modal', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
