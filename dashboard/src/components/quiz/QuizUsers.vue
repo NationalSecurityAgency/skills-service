@@ -14,20 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <quiz-run v-if="quizId" :quiz-id="quizId" />
+<div>
+  <sub-page-header title="Users"/>
+</div>
 </template>
 
 <script>
-  import QuizRun from '@/common-components/quiz/QuizRun';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
 
   export default {
-    name: 'QuizRunInDashboard',
-    components: { QuizRun },
-    computed: {
-      quizId() {
-        return this.$route?.params?.quizId;
-      },
-    },
+    name: 'QuizUsers',
+    components: { SubPageHeader },
   };
 </script>
 

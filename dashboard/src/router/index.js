@@ -90,6 +90,8 @@ import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportCo
 import QuizPage from '@/components/quiz/QuizPage';
 import Questions from '@/components/quiz/testCreation/Questions';
 import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
+import QuizSettings from '@/components/quiz/QuizSettings';
+import QuizUsers from '@/components/quiz/QuizUsers';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
 
 Vue.use(Router);
@@ -117,13 +119,13 @@ const router = new Router({
           },
         },
       }, {
-        name: 'TestAndSurveys',
-        path: 'tests-and-surveys',
+        name: 'QuizzesAndSurveys',
+        path: 'quizzes',
         component: QuizDefinitionsPage,
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Tests and Surveys',
+            message: 'Quizzes and Surveys',
           },
         },
       }, {
@@ -916,7 +918,7 @@ const router = new Router({
       }],
     },
     {
-      path: '/administrator/tests-and-surveys/:quizId',
+      path: '/administrator/quizzes/:quizId',
       component: QuizPage,
       meta: {
         requiresAuth: true,
@@ -941,7 +943,27 @@ const router = new Router({
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Test Metrics',
+            message: 'Quiz Metrics',
+          },
+        },
+      }, {
+        name: 'QuizUsers',
+        path: 'users',
+        component: QuizUsers,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Users',
+          },
+        },
+      }, {
+        name: 'QuizSettings',
+        path: 'settings',
+        component: QuizSettings,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Settings',
           },
         },
       }],

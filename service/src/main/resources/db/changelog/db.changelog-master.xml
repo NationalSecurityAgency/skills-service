@@ -2271,6 +2271,46 @@
                                  referencedColumnNames="id"
                                  referencedTableName="skill_definition"/>
 
+        <createTable tableName="quiz_settings">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="setting" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quiz_ref_id" type="int" />
+            <column name="user_ref_id" type="int" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_quiz_settings_setting"
+                     tableName="quiz_settings">
+            <column name="setting" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="quiz_ref_id"
+                                 baseTableName="quiz_settings"
+                                 constraintName="fk_quiz_settings_quiz_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_definition"/>
+        <addForeignKeyConstraint baseColumnNames="user_ref_id"
+                                 baseTableName="quiz_settings"
+                                 constraintName="fk_quiz_settings_user_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_attrs"/>
     </changeSet>
 
 </databaseChangeLog>

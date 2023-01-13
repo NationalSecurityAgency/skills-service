@@ -16,15 +16,21 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
+import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.QuizDefResult
 import skills.controller.result.model.QuizMetrics
 import skills.controller.result.model.QuizQuestionDefResult
+import skills.controller.result.model.QuizSettingsRes
 import skills.controller.result.model.RequestResult
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptReq
@@ -32,6 +38,7 @@ import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
+import skills.services.quiz.QuizSettingsService
 
 @RestController
 @RequestMapping("/admin/quiz-definitions")
@@ -44,6 +51,9 @@ class QuizController {
 
     @Autowired
     QuizRunService quizRunService
+
+    @Autowired
+    QuizSettingsService quizSettingsService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -120,6 +130,24 @@ class QuizController {
                                          @PathVariable("userId") String userId,
                                          @PathVariable("quizAttempId") Integer quizAttemptId) {
         return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
+    }
+
+
+    @RequestMapping(value = "/{quizId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveQuizSettings(@PathVariable("quizId") String quizId, @RequestBody List<QuizSettingsRequest> values) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotNull(values, "Settings")
+
+        quizSettingsService.saveSettings(quizId, values)
+
+        return RequestResult.success()
+    }
+
+
+    @RequestMapping(value = "/{quizId}/settings", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    List<QuizSettingsRes> getQuizSettings(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotNull(quizId, "QuizId")
+        return quizSettingsService.getSettings(quizId)
     }
 
 }

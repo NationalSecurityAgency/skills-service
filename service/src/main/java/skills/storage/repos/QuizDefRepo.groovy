@@ -26,6 +26,10 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
     @Nullable
     QuizDef findByQuizIdIgnoreCase(String quizId)
 
+    @Nullable
+    @Query(value = "select q.id from QuizDef q where lower(q.quizId) = lower(?1)")
+    Integer getQuizRefIdByQuizIdIgnoreCase(String quizId)
+
     @Modifying
     int deleteByQuizIdIgnoreCase(String quizId)
 

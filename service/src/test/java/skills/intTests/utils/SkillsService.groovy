@@ -1641,6 +1641,16 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
+    def saveQuizSettings(String quizId, List settings) {
+        String url = "${getQuizDefUrl(quizId)}/settings"
+        return wsHelper.adminPost(url, settings)
+    }
+
+    def getQuizSettings(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/settings"
+        return wsHelper.adminGet(url)
+    }
+
     def getQuizInfo(String quizId) {
         String url = "/quizzes/${quizId}"
         return wsHelper.apiGet(url)

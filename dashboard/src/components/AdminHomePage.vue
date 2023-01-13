@@ -58,9 +58,9 @@ limitations under the License.
           page: 'AdminHomePage',
         });
         items.push({
-          name: 'Tests and Surveys',
+          name: 'Quizzes and Surveys',
           iconClass: 'fa-spell-check skills-color-subjects',
-          page: 'TestAndSurveys',
+          page: 'QuizzesAndSurveys',
         });
 
         if (this.isSupervisor || this.isRoot) {

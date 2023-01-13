@@ -26,6 +26,13 @@ limitations under the License.
                     :aria-label="'edit Quiz '+ quiz.quizId">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
+          <b-button ref="shareProjectButton"
+                    data-cy="shareProjBtn"
+                    variant="outline-primary"
+                    v-skills="'ShareProject'"
+                    :aria-label="`Share ${quizId} quiz with users`">
+            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
+          </b-button>
           <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
                     data-cy="quizPreview"
                     variant="outline-primary" :aria-label="'preview client display for project'+quiz.name">
@@ -37,7 +44,9 @@ limitations under the License.
 
     <navigation v-if="!isLoading" :nav-items="[
           {name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions'},
+          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers'},
           {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics'},
+          {name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings'},
         ]">
     </navigation>
   </div>
