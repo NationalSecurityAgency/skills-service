@@ -549,4 +549,37 @@ describe('Contact Project Users Specs', () => {
         cy.get(`button.attachment-button`).should('not.exist');
     });
 
+    it('attachments cannot be uploaded via drag and drop', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        })
+          .as('createProject');
+
+        cy.intercept('POST', '/admin/projects/proj1/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+          .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/contactUsersCount')
+          .as('updateCount');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels')
+          .as('getSubjectLevels');
+
+        cy.visit('/administrator/projects/proj1/contact-users');
+
+        cy.get('[data-cy="nav-Contact Users"]')
+          .click();
+        cy.wait('@emailSupported');
+        const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
+        cy.get(markdownInput).focus().selectFile('cypress/attachments/test-pdf.pdf', { action: 'drag-drop' })
+
+        cy.get('a[href$="test-pdf.pdf"]')
+          .should('not.exist');
+    });
+
 });

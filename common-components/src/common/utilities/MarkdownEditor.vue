@@ -222,6 +222,9 @@ limitations under the License.
         }
       },
       attachFile(event) {
+        if (!this.allowAttachments) {
+          return;
+        }
         const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files;
         if (files && files.length > 0) {
           const file = [...files].find((el) => this.allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1));
