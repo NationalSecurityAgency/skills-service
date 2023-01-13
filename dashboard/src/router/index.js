@@ -90,7 +90,7 @@ import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportCo
 import QuizPage from '@/components/quiz/QuizPage';
 import Questions from '@/components/quiz/testCreation/Questions';
 import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
-import QuizRun from '@/common-components/quiz/QuizRun';
+import QuizRun from '@/components/quiz/QuizRunInDashboard';
 
 Vue.use(Router);
 

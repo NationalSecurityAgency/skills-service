@@ -33,6 +33,8 @@ import skills.quizLoading.model.QuizQuestionAttemptReq
 import skills.quizLoading.model.QuizQuestionGradedResult
 import skills.quizLoading.model.QuizQuestionInfo
 import skills.quizLoading.model.QuizReportAnswerReq
+import skills.services.events.SkillEventResult
+import skills.services.events.SkillEventsService
 import skills.storage.model.QuizAnswerDef
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAnswerAttempt
@@ -42,6 +44,7 @@ import skills.storage.model.QuizQuestionDef
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizQuestionAttempt
 import skills.storage.repos.QuizAnswerDefRepo
+import skills.storage.repos.QuizToSkillDefRepo
 import skills.storage.repos.UserQuizAnswerAttemptRepo
 import skills.storage.repos.UserQuizAttemptRepo
 import skills.storage.repos.QuizDefRepo
@@ -67,6 +70,12 @@ class QuizRunService {
 
     @Autowired
     UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
+    SkillEventsService skillEventsService
 
     @Autowired
     UserQuizQuestionAttemptRepo quizQuestionAttemptRepo
@@ -269,7 +278,24 @@ class QuizRunService {
         userQuizAttempt.completed = new Date()
         quizAttemptRepo.save(userQuizAttempt)
 
+        gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)
         return gradedResult
+    }
+
+    @Profile
+    List<SkillEventResult> reportAnyAssociatedSkills(UserQuizAttempt userQuizAttempt, QuizDef quizDef) {
+        List<SkillEventResult> res = []
+        if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
+            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDef.id)
+            if (skills){
+                skills.each {
+                    SkillEventResult skillEventResult = skillEventsService.reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, false, userQuizAttempt.completed,
+                            new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                    res.add(skillEventResult)
+                }
+            }
+        }
+        return res
     }
 
     @Transactional

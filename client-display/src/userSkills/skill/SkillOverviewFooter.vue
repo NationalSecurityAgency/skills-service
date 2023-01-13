@@ -104,6 +104,7 @@ limitations under the License.
         :is-approval-required="isApprovalRequired"
         :is-honor-system="isHonorSystem"
         :is-justitification-required="isJustificationRequired" />
+    <quiz-modal v-if="quizModalVisible" v-model="quizModalVisible" :skill="skillInternal" @testWasTaken="testWasTaken"/>
 
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
@@ -134,15 +135,17 @@ limitations under the License.
   import UserSkillsService from '../service/UserSkillsService';
   import SelfReportSkillModal from './SelfReportSkillModal';
   import ModalPositioner from './ModalPositioner';
+  import QuizModal from './QuizModal';
 
   export default {
     name: 'SkillOverviewFooter',
-    components: { ModalPositioner, SelfReportSkillModal },
+    components: { QuizModal, ModalPositioner, SelfReportSkillModal },
     props: ['skill'],
     data() {
       return {
         skillInternal: {},
         selfReportModalVisible: false,
+        quizModalVisible: false,
         clearRejectionModalVisible: false,
         rejectionDialogYOffset: 0,
         approvalRequestedMsg: '',
@@ -187,10 +190,14 @@ limitations under the License.
     },
     methods: {
       showSelfReportModal(event) {
-        this.selfReportModalVisible = true;
-        this.$nextTick(() => {
-          this.$refs.selfReportModal.updatePosition(event.pageY);
-        });
+        if (this.skillInternal.selfReporting.type === 'Quiz') {
+          this.quizModalVisible = true;
+        } else {
+          this.selfReportModalVisible = true;
+          this.$nextTick(() => {
+            this.$refs.selfReportModal.updatePosition(event.pageY);
+          });
+        }
       },
       showRejectionModal(event) {
         this.clearRejectionModalVisible = true;
@@ -263,6 +270,15 @@ limitations under the License.
           }).finally(() => {
             this.selfReportModalVisible = false;
           });
+      },
+      testWasTaken(testResult) {
+        const { gradedRes } = testResult;
+        if (gradedRes && gradedRes.passed && gradedRes.associatedSkillResults) {
+          const skill = gradedRes.associatedSkillResults.find((e) => e.projectId === this.skillInternal.projectId && e.skillId === this.skillInternal.skillId);
+          if (skill.pointsEarned > 0) {
+            this.$emit('points-earned', skill.pointsEarned);
+          }
+        }
       },
     },
   };

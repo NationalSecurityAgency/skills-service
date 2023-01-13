@@ -15,7 +15,10 @@
  */
 package skills.quizLoading.model
 
+import skills.services.events.SkillEventResult
+
 class QuizGradedResult {
     Boolean passed
     List<QuizQuestionGradedResult> gradedQuestions
+    List<SkillEventResult> associatedSkillResults
 }

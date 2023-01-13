@@ -23,16 +23,36 @@ import skills.storage.model.QuizToSkillDef
 interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     static interface QuizNameAndId {
+        Integer getSkillRefId()
         String getQuizName()
         String getQuizId()
     }
 
+    static interface ProjectIdAndSkillId {
+        String getProjectId()
+        String getSkillId()
+    }
+
     @Nullable
-    @Query('''select q.quizId as quizId, q.name as quizName
+    @Query('''select q.quizId as quizId, q.name as quizName, qToS.skillRefId as skillRefId
             from QuizToSkillDef qToS, QuizDef q 
             where qToS.skillRefId = ?1
                 and q.id = qToS.quizRefId''')
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
+
+    @Nullable
+    @Query('''select skill.skillId as skillId, skill.projectId as projectId
+            from QuizToSkillDef qToS, SkillDef skill 
+            where qToS.quizRefId = ?1
+                and skill.id = qToS.skillRefId''')
+    List<ProjectIdAndSkillId> getSkillsForQuiz(Integer quizRefId)
+
+    @Nullable
+    @Query('''select q.quizId as quizId, q.name as quizName, qToS.skillRefId as skillRefId
+            from QuizToSkillDef qToS, QuizDef q 
+            where qToS.skillRefId in ?1
+                and q.id = qToS.quizRefId''')
+    List<QuizNameAndId> getQuizInfoSkillIdRef(List<Integer> skillIdRef)
 
     void deleteBySkillRefId(Integer skillRefId)
 }

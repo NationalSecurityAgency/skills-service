@@ -27,6 +27,8 @@ import {
     SpinnerPlugin,
     TooltipPlugin,
     FormTextareaPlugin,
+    CardPlugin,
+    OverlayPlugin,
 } from 'bootstrap-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -57,6 +59,8 @@ Vue.use(ProgressPlugin);
 Vue.use(SpinnerPlugin);
 Vue.use(TooltipPlugin);
 Vue.use(FormTextareaPlugin);
+Vue.use(CardPlugin);
+Vue.use(OverlayPlugin);
 Vue.use(FiltersPlugin);
 
 localize({

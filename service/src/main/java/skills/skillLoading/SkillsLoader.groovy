@@ -112,6 +112,9 @@ class SkillsLoader {
     DependencySummaryLoader dependencySummaryLoader
 
     @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
     NativeQueriesRepo nativeQueriesRepo
 
     @Autowired
@@ -510,6 +513,9 @@ class SkillsLoader {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
         }
 
+        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz ?
+            quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDef.id) : null
+
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
         String copiedFromProjectName = skillDef.copiedFromProjectId ? projDefRepo.getProjectName(skillDef.copiedFromProjectId).getProjectName() : null
 
@@ -536,7 +542,7 @@ class SkillsLoader {
                 dependencyInfo: skillDependencySummary,
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
-                selfReporting: loadSelfReporting(userId, skillDef),
+                selfReporting: loadSelfReporting(userId, skillDef, quizNameAndId),
                 type: skillDef.type,
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
@@ -549,7 +555,9 @@ class SkillsLoader {
         clientPrefService.saveOrUpdateProjPrefForCurrentUser(ClientPrefKey.LastViewedSkill, skillId, projectId)
     }
 
-    private SelfReportingInfo loadSelfReportingFromApproval(SkillApproval skillApproval, SkillDefParent skillDef) {
+    private SelfReportingInfo loadSelfReportingFromApproval(SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints) {
+        SkillApproval skillApproval = skillDefAndUserPoints.approval
+        SkillDefParent skillDef = skillDefAndUserPoints.skillDef
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.id,
                 enabled: skillDef.selfReportingType != null,
@@ -557,14 +565,16 @@ class SkillsLoader {
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
-                rejectionMsg: skillApproval?.rejectionMsg
+                rejectionMsg: skillApproval?.rejectionMsg,
+                quizId: skillDefAndUserPoints.quizId,
+                quizName: skillDefAndUserPoints.quizName,
         )
 
         return selfReportingInfo
     }
 
     @Profile
-    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef){
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef, QuizToSkillDefRepo.QuizNameAndId quizNameAndId){
         boolean enabled = skillDef.selfReportingType != null
         Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
         String queryProjId = skillDef.copiedFrom ? skillDef.copiedFromProjectId : skillDef.projectId
@@ -579,7 +589,9 @@ class SkillsLoader {
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
-                rejectionMsg: skillApproval?.rejectionMsg
+                rejectionMsg: skillApproval?.rejectionMsg,
+                quizId: quizNameAndId?.quizId,
+                quizName: quizNameAndId?.quizName,
         )
 
         return selfReportingInfo
@@ -1048,7 +1060,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? loadSelfReportingFromApproval(skillDefAndUserPoints?.approval, skillDef) : null,
+                        selfReporting: skillDef.selfReportingType ? loadSelfReportingFromApproval(skillDefAndUserPoints) : null,
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,

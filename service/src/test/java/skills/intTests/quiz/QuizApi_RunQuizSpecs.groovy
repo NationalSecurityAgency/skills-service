@@ -19,14 +19,12 @@ import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.storage.repos.QuizAnswerDefRepo
-import skills.storage.repos.QuizQuestionDefRepo
-import skills.storage.repos.UserQuizAnswerAttemptRepo
-import skills.storage.repos.UserQuizAttemptRepo
-import skills.storage.repos.UserQuizQuestionAttemptRepo
-import spock.lang.IgnoreRest
+import skills.storage.model.SkillDef
+import skills.storage.repos.*
 
-class QuizApiSpecs extends DefaultIntSpec {
+import static skills.intTests.utils.SkillsFactory.*
+
+class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
     @Autowired
     QuizQuestionDefRepo quizQuestionDefRepo
@@ -256,5 +254,35 @@ class QuizApiSpecs extends DefaultIntSpec {
         userQuizAttemptRepo.findAll() == []
         userQuizQuestionAttemptRepo.findAll() == []
         userQuizAnswerAttemptRepo.findAll() == []
+    }
+
+    def "passing quiz attempt gives skill credit"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createSkill(skillWithQuiz)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.associatedSkillResults.pointsEarned == [skillRes.totalPoints]
+        gradedQuizAttempt.associatedSkillResults.skillApplied == [true]
+
+        skillRes.points ==  skillRes.totalPoints
     }
 }

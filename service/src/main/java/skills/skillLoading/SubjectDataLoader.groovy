@@ -27,6 +27,7 @@ import skills.services.settings.SettingsService
 import skills.skillLoading.model.SkillDependencySummary
 import skills.skillLoading.model.SkillTag
 import skills.storage.model.*
+import skills.storage.repos.QuizToSkillDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -58,6 +59,9 @@ class SubjectDataLoader {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
     static class SkillsAndPoints {
         SkillDef skillDef
         int points
@@ -65,6 +69,8 @@ class SubjectDataLoader {
         String copiedFromProjectName
         String description
         Boolean isLastViewed
+        String quizId
+        String quizName
 
         SkillDependencySummary dependencyInfo
 
@@ -126,6 +132,7 @@ class SubjectDataLoader {
         skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleBadges(projectId, skillsAndPoints)
         skillsAndPoints = handleSkillTags(projectId, skillsAndPoints)
+        skillsAndPoints = handleSkillQuizInfo(projectId, skillsAndPoints)
 
         new SkillsData(childrenWithPoints: skillsAndPoints)
     }
@@ -168,6 +175,29 @@ class SubjectDataLoader {
                 it.tags = tagsById[it.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}?.sort { a, b -> a.tagValue <=> b.tagValue }
                 it.children.forEach{ child ->
                     child.tags = tagsById[child.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}?.sort { a, b -> a.tagValue <=> b.tagValue }
+                }
+            }
+        }
+        return skillsAndPoints;
+    }
+
+    @Profile
+    private List<SkillsAndPoints> handleSkillQuizInfo(String projectId, List<SkillsAndPoints> skillsAndPoints) {
+        if(projectId) {
+            List<SkillsAndPoints> quizBasedSkills = skillsAndPoints.findAll({ it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz})
+            if (quizBasedSkills) {
+                List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.id}
+                List<QuizToSkillDefRepo.QuizNameAndId> quizInfo = quizToSkillDefRepo.getQuizInfoSkillIdRef(skillRefIds)
+                Map<Integer, List<QuizToSkillDefRepo.QuizNameAndId>> bySkillRefId = quizInfo.groupBy() { it.getSkillRefId() }
+                quizBasedSkills.each {
+                    List<QuizToSkillDefRepo.QuizNameAndId> found = bySkillRefId[it.skillDef.id]
+                    if (found) {
+                        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = found.first()
+                        it.quizId = quizNameAndId.quizId
+                        it.quizName = quizNameAndId.quizName
+                    } else {
+                        log.error("Failed to find quiz for skill ref id [{}]. This is likely an issue with the data and a record is missing in the QuizToSkillDef or SkillDef's SelfReportingType.Quiz is not correct.", it.skillDef.id)
+                    }
                 }
             }
         }
