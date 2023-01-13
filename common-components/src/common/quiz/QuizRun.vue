@@ -31,7 +31,7 @@ limitations under the License.
         <slot name="splashPageTitle">
           You are about to begin the test!
         </slot>
-        <div class="mb-1 mt-4 quiz-name" style="font-size: 1.7rem">
+        <div class="mb-1 mt-4" style="font-size: 1.7rem">
           <span class="font-weight-bold text-success">{{ quizInfo.name }}</span>
         </div>
       </div>
@@ -255,9 +255,5 @@ limitations under the License.
 </script>
 
 <style scoped>
-.quiz-name {
-  animation: zoomIn; /* referring directly to the animation's @keyframe declaration */
-  animation-duration: 1s; /* don't forget to set a duration! */
-  animate-delay: 1.7s;
-}
+
 </style>

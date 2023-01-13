@@ -10,10 +10,10 @@
               @testWasTaken="testWasTaken"
       @cancelled="cancel">
       <template slot="splashPageTitle">
-        <div class="mb-1">
-          Earn the points for
+        <div class="mb-2">
+          <i class="fas fa-glass-cheers text-info" style="font-size: 1.5rem;"></i> You will earn <b-badge variant="success">{{ skill.points}}</b-badge> points for
           <span class="font-weight-bold text-primary" style="font-size: 1.2rem">{{ skill.skill }}</span>
-          skill <b-badge>immediately</b-badge> by passing this test.
+          skill by passing this test.
         </div>
       </template>
     </quiz-run>
@@ -39,6 +39,9 @@
       show(newValue) {
         this.$emit('input', newValue);
       },
+    },
+    mounted() {
+      console.log(this.skill);
     },
     methods: {
       cancel() {

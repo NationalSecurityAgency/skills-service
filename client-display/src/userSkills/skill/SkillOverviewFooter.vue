@@ -25,8 +25,25 @@ limitations under the License.
                   :disabled="selfReportDisabled"
                   @click="showSelfReportModal"
                   data-cy="selfReportBtn">
-            <i class="fas fa-check-square"></i> I did it
+            <i class="fas fa-check-square mr-1"></i>
+            <span v-if="isQuizSkill">Take Quiz</span>
+            <span v-else>I did it</span>
           </button>
+        </div>
+      </div>
+      <div v-if="isQuizSkill" class="col text-right">
+        <div class="font-italic text-secondary">
+          <i class="fas fa-user-edit text-info" style="font-size: 1.2rem;"></i>
+          Quiz Completion Required:
+        </div>
+        <div>
+          <b-button variant="link"
+                    tag="a"
+                    class="p-0"
+                  @click="showSelfReportModal"
+                  data-cy="quizLink">
+            <span class="font-weight-bold text-primary"  style="font-size: 1rem;">{{ skillInternal.selfReporting.quizName }}</span>
+          </b-button>
         </div>
       </div>
       <div v-if="isPendingApproval()" class="col text-right" data-cy="pendingApprovalStatus">
@@ -187,10 +204,13 @@ limitations under the License.
         const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.rejectedOn !== null && this.skillInternal.selfReporting.rejectedOn !== undefined;
         return res;
       },
+      isQuizSkill() {
+        return this.skillInternal.selfReporting.type === 'Quiz';
+      },
     },
     methods: {
       showSelfReportModal(event) {
-        if (this.skillInternal.selfReporting.type === 'Quiz') {
+        if (this.isQuizSkill) {
           this.quizModalVisible = true;
         } else {
           this.selfReportModalVisible = true;

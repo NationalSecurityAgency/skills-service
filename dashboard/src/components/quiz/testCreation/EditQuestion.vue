@@ -133,7 +133,7 @@ limitations under the License.
   import VueSelect from 'vue-select';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import MarkdownEditor from '@/components/utils/MarkdownEditor';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
 
   export default {

@@ -82,7 +82,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import InputSanitizer from '@/components/utils/InputSanitizer';
   import IdInput from '@/components/utils/inputForm/IdInput';
-  import MarkdownEditor from '@/components/utils/MarkdownEditor';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
 

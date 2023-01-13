@@ -149,7 +149,6 @@ limitations under the License.
     if (foundSkill) {
       foundSkill.description = desc;
       foundSkill.achievedOn = desc.achievedOn;
-      foundSkill.selfReporting = desc.selfReporting;
     }
   };
 
