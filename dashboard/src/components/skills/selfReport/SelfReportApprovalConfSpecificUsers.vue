@@ -45,41 +45,44 @@ limitations under the License.
       </div>
     </ValidationProvider>
 
-    <skills-b-table v-if="hadData" class="mt-3"
-                    :options="table.options" :items="table.items"
-                    tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                    data-cy="skillApprovalConfSpecificUsersTable">
-      <template v-slot:cell(userId)="data">
-        <div class="row" :data-cy="`userIdCell-${data.item.userId}`">
-          <div class="col">
-            {{ data.item.userIdForDisplay }}
+    <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
+    <div v-if="!loading">
+      <skills-b-table v-if="hadData" class="mt-3"
+                      :options="table.options" :items="table.items"
+                      tableStoredStateId="skillApprovalConfSpecificUsersTable"
+                      data-cy="skillApprovalConfSpecificUsersTable">
+        <template v-slot:cell(userId)="data">
+          <div class="row" :data-cy="`userIdCell-${data.item.userId}`">
+            <div class="col">
+              {{ data.item.userIdForDisplay }}
+            </div>
+            <div class="col-auto">
+              <b-button title="Delete Skill"
+                        variant="outline-danger"
+                        :aria-label="`Remove ${data.value} tag.`"
+                        @click="removeTagConf(data.item)"
+                        :disabled="data.item.deleteInProgress"
+                        data-cy="deleteBtn"
+                        size="sm">
+                <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
+                <i v-else class="fas fa-trash" aria-hidden="true"/>
+              </b-button>
+            </div>
           </div>
-          <div class="col-auto">
-            <b-button title="Delete Skill"
-                      variant="outline-danger"
-                      :aria-label="`Remove ${data.value} tag.`"
-                      @click="removeTagConf(data.item)"
-                      :disabled="data.item.deleteInProgress"
-                      data-cy="deleteBtn"
-                      size="sm">
-              <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
-              <i v-else class="fas fa-trash" aria-hidden="true"/>
-            </b-button>
-          </div>
-        </div>
-      </template>
-      <template v-slot:cell(updated)="data">
-        <date-cell :value="data.value" />
-      </template>
-    </skills-b-table>
+        </template>
+        <template v-slot:cell(updated)="data">
+          <date-cell :value="data.value" />
+        </template>
+      </skills-b-table>
 
-    <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                 class="my-5"
-                 data-cy="noUserConf"
-                 icon-size="fa-2x"
-                 icon="fas fa-user-plus">
-      You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
-    </no-content2>
+      <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                   class="my-5"
+                   data-cy="noUserConf"
+                   icon-size="fa-2x"
+                   icon="fas fa-user-plus">
+        You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+      </no-content2>
+    </div>
   </b-card>
 </template>
 
@@ -92,11 +95,12 @@ limitations under the License.
   import SelfReportApprovalConfMixin
     from '@/components/skills/selfReport/SelfReportApprovalConfMixin';
   import NoContent2 from '@/components/utils/NoContent2';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
     name: 'SelfReportApprovalConfSpecificUsers',
     components: {
-      NoContent2, DateCell, SkillsBTable, ExistingUserInput,
+      NoContent2, DateCell, SkillsBTable, ExistingUserInput, SkillsSpinner,
     },
     mixins: [SelfReportApprovalConfMixin],
     props: {
@@ -106,6 +110,7 @@ limitations under the License.
       return {
         projectId: this.$route.params.projectId,
         currentSelectedUser: null,
+        loading: false,
         table: {
           items: [],
           options: {
@@ -160,6 +165,7 @@ limitations under the License.
     },
     methods: {
       addConf() {
+        this.loading = true;
         const currentUserId = this.currentSelectedUser.dn ? this.currentSelectedUser.dn : this.currentSelectedUser.userId;
         SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, currentUserId)
           .then((res) => {
@@ -167,6 +173,8 @@ limitations under the License.
             this.$emit('conf-added', res);
             this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
             this.currentSelectedUser = null;
+          }).finally(() => {
+            this.loading = false;
           });
       },
       assignCustomValidation() {
