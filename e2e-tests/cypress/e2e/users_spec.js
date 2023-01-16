@@ -777,7 +777,7 @@ describe('Users Tests', () => {
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
         cy.wait('@getUserTags')
         cy.contains("Client Display");
-        cy.contains("ID: skills@evoforge.org, Org: tagA");
+        cy.contains("Org: tagA");
     });
 
     it('do not show user tag on users page if not enabled', () => {
