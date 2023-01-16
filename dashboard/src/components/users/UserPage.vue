@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="componentIsLoading" :options="headerOptions">
+    <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle" v-if="tags">
         {{tags}}
       </div>
@@ -47,40 +47,41 @@ limitations under the License.
         userIdForDisplay: '',
         isLoading: true,
         tags: '',
-        tagsLoading: true,
       };
-    },
-    mounted() {
-      if (this.$store.getters.config.userPageTagsToDisplay) {
-        UsersService.getUserTags(this.$route.params.userId).then((response) => {
-          this.tags = this.processUserTags(response);
-          this.tagsLoading = false;
-        });
-      }
     },
     created() {
       this.userTitle = this.$route.params.userId;
       this.userIdForDisplay = this.$route.params.userId;
+      let userTags;
+      let userDetails;
+
+      if (this.$store.getters.config.userPageTagsToDisplay) {
+        userTags = UsersService.getUserTags(this.$route.params.userId).then((response) => {
+          this.tags = this.processUserTags(response);
+        });
+      }
+
       if (this.$store.getters.isPkiAuthenticated) {
         UsersService.getUserInfo(this.$route.params.projectId, this.$route.params.userId)
           .then((result) => {
             this.userIdForDisplay = result.userIdForDisplay;
             this.userTitle = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
-            this.loadUserDetails();
+            userDetails = this.loadUserDetails();
           });
       } else {
-        this.loadUserDetails();
+        userDetails = this.loadUserDetails();
       }
-      this.loadUserDetails();
+      userDetails = this.loadUserDetails();
+
+      Promise.all([userTags, userDetails]).finally(() => {
+        this.isLoading = false;
+      });
     },
     computed: {
       ...mapGetters([
         'numSkills',
         'userTotalPoints',
       ]),
-      componentIsLoading() {
-        return this.isLoading || this.tagsLoading;
-      },
       headerOptions() {
         return {
           icon: 'fas fa-user skills-color-users',
@@ -103,11 +104,7 @@ limitations under the License.
         'loadUserDetailsState',
       ]),
       loadUserDetails() {
-        this.isLoading = true;
-        this.loadUserDetailsState({ projectId: this.$route.params.projectId, userId: this.$route.params.userId })
-          .finally(() => {
-            this.isLoading = false;
-          });
+        return this.loadUserDetailsState({ projectId: this.$route.params.projectId, userId: this.$route.params.userId });
       },
       processUserTags(userTags) {
         const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
