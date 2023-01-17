@@ -17,7 +17,13 @@ limitations under the License.
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle" v-if="tags">
-        {{tags}}
+        <span v-for="(tag, index) in tags" :key="index" class="text-muted">
+          <span>{{tag.label}}</span>:
+          <span v-for="(value, vIndex) in tag.value" :key="vIndex">
+            {{value}}<span v-if="vIndex < tag.value.length - 1">, </span>
+          </span>
+          <span v-if="index < tags.length - 1">; </span>
+        </span>
       </div>
     </page-header>
 
@@ -119,14 +125,17 @@ limitations under the License.
           });
         }
 
-        const tagStrings = [];
+        const processedTags = [];
         tags.forEach((tag) => {
-          const userTag = userTags.find((ut) => ut.key === tag.key);
+          const userTag = userTags.filter((ut) => ut.key === tag.key);
           if (userTag) {
-            tagStrings.push(`${tag.label}: ${userTag.value}`);
+            const values = userTag.map((ut) => ut.value);
+            if (values.length > 0) {
+              processedTags.push({ label: tag.label, value: values });
+            }
           }
         });
-        return tagStrings.join(', ');
+        return processedTags;
       },
       getNavItems() {
         const hasSubject = this.$route.params.subjectId || false;
