@@ -33,9 +33,6 @@ limitations under the License.
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-info btn-floating btn-lg" v-if="scrollDistance > 200" id="returnToTopButton" @click="scrollToTop">
-      <i class="fas fa-arrow-up"></i>
-    </button>
     <dashboard-footer />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
   </div>
@@ -69,7 +66,6 @@ limitations under the License.
       return {
         isLoading: false,
         isSupervisor: false,
-        scrollDistance: 0,
       };
     },
     computed: {
@@ -101,8 +97,6 @@ limitations under the License.
     },
     mounted() {
       this.registerToDisplayProgress();
-
-      window.addEventListener('scroll', this.handleScroll);
     },
     watch: {
       activeProjectId() {
@@ -127,12 +121,6 @@ limitations under the License.
       },
     },
     methods: {
-      handleScroll() {
-        this.scrollDistance = window.scrollY;
-      },
-      scrollToTop() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      },
       addCustomIconCSS() { // This must be done here AFTER authentication
         IconManagerService.refreshCustomIconCss(this.activeProjectId, this.isSupervisor);
       },
@@ -175,18 +163,6 @@ limitations under the License.
     --vs-search-input-placeholder-color: #adadad;
     --vs-dropdown-option--active-bg: #264653;
     --vs-dropdown-option--active-color: #FFFFFF;
-  }
-
-  #returnToTopButton {
-    position: fixed;
-    bottom: 70px;
-    right: 15px;
-    border-radius: 50px;
-    opacity: 0.6;
-  }
-
-  #returnToTopButton:hover {
-    opacity: 1;
   }
 
 </style>

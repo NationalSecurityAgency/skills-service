@@ -78,6 +78,7 @@ limitations under the License.
     <project-share-modal v-if="shareProjModal" v-model="shareProjModal"
                            :share-url="shareUrl"
                            @hidden="focusOnShareButton"/>
+    <scroll-to-top />
   </div>
 
 </template>
@@ -93,6 +94,7 @@ limitations under the License.
   import ProjectService from '@/components/projects/ProjectService';
   import ProjectShareModal from '@/components/projects/ProjectShareModal';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -106,6 +108,7 @@ limitations under the License.
       PageHeader,
       Navigation,
       EditProject,
+      ScrollToTop,
     },
     data() {
       return {
