@@ -40,8 +40,10 @@ import skills.services.UserAgreementResult
 import skills.services.UserAgreementService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserTagRepo
 
 @RestController
 @RequestMapping("/app")
@@ -66,6 +68,9 @@ class UserInfoController {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
@@ -251,5 +256,10 @@ class UserInfoController {
         return currentUser
     }
 
+    @RequestMapping(value="/userInfo/userTags/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<UserTag> getUserTags(@PathVariable("userId") String userId) {
+        return userTagRepo.findAllByUserId(userId)
+    }
 }
 

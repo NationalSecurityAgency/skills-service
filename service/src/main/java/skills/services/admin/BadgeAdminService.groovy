@@ -253,6 +253,8 @@ class BadgeAdminService {
 
         ruleSetDefGraphService.removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
                 projectId, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
+
+        awardBadgeToUsersMeetingRequirements(badge)
     }
 
     @Transactional(readOnly = true)

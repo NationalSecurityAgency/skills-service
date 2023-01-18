@@ -15,7 +15,17 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions"/>
+    <page-header :loading="isLoading" :options="headerOptions">
+      <div slot="subSubTitle" v-if="tags">
+        <span v-for="(tag, index) in tags" :key="index">
+          <span class="text-muted">{{tag.label}}:</span>
+          <span v-for="(value, vIndex) in tag.value" :key="vIndex">
+            {{value}}<span v-if="vIndex < tag.value.length - 1">, </span>
+          </span>
+          <span v-if="index < tags.length - 1">; </span>
+        </span>
+      </div>
+    </page-header>
 
     <navigation v-if="userIdForDisplay" :nav-items="getNavItems()">
     </navigation>
@@ -45,22 +55,36 @@ limitations under the License.
         userTitle: '',
         userIdForDisplay: '',
         isLoading: true,
+        tags: '',
       };
     },
     created() {
       this.userTitle = this.$route.params.userId;
       this.userIdForDisplay = this.$route.params.userId;
+      let userTags;
+      let userDetails;
+
+      if (this.$store.getters.config.userPageTagsToDisplay) {
+        userTags = UsersService.getUserTags(this.$route.params.userId).then((response) => {
+          this.tags = this.processUserTags(response);
+        });
+      }
+
       if (this.$store.getters.isPkiAuthenticated) {
         UsersService.getUserInfo(this.$route.params.projectId, this.$route.params.userId)
           .then((result) => {
             this.userIdForDisplay = result.userIdForDisplay;
             this.userTitle = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
-            this.loadUserDetails();
+            userDetails = this.loadUserDetails();
           });
       } else {
-        this.loadUserDetails();
+        userDetails = this.loadUserDetails();
       }
-      this.loadUserDetails();
+      userDetails = this.loadUserDetails();
+
+      Promise.all([userTags, userDetails]).finally(() => {
+        this.isLoading = false;
+      });
     },
     computed: {
       ...mapGetters([
@@ -89,11 +113,32 @@ limitations under the License.
         'loadUserDetailsState',
       ]),
       loadUserDetails() {
-        this.isLoading = true;
-        this.loadUserDetailsState({ projectId: this.$route.params.projectId, userId: this.$route.params.userId })
-          .finally(() => {
-            this.isLoading = false;
+        return this.loadUserDetailsState({ projectId: this.$route.params.projectId, userId: this.$route.params.userId });
+      },
+      processUserTags(userTags) {
+        const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
+        const tags = [];
+        if (userPageTags) {
+          const tagSections = userPageTags.split('|');
+          tagSections.forEach((section) => {
+            const [key, label] = section.split('/');
+            tags.push({
+              key, label,
+            });
           });
+        }
+
+        const processedTags = [];
+        tags.forEach((tag) => {
+          const userTag = userTags.filter((ut) => ut.key === tag.key);
+          if (userTag) {
+            const values = userTag.map((ut) => ut.value);
+            if (values.length > 0) {
+              processedTags.push({ label: tag.label, value: values });
+            }
+          }
+        });
+        return processedTags;
       },
       getNavItems() {
         const hasSubject = this.$route.params.subjectId || false;
