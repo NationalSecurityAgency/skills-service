@@ -724,6 +724,10 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getUserTags(String userId) {
+        String url = "/userInfo/userTags/${userId}"
+        wsHelper.appGet(url)
+    }
 
     def getCustomClientDisplayCss(String projectId = null){
         String url = projectId ? "/projects/${projectId}/customIconCss" : "/icons/customIconCss"
