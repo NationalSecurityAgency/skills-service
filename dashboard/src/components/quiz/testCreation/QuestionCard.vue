@@ -31,15 +31,23 @@ limitations under the License.
             <div class="px-2 py-1">
               <markdown-text :text="question.question"/>
 
-              <div class="mt-1 pl-1">
+              <div v-if="!isTextInputType" class="mt-1 pl-1">
                 <div v-for="(a) in question.answers" :key="a.id" class="row no-gutters">
-                  <div class="col-auto">
-                    <select-correct-answer :value="a.isCorrect" :read-only="true"
-                                           font-size="1.5rem"/>
+                  <div class="col-auto pb-1">
+                    <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
+                                           font-size="1.3rem"/>
                   </div>
-                  <div class="col pt-1 ml-2"><span class="mt-1 answerText">{{ a.answer }}</span>
+                  <div class="col ml-2 pb-1"><div class="answerText align-middle">{{ a.answer }}</div>
                   </div>
                 </div>
+              </div>
+              <div v-if="isTextInputType">
+                <b-form-textarea
+                  id="textarea"
+                  placeholder="Users will be required to enter text."
+                  :disabled="true"
+                  rows="2"
+                  max-rows="4"/>
               </div>
             </div>
           </b-col>
@@ -75,8 +83,17 @@ limitations under the License.
     name: 'QuestionCard',
     components: { MarkdownText, SelectCorrectAnswer },
     props: {
+      quizType: String,
       question: Object,
       questionNum: Number,
+    },
+    computed: {
+      isSingleChoiceType() {
+        return this.question.questionType === 'SingleChoice';
+      },
+      isTextInputType() {
+        return this.question.questionType === 'TextInput';
+      },
     },
   };
 </script>
@@ -109,7 +126,7 @@ limitations under the License.
 //}
 
 .answerText {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 </style>

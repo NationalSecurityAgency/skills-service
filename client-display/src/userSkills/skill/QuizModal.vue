@@ -28,7 +28,7 @@ limitations under the License.
         <div class="mb-2">
           <i class="fas fa-glass-cheers text-info" style="font-size: 1.5rem;"></i> You will earn <b-badge variant="success">{{ skill.points}}</b-badge> points for
           <span class="font-weight-bold text-primary" style="font-size: 1.2rem">{{ skill.skill }}</span>
-          skill by passing this test.
+          skill by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this test</span>.
         </div>
       </template>
     </quiz-run>
@@ -55,8 +55,10 @@ limitations under the License.
         this.$emit('input', newValue);
       },
     },
-    mounted() {
-      console.log(this.skill);
+    computed: {
+      isSurveySkill() {
+        return this.skill.selfReporting.type === 'Survey';
+      },
     },
     methods: {
       cancel() {

@@ -26,28 +26,38 @@ limitations under the License.
           <label for="projectIdInput">* Name</label>
           <ValidationProvider
             rules="required|minNameLength|maxQuizNameLength|uniqueName|customNameValidator"
+            :debounce="500"
             v-slot="{errors}"
-            name="Test Name">
+            name="Quiz Name">
             <input class="form-control" type="text" v-model="quizInternal.name"
                    v-on:input="updateQuizId"
                    v-on:keydown.enter="handleSubmit(saveQuiz)"
                    v-focus
-                   data-cy="testName"
-                   id="testNameInput"
+                   data-cy="quizName"
+                   id="quizNameInput"
                    :aria-invalid="errors && errors.length > 0"
-                   aria-errormessage="testNameError"
-                   aria-describedby="testNameError"/>
-            <small role="alert" class="form-text text-danger" data-cy="testNameError"
-                   id="testNameError">{{ errors[0] }}</small>
+                   aria-errormessage="quizNameError"
+                   aria-describedby="quizNameError"/>
+            <small role="alert" class="form-text text-danger" data-cy="quizNameError"
+                   id="quizNameError">{{ errors[0] }}</small>
           </ValidationProvider>
         </div>
 
-        <id-input type="text" label="Test ID" v-model="quizInternal.quizId"
+        <id-input type="text" label="Quiz ID" v-model="quizInternal.quizId"
                   additional-validation-rules="uniqueId"
                   v-on:keydown.enter.native="handleSubmit(updateProject)"
                   :next-focus-el="previousFocus"
                   @shown="tooltipShowing=true"
                   @hidden="tooltipShowing=false"/>
+
+        <div class="form-group mt-3">
+          <label id="quizTypeLabel" for="quizTypeInput">* Type:</label>
+          <b-form-select v-model="quizInternal.type"
+                         id="quizTypeInput"
+                         :options="quizTypeOptions"
+                         aria-labelledby="quizTypeLabel"
+                         data-cy="quizTypeSelector" required/>
+        </div>
 
         <label>Description</label>
         <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250"
@@ -106,6 +116,10 @@ limitations under the License.
         loading: false,
         show: this.value,
         quizInternal: {},
+        quizTypeOptions: [
+          { value: 'Quiz', text: 'Quiz' },
+          { value: 'Survey', text: 'Survey' },
+        ],
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
@@ -145,7 +159,7 @@ limitations under the License.
     },
     computed: {
       title() {
-        return this.isEdit ? 'Editing Existing Test' : 'New Test';
+        return this.isEdit ? 'Editing Existing Quiz' : 'New Quiz';
       },
     },
     methods: {
@@ -153,6 +167,7 @@ limitations under the License.
         this.quizInternal = {
           originalQuizId: quizDef.quizId,
           isEdit: this.isEdit,
+          type: quizDef.type ? quizDef.type : 'Quiz',
           ...quizDef,
         };
       },

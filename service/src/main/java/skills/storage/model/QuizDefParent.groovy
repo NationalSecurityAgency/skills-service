@@ -24,6 +24,10 @@ import javax.persistence.*
 @MappedSuperclass
 class QuizDefParent implements Serializable {
 
+    static enum QuizType {
+        Quiz, Survey,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
@@ -31,6 +35,9 @@ class QuizDefParent implements Serializable {
     String quizId
 
     String name
+
+    @Enumerated(EnumType.STRING)
+    QuizType type
 
     @Column(name="created", updatable = false, insertable = false)
     Date created

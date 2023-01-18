@@ -16,24 +16,16 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
-import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
-import skills.controller.result.model.QuizDefResult
-import skills.controller.result.model.QuizMetrics
-import skills.controller.result.model.QuizQuestionDefResult
-import skills.controller.result.model.QuizSettingsRes
-import skills.controller.result.model.RequestResult
+import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
-import skills.quizLoading.model.QuizAttemptReq
 import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
@@ -61,6 +53,7 @@ class QuizController {
         return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
     }
 
+
     @RequestMapping(value = "/{quizId}", method = RequestMethod.DELETE)
     void deleteProject(@PathVariable("quizId") String quizId) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
@@ -71,6 +64,12 @@ class QuizController {
     @ResponseBody
     QuizDefResult getQuizDef(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuizDef(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    QuizDefSummaryResult getQuizSummary(@PathVariable("quizId") String quizId) {
+        return quizDefService.getQuizDefSummary(quizId)
     }
 
     @RequestMapping(value = "/{quizId}/questions/create", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -96,7 +95,7 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
-    List<QuizQuestionDefResult> getQuestionDefs(@PathVariable("quizId") String quizId) {
+    QuizQuestionsResult getQuestionDefs(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuestionDefs(quizId)
     }
 

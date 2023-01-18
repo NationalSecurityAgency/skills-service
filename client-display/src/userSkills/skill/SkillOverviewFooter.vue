@@ -27,14 +27,15 @@ limitations under the License.
                   data-cy="selfReportBtn">
             <i class="fas fa-check-square mr-1"></i>
             <span v-if="isQuizSkill">Take Quiz</span>
-            <span v-else>I did it</span>
+            <span v-if="isSurveySkill">Complete Survey</span>
+            <span v-if="!isQuizOrSurveySkill">I did it</span>
           </button>
         </div>
       </div>
-      <div v-if="isQuizSkill" class="col text-right">
+      <div v-if="isQuizOrSurveySkill" class="col text-right">
         <div class="font-italic text-secondary">
-          <i class="fas fa-user-edit text-info" style="font-size: 1.2rem;"></i>
-          Quiz Completion<span v-if="!selfReportDisabled"> Required</span>:
+          <i class="fas fa-user-edit text-info mr-1" style="font-size: 1.2rem;"></i>
+          <span v-if="isQuizSkill">Quiz</span><span v-if="isSurveySkill">Survey</span> Completion<span v-if="!selfReportDisabled"> Required</span>:
         </div>
         <div>
           <span v-if="selfReportDisabled"
@@ -207,12 +208,18 @@ limitations under the License.
         return res;
       },
       isQuizSkill() {
-        return this.skillInternal.selfReporting.type === 'Quiz';
+        return this.skillInternal && this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'Quiz';
+      },
+      isSurveySkill() {
+        return this.skillInternal && this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'Survey';
+      },
+      isQuizOrSurveySkill() {
+        return this.isQuizSkill || this.isSurveySkill;
       },
     },
     methods: {
       showSelfReportModal(event) {
-        if (this.isQuizSkill) {
+        if (this.isQuizOrSurveySkill) {
           this.quizModalVisible = true;
         } else {
           this.selfReportModalVisible = true;

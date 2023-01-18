@@ -20,4 +20,5 @@ class QuizQuestionInfo {
     String question
     Boolean canSelectMoreThanOne
     List<QuizAnswerOptionsInfo> answerOptions
+    String questionType
 }

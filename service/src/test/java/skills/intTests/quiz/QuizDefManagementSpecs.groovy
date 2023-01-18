@@ -20,6 +20,7 @@ import skills.auth.AuthUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.QuizDefParent
 
 @Slf4j
 class QuizDefManagementSpecs extends DefaultIntSpec {
@@ -39,6 +40,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         def newQuiz = skillsService.createQuizDef(quiz)
 
         def quizDefs = skillsService.getQuizDefs()
+        def quizDef = skillsService.getQuizDef(quiz.quizId)
+        def quizDefSummary = skillsService.getQuizDefSummary(quiz.quizId)
 
         then:
         newQuiz.body.quizId == quiz.quizId
@@ -46,6 +49,33 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         quizDefs.quizId == [quiz.quizId]
         quizDefs.name == [quiz.name]
+
+        quizDef.quizId == quiz.quizId
+        quizDef.name == quiz.name
+        quizDef.type == quiz.type
+
+        quizDefSummary.quizId == quiz.quizId
+        quizDefSummary.name == quiz.name
+        quizDefSummary.type == quiz.type
+        quizDefSummary.numQuestions == 0
+    }
+
+    def "create quiz-survey definition"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+
+        when:
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def quizDefs = skillsService.getQuizDefs()
+
+        then:
+        newQuiz.body.quizId == quiz.quizId
+        newQuiz.body.name == quiz.name
+        newQuiz.body.type == QuizDefParent.QuizType.Survey.toString()
+
+        quizDefs.quizId == [quiz.quizId]
+        quizDefs.name == [quiz.name]
+        quizDefs.type == [QuizDefParent.QuizType.Survey.toString()]
     }
 
     def "remove quiz definition"() {
@@ -171,9 +201,10 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDef(question2)
 
         when:
-        def questions = skillsService.getQuizQuestionDefs(quiz.quizId)
-
+        def res = skillsService.getQuizQuestionDefs(quiz.quizId)
+        def questions = res.questions
         then:
+        res.quizType == 'Quiz'
         questions.size() == 2
         questions[0].id
         questions[1].id
@@ -195,21 +226,41 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         when:
         def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
 
-        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes[2].id, 4)
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes.questions[2].id, 4)
         def qRes1 = skillsService.getQuizQuestionDefs(quiz.quizId)
 
-        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes[1].id, 0)
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes.questions[1].id, 0)
         def qRes2 = skillsService.getQuizQuestionDefs(quiz.quizId)
 
         then:
-        qRes.id == qRes.id
-        qRes.displayOrder == [0, 1, 2, 3, 4]
+        qRes.questions.displayOrder == [0, 1, 2, 3, 4]
 
-        qRes1.id == [qRes[0].id, qRes[1].id, qRes[3].id, qRes[4].id, qRes[2].id]
-        qRes1.displayOrder == [0, 1, 2, 3, 4]
+        qRes1.questions.id == [qRes.questions[0].id, qRes.questions[1].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
+        qRes1.questions.displayOrder == [0, 1, 2, 3, 4]
 
-        qRes2.id == [qRes[1].id, qRes[0].id, qRes[3].id, qRes[4].id, qRes[2].id]
-        qRes2.displayOrder == [0, 1, 2, 3, 4]
+        qRes2.questions.id == [qRes.questions[1].id, qRes.questions[0].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
+        qRes2.questions.displayOrder == [0, 1, 2, 3, 4]
+    }
+
+    def "get quiz definition summary"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        def quizDef = skillsService.getQuizDef(quiz.quizId)
+        def quizDefSummary = skillsService.getQuizDefSummary(quiz.quizId)
+
+        then:
+        quizDef.quizId == quiz.quizId
+        quizDef.name == quiz.name
+        quizDef.type == quiz.type
+
+        quizDefSummary.quizId == quiz.quizId
+        quizDefSummary.name == quiz.name
+        quizDefSummary.type == quiz.type
+        quizDefSummary.numQuestions == 5
     }
 
 }

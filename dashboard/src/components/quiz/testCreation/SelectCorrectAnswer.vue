@@ -16,8 +16,8 @@ limitations under the License.
 <template>
   <span v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0"
         aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}">
-    <i v-if="!selected" class="far fa-square" :style="{ 'font-size': fontSize }"></i>
-    <i v-if="selected" class="far fa-check-square text-success" :style="{ 'font-size': fontSize }"></i>
+    <i v-if="!selected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+    <i v-if="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
   </span>
 </template>
 
@@ -33,6 +33,10 @@ limitations under the License.
       fontSize: {
         type: String,
         default: '2.1rem',
+      },
+      isRadioIcon: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {

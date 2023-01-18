@@ -42,12 +42,12 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
     Boolean existsByQuizIdIgnoreCase(String quizId)
     Boolean existsByNameIgnoreCase(String quizName)
 
-    static interface QuizDefSummaryResult {
+    static interface QuizDefBasicResult {
         String getQuizId();
 
         String getName();
 
-        int getNumQuestions();
+        String getQuizType()
 
         Date getCreated();
     }
@@ -55,11 +55,30 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
                 SELECT 
                     qd.quiz_id AS quizId,
                     qd.name AS name,
+                    qd.type as quizType,
                     qd.created
                 FROM quiz_definition qd
                 JOIN user_roles ur on (ur.quiz_id = qd.quiz_id AND ur.role_name in ('ROLE_QUIZ_ADMIN'))
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)
     @Nullable
-    List<QuizDefSummaryResult> getQuizDefSummariesByUser(String userId)
+    List<QuizDefBasicResult> getQuizDefSummariesByUser(String userId)
+
+    static interface QuizDefSummaryRes {
+        String getName();
+        String getQuizType()
+        Date getCreated();
+        Integer getNumQuestions()
+    }
+    @Query(value="""
+                select 
+                    qd.name AS name,
+                    qd.type as quizType,
+                    qd.created as created,
+                    COALESCE(questions.questionCount, 0) as numQuestions
+                FROM quiz_definition qd
+                LEFT JOIN (SELECT max(quiz_id) as quiz_id, COUNT(id) AS questionCount FROM quiz_question_definition WHERE LOWER(quiz_id) = LOWER(?1)) questions ON questions.quiz_id = qd.quiz_id
+                WHERE qd.quiz_id = ?1
+            """, nativeQuery = true)
+    QuizDefSummaryRes getQuizDefSummary(String quizId)
 }

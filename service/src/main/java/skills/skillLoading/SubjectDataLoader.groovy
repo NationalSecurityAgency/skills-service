@@ -70,6 +70,7 @@ class SubjectDataLoader {
         String description
         Boolean isLastViewed
         String quizId
+        QuizDefParent.QuizType quizType
         String quizName
 
         SkillDependencySummary dependencyInfo
@@ -195,6 +196,7 @@ class SubjectDataLoader {
                         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = found.first()
                         it.quizId = quizNameAndId.quizId
                         it.quizName = quizNameAndId.quizName
+                        it.quizType = quizNameAndId.quizType
                     } else {
                         log.error("Failed to find quiz for skill ref id [{}]. This is likely an issue with the data and a record is missing in the QuizToSkillDef or SkillDef's SelfReportingType.Quiz is not correct.", it.skillDef.id)
                     }

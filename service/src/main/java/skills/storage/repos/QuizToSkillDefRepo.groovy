@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
+import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 
 interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
@@ -26,6 +27,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         Integer getSkillRefId()
         String getQuizName()
         String getQuizId()
+        QuizDefParent.QuizType getQuizType()
     }
 
     static interface ProjectIdAndSkillId {
@@ -34,7 +36,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     }
 
     @Nullable
-    @Query('''select q.quizId as quizId, q.name as quizName, qToS.skillRefId as skillRefId
+    @Query('''select q.quizId as quizId, q.name as quizName, q.type as quizType, qToS.skillRefId as skillRefId
             from QuizToSkillDef qToS, QuizDef q 
             where qToS.skillRefId = ?1
                 and q.id = qToS.quizRefId''')
@@ -48,7 +50,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     List<ProjectIdAndSkillId> getSkillsForQuiz(Integer quizRefId)
 
     @Nullable
-    @Query('''select q.quizId as quizId, q.name as quizName, qToS.skillRefId as skillRefId
+    @Query('''select q.quizId as quizId, q.name as quizName, q.type as quizType, qToS.skillRefId as skillRefId
             from QuizToSkillDef qToS, QuizDef q 
             where qToS.skillRefId in ?1
                 and q.id = qToS.quizRefId''')

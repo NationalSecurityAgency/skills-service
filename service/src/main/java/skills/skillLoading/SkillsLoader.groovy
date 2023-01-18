@@ -561,7 +561,7 @@ class SkillsLoader {
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.id,
                 enabled: skillDef.selfReportingType != null,
-                type: skillDef.selfReportingType,
+                type: skillDefAndUserPoints.quizType == QuizDefParent.QuizType.Survey ? 'Survey' : skillDef.selfReportingType.toString(),
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
@@ -585,7 +585,7 @@ class SkillsLoader {
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),
                 enabled: enabled,
-                type: skillDef.selfReportingType,
+                type: quizNameAndId?.quizType == QuizDefParent.QuizType.Survey ? 'Survey' : skillDef.selfReportingType.toString(),
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
@@ -666,15 +666,6 @@ class SkillsLoader {
                 href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                 achievedOn: it.getAchievedOn(),
                 type: it.getType(),
-                selfReporting: new SelfReportingInfo(
-                        approvalId: skillApproval?.getSkillApproval()?.getId(),
-                        type: it.getSelfReportingType(),
-                        justificationRequired: Boolean.valueOf(it.justificationRequired),
-                        enabled: it.getSelfReportingType() != null,
-                        requestedOn: skillApproval?.getSkillApproval()?.getRequestedOn()?.time,
-                        rejectedOn: skillApproval?.getSkillApproval()?.getRejectedOn()?.time,
-                        rejectionMsg: skillApproval?.getSkillApproval()?.getRejectionMsg()
-                )
         )
         skillDescription
     }

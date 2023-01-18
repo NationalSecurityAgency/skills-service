@@ -41,7 +41,7 @@ limitations under the License.
                   </div>
                 </div>
               </template>
-              <question-card :question="q" :question-num="index+1"></question-card>
+              <question-card :question="q" :quiz-type="quizType" :question-num="index+1"></question-card>
             </b-overlay>
             <!--        <hr v-if="index + 1 < questions.length"/>-->
           </div>
@@ -86,6 +86,7 @@ limitations under the License.
       return {
         isLoading: false,
         quizId: this.$route.params.quizId,
+        quizType: null,
         questions: [],
         editQuestionInfo: {
           showDialog: false,
@@ -119,7 +120,7 @@ limitations under the License.
           id: null,
           question: '',
           type: 'MultipleChoice',
-          graded: true,
+          quizType: this.quizType,
           answers: [{
             id: null,
             answer: '',
@@ -136,7 +137,8 @@ limitations under the License.
         this.isLoading = true;
         QuizService.getQuizQuestionDefs(this.quizId)
           .then((res) => {
-            this.questions = res;
+            this.questions = res.questions;
+            this.quizType = res.quizType;
           })
           .finally(() => {
             this.isLoading = false;

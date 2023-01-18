@@ -15,10 +15,13 @@
  */
 package skills.controller.result.model
 
+import skills.storage.model.QuizDefParent
+
 class QuizDefResult {
 
     String quizId
     String name
+    QuizDefParent.QuizType type
     String description
 
     Date created

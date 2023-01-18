@@ -15,10 +15,12 @@
  */
 package skills.quizLoading.model
 
+
 class QuizInfo {
     String name
     String description
     Boolean isAttemptAlreadyInProgress
+    String quizType
 
     List<QuizQuestionInfo> questions
 }

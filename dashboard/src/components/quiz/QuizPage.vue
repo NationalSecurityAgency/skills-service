@@ -15,15 +15,15 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="subSubTitle" v-if="quiz">
+    <page-header :loading="loadingQuizSummary" :options="headerOptions">
+      <div slot="subSubTitle">
         <b-button-group class="mt-1" size="sm">
           <b-button ref="editQuizButton"
                     class="btn btn-outline-primary"
                     size="sm"
                     variant="outline-primary"
                     data-cy="btn_edit-quiz"
-                    :aria-label="'edit Quiz '+ quiz.quizId">
+                    :aria-label="`edit Quiz ${quizId}`">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
           <b-button ref="shareProjectButton"
@@ -33,16 +33,16 @@ limitations under the License.
                     :aria-label="`Share ${quizId} quiz with users`">
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
-          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
+          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId }, query: { preview: 'true' }}"
                     data-cy="quizPreview"
-                    variant="outline-primary" :aria-label="'preview client display for project'+quiz.name">
+                    variant="outline-primary" :aria-label="`Preview Quiz ${quizId}`">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
       </div>
     </page-header>
 
-    <navigation v-if="!isLoading" :nav-items="[
+    <navigation v-if="!loadingQuizSummary" :nav-items="[
           {name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers'},
           {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics'},
@@ -53,8 +53,11 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import Navigation from '@/components/utils/Navigation';
   import PageHeader from '@/components/utils/pages/PageHeader';
+
+  const { mapActions, mapGetters } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizPage',
@@ -66,31 +69,43 @@ limitations under the License.
       return {
         isLoading: false,
         quizId: this.$route.params.quizId,
-        quiz: {
-          name: 'My First Cool Quiz',
-          quizId: 'myFirstCoolQuiz',
-          numQuestions: 12,
-          createdOn: 1626892932373,
-          live: true,
-        },
       };
     },
     computed: {
+      ...mapGetters([
+        'quizSummary',
+        'loadingQuizSummary',
+      ]),
       headerOptions() {
-        if (!this.quiz) {
+        if (!this.quizSummary) {
           return {};
         }
+        const isSurvey = this.quizSummary.type === 'Survey';
+        const typeDesc = isSurvey ? 'Collect Info' : 'Graded Questions';
+        const typeIcon = isSurvey ? 'fas fa-chart-pie' : 'fas fa-tasks';
         return {
-          icon: 'fas fa-cubes skills-color-subjects',
-          title: `QUIZ: ${this.quiz.name}`,
-          subTitle: `ID: ${this.quiz.quizId}`,
+          icon: 'fas fa-spell-check skills-color-subjects',
+          title: `${this.quizSummary.name}`,
           stats: [{
+            label: 'Type',
+            preformatted: `<div class="h5 font-weight-bold mb-0">${this.quizSummary.type}</div>`,
+            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${typeDesc}</div>`,
+            icon: `${typeIcon} skills-color-points`,
+          }, {
             label: 'Questions',
-            count: this.quiz.numQuestions,
+            count: this.quizSummary.numQuestions,
             icon: 'fas fa-graduation-cap skills-color-skills',
           }],
         };
       },
+    },
+    mounted() {
+      this.loadQuizSummary({ quizId: this.$route.params.quizId });
+    },
+    methods: {
+      ...mapActions([
+        'loadQuizSummary',
+      ]),
     },
   };
 </script>

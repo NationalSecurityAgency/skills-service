@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+import dayjs from 'dayjs';
+import utcPlugin from 'dayjs/plugin/utc';
 
-class QuizAttemptStartResult {
-    static class AnswerIdAndEnteredText {
-        Integer answerId
-        String answerText
-    }
+dayjs.extend(utcPlugin);
 
-    Integer id
-    Boolean inProgressAlready = false
-    // only applicable if there is already attempt in-progress
-    List<Integer> selectedAnswerIds
-    List<AnswerIdAndEnteredText> enteredText
-}
+describe('Quiz Metrics Tests', () => {
+
+    beforeEach(() => {
+
+    });
+
+    it('change quiz type', function () {
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+    });
+
+
+
+});

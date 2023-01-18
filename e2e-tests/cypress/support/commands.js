@@ -184,6 +184,7 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
     cy.request('POST', `/app/quiz-definitions/quiz${quizNum}/`, Object.assign({
         quizId: `quizId${quizNum}`,
         name: `This is quiz ${quizNum}`,
+        type: 'Quiz',
         description: `What a cool quiz #${quizNum}this is! Thank you for taking it!`
     }, overrideProps));
 });

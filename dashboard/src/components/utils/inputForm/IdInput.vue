@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationProvider :rules="rules" v-slot="{ errors }" :name="label" ref="idVp">
+  <ValidationProvider :rules="rules" v-slot="{ errors }" :debounce="500" :name="label" ref="idVp">
     <div class="form-group mt-0 mb-0">
       <div class="row">
         <div class="col">

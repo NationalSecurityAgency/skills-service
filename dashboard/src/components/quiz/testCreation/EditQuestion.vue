@@ -40,7 +40,7 @@ limitations under the License.
           <span class="font-weight-bold text-primary">Answers:</span>
         </div>
 
-        <div class="row mb-2 no-gutters">
+        <div v-if="isSurveyType" class="row mb-2 no-gutters">
           <div class="col">
             <vue-select :options="questionType.options"
                         :clearable="false"
@@ -53,22 +53,24 @@ limitations under the License.
               </template>
             </vue-select>
           </div>
-          <div class="col-auto ml-1">
-            <div class="border rounded form-control">
-              <span class="font-italic">Graded:</span> <b-form-checkbox v-model="questionDefInternal.graded" name="check-button" class="d-inline-block" switch>
-            </b-form-checkbox>
-            </div>
-          </div>
         </div>
 
-        <div class="pl-3">
-          <div class="mb-1">
-            <span class="text-secondary">Check the correct answer(s) on the left:</span>
+        <div v-if="isQuestionTypeTextInput" class="pl-3">
+          <b-form-textarea
+            id="textarea"
+            placeholder="Users will be required to enter text."
+            :disabled="true"
+            rows="3"
+            max-rows="6"/>
+        </div>
+        <div v-if="!isQuestionTypeTextInput" class="pl-3">
+          <div class="mb-1" v-if="isQuizType">
+            <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
           </div>
           <div v-for="(answer, index) in questionDefInternal.answers" :key="index">
             <div class="row no-gutters mt-2">
               <div class="col-auto">
-                <select-correct-answer v-model="answer.isCorrect" class="mr-2" @selected="updateNumQuestionWithContent"/>
+                <select-correct-answer v-if="isQuizType" v-model="answer.isCorrect" class="mr-2" @selected="updateNumQuestionWithContent"/>
               </div>
               <div class="col">
                   <input class="form-control" type="text" v-model="answer.answer"
@@ -102,7 +104,7 @@ limitations under the License.
             <div v-if="customValidation.numAnswersWithContent < 2">
               <i class="fas fa-exclamation-triangle" /> Must enter at least <b-badge>2</b-badge> answers.
             </div>
-            <div v-if="!customValidation.atLeastOneCorrectAnswerSelected" class="mt-2">
+            <div v-if="!customValidation.passedAtLeastOneCorrectAnswerSelected" class="mt-2">
               <i class="fas fa-exclamation-triangle" /> Must select at least <b-badge>1</b-badge> correct answer!
             </div>
             <div v-if="customValidation.emptyQuestionSetToBeCorrect" class="mt-2">
@@ -163,8 +165,12 @@ limitations under the License.
             id: 'MultipleChoice',
             icon: 'fas fa-tasks',
           }, {
+            label: 'Single Choice',
+            id: 'SingleChoice',
+            icon: 'far fa-check-square',
+          }, {
             label: 'Input Text',
-            id: 'InputText',
+            id: 'TextInput',
             icon: 'far fa-keyboard',
           }],
           selectedType: {
@@ -209,8 +215,20 @@ limitations under the License.
       },
     },
     computed: {
+      isSurveyType() {
+        return this.questionDef.quizType === 'Survey';
+      },
+      isQuizType() {
+        return this.questionDef.quizType === 'Quiz';
+      },
+      isQuestionTypeTextInput() {
+        return this.questionType.selectedType.id === 'TextInput';
+      },
+      quizType() {
+        return this.questionDef.quizType;
+      },
       title() {
-        return this.isEdit ? 'Editing Existing Question' : 'New Question';
+        return this.isEdit ? `Editing Existing ${this.quizType} Question` : `New ${this.quizType} Question`;
       },
       twoOrLessQuestions() {
         const { answers } = this.questionDefInternal;
@@ -231,6 +249,9 @@ limitations under the License.
           ...questionDef,
         };
       },
+      selectSurveyQuestionType(selected) {
+        this.surveyInfo.selectedType = selected.id;
+      },
       addNewAnswer(index) {
         const newQuestion = {
           id: null,
@@ -244,23 +265,26 @@ limitations under the License.
       },
       updateNumQuestionWithContent() {
         let numAnswersWithContent = 0;
-        let atLeastOneCorrectAnswerSelected = false;
+        let passedAtLeastOneCorrectAnswerSelected = false;
         let emptyQuestionSetToBeCorrect = false;
         const { answers } = this.questionDefInternal;
         if (answers) {
           numAnswersWithContent = answers.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
-          atLeastOneCorrectAnswerSelected = answers.find((a) => a.isCorrect) !== undefined;
+          passedAtLeastOneCorrectAnswerSelected = this.isSurveyType || answers.find((a) => a.isCorrect) !== undefined;
           emptyQuestionSetToBeCorrect = answers.find((a) => a.isCorrect && (!a.answer || a.answer.trim().length === 0)) !== undefined;
         }
         this.customValidation.numAnswersWithContent = numAnswersWithContent;
-        this.customValidation.atLeastOneCorrectAnswerSelected = atLeastOneCorrectAnswerSelected;
+        this.customValidation.passedAtLeastOneCorrectAnswerSelected = passedAtLeastOneCorrectAnswerSelected;
         this.customValidation.emptyQuestionSetToBeCorrect = emptyQuestionSetToBeCorrect;
         if (this.customValidation.startUpdatingShowFlag) {
           this.customValidation.show = !this.isCustomValidationValid();
         }
       },
       isCustomValidationValid() {
-        return this.customValidation.numAnswersWithContent >= 2 && this.customValidation.atLeastOneCorrectAnswerSelected && !this.customValidation.emptyQuestionSetToBeCorrect;
+        if (this.isQuestionTypeTextInput) {
+          return true;
+        }
+        return this.customValidation.numAnswersWithContent >= 2 && this.customValidation.passedAtLeastOneCorrectAnswerSelected && !this.customValidation.emptyQuestionSetToBeCorrect;
       },
       closeMe(e) {
         this.show = false;

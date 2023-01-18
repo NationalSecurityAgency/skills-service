@@ -56,4 +56,40 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillRes.selfReporting.quizName == quiz.name
     }
 
+    def "return survey information with the skills"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(1)
+
+        when:
+        def skillsRes = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId)
+        def skillRes = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills[0].skillId)
+        then:
+        skillsRes.skills[0].selfReporting.type == "Survey"
+        skillsRes.skills[0].selfReporting.quizId == quiz.quizId
+        skillsRes.skills[0].selfReporting.quizName == quiz.name
+        !skillsRes.skills[1].selfReporting
+        !skillsRes.skills[2].selfReporting
+
+        skillRes.selfReporting.type == "Survey"
+        skillRes.selfReporting.quizId == quiz.quizId
+        skillRes.selfReporting.quizName == quiz.name
+    }
+
 }

@@ -26,13 +26,24 @@ limitations under the License.
     <div class="col">
       <markdown-text :text="q.question"/>
 
-      <div v-if="q.canSelectMoreThanOne" class="text-secondary font-italic small">(Select <b>all</b> that apply)</div>
-      <div class="mt-1 pl-1">
-        <div v-for="a in answerOptions" :key="a.id">
-          <quiz-run-answer
-              :a="a"
-              :can-select-more-than-one="q.canSelectMoreThanOne"
-              @selection-changed="selectionChanged"/>
+      <div v-if="isTextInput">
+        <b-form-textarea
+            id="textarea"
+            v-model="answerText"
+            debounce="500"
+            placeholder="Please enter your response here..."
+            rows="2"
+            max-rows="20"/>
+      </div>
+      <div v-else>
+        <div v-if="isMultipleChoice" class="text-secondary font-italic small">(Select <b>all</b> that apply)</div>
+        <div class="mt-1 pl-1">
+          <div v-for="a in answerOptions" :key="a.id">
+            <quiz-run-answer
+                :a="a"
+                :can-select-more-than-one="isMultipleChoice"
+                @selection-changed="selectionChanged"/>
+          </div>
         </div>
       </div>
     </div>
@@ -53,12 +64,41 @@ limitations under the License.
     data() {
       return {
         answerOptions: [],
+        answerText: '',
       };
     },
     mounted() {
       this.answerOptions = this.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
+      if (this.isTextInput) {
+        const existingAnswerText = this.q.answerOptions[0].answerText;
+        this.answerText = existingAnswerText || '';
+      }
+    },
+    watch: {
+      answerText() {
+        this.textAnswerChanged();
+      },
+    },
+    computed: {
+      isMultipleChoice() {
+        return this.q.questionType === 'MultipleChoice';
+      },
+      isSingleChoice() {
+        return this.q.questionType === 'SingleChoice';
+      },
+      isTextInput() {
+        return this.q.questionType === 'TextInput';
+      },
     },
     methods: {
+      textAnswerChanged() {
+        // only 1 answer in case of TextInput
+        const selectedAnswerIds = this.answerOptions.map((a) => a.id);
+        const currentAnswer = {
+          questionId: this.q.id, selectedAnswerIds, changedAnswerId: this.answerOptions[0].id, changedAnswerIdSelected: true, answerText: this.answerText,
+        };
+        this.$emit('answer-text-changed', currentAnswer);
+      },
       selectionChanged(selectedStatus) {
         this.answerOptions = this.answerOptions.map((a) => {
           const isThisId = a.id === selectedStatus.id;

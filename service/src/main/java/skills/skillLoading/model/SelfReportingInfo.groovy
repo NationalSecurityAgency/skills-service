@@ -23,7 +23,7 @@ class SelfReportingInfo {
 
     boolean enabled
     boolean justificationRequired
-    SkillDef.SelfReportingType type
+    String type
 
     // only applicable to when selfReportingType == SelfReportingType.Approval
     Long requestedOn

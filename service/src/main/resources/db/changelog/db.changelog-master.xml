@@ -1969,6 +1969,9 @@
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
 
             <column name="description" type="text"/>
 
@@ -2050,9 +2053,7 @@
             <column name="question_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="answer" type="text">
-                <constraints nullable="false"/>
-            </column>
+            <column name="answer" type="text" />
             <column name="is_correct_answer" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -2193,6 +2194,7 @@
             <column name="quiz_answer_definition_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="answer" type="text" />
 
             <column name="user_id" type="varchar(255)">
                 <constraints nullable="false"/>

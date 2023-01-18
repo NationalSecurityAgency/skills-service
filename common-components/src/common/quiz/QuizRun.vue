@@ -29,14 +29,15 @@ limitations under the License.
     <b-card v-if="splashScreen.show" body-class="pl-4">
       <div class="h5">
         <slot name="splashPageTitle">
-          You are about to begin the test!
+          <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+          <span v-else>You are about to begin the quiz!</span>
         </slot>
         <div class="mb-1 mt-4" style="font-size: 1.7rem">
           <span class="font-weight-bold text-success">{{ quizInfo.name }}</span>
         </div>
       </div>
 
-      <div class="row">
+      <div v-if="!isSurveyType" class="row">
 <!--        <div class="col"></div>-->
         <div class="col-auto">
           <b-card class="text-center" body-class="pt-2 pb-1">
@@ -59,13 +60,31 @@ limitations under the License.
         <markdown-text :text="quizInfo.description" />
       </p>
 
-      <div class="mt-4 text-center">
+      <div class="mt-4">
         <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
         <b-button variant="outline-success" @click="startQuizAttempt" class="text-uppercase"><i class="fas fa-play-circle"> Start</i></b-button>
       </div>
     </b-card>
 
-    <b-card v-if="quizResult && !splashScreen.show" class="mb-3" body-class="text-center">
+    <b-card v-if="isSurveyType && quizResult && !splashScreen.show" class="mb-3" body-class="text-center pt-5">
+      <div class="mb-3 mt-2">
+        <i class="fas fa-chart-pie text-info" style="font-size: 6rem;"></i>
+      </div>
+      <div class="h4 text-success font-weight-bold">
+        {{ quizInfo.name }}
+      </div>
+      <div class="h3 font-weight-bold text-uppercase text-secondary mt-3">
+        All done!
+      </div>
+      <div class="h5 text-secondary">
+        Thank you for taking the time to complete the survey!
+      </div>
+      <div class="mt-5">
+        <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold"><i class="fas fa-times-circle"></i> Close</b-button>
+      </div>
+    </b-card>
+
+    <b-card v-if="!isSurveyType && quizResult && !splashScreen.show" class="mb-3" body-class="text-center">
       <div>Thank you completing <span class="text-primary font-weight-bold">{{ quizInfo.name }}</span> test!</div>
       <div class="h2 mt-4 mb-3 text-uppercase">
         <span v-if="quizResult.gradedRes.passed" class="text-success"><i class="fas fa-check-double"></i> Passed</span>
@@ -106,9 +125,9 @@ limitations under the License.
       </div>
     </b-card>
 
-    <b-card v-if="!splashScreen.show" body-class="pl-5" class="mb-4">
+    <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult)" body-class="pl-5" class="mb-4">
       <div v-for="(q, index) in quizInfo.questions" :key="q.id">
-        <quiz-run-question :q="q" :num="index" @selected-answer="updateSelectedAnswers"/>
+        <quiz-run-question :q="q" :num="index" @selected-answer="updateSelectedAnswers" @answer-text-changed="updateSelectedAnswers"/>
       </div>
 
       <div v-if="notEveryQuestionHasAnAnswer" class="alert alert-danger text-center">
@@ -156,6 +175,11 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
+    computed: {
+      isSurveyType() {
+        return this.quizInfo.quizType === 'Survey';
+      },
+    },
     methods: {
       loadData() {
         this.isLoading = true;
@@ -176,13 +200,21 @@ limitations under the License.
         QuizRunService.startQuizAttempt(this.quizId)
           .then((startQuizAttemptRes) => {
             this.quizAttemptId = startQuizAttemptRes.id;
-            const { selectedAnswerIds } = startQuizAttemptRes;
+            const { selectedAnswerIds, enteredText } = startQuizAttemptRes;
             const copy = ({ ...this.quizInfo });
             copy.questions = this.quizInfo.questions.map((q) => {
               const answerOptions = q.answerOptions.map((a) => ({
                   ...a,
                   selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
               }));
+              if (enteredText && q.questionType === 'TextInput') {
+                const answerId = q.answerOptions[0].id;
+                const enteredTextObj = enteredText.find((t) => t.answerId === answerId);
+                if (enteredTextObj) {
+                  // eslint-disable-next-line no-param-reassign
+                  answerOptions[0].answerText = enteredTextObj.answerText;
+                }
+              }
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
@@ -198,7 +230,7 @@ limitations under the License.
           this.notEveryQuestionHasAnAnswer = false;
         }
         this.questionsWithAnswersSelected = res;
-        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId, questionSelectedAnswer.changedAnswerIdSelected));
+        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId, questionSelectedAnswer.changedAnswerIdSelected, questionSelectedAnswer.answerText));
       },
       completeTestRun() {
         const everyQuestionHasAnswer = this.questionsWithAnswersSelected.length === this.quizInfo.questions.length;

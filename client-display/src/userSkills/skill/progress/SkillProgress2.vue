@@ -70,7 +70,8 @@ limitations under the License.
 
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
                   variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden self-report-badge"><i class="fas fa-user-check mr-1"></i><span class="sr-spelled-out mr-1">Self Reportable:</span>
-                <span v-if="skill.selfReporting.type === 'Quiz'"><span class="sr-spelled-out mr-1">Take a</span>Quiz</span>
+                <span v-if="skill.selfReporting.type === 'Quiz'"><span class="sr-spelled-out mr-1">Take </span>Quiz</span>
+                <span v-if="skill.selfReporting.type === 'Survey'"><span class="sr-spelled-out mr-1">Complete </span>Survey</span>
                 <span v-if="skill.selfReporting.type === 'HonorSystem'">Honor<span class="sr-spelled-out ml-1">System</span></span>
                 <span v-if="skill.selfReporting.type === 'Approval'"><span class="sr-spelled-out mr-1">Request</span>Approval</span>
               </b-badge>

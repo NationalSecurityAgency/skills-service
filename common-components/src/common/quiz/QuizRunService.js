@@ -24,8 +24,8 @@ export default {
     return axios.post(`/api/quizzes/${quizId}/attempt`)
         .then((response) => response.data);
   },
-  reportAnswer(quizId, attemptId, answerId, isSelected) {
-    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { isSelected })
+  reportAnswer(quizId, attemptId, answerId, isSelected, answerText = null) {
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { isSelected, answerText })
         .then((response) => response.data);
   },
   completeQuizAttempt(quizId, attemptId) {

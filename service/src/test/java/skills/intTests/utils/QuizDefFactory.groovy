@@ -16,6 +16,7 @@
 package skills.intTests.utils
 
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.QuizDefParent
 
 class QuizDefFactory {
 
@@ -31,7 +32,11 @@ class QuizDefFactory {
     }
 
     static createQuiz(int quizNumber = 1, String description = null) {
-        return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), description: description]
+        return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), type: QuizDefParent.QuizType.Quiz.toString(), description: description]
+    }
+
+    static createQuizSurvey(int quizNumber = 1, String description = null) {
+        return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), type: QuizDefParent.QuizType.Survey.toString(), description: description]
     }
 
     static createMultipleChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2) {
@@ -40,19 +45,32 @@ class QuizDefFactory {
         }
     }
 
-    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
+    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, boolean isGraded = true, QuizQuestionType questionType = QuizQuestionType.MultipleChoice) {
         String question = "This is questions #${questionsNumber}".toString()
-        List answers = (1..numberOfAnswers).collect {
+        List answers = numberOfAnswers > 0 ? (1..numberOfAnswers).collect {
             return [
                     answer: "Answer #${it}".toString(),
-                    isCorrect: it == 1 ? true : false,
+                    isCorrect: it == 1 ? isGraded && true : false,
             ]
-        }
+        } : []
+
         return [
                 quizId  : getDefaultQuizId(quizNumber),
                 question: question,
-                questionType: QuizQuestionType.MultipleChoice.toString(),
+                questionType: questionType.toString(),
                 answers: answers,
         ]
+    }
+
+    static createMultipleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
+        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, false)
+    }
+
+    static createSingleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
+        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, false, QuizQuestionType.SingleChoice)
+    }
+
+    static createTextInputSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
+        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, 0, false, QuizQuestionType.TextInput)
     }
 }

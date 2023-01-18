@@ -53,12 +53,14 @@ limitations under the License.
       <template v-slot:cell(name)="data">
         <div class="row">
           <div class="col">
-            <div class="h5">{{ data.item.name }}
-              <b-badge v-if="data.item.live" variant="success" style="font-size: 0.9rem;"><i
-                class="fas fa-rocket"></i> Live
-              </b-badge>
+            <div class="h5">
+              <router-link :data-cy="`managesQuizLink_${data.item.quizId}`"
+                           :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
+                           :aria-label="`Manage Quiz ${data.item.name}`"
+                           tag="a">
+                {{ data.item.name }}
+              </router-link>
             </div>
-            <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.quizId }}</div>
           </div>
           <div class="col-auto text-right">
             <router-link :data-cy="`managesQuizBtn_${data.item.quizId}`"

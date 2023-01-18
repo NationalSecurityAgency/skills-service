@@ -15,30 +15,18 @@
  */
 package skills.controller
 
-import callStack.profiler.Profile
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
-import skills.auth.UserInfoService
+import org.springframework.web.bind.annotation.*
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
 import skills.controller.result.model.RequestResult
 import skills.quizLoading.QuizRunService
-import skills.quizLoading.model.QuizAttemptReq
 import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizInfo
 import skills.quizLoading.model.QuizReportAnswerReq
-import skills.skillLoading.model.OverallSkillSummary
-
-import javax.servlet.http.HttpServletRequest
 
 @CrossOrigin(allowCredentials = "true", originPatterns = ["*"])
 @RestController
@@ -56,14 +44,6 @@ class UserQuizController {
     @ResponseBody
     QuizInfo getQuizInfo(@PathVariable("quizId") String quizId) {
         return quizRunService.loadQuizInfo(quizId);
-    }
-
-    @RequestMapping(value = "/quizzes/{quizId}/attempt/old", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
-    @ResponseBody
-    @Deprecated
-    QuizGradedResult reportQuizAttempt(@PathVariable("quizId") String quizId,
-                                       @RequestBody QuizAttemptReq quizAttemptReq) {
-        return quizRunService.reportQuizAttempt(quizId, quizAttemptReq);
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

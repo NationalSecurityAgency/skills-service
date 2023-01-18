@@ -23,4 +23,6 @@ class QuizDefRequest {
     String description
     // this only considered in the update to support updating id
     String quizId
+
+    String type
 }

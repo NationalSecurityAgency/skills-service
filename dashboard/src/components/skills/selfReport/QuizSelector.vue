@@ -18,7 +18,7 @@ limitations under the License.
   <ValidationProvider rules="required" v-slot="{errors}" name="Test">
     <v-select :options="availableQuizzes"
               v-model="selectedInternal"
-              placeholder="Search and select from the available tests..."
+              placeholder="Search available quizzes and surveys..."
               :multiple="false"
               :filterable="true"
               label="name"
@@ -26,6 +26,20 @@ limitations under the License.
               @input="quizSelected"
               class="ml-2"
               data-cy="quizSelector">
+      <template #option="{ name, type }">
+        <span class="text-secondary">{{ type }}:</span><span class="h6 ml-2">{{ name }}</span>
+      </template>
+      <template #selected-option-container="{ option }">
+        <div class="p-1">
+          <span class="text-secondary">{{ option.type }}:</span><span class="ml-1">{{ option.name }}</span>
+        </div>
+      </template>
+      <template #no-options>
+        <div class="text-left pl-3 pb-2">
+          <div>You currently do not administer any quizzes or surveys.</div>
+          <div>Please navigate to the <router-link target="_blank" :to="{ name: 'QuizzesAndSurveys' }" class="skills-underline-container">Quizzes and Surveys <i class="fas fa-external-link-alt text-secondary" aria-hidden="true"></i></router-link> page to start creating.</div>
+        </div>
+      </template>
     </v-select>
     <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
   </ValidationProvider>
@@ -37,7 +51,7 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
 
   export default {
-    name: 'TestSelector',
+    name: 'QuizSelector',
     components: { vSelect },
     props: {
       initiallySelectedQuizId: {

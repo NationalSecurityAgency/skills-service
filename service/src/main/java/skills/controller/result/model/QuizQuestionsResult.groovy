@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+package skills.controller.result.model
 
-class QuizQuestionAttemptReq {
-    Integer questionId
-    List<Integer> selectedAnswerIds
+
+import skills.storage.model.QuizDefParent
+
+class QuizQuestionsResult {
+    QuizDefParent.QuizType quizType
+    List<QuizQuestionDefResult> questions
 }

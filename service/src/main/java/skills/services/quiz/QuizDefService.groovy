@@ -95,7 +95,7 @@ class QuizDefService {
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
-        List<QuizDefRepo.QuizDefSummaryResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
+        List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
             res.addAll(fromDb.collect {convert(it) })
         }
@@ -129,6 +129,20 @@ class QuizDefService {
         QuizDefWithDescription quizDefWithDescription = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         return convert(quizDefWithDescription)
     }
+
+    @Transactional(readOnly = true)
+    QuizDefSummaryResult getQuizDefSummary(String quizId) {
+        assert quizId
+        QuizDefRepo.QuizDefSummaryRes dbRes = quizDefRepo.getQuizDefSummary(quizId)
+        return new QuizDefSummaryResult(
+                quizId: quizId,
+                name: dbRes.getName(),
+                created: dbRes.getCreated(),
+                type: QuizDefParent.QuizType.valueOf(dbRes.getQuizType()),
+                numQuestions: dbRes.getNumQuestions()
+        )
+    }
+
     @Transactional()
     QuizDefResult saveQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userIdParam = null) {
         validateQuizDefRequest(newQuizId, quizDefRequest)
@@ -148,6 +162,7 @@ class QuizDefService {
         }
         if (quizDefWithDescription) {
             Props.copy(quizDefRequest, quizDefWithDescription)
+            quizDefWithDescription.type = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
             log.debug("Updating [{}]", quizDefWithDescription)
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
@@ -156,7 +171,7 @@ class QuizDefService {
             log.debug("Saved [{}]", quizDefWithDescription)
         } else {
             quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
-                    description: quizDefRequest.description)
+                    description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
             log.debug("Created project [{}]", quizDefWithDescription)
 
             String userId = userIdParam ?: userInfoService.getCurrentUserId()
@@ -180,30 +195,51 @@ class QuizDefService {
 
     @Transactional()
     QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest) {
-        validate(quizId, questionDefRequest)
         QuizDef quizDef = findQuizDef(quizId)
+        validate(quizDef, questionDefRequest)
 
         lockingService.lockQuizDef(quizDef.quizId)
 
         Integer maxExistingDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(quizDef.quizId)
         int displayOrder = maxExistingDisplayOrder != null ? maxExistingDisplayOrder + 1 : 0
 
+        QuizQuestionType questionType = questionDefRequest.questionType
+        if (!questionType || questionType != QuizQuestionType.TextInput) {
+            questionType = questionDefRequest.answers.count { it.isCorrect } > 1 ?
+                    QuizQuestionType.MultipleChoice : QuizQuestionType.SingleChoice
+        }
+
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
                 question: questionDefRequest.question,
-                type: questionDefRequest.questionType,
+                type: questionType,
                 displayOrder: displayOrder,
         )
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
 
-        List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
-            new QuizAnswerDef(
-                    quizId: quizDef.quizId,
-                    questionRefId: savedQuestion.id,
-                    answer: answerDefRequest.answer,
-                    isCorrectAnswer: answerDefRequest.isCorrect,
-                    displayOrder: index + 1,
-            )
+        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
+
+        List<QuizAnswerDef> answerDefs
+        if (isTextInputQuestion) {
+            answerDefs = [
+                    new QuizAnswerDef(
+                            quizId: quizDef.quizId,
+                            questionRefId: savedQuestion.id,
+                            answer: null,
+                            isCorrectAnswer: false,
+                            displayOrder: 1,
+                    )
+            ]
+        } else {
+            answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+                new QuizAnswerDef(
+                        quizId: quizDef.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: answerDefRequest.answer,
+                        isCorrectAnswer: answerDefRequest.isCorrect,
+                        displayOrder: index + 1,
+                )
+            }
         }
         List<QuizAnswerDef> savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
 
@@ -230,19 +266,22 @@ class QuizDefService {
     }
 
     @Transactional
-    List<QuizQuestionDefResult> getQuestionDefs(String quizId) {
+    QuizQuestionsResult getQuestionDefs(String quizId) {
+        QuizDef quizDef = findQuizDef(quizId)
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         if (!dbQuestionDefs){
-            return []
+            return new QuizQuestionsResult(quizType: quizDef.type, questions: [])
         }
 
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy {it.questionRefId }
 
-        return dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
+        List<QuizQuestionDefResult> questions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[quizQuestionDef.id]
             convert(quizQuestionDef, quizAnswerDefs)
         }.sort({ it.displayOrder })
+
+        return new QuizQuestionsResult(quizType: quizDef.type, questions: questions)
     }
 
     @Transactional
@@ -301,7 +340,7 @@ class QuizDefService {
         new QuizQuestionDefResult(
                 id: savedQuestion.id,
                 question: savedQuestion.question,
-                questionType: QuizQuestionType.valueOf(savedQuestion.type),
+                questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)},
                 displayOrder: savedQuestion.displayOrder,
         )
@@ -323,15 +362,28 @@ class QuizDefService {
         }
         return updatedDef
     }
-    private void validate(String quizId, QuizQuestionDefRequest questionDefRequest) {
+    private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
+        String quizId = quizDef.getQuizId()
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
-        QuizValidator.isNotNull(questionDefRequest.answers, "questions", quizId)
-        QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least answer", quizId)
-        questionDefRequest.answers.each {
-            QuizValidator.isNotBlank(it.answer, "questions.answer", quizId)
+
+        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
+        if (isTextInputQuestion) {
+            if (questionDefRequest.answers) {
+                throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
+            }
+        } else {
+            QuizValidator.isNotNull(questionDefRequest.answers, "questions", quizId)
+            questionDefRequest.answers.each {
+                QuizValidator.isNotBlank(it.answer, "questions.answer", quizId)
+            }
+            if (quizDef.type == QuizDefParent.QuizType.Quiz) {
+                QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least answer", quizId)
+                QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) != null, "For quiz.type of Quiz must set isCorrect=true on at least 1 question", quizId)
+            } else {
+                QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) == null, "All answers for a survey questions must set to isCorrect=false", quizId)
+            }
         }
-        QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) != null, "Must set isCorrect=true on at least 1 question", quizId)
 
     }
 
@@ -353,6 +405,7 @@ class QuizDefService {
     }
 
 
+    Set<String> availableQuizTypes = QuizDefParent.QuizType.values().collect({ it.toString() }).toSet()
     private void validateQuizDefRequest(String quizId, QuizDefRequest quizDefRequest) {
         IdFormatValidator.validate(quizId)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId Id", quizId)
@@ -360,6 +413,11 @@ class QuizDefService {
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxQuizNameLength, "Quiz Name", quizDefRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Quiz Name", quizDefRequest.name)
+
+        QuizValidator.isNotBlank(quizDefRequest.type, "Type")
+        if (!availableQuizTypes.contains(quizDefRequest.type)){
+            throw new SkillQuizException("No supported quiz type [${quizDefRequest.type}] please select one from ${availableQuizTypes}", quizId, ErrorCode.BadParam)
+        }
 
         if (!quizDefRequest?.name) {
             throw new SkillQuizException("Quiz name was not provided.", quizId, ErrorCode.BadParam)
@@ -371,8 +429,9 @@ class QuizDefService {
         }
     }
 
-    private QuizDefResult convert(QuizDefRepo.QuizDefSummaryResult quizDefSummaryResult) {
+    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult) {
         QuizDefResult result = Props.copy(quizDefSummaryResult, new QuizDefResult())
+        result.type = QuizDefParent.QuizType.valueOf(quizDefSummaryResult.getQuizType())
         result.displayOrder = 0 // todo
         return result
     }

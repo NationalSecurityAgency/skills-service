@@ -59,10 +59,10 @@ limitations under the License.
           <template>
             <div class="row m-0 no-gutters">
               <div class="col-12 col-lg-auto">
-                <b-form-radio class="" value="Quiz" :disabled="!selfReport.enabled">Take a Test</b-form-radio>
+                <b-form-radio class="" value="Quiz" :disabled="!selfReport.enabled">Quiz/Survey</b-form-radio>
               </div>
-              <div class="col">
-                <test-selector v-if="quizSelected" :initiallySelectedQuizId="skill.quizId" @changed="quizIdSelected"/>
+              <div class="col pl-2">
+                <quiz-selector v-if="quizSelected" :initiallySelectedQuizId="skill.quizId" @changed="quizIdSelected"/>
               </div>
             </div>
           </template>
@@ -99,11 +99,11 @@ limitations under the License.
 <script>
   import SelfReportService from '@/components/skills/selfReport/SelfReportService';
   import InlineHelp from '@/components/utils/InlineHelp';
-  import TestSelector from '@/components/skills/selfReport/TestSelector';
+  import QuizSelector from '@/components/skills/selfReport/QuizSelector';
 
   export default {
     name: 'SelfReportingTypeInput',
-    components: { TestSelector, InlineHelp },
+    components: { QuizSelector, InlineHelp },
     props: {
       value: String,
       skill: Object,

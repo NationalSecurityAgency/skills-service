@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import skills.services.quiz.QuizQuestionType
 
 import javax.persistence.*
 
@@ -36,7 +37,8 @@ class QuizQuestionDef {
     String quizId
 
     String question
-    String type
+    @Enumerated(EnumType.STRING)
+    QuizQuestionType type
 
     Integer displayOrder
 

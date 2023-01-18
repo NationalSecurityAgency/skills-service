@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <quiz-run v-if="quizId" :quiz-id="quizId" />
+  <quiz-run v-if="quizId" :quiz-id="quizId" @testWasTaken="navToProgressAndRanking" @cancelled="navToProgressAndRanking"/>
 </template>
 
 <script>
@@ -26,6 +26,11 @@ limitations under the License.
     computed: {
       quizId() {
         return this.$route?.params?.quizId;
+      },
+    },
+    methods: {
+      navToProgressAndRanking() {
+        this.$router.push({ name: 'MyProgressPage' });
       },
     },
   };

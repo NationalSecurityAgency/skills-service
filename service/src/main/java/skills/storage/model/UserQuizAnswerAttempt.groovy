@@ -45,6 +45,9 @@ class UserQuizAnswerAttempt {
     String userId
     QuizAnswerStatus status
 
+    // optional - used for QuizQuestionType.TextInput
+    String answer
+
     @Column(name="created", updatable = false, insertable = false)
     Date created
 

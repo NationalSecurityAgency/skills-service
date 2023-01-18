@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+package skills.controller.result.model
 
-class QuizAttemptReq {
-    List<QuizQuestionAttemptReq> questionAnswers
+import skills.storage.model.QuizDefParent
+
+class QuizDefSummaryResult {
+    String quizId
+    String name
+    QuizDefParent.QuizType type
+
+    Date created
+
+    Integer numQuestions
 }

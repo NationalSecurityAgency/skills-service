@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
+import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizAnswerDef
 
 interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
@@ -29,9 +30,14 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
         String getIsCorrectAnswer()
         String getQuizId()
         Integer getQuestionRefId()
+
+        QuizQuestionType getQuestionType()
     }
     @Nullable
-    @Query(value = '''select answer.isCorrectAnswer as isCorrectAnswer, answer.quizId as quizId, question.id as questionRefId
+    @Query(value = '''select answer.isCorrectAnswer as isCorrectAnswer, 
+                answer.quizId as quizId, 
+                question.type as questionType,
+                question.id as questionRefId
             from QuizAnswerDef answer, QuizQuestionDef question 
             where answer.id = ?1
                 and question.id=answer.questionRefId''')

@@ -17,4 +17,5 @@ package skills.quizLoading.model
 
 class QuizReportAnswerReq {
     Boolean isSelected = true
+    String answerText
 }
