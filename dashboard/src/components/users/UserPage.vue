@@ -19,12 +19,14 @@ limitations under the License.
 
     <navigation v-if="userIdForDisplay" :nav-items="getNavItems()">
     </navigation>
+    <scroll-to-top />
   </div>
 </template>
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
 
+  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
   import Navigation from '../utils/Navigation';
   import PageHeader from '../utils/pages/PageHeader';
   import UsersService from './UsersService';
@@ -36,6 +38,7 @@ limitations under the License.
     components: {
       PageHeader,
       Navigation,
+      ScrollToTop,
     },
     data() {
       return {
