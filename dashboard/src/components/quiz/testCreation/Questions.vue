@@ -65,6 +65,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { createNamespacedHelpers } from 'vuex';
   import Sortable from 'sortablejs';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
@@ -72,6 +73,8 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
+
+  const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'Questions',
@@ -108,10 +111,14 @@ limitations under the License.
       },
     },
     methods: {
+      ...mapActions([
+        'loadQuizSummary',
+      ]),
       questionDefSaved(questionDef) {
         const questionDefWithQuizId = ({ ...questionDef, quizId: this.quizId });
         QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
           .then((res) => {
+            this.loadQuizSummary({ quizId: this.quizId });
             this.questions.push(res);
           });
       },

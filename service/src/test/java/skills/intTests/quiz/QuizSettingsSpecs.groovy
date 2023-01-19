@@ -15,9 +15,11 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 
 class QuizSettingsSpecs extends DefaultIntSpec {
 
@@ -35,11 +37,73 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         ])
         def settings = skillsService.getQuizSettings(quiz.quizId)
 
-        println JsonOutput.toJson(settings)
         then:
         settings.setting == ['name1', 'name2', 'name3']
         settings.value == ['val1', 'val2', 'val3']
     }
 
+    def "existing settings are updated and new are inserted"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'name1', value: 'val1'],
+                [setting: 'name2', value: 'val2'],
+                [setting: 'name3', value: 'val3'],
+        ])
+
+        when:
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'name2', value: 'updated'],
+                [setting: 'name4', value: 'val4'],
+        ])
+        def settings = skillsService.getQuizSettings(quiz.quizId)
+
+        then:
+        settings.setting == ['name1', 'name2', 'name3', 'name4']
+        settings.value == ['val1', 'updated', 'val3', 'val4']
+    }
+
+    def "validation - setting has to be provided"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'name1', value: 'val1'],
+                [setting: null, value: 'val2'],
+                [setting: 'name3', value: 'val3'],
+        ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("settings.setting was not provided")
+        e.message.contains("quizId:${quiz.quizId}")
+    }
+
+    def "validation - setting's value has to be provided"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'name1', value: 'val1'],
+                [setting: 'name2', value: null],
+                [setting: 'name3', value: 'val3'],
+        ])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("settings.value was not provided")
+        e.message.contains("quizId:${quiz.quizId}")
+    }
 }
 

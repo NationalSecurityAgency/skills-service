@@ -48,6 +48,15 @@ const actions = {
         });
     });
   },
+  afterQuizSummaryLoaded({ state }) {
+    return new Promise((resolve) => {
+      (function waitForQuizSummary() {
+        if (!state.loadingQuizSummary) return resolve(state.quizSummary);
+        setTimeout(waitForQuizSummary, 100);
+        return state.quizSummary;
+      }());
+    });
+  },
 };
 
 const state = {
