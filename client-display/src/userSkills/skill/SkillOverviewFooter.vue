@@ -21,15 +21,22 @@ limitations under the License.
           <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info skills-theme-btn">
             <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
           </a>
-          <button v-if="selfReport.available" class="btn btn-outline-info skills-theme-btn"
+          <button v-if="selfReport.available && !isQuizOrSurveySkill" class="btn btn-outline-info skills-theme-btn"
                   :disabled="selfReportDisabled"
                   @click="showSelfReportModal"
                   data-cy="selfReportBtn">
             <i class="fas fa-check-square mr-1"></i>
+            I did it
+          </button>
+          <b-button v-if="selfReport.available && isQuizOrSurveySkill" class="btn btn-outline-info skills-theme-btn"
+                  :disabled="selfReportDisabled"
+                    variant="outline-info"
+                  :to="{ name:'quizPage', params: { skillInternal: skillInternal.subjectId, skillId: skillInternal.skillId, quizId: skillInternal.selfReporting.quizId, skill: skillInternal } }"
+                  data-cy="selfReportBtn">
+            <i class="fas fa-check-square mr-1"></i>
             <span v-if="isQuizSkill">Take Quiz</span>
             <span v-if="isSurveySkill">Complete Survey</span>
-            <span v-if="!isQuizOrSurveySkill">I did it</span>
-          </button>
+          </b-button>
         </div>
       </div>
       <div v-if="isQuizOrSurveySkill" class="col text-right">
@@ -43,7 +50,7 @@ limitations under the License.
           <b-button v-else variant="link"
                     tag="a"
                     class="p-0"
-                  @click="showSelfReportModal"
+                  :to="{ name:'quizPage', params: { skillInternal: skillInternal.subjectId, skillId: skillInternal.skillId, quizId: skillInternal.selfReporting.quizId, skill: skillInternal } }"
                   data-cy="quizLink">
             <span class="font-weight-bold text-primary"  style="font-size: 1rem;">{{ skillInternal.selfReporting.quizName }}</span>
           </b-button>
@@ -124,7 +131,6 @@ limitations under the License.
         :is-approval-required="isApprovalRequired"
         :is-honor-system="isHonorSystem"
         :is-justitification-required="isJustificationRequired" />
-    <quiz-modal v-if="quizModalVisible" v-model="quizModalVisible" :skill="skillInternal" @testWasTaken="testWasTaken"/>
 
     <b-modal id="clearRejectionMsgDialog"
              title="CLEAR APPROVAL REJECTION"
@@ -155,17 +161,15 @@ limitations under the License.
   import UserSkillsService from '../service/UserSkillsService';
   import SelfReportSkillModal from './SelfReportSkillModal';
   import ModalPositioner from './ModalPositioner';
-  import QuizModal from './QuizModal';
 
   export default {
     name: 'SkillOverviewFooter',
-    components: { QuizModal, ModalPositioner, SelfReportSkillModal },
+    components: { ModalPositioner, SelfReportSkillModal },
     props: ['skill'],
     data() {
       return {
         skillInternal: {},
         selfReportModalVisible: false,
-        quizModalVisible: false,
         clearRejectionModalVisible: false,
         rejectionDialogYOffset: 0,
         approvalRequestedMsg: '',
@@ -219,14 +223,10 @@ limitations under the License.
     },
     methods: {
       showSelfReportModal(event) {
-        if (this.isQuizOrSurveySkill) {
-          this.quizModalVisible = true;
-        } else {
-          this.selfReportModalVisible = true;
-          this.$nextTick(() => {
-            this.$refs.selfReportModal.updatePosition(event.pageY);
-          });
-        }
+        this.selfReportModalVisible = true;
+        this.$nextTick(() => {
+          this.$refs.selfReportModal.updatePosition(event.pageY);
+        });
       },
       showRejectionModal(event) {
         this.clearRejectionModalVisible = true;

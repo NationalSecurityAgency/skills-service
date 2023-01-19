@@ -51,7 +51,7 @@ limitations under the License.
     data() {
       return {
         items: [],
-        idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global'],
+        idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global', 'quizzes'],
         keysToExcludeFromPath: [],
         ignoreNext: false,
         projectDisplayName: 'Project',
@@ -212,7 +212,12 @@ limitations under the License.
         return url;
       },
       prepKey(key) {
-        const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
+        let res = key;
+        if (key.endsWith('zes')) {
+          res = key.substring(0, key.length - 3);
+        } else {
+          res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
+        }
         return this.capitalize(this.substituteCustomLabels(res));
       },
       substituteCustomLabels(label) {

@@ -21,6 +21,7 @@ limitations under the License.
            body-class="p-0"
            :no-close-on-backdrop="true"
            v-model="show">
+    <modal-positioner :y-offset="modalYOffset"/>
     <quiz-run :quiz-id="skill.selfReporting.quizId"
               @testWasTaken="testWasTaken"
       @cancelled="cancel">
@@ -37,10 +38,11 @@ limitations under the License.
 
 <script>
   import QuizRun from '@/common-components/quiz/QuizRun';
+  import ModalPositioner from '@/userSkills/skill/ModalPositioner';
 
   export default {
     name: 'QuizModal',
-    components: { QuizRun },
+    components: { ModalPositioner, QuizRun },
     props: {
       skill: Object,
       value: Boolean,
@@ -48,6 +50,7 @@ limitations under the License.
     data() {
       return {
         show: this.value,
+        modalYOffset: 0,
       };
     },
     watch: {
@@ -67,6 +70,9 @@ limitations under the License.
       testWasTaken(quizResult) {
         this.show = false;
         this.$emit('testWasTaken', quizResult);
+      },
+      updatePosition(yOffset) {
+        this.modalYOffset = yOffset;
       },
     },
   };
