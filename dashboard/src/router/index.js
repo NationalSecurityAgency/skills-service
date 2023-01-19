@@ -394,7 +394,7 @@ const router = new Router({
         },
       }, {
         name: 'QuizRun',
-        path: 'tests/:quizId',
+        path: 'quizzes/:quizId',
         component: QuizRun,
         meta: {
           requiresAuth: true,

@@ -51,7 +51,7 @@ limitations under the License.
     data() {
       return {
         items: [],
-        idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global', 'quizzes'],
+        idsToExcludeFromPath: ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global'],
         keysToExcludeFromPath: [],
         ignoreNext: false,
         projectDisplayName: 'Project',
@@ -177,7 +177,7 @@ limitations under the License.
                 // '/projects/projectId/subjects/subjectId/stats we must end up with:
                 //    'projects / project:projectId / subject:subjectId / stats'
                 // notice that 'subjects' is missing
-                if (!this.shouldExcludeValue(value)) {
+                if (!this.shouldExcludeValue(value) && !this.isQuizzesValueUnderProgressAndRanking(value, res)) {
                   newItems.push(this.buildResItem(key, value, res, index));
                 }
                 if (value !== 'Projects' && value !== projectAndRankingPathItem && value !== lastItemInPathCustomName) {
@@ -246,6 +246,10 @@ limitations under the License.
       },
       shouldExcludeKey(key) {
         return this.keysToExcludeFromPath.some((searchForMe) => key === searchForMe);
+      },
+      isQuizzesValueUnderProgressAndRanking(value, items) {
+        const isQuizzes = value === 'quizzes';
+        return isQuizzes && items.includes('progress-and-rankings');
       },
       isProgressAndRankingEnabled() {
         return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
