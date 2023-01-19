@@ -328,6 +328,25 @@ limitations under the License.
             </div>
           </div>
 
+          <div class="row mt-3">
+            <div class="col col-md-3 text-secondary" id="scrollToTopButton">
+              Display Scroll to Top Button:
+              <inline-help
+                target-id="scrollToTopHelp"
+                msg="Toggle this setting to display the Scroll to Top button for users"/>
+            </div>
+            <div class="col">
+              <b-form-checkbox v-model="settings.scrollToTop.value"
+                               name="check-button"
+                               v-on:input="scrollToTopChanged"
+                               aria-labelledby="scrollToTopLabel"
+                               data-cy="scrollToTopSwitch"
+                               switch>
+                {{ scrollToTopLabel }}
+              </b-form-checkbox>
+            </div>
+          </div>
+
           <hr/>
 
           <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
@@ -468,6 +487,13 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
+          scrollToTop: {
+            value: false,
+            setting: 'scroll-to-top',
+            lastLoadedValue: false,
+            dirty: false,
+            projectId: this.$route.params.projectId,
+          },
           projectDisplayName: {
             value: 'Project',
             setting: 'project.displayName',
@@ -546,6 +572,9 @@ limitations under the License.
       groupDescriptionsLabel() {
         return this.formatToggleLabel(this.settings.groupDescriptions.value);
       },
+      scrollToTopLabel() {
+        return this.formatToggleLabel(this.settings.scrollToTop.value);
+      },
       rankOptOutLabel() {
         return this.formatToggleLabel(this.settings.rankAndLeaderboardOptOut.value);
       },
@@ -610,6 +639,9 @@ limitations under the License.
       },
       groupDescriptionsChanged(value) {
         this.settings.groupDescriptions.dirty = `${value}` !== `${this.settings.groupDescriptions.lastLoadedValue}`;
+      },
+      scrollToTopChanged(value) {
+        this.settings.scrollToTop.dirty = `${value}` !== `${this.settings.scrollToTop.lastLoadedValue}`;
       },
       inviteOnlyProjectChanged(value) {
         this.settings.inviteOnlyProject.dirty = `${value}` !== `${this.settings.inviteOnlyProject.lastLoadedValue}`;
