@@ -14,15 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <quiz-run v-if="quizId" :quiz-id="quizId" @testWasTaken="navToProgressAndRanking" @cancelled="navToProgressAndRanking"/>
+  <div class="container-fluid">
+    <skills-spinner :is-loading="loadingQuizInfo" />
+    <div v-if="!loadingQuizInfo">
+      <sub-page-header :title="quizInfo.quizType" class="pt-4 pl-3">
+      </sub-page-header>
+
+      <quiz-run v-if="quizId"
+                :quiz-id="quizId"
+                :quiz="quizInfo"
+                class="mb-5"
+                @testWasTaken="navToProgressAndRanking"
+                @cancelled="navToProgressAndRanking"/>
+    </div>
+  </div>
 </template>
 
 <script>
   import QuizRun from '@/common-components/quiz/QuizRun';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
     name: 'QuizRunInDashboard',
-    components: { QuizRun },
+    components: {
+      SkillsSpinner,
+      SubPageHeader,
+      QuizRun,
+    },
+    data() {
+      return {
+        quizInfo: {},
+        loadingQuizInfo: true,
+      };
+    },
+    mounted() {
+      this.loadQuizInfo();
+    },
     computed: {
       quizId() {
         return this.$route?.params?.quizId;
@@ -31,6 +60,16 @@ limitations under the License.
     methods: {
       navToProgressAndRanking() {
         this.$router.push({ name: 'MyProgressPage' });
+      },
+      loadQuizInfo() {
+        this.loadingQuizInfo = true;
+        QuizRunService.getQuizInfo(this.quizId)
+          .then((quizInfo) => {
+            this.quizInfo = quizInfo;
+          })
+          .finally(() => {
+            this.loadingQuizInfo = false;
+          });
       },
     },
   };
