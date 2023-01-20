@@ -20,7 +20,11 @@ limitations under the License.
         <span v-for="(tag, index) in tags" :key="index">
           <span class="text-muted">{{tag.label}}: </span>
           <span v-for="(value, vIndex) in tag.value" :key="vIndex">
-            <a :href="`${tag.url}${encodeURIComponent(value)}`">{{value}}</a><span v-if="vIndex < tag.value.length - 1">, </span>
+            <router-link
+              :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tag.key, tagFilter: value } }"
+              class="text-info mb-0 pb-0 preview-card-title"
+              :aria-label="`View metrics for ${value}`" role="link">{{ value }}</router-link>
+              <span v-if="vIndex < tag.value.length - 1">, </span>
           </span>
           <span v-if="index < tags.length - 1">; </span>
         </span>
@@ -53,6 +57,7 @@ limitations under the License.
         userIdForDisplay: '',
         isLoading: true,
         tags: '',
+        projectId: this.$route.params.projectId,
       };
     },
     created() {
@@ -131,8 +136,7 @@ limitations under the License.
           if (userTag) {
             const values = userTag.map((ut) => ut.value);
             if (values.length > 0) {
-              const url = `/admin/projects/${encodeURIComponent(this.$route.params.projectId)}/userTags/${encodeURIComponent(tag.label)}/`;
-              processedTags.push({ label: tag.label, value: values, url });
+              processedTags.push({ label: tag.label, key: tag.key, value: values });
             }
           }
         });
