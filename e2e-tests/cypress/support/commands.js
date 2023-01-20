@@ -189,6 +189,15 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
     }, overrideProps));
 });
 
+Cypress.Commands.add("createSurveyDef", (surveyNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/app/quiz-definitions/quiz${surveyNum}/`, Object.assign({
+        quizId: `surveyId${surveyNum}`,
+        name: `This is survey ${surveyNum}`,
+        type: 'Survey',
+        description: `What a cool survey #${surveyNum}! Thank you for taking it!`
+    }, overrideProps));
+});
+
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userNum = 1, quizAttemptInfo) => {
 
     const quizId = `quiz${quizNum}`;
@@ -249,6 +258,24 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
         answers: [{
             answer: 'First Answer',
             isCorrect: true,
+        }, {
+            answer: 'Second Answer',
+            isCorrect: false,
+        }, {
+            answer: 'Third Answer',
+            isCorrect: false,
+        }],
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${quizNum}`,
+        questionType: 'MultipleChoice',
+        answers: [{
+            answer: 'First Answer',
+            isCorrect: false,
         }, {
             answer: 'Second Answer',
             isCorrect: false,

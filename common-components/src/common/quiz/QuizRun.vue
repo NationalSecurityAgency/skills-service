@@ -26,42 +26,22 @@ limitations under the License.
       </template>
     </quiz-run-splash-screen>
 
-    <b-card v-if="isSurveyType && quizResult && !splashScreen.show" class="mb-3" body-class="">
-      <div class="h5">
+    <survey-run-completion-summary
+        v-if="isSurveyType && quizResult && !splashScreen.show"
+        class="mb-3"
+        :quiz-info="quizInfo"
+        :quiz-result="quizResult"
+        @close="doneWithThisRun">
+      <template slot="completeAboveTitle">
         <slot name="completeAboveTitle">
           <i class="fas fa-handshake text-info"></i> Thank you for taking the time to complete the survey!
         </slot>
-      </div>
-
-      <div class="mb-1 mt-4 h2">
-        <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
-      </div>
-
-      <div class="row">
-        <div class="col-auto">
-          <b-card class="text-center" body-class="pt-2 pb-1">
-            <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;"></i>
-            <span class="text-secondary font-italic ml-1">Questions:</span>
-            <span class="text-uppercase ml-1 font-weight-bold">{{ quizInfo.questions.length }}</span>
-          </b-card>
-        </div>
-        <div class="col-auto">
-          <b-card class="text-center" body-class="pt-2 pb-1">
-            <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
-            <span class="text-secondary font-italic ml-1">Completed In:</span>
-            <span class="text-uppercase ml-1 font-weight-bold">1 minute</span>
-          </b-card>
-        </div>
-        <div class="col"></div>
-      </div>
-
-      <div class="mt-5">
-        <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold"><i class="fas fa-times-circle"></i> Close</b-button>
-      </div>
-    </b-card>
+      </template>
+    </survey-run-completion-summary>
 
     <quiz-run-completion-summary
-        v-if="!isSurveyType && quizResult && !splashScreen.show" class="mb-3"
+        v-if="!isSurveyType && quizResult && !splashScreen.show"
+        class="mb-3"
         :quiz-info="quizInfo"
         :quiz-result="quizResult"
         @close="doneWithThisRun"
@@ -118,10 +98,12 @@ limitations under the License.
   import QuizRunQuestion from '@/common-components/quiz/QuizRunQuestion';
   import QuizRunSplashScreen from '@/common-components/quiz/QuizRunSplashScreen';
   import QuizRunCompletionSummary from '@/common-components/quiz/QuizRunCompletionSummary';
+  import SurveyRunCompletionSummary from '@/common-components/quiz/SurveyRunCompletionSummary';
 
   export default {
     name: 'QuizRun',
     components: {
+      SurveyRunCompletionSummary,
       QuizRunCompletionSummary,
       QuizRunSplashScreen,
       SkillsSpinner,

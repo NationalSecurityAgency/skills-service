@@ -162,6 +162,47 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
     });
+
+
+    it('run survey', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Survey')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by completing this survey')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('not.exist')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool survey #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey')
+
+        cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+    });
 });
 
 
