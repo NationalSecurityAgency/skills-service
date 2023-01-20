@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+package skills.quizLoading
 
+enum QuizSettings {
+    MaxNumAttempts('quizNumberOfAttempts',)
 
-class QuizInfo {
-    String name
-    String description
-    String quizType
+    String setting;
 
-    List<QuizQuestionInfo> questions
+    private QuizSettings(String setting) {
+        this.setting = setting;
+    }
 
-    Boolean isAttemptAlreadyInProgress
-    Integer userNumPreviousQuizAttempts
-    Boolean userQuizPassed
-    Date userLastQuizAttemptDate
 }

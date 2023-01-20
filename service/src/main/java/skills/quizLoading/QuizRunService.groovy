@@ -51,6 +51,9 @@ class QuizRunService {
     UserQuizAttemptRepo quizAttemptRepo
 
     @Autowired
+    QuizSettingsRepo quizSettingsRepo
+
+    @Autowired
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
@@ -80,14 +83,19 @@ class QuizRunService {
 
         List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId)
 
-        Boolean isAttemptAlreadyInProgress = quizAttemptRepo.existsByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+        UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
+                quizAttemptRepo.getUserAttemptsStats(userId, updatedDef.id,
+                        UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
         return new QuizInfo(
                 name: updatedDef.name,
                 description: updatedDef.description,
                 questions: questions,
-                isAttemptAlreadyInProgress: isAttemptAlreadyInProgress,
-                quizType: updatedDef.getType().toString()
+                quizType: updatedDef.getType().toString(),
+                isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
+                userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
+                userQuizPassed: userAttemptsStats?.getUserQuizPassed() ?: false,
+                userLastQuizAttemptDate: userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null,
         )
     }
 
@@ -139,7 +147,10 @@ class QuizRunService {
                     enteredText: enteredText,
             )
         }
+
         QuizDef quizDef = getQuizDef(quizId)
+        validateQuizAttempts(quizDef, userId, quizId)
+
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
                 userId: userId,
                 quizDefinitionRefId: quizDef.id,
@@ -148,6 +159,31 @@ class QuizRunService {
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
         return new QuizAttemptStartResult(id: savedAttempt.id)
+    }
+
+    @Profile
+    private void validateQuizAttempts(QuizDef quizDef, String userId, String quizId) {
+        UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
+                UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
+        Integer numCurrentAttempts = userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0
+        if (quizDef.type == QuizDefParent.QuizType.Survey) {
+            if (numCurrentAttempts > 0) {
+                throw new SkillQuizException("User [${userId}] has already taken this survey", quizId, ErrorCode.BadParam)
+            }
+        } else {
+            if (userAttemptsStats?.getUserQuizPassed()) {
+                throw new SkillQuizException("User [${userId}] already took and passed this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
+            }
+
+            QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizDef.id)
+            if (quizSetting) {
+                int numConfiguredAttempts = Integer.valueOf(quizSetting.value)
+                // anything 0 or below is considered to be unlimited attempts
+                if (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts) {
+                    throw new SkillQuizException("User [${userId}] exhausted [${numConfiguredAttempts}] available attempts for this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
+                }
+            }
+        }
     }
 
     @Transactional

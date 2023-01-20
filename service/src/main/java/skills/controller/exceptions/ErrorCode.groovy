@@ -51,5 +51,7 @@ enum ErrorCode {
     UserRoleAlreadyAssigned,
     NotYourInvitationCode,
     ExpiredProjectInvite,
-    ProjectInviteAlreadyExists
+    ProjectInviteAlreadyExists,
+    UserQuizAttemptsExhausted,
+    SurveyCanOnlyBeTakenOnce,
 }

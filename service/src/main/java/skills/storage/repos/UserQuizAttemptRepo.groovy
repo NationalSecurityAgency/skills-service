@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.LabeledCount
 import skills.storage.model.UserQuizAttempt
@@ -44,15 +45,27 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''')
     UserQuizAttempt getByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
 
+    static interface UserQuizAttemptStats {
+        Boolean getIsAttemptAlreadyInProgress()
+        Integer getUserNumPreviousQuizAttempts()
+        Boolean getUserQuizPassed()
+        Date getUserLastQuizAttemptCompleted()
+    }
+
     @Nullable
-    @Query('''select count(quizAttempt.id) > 0      
-        from UserQuizAttempt quizAttempt, QuizDef quizDef
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizAttempt.userId = ?1
-            and quizDef.quizId = ?2
-            and quizAttempt.status = ?3
+    @Query('''select
+            (sum(case when quizAttempt.status = :inProgressStatus then 1 else 0 end) > 0) as isAttemptAlreadyInProgress, 
+            (sum(case when quizAttempt.status = :passedStatus then 1 else 0 end) > 0) as userQuizPassed,
+            sum(case when quizAttempt.completed is not null then 1 else 0 end) as userNumPreviousQuizAttempts,
+            max(quizAttempt.completed) as userLastQuizAttemptCompleted   
+        from UserQuizAttempt quizAttempt
+        where quizAttempt.userId = :userId
+            and quizAttempt.quizDefinitionRefId = :quizDefId
      ''')
-    boolean existsByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
+    UserQuizAttemptStats getUserAttemptsStats(@Param('userId') String userId,
+                                              @Param('quizDefId') Integer quizDefId,
+                                              @Param('inProgressStatus') QuizAttemptStatus inProgressStatus,
+                                              @Param('passedStatus') QuizAttemptStatus passedStatus)
 
 
     @Query('''select count(quizAttempt.id) > 0      
@@ -63,4 +76,5 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
             and quizDef.quizId = ?3
      ''')
     boolean existsByUserIdAndIdAndQuizId(String userId, Integer id, String quizId)
+
 }
