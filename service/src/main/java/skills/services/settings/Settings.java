@@ -31,7 +31,7 @@ public enum Settings {
     GROUP_DESCRIPTIONS("group-descriptions"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
     USER_PROJECT_ROLE("user_project_role"),
-    SCROLL_TO_TOP("scroll-to-top");
+    HIDE_SCROLL_TO_TOP("hide-scroll-to-top");
 
     private String settingName;
 

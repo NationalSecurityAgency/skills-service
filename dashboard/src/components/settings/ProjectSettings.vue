@@ -330,13 +330,13 @@ limitations under the License.
 
           <div class="row mt-3">
             <div class="col col-md-3 text-secondary" id="scrollToTopButton">
-              Display Scroll to Top Button:
+              Hide Scroll to Top Button for Users:
               <inline-help
                 target-id="scrollToTopHelp"
-                msg="Toggle this setting to display the Scroll to Top button for users"/>
+                msg="Toggle this setting to hide the Scroll to Top button for users"/>
             </div>
             <div class="col">
-              <b-form-checkbox v-model="settings.scrollToTop.value"
+              <b-form-checkbox v-model="settings.hideScrollToTop.value"
                                name="check-button"
                                v-on:input="scrollToTopChanged"
                                aria-labelledby="scrollToTopLabel"
@@ -487,9 +487,9 @@ limitations under the License.
             dirty: false,
             projectId: this.$route.params.projectId,
           },
-          scrollToTop: {
+          hideScrollToTop: {
             value: false,
-            setting: 'scroll-to-top',
+            setting: 'hide-scroll-to-top',
             lastLoadedValue: false,
             dirty: false,
             projectId: this.$route.params.projectId,
@@ -573,7 +573,7 @@ limitations under the License.
         return this.formatToggleLabel(this.settings.groupDescriptions.value);
       },
       scrollToTopLabel() {
-        return this.formatToggleLabel(this.settings.scrollToTop.value);
+        return this.formatToggleLabel(this.settings.hideScrollToTop.value);
       },
       rankOptOutLabel() {
         return this.formatToggleLabel(this.settings.rankAndLeaderboardOptOut.value);
@@ -641,7 +641,7 @@ limitations under the License.
         this.settings.groupDescriptions.dirty = `${value}` !== `${this.settings.groupDescriptions.lastLoadedValue}`;
       },
       scrollToTopChanged(value) {
-        this.settings.scrollToTop.dirty = `${value}` !== `${this.settings.scrollToTop.lastLoadedValue}`;
+        this.settings.hideScrollToTop.dirty = `${value}` !== `${this.settings.hideScrollToTop.lastLoadedValue}`;
       },
       inviteOnlyProjectChanged(value) {
         this.settings.inviteOnlyProject.dirty = `${value}` !== `${this.settings.inviteOnlyProject.lastLoadedValue}`;

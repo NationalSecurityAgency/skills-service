@@ -41,7 +41,7 @@ limitations under the License.
             </div>
             <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastViewedSkill" />
         </div>
-        <scroll-to-top v-if="this.$store.getters.config.scrollToTopButton" />
+        <scroll-to-top v-if="!this.$store.getters.config.hideScrollToTopButton" />
     </section>
 </template>
 

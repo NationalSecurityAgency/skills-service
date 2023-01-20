@@ -117,7 +117,7 @@ class PublicConfigController {
         res["levelDisplayName"] = 'Level'
         res["groupDescriptionsOn"] = false
         res["displayProjectDescription"] = true
-        res["scrollToTopButton"] = false
+        res["hideScrollToTopButton"] = false
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
@@ -130,7 +130,7 @@ class PublicConfigController {
                     'level.displayName',
                     Settings.GROUP_DESCRIPTIONS.settingName,
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
-                    Settings.SCROLL_TO_TOP.settingName
+                    Settings.HIDE_SCROLL_TO_TOP.settingName
             ])?.collectEntries {
                 [it.setting, it.value]
             }
@@ -165,11 +165,11 @@ class PublicConfigController {
             } else {
                 res["displayProjectDescription"] = false
             }
-            Boolean scrollToTopButton = Boolean.valueOf(projectSettings?[Settings.SCROLL_TO_TOP.settingName])
-            if (scrollToTopButton) {
-                res["scrollToTopButton"] = true
+            Boolean hideScrollToTopButton = Boolean.valueOf(projectSettings?[Settings.HIDE_SCROLL_TO_TOP.settingName])
+            if (hideScrollToTopButton) {
+                res["hideScrollToTopButton"] = true
             } else {
-                res["scrollToTopButton"] = false
+                res["hideScrollToTopButton"] = false
             }
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting
