@@ -17,51 +17,14 @@ limitations under the License.
 <div>
   <skills-spinner :is-loading="isLoading" class="mt-3"/>
   <div v-if="!isLoading">
-    <b-card v-if="splashScreen.show" body-class="">
-      <div class="h5">
+    <quiz-run-splash-screen v-if="splashScreen.show" :quiz-info="quizInfo" @cancel="cancelQuizAttempt" @start="startQuizAttempt">
+      <template slot="aboveTitle">
         <slot name="splashPageTitle">
           <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
           <span v-else>You are about to begin the quiz!</span>
         </slot>
-        <div class="mb-1 mt-4 h2">
-          <span class="font-weight-bold text-success">{{ quizInfo.name }}</span>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-auto">
-          <b-card class="text-center" body-class="pt-2 pb-1">
-            <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;"></i>
-            <span class="text-secondary font-italic ml-1">Questions:</span>
-            <span class="text-uppercase ml-1 font-weight-bold">{{ quizInfo.questions.length }}</span>
-          </b-card>
-        </div>
-        <div v-if="!isSurveyType" class="col-auto">
-          <b-card class="text-center" body-class="pt-2 pb-1">
-            <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
-            <span class="text-secondary font-italic ml-1">Time Limit:</span>
-            <span class="text-uppercase ml-1 font-weight-bold">None</span>
-          </b-card>
-        </div>
-        <div v-if="!isSurveyType" class="col-auto">
-          <b-card class="text-center" body-class="pt-2 pb-1">
-            <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;"></i>
-            <span class="text-secondary font-italic ml-1">Attempts:</span>
-            <span class="text-uppercase ml-1 font-weight-bold">Unlimited</span>
-          </b-card>
-        </div>
-        <div class="col"></div>
-      </div>
-
-      <p v-if="quizInfo.description" class="mt-3">
-        <markdown-text :text="quizInfo.description" />
-      </p>
-
-      <div class="mt-5">
-        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
-        <b-button variant="outline-success" @click="startQuizAttempt" class="text-uppercase"><i class="fas fa-play-circle"> Start</i></b-button>
-      </div>
-    </b-card>
+      </template>
+    </quiz-run-splash-screen>
 
     <b-card v-if="isSurveyType && quizResult && !splashScreen.show" class="mb-3" body-class="">
       <div class="h5">
@@ -97,75 +60,28 @@ limitations under the License.
       </div>
     </b-card>
 
-    <b-card v-if="!isSurveyType && quizResult && !splashScreen.show" class="mb-3" body-class="text-left">
-      <div class="h5">
-        <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-          <i class="fas fa-handshake"></i> Thank you completing the test!
+    <quiz-run-completion-summary
+        v-if="!isSurveyType && quizResult && !splashScreen.show" class="mb-3"
+        :quiz-info="quizInfo"
+        :quiz-result="quizResult"
+        @close="doneWithThisRun"
+        @run-again="tryAgain">
+      <template slot="completeAboveTitle">
+        <slot name="completeAboveTitle">
+          <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+          <span v-else>You are about to begin the quiz!</span>
         </slot>
-        <span v-else><i class="fas fa-handshake"></i> Thank you completing the test!</span>
-      </div>
-      <div class="mb-1 mt-4 h2">
-        <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
-        <div class="h2 d-inline-block ml-2">
-          <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning"><i class="far fa-times-circle"></i> Failed</b-badge>
-          <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success"><i class="fas fa-check-double"></i> Passed</b-badge>
-        </div>
-      </div>
-      <b-card-group deck>
-        <b-card bg-variant="light" class="text-center">
-          <b-card-text>
-            <div class="h3">
-              {{ quizResult.percentCorrect }}%
-            </div>
-            <div class="text-secondary mt-2">
-              <b>100%</b> is required to pass
-            </div>
-          </b-card-text>
-        </b-card>
+      </template>
+    </quiz-run-completion-summary>
 
-        <b-card bg-variant="light" class="text-center">
-          <b-card-text>
-            <div class="h3">
-              <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
-            </div>
-            <div class="text-secondary mt-2">
-              <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> questions</span>
-              <span v-else>Well done!</span>
-            </div>
-          </b-card-text>
-        </b-card>
-
-        <b-card bg-variant="light" class="text-center">
-          <b-card-text>
-            <div class="h3">
-              <b-badge variant="success">2</b-badge> more attempts
-            </div>
-            <div class="text-secondary mt-2">
-              Used <b-badge variant="warning">1</b-badge> out of <b-badge variant="success">3</b-badge> attempts
-            </div>
-          </b-card-text>
-        </b-card>
-      </b-card-group>
-
-      <div v-if="!quizResult.gradedRes.passed" class="mt-4">
-        <div class="my-2"><span class="text-info">No worries!</span> Would you like to try again?</div>
-        <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2"><i class="fas fa-times-circle"></i> Close</b-button>
-        <b-button variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold"><i class="fas fa-redo"></i> Try Again</b-button>
-      </div>
-
-      <div v-if="quizResult.gradedRes.passed" class="mt-4">
-        <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold"><i class="fas fa-times-circle"></i> Close</b-button>
-      </div>
-    </b-card>
-
-    <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult)" body-class="" class="mb-4">
+    <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult)" class="mb-4" data-cy="quizRunQuestions">
 
       <div class="row bg-white border-bottom py-2 mb-3" data-cy="subPageHeader">
         <div class="col">
-          <div class="h4 text-success font-weight-bold">{{ quizInfo.name }}</div>
+          <div class="h4 text-success font-weight-bold" data-cy="quizName">{{ quizInfo.name }}</div>
         </div>
         <div class="col-auto text-right text-muted">
-          <b-badge variant="success">{{quizInfo.questions.length}}</b-badge> <span class="text-uppercase">questions</span>
+          <b-badge variant="success" data-cy="numQuestions">{{quizInfo.questions.length}}</b-badge> <span class="text-uppercase">questions</span>
         </div>
       </div>
 
@@ -177,8 +93,8 @@ limitations under the License.
         <i class="fas fa-exclamation-triangle"></i> Not every question has an answer!
       </div>
       <div v-if="!quizResult" class="text-left mt-5">
-        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2 font-weight-bold"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
-        <b-button variant="outline-success" @click="completeTestRun" class="text-uppercase font-weight-bold"><i class="fas fa-check-double"></i> Done</b-button>
+        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2 font-weight-bold" data-cy="cancelCurrentAttemptQuizBtn"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
+        <b-button variant="outline-success" @click="completeTestRun" class="text-uppercase font-weight-bold" data-cy="completeQuizBtn"><i class="fas fa-check-double"></i> Done</b-button>
       </div>
 
       <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
@@ -200,11 +116,17 @@ limitations under the License.
   import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsSpinner from '@/common-components/utilities/SkillsSpinner';
   import QuizRunQuestion from '@/common-components/quiz/QuizRunQuestion';
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
+  import QuizRunSplashScreen from '@/common-components/quiz/QuizRunSplashScreen';
+  import QuizRunCompletionSummary from '@/common-components/quiz/QuizRunCompletionSummary';
 
   export default {
     name: 'QuizRun',
-    components: { MarkdownText, SkillsSpinner, QuizRunQuestion },
+    components: {
+      QuizRunCompletionSummary,
+      QuizRunSplashScreen,
+      SkillsSpinner,
+      QuizRunQuestion,
+    },
     props: {
       quizId: String,
       quiz: {

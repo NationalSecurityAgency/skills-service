@@ -20,17 +20,13 @@ limitations under the License.
        tabindex="0"
        :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable' : !a.isGraded }"
        aria-label="Select as the correct answer">
-      <div class="row no-gutters">
+      <div class="row no-gutters" :data-cy="`selected_${selected}`">
         <div class="col-auto">
-<!--          <div v-if="a.isGraded && a.selected !== a.isCorrect" class="fa-stack">-->
-<!--            <i class="fa-stack-1x" :class="selectionIconObject" />-->
-<!--            <i class="fa fa-ban text-danger"></i>-->
-<!--          </div>-->
           <b-overlay v-if="a.isGraded && a.selected !== a.isCorrect" show variant="transparent"
                      opacity="0">
             <template #overlay>
-              <i v-if="a.selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;"></i>
-              <i v-else class="fa fa-check text-danger" style="font-size: 1rem;"></i>
+              <i v-if="a.selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
+              <i v-else class="fa fa-check text-danger" style="font-size: 1rem;" data-cy="missedSelection"></i>
             </template>
             <span class="checkmark">
                <i :class="selectionIconObject" />
@@ -41,7 +37,7 @@ limitations under the License.
             </span>
         </div>
         <div class="col ml-2">
-          <span class="answerText">{{ a.answerOption }}</span>
+          <span class="answerText" data-cy="answerText">{{ a.answerOption }}</span>
         </div>
       </div>
     </div>

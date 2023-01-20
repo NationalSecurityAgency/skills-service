@@ -185,7 +185,7 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
         quizId: `quizId${quizNum}`,
         name: `This is quiz ${quizNum}`,
         type: 'Quiz',
-        description: `What a cool quiz #${quizNum}this is! Thank you for taking it!`
+        description: `What a cool quiz #${quizNum}! Thank you for taking it!`
     }, overrideProps));
 });
 

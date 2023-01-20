@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row no-gutters mb-4">
+  <div class="row no-gutters mb-4" :data-cy="`question_${num+1}`">
     <div class="col-auto pt-2 pr-2">
       <b-badge class="d-inline-block" :variant="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'default'}`">{{num + 1}}</b-badge>
       <span v-if="q.gradedInfo" class="ml-1 pt-1">
-        <span v-if="q.gradedInfo.isCorrect" class="text-success" style="font-size: 1.1rem;"><i class="fas fa-check-double"></i></span>
-        <span v-if="!q.gradedInfo.isCorrect" class="text-danger" style="font-size: 1.1rem;"><i class="fas fa-times-circle"></i></span>
+        <span v-if="q.gradedInfo.isCorrect" class="text-success" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double"></i></span>
+        <span v-if="!q.gradedInfo.isCorrect" class="text-danger" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle"></i></span>
       </span>
     </div>
 
     <div class="col">
-      <markdown-text :text="q.question"/>
+      <markdown-text :text="q.question" data-cy="questionsText" />
 
       <div v-if="isTextInput">
         <b-form-textarea
@@ -38,8 +38,9 @@ limitations under the License.
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small">(Select <b>all</b> that apply)</div>
         <div class="mt-1 pl-1">
-          <div v-for="a in answerOptions" :key="a.id">
+          <div v-for="(a, aIndex) in answerOptions" :key="a.id">
             <quiz-run-answer
+                :data-cy="`answer_${aIndex+1}`"
                 :a="a"
                 :can-select-more-than-one="isMultipleChoice"
                 @selection-changed="selectionChanged"/>

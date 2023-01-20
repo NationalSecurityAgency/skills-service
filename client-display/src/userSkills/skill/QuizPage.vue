@@ -28,7 +28,7 @@ limitations under the License.
             <i class="fas fa-glass-cheers text-info" style="font-size: 1.5rem;"></i> You will earn <b-badge variant="success">
             <animated-number :num="skillInternal.pointIncrement"></animated-number></b-badge> points for
             <span class="font-weight-bold text-primary" style="font-size: 1.2rem">{{ skillInternal.skill }}</span>
-            skill by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this test</span>.
+            skill by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this quiz</span>.
           </div>
         </template>
         <template slot="completeAboveTitle">
@@ -52,9 +52,11 @@ limitations under the License.
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
   import QuizRunService from '@/common-components/quiz/QuizRunService';
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   export default {
     name: 'QuizPage',
+    mixins: [NavigationErrorMixin],
     components: {
       QuizRun, SkillsTitle, SkillsSpinner, AnimatedNumber,
     },
@@ -93,7 +95,7 @@ limitations under the License.
     },
     methods: {
       done() {
-        this.$router.push({
+        this.handlePush({
           name: 'skillDetails',
           params: {
             quizId: this.quizId,

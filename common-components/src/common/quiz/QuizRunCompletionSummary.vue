@@ -1,0 +1,99 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+<template>
+  <b-card body-class="text-left" data-cy="quizCompletion">
+    <div class="h5">
+      <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
+        <i class="fas fa-handshake"></i> Thank you completing the test!
+      </slot>
+      <span v-else><i class="fas fa-handshake"></i> Thank you completing the test!</span>
+    </div>
+    <div class="mb-1 mt-4 h2">
+      <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
+      <div class="h2 d-inline-block ml-2">
+        <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning"><i class="far fa-times-circle"></i> Failed</b-badge>
+        <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success"><i class="fas fa-check-double"></i> Passed</b-badge>
+      </div>
+    </div>
+    <b-card-group deck>
+      <b-card bg-variant="light" class="text-center">
+        <b-card-text>
+          <div class="h3">
+            {{ quizResult.percentCorrect }}%
+          </div>
+          <div class="text-secondary mt-2">
+            <b>100%</b> is required to pass
+          </div>
+        </b-card-text>
+      </b-card>
+
+      <b-card bg-variant="light" class="text-center">
+        <b-card-text>
+          <div class="h3">
+            <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
+          </div>
+          <div class="text-secondary mt-2">
+            <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> questions</span>
+            <span v-else>Well done!</span>
+          </div>
+        </b-card-text>
+      </b-card>
+
+      <b-card v-if="!quizResult.gradedRes.passed" bg-variant="light" class="text-center" data-cy="numAttemptsInfoCard">
+        <b-card-text>
+          <div class="h3">
+            <b-badge variant="success">2</b-badge> more attempts
+          </div>
+          <div class="text-secondary mt-2">
+            Used <b-badge variant="warning">1</b-badge> out of <b-badge variant="success">3</b-badge> attempts
+          </div>
+        </b-card-text>
+      </b-card>
+    </b-card-group>
+
+    <div v-if="!quizResult.gradedRes.passed" class="mt-4">
+      <div class="my-2"><span class="text-info">No worries!</span> Would you like to try again?</div>
+      <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+      <b-button variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
+    </div>
+
+    <div v-if="quizResult.gradedRes.passed" class="mt-4">
+      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+    </div>
+  </b-card>
+</template>
+
+<script>
+  export default {
+    name: 'QuizRunCompletionSummary',
+    props: {
+      quizResult: Object,
+      quizInfo: Object,
+    },
+    methods: {
+      close() {
+        this.$emit('close');
+      },
+      runAgain() {
+        this.$emit('run-again');
+      },
+    },
+  };
+</script>
+
+<style scoped>
+
+</style>

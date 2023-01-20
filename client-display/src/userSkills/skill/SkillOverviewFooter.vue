@@ -28,11 +28,12 @@ limitations under the License.
             <i class="fas fa-check-square mr-1"></i>
             I did it
           </button>
-          <b-button v-if="selfReport.available && isQuizOrSurveySkill" class="btn btn-outline-info skills-theme-btn"
-                  :disabled="selfReportDisabled"
+          <b-button v-if="selfReport.available && isQuizOrSurveySkill"
+                    class="skills-theme-btn"
+                    :disabled="selfReportDisabled"
                     variant="outline-info"
-                  :to="{ name:'quizPage', params: { skillInternal: skillInternal.subjectId, skillId: skillInternal.skillId, quizId: skillInternal.selfReporting.quizId, skill: skillInternal } }"
-                  data-cy="selfReportBtn">
+                    @click="navToQuiz"
+                    data-cy="takeQuizBtn">
             <i class="fas fa-check-square mr-1"></i>
             <span v-if="isQuizSkill">Take Quiz</span>
             <span v-if="isSurveySkill">Complete Survey</span>
@@ -50,9 +51,11 @@ limitations under the License.
           <b-button v-else variant="link"
                     tag="a"
                     class="p-0"
-                  :to="{ name:'quizPage', params: { skillInternal: skillInternal.subjectId, skillId: skillInternal.skillId, quizId: skillInternal.selfReporting.quizId, skill: skillInternal } }"
-                  data-cy="quizLink">
-            <span class="font-weight-bold text-primary"  style="font-size: 1rem;">{{ skillInternal.selfReporting.quizName }}</span>
+                    @click="navToQuiz"
+                    data-cy="quizLink">
+            <span class="font-weight-bold text-primary" style="font-size: 1rem;">{{
+                skillInternal.selfReporting.quizName
+              }}</span>
           </b-button>
         </div>
       </div>
@@ -158,12 +161,14 @@ limitations under the License.
 </template>
 
 <script>
+  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import UserSkillsService from '../service/UserSkillsService';
   import SelfReportSkillModal from './SelfReportSkillModal';
   import ModalPositioner from './ModalPositioner';
 
   export default {
     name: 'SkillOverviewFooter',
+    mixins: [NavigationErrorMixin],
     components: { ModalPositioner, SelfReportSkillModal },
     props: ['skill'],
     data() {
@@ -226,6 +231,14 @@ limitations under the License.
         this.selfReportModalVisible = true;
         this.$nextTick(() => {
           this.$refs.selfReportModal.updatePosition(event.pageY);
+        });
+      },
+      navToQuiz() {
+        this.handlePush({
+          name: 'quizPage',
+          params: {
+            skillInternal: this.skillInternal.subjectId, skillId: this.skillInternal.skillId, quizId: this.skillInternal.selfReporting.quizId, skill: this.skillInternal,
+          },
         });
       },
       showRejectionModal(event) {
