@@ -84,9 +84,9 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('attachment-button')
         cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
 
-
         cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
           .should('have.attr', 'target', '_blank');
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();
@@ -105,6 +105,7 @@ describe('Markdown Tests', () => {
 
         cy.get('a[href$="test-pdf.pdf"]')
           .should('have.attr', 'target', '_blank');
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();
@@ -132,7 +133,30 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7424] exceeds maximum file size [5]');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7.25 KB] exceeds maximum file size [5 B]');
+    });
+
+    it('do not display upload warning when not configured', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.attachmentWarningMessage = null;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.get('[data-cy="attachmentWarningMessage"]').should('not.exist')
+        cy.clickToolbarButton('attachment-button')
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+          .should('have.attr', 'target', '_blank');
+        cy.get('[data-cy="attachmentWarningMessage"]').should('not.exist')
     });
 
     it('attempt to upload an attachment that is not an accepted mime-type', () => {
@@ -151,7 +175,7 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
-        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - Invalid file type [invalid/type]');
+        cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File type is not supported. Supported file types are [.xlsx,.docx,.pptx,.doc,.odp,.ods,.odt,.pdf,.ppt,.xls]');
     });
 
     it('upload valid mime-types', () => {

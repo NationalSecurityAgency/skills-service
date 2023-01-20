@@ -189,4 +189,55 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy=emailSent]')
             .should('be.visible');
     });
+
+    it('attachments are not enabled', () => {
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+          .as('emailSupported');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
+          .as('isRoot');
+
+        cy.intercept('POST', '/root/users/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.visit('/administrator/');
+
+        cy.get('[data-cy="nav-Contact Admins"]')
+          .click();
+        cy.wait('@isRoot');
+
+        cy.get(`button.bold`).should('exist');
+        cy.get(`button.attachment-button`).should('not.exist');
+    });
+
+    it('attachments cannot be uploaded via drag and drop', () => {
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+          .as('emailSupported');
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
+          .as('isRoot');
+
+        cy.intercept('POST', '/root/users/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.visit('/administrator/');
+
+        cy.get('[data-cy="nav-Contact Admins"]')
+          .click();
+        cy.wait('@isRoot');
+        const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
+        cy.get(markdownInput).focus().selectFile('cypress/attachments/test-pdf.pdf', { action: 'drag-drop' })
+
+        cy.get('a[href$="test-pdf.pdf"]')
+          .should('not.exist');
+    });
+
 });

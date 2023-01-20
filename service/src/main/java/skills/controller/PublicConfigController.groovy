@@ -106,6 +106,7 @@ class PublicConfigController {
         res["allowedAttachmentFileTypes"] = uiConfigProperties.ui.allowedAttachmentFileTypes
         res["allowedAttachmentMimeTypes"] = uiConfigProperties.ui.allowedAttachmentMimeTypes
         res["maxAttachmentSize"] = uiConfigProperties.ui.maxAttachmentSize
+        res["attachmentWarningMessage"] = uiConfigProperties.ui.attachmentWarningMessage
         res["descriptionMaxLength"] = uiConfigProperties.ui.descriptionMaxLength
         res["paragraphValidationRegex"] = uiConfigProperties.ui.paragraphValidationRegex
         res["paragraphValidationMessage"] = uiConfigProperties.ui.paragraphValidationMessage

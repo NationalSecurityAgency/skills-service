@@ -150,7 +150,7 @@ class ProjectExpirationService {
                                 projectId       : it.projectId,
                                 publicUrl       : publicUrl,
                                 expiresOn       : expirationDate.toLocalDateTime().format(DateTimeFormatter.ISO_DATE),
-                                expiringIn      : "${days} day${days == 1 ? '' : 's'}",
+                                expiringIn      : days == 0 ? "today" : "in ${days} day${days == 1 ? '' : 's'}",
                                 createdOn       : it.created.toLocalDateTime().format(DateTimeFormatter.ISO_DATE),
                                 unusedProjectExpirationInDays : unusedProjectExpirationInDays
                         ],

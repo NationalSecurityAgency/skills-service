@@ -30,7 +30,7 @@ limitations under the License.
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
         <div class="col">
-          Insert images by pasting, dragging & dropping, or selecting from toolbar.
+          Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="col-auto">
           <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
@@ -38,6 +38,11 @@ limitations under the License.
              :href="editorFeaturesUrl" target="_blank" style="display: inline-block">
             <i class="far fa-question-circle editor-help-footer-help-icon"/>
           </a>
+        </div>
+      </div>
+      <div v-if="attachmentWarningMessage && hasNewAttachment" class="row">
+        <div class="col">
+          <span data-cy="attachmentWarningMessage" class="text-danger" style="font-size: .9rem">{{ attachmentWarningMessage }}</span>
         </div>
       </div>
     </div>
@@ -97,6 +102,7 @@ limitations under the License.
         intervalId: null,
         intervalRuns: 0,
         maxIntervalAttempts: 8,
+        hasNewAttachment: false,
         attachmentError: '',
       };
     },
@@ -137,13 +143,16 @@ limitations under the License.
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
       },
       maxAttachmentSize() {
-        return this.$store.getters.config.maxAttachmentSize;
+        return this.$store.getters.config.maxAttachmentSize ? Number(this.$store.getters.config.maxAttachmentSize) : 0;
       },
       allowedAttachmentFileTypes() {
         return this.$store.getters.config.allowedAttachmentFileTypes;
       },
       allowedAttachmentMimeTypes() {
         return this.$store.getters.config.allowedAttachmentMimeTypes;
+      },
+      attachmentWarningMessage() {
+        return this.$store.getters.config.attachmentWarningMessage;
       },
       // see: https://github.com/NationalSecurityAgency/skills-service/issues/1714
       // emojiWidgetRule() {
@@ -213,12 +222,16 @@ limitations under the License.
         }
       },
       attachFile(event) {
+        if (!this.allowAttachments) {
+          return;
+        }
         const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files;
         if (files && files.length > 0) {
           const file = [...files].find((el) => this.allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1));
+          event.preventDefault();
+          event.stopPropagation();
           if (file) {
-            event.preventDefault();
-            event.stopPropagation();
+            this.hasNewAttachment = true;
             this.attachmentError = ''; // reset any previous error
             if (file.size <= this.maxAttachmentSize) {
               const data = new FormData();
@@ -239,13 +252,16 @@ limitations under the License.
                 this.$refs.provider.validate(event);
               });
             } else {
-              this.attachmentError = `Unable to upload attachment - File size [${file.size}] exceeds maximum file size [${this.maxAttachmentSize}]`;
+              this.attachmentError = `Unable to upload attachment - File size [${this.prettyBytes(file.size)}] exceeds maximum file size [${this.prettyBytes(this.maxAttachmentSize)}]`;
             }
           } else {
-            this.attachmentError = `Unable to upload attachment - Invalid file type [${[...files][0].type}]`;
+            this.attachmentError = `Unable to upload attachment - File type is not supported. Supported file types are [${this.allowedAttachmentFileTypes}]`;
           }
           this.$refs.provider.validate(event);
         }
+      },
+      prettyBytes(bytes) {
+        return this.$options.filters.prettyBytes(bytes);
       },
     },
   };
@@ -278,5 +294,8 @@ limitations under the License.
   }
   span.placeholder.ProseMirror-widget {
     color: #687278 !important;
+  }
+  div.toastui-editor-contents {
+    font-size: 0.9rem !important;
   }
 </style>
