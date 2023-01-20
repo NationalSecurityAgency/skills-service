@@ -18,9 +18,9 @@ limitations under the License.
     <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle" v-if="tags">
         <span v-for="(tag, index) in tags" :key="index">
-          <span class="text-muted">{{tag.label}}:</span>
+          <span class="text-muted">{{tag.label}}: </span>
           <span v-for="(value, vIndex) in tag.value" :key="vIndex">
-            {{value}}<span v-if="vIndex < tag.value.length - 1">, </span>
+            <a :href="`${tag.url}${encodeURIComponent(value)}`">{{value}}</a><span v-if="vIndex < tag.value.length - 1">, </span>
           </span>
           <span v-if="index < tags.length - 1">; </span>
         </span>
@@ -134,7 +134,8 @@ limitations under the License.
           if (userTag) {
             const values = userTag.map((ut) => ut.value);
             if (values.length > 0) {
-              processedTags.push({ label: tag.label, value: values });
+              const url = `/admin/projects/${encodeURIComponent(this.$route.params.projectId)}/userTags/${encodeURIComponent(tag.label)}/`;
+              processedTags.push({ label: tag.label, value: values, url });
             }
           }
         });
