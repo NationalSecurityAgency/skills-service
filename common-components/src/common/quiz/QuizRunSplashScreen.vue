@@ -24,7 +24,7 @@ limitations under the License.
 
     <b-card v-if="!isSurveyType" class="mb-1" body-class="h5" data-cy="quizPassInfo">
       <i class="fas fa-check-circle text-success"></i>
-      Must get <b-badge variant="success">{{ quizInfo.minNumQuestionsToPass }}</b-badge> / <b-badge>{{ quizInfo.questions.length }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
+      Must get <b-badge variant="success">{{ minNumQuestionsToPass }}</b-badge> / <b-badge>{{ quizInfo.questions.length }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
     </b-card>
 
     <div class="row">
@@ -86,6 +86,9 @@ limitations under the License.
       },
       allAttemptsExhausted() {
         return this.quizInfo.maxAttemptsAllowed > 0 && this.quizInfo.maxAttemptsAllowed <= this.quizInfo.userNumPreviousQuizAttempts;
+      },
+      minNumQuestionsToPass() {
+        return this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : this.quizInfo.questions.length;
       },
     },
     methods: {

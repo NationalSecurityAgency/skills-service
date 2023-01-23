@@ -55,7 +55,7 @@ limitations under the License.
         <b-card-text>
           <div class="h3" data-cy="title">
             <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity"></i> Attempts</span>
-            <span v-if="!unlimitedAttempts"><b-badge variant="success">2</b-badge> more attempts</span>
+            <span v-if="!unlimitedAttempts"><b-badge variant="success">{{ numAttemptsLeft }}</b-badge> more attempts</span>
           </div>
           <div class="text-secondary mt-2" data-cy="subTitle">
             <span v-if="unlimitedAttempts">Unlimited Attempts - <b-badge variant="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</b-badge> attempt so far</span>
@@ -95,6 +95,9 @@ limitations under the License.
     computed: {
       unlimitedAttempts() {
         return this.quizInfo.maxAttemptsAllowed <= 0;
+      },
+      numAttemptsLeft() {
+        return this.quizInfo.maxAttemptsAllowed - this.quizInfo.userNumPreviousQuizAttempts - 1;
       },
     },
   };
