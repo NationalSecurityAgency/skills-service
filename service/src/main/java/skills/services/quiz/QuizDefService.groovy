@@ -294,7 +294,8 @@ class QuizDefService {
         }
         int numPassed = numPassedCount ? numPassedCount.getCount() : 0
 
-        List<QuizQuestionDefResult> questionDefResults = getQuestionDefs(quizId)
+        QuizQuestionsResult quizQuestionsResult = getQuestionDefs(quizId)
+        List<QuizQuestionDefResult> questionDefResults = quizQuestionsResult?.questions
         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId)
         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizAnswerAttemptCounts(quizId)
 

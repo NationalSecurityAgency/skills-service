@@ -76,26 +76,27 @@ class QuizRunService {
 
     @Transactional
     QuizInfo loadQuizInfo(String userId, String quizId) {
-        QuizDefWithDescription updatedDef = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
-        if (!updatedDef) {
+        QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
+        if (!quizDefWithDesc) {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
 
         List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId)
 
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
-                quizAttemptRepo.getUserAttemptsStats(userId, updatedDef.id,
+                quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
         return new QuizInfo(
-                name: updatedDef.name,
-                description: updatedDef.description,
+                name: quizDefWithDesc.name,
+                description: quizDefWithDesc.description,
                 questions: questions,
-                quizType: updatedDef.getType().toString(),
+                quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
                 userQuizPassed: userAttemptsStats?.getUserQuizPassed() ?: false,
                 userLastQuizAttemptDate: userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null,
+                maxAttemptsAllowed: getMaxQuizAttemptsSetting(quizDefWithDesc.id)
         )
     }
 
@@ -130,6 +131,7 @@ class QuizRunService {
 
     @Transactional
     QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
+        log.info("Starting [{}] quiz attempt for [{}] user", quizId, userId)
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
         if (inProgressAttempt) {
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
@@ -175,15 +177,17 @@ class QuizRunService {
                 throw new SkillQuizException("User [${userId}] already took and passed this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
             }
 
-            QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizDef.id)
-            if (quizSetting) {
-                int numConfiguredAttempts = Integer.valueOf(quizSetting.value)
-                // anything 0 or below is considered to be unlimited attempts
-                if (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts) {
-                    throw new SkillQuizException("User [${userId}] exhausted [${numConfiguredAttempts}] available attempts for this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
-                }
+            int numConfiguredAttempts = getMaxQuizAttemptsSetting(quizDef.id)
+            // anything 0 or below is considered to be unlimited attempts
+            if (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts) {
+                throw new SkillQuizException("User [${userId}] exhausted [${numConfiguredAttempts}] available attempts for this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
             }
         }
+    }
+
+    private Integer getMaxQuizAttemptsSetting(Integer quizRefId) {
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizRefId)
+        return quizSetting ? Integer.valueOf(quizSetting.value) : -1
     }
 
     @Transactional

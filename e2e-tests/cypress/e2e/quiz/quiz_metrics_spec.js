@@ -83,7 +83,7 @@ describe('Quiz Metrics Tests', () => {
         cy.runQuizForUser(1, 8, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
         cy.runQuizForUser(1, 9, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [1, 3]}, {selectedIndex: [1]} ]);
 
-        cy.visit('/administrator/tests-and-surveys');
+        cy.visit('/administrator/quizzes/quiz1/metrics');
     });
 
 

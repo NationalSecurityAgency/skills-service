@@ -163,6 +163,44 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
     });
 
+    it('quiz attempts been exhausted', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMaxNumAttempts(1, 1)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForUser(1, 'user0', [{selectedIndex: [1]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+
+        cy.get('[data-cy="noMoreAttemptsAlert"]').contains('This quiz allows 1 maximum attempt.')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="quizDescription"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / 1')
+
+        // has 1 attempt left
+        cy.setQuizMaxNumAttempts(1, 2)
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="noMoreAttemptsAlert"]').should('not.exist')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="quizDescription"]').should('exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / 2')
+
+        // unlimited
+        cy.setQuizMaxNumAttempts(1, -1)
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="noMoreAttemptsAlert"]').should('not.exist')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="quizDescription"]').should('exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / Unlimited')
+    });
+
 
     it('run survey', () => {
         cy.createSurveyDef(1);

@@ -198,57 +198,66 @@ Cypress.Commands.add("createSurveyDef", (surveyNum = 1, overrideProps = {}) => {
     }, overrideProps));
 });
 
-Cypress.Commands.add("runQuizForUser", (quizNum = 1, userNum = 1, quizAttemptInfo) => {
+Cypress.Commands.add("setQuizMaxNumAttempts", (quizNum = 1, numAttemps) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizNumberOfAttempts',
+        value: `${numAttemps}`
+    }]);
+});
 
-    const quizId = `quiz${quizNum}`;
-
-    const userId = `user${userNum}`;
+Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo) => {
+    const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');
-
-    const waitConf = {
-        timeout: 60000, // waits up to 1 minutes
-        interval: 500 // performs the check every 500 ms, default to 200
-    };
 
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
         cy.login(vars.defaultUser, vars.defaultPass);
-
-        cy.request(`/admin/quiz-definitions/${quizId}/questions`)
-            .then((response) => {
-                // cy.log(JSON.stringify(response.body, null, 2));
-                const questionAnswers = response.body.map((qDef, questionIndex) => {
-                    const answerIndexes = quizAttemptInfo[questionIndex];
-                    const { answers } = qDef;
-                    // cy.log(JSON.stringify(answerIndexes, null, 2));
-                    // cy.log(JSON.stringify(answers, null, 2));
-                    const selectedAnswerIds = answerIndexes.selectedIndex.map((aIndex) => {
-                        // cy.log(aIndex);
-                        const foundAnswer = answers[aIndex];
-                        // cy.log(JSON.stringify(foundAnswer, null, 2));
-                        return foundAnswer.id;
-                    });
-                    return selectedAnswerIds;
-                }).flat();
-
-                cy.log(JSON.stringify(questionAnswers, null, 2));
-
-                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt`)
-                    .then((response) => {
-                        const attemptId = response.body.id
-
-
-                        const allRequests = questionAnswers.map((answerId) => {
-                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {isSelected: true});
-                        });
-                        Promise.all(allRequests).then(() => {
-                            cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
-                        })
-                    });
-
-            });
+        cy.runQuiz(quizNum, userId, quizAttemptInfo)
     });
-})
+});
+
+Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo) => {
+    cy.fixture('vars.json')
+        .then((vars) => {
+            const userId = vars.defaultUser;
+            cy.runQuiz(quizNum, userId, quizAttemptInfo)
+        });
+});
+
+Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo) => {
+    const quizId = `quiz${quizNum}`;
+    cy.request(`/admin/quiz-definitions/${quizId}/questions`)
+        .then((response) => {
+            cy.log(JSON.stringify(response.body, null, 2));
+            const questionAnswers = response.body.questions.map((qDef, questionIndex) => {
+                cy.log(`qDef=${qDef}, questionIndex=${questionIndex}`);
+                const answerIndexes = quizAttemptInfo[questionIndex];
+                cy.log(JSON.stringify(answerIndexes, null, 2));
+                const { answers } = qDef;
+                const selectedAnswerIds = answerIndexes.selectedIndex.map((aIndex) => {
+                    const foundAnswer = answers[aIndex];
+                    return foundAnswer.id;
+                });
+                return selectedAnswerIds;
+            })
+                .flat();
+
+            cy.log(JSON.stringify(questionAnswers, null, 2));
+
+            cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt`)
+                .then((response) => {
+                    const attemptId = response.body.id;
+
+                    const allRequests = questionAnswers.map((answerId) => {
+                        return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true });
+                    });
+                    Promise.all(allRequests)
+                        .then(() => {
+                            cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
+                        });
+                });
+        });
+});
 
 Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({

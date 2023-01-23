@@ -41,19 +41,23 @@ limitations under the License.
         <b-card class="text-center" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Attempts:</span>
-          <span class="text-uppercase ml-1 font-weight-bold" data-cy="numAttempts">Unlimited</span>
+          <span class="text-uppercase ml-1 font-weight-bold" data-cy="numAttempts"><b-badge>{{quizInfo.userNumPreviousQuizAttempts}}</b-badge> / <b-badge>{{ maxAttemptsDisplay }}</b-badge></span>
         </b-card>
       </div>
       <div class="col"></div>
     </div>
 
-    <p v-if="quizInfo.description" class="mt-3" data-cy="quizDescription">
+    <div v-if="allAttemptsExhausted" class="alert alert-danger mt-3 h4" data-cy="noMoreAttemptsAlert">
+      <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> No more attempts available. This quiz allows <b-badge>{{quizInfo.maxAttemptsAllowed}}</b-badge> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
+    </div>
+
+    <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-3" data-cy="quizDescription">
       <markdown-text :text="quizInfo.description" />
     </p>
 
     <div class="mt-5">
       <b-button variant="outline-danger" @click="cancel" class="text-uppercase mr-2" data-cy="cancelQuizAttempt"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
-      <b-button variant="outline-success" @click="start" class="text-uppercase" data-cy="startQuizAttempt"><i class="fas fa-play-circle"> Start</i></b-button>
+      <b-button v-if="!allAttemptsExhausted" variant="outline-success" @click="start" class="text-uppercase" data-cy="startQuizAttempt"><i class="fas fa-play-circle"> Start</i></b-button>
     </div>
   </b-card>
 </template>
@@ -72,6 +76,12 @@ limitations under the License.
     computed: {
       isSurveyType() {
         return this.quizInfo.quizType === 'Survey';
+      },
+      maxAttemptsDisplay() {
+        return this.quizInfo.maxAttemptsAllowed > 0 ? this.quizInfo.maxAttemptsAllowed : 'Unlimited';
+      },
+      allAttemptsExhausted() {
+        return this.quizInfo.maxAttemptsAllowed > 0 && this.quizInfo.maxAttemptsAllowed <= this.quizInfo.userNumPreviousQuizAttempts;
       },
     },
     methods: {

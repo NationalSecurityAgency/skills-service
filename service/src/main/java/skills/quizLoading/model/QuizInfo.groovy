@@ -25,6 +25,7 @@ class QuizInfo {
 
     Boolean isAttemptAlreadyInProgress
     Integer userNumPreviousQuizAttempts
+    Integer maxAttemptsAllowed
     Boolean userQuizPassed
     Date userLastQuizAttemptDate
 }

@@ -314,6 +314,11 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def gradedQuizAttempt3 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt3.id).body
         def quizInfo_t4 = skillsService.getQuizInfo(quiz.quizId)
 
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MaxNumAttempts.setting, value: '3'],
+        ])
+        def quizInfo_t5 = skillsService.getQuizInfo(quiz.quizId)
+
         then:
         gradedQuizAttempt.passed == false
         gradedQuizAttempt2.passed == false
@@ -323,27 +328,37 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         quizInfo.userNumPreviousQuizAttempts == 0
         quizInfo.userQuizPassed == false
         quizInfo.userLastQuizAttemptDate == null
+        quizInfo.maxAttemptsAllowed == -1
 
         quizInfo_t1.isAttemptAlreadyInProgress == false
         quizInfo_t1.userNumPreviousQuizAttempts == 1
         quizInfo_t1.userQuizPassed == false
         quizInfo_t1.userLastQuizAttemptDate
+        quizInfo_t1.maxAttemptsAllowed == -1
 
         quizInfo_t2.isAttemptAlreadyInProgress == false
         quizInfo_t2.userNumPreviousQuizAttempts == 2
         quizInfo_t2.userQuizPassed == false
         quizInfo_t2.userLastQuizAttemptDate
+        quizInfo.maxAttemptsAllowed == -1
 
         quizInfo_t3.isAttemptAlreadyInProgress == true
         quizInfo_t3.userNumPreviousQuizAttempts == 2
         quizInfo_t3.userQuizPassed == false
         quizInfo_t3.userLastQuizAttemptDate
+        quizInfo_t3.maxAttemptsAllowed == -1
 
         quizInfo_t4.isAttemptAlreadyInProgress == false
         quizInfo_t4.userNumPreviousQuizAttempts == 3
         quizInfo_t4.userQuizPassed == true
         quizInfo_t4.userLastQuizAttemptDate
+        quizInfo_t4.maxAttemptsAllowed == -1
 
+        quizInfo_t5.isAttemptAlreadyInProgress == false
+        quizInfo_t5.userNumPreviousQuizAttempts == 3
+        quizInfo_t5.userQuizPassed == true
+        quizInfo_t5.userLastQuizAttemptDate
+        quizInfo_t5.maxAttemptsAllowed == 3
     }
 
 }
