@@ -105,7 +105,7 @@ describe('Quiz Tests', () => {
     });
 
 
-    it.only('create quiz and survey', function () {
+    it('create quiz and survey', function () {
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
         cy.createQuizQuestionDef(1, 1, {question: 'What word completes the phrase: ``Everything but the kitchen``?', answers: [{
                 answer: 'Sink',

@@ -585,7 +585,7 @@ class SkillsLoader {
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),
                 enabled: enabled,
-                type: quizNameAndId?.quizType == QuizDefParent.QuizType.Survey ? 'Survey' : skillDef.selfReportingType.toString(),
+                type: quizNameAndId?.quizType == QuizDefParent.QuizType.Survey ? 'Survey' : skillDef.selfReportingType?.toString(),
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
