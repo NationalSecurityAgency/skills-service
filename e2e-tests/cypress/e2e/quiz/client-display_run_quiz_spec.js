@@ -201,6 +201,68 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / Unlimited')
     });
 
+    it('pass when MinNumQuestionsToPass is configured', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 3 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('66%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the test.')
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+        cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '66%')
+        cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentToPass"]').should('have.text', '66%')
+        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="numCorrect"]').contains('2 out of 3')
+        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="subTitleMsg"]').contains('Well done')
+    });
+
+    it('fail when MinNumQuestionsToPass is configured', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 3 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('66%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizFailed"]')
+        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the test')
+        cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '33%')
+        cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentToPass"]').should('have.text', '66%')
+        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="numCorrect"]').contains('1 out of 3')
+        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="subTitleMsg"]').contains('Missed by 1 question')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"] .fa-infinity')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Unlimited Attempts')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('1 attempt so far')
+    });
 
     it('run survey', () => {
         cy.createSurveyDef(1);

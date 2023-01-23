@@ -151,7 +151,8 @@ limitations under the License.
           });
       },
       setQuizInfo(quizInfo) {
-        this.quizInfo = quizInfo;
+        const percentToPass = quizInfo.minNumQuestionsToPass <= 0 ? 100 : Math.trunc(((quizInfo.minNumQuestionsToPass * 100) / quizInfo.questions.length));
+        this.quizInfo = { ...quizInfo, percentToPass };
         if (quizInfo.isAttemptAlreadyInProgress) {
           this.startQuizAttempt();
         } else {
@@ -209,13 +210,14 @@ limitations under the License.
                 .then((gradedRes) => {
                   const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
                   const numTotal = gradedRes.gradedQuestions.length;
+                  const numQuestionsToPass = this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : numTotal;
                   const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
                   this.quizResult = {
                     gradedRes,
                     numCorrect,
                     numTotal,
                     percentCorrect,
-                    missedBy: numTotal - numCorrect,
+                    missedBy: numQuestionsToPass - numCorrect,
                   };
 
                   const updatedQuizInfo = ({ ...this.quizInfo });

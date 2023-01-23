@@ -79,6 +79,12 @@ class QuizController {
         return quizDefService.saveQuestion(quizId, questionDefRequest)
     }
 
+    @RequestMapping(value = "/{quizId}/questions/{questionRefId}", method = [RequestMethod.DELETE], produces = "application/json")
+    @ResponseBody
+    RequestResult deleteQuestionDef(@PathVariable("quizId") String quizId, @PathVariable("questionRefId") Integer questionRefId) {
+        return quizDefService.deleteQuestion(quizId, questionRefId)
+    }
+
     @RequestMapping(value = "/{quizId}/questions/{questionId}", method = RequestMethod.PATCH)
     @ResponseBody
     RequestResult updateSkillDisplayOrder(@PathVariable("quizId") String quizId,

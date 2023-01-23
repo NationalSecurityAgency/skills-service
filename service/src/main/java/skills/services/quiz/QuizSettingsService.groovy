@@ -17,6 +17,7 @@ package skills.services.quiz
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,8 +26,10 @@ import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.QuizSettingsRes
+import skills.quizLoading.QuizSettings
 import skills.storage.model.QuizSetting
 import skills.storage.repos.QuizDefRepo
+import skills.storage.repos.QuizQuestionDefRepo
 import skills.storage.repos.QuizSettingsRepo
 
 @Service
@@ -39,12 +42,14 @@ class QuizSettingsService {
     @Autowired
     QuizDefRepo quizDefRepo
 
+    @Autowired
+    QuizQuestionDefRepo quizQuestionDefRepo
+
     @Transactional
     void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests) {
         Integer quizRefId = getQuizDefRefId(quizId)
         settingsRequests.each {
-            QuizValidator.isNotBlank(it.setting, "settings.setting", quizId)
-            QuizValidator.isNotBlank(it.value, "settings.value", quizId)
+            validateProvidedQuizSetting(quizId, it)
 
             QuizSetting existing = quizSettingsRepo.findBySettingAndQuizRefId(it.setting, quizRefId)
             if (existing) {
@@ -54,6 +59,34 @@ class QuizSettingsService {
                 quizSettingsRepo.save(new QuizSetting(setting: it.setting, value: it.value, quizRefId: quizRefId))
             }
         }
+    }
+
+    private void validateProvidedQuizSetting(String quizId, QuizSettingsRequest quizSettingsRequest) {
+        QuizValidator.isNotBlank(quizSettingsRequest.setting, "settings.setting", quizId)
+        QuizValidator.isNotBlank(quizSettingsRequest.value, "settings.value", quizId)
+
+        if (quizSettingsRequest.setting == QuizSettings.MaxNumAttempts.setting || quizSettingsRequest.setting == QuizSettings.MinNumQuestionsToPass.setting) {
+            if (!NumberUtils.isCreatable(quizSettingsRequest.value)) {
+                throw new SkillQuizException("Provided value [${quizSettingsRequest.value}] for [${quizSettingsRequest.setting}] setting must be numeric", quizId, ErrorCode.BadParam)
+            }
+
+            Integer maxNumAttempts = Integer.valueOf(quizSettingsRequest.value)
+            if (maxNumAttempts < -1) {
+                throw new SkillQuizException("Provided value [${quizSettingsRequest.value}] for [${quizSettingsRequest.setting}] setting must be >= -1", quizId, ErrorCode.BadParam)
+            }
+        }
+        if (quizSettingsRequest.setting == QuizSettings.MinNumQuestionsToPass.setting) {
+            Integer minNumQuestionsToPass = Integer.valueOf(quizSettingsRequest.value)
+            int numDeclaredQuestions = quizQuestionDefRepo.countByQuizId(quizId)
+            if (numDeclaredQuestions == 0) {
+                throw new SkillQuizException("Cannot modify [${quizSettingsRequest.setting}] becuase there is 0 declared questions", quizId, ErrorCode.BadParam)
+            }
+
+            if (numDeclaredQuestions < minNumQuestionsToPass) {
+                throw new SkillQuizException("Provided [${quizSettingsRequest.setting}] setting [${minNumQuestionsToPass}] must be less than [${numDeclaredQuestions}] declared questions.", quizId, ErrorCode.BadParam)
+            }
+        }
+
     }
 
     @Transactional(readOnly = true)

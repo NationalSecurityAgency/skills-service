@@ -44,4 +44,6 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     @Query('''update QuizQuestionDef set displayOrder = ?2 where id = ?1''')
     void updateDisplayOrder(Integer id, Integer newDisplayOrder)
 
+
+    Integer countByQuizId(String quizId)
 }

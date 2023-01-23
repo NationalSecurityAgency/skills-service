@@ -22,29 +22,33 @@ limitations under the License.
       </div>
     </div>
 
+    <b-card v-if="!isSurveyType" class="mb-1" body-class="h5" data-cy="quizPassInfo">
+      <i class="fas fa-check-circle text-success"></i>
+      Must get <b-badge variant="success">{{ quizInfo.minNumQuestionsToPass }}</b-badge> / <b-badge>{{ quizInfo.questions.length }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
+    </b-card>
+
     <div class="row">
-      <div class="col-auto">
-        <b-card class="text-center" body-class="pt-2 pb-1" data-cy="quizInfoCard">
+      <div class="col-sm pt-2">
+        <b-card class="" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Questions:</span>
           <span class="text-uppercase ml-1 font-weight-bold" data-cy="numQuestions">{{ quizInfo.questions.length }}</span>
         </b-card>
       </div>
-      <div v-if="!isSurveyType" class="col-auto">
-        <b-card class="text-center" body-class="pt-2 pb-1" data-cy="quizInfoCard">
+      <div v-if="!isSurveyType" class="col pt-2">
+        <b-card class="" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Time Limit:</span>
           <span class="text-uppercase ml-1 font-weight-bold">None</span>
         </b-card>
       </div>
-      <div v-if="!isSurveyType" class="col-auto">
-        <b-card class="text-center" body-class="pt-2 pb-1" data-cy="quizInfoCard">
+      <div v-if="!isSurveyType" class="col-md pt-2">
+        <b-card class="" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Attempts:</span>
           <span class="text-uppercase ml-1 font-weight-bold" data-cy="numAttempts"><b-badge>{{quizInfo.userNumPreviousQuizAttempts}}</b-badge> / <b-badge>{{ maxAttemptsDisplay }}</b-badge></span>
         </b-card>
       </div>
-      <div class="col"></div>
     </div>
 
     <div v-if="allAttemptsExhausted" class="alert alert-danger mt-3 h4" data-cy="noMoreAttemptsAlert">

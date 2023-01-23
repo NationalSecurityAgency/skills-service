@@ -19,46 +19,47 @@ limitations under the License.
       <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
         <i class="fas fa-handshake"></i> Thank you completing the test!
       </slot>
-      <span v-else><i class="fas fa-handshake"></i> Thank you completing the test!</span>
+      <span v-else><i class="fas fa-handshake"></i> Thank you for completing the test!</span>
     </div>
     <div class="mb-1 mt-4 h2">
       <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
       <div class="h2 d-inline-block ml-2">
-        <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning"><i class="far fa-times-circle"></i> Failed</b-badge>
-        <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success"><i class="fas fa-check-double"></i> Passed</b-badge>
+        <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning" data-cy="quizFailed"><i class="far fa-times-circle"></i> Failed</b-badge>
+        <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success" data-cy="quizPassed"><i class="fas fa-check-double"></i> Passed</b-badge>
       </div>
     </div>
     <b-card-group deck>
-      <b-card bg-variant="light" class="text-center">
+      <b-card bg-variant="light" class="text-center" data-cy="numCorrectInfoCard">
         <b-card-text>
-          <div class="h3">
-            {{ quizResult.percentCorrect }}%
+          <div class="h3" data-cy="numCorrect">
+            <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
           </div>
-          <div class="text-secondary mt-2">
-            <b>100%</b> is required to pass
+          <div class="text-secondary mt-2" data-cy="subTitleMsg">
+            <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
+            <span v-else>Well done!</span>
           </div>
         </b-card-text>
       </b-card>
-
-      <b-card bg-variant="light" class="text-center">
+      <b-card bg-variant="light" class="text-center" data-cy="percentCorrectInfoCard">
         <b-card-text>
           <div class="h3">
-            <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
+            <span data-cy="percentCorrect">{{ quizResult.percentCorrect }}%</span>
           </div>
           <div class="text-secondary mt-2">
-            <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> questions</span>
-            <span v-else>Well done!</span>
+            <b data-cy="percentToPass">{{ quizInfo.percentToPass }}%</b> is required to pass
           </div>
         </b-card-text>
       </b-card>
 
       <b-card v-if="!quizResult.gradedRes.passed" bg-variant="light" class="text-center" data-cy="numAttemptsInfoCard">
         <b-card-text>
-          <div class="h3">
-            <b-badge variant="success">2</b-badge> more attempts
+          <div class="h3" data-cy="title">
+            <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity"></i> Attempts</span>
+            <span v-if="!unlimitedAttempts"><b-badge variant="success">2</b-badge> more attempts</span>
           </div>
-          <div class="text-secondary mt-2">
-            Used <b-badge variant="warning">1</b-badge> out of <b-badge variant="success">3</b-badge> attempts
+          <div class="text-secondary mt-2" data-cy="subTitle">
+            <span v-if="unlimitedAttempts">Unlimited Attempts - <b-badge variant="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</b-badge> attempt so far</span>
+            <span v-if="!unlimitedAttempts">Used <b-badge variant="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</b-badge> out of <b-badge variant="success">{{ quizInfo.maxAttemptsAllowed }}</b-badge> attempts</span>
           </div>
         </b-card-text>
       </b-card>
@@ -89,6 +90,11 @@ limitations under the License.
       },
       runAgain() {
         this.$emit('run-again');
+      },
+    },
+    computed: {
+      unlimitedAttempts() {
+        return this.quizInfo.maxAttemptsAllowed <= 0;
       },
     },
   };

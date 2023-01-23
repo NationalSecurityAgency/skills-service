@@ -28,6 +28,9 @@ interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
     QuizSetting findBySettingAndQuizRefId(String setting, Integer quizRefId)
 
     @Nullable
+    List<QuizSetting> findAllByQuizRefIdAndSettingIn(Integer quizRefId, List<String> settings)
+
+    @Nullable
     List<QuizSetting> findAllByQuizRefId(Integer quizRefId)
 
 }

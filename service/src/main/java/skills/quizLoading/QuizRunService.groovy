@@ -87,6 +87,9 @@ class QuizRunService {
                 quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
+        QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: quizDefWithDesc.description,
@@ -96,7 +99,8 @@ class QuizRunService {
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
                 userQuizPassed: userAttemptsStats?.getUserQuizPassed() ?: false,
                 userLastQuizAttemptDate: userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null,
-                maxAttemptsAllowed: getMaxQuizAttemptsSetting(quizDefWithDesc.id)
+                maxAttemptsAllowed: maxNumAttemptsSetting ? Integer.valueOf(maxNumAttemptsSetting.value) : -1,
+                minNumQuestionsToPass: minNumQuestionsToPassSetting ? Integer.valueOf(minNumQuestionsToPassSetting.value) : -1,
         )
     }
 
@@ -185,8 +189,19 @@ class QuizRunService {
         }
     }
 
+    @Profile
+    private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting])
+    }
+
+    @Profile
     private Integer getMaxQuizAttemptsSetting(Integer quizRefId) {
         QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizRefId)
+        return quizSetting ? Integer.valueOf(quizSetting.value) : -1
+    }
+    @Profile
+    private Integer getMinNumQuestionsToPassSetting(Integer quizRefId) {
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizRefId)
         return quizSetting ? Integer.valueOf(quizSetting.value) : -1
     }
 
@@ -313,7 +328,9 @@ class QuizRunService {
 
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
-        boolean quizPassed = !gradedQuestions.find { !it.isCorrect }
+        int numCorrect = gradedQuestions.count { it.isCorrect }
+        Integer minUmQuestionsToPass = getMinNumQuestionsToPassSetting(quizDef.id)
+        boolean quizPassed = minUmQuestionsToPass > 0 ? numCorrect >= minUmQuestionsToPass : numCorrect == gradedQuestions.size()
         QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, gradedQuestions: gradedQuestions)
 
         userQuizAttempt.status = quizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED

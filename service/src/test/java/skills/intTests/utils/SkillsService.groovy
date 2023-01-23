@@ -1626,6 +1626,10 @@ class SkillsService {
             createQuizQuestionDef(it)
         }
     }
+    def deleteQuizQuestionDef(String quizId, Integer questionRefId) {
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionRefId}"
+        return wsHelper.adminDelete(url)
+    }
 
     def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
         assert quizId

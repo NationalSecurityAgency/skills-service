@@ -37,7 +37,7 @@ limitations under the License.
 
       <div class="row mt-3">
         <div id="quizPassingReq" class="col col-md-3 text-secondary" >
-          Number of Attempts:
+          Maximum Number of Attempts:
         </div>
         <div class="col">
           <div class="row">

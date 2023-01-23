@@ -23,6 +23,8 @@ class QuizInfo {
 
     List<QuizQuestionInfo> questions
 
+    Integer minNumQuestionsToPass
+
     Boolean isAttemptAlreadyInProgress
     Integer userNumPreviousQuizAttempts
     Integer maxAttemptsAllowed

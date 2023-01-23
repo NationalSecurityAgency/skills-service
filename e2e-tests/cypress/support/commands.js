@@ -204,6 +204,12 @@ Cypress.Commands.add("setQuizMaxNumAttempts", (quizNum = 1, numAttemps) => {
         value: `${numAttemps}`
     }]);
 });
+Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizPassingReq',
+        value: `${numQuestions}`
+    }]);
+});
 
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;

@@ -31,7 +31,9 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
+import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
+import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
@@ -65,6 +67,9 @@ class QuizDefService {
 
     @Autowired
     QuizAnswerDefRepo quizAnswerRepo
+
+    @Autowired
+    QuizSettingsRepo quizSettingsRepo
 
     @Autowired
     LockingService lockingService
@@ -191,6 +196,34 @@ class QuizDefService {
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
+    }
+
+    @Transactional()
+    void deleteQuestion(String quizId, Integer quizQuestionDefId) {
+        QuizDef quizDef = findQuizDef(quizId)
+
+        lockingService.lockQuizDef(quizDef.quizId)
+
+        QuizQuestionDef quizQuestionDef = quizQuestionRepo.getById(quizQuestionDefId)
+        QuizValidator.isNotNull(quizQuestionDef, "Question Definition ID", quizDef.quizId)
+        if (quizQuestionDef.quizId != quizDef.quizId) {
+            throw new SkillQuizException("Provided Question Definition ID [${quizQuestionDefId}] does not belong to the quiz [${quizDef.quizId}]", quizDef.quizId, ErrorCode.BadParam)
+        }
+
+
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizDef.id)
+        if (quizSetting) {
+            Integer minNumQuestionsToPass = Integer.valueOf(quizSetting.value)
+            int numTotalQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId) -1
+            if (numTotalQuestions == 0) {
+                quizSettingsRepo.delete(quizSetting)
+            } else if (numTotalQuestions < minNumQuestionsToPass) {
+                quizSetting.value =  "${numTotalQuestions}"
+                quizSettingsRepo.save(quizSetting)
+            }
+        }
+
+        quizAnswerRepo.delete(quizQuestionDef)
     }
 
     @Transactional()
