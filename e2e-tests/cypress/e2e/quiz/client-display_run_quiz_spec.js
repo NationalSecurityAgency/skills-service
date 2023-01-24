@@ -292,7 +292,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 3 attempts')
     });
 
-    it.only('two attempts are used when max attempts is configured', () => {
+    it('two attempts are used when max attempts is configured', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.setQuizMaxNumAttempts(1, 3)
