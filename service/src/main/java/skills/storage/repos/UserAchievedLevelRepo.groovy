@@ -29,6 +29,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserTagCount
 
 @CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>, JpaSpecificationExecutor<UserAchievement> {
@@ -623,6 +624,13 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 ''')
     SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
+    @Query(value = '''
+select count(distinct ua) as userCount, ut.value as tagValue
+from UserAchievement ua, UserTag ut
+join UserTag ut on ut.userId = ua.userId
+where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
+''')
+    List<UserTagCount> countNumAchievedByUserTag(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("userTagKey") String userTagKey)
 
     @Query(value = '''select count(ua) as totalCount,
                       sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,

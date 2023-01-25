@@ -43,6 +43,10 @@ limitations under the License.
 
       <skill-achieved-by-users-over-time class="mb-3"/>
       <skill-events-over-time class="mb-3"/>
+      <div v-for="tag of tags" :key="tag.key">
+        <users-by-tag-chart :tag="tag" class="mb-3" />
+      </div>
+
       <metrics-card title="Post Achievement Metrics" data-cy="postAchievementContainers">
         <div class="row">
             <div class="col-xl-4 col-lg-5 col-md-12 col-sm-12 mb-3">
@@ -72,6 +76,7 @@ limitations under the License.
   import PostAchievementUsersPieChart from './PostAchievementUsersPieChart';
   import PostAchievementUsersTable from './PostAchievementUsersTable';
   import BinnedPostAchievementUsage from './BinnedPostAchievementUsage';
+  import UsersByTagChart from './UsersByTagChart';
   import MetricsCard from '../utils/MetricsCard';
 
   export default {
@@ -86,6 +91,7 @@ limitations under the License.
       BinnedPostAchievementUsage,
       MetricsCard,
       PostAchievementUsersTable,
+      UsersByTagChart,
     },
     data() {
       return {
@@ -93,9 +99,22 @@ limitations under the License.
         numUsersAchieved: 0,
         numUsersInProgress: 0,
         lastAchieved: 0,
+        tags: [],
       };
     },
     mounted() {
+      const tags = [];
+      const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
+      if (userPageTags) {
+        const tagSections = userPageTags.split('|');
+        tagSections.forEach((section) => {
+          const [key, label] = section.split('/');
+          tags.push({
+            key, label,
+          });
+        });
+      }
+      this.tags = tags;
       MetricsService.loadChart(this.$route.params.projectId, 'singleSkillCountsChartBuilder', { skillId: this.$route.params.skillId })
         .then((dataFromServer) => {
           this.numUsersAchieved = dataFromServer.numUsersAchieved;
