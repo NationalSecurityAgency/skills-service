@@ -55,7 +55,6 @@ limitations under the License.
     </quiz-run-completion-summary>
 
     <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult)" class="mb-4" data-cy="quizRunQuestions">
-
       <div class="row bg-white border-bottom py-2 mb-3" data-cy="subPageHeader">
         <div class="col">
           <div class="h4 text-success font-weight-bold" data-cy="quizName">{{ quizInfo.name }}</div>
@@ -65,16 +64,38 @@ limitations under the License.
         </div>
       </div>
 
-      <div v-for="(q, index) in quizInfo.questions" :key="q.id">
-        <quiz-run-question :q="q" :num="index" @selected-answer="updateSelectedAnswers" @answer-text-changed="updateSelectedAnswers"/>
-      </div>
+      <b-overlay :show="isCompleting" opacity="0.2">
+        <div v-for="(q, index) in quizInfo.questions" :key="q.id">
+          <quiz-run-question
+              :q="q"
+              :text-input-err-msg="q.textInputErrMsg"
+              :num="index+1"
+              :enable-missing-indicator="notEveryQuestionHasAnAnswer || (q.textInputErrMsg && q.textInputErrMsg.length > 0)"
+              @selected-answer="updateSelectedAnswers"
+              @answer-text-changed="updateSelectedAnswers"/>
+        </div>
+      </b-overlay>
 
-      <div v-if="notEveryQuestionHasAnAnswer" class="alert alert-danger text-center">
-        <i class="fas fa-exclamation-triangle"></i> Not every question has an answer!
+      <div v-if="notEveryQuestionHasAnAnswer || someQuestionsHaveErrors" class="alert alert-danger text-center" data-cy="issuesWithAnswer">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span v-if="notEveryQuestionHasAnAnswer || !someQuestionsHaveErrors">Missing answers!</span>
+        <span v-if="someQuestionsHaveErrors">There are still validation errors. Please revisit the {{ quizInfo.quizType }}!</span>
       </div>
       <div v-if="!quizResult" class="text-left mt-5">
-        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2 font-weight-bold" data-cy="cancelCurrentAttemptQuizBtn"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
-        <b-button variant="outline-success" @click="completeTestRun" class="text-uppercase font-weight-bold" data-cy="completeQuizBtn"><i class="fas fa-check-double"></i> Done</b-button>
+        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2 font-weight-bold"
+                  :disabled="isCompleting"
+                  data-cy="cancelCurrentAttemptQuizBtn">
+          <i class="fas fas fa-times-circle" aria-hidden="true"> Cancel</i>
+        </b-button>
+        <b-overlay :show="isCompleting" rounded opacity="0.6" spinner-small class="d-inline-block">
+          <b-button variant="outline-success"
+                    @click="completeTestRun"
+                    :disabled="isCompleting"
+                    class="text-uppercase font-weight-bold"
+                    data-cy="completeQuizBtn">
+            <i class="fas fa-check-double" aria-hidden="true"></i> Done
+          </b-button>
+        </b-overlay>
       </div>
 
       <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
@@ -85,7 +106,6 @@ limitations under the License.
         <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2"><i class="fas fa-times-circle"></i> Close</b-button>
         <b-button variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold"><i class="fas fa-redo"></i> Try Again</b-button>
       </div>
-
     </b-card>
 
   </div>
@@ -119,9 +139,11 @@ limitations under the License.
     data() {
       return {
         isLoading: true,
+        isCompleting: false,
         quizInfo: null,
         questionsWithAnswersSelected: [],
         notEveryQuestionHasAnAnswer: false,
+        someQuestionsHaveErrors: false,
         quizResult: null,
         quizAttemptId: null,
         reportAnswerPromises: [],
@@ -191,53 +213,111 @@ limitations under the License.
       },
       updateSelectedAnswers(questionSelectedAnswer) {
         const res = this.questionsWithAnswersSelected.filter((q) => q.questionId !== questionSelectedAnswer.questionId);
-        if (questionSelectedAnswer && questionSelectedAnswer.selectedAnswerIds && questionSelectedAnswer.selectedAnswerIds.length > 0) {
+        const isTextInput = questionSelectedAnswer.questionType === 'TextInput';
+        const questionHasASelection = questionSelectedAnswer && questionSelectedAnswer.selectedAnswerIds && questionSelectedAnswer.selectedAnswerIds.length > 0
+          && (!isTextInput || questionSelectedAnswer.changedAnswerIdSelected === true);
+
+        this.notEveryQuestionHasAnAnswer = false;
+        this.someQuestionsHaveErrors = false;
+
+        if (questionHasASelection) {
           res.push(questionSelectedAnswer);
-          this.notEveryQuestionHasAnAnswer = false;
         }
+
         this.questionsWithAnswersSelected = res;
+        if (isTextInput) {
+          if (questionSelectedAnswer.changedAnswerIdSelected && questionSelectedAnswer.answerText) {
+            this.validateQuestionAnswerText(questionSelectedAnswer.questionId, questionSelectedAnswer.answerText)
+              .then((validationRes) => {
+                if (validationRes.valid) {
+                  this.reportAnswer(questionSelectedAnswer);
+                }
+              });
+          } else {
+            this.reportAnswer(questionSelectedAnswer);
+            // clear error if needed
+            const questionWithErrIndex = this.quizInfo.questions.findIndex((q) => q.id === questionSelectedAnswer.questionId);
+            if (this.quizInfo.questions[questionWithErrIndex].textInputErrMsg) {
+              this.quizInfo.questions[questionWithErrIndex].textInputErrMsg = null;
+              this.quizInfo.questions = this.quizInfo.questions.map((q) => q);
+            }
+          }
+        } else {
+          this.reportAnswer(questionSelectedAnswer);
+        }
+      },
+      validateQuestionAnswerText(questionId, answerText) {
+        return QuizRunService.validateDescription(answerText)
+          .then((validationRes) => {
+            const questionWithErrIndex = this.quizInfo.questions.findIndex((q) => q.id === questionId);
+            this.quizInfo.questions[questionWithErrIndex].textInputErrMsg = !validationRes.valid ? validationRes.msg : null;
+            this.quizInfo.questions = this.quizInfo.questions.map((q) => q);
+            return validationRes;
+          });
+      },
+      reportAnswer(questionSelectedAnswer) {
         this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId, questionSelectedAnswer.changedAnswerIdSelected, questionSelectedAnswer.answerText));
       },
       completeTestRun() {
-        const everyQuestionHasAnswer = this.questionsWithAnswersSelected.length === this.quizInfo.questions.length;
-        if (!everyQuestionHasAnswer) {
-          this.notEveryQuestionHasAnAnswer = true;
-        } else {
-          this.isLoading = true;
-          Promise.all(this.reportAnswerPromises)
-            .then(() => {
-              QuizRunService.completeQuizAttempt(this.quizId, this.quizAttemptId)
-                .then((gradedRes) => {
-                  const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
-                  const numTotal = gradedRes.gradedQuestions.length;
-                  const numQuestionsToPass = this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : numTotal;
-                  const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
-                  this.quizResult = {
-                    gradedRes,
-                    numCorrect,
-                    numTotal,
-                    percentCorrect,
-                    missedBy: numQuestionsToPass - numCorrect,
-                  };
+        this.isCompleting = true;
+        const questionsWithText = this.questionsWithAnswersSelected.filter((q) => q.answerText && q.answerText.trim().length > 0);
+        const validationPromises = [];
+        questionsWithText.forEach((q) => {
+          validationPromises.push(this.validateQuestionAnswerText(q.questionId, q.answerText));
+        });
+        Promise.all(validationPromises).then((validationResults) => {
+          const foundIndex = validationResults.findIndex((validationResult) => validationResult.valid === false);
+          if (validationResults && validationResults.length > 0 && foundIndex >= 0) {
+            this.someQuestionsHaveErrors = true;
+            this.isCompleting = false;
+          } else {
+            Promise.all(this.reportAnswerPromises)
+              .then(() => {
+                const everyQuestionHasAnswer = this.questionsWithAnswersSelected.length === this.quizInfo.questions.length;
+                const someQuestionsHaveIssues = this.quizInfo.questions.find((q) => q.textInputErrMsg);
+                if (!everyQuestionHasAnswer || someQuestionsHaveIssues) {
+                  this.notEveryQuestionHasAnAnswer = !everyQuestionHasAnswer;
+                  this.someQuestionsHaveErrors = someQuestionsHaveIssues;
+                  this.isCompleting = false;
+                } else {
+                  this.reportTestRunToBackend()
+                    .finally(() => {
+                      this.isCompleting = false;
+                    });
+                }
+              });
+          }
+        });
+      },
+      reportTestRunToBackend() {
+        return QuizRunService.completeQuizAttempt(this.quizId, this.quizAttemptId)
+          .then((gradedRes) => {
+            const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
+            const numTotal = gradedRes.gradedQuestions.length;
+            const numQuestionsToPass = this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : numTotal;
+            const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+            this.quizResult = {
+              gradedRes,
+              numCorrect,
+              numTotal,
+              percentCorrect,
+              missedBy: numQuestionsToPass - numCorrect,
+            };
 
-                  const updatedQuizInfo = ({ ...this.quizInfo });
-                  updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
-                    const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
+            const updatedQuizInfo = ({ ...this.quizInfo });
+            updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
+              const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
 
-                    const answerOptions = q.answerOptions.map((a) => ({
-                          ...a,
-                          selected: gradedQuestion.selectedAnswerIds.includes(a.id),
-                          isGraded: true,
-                          isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
-                    }));
-                    return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
-                  });
-                  this.quizInfo = updatedQuizInfo;
-                }).finally(() => {
-                  this.isLoading = false;
-                });
+              const answerOptions = q.answerOptions.map((a) => ({
+                  ...a,
+                  selected: gradedQuestion.selectedAnswerIds.includes(a.id),
+                  isGraded: true,
+                  isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
+              }));
+              return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
             });
-        }
+            this.quizInfo = updatedQuizInfo;
+          });
       },
       tryAgain() {
         this.quizResult = null;

@@ -16,8 +16,10 @@
 package skills.intTests.quiz
 
 import groovy.json.JsonOutput
+import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 
 class QuizApi_RunSurveySpecs extends DefaultIntSpec {
 
@@ -71,5 +73,130 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         restartedQuizAttempt.selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
         restartedQuizAttempt.enteredText.size() == 1
         restartedQuizAttempt.enteredText.find { it.answerId == quizInfo.questions[2].answerOptions[0].id }.answerText == 'This is user provided answer'
+    }
+
+    def "empty or non-existent text for TextInput question type should remove the answer"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'ans'])
+
+        def quizAttempt_t1 =  skillsService.startQuizAttempt(quiz.quizId).body
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:false, answerText: '   '])
+        def quizAttempt_t2 =  skillsService.startQuizAttempt(quiz.quizId).body
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'ans1'])
+        def quizAttempt_t3 =  skillsService.startQuizAttempt(quiz.quizId).body
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:false, answerText: null])
+        def quizAttempt_t4 =  skillsService.startQuizAttempt(quiz.quizId).body
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttempt_t4))
+        then:
+        quizAttempt_t1.enteredText.answerId == [quizInfo.questions[2].answerOptions[0].id]
+        quizAttempt_t1.enteredText.answerText == ['ans']
+
+        !quizAttempt_t2.enteredText
+
+        quizAttempt_t3.enteredText.answerId == [quizInfo.questions[2].answerOptions[0].id]
+        quizAttempt_t3.enteredText.answerText == ['ans1']
+
+        !quizAttempt_t4.enteredText
+    }
+
+    def "TextInput question validation: selected answers must provide an answer"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: null])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("answerText was not provided")
+        e.message.contains("quizId:${quiz.quizId}")
+        e.message.contains("errorCode:${ErrorCode.BadParam}")
+    }
+
+    def "TextInput question validation: selected answers must provide an answer - empty string is not acceptable"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: '    '])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("answerText was not provided")
+        e.message.contains("quizId:${quiz.quizId}")
+        e.message.contains("errorCode:${ErrorCode.BadParam}")
+    }
+
+    def "TextInput question validation: not selected answers must NOT provide an answer"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:false, answerText: '  blah   '])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("For TextInput type, if isSelected=false then the answer must be null or blank")
+        e.message.contains("quizId:${quiz.quizId}")
+        e.message.contains("errorCode:${ErrorCode.BadParam}")
+    }
+
+    def "TextInput question validation: custom text validation"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'Jabberwocky text'])
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("answerText is invalid: paragraphs may not contain jabberwocky")
+        e.message.contains("quizId:${quiz.quizId}")
+        e.message.contains("errorCode:${ErrorCode.BadParam}")
     }
 }

@@ -876,7 +876,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         approvals4.each { assert it.getApproverActionTakenOn() != null }
     }
 
-    def "skill additional info endpoint must return self-report approval status for imported skills"() {
+    def "skills display summary endpoints must return self-report approval status for imported skills"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
         def project3 = createProject(3)
@@ -899,7 +899,6 @@ class CatalogSkillTests extends CatalogIntSpec {
         proj2_skill4.selfReportingType = SkillDef.SelfReportingType.Approval
         proj2_skill5.selfReportingType = SkillDef.SelfReportingType.Approval
 
-
         skillsService.createProject(project1)
         skillsService.createProject(project2)
         skillsService.createProject(project3)
@@ -921,34 +920,35 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(proj2_skill5)
 
         def user = getRandomUsers(1)[0]
-        skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
-        skillsService.addSkill([projectId: project2.projectId, skillId: proj2_skill4.skillId], user)
-        skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
+        println skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user)
+        println skillsService.addSkill([projectId: project2.projectId, skillId: proj2_skill4.skillId], user)
+        println skillsService.addSkill([projectId: project2.projectId, skillId: skill3.skillId], user)
         when:
-        def subjDescRes = skillsService.getSubjectDescriptions(project2.projectId, p2subj1.subjectId, user)
+        def skillsSummary = skillsService.getSkillSummary(user, project2.projectId, p2subj1.subjectId, -1, true).skills
+        println JsonOutput.prettyPrint(JsonOutput.toJson(skillsSummary))
         then:
-        subjDescRes.size() == 5
-        def self1 = subjDescRes.find { it.skillId == skill.skillId }.selfReporting
+        skillsSummary.size() == 5
+        def self1 = skillsSummary.find { it.skillId == skill.skillId }.selfReporting
         self1.enabled
         self1.type == "Approval"
         self1.requestedOn
 
-        def self2 = subjDescRes.find { it.skillId == skill2.skillId }.selfReporting
+        def self2 = skillsSummary.find { it.skillId == skill2.skillId }.selfReporting
         self2.enabled
         self2.type == "Approval"
         !self2.requestedOn
 
-        def self3 = subjDescRes.find { it.skillId == skill3.skillId }.selfReporting
+        def self3 = skillsSummary.find { it.skillId == skill3.skillId }.selfReporting
         self3.enabled
         self3.type == "Approval"
         self3.requestedOn
 
-        def self4 = subjDescRes.find { it.skillId == proj2_skill4.skillId }.selfReporting
+        def self4 = skillsSummary.find { it.skillId == proj2_skill4.skillId }.selfReporting
         self4.enabled
         self4.type == "Approval"
         self4.requestedOn
 
-        def self5 = subjDescRes.find { it.skillId == proj2_skill5.skillId }.selfReporting
+        def self5 = skillsSummary.find { it.skillId == proj2_skill5.skillId }.selfReporting
         self5.enabled
         self5.type == "Approval"
         !self5.requestedOn

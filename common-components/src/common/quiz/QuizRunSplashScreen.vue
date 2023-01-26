@@ -16,13 +16,17 @@ limitations under the License.
 <template>
   <b-card data-cy="quizSplashScreen">
     <div class="h5">
-      <slot name="aboveTitle" />
+      <div v-if="quizInfo.userQuizPassed" class="alert alert-success">
+        <i class="fas fa-gift" aria-hidden="true"></i> Good News! You already <span v-if="!isSurveyType">passed this quiz</span><span v-else>completed this survey</span> <span class="font-weight-bold">{{ quizInfo.userLastQuizAttemptDate | timeFromNow }}</span>!
+        <b-button variant="outline-primary" @click="cancel" class="text-uppercase" size="sm" data-cy="closeQuizAttemptInAlert"><i class="fas fas fa-times-circle" aria-hidden="true"> Close {{ quizInfo.quizType }}</i></b-button>
+      </div>
+      <slot v-if="!quizInfo.userQuizPassed" name="aboveTitle" />
       <div class="mb-1 mt-4 h2">
         <span class="font-weight-bold text-success">{{ quizInfo.name }}</span>
       </div>
     </div>
 
-    <b-card v-if="!isSurveyType" class="mb-1" body-class="h5" data-cy="quizPassInfo">
+    <b-card v-if="!isSurveyType && canStartQuiz" class="mb-1" body-class="h5" data-cy="quizPassInfo">
       <i class="fas fa-check-circle text-success"></i>
       Must get <b-badge variant="success">{{ minNumQuestionsToPass }}</b-badge> / <b-badge>{{ quizInfo.questions.length }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
     </b-card>
@@ -60,8 +64,9 @@ limitations under the License.
     </p>
 
     <div class="mt-5">
-      <b-button variant="outline-danger" @click="cancel" class="text-uppercase mr-2" data-cy="cancelQuizAttempt"><i class="fas fas fa-times-circle"> Cancel</i></b-button>
-      <b-button v-if="!allAttemptsExhausted" variant="outline-success" @click="start" class="text-uppercase" data-cy="startQuizAttempt"><i class="fas fa-play-circle"> Start</i></b-button>
+      <b-button v-if="canStartQuiz" variant="outline-danger" @click="cancel" class="text-uppercase mr-2" data-cy="cancelQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Cancel</i></b-button>
+      <b-button v-if="canStartQuiz" variant="outline-success" @click="start" class="text-uppercase" data-cy="startQuizAttempt"><i class="fas fa-play-circle" aria-hidden="true"> Start</i></b-button>
+      <b-button v-if="!canStartQuiz" variant="outline-primary" @click="cancel" class="text-uppercase mr-2" data-cy="closeQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Close</i></b-button>
     </div>
   </b-card>
 </template>
@@ -89,6 +94,9 @@ limitations under the License.
       },
       minNumQuestionsToPass() {
         return this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : this.quizInfo.questions.length;
+      },
+      canStartQuiz() {
+        return !this.quizInfo.userQuizPassed && !this.allAttemptsExhausted;
       },
     },
     methods: {

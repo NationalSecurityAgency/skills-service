@@ -17,6 +17,7 @@ package skills.quizLoading
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,8 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.quizLoading.model.*
+import skills.services.CustomValidationResult
+import skills.services.CustomValidator
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
@@ -49,6 +52,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
+    CustomValidator validator
 
     @Autowired
     QuizSettingsRepo quizSettingsRepo
@@ -226,7 +232,15 @@ class QuizRunService {
         }
 
         if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
-            QuizValidator.isNotBlank(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
+            if (quizReportAnswerReq.isSelected) {
+                QuizValidator.isNotBlank(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
+                CustomValidationResult customValidationResult = validator.validateDescription(quizReportAnswerReq.getAnswerText())
+                if (!customValidationResult.valid) {
+                    throw new SkillQuizException("answerText is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+                }
+            } else {
+                QuizValidator.isTrue(StringUtils.isBlank(quizReportAnswerReq.getAnswerText()), "For TextInput type, if isSelected=false then the answer must be null or blank", quizId)
+            }
             handleReportingTextInputQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else {
             handleReportingAChoiceBasedQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
@@ -236,9 +250,13 @@ class QuizRunService {
     private void handleReportingTextInputQuestion(String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         if (existingAnswerAttempt) {
-            existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
-            quizAttemptAnswerRepo.save(existingAnswerAttempt)
-        } else {
+            if (quizReportAnswerReq.isSelected) {
+                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+                quizAttemptAnswerRepo.save(existingAnswerAttempt)
+            } else {
+                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
+            }
+        } else if (quizReportAnswerReq.isSelected) {
             UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
                     userQuizAttemptRefId: quizAttemptId,
                     quizAnswerDefinitionRefId: answerDefId,

@@ -301,6 +301,14 @@ Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, ques
     }, overrideProps));
 });
 
+Cypress.Commands.add("createTextInputQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${quizNum}`,
+        questionType: 'TextInput',
+    }, overrideProps));
+});
+
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
     cy.request('POST', `/app/projects/proj${projNum}`, Object.assign({
