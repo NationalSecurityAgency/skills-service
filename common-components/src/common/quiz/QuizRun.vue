@@ -82,10 +82,10 @@ limitations under the License.
         <span v-if="someQuestionsHaveErrors">There are still validation errors. Please revisit the {{ quizInfo.quizType }}!</span>
       </div>
       <div v-if="!quizResult" class="text-left mt-5">
-        <b-button variant="outline-danger" @click="cancelQuizAttempt" class="text-uppercase mr-2 font-weight-bold"
+        <b-button variant="outline-info" @click="saveAndCloseThisRun" class="text-uppercase mr-2 font-weight-bold"
                   :disabled="isCompleting"
-                  data-cy="cancelCurrentAttemptQuizBtn">
-          <i class="fas fas fa-times-circle" aria-hidden="true"> Cancel</i>
+                  data-cy="saveAndCloseQuizAttemptBtn">
+          <i class="fas fa-save" aria-hidden="true"> Save and Close</i>
         </b-button>
         <b-overlay :show="isCompleting" rounded opacity="0.6" spinner-small class="d-inline-block">
           <b-button variant="outline-success"
@@ -325,6 +325,14 @@ limitations under the License.
       },
       cancelQuizAttempt() {
         this.$emit('cancelled');
+      },
+      saveAndCloseThisRun() {
+        this.isCompleting = true;
+        Promise.all(this.reportAnswerPromises)
+          .then(() => {
+            this.$emit('cancelled');
+            this.isCompleting = false;
+          });
       },
       doneWithThisRun() {
         this.$emit('testWasTaken', this.quizResult);

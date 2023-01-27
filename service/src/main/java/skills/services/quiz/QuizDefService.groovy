@@ -237,7 +237,7 @@ class QuizDefService {
         int displayOrder = maxExistingDisplayOrder != null ? maxExistingDisplayOrder + 1 : 0
 
         QuizQuestionType questionType = questionDefRequest.questionType
-        if (!questionType || questionType != QuizQuestionType.TextInput) {
+        if (!questionType || (questionType != QuizQuestionType.TextInput && quizDef.type != QuizDefParent.QuizType.Survey)) {
             questionType = questionDefRequest.answers.count { it.isCorrect } > 1 ?
                     QuizQuestionType.MultipleChoice : QuizQuestionType.SingleChoice
         }

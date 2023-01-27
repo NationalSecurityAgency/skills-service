@@ -39,7 +39,7 @@ limitations under the License.
         <div v-if="textInputErrMsg" class="text-danger" data-cy="textInputErrMsg"> {{ textInputErrMsg }}</div>
       </div>
       <div v-else>
-        <div v-if="isMultipleChoice" class="text-secondary font-italic small">(Select <b>all</b> that apply)</div>
+        <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
         <div class="mt-1 pl-1">
             <div v-for="(a, aIndex) in answerOptions" :key="a.id">
               <quiz-run-answer
@@ -127,7 +127,7 @@ limitations under the License.
         this.answerOptions = this.answerOptions.map((a) => {
           const isThisId = a.id === selectedStatus.id;
           const isSelected = isThisId && selectedStatus.selected;
-          const selectRes = isSelected || (this.q.canSelectMoreThanOne && a.selected && !isThisId);
+          const selectRes = isSelected || (this.q.questionType === 'MultipleChoice' && a.selected && !isThisId);
           return {
             ...a,
             selected: selectRes,

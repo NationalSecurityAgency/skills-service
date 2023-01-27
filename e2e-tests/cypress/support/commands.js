@@ -286,7 +286,7 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
 Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
         quizId: `quizId${quizNum}`,
-        question: `This is a question # ${quizNum}`,
+        question: `This is a question # ${questionNum}`,
         questionType: 'MultipleChoice',
         answers: [{
             answer: 'First Answer',
