@@ -64,23 +64,20 @@ limitations under the License.
         </div>
       </div>
 
+      <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
       <b-overlay :show="isCompleting" opacity="0.2">
         <div v-for="(q, index) in quizInfo.questions" :key="q.id">
           <quiz-run-question
               :q="q"
-              :text-input-err-msg="q.textInputErrMsg"
+              :quiz-id="quizId"
+              :quiz-attempt-id="quizAttemptId"
               :num="index+1"
-              :enable-missing-indicator="notEveryQuestionHasAnAnswer || (q.textInputErrMsg && q.textInputErrMsg.length > 0)"
               @selected-answer="updateSelectedAnswers"
               @answer-text-changed="updateSelectedAnswers"/>
         </div>
       </b-overlay>
 
-      <div v-if="notEveryQuestionHasAnAnswer || someQuestionsHaveErrors" class="alert alert-danger text-center" data-cy="issuesWithAnswer">
-        <i class="fas fa-exclamation-triangle mr-2"></i>
-        <span v-if="notEveryQuestionHasAnAnswer || !someQuestionsHaveErrors">Missing answers!</span>
-        <span v-if="someQuestionsHaveErrors">There are still validation errors. Please revisit the {{ quizInfo.quizType }}!</span>
-      </div>
+        <quiz-run-validation-warnings v-if="invalid" :errors-to-show="errorsToShow" />
       <div v-if="!quizResult" class="text-left mt-5">
         <b-button variant="outline-info" @click="saveAndCloseThisRun" class="text-uppercase mr-2 font-weight-bold"
                   :disabled="isCompleting"
@@ -89,7 +86,7 @@ limitations under the License.
         </b-button>
         <b-overlay :show="isCompleting" rounded opacity="0.6" spinner-small class="d-inline-block">
           <b-button variant="outline-success"
-                    @click="completeTestRun"
+                    @click="handleSubmit(completeTestRun)"
                     :disabled="isCompleting"
                     class="text-uppercase font-weight-bold"
                     data-cy="completeQuizBtn">
@@ -97,6 +94,7 @@ limitations under the License.
           </b-button>
         </b-overlay>
       </div>
+      </ValidationObserver>
 
       <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
         <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold"><i class="fas fa-times-circle"></i> Close</b-button>
@@ -119,10 +117,12 @@ limitations under the License.
   import QuizRunSplashScreen from '@/common-components/quiz/QuizRunSplashScreen';
   import QuizRunCompletionSummary from '@/common-components/quiz/QuizRunCompletionSummary';
   import SurveyRunCompletionSummary from '@/common-components/quiz/SurveyRunCompletionSummary';
+  import QuizRunValidationWarnings from '@/common-components/quiz/QuizRunValidationWarnings';
 
   export default {
     name: 'QuizRun',
     components: {
+      QuizRunValidationWarnings,
       SurveyRunCompletionSummary,
       QuizRunCompletionSummary,
       QuizRunSplashScreen,
@@ -141,9 +141,6 @@ limitations under the License.
         isLoading: true,
         isCompleting: false,
         quizInfo: null,
-        questionsWithAnswersSelected: [],
-        notEveryQuestionHasAnAnswer: false,
-        someQuestionsHaveErrors: false,
         quizResult: null,
         quizAttemptId: null,
         reportAnswerPromises: [],
@@ -162,6 +159,11 @@ limitations under the License.
     computed: {
       isSurveyType() {
         return this.quizInfo.quizType === 'Survey';
+      },
+      errorsToShow() {
+        const values = Object.values(this.$refs.observer.errors).flat().filter((val) => val && val.length > 0);
+        const unique = values.filter((v, i, a) => a.indexOf(v) === i);
+        return unique && unique.length > 0 ? unique : null;
       },
     },
     methods: {
@@ -206,86 +208,28 @@ limitations under the License.
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
-            this.questionsWithAnswersSelected = copy.questions.filter((q) => q.answerOptions.map((a) => a.selected).indexOf(true) >= 0);
           }).finally(() => {
             this.isLoading = false;
           });
       },
       updateSelectedAnswers(questionSelectedAnswer) {
-        const res = this.questionsWithAnswersSelected.filter((q) => q.questionId !== questionSelectedAnswer.questionId);
-        const isTextInput = questionSelectedAnswer.questionType === 'TextInput';
-        const questionHasASelection = questionSelectedAnswer && questionSelectedAnswer.selectedAnswerIds && questionSelectedAnswer.selectedAnswerIds.length > 0
-          && (!isTextInput || questionSelectedAnswer.changedAnswerIdSelected === true);
-
-        this.notEveryQuestionHasAnAnswer = false;
-        this.someQuestionsHaveErrors = false;
-
-        if (questionHasASelection) {
-          res.push(questionSelectedAnswer);
+        if (questionSelectedAnswer.reportAnswerPromise) {
+          this.reportAnswerPromises.push(questionSelectedAnswer.reportAnswerPromise);
         }
-
-        this.questionsWithAnswersSelected = res;
-        if (isTextInput) {
-          if (questionSelectedAnswer.changedAnswerIdSelected && questionSelectedAnswer.answerText) {
-            this.validateQuestionAnswerText(questionSelectedAnswer.questionId, questionSelectedAnswer.answerText)
-              .then((validationRes) => {
-                if (validationRes.valid) {
-                  this.reportAnswer(questionSelectedAnswer);
-                }
-              });
-          } else {
-            this.reportAnswer(questionSelectedAnswer);
-            // clear error if needed
-            const questionWithErrIndex = this.quizInfo.questions.findIndex((q) => q.id === questionSelectedAnswer.questionId);
-            if (this.quizInfo.questions[questionWithErrIndex].textInputErrMsg) {
-              this.quizInfo.questions[questionWithErrIndex].textInputErrMsg = null;
-              this.quizInfo.questions = this.quizInfo.questions.map((q) => q);
-            }
-          }
-        } else {
-          this.reportAnswer(questionSelectedAnswer);
-        }
-      },
-      validateQuestionAnswerText(questionId, answerText) {
-        return QuizRunService.validateDescription(answerText)
-          .then((validationRes) => {
-            const questionWithErrIndex = this.quizInfo.questions.findIndex((q) => q.id === questionId);
-            this.quizInfo.questions[questionWithErrIndex].textInputErrMsg = !validationRes.valid ? validationRes.msg : null;
-            this.quizInfo.questions = this.quizInfo.questions.map((q) => q);
-            return validationRes;
-          });
-      },
-      reportAnswer(questionSelectedAnswer) {
-        this.reportAnswerPromises.push(QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, questionSelectedAnswer.changedAnswerId, questionSelectedAnswer.changedAnswerIdSelected, questionSelectedAnswer.answerText));
       },
       completeTestRun() {
         this.isCompleting = true;
-        const questionsWithText = this.questionsWithAnswersSelected.filter((q) => q.answerText && q.answerText.trim().length > 0);
-        const validationPromises = [];
-        questionsWithText.forEach((q) => {
-          validationPromises.push(this.validateQuestionAnswerText(q.questionId, q.answerText));
-        });
-        Promise.all(validationPromises).then((validationResults) => {
-          const foundIndex = validationResults.findIndex((validationResult) => validationResult.valid === false);
-          if (validationResults && validationResults.length > 0 && foundIndex >= 0) {
-            this.someQuestionsHaveErrors = true;
-            this.isCompleting = false;
-          } else {
+        this.$refs.observer.validate().then((validationResults) => {
+          if (validationResults) {
             Promise.all(this.reportAnswerPromises)
               .then(() => {
-                const everyQuestionHasAnswer = this.questionsWithAnswersSelected.length === this.quizInfo.questions.length;
-                const someQuestionsHaveIssues = this.quizInfo.questions.find((q) => q.textInputErrMsg);
-                if (!everyQuestionHasAnswer || someQuestionsHaveIssues) {
-                  this.notEveryQuestionHasAnAnswer = !everyQuestionHasAnswer;
-                  this.someQuestionsHaveErrors = someQuestionsHaveIssues;
-                  this.isCompleting = false;
-                } else {
-                  this.reportTestRunToBackend()
-                    .finally(() => {
-                      this.isCompleting = false;
-                    });
-                }
+                this.reportTestRunToBackend()
+                  .finally(() => {
+                    this.isCompleting = false;
+                  });
               });
+          } else {
+            this.isCompleting = false;
           }
         });
       },

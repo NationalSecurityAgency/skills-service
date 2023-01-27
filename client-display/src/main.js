@@ -29,6 +29,8 @@ import {
     FormTextareaPlugin,
     CardPlugin,
     OverlayPlugin,
+    CollapsePlugin,
+    LinkPlugin,
 } from 'bootstrap-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -62,6 +64,8 @@ Vue.use(FormTextareaPlugin);
 Vue.use(CardPlugin);
 Vue.use(OverlayPlugin);
 Vue.use(FiltersPlugin);
+Vue.use(CollapsePlugin);
+Vue.use(LinkPlugin);
 
 localize({
   en,

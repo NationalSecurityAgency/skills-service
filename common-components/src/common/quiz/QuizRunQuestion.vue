@@ -17,7 +17,6 @@ limitations under the License.
   <div class="row no-gutters mb-4" :data-cy="`question_${num}`">
     <div class="col-auto pt-2 pr-2">
       <b-badge class="d-inline-block" :variant="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'default'}`">{{ num }}</b-badge>
-      <span v-if="enableMissingIndicator && (isMissingAnswer || textInputErrMsg)" class="text-danger" style="font-size: 1.1rem;" data-cy="issueWithAnAnswer"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
       <span v-if="q.gradedInfo" class="ml-1 pt-1">
         <span v-if="q.gradedInfo.isCorrect" class="text-success" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
         <span v-if="!q.gradedInfo.isCorrect" class="text-danger" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
@@ -27,51 +26,50 @@ limitations under the License.
     <div class="col">
       <markdown-text :text="q.question" data-cy="questionsText" />
 
+      <ValidationObserver ref="singleQuestionObserver">
       <div v-if="isTextInput">
-        <b-form-textarea
-            id="textarea"
-            data-cy="textInputAnswer"
-            v-model="answerText"
-            debounce="400"
-            placeholder="Please enter your response here..."
-            rows="2"
-            max-rows="20"/>
-        <div v-if="textInputErrMsg" class="text-danger" data-cy="textInputErrMsg"> {{ textInputErrMsg }}</div>
+        <ValidationProvider rules="required|customDescriptionValidator" v-slot="{errors}" :name="`Answer to question #${num}`" :debounce="400" :immediate="false">
+          <b-form-textarea
+              :id="`answer-${num}`"
+              data-cy="textInputAnswer"
+              v-model="answerText"
+              @input="textAnswerChanged"
+              placeholder="Please enter your response here..."
+              rows="2"
+              max-rows="20"/>
+          <small role="alert" class="form-text text-danger" data-cy="textInputAnswerErr" id="skillPointIncrementError">{{ errors[0] }}</small>
+        </ValidationProvider>
       </div>
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
-        <div class="mt-1 pl-1">
-            <div v-for="(a, aIndex) in answerOptions" :key="a.id">
-              <quiz-run-answer
-                  :data-cy="`answer_${aIndex+1}`"
-                  :a="a"
-                  :can-select-more-than-one="isMultipleChoice"
-                  @selection-changed="selectionChanged"/>
-            </div>
-        </div>
+          <ValidationProvider rules="atLeastOneSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
+            <quiz-run-answers class="mt-1 pl-1"
+                              @selected-answer="selectionChanged"
+                              v-model="answerOptions"
+                              :q="q"
+                              :can-select-more-than-one="isMultipleChoice"/>
+            <small role="alert" class="form-text text-danger" data-cy="choiceAnswerErr" id="skillPointIncrementError">{{ errors[0] }}</small>
+          </ValidationProvider>
       </div>
+      </ValidationObserver>
     </div>
   </div>
 </template>
 
 <script>
+  import { extend } from 'vee-validate';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import QuizRunAnswer from '@/common-components/quiz/QuizRunAnswer';
+  import QuizRunAnswers from '@/common-components/quiz/QuizRunAnswers';
+  import QuizRunService from './QuizRunService';
 
   export default {
     name: 'QuizRunQuestion',
-    components: { QuizRunAnswer, MarkdownText },
+    components: { QuizRunAnswers, MarkdownText },
     props: {
       q: Object,
+      quizId: String,
+      quizAttemptId: Number,
       num: Number,
-      enableMissingIndicator: {
-        type: Boolean,
-        default: false,
-      },
-      textInputErrMsg: {
-        type: String,
-        default: '',
-      },
     },
     data() {
       return {
@@ -85,11 +83,7 @@ limitations under the License.
         const existingAnswerText = this.q.answerOptions[0].answerText;
         this.answerText = existingAnswerText || '';
       }
-    },
-    watch: {
-      answerText() {
-        this.textAnswerChanged();
-      },
+      this.setupValidation();
     },
     computed: {
       isMultipleChoice() {
@@ -109,8 +103,19 @@ limitations under the License.
       },
     },
     methods: {
-      textAnswerChanged() {
-        // only 1 answer in case of TextInput
+      setupValidation() {
+        extend('atLeastOneSelected', {
+          message: () => 'At least 1 choice must be selected',
+          validate(value) {
+            const foundSelected = value && (value.findIndex((a) => a.selected) >= 0);
+            return foundSelected;
+          },
+        }, {
+          immediate: false,
+        });
+      },
+      textAnswerChanged(answerText) {
+        this.answerText = answerText;
         const selectedAnswerIds = this.answerOptions.map((a) => a.id);
         const isAnswerBlank = !this.answerText || this.answerText.trimEnd() === '';
         const currentAnswer = {
@@ -121,27 +126,35 @@ limitations under the License.
           changedAnswerIdSelected: !isAnswerBlank,
           answerText: this.answerText,
         };
-        this.$emit('answer-text-changed', currentAnswer);
-      },
-      selectionChanged(selectedStatus) {
-        this.answerOptions = this.answerOptions.map((a) => {
-          const isThisId = a.id === selectedStatus.id;
-          const isSelected = isThisId && selectedStatus.selected;
-          const selectRes = isSelected || (this.q.questionType === 'MultipleChoice' && a.selected && !isThisId);
-          return {
-            ...a,
-            selected: selectRes,
-          };
+        this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+          // only 1 answer in case of TextInput
+          this.$emit('answer-text-changed', {
+            ...currentAnswer,
+            reportAnswerPromise,
+          });
         });
-        const selectedAnswerIds = this.answerOptions.filter((a) => a.selected).map((a) => a.id);
-        const currentAnswer = {
-          questionId: this.q.id,
-          questionType: this.q.questionType,
-          selectedAnswerIds,
-          changedAnswerId: selectedStatus.id,
-          changedAnswerIdSelected: selectedStatus.selected,
-        };
-        this.$emit('selected-answer', currentAnswer);
+      },
+      selectionChanged(currentAnswer) {
+        this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+          this.$emit('selected-answer', {
+            ...currentAnswer,
+            reportAnswerPromise,
+          });
+        });
+      },
+      reportAnswer(answer) {
+        if (this.$refs.singleQuestionObserver) {
+          return this.$refs.singleQuestionObserver.validate()
+            .then((validationResults) => {
+              if (validationResults) {
+                return QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText);
+              }
+              return null;
+            });
+        }
+        return new Promise((resolve) => {
+          resolve(null);
+        });
       },
     },
   };
