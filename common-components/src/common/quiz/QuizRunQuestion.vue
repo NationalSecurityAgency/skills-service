@@ -33,7 +33,8 @@ limitations under the License.
               :id="`answer-${num}`"
               data-cy="textInputAnswer"
               v-model="answerText"
-              @input="textAnswerChanged"
+              @update="textAnswerChanged"
+              :debounce="500"
               placeholder="Please enter your response here..."
               rows="2"
               max-rows="20"/>
@@ -144,8 +145,10 @@ limitations under the License.
       },
       reportAnswer(answer) {
         if (this.$refs.singleQuestionObserver) {
-          return this.$refs.singleQuestionObserver.validate()
+          return this.$refs.singleQuestionObserver.validate({ silent: false })
             .then((validationResults) => {
+              console.log('validation??');
+              console.log(validationResults);
               if (validationResults) {
                 return QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText);
               }

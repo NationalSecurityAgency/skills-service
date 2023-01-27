@@ -174,7 +174,10 @@ limitations under the License.
             // eslint-disable-next-line global-require
             require('@/common-components/validators/CustomDescriptionValidator');
             extend('maxDescriptionLength', ValidatorFactory.newCharLengthValidator(store.getters.config.descriptionMaxLength));
-            extend('required', required);
+            extend('required', {
+              ...required,
+              message: '{_field_} is required',
+            });
           });
       },
       handleTheming(theme) {
