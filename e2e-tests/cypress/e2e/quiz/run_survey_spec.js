@@ -199,7 +199,7 @@ describe('Client Display Survey Tests', () => {
         cy.wait('@reportAnswer')
     });
 
-    const environments =   ['dashboard'] //['dashboard', 'client-display']
+    const environments =  ['dashboard', 'client-display']
     environments.forEach((env) => {
         it(`run a survey in [${env}]`, () => {
             cy.createSurveyDef(1);
@@ -385,7 +385,7 @@ describe('Client Display Survey Tests', () => {
             // make validate call very slow that way as-you-type validation will not be performed by the time Done button is pressed
             cy.intercept('/api/validation/description', (req) => {
                 req.reply((res) => {
-                    res.send({ delay: 2000 });
+                    res.send({ delay: 3000 });
                 });
             }).as('validateDescription');
 

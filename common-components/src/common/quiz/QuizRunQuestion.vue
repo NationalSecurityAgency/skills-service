@@ -33,7 +33,6 @@ limitations under the License.
               :id="`answer-${num}`"
               data-cy="textInputAnswer"
               v-model="answerText"
-              @update="textAnswerChanged"
               :debounce="500"
               placeholder="Please enter your response here..."
               rows="2"
@@ -86,6 +85,11 @@ limitations under the License.
       }
       this.setupValidation();
     },
+    watch: {
+      answerText() {
+        this.textAnswerChanged();
+      },
+    },
     computed: {
       isMultipleChoice() {
         return this.q.questionType === 'MultipleChoice';
@@ -115,8 +119,7 @@ limitations under the License.
           immediate: false,
         });
       },
-      textAnswerChanged(answerText) {
-        this.answerText = answerText;
+      textAnswerChanged() {
         const selectedAnswerIds = this.answerOptions.map((a) => a.id);
         const isAnswerBlank = !this.answerText || this.answerText.trimEnd() === '';
         const currentAnswer = {
@@ -147,8 +150,6 @@ limitations under the License.
         if (this.$refs.singleQuestionObserver) {
           return this.$refs.singleQuestionObserver.validate({ silent: false })
             .then((validationResults) => {
-              console.log('validation??');
-              console.log(validationResults);
               if (validationResults) {
                 return QuizRunService.reportAnswer(this.quizId, this.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText);
               }
