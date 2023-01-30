@@ -401,21 +401,29 @@ class QuizDefService {
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
 
-        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
-        if (isTextInputQuestion) {
-            if (questionDefRequest.answers) {
-                throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
+        if (questionDefRequest.questionType != QuizQuestionType.TextInput) {
+            QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
+            questionDefRequest.answers.each {
+                QuizValidator.isNotBlank(it.answer, "answers.answer", quizId)
+            }
+        }
+        if (quizDef.type == QuizDefParent.QuizType.Quiz) {
+            QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
+            QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) != null, "For quiz.type of Quiz must set isCorrect=true on at least 1 question", quizId)
+
+            if (questionDefRequest.questionType == QuizQuestionType.MultipleChoice) {
+                QuizValidator.isTrue(questionDefRequest.answers.count({ it.isCorrect }) >= 2, "For questionType=[${QuizQuestionType.MultipleChoice}] must provide >= 2 correct answers", quizId)
+            } else if (questionDefRequest.questionType == QuizQuestionType.SingleChoice) {
+                QuizValidator.isTrue(questionDefRequest.answers.count({ it.isCorrect }) == 1, "For questionType=[${QuizQuestionType.SingleChoice}] must provide exactly 1 correct answer", quizId)
+            } else {
+                QuizValidator.isTrue(false, "questionType=[${questionDefRequest.questionType}] is not supported for quiz.type of Quiz", quizId)
             }
         } else {
-            QuizValidator.isNotNull(questionDefRequest.answers, "questions", quizId)
-            questionDefRequest.answers.each {
-                QuizValidator.isNotBlank(it.answer, "questions.answer", quizId)
-            }
-            if (quizDef.type == QuizDefParent.QuizType.Quiz) {
-                QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least answer", quizId)
-                QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) != null, "For quiz.type of Quiz must set isCorrect=true on at least 1 question", quizId)
-            } else {
-                QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect}) == null, "All answers for a survey questions must set to isCorrect=false", quizId)
+            QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) == null, "All answers for a survey questions must set to isCorrect=false", quizId)
+            if (questionDefRequest.questionType == QuizQuestionType.TextInput) {
+                if (questionDefRequest.answers) {
+                    throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
+                }
             }
         }
 

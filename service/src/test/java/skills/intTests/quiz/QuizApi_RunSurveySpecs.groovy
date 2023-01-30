@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
 import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -41,7 +41,6 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
 
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(gradedQuizAttempt))
         then:
         gradedQuizAttempt.passed == true
         gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
@@ -68,7 +67,6 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
 
         def restartedQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(restartedQuizAttempt))
         then:
         restartedQuizAttempt.selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
         restartedQuizAttempt.enteredText.size() == 1
@@ -103,7 +101,6 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:false, answerText: null])
         def quizAttempt_t4 =  skillsService.startQuizAttempt(quiz.quizId).body
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttempt_t4))
         then:
         quizAttempt_t1.enteredText.answerId == [quizInfo.questions[2].answerOptions[0].id]
         quizAttempt_t1.enteredText.answerText == ['ans']

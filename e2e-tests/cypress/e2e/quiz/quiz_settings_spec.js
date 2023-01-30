@@ -20,9 +20,6 @@ dayjs.extend(utcPlugin);
 
 describe('Quiz Metrics Tests', () => {
 
-    beforeEach(() => {
-
-    });
 
     it('quiz setting: configure question passing requirement', function () {
         cy.createQuizDef(1);
@@ -99,9 +96,5 @@ describe('Quiz Metrics Tests', () => {
         cy.visit('/administrator/quizzes/quiz1/settings');
         cy.get('[data-cy="noSettingsAvailable"]')
     });
-
-
-Se
-
 
 });

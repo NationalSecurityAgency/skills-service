@@ -17,6 +17,7 @@ package skills.intTests.utils
 
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
+import skills.storage.model.QuizDefParent.QuizType
 
 class QuizDefFactory {
 
@@ -39,18 +40,21 @@ class QuizDefFactory {
         return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), type: QuizDefParent.QuizType.Survey.toString(), description: description]
     }
 
-    static createMultipleChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2) {
+    static createChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
         return (1..numberOfQuestions).collect {
-            createMultipleChoiceQuestion(quizNumber, it, numberOfAnswers)
+            createChoiceQuestion(quizNumber, it, numberOfAnswers, questionType, quizType)
         }
     }
 
-    static createMultipleChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, boolean isGraded = true, QuizQuestionType questionType = QuizQuestionType.MultipleChoice) {
+    static createChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
         String question = "This is questions #${questionsNumber}".toString()
+        boolean isMultipleChoice = questionType == QuizQuestionType.MultipleChoice
+        boolean isQuiz = quizType == QuizType.Quiz
         List answers = numberOfAnswers > 0 ? (1..numberOfAnswers).collect {
+            boolean isEven = !(it % 2 == 0)
             return [
                     answer: "Answer #${it}".toString(),
-                    isCorrect: it == 1 ? isGraded && true : false,
+                    isCorrect: isQuiz && ((isMultipleChoice && isEven) || (!isMultipleChoice && it == 1))  ? true : false,
             ]
         } : []
 
@@ -62,15 +66,15 @@ class QuizDefFactory {
         ]
     }
 
-    static createMultipleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
-        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, false)
+    static createMultipleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, QuizType quizType = QuizType.Survey) {
+        return this.createChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, QuizQuestionType.MultipleChoice, quizType)
     }
 
-    static createSingleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
-        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, false, QuizQuestionType.SingleChoice)
+    static createSingleChoiceSurveyQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, QuizType quizType = QuizType.Survey) {
+        return this.createChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, QuizQuestionType.SingleChoice, quizType)
     }
 
     static createTextInputSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
-        return this.createMultipleChoiceQuestion(quizNumber, questionsNumber, 0, false, QuizQuestionType.TextInput)
+        return this.createChoiceQuestion(quizNumber, questionsNumber, 0, QuizQuestionType.TextInput, QuizType.Survey)
     }
 }

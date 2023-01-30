@@ -80,10 +80,12 @@ limitations under the License.
       if (this.$route.params.skill) {
         this.skillInternal = ({ ...this.$route.params.skill });
         this.loadingSkillInfo = false;
+        this.loadQuizInfo();
       } else {
-        this.loadSkillInfo();
+        this.loadSkillInfo().then(() => {
+          this.loadQuizInfo();
+        });
       }
-      this.loadQuizInfo();
     },
     computed: {
       isSurveySkill() {
@@ -105,7 +107,7 @@ limitations under the License.
       },
       loadSkillInfo() {
         this.loadingSkillInfo = true;
-        UserSkillsService.getSkillSummary(this.skillId, null, null)
+        return UserSkillsService.getSkillSummary(this.skillId, null, null)
           .then((res) => {
             this.skillInternal = res;
           }).finally(() => {

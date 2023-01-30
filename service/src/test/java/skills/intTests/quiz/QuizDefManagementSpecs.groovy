@@ -16,7 +16,6 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
-import skills.auth.AuthUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
@@ -172,11 +171,11 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         "Test Quiz #3"   | false
     }
 
-    def "add question to quiz"() {
+    def "add MultipleChoice question to quiz"() {
         def quiz = QuizDefFactory.createQuiz(1)
         def newQuiz = skillsService.createQuizDef(quiz)
 
-        def question = QuizDefFactory.createMultipleChoiceQuestion(1, 1, 2)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.MultipleChoice)
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
@@ -185,6 +184,27 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.id
         newQuestion.body.question == question.question
         newQuestion.body.questionType == QuizQuestionType.MultipleChoice.toString()
+        newQuestion.body.answers.size() == 3
+        newQuestion.body.answers[0].id
+        newQuestion.body.answers[1].id
+        newQuestion.body.answers[2].id
+        newQuestion.body.answers.answer == question.answers.answer
+        newQuestion.body.answers.isCorrect == [true, false, true]
+    }
+
+    def "add SingleChoice question to quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.questionType == QuizQuestionType.SingleChoice.toString()
         newQuestion.body.answers.size() == 2
         newQuestion.body.answers[0].id
         newQuestion.body.answers[1].id
@@ -195,9 +215,10 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
     def "get quiz questions"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
-        def question1 = QuizDefFactory.createMultipleChoiceQuestion(1, 1, 2)
+        def question1 = QuizDefFactory.createChoiceQuestion(1, 1, 2)
         skillsService.createQuizQuestionDef(question1)
-        def question2 = QuizDefFactory.createMultipleChoiceQuestion(1, 2, 3)
+        def question2 = QuizDefFactory.createChoiceQuestion(1, 2, 3, QuizQuestionType.MultipleChoice)
+        question2.answers[1].isCorrect = true
         skillsService.createQuizQuestionDef(question2)
 
         when:
@@ -209,18 +230,24 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         questions[0].id
         questions[1].id
         questions.question == [question1.question, question2.question]
-        questions.questionType == [QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
+        questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
 
         questions[0].answers[0].id
         questions[0].answers[1].id
         questions[0].answers.answer == question1.answers.answer
         questions[0].answers.isCorrect == question1.answers.isCorrect
+
+        questions[1].answers[0].id
+        questions[1].answers[1].id
+        questions[1].answers[2].id
+        questions[1].answers.answer == question2.answers.answer
+        questions[1].answers.isCorrect == question2.answers.isCorrect
     }
 
     def "change quiz questions display order"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -245,7 +272,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
     def "get quiz definition summary"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:

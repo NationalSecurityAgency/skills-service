@@ -278,7 +278,7 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
             isCorrect: false,
         }, {
             answer: 'Third Answer',
-            isCorrect: false,
+            isCorrect: true,
         }],
     }, overrideProps));
 });

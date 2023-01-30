@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 
@@ -24,7 +24,7 @@ class QuizMetricsSpecs extends DefaultIntSpec {
     def "load metrics"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -36,7 +36,6 @@ class QuizMetricsSpecs extends DefaultIntSpec {
 
         when:
         def metrics = skillsService.getQuizMetrics(quiz.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(metrics))
         then:
         metrics
     }

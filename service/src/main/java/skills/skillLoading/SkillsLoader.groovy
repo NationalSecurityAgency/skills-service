@@ -556,8 +556,11 @@ class SkillsLoader {
     }
 
     private SelfReportingInfo loadSelfReportingFromApproval(SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints) {
-        SkillApproval skillApproval = skillDefAndUserPoints.approval
         SkillDefParent skillDef = skillDefAndUserPoints.skillDef
+        if (!skillDefAndUserPoints || !skillDef?.selfReportingType) {
+            return new SelfReportingInfo(enabled: false)
+        }
+        SkillApproval skillApproval = skillDefAndUserPoints.approval
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.id,
                 enabled: skillDef.selfReportingType != null,
@@ -1051,7 +1054,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
-                        selfReporting: skillDef.selfReportingType ? loadSelfReportingFromApproval(skillDefAndUserPoints) : null,
+                        selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
                         subjectName: subjectName,
                         subjectId: subjectId,
                         type: skillDef.type,

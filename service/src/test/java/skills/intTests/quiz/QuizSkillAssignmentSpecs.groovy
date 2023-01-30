@@ -15,15 +15,13 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.storage.model.SkillDef
 
-import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createSubject
-import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class QuizSkillAssignmentSpecs extends DefaultIntSpec {
@@ -44,7 +42,6 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
         def skill = skillsService.getSkill(skillWithQuiz)
         def skills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(skills))
         then:
         skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skill.quizId == quiz.body.quizId

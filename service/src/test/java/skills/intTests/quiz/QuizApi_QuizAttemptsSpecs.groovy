@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
@@ -23,10 +23,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
-import skills.storage.model.SkillDef
 import skills.storage.repos.*
-
-import static skills.intTests.utils.SkillsFactory.*
 
 class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
 
@@ -48,7 +45,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "run quiz 2 attempts - failed attempt followed by a pass"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -80,7 +77,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "previous quiz attempts do not affect follow-on attempts"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -105,7 +102,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "only 1 attempt is allowed"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -131,7 +128,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "each user has their own attempt count"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -159,7 +156,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "only 2 attempts are allowed"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -192,7 +189,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "MaxNumAttempts=-1 means unlimited attempts"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -221,7 +218,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "by default there is unlimited # of attempts"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
 
@@ -265,7 +262,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "passed quiz cannot be run again"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -286,7 +283,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
     def "quiz info returns attempt information"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 1, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:

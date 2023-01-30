@@ -16,21 +16,16 @@
 package skills.intTests.quiz
 
 
-import org.springframework.beans.factory.annotation.Autowired
-import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
-import skills.storage.repos.*
 
 class QuizApi_MinNumQuestionsToPassSpecs extends DefaultIntSpec {
 
     def "get quiz info - number of questions required to pass "() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 3, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -50,7 +45,7 @@ class QuizApi_MinNumQuestionsToPassSpecs extends DefaultIntSpec {
     def "pass quiz by getting the exact number of required questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 3, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [

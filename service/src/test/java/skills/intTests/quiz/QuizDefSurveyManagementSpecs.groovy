@@ -15,11 +15,11 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.QuizDefParent
 
 @Slf4j
 class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
@@ -28,15 +28,14 @@ class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
         def quiz = QuizDefFactory.createQuizSurvey(1)
         skillsService.createQuizDef(quiz)
         def questions = [
-                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
-                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3, QuizDefParent.QuizType.Survey),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4, QuizDefParent.QuizType.Survey),
                 QuizDefFactory.createTextInputSurveyQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
         when:
         def res = skillsService.getQuizQuestionDefs(quiz.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         then:
         res.quizType == quiz.type
         res.questions.questionType == [QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]

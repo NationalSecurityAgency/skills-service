@@ -54,7 +54,7 @@ describe('Client Display Survey Tests', () => {
         Cypress.Commands.add("closeQuizPage", (env) => {
             const isDashboard = env == 'dashboard'
 
-            cy.equizCompletedCheck(env)
+            cy.completedCheck(env)
             if (isDashboard) {
                 cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
                 cy.get('[data-cy="manageMyProjsBtn"]')
@@ -409,99 +409,92 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
             cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
         });
+
+        it(`all questions must be answered validation in [${env}]`, () => {
+            cy.createSurveyDef(1);
+            cy.createTextInputQuestionDef(1, 1);
+            cy.createSurveyMultipleChoiceQuestionDef(1, 2);
+            cy.createSurveyMultipleChoiceQuestionDef(1, 3);
+
+            cy.createProject(1)
+            cy.createSubject(1,1)
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+            cy.visitQuizPage(env)
+            cy.get('[data-cy="startQuizAttempt"]').click()
+
+            cy.get('[data-cy="completeQuizBtn"]').click()
+
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+
+            cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+
+            cy.get('[data-cy="completeQuizBtn"]').click()
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').type('y')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
+            cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+
+            cy.get('[data-cy="completeQuizBtn"]').click()
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
+            cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+        });
+
+        it('only up to 5 validation warnings are shown on the bottom', () => {
+            cy.createSurveyDef(1);
+            cy.createTextInputQuestionDef(1, 1);
+            cy.createTextInputQuestionDef(1, 2);
+            cy.createTextInputQuestionDef(1, 3);
+            cy.createTextInputQuestionDef(1, 4);
+            cy.createTextInputQuestionDef(1, 5);
+            cy.createTextInputQuestionDef(1, 6);
+            cy.createTextInputQuestionDef(1, 7);
+
+            cy.createProject(1)
+            cy.createSubject(1,1)
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+            cy.visitQuizPage(env)
+            cy.get('[data-cy="startQuizAttempt"]').click()
+
+            cy.get('[data-cy="completeQuizBtn"]').click()
+
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #2 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #3 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #4 is required').should('not.be.visible')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #5 is required').should('not.be.visible')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #6 is required').should('not.be.visible')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #7 is required').should('not.be.visible')
+            cy.get('[data-cy="questionErrors"]').contains('Expand 4 more...').click()
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #4 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #5 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #6 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Answer to question #7 is required')
+            cy.get('[data-cy="questionErrors"]').contains('Collapse')
+            cy.get('[data-cy="questionErrors"]').contains('Expand 4 more...').should('not.exist')
+        });
     });
 
-    it('all questions must be answered validation', () => {
-        cy.createSurveyDef(1);
-        cy.createTextInputQuestionDef(1, 1);
-        cy.createSurveyMultipleChoiceQuestionDef(1, 2);
-        cy.createSurveyMultipleChoiceQuestionDef(1, 3);
-
-        cy.createProject(1)
-        cy.createSubject(1,1)
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-
-        cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
-        cy.get('[data-cy="takeQuizBtn"]').click();
-
-        cy.get('[data-cy="title"]').contains('Survey')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-
-        cy.get('[data-cy="completeQuizBtn"]').click()
-
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-        cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-
-        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-
-        cy.get('[data-cy="completeQuizBtn"]').click()
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').type('y')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
-        cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-
-        cy.get('[data-cy="completeQuizBtn"]').click()
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
-        cy.get('[data-cy="questionErrors"]').contains('At least 1 choice must be selected')
-        cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
-        cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
-    });
-
-    it('only up to 5 validation warnings are shown on the bottom', () => {
-        cy.createSurveyDef(1);
-        cy.createTextInputQuestionDef(1, 1);
-        cy.createTextInputQuestionDef(1, 2);
-        cy.createTextInputQuestionDef(1, 3);
-        cy.createTextInputQuestionDef(1, 4);
-        cy.createTextInputQuestionDef(1, 5);
-        cy.createTextInputQuestionDef(1, 6);
-        cy.createTextInputQuestionDef(1, 7);
-
-        cy.createProject(1)
-        cy.createSubject(1,1)
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
-
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
-
-        cy.get('[data-cy="title"]').contains('Survey')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-
-        cy.get('[data-cy="completeQuizBtn"]').click()
-
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #2 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #3 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #4 is required').should('not.be.visible')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #5 is required').should('not.be.visible')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #6 is required').should('not.be.visible')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #7 is required').should('not.be.visible')
-        cy.get('[data-cy="questionErrors"]').contains('Expand 4 more...').click()
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #4 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #5 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #6 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Answer to question #7 is required')
-        cy.get('[data-cy="questionErrors"]').contains('Collapse')
-        cy.get('[data-cy="questionErrors"]').contains('Expand 4 more...').should('not.exist')
-    });
-
-    it('taken survey cannot be taken again', () => {
+    it('taken survey cannot be taken again in client-display', () => {
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
 

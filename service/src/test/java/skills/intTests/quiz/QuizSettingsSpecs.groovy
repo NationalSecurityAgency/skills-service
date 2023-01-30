@@ -27,7 +27,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "save settings"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -46,7 +46,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "existing settings are updated and new are inserted"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -70,7 +70,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation - setting has to be provided"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -90,7 +90,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation - setting's value has to be provided"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -110,7 +110,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "valid MaxNumAttempts setting"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -134,7 +134,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation: valid MaxNumAttempts setting - must be > -1"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -152,7 +152,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation: valid MaxNumAttempts setting - must be a number"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -170,7 +170,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "valid MinNumQuestionsToPass setting"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -194,7 +194,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation: valid MinNumQuestionsToPass setting - must be > -1"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -212,7 +212,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation: valid MinNumQuestionsToPass setting - must be a number"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -246,7 +246,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "validation: valid MinNumQuestionsToPass setting - must be less than the declared questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -264,7 +264,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "MinNumQuestionsToPass setting - must be less than the declared questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         when:
@@ -282,7 +282,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "MinNumQuestionsToPass setting - when a question is removed adjust the MinNumQuestionsToPass setting if needed"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 3, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)

@@ -15,15 +15,10 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsService
-import skills.quizLoading.QuizSettings
+import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.repos.*
 
@@ -46,25 +41,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     @Autowired
     UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
 
-    def "change quiz questions display order"() {
-        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
-        skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
-        questions[1].answers[0].isCorrect = true
-        questions[1].answers[1].isCorrect = true
-        skillsService.createQuizQuestionDefs(questions)
-
-        when:
-        def qRes = skillsService.getQuizInfo(quiz.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(qRes))
-        then:
-        qRes.name == quiz.name
-    }
-
     def "run quiz - pass"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -84,7 +64,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "run quiz - fail quiz"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -104,7 +84,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "answer is updated when reporting a different answer for a single-choice answer"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -114,12 +94,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
         when:
         def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
 
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
 
         def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
 
         then:
         quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
@@ -129,7 +107,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "answer is added when reporting a different answer for a multiple-choice answer"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 4)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 4, QuizQuestionType.MultipleChoice)
         questions[0].answers[2].isCorrect = true
         skillsService.createQuizQuestionDefs(questions)
 
@@ -140,12 +118,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
         when:
         def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
 
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
 
         def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
 
         then:
         quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
@@ -155,7 +131,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "answer is removed when reporting same answer for a multiple-choice answer with isSelected=false"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 4)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 4, QuizQuestionType.MultipleChoice)
         questions[0].answers[2].isCorrect = true
         skillsService.createQuizQuestionDefs(questions)
 
@@ -168,12 +144,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
         when:
         def quizAttemptBeforeApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptBeforeApdate))
 
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id, [isSelected: false])
 
         def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptAfterApdate))
 
         then:
         quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id, quizInfo.questions[0].answerOptions[2].id]
@@ -183,7 +157,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "removing quiz definition removes questions and answers definitions and attempts"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
@@ -206,7 +180,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "passing quiz attempt gives skill credit"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 2, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def proj = createProject(1)

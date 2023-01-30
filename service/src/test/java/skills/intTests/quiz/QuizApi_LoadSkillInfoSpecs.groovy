@@ -18,6 +18,7 @@ package skills.intTests.quiz
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -27,7 +28,7 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
     def "return quiz information with the skills"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createMultipleChoiceQuestions(1, 5, 2)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
         skillsService.createQuizQuestionDefs(questions)
 
         def proj = createProject(1)
@@ -60,8 +61,8 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         def quiz = QuizDefFactory.createQuizSurvey(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = [
-                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
-                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3, QuizDefParent.QuizType.Survey),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4, QuizDefParent.QuizType.Survey),
                 QuizDefFactory.createTextInputSurveyQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)

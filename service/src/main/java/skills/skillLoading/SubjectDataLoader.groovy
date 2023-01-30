@@ -28,6 +28,7 @@ import skills.skillLoading.model.SkillDependencySummary
 import skills.skillLoading.model.SkillTag
 import skills.storage.model.*
 import skills.storage.repos.QuizToSkillDefRepo
+import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -61,6 +62,9 @@ class SubjectDataLoader {
 
     @Autowired
     QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
+    SkillApprovalRepo skillApprovalRepo
 
     static class SkillsAndPoints {
         SkillDef skillDef

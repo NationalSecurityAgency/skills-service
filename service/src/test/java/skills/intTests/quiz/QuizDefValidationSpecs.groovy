@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.services.quiz.QuizQuestionType
 
 @Slf4j
 class QuizDefValidationSpecs extends DefaultIntSpec {
@@ -39,5 +40,80 @@ class QuizDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("code=403 FORBIDDEN")
     }
 
+    def "only quiz admin can add a question"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+        // create project where projectId = quizId
+        skillsService.createProject([projectId: quiz1.quizId, name: "Some Project Name"])
+        when:
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2)
+        otherUser.createQuizQuestionDef(question)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "quiz single choice question must have 1 answer marked as correct"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        question.answers[1].isCorrect = true
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("For questionType=[SingleChoice] must provide exactly 1 correct answer")
+    }
+
+    def "quiz multiple choice question must have 2 or more questions marked as correct"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.MultipleChoice)
+        question.answers[0].isCorrect = true
+        question.answers[1].isCorrect = false
+        question.answers[2].isCorrect = false
+        question.answers[3].isCorrect = false
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("For questionType=[MultipleChoice] must provide >= 2 correct answers")
+    }
+
+    def "TextInput question type is not supported for a quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question =  QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.TextInput)
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("questionType=[TextInput] is not supported for quiz.type of Quiz")
+    }
+
+    def "quiz SingleChoice question must have at lest 2 answers"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Must have at least 2 answers")
+    }
+
+    def "quiz MultipleChoice question must have at lest 2 answers"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.MultipleChoice)
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Must have at least 2 answers")
+    }
 }
 
