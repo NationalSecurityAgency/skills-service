@@ -78,7 +78,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
 
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
-        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', 'Unlimited')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
 
@@ -163,6 +163,74 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
     });
 
+    it('wrong anders are accurately depicted on the result screen', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: false,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: true
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: true,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: false,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: true
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: true,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 4,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+    });
+
     it('quiz attempts been exhausted', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
@@ -179,7 +247,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="noMoreAttemptsAlert"]').contains('This quiz allows 1 maximum attempt.')
         cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
         cy.get('[data-cy="quizDescription"]').should('not.exist')
-        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / 1')
 
         // has 1 attempt left
@@ -347,6 +415,28 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizSplashScreen"]').contains('You already passed this quiz')
         cy.get('[data-cy="closeQuizAttempt"]').click()
         cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
+    it('passed quiz with 1 attempt should only display the passed information', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMaxNumAttempts(1, 1)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForUser(1, 'user0', [{selectedIndex: [0]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You already passed this quiz')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="quizPassInfo"]').should('not.exist')
+        cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="closeQuizAttemptInAlert"]').should('be.enabled')
+        cy.get('[data-cy="closeQuizAttemptInAlert"]').contains('Close Quiz')
+        cy.get('[data-cy="noMoreAttemptsAlert"]').should('not.exist')
     })
 });
 

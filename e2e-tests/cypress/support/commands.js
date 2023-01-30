@@ -269,6 +269,24 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${quizNum}`,
+        questionType: 'SingleChoice',
+        answers: [{
+            answer: 'First Answer',
+            isCorrect: true,
+        }, {
+            answer: 'Second Answer',
+            isCorrect: false,
+        }, {
+            answer: 'Third Answer',
+            isCorrect: false,
+        }],
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${quizNum}`,
         questionType: 'MultipleChoice',
         answers: [{
             answer: 'First Answer',
@@ -279,6 +297,9 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
         }, {
             answer: 'Third Answer',
             isCorrect: true,
+        }, {
+            answer: 'Fourth Answer',
+            isCorrect: false,
         }],
     }, overrideProps));
 });

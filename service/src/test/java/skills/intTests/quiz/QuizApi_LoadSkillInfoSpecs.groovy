@@ -49,8 +49,8 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillsRes.skills[0].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
         skillsRes.skills[0].selfReporting.quizId == quiz.quizId
         skillsRes.skills[0].selfReporting.quizName == quiz.name
-        !skillsRes.skills[1].selfReporting
-        !skillsRes.skills[2].selfReporting
+        !skillsRes.skills[1].selfReporting.enabled
+        !skillsRes.skills[2].selfReporting.enabled
 
         skillRes.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
         skillRes.selfReporting.quizId == quiz.quizId
@@ -85,8 +85,8 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillsRes.skills[0].selfReporting.type == "Survey"
         skillsRes.skills[0].selfReporting.quizId == quiz.quizId
         skillsRes.skills[0].selfReporting.quizName == quiz.name
-        !skillsRes.skills[1].selfReporting
-        !skillsRes.skills[2].selfReporting
+        !skillsRes.skills[1].selfReporting.enabled
+        !skillsRes.skills[2].selfReporting.enabled
 
         skillRes.selfReporting.type == "Survey"
         skillRes.selfReporting.quizId == quiz.quizId

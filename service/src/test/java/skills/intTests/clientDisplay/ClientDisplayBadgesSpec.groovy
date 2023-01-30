@@ -775,6 +775,6 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         then:
         summary.skills.size() == 2
         summary.skills[0].selfReporting.requestedOn == requestedDate.time
-        summary.skills[1].selfReporting == null
+        !summary.skills[1].selfReporting.enabled
     }
 }

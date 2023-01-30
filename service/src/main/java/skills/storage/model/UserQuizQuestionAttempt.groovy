@@ -41,6 +41,7 @@ class UserQuizQuestionAttempt {
     Integer quizQuestionDefinitionRefId
 
     String userId
+    @Enumerated(EnumType.STRING)
     QuizQuestionStatus status
 
     @Column(name="created", updatable = false, insertable = false)

@@ -38,6 +38,7 @@ class UserQuizAttempt {
     Integer id
 
     Integer quizDefinitionRefId
+    @Enumerated(EnumType.STRING)
     QuizAttemptStatus status
 
     String userId

@@ -48,6 +48,9 @@ limitations under the License.
       value(newVal) {
         this.answerOptionsInternal = newVal ? newVal.map((a) => ({ ...a })) : [];
       },
+      'q.gradedInfo': function handleGraded(gradedInfo) {
+        this.answerOptionsInternal = this.answerOptionsInternal.map((answer) => ({ ...answer, isGraded: true, isCorrect: gradedInfo.correctAnswerIds.indexOf(answer.id) >= 0 }));
+      },
     },
     methods: {
       selectionChanged(selectedStatus) {

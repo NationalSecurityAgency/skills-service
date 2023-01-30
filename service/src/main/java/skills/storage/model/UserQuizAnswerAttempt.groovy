@@ -43,6 +43,7 @@ class UserQuizAnswerAttempt {
     Integer quizAnswerDefinitionRefId
 
     String userId
+    @Enumerated(EnumType.STRING)
     QuizAnswerStatus status
 
     // optional - used for QuizQuestionType.TextInput

@@ -55,7 +55,7 @@ limitations under the License.
       </div>
     </div>
 
-    <div v-if="allAttemptsExhausted" class="alert alert-danger mt-3 h4" data-cy="noMoreAttemptsAlert">
+    <div v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" class="alert alert-danger mt-3 h4" data-cy="noMoreAttemptsAlert">
       <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> No more attempts available. This quiz allows <b-badge>{{quizInfo.maxAttemptsAllowed}}</b-badge> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
     </div>
 
