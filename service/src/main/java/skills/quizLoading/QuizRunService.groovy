@@ -162,6 +162,8 @@ class QuizRunService {
 
         QuizDef quizDef = getQuizDef(quizId)
         validateQuizAttempts(quizDef, userId, quizId)
+        int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
+        QuizValidator.isTrue(numQuestions > 0, "Must have at least 1 question declared in order to start.", quizDef.quizId)
 
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
                 userId: userId,

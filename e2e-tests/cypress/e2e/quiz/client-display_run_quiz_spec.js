@@ -60,6 +60,23 @@ describe('Client Display Quiz Tests', () => {
         });
     });
 
+    it('visit quiz without any questions', () => {
+        cy.createQuizDef(1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizHasNoQuestions"]').contains(' This Quiz has no questions declared ')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
     it('run quiz', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);

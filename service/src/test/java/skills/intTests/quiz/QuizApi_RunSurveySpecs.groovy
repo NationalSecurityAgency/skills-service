@@ -196,4 +196,15 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         e.message.contains("quizId:${quiz.quizId}")
         e.message.contains("errorCode:${ErrorCode.BadParam}")
     }
+
+    def "quiz must have at least 1 questions to start"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        when:
+        skillsService.startQuizAttempt(quiz.quizId)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Must have at least 1 question declared in order to start.")
+    }
 }

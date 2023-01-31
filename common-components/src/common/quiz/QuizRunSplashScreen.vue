@@ -28,7 +28,7 @@ limitations under the License.
 
     <b-card v-if="!isSurveyType && canStartQuiz" class="mb-1" body-class="h5" data-cy="quizPassInfo">
       <i class="fas fa-check-circle text-success"></i>
-      Must get <b-badge variant="success">{{ minNumQuestionsToPass }}</b-badge> / <b-badge>{{ quizInfo.questions.length }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
+      Must get <b-badge variant="success">{{ minNumQuestionsToPass }}</b-badge> / <b-badge>{{ numQuestions }}</b-badge> questions <span class="text-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-success text-uppercase">pass</span>. Good Luck!
     </b-card>
 
     <div class="row">
@@ -36,7 +36,7 @@ limitations under the License.
         <b-card class="" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Questions:</span>
-          <span class="text-uppercase ml-1 font-weight-bold" data-cy="numQuestions">{{ quizInfo.questions.length }}</span>
+          <span class="text-uppercase ml-1 font-weight-bold" data-cy="numQuestions">{{ numQuestions }}</span>
         </b-card>
       </div>
       <div v-if="!isSurveyType" class="col pt-2">
@@ -57,6 +57,9 @@ limitations under the License.
 
     <div v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" class="alert alert-danger mt-3 h4" data-cy="noMoreAttemptsAlert">
       <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> No more attempts available. This quiz allows <b-badge>{{quizInfo.maxAttemptsAllowed}}</b-badge> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
+    </div>
+    <div v-if="numQuestions === 0" class="alert alert-danger mt-3 h4" data-cy="quizHasNoQuestions">
+      <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.
     </div>
 
     <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-3" data-cy="quizDescription">
@@ -83,6 +86,9 @@ limitations under the License.
       quizInfo: Object,
     },
     computed: {
+      numQuestions() {
+        return this.quizInfo.questions.length;
+      },
       isSurveyType() {
         return this.quizInfo.quizType === 'Survey';
       },
@@ -93,10 +99,10 @@ limitations under the License.
         return this.quizInfo.maxAttemptsAllowed > 0 && this.quizInfo.maxAttemptsAllowed <= this.quizInfo.userNumPreviousQuizAttempts;
       },
       minNumQuestionsToPass() {
-        return this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : this.quizInfo.questions.length;
+        return this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : this.numQuestions;
       },
       canStartQuiz() {
-        return !this.quizInfo.userQuizPassed && !this.allAttemptsExhausted;
+        return !this.quizInfo.userQuizPassed && !this.allAttemptsExhausted && this.numQuestions > 0;
       },
     },
     methods: {

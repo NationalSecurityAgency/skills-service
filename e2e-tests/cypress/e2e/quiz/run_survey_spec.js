@@ -201,6 +201,19 @@ describe('Client Display Survey Tests', () => {
 
     const environments =  ['dashboard', 'client-display']
     environments.forEach((env) => {
+        it (`visit survey without any questions in [${env}]`, () => {
+            cy.createSurveyDef(1);
+
+            cy.createProject(1)
+            cy.createSubject(1,1)
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+            cy.visitQuizPage(env)
+            cy.get('[data-cy="quizHasNoQuestions"]').contains('This Survey has no questions declared ')
+            cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+            cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+        });
+
         it(`run a survey in [${env}]`, () => {
             cy.createSurveyDef(1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 1);
