@@ -29,86 +29,102 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
-    <div class="row px-3 py-3">
-      <div class="col-12">
-        <b-input v-model="filter.name" v-on:keyup.enter="applyFilters"
-                 data-cy="skillsTable-skillFilter" aria-label="skill name filter"/>
+  <div style="min-height: 20rem;">
+    <skills-spinner :is-loading="loading" class="my-5"/>
+    <no-content2 v-if="!loading && !hasData" title="No Quiz or Survey Definitions"
+                 class="mt-5"
+                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
+                 data-cy="noQuizzesYet"/>
+    <div v-if="!loading && hasData">
+      <div class="row px-3 py-3">
+        <div class="col-12">
+          <b-input v-model="filter.name" v-on:keyup.enter="applyFilters"
+                   data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>
+        </div>
       </div>
-    </div>
 
-    <div class="row pl-3 mb-3">
-      <div class="col">
-        <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i
-          class="fa fa-filter"/> Filter
-        </b-button>
-        <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i
-          class="fa fa-times"/> Reset
-        </b-button>
+      <div class="row pl-3 mb-3">
+        <div class="col">
+          <b-button variant="outline-info" @click="applyFilters" data-cy="quizFilterBtn"><i
+            class="fa fa-filter" aria-hidden="true"/> Filter
+          </b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="quizResetBtn"><i
+            class="fa fa-times" aria-hidden="true"/> Reset
+          </b-button>
+        </div>
       </div>
-    </div>
 
-    <skills-b-table :options="options" :items="quizzes"
-                    data-cy="performedSkillsTable">
-      <template v-slot:cell(name)="data">
-        <div class="row">
-          <div class="col">
-            <div class="h5">
-              <router-link :data-cy="`managesQuizLink_${data.item.quizId}`"
+      <skills-b-table :options="options" :items="quizzes"
+                      tableStoredStateId="quizDeffinitionsTable"
+                      data-cy="quizDeffinitionsTable">
+        <template #head(name)="data">
+          <span class="text-primary"><i class="fas fa-spell-check skills-color-subjects" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(type)="data">
+          <span class="text-primary"><i class="fas fa-sliders-h text-success" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template #head(created)="data">
+          <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
+        <template v-slot:cell(name)="data">
+          <div class="row">
+            <div class="col">
+              <div class="h5">
+                <router-link :data-cy="`managesQuizLink_${data.item.quizId}`"
+                             :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
+                             :aria-label="`Manage Quiz ${data.item.name}`"
+                             tag="a">
+                  <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.name" />
+                </router-link>
+              </div>
+            </div>
+            <div class="col-auto text-right">
+              <router-link :data-cy="`managesQuizBtn_${data.item.quizId}`"
                            :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
                            :aria-label="`Manage Quiz ${data.item.name}`"
-                           tag="a">
-                {{ data.item.name }}
+                           class="btn btn-outline-primary btn-sm">
+                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"
+                                                                   aria-hidden="true"/>
               </router-link>
+              <b-button-group size="sm" class="ml-1">
+                <b-button @click="showUpdateModal(data.item)"
+                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.quizId}`"
+                          :aria-label="'edit Quiz '+data.item.name" :ref="'edit_'+data.item.quizId"
+                          title="Edit Quiz">
+                  <i class="fas fa-edit" aria-hidden="true"/>
+                </b-button>
+                <b-button @click="showDeleteWarningModal(data.item)" variant="outline-primary"
+                          :data-cy="`deleteQuizButton_${data.item.quizId}`"
+                          :aria-label="'delete Quiz '+data.item.name"
+                          :ref="`delete_${data.item.quizId}`"
+                          title="Delete Quiz">
+                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
+                </b-button>
+              </b-button-group>
             </div>
           </div>
-          <div class="col-auto text-right">
-            <router-link :data-cy="`managesQuizBtn_${data.item.quizId}`"
-                         :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
-                         :aria-label="`Manage Quiz ${data.item.name}`"
-                         class="btn btn-outline-primary btn-sm">
-              <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"
-                                                                 aria-hidden="true"/>
-            </router-link>
-            <b-button-group size="sm" class="ml-1">
-              <b-button @click="showUpdateModal(data.item)"
-                        variant="outline-primary" :data-cy="`editSkillButton_${data.item.quizId}`"
-                        :aria-label="'edit Quiz '+data.item.name" :ref="'edit_'+data.item.quizId"
-                        title="Edit Quiz">
-                <i class="fas fa-edit" aria-hidden="true"/>
-              </b-button>
-              <b-button @click="showDeleteWarningModal(data.item)" variant="outline-primary"
-                        :data-cy="`deleteQuizButton_${data.item.quizId}`"
-                        :aria-label="'delete Quiz '+data.item.name"
-                        :ref="`delete_${data.item.quizId}`"
-                        title="Delete Quiz">
-                <i class="text-warning fas fa-trash" aria-hidden="true"/>
-              </b-button>
-            </b-button-group>
-          </div>
+        </template>
+        <template v-slot:cell(created)="data">
+          <date-cell :value="data.value"/>
+        </template>
+      </skills-b-table>
+    </div>
+      <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
+                 :quiz="editQuizInfo.quizDef"
+                 :is-edit="editQuizInfo.isEdit"
+                 @quiz-saved="updateQuizDef"
+                 @hidden="focusOnRefId(`edit_${$event.quizId}`)"/>
+      <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
+                          @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
+        <p>
+          This will remove <span
+          class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> test.
+        </p>
+        <div>
+          Deletion can not be undone and permanently removes all of the test's underlying configuration
+          as well as users' test achievements, stats and metrics.
         </div>
-      </template>
-      <template v-slot:cell(created)="data">
-        <date-cell :value="data.value"/>
-      </template>
-    </skills-b-table>
-
-    <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
-               :quiz="editQuizInfo.quizDef"
-               :is-edit="editQuizInfo.isEdit"
-               @quiz-saved="updateQuizDef"
-               @hidden="focusOnRefId(`edit_${$event.quizId}`)"/>
-    <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
-                        @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
-      <p>
-        This will remove <span
-        class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> test.
-      </p>
-      <div>
-        Deletion can not be undone and permanently removes all of the test's underlying configuration
-        as well as users' test achievements, stats and metrics.
-      </div>
-    </removal-validation>
+      </removal-validation>
   </div>
 </template>
 
@@ -118,10 +134,15 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import NoContent2 from '@/components/utils/NoContent2';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'QuizDefinitions',
     components: {
+      NoContent2,
+      SkillsSpinner,
       RemovalValidation,
       DateCell,
       SkillsBTable,
@@ -129,10 +150,12 @@ limitations under the License.
     },
     data() {
       return {
+        loading: true,
         filter: {
           name: '',
         },
         quizzes: [],
+        quizzesPreFilter: [],
         options: {
           emptyText: 'Click Test+ on the top-right to create a test!',
           busy: false,
@@ -144,7 +167,12 @@ limitations under the License.
           fields: [
             {
               key: 'name',
-              label: 'Test Name',
+              label: 'Name',
+              sortable: true,
+            },
+            {
+              key: 'type',
+              label: 'Type',
               sortable: true,
             },
             {
@@ -175,12 +203,29 @@ limitations under the License.
     mounted() {
       this.loadData();
     },
+    computed: {
+      hasData() {
+        return this.quizzesPreFilter && this.quizzesPreFilter.length > 0;
+      },
+    },
     methods: {
       applyFilters() {
-        this.quizzes = this.quizzes.map((q) => ({ ...q }));
+        if (!this.filter.name || this.filter.name.trim() === '') {
+          this.reset();
+        } else {
+          this.quizzes = this.quizzesPreFilter.filter((q) => q.name.toLowerCase()
+            .indexOf(this.filter.name.trim().toLowerCase()) > 0)?.map((item) => {
+            const nameHtml = StringHighlighter.highlight(item.name, this.filter.name);
+            return {
+              nameHtml,
+              ...item,
+            };
+          });
+        }
       },
       reset() {
-        this.quizzes = this.quizzes.map((q) => ({ ...q }));
+        this.filter.name = '';
+        this.quizzes = this.quizzesPreFilter.map((q) => ({ ...q }));
       },
       showUpdateModal(quizDef, isEdit = true) {
         this.editQuizInfo.quizDef = quizDef;
@@ -188,6 +233,9 @@ limitations under the License.
         this.editQuizInfo.showDialog = true;
       },
       updateQuizDef(quizDef) {
+        if (!this.hasData) {
+          this.loading = true;
+        }
         this.options.busy = true;
         const isNewQuizDef = !quizDef.originalQuizId;
         QuizService.updateQuizDef(quizDef)
@@ -195,17 +243,21 @@ limitations under the License.
             // presence of the originalQuizId indicates edit operation
             if (isNewQuizDef) {
               this.quizzes.push(updatedQuizDef);
+              this.quizzesPreFilter.push(updatedQuizDef);
             } else {
-              this.quizzes = this.quizzes.map((q) => {
+              const replaceUpdated = (q) => {
                 if (q.quizId === quizDef.originalQuizId) {
                   return updatedQuizDef;
                 }
                 return q;
-              });
+              };
+              this.quizzes = this.quizzes.map(replaceUpdated);
+              this.quizzesPreFilter = this.quizzesPreFilter.map(replaceUpdated);
             }
           })
           .finally(() => {
             this.options.busy = false;
+            this.loading = false;
             if (isNewQuizDef) {
               this.$emit('focus-on-new-button');
             } else {
@@ -214,13 +266,16 @@ limitations under the License.
           });
       },
       loadData() {
-        this.options.busy = true;
+        this.loading = true;
         QuizService.getQuizDefs()
           .then((res) => {
             this.quizzes = res;
+            this.quizzesPreFilter = res;
+            this.options.pagination.totalRows = this.quizzes.length;
           })
           .finally(() => {
             this.options.busy = false;
+            this.loading = false;
           });
       },
       showDeleteWarningModal(quizDef) {
@@ -234,6 +289,7 @@ limitations under the License.
         QuizService.deleteQuizId(quizDef.quizId)
           .then(() => {
             this.quizzes = this.quizzes.filter((q) => q.quizId !== quizDef.quizId);
+            this.quizzesPreFilter = this.quizzesPreFilter.filter((q) => q.quizId !== quizDef.quizId);
           })
           .finally(() => {
             this.options.busy = false;

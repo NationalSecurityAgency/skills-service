@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header ref="quizDefPageSubPageHeader" title="Quizzes And Surveys" action="Quiz" @add-action="openNewTestModal"/>
+  <sub-page-header ref="quizDefPageSubPageHeader" title="Quizzes And Surveys" action="Quiz/Survey" @add-action="openNewTestModal"/>
 
   <b-card body-class="p-0">
     <quiz-definitions ref="configuredTests" @focus-on-new-button="focusOnNewButton"/>

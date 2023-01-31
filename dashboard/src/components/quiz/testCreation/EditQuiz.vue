@@ -43,7 +43,7 @@ limitations under the License.
           </ValidationProvider>
         </div>
 
-        <id-input type="text" label="Quiz ID" v-model="quizInternal.quizId"
+        <id-input type="text" label="Quiz/Survey ID" v-model="quizInternal.quizId"
                   additional-validation-rules="uniqueId"
                   v-on:keydown.enter.native="handleSubmit(updateProject)"
                   :next-focus-el="previousFocus"
@@ -62,10 +62,10 @@ limitations under the License.
         <label>Description</label>
         <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250"
                             v-slot="{errors}"
-                            name="Badge Description">
-          <markdown-editor v-model="quizInternal.description"></markdown-editor>
+                            name="Quiz/Survey Description">
+          <markdown-editor v-model="quizInternal.description" data-cy="quizDescription"></markdown-editor>
           <small role="alert" class="form-text text-danger mb-3"
-                 data-cy="badgeDescriptionError">{{ errors[0] }}</small>
+                 data-cy="quizDescriptionError">{{ errors[0] }}</small>
         </ValidationProvider>
 
         <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite">
@@ -159,7 +159,7 @@ limitations under the License.
     },
     computed: {
       title() {
-        return this.isEdit ? 'Editing Existing Quiz' : 'New Quiz';
+        return this.isEdit ? 'Editing Existing Quiz/Survey' : 'New Quiz/Survey';
       },
     },
     methods: {
