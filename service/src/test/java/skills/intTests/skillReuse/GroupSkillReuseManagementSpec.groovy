@@ -529,10 +529,10 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         subj2_before.skills[0].children[0].totalPoints == 6 * 33
         subj2_before.skills[0].children[0].pointIncrementInterval == 520
         subj2_before.skills[0].children[0].maxOccurrencesWithinIncrementInterval == 2
+        !subj2_before.skills[0].children[0].selfReporting.enabled
         def skillDescBefore = subj2_desc_before.find { it.skillId == SkillReuseIdUtil.addTag("originalSkillId", 0) }
         skillDescBefore.description == "Original Desc"
         skillDescBefore.href == "http://veryOriginal.com"
-        !skillDescBefore.selfReporting.enabled
 
         projStat_before.numSubjects == 2
         projStat_before.numSkills == 3
@@ -559,11 +559,11 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         subj2.skills[0].children[0].totalPoints == 10 * 22
         subj2.skills[0].children[0].pointIncrementInterval == 600
         subj2.skills[0].children[0].maxOccurrencesWithinIncrementInterval == 1
+        subj2.skills[0].children[0].selfReporting.enabled
+        subj2.skills[0].children[0].selfReporting.type == "Approval"
         def skillDescAfter = subj2_desc.find { it.skillId == SkillReuseIdUtil.addTag("newSkillId", 0) }
         skillDescAfter.description == "New Desc"
         skillDescAfter.href == "http://sonew.com"
-        skillDescAfter.selfReporting.enabled
-        skillDescAfter.selfReporting.type == "Approval"
 
         projStat.numSubjects == 2
         projStat.numSkills == 3

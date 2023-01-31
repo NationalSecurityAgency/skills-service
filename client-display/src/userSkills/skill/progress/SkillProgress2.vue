@@ -165,10 +165,6 @@ limitations under the License.
            class="skills-theme-bottom-border-with-background-color"
            :class="{ 'separator-border-thick' : showDescription }"
       >
-        <pre>
-          {{ JSON.stringify(childSkill, null, 2) }}
-        </pre>
-
         <skill-progress2
             :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
             class="mb-3"
