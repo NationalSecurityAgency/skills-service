@@ -27,6 +27,7 @@ limitations under the License.
 
 <script>
   import QuizRunAnswer from '@/common-components/quiz/QuizRunAnswer';
+  import QuestionType from '@/common-components/quiz/QuestionType';
 
   export default {
     name: 'QuizRunAnswers',
@@ -57,7 +58,7 @@ limitations under the License.
         this.answerOptionsInternal = this.value.map((a) => {
           const isThisId = a.id === selectedStatus.id;
           const isSelected = isThisId && selectedStatus.selected;
-          const selectRes = isSelected || (this.q.questionType === 'MultipleChoice' && a.selected && !isThisId);
+          const selectRes = isSelected || (this.q.questionType === QuestionType.MultipleChoice && a.selected && !isThisId);
           return {
             ...a,
             selected: selectRes,

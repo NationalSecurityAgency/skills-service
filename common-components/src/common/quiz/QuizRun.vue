@@ -100,9 +100,9 @@ limitations under the License.
         <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold"><i class="fas fa-times-circle"></i> Close</b-button>
       </div>
       <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-5">
-        <div class="my-2"><span class="text-info">No worries!</span> Would you like to try again?</div>
-        <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2"><i class="fas fa-times-circle"></i> Close</b-button>
-        <b-button variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold"><i class="fas fa-redo"></i> Try Again</b-button>
+        <div class="my-2" v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
+        <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+        <b-button v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0" variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
       </div>
     </b-card>
 
@@ -118,6 +118,7 @@ limitations under the License.
   import QuizRunCompletionSummary from '@/common-components/quiz/QuizRunCompletionSummary';
   import SurveyRunCompletionSummary from '@/common-components/quiz/SurveyRunCompletionSummary';
   import QuizRunValidationWarnings from '@/common-components/quiz/QuizRunValidationWarnings';
+  import QuestionType from '@/common-components/quiz/QuestionType';
 
   export default {
     name: 'QuizRun',
@@ -197,7 +198,7 @@ limitations under the License.
                   ...a,
                   selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
               }));
-              if (enteredText && q.questionType === 'TextInput') {
+              if (enteredText && q.questionType === QuestionType.TextInput) {
                 const answerId = q.answerOptions[0].id;
                 const enteredTextObj = enteredText.find((t) => t.answerId === answerId);
                 if (enteredTextObj) {

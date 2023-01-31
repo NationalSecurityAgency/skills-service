@@ -137,6 +137,7 @@ limitations under the License.
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
+  import QuestionType from '@/common-components/quiz/QuestionType';
 
   export default {
     name: 'EditQuestion',
@@ -162,20 +163,20 @@ limitations under the License.
         questionType: {
           options: [{
             label: 'Multiple Choice',
-            id: 'MultipleChoice',
+            id: QuestionType.MultipleChoice,
             icon: 'fas fa-tasks',
           }, {
             label: 'Single Choice',
-            id: 'SingleChoice',
+            id: QuestionType.SingleChoice,
             icon: 'far fa-check-square',
           }, {
             label: 'Input Text',
-            id: 'TextInput',
+            id: QuestionType.TextInput,
             icon: 'far fa-keyboard',
           }],
           selectedType: {
             label: 'Multiple Choice',
-            id: 'MultipleChoice',
+            id: QuestionType.MultipleChoice,
             icon: 'fas fa-tasks',
           },
         },
@@ -222,7 +223,7 @@ limitations under the License.
         return this.questionDef.quizType === 'Quiz';
       },
       isQuestionTypeTextInput() {
-        return this.questionType.selectedType.id === 'TextInput';
+        return this.questionType.selectedType.id === QuestionType.TextInput;
       },
       quizType() {
         return this.questionDef.quizType;
@@ -307,9 +308,15 @@ limitations under the License.
               } else {
                 const { answers } = this.questionDefInternal;
                 const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
+                const numCorrect = answers.filter((a) => a.isCorrect).length;
+                let questionType = this.questionType.selectedType.id;
+                if (this.isQuizType) {
+                  questionType = numCorrect > 1 ? QuestionType.MultipleChoice : QuestionType.SingleChoice;
+                }
+
                 const questionDefRes = {
                   question: this.questionDefInternal.question,
-                  questionType: this.questionType.selectedType.id,
+                  questionType,
                   answers: removeEmptyQuestions,
                 };
                 this.$emit('question-saved', questionDefRes);

@@ -60,6 +60,7 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import QuizRunAnswers from '@/common-components/quiz/QuizRunAnswers';
+  import QuestionType from '@/common-components/quiz/QuestionType';
   import QuizRunService from './QuizRunService';
 
   export default {
@@ -92,13 +93,13 @@ limitations under the License.
     },
     computed: {
       isMultipleChoice() {
-        return this.q.questionType === 'MultipleChoice';
+        return this.q.questionType === QuestionType.MultipleChoice;
       },
       isSingleChoice() {
-        return this.q.questionType === 'SingleChoice';
+        return this.q.questionType === QuestionType.SingleChoice;
       },
       isTextInput() {
-        return this.q.questionType === 'TextInput';
+        return this.q.questionType === QuestionType.TextInput;
       },
       isMissingAnswer() {
         if (this.isTextInput) {

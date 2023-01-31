@@ -373,7 +373,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the test')
-        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('2 more attempts')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('2 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 3 attempts')
     });
 
@@ -399,7 +399,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the test')
-        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 more attempts')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
     });
 
@@ -432,6 +432,40 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizSplashScreen"]').contains('You already passed this quiz')
         cy.get('[data-cy="closeQuizAttempt"]').click()
         cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
+    it('do no present retry button after failing last attempt', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.setQuizMaxNumAttempts(1, 1)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 2 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('100%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the test')
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="runQuizAgainBtn"]').should('not.exist')
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').should('be.enabled')
+        cy.get('[data-cy="quizCompletion"]').contains('Would you like to try again?').should('not.exist')
+        cy.get('[data-cy="numAttemptsInfoCard"]').contains('No More Attempts')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 1 attempts')
+
+        cy.get('[data-cy="quizRunQuestions"]').contains('Would you like to try again?').should('not.exist')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="runQuizAgainBtn"]').should('not.exist')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="closeQuizBtn"]').should('be.enabled')
     });
 
     it('passed quiz with 1 attempt should only display the passed information', () => {

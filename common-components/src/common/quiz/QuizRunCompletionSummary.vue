@@ -55,7 +55,10 @@ limitations under the License.
         <b-card-text>
           <div class="h3" data-cy="title">
             <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity"></i> Attempts</span>
-            <span v-if="!unlimitedAttempts"><b-badge variant="success">{{ numAttemptsLeft }}</b-badge> more attempts</span>
+            <span v-if="!unlimitedAttempts">
+              <span v-if="numAttemptsLeft === 0">No</span>
+              <b-badge v-else variant="success">{{ numAttemptsLeft }}</b-badge> More Attempts
+            </span>
           </div>
           <div class="text-secondary mt-2" data-cy="subTitle">
             <span v-if="unlimitedAttempts">Unlimited Attempts - <b-badge variant="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</b-badge> attempt so far</span>
@@ -66,9 +69,9 @@ limitations under the License.
     </b-card-group>
 
     <div v-if="!quizResult.gradedRes.passed" class="mt-4">
-      <div class="my-2"><span class="text-info">No worries!</span> Would you like to try again?</div>
+      <div class="my-2" v-if="numAttemptsLeft > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
       <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
-      <b-button variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
+      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
     </div>
 
     <div v-if="quizResult.gradedRes.passed" class="mt-4">

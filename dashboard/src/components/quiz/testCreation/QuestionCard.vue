@@ -78,6 +78,7 @@ limitations under the License.
 <script>
   import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
+  import QuestionType from '@/common-components/quiz/QuestionType';
 
   export default {
     name: 'QuestionCard',
@@ -89,10 +90,10 @@ limitations under the License.
     },
     computed: {
       isSingleChoiceType() {
-        return this.question.questionType === 'SingleChoice';
+        return this.question.questionType === QuestionType.SingleChoice;
       },
       isTextInputType() {
-        return this.question.questionType === 'TextInput';
+        return this.question.questionType === QuestionType.TextInput;
       },
     },
   };

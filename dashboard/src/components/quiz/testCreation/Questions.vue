@@ -73,6 +73,7 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
+  import QuestionType from '@/common-components/quiz/QuestionType';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
@@ -126,7 +127,7 @@ limitations under the License.
         this.editQuestionInfo.questionDef = {
           id: null,
           question: '',
-          type: 'MultipleChoice',
+          type: QuestionType.MultipleChoice,
           quizType: this.quizType,
           answers: [{
             id: null,
