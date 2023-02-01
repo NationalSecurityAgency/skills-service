@@ -18,6 +18,7 @@ package skills.intTests.quiz
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 
@@ -105,7 +106,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         quiz2.description = "Important Update"
         skillsService.createQuizDef(quiz2, quiz2.quizId)
         def quizDefsAfter = skillsService.getQuizDefs()
-        def quiz2WithDescAfter = skillsService.getQuizDefs()
+
         then:
         quizDefs.quizId == [quiz1.quizId, quiz2.quizId]
         quizDefs.name == [quiz1.name, originalQuiz2Name]

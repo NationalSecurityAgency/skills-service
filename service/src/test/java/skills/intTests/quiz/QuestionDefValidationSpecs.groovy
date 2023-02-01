@@ -23,38 +23,7 @@ import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
 
 @Slf4j
-class QuizDefValidationSpecs extends DefaultIntSpec {
-
-    def "only quiz admin can remove quiz"() {
-        def quiz1 = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(quiz1)
-
-        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-        SkillsService otherUser = createService(user)
-        // create project where projectId = quizId
-        skillsService.createProject([projectId: quiz1.quizId, name: "Some Project Name"])
-        when:
-        otherUser.removeQuizDef(quiz1.quizId)
-        then:
-        SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("code=403 FORBIDDEN")
-    }
-
-    def "only quiz admin can add a question"() {
-        def quiz1 = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(quiz1)
-
-        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-        SkillsService otherUser = createService(user)
-        // create project where projectId = quizId
-        skillsService.createProject([projectId: quiz1.quizId, name: "Some Project Name"])
-        when:
-        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2)
-        otherUser.createQuizQuestionDef(question)
-        then:
-        SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("code=403 FORBIDDEN")
-    }
+class QuestionDefValidationSpecs extends DefaultIntSpec {
 
     def "quiz single choice question must have 1 answer marked as correct"() {
         def quiz = QuizDefFactory.createQuiz(1)

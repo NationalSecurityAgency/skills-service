@@ -114,7 +114,7 @@ skills:
       maxTimeWindowInMinutes: 43200
       docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
-      maxQuizDefsPerAdmin: 100
+      maxQuizDefsPerAdmin: 1000
       maxQuestionsPerQuiz: 100
       maxAnswersPerQuizQuestion: 20
       maxSubjectsPerProject: 25

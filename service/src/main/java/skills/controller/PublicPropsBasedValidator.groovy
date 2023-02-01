@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.PublicProps
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectRequest
 import skills.services.IdFormatValidator
@@ -35,6 +36,22 @@ class PublicPropsBasedValidator {
             if (value.length() > maxLength) {
                 throw new SkillException("[${fieldName}] must not exceed [${maxLength}] chars.")
             }
+        }
+    }
+
+    void quizValidationMaxStrLength(PublicProps.UiProp prop, String fieldName, String value, String quizId) {
+        if (value) {
+            int maxLength = publicProps.getInt(prop)
+            if (value.length() > maxLength) {
+                throw new SkillQuizException("[${fieldName}] must not exceed [${maxLength}] chars.", quizId)
+            }
+        }
+    }
+    void quizValidationMinStrLength(PublicProps.UiProp prop, String fieldName, String value, String quizId) {
+        SkillsValidator.isNotBlank(value, fieldName)
+        int minLen = publicProps.getInt(prop)
+        if(value.length() < minLen){
+            throw new SkillQuizException("[${fieldName}] must not be less than [${minLen}] chars.", quizId)
         }
     }
 

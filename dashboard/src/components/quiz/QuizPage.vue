@@ -22,7 +22,8 @@ limitations under the License.
                     class="btn btn-outline-primary"
                     size="sm"
                     variant="outline-primary"
-                    data-cy="btn_edit-quiz"
+                    data-cy="editQuizButton"
+                    @click="editQuizInfo.showDialog = true"
                     :aria-label="`edit Quiz ${quizId}`">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
@@ -42,6 +43,12 @@ limitations under the License.
       </div>
     </page-header>
 
+    <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
+               :quiz="editQuizInfo.quizDef"
+               :is-edit="editQuizInfo.isEdit"
+               @quiz-saved="updateQuizDef"
+               @hidden="handleHideQuizEdit"/>
+
     <navigation v-if="!loadingQuizSummary" :nav-items="[
           {name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers'},
@@ -56,12 +63,15 @@ limitations under the License.
   import { createNamespacedHelpers } from 'vuex';
   import Navigation from '@/components/utils/Navigation';
   import PageHeader from '@/components/utils/pages/PageHeader';
+  import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
+  import QuizService from '@/components/quiz/QuizService';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizPage',
     components: {
+      EditQuiz,
       PageHeader,
       Navigation,
     },
@@ -69,6 +79,13 @@ limitations under the License.
       return {
         isLoading: false,
         quizId: this.$route.params.quizId,
+        editQuizInfo: {
+          showDialog: false,
+          isEdit: true,
+          quizDef: {
+            quizId: this.$route.params.quizId,
+          },
+        },
       };
     },
     computed: {
@@ -106,6 +123,36 @@ limitations under the License.
       ...mapActions([
         'loadQuizSummary',
       ]),
+      updateQuizDef(quizDef) {
+        QuizService.updateQuizDef(quizDef)
+          .then(() => {
+          const origId = this.quizId;
+          if (quizDef.quizId !== origId) {
+            this.quizId = quizDef.quizId;
+            this.editQuizInfo.quizDef.quizId = quizDef.quizId;
+            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, quizId: quizDef.quizId } })
+              .then(() => {
+                this.loadQuizSummary({ quizId: quizDef.quizId }).then(() => this.handleHideQuizEdit());
+              });
+          } else {
+            this.loadQuizSummary({ quizId: this.$route.params.quizId }).then(() => this.handleHideQuizEdit());
+          }
+          this.$nextTick(() => {
+            this.$announcer.polite(`${quizDef.type} ${quizDef.name} has been edited`);
+          });
+        });
+      },
+      handleHideQuizEdit() {
+        this.editQuizInfo.showDialog = false;
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const ref = this.$refs?.editQuizButton;
+            if (ref) {
+              ref.focus();
+            }
+          });
+        });
+      },
     },
   };
 </script>

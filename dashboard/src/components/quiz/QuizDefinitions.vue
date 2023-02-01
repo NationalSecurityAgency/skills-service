@@ -88,8 +88,8 @@ limitations under the License.
               </router-link>
               <b-button-group size="sm" class="ml-1">
                 <b-button @click="showUpdateModal(data.item)"
-                          variant="outline-primary" :data-cy="`editSkillButton_${data.item.quizId}`"
-                          :aria-label="'edit Quiz '+data.item.name" :ref="'edit_'+data.item.quizId"
+                          variant="outline-primary" :data-cy="`editQuizButton_${data.item.quizId}`"
+                          :aria-label="`Edit Quiz ${data.item.name}`" :ref="`edit_${data.item.quizId}`"
                           title="Edit Quiz">
                   <i class="fas fa-edit" aria-hidden="true"/>
                 </b-button>
@@ -118,11 +118,11 @@ limitations under the License.
                           @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
         <p>
           This will remove <span
-          class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> test.
+          class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
         </p>
         <div>
-          Deletion can not be undone and permanently removes all of the test's underlying configuration
-          as well as users' test achievements, stats and metrics.
+          Deletion <b>cannot</b> be undone and permanently removes all of the underlying questoins
+          as well as users' achievements, stats and metrics. Proceed with caution!
         </div>
       </removal-validation>
   </div>
@@ -244,6 +244,7 @@ limitations under the License.
             if (isNewQuizDef) {
               this.quizzes.push(updatedQuizDef);
               this.quizzesPreFilter.push(updatedQuizDef);
+              this.options.pagination.totalRows = this.quizzesPreFilter.length;
             } else {
               const replaceUpdated = (q) => {
                 if (q.quizId === quizDef.originalQuizId) {
@@ -263,14 +264,17 @@ limitations under the License.
             } else {
               this.focusOnRefId(`edit_${quizDef.quizId}`);
             }
+            this.$nextTick(() => {
+              this.$announcer.polite(`${quizDef.type} ${quizDef.name} has been edited`);
+            });
           });
       },
       loadData() {
         this.loading = true;
         QuizService.getQuizDefs()
           .then((res) => {
-            this.quizzes = res;
-            this.quizzesPreFilter = res;
+            this.quizzes = res.map((q) => ({ ...q }));
+            this.quizzesPreFilter = res.map((q) => ({ ...q }));
             this.options.pagination.totalRows = this.quizzes.length;
           })
           .finally(() => {

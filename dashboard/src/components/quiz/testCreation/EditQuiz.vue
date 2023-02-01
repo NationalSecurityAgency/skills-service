@@ -23,18 +23,18 @@ limitations under the License.
       <skills-spinner :is-loading="loading"/>
       <b-container v-if="!loading" fluid>
         <div class="form-group">
-          <label for="projectIdInput">* Name</label>
+          <label for="quizNameInput">* Name</label>
           <ValidationProvider
             rules="required|minNameLength|maxQuizNameLength|uniqueName|customNameValidator"
             :debounce="500"
             v-slot="{errors}"
             name="Quiz Name">
-            <input class="form-control" type="text" v-model="quizInternal.name"
+            <input id="quizNameInput"
+                   class="form-control" type="text" v-model="quizInternal.name"
                    v-on:input="updateQuizId"
                    v-on:keydown.enter="handleSubmit(saveQuiz)"
                    v-focus
                    data-cy="quizName"
-                   id="quizNameInput"
                    :aria-invalid="errors && errors.length > 0"
                    aria-errormessage="quizNameError"
                    aria-describedby="quizNameError"/>
@@ -50,13 +50,15 @@ limitations under the License.
                   @shown="tooltipShowing=true"
                   @hidden="tooltipShowing=false"/>
 
-        <div class="form-group mt-3">
+        <div class="form-group mt-3" data-cy="quizTypeSection">
           <label id="quizTypeLabel" for="quizTypeInput">* Type:</label>
           <b-form-select v-model="quizInternal.type"
                          id="quizTypeInput"
                          :options="quizTypeOptions"
+                         :disabled="isEdit"
                          aria-labelledby="quizTypeLabel"
                          data-cy="quizTypeSelector" required/>
+          <div v-if="isEdit" class="text-secondary font-italic small">** Can only be modified for a new quiz/survey **</div>
         </div>
 
         <label>Description</label>
@@ -218,7 +220,7 @@ limitations under the License.
         extend('uniqueId', {
           message: (field) => `The value for the ${field} is already taken.`,
           validate(value) {
-            if (self.isEdit && self.quizInternal.projectId === value) {
+            if (self.isEdit && self.quizInternal.quizId === value) {
               return true;
             }
             return QuizService.checkIfQuizIdExist(value)

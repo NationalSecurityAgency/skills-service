@@ -166,8 +166,9 @@ class QuizDefService {
             serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
         }
         if (quizDefWithDescription) {
+            QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
+            QuizValidator.isTrue(quizDefWithDescription.type == incomingType, "Existing quiz type cannot be changed", quizDefWithDescription.quizId)
             Props.copy(quizDefRequest, quizDefWithDescription)
-            quizDefWithDescription.type = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
             log.debug("Updating [{}]", quizDefWithDescription)
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
@@ -450,15 +451,19 @@ class QuizDefService {
     Set<String> availableQuizTypes = QuizDefParent.QuizType.values().collect({ it.toString() }).toSet()
     private void validateQuizDefRequest(String quizId, QuizDefRequest quizDefRequest) {
         IdFormatValidator.validate(quizId)
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId Id", quizId)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "QuizId Id", quizId)
+        propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId", quizId, quizId)
+        propsBasedValidator.quizValidationMinStrLength(PublicProps.UiProp.minIdLength, "QuizId", quizId, quizId)
 
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxQuizNameLength, "Quiz Name", quizDefRequest.name)
-        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Quiz Name", quizDefRequest.name)
+        propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizNameLength, "Quiz Name", quizDefRequest.name, quizId)
+        propsBasedValidator.quizValidationMinStrLength(PublicProps.UiProp.minNameLength, "Quiz Name", quizDefRequest.name, quizId)
+
+        if (quizDefRequest.description) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Quiz Description", quizDefRequest.description)
+        }
 
         QuizValidator.isNotBlank(quizDefRequest.type, "Type")
         if (!availableQuizTypes.contains(quizDefRequest.type)){
-            throw new SkillQuizException("No supported quiz type [${quizDefRequest.type}] please select one from ${availableQuizTypes}", quizId, ErrorCode.BadParam)
+            throw new SkillQuizException("Not supported quiz type [${quizDefRequest.type}] please select one from ${availableQuizTypes}", quizId, ErrorCode.BadParam)
         }
 
         if (!quizDefRequest?.name) {
