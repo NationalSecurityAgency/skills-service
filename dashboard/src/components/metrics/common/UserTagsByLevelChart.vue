@@ -109,7 +109,6 @@ limitations under the License.
                 series.push({ name: `Level ${item}`, data });
               });
               this.series = series.reverse();
-              console.log(series);
             }
             this.loading = false;
           });
