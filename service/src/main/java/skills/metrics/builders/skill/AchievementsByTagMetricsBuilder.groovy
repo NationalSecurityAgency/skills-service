@@ -17,12 +17,14 @@ package skills.metrics.builders.skill
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.UserTagCount
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import static org.springframework.data.domain.Sort.Direction.ASC
 
 @Component
 @Slf4j
@@ -48,7 +50,9 @@ class AchievementsByTagMetricsBuilder implements ProjectMetricsBuilder {
     @Override
     Object build(String projectId, String chartId, Map<String, String> props) {
         String skillId = MetricsParams.getSkillId(projectId, chartId, props);
-        def skillsPerformed = userPerformedSkillRepo.findAllByProjectIdAndSkillIdAndUserTag(projectId, skillId, props.userTagKey)
+        PageRequest pageRequest = PageRequest.of(0, 20 )
+
+        def skillsPerformed = userPerformedSkillRepo.findAllByProjectIdAndSkillIdAndUserTag(projectId, skillId, props.userTagKey, pageRequest)
         def skillsAchieved = userAchievedRepo.countNumAchievedByUserTag(projectId, skillId, props.userTagKey)
 
         def tagMap = new HashMap<String, UserTagCounts>()

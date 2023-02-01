@@ -53,9 +53,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 where s.projectId = ?1 and
                 s.skillId = ?2 and
                 s.enabled = 'true'
-              ) and ut.key = ?3 group by ut.value''')
+              ) and ut.key = ?3 group by ut.value order by userCount desc''')
     @Nullable
-    List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey)
+    List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey, Pageable pageable)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)
