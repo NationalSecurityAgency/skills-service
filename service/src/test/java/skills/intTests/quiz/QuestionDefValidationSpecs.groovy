@@ -84,5 +84,58 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Must have at least 2 answers")
     }
+
+    def "question text custom validation"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+
+        when:
+        question.question = "ab jabberwocky kd"
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Question: paragraphs may not contain jabberwocky")
+    }
+
+    def "question text <= 2000 chars"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+
+        when:
+        question.question = (1..2001).collect { "a" }.join("")
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Question] must not exceed [2000] chars")
+    }
+
+    def "quiz SingleChoice question must fill in each answer"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        question.answers[0].answer = ''
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("answers.answer was not provided")
+    }
+
+    def "quiz MultipleChoice question must fill in each answer"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.MultipleChoice)
+        question.answers[1].answer = ''
+        when:
+        skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("answers.answer was not provided")
+    }
+
 }
 

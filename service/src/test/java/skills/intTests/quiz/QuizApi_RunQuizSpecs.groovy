@@ -218,4 +218,25 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Must have at least 1 question declared in order to start.")
     }
+
+    def "configured question sort oder is respected"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        when:
+
+        def quizInfo0 = skillsService.getQuizInfo(quiz.quizId)
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes.questions[2].id, 4)
+        def quizInfo1 = skillsService.getQuizInfo(quiz.quizId)
+        skillsService.changeQuizQuestionDisplayOrder(quiz.quizId, qRes.questions[1].id, 0)
+        def quizInfo2 = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        quizInfo0.questions.id == [qRes.questions[0].id, qRes.questions[1].id, qRes.questions[2].id, qRes.questions[3].id, qRes.questions[4].id]
+        quizInfo1.questions.id == [qRes.questions[0].id, qRes.questions[1].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
+        quizInfo2.questions.id == [qRes.questions[1].id, qRes.questions[0].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
+    }
 }

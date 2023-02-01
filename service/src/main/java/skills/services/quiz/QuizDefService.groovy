@@ -397,10 +397,17 @@ class QuizDefService {
         }
         return updatedDef
     }
+
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
         String quizId = quizDef.getQuizId()
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question)
+        CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question)
+        if (!customValidationResult.valid) {
+            throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+        }
 
         if (questionDefRequest.questionType != QuizQuestionType.TextInput) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)

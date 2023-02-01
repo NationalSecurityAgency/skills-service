@@ -115,7 +115,7 @@ class QuizRunService {
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
-        List<QuizQuestionInfo> questions = dbQuestionDefs.collect {
+        List<QuizQuestionInfo> questions = dbQuestionDefs?.sort {it.getDisplayOrder() }?.collect {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[it.id]
             new QuizQuestionInfo(
                     id: it.id,
