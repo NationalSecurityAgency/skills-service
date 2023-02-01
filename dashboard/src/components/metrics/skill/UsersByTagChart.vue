@@ -83,7 +83,7 @@ limitations under the License.
           yaxis: {
             categories: [],
             title: {
-              text: 'Org',
+              text: this.tag.label,
             },
           },
           dataLabels: {

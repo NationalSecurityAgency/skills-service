@@ -1,0 +1,123 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+<template>
+  <metrics-card :title="`Levels by ${tag.label}`" data-cy="numUsersByTag">
+    <skills-spinner :is-loading="loading" class="mb-5"/>
+      <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
+        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+      </metrics-overlay>
+  </metrics-card>
+</template>
+
+<script>
+  import MetricsCard from '../utils/MetricsCard';
+  import MetricsService from '../MetricsService';
+  import MetricsOverlay from '../utils/MetricsOverlay';
+  import SkillsSpinner from '../../utils/SkillsSpinner';
+
+  export default {
+    name: 'UserTagsByLevelChart',
+    components: { MetricsOverlay, MetricsCard, SkillsSpinner },
+    props: ['tag'],
+    data() {
+      return {
+        series: [],
+        loading: true,
+        chartOptions: {
+          chart: {
+            stacked: true,
+            height: 250,
+            width: 250,
+            type: 'bar',
+            toolbar: {
+              show: true,
+              offsetX: 0,
+              offsetY: -60,
+            },
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+            },
+          },
+          stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent'],
+          },
+          xaxis: {
+            type: 'category',
+            title: {
+              text: '# of Users',
+            },
+            labels: {
+              style: {
+                fontSize: '13px',
+                fontWeight: 600,
+              },
+            },
+          },
+          yaxis: {
+            title: {
+              text: this.tag.label,
+            },
+          },
+          dataLabels: {
+            enabled: true,
+          },
+          legend: {
+            show: true,
+          },
+        },
+      };
+    },
+    mounted() {
+      this.loadData();
+    },
+    methods: {
+      loadData() {
+        this.loading = true;
+        MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { skillId: this.$route.params.subjectId, userTagKey: this.tag.key })
+          .then((dataFromServer) => {
+            if (dataFromServer && Object.keys(dataFromServer).length > 0) {
+              const series = [];
+              Object.keys(dataFromServer).forEach((item) => {
+                const tags = Object.keys(dataFromServer[item]);
+                const data = [];
+                tags.forEach((tag) => {
+                  const dataItem = {
+                    x: tag,
+                    y: dataFromServer[item][tag],
+                  };
+                  if (dataFromServer[item][tag] > 0) {
+                    data.push(dataItem);
+                  }
+                });
+                series.push({ name: `Level ${item}`, data });
+              });
+              this.series = series.reverse();
+              console.log(series);
+            }
+            this.loading = false;
+          });
+      },
+    },
+  };
+</script>
+
+<style scoped>
+
+</style>

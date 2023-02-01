@@ -18,6 +18,9 @@ limitations under the License.
     <sub-page-header title="Metrics"/>
     <level-breakdown-metric title="Subject Levels"/>
     <num-users-per-day class="my-3" title="Subject's users per day" role="figure"/>
+    <div v-for="tag of tags" :key="tag.key">
+      <user-tags-by-level-chart :tag="tag" class="mb-3" />
+    </div>
   </div>
 </template>
 
@@ -25,6 +28,7 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import LevelBreakdownMetric from '@/components/metrics/common/LevelBreakdownMetric';
   import NumUsersPerDay from '@/components/metrics/common/NumUsersPerDay';
+  import UserTagsByLevelChart from '@/components/metrics/common/UserTagsByLevelChart';
 
   export default {
     name: 'MetricsOnSubjectPage',
@@ -32,9 +36,25 @@ limitations under the License.
       NumUsersPerDay,
       LevelBreakdownMetric,
       SubPageHeader,
+      UserTagsByLevelChart,
+    },
+    mounted() {
+      const tags = [];
+      const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
+      if (userPageTags) {
+        const tagSections = userPageTags.split('|');
+        tagSections.forEach((section) => {
+          const [key, label] = section.split('/');
+          tags.push({
+            key, label,
+          });
+        });
+      }
+      this.tags = tags;
     },
     data() {
       return {
+        tags: [],
         loading: true,
       };
     },

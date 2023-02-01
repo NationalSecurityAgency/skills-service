@@ -514,6 +514,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         Long getNumberUsers()
     }
 
+    static interface LevelAndTagCount {
+        String getSkillId()
+        String getUserTag()
+        Integer getLevel()
+        Long getNumberUsers()
+    }
+
     @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers 
             from UserAchievement as ua, SkillDef as sd 
             where 
@@ -525,6 +532,24 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     List<SkillAndLevelUserCount> countNumUsersPerContainerTypeAndLevel(
             @Param("projectId") String projectId,
             @Param("containerType") SkillDef.ContainerType containerType
+    )
+
+    @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers, ut.value as userTag 
+            from UserAchievement as ua, SkillDef as sd 
+            join UserTag ut on ut.userId = ua.userId
+            where 
+                ua.skillId = sd.skillId and
+                ua.skillId = :skillId and
+                ua.projectId = :projectId and
+                sd.type = :containerType and
+                ut.key = :userTagKey
+            group by ua.skillId, ua.level, ut.value
+           ''')
+    List<LevelAndTagCount> countNumUsersPerSubjectTagAndLevel(
+            @Param("projectId") String projectId,
+            @Param("containerType") SkillDef.ContainerType containerType,
+            @Param("skillId") String skillId,
+            @Param("userTagKey") String userTagKey
     )
 
     @Query('''select count(distinct ua.userId) from UserAchievement ua
