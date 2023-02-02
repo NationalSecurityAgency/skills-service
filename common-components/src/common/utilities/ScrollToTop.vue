@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <button type="button" class="btn btn-info btn-floating btn-lg" v-if="scrollDistance > 200" id="returnToTopButton" @click="scrollToTop">
+  <button type="button" class="btn btn-info btn-floating btn-lg skills-theme-btn" v-if="scrollDistance > 200" id="returnToTopButton" @click="scrollToTop">
     <i class="fas fa-arrow-up"></i> <span class="sr-only">return to top</span>
   </button>
 </template>

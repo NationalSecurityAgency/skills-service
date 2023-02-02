@@ -16,16 +16,12 @@ limitations under the License.
 <template>
   <div>
     <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate" />
-    <scroll-to-top />
   </div>
 </template>
 
 <script>
-  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
-
   export default {
     name: 'MyProgress',
-    components: { ScrollToTop },
   };
 </script>
 

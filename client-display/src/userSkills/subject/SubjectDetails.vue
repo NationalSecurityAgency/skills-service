@@ -41,13 +41,11 @@ limitations under the License.
             </div>
             <skills-progress-list @points-earned="refreshHeader" :subject="displayData.userSkills" @scrollTo="scrollToLastViewedSkill" />
         </div>
-        <scroll-to-top />
     </section>
 </template>
 
 <script>
   import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
   import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
@@ -63,7 +61,6 @@ limitations under the License.
       SkillsTitle,
       SkillsProgressList,
       SkillsSpinner,
-      ScrollToTop,
     },
     beforeRouteEnter(to, from, next) {
       if (to.name === 'subjectDetails' && from.name === 'skillDetails') {

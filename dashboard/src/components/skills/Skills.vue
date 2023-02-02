@@ -67,7 +67,6 @@ limitations under the License.
     <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
                          @to-import="importFromCatalog" @hidden="focusOnImportFromCatalogButton"/>
 
-    <scroll-to-top />
   </div>
 </template>
 
@@ -82,7 +81,6 @@ limitations under the License.
   import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup';
   import ImportFromCatalog from '@/components/skills/catalog/ImportFromCatalog';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
@@ -98,7 +96,6 @@ limitations under the License.
       SubPageHeader,
       SkillsTable,
       LoadingContainer,
-      ScrollToTop,
     },
     data() {
       return {

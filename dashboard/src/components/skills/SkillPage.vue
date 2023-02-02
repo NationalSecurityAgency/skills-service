@@ -55,7 +55,6 @@ limitations under the License.
     </navigation>
     <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"
                 :project-id="this.$route.params.projectId" :subject-id="this.$route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>
-    <scroll-to-top />
   </div>
 </template>
 
@@ -68,7 +67,6 @@ limitations under the License.
   import EditSkill from '@/components/skills/EditSkill';
   import ShowMore from '@/components/skills/selfReport/ShowMore';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
 
   const subjects = createNamespacedHelpers('subjects');
   const skills = createNamespacedHelpers('skills');
@@ -81,7 +79,6 @@ limitations under the License.
       Navigation,
       EditSkill,
       ShowMore,
-      ScrollToTop,
     },
     data() {
       return {
