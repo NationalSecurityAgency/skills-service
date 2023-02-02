@@ -15,10 +15,9 @@ limitations under the License.
 */
 <template>
   <metrics-card :title="`Levels by ${tag.label}`" data-cy="numUsersByTag">
-    <skills-spinner :is-loading="loading" class="mb-5"/>
-      <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
-        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
-      </metrics-overlay>
+    <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
+      <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+    </metrics-overlay>
   </metrics-card>
 </template>
 

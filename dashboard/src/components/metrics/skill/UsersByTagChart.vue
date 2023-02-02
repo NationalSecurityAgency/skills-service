@@ -17,14 +17,14 @@ limitations under the License.
   <metrics-card :title="`Top 20 ${tag.label} User Counts`" data-cy="numUsersByTag">
     <div class="row">
       <div class="col-xl-6 col-lg-5 col-md-12 col-sm-12 mb-3">
-        <metrics-card title="In Progress" data-cy="numUsersByTag">
+        <metrics-card title="In Progress" data-cy="usersInProgressByTag">
           <metrics-overlay :loading="loading" :has-data="inProgressSeries.length > 0" no-data-msg="No users currently working on this skill.">
             <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="inProgressSeries"></apexchart>
           </metrics-overlay>
         </metrics-card>
       </div>
       <div class="col-xl-6 col-lg-5 col-md-12 col-sm-12 mb-3">
-        <metrics-card title="Achieved" data-cy="numUsersByTag">
+        <metrics-card title="Achieved" data-cy="usersAchievedByTag">
           <metrics-overlay :loading="loading" :has-data="achievedSeries.length > 0" no-data-msg="No achievements yet for this skill.">
             <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="achievedSeries"></apexchart>
           </metrics-overlay>
