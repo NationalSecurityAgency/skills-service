@@ -41,16 +41,17 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
         def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, SkillDef.ContainerType.Subject, skillId, props.userTagKey);
 
-        HashMap<Integer, HashMap<String, Integer>> users = new HashMap<Integer, HashMap<String, Integer>>();
-        userCount.forEach( it -> {
+        HashMap<String, HashMap<Integer, Integer>> users = new HashMap<String, HashMap<Integer, Integer>>();
+
+        userCount.sort({it.userTag}).forEach( it -> {
             HashMap<Integer, Integer> userInfo = new HashMap<String, Integer>();
-            userInfo.put(it.userTag, it.numberUsers);
-            if(users[it.level]) {
-                def tag = users[it.level];
-                tag[it.userTag] = it.numberUsers
-                users[it.level] = tag;
+            userInfo.put(it.level, it.numberUsers);
+            if(users[it.userTag]) {
+                def tag = users[it.userTag];
+                tag[it.level] = it.numberUsers
+                users[it.userTag] = tag;
             } else {
-                users[it.level] = userInfo;
+                users[it.userTag] = userInfo;
             }
         })
 
@@ -60,19 +61,14 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
     }
 
     private void adjustCountsToOnlyCountLastLevel(users) {
-        def levels = users.keySet().sort();
-        if(levels.size() > 1) {
-            for (int level = levels[0]; level < levels.size(); level++) {
-                if(users[level]) {
-                    users[level]?.keySet().forEach(tag -> {
-                        for (int nextLevel = levels[1]; nextLevel <= levels.size(); nextLevel++) {
-                            if(users[level][tag] && users[nextLevel][tag]) {
-                                users[level][tag] = users[level][tag] - users[nextLevel][tag];
-                            }
-                        }
-                    })
+        def tags = users.keySet();
+        tags.forEach( tag -> {
+            def levels = users[tag].size()
+            for (int i = levels; i > 1; i--) {
+                for (int j = i - 1; j >= 1; j--) {
+                    users[tag][j] = users[tag][j] - users[tag][i]
                 }
             }
-        }
+        })
     }
 }

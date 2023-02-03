@@ -25,11 +25,10 @@ limitations under the License.
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
 
   export default {
     name: 'UserTagsByLevelChart',
-    components: { MetricsOverlay, MetricsCard, SkillsSpinner },
+    components: { MetricsOverlay, MetricsCard },
     props: ['tag'],
     data() {
       return {
@@ -59,6 +58,7 @@ limitations under the License.
           },
           xaxis: {
             type: 'category',
+            categories: ['ABC123', 'DEF456'],
             title: {
               text: '# of Users',
             },
@@ -91,23 +91,24 @@ limitations under the License.
         this.loading = true;
         MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { skillId: this.$route.params.subjectId, userTagKey: this.tag.key })
           .then((dataFromServer) => {
+            console.log(dataFromServer);
             if (dataFromServer && Object.keys(dataFromServer).length > 0) {
+              const tags = Object.keys(dataFromServer);
               const series = [];
-              Object.keys(dataFromServer).forEach((item) => {
-                const tags = Object.keys(dataFromServer[item]);
+              tags.forEach((tag) => {
+                const levels = Object.keys(dataFromServer[item]);
                 const data = [];
-                tags.forEach((tag) => {
+                levels.forEach((level) => {
                   const dataItem = {
-                    x: tag,
-                    y: dataFromServer[item][tag],
+                    x: `Level ${level}`,
+                    y: dataFromServer[item][level],
                   };
-                  if (dataFromServer[item][tag] > 0) {
-                    data.push(dataItem);
-                  }
+                  data.push(dataItem);
                 });
-                series.push({ name: `Level ${item}`, data });
+                series.push({ name: item, data });
               });
-              this.series = series.reverse();
+              console.log(series);
+              this.series = series;
             }
             this.loading = false;
           });
