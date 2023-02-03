@@ -15,14 +15,17 @@ limitations under the License.
 */
 <template>
   <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="quizInternal.testId" size="xl" :title="title" v-model="show"
+    <b-modal :id="quiz.quizId" size="xl" :title="title" v-model="show"
              :no-close-on-backdrop="true" :centered="true"
              header-bg-variant="info"
              @hide="publishHidden"
+             @shown="showDescription = true"
              header-text-variant="light" no-fade>
       <skills-spinner :is-loading="loading"/>
-      <b-container v-if="!loading" fluid>
-        <div class="form-group">
+      <b-container fluid v-if="!loading">
+        <div class="row">
+          <div class="col-12">
+            <div class="form-group">
           <label for="quizNameInput">* Name</label>
           <ValidationProvider
             rules="required|minNameLength|maxQuizNameLength|uniqueName|customNameValidator"
@@ -42,33 +45,47 @@ limitations under the License.
                    id="quizNameError">{{ errors[0] }}</small>
           </ValidationProvider>
         </div>
-
-        <id-input type="text" label="Quiz/Survey ID" v-model="quizInternal.quizId"
-                  additional-validation-rules="uniqueId"
-                  v-on:keydown.enter.native="handleSubmit(updateProject)"
-                  :next-focus-el="previousFocus"
-                  @shown="tooltipShowing=true"
-                  @hidden="tooltipShowing=false"/>
-
-        <div class="form-group mt-3" data-cy="quizTypeSection">
-          <label id="quizTypeLabel" for="quizTypeInput">* Type:</label>
-          <b-form-select v-model="quizInternal.type"
-                         id="quizTypeInput"
-                         :options="quizTypeOptions"
-                         :disabled="isEdit"
-                         aria-labelledby="quizTypeLabel"
-                         data-cy="quizTypeSelector" required/>
-          <div v-if="isEdit" class="text-secondary font-italic small">** Can only be modified for a new quiz/survey **</div>
+          </div>
         </div>
 
-        <label>Description</label>
-        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250"
-                            v-slot="{errors}"
-                            name="Quiz/Survey Description">
-          <markdown-editor v-model="quizInternal.description" data-cy="quizDescription"></markdown-editor>
-          <small role="alert" class="form-text text-danger mb-3"
-                 data-cy="quizDescriptionError">{{ errors[0] }}</small>
-        </ValidationProvider>
+        <div class="row">
+          <div class="col-12">
+            <id-input type="text" label="Quiz/Survey ID" v-model="quizInternal.quizId"
+                      additional-validation-rules="uniqueId"
+                      v-on:keydown.enter.native="handleSubmit(updateProject)"
+                      :next-focus-el="previousFocus"
+                      @shown="tooltipShowing=true"
+                      @hidden="tooltipShowing=false"/>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="form-group" data-cy="quizTypeSection">
+              <label id="quizTypeLabel" for="quizTypeInput">* Type:</label>
+              <b-form-select v-model="quizInternal.type"
+                             id="quizTypeInput"
+                             :options="quizTypeOptions"
+                             :disabled="isEdit"
+                             aria-labelledby="quizTypeLabel"
+                             data-cy="quizTypeSelector" required/>
+              <div v-if="isEdit" class="text-secondary font-italic small">** Can only be modified for a new quiz/survey **</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3" v-if="showDescription">
+          <div class="col-12">
+            <label>Description</label>
+            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="400"
+                                v-slot="{errors}"
+                                name="Quiz/Survey Description">
+              <markdown-editor v-model="quizInternal.description" data-cy="quizDescription"></markdown-editor>
+              <small role="alert" class="form-text text-danger mb-3"
+                     data-cy="quizDescriptionError">{{ errors[0] }}</small>
+            </ValidationProvider>
+          </div>
+        </div>
 
         <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite">
           <small>***{{ overallErrMsg }}***</small></p>
@@ -126,6 +143,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         overallErrMsg: '',
+        showDescription: false,
       };
     },
     created() {

@@ -25,6 +25,7 @@ limitations under the License.
       <skills-spinner :is-loading="isLoading" />
       <div v-if="!isLoading">
         <no-content2 v-if="!hasData" class="my-5"
+                     data-cy="noQuestionsYet"
                      title="No Questions Yet..." message="Create a question to get started."/>
         <div v-if="hasData" id="questionsCard">
 <!--          <div class="p-2 text-right">-->
@@ -50,7 +51,11 @@ limitations under the License.
 
       <template #footer>
         <div class="text-right">
-          <b-button variant="outline-primary" size="sm" @click="openNewAnswerModal">
+          <b-button ref="newQuestionOnBottomBtn"
+                    data-cy="newQuestionOnBottomBtn"
+                    variant="outline-primary"
+                    size="sm"
+                    @click="openNewAnswerModal('newQuestionOnBottomBtn')">
             Question <i class="fas fa-plus-circle"/>
           </b-button>
         </div>
@@ -60,6 +65,7 @@ limitations under the License.
     <edit-question v-if="editQuestionInfo.showDialog" v-model="editQuestionInfo.showDialog"
                    :is-edit="editQuestionInfo.isEdit"
                    @question-saved="questionDefSaved"
+                   @hidden="handleNewQuestionBtnFocus"
                    :question-def="editQuestionInfo.questionDef"/>
   </div>
 </template>
@@ -96,6 +102,7 @@ limitations under the License.
           showDialog: false,
           isEdit: false,
           questionDef: {},
+          initiatedByBtnRef: null,
         },
         sortOrder: {
           loading: false,
@@ -119,11 +126,23 @@ limitations under the License.
         const questionDefWithQuizId = ({ ...questionDef, quizId: this.quizId });
         QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
           .then((res) => {
-            this.loadQuizSummary({ quizId: this.quizId });
+            this.loadQuizSummary({ quizId: this.quizId }).then(() => this.handleNewQuestionBtnFocus());
             this.questions.push(res);
           });
       },
-      openNewAnswerModal() {
+      handleNewQuestionBtnFocus() {
+        const self = this;
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            if (this.editQuestionInfo.initiatedByBtnRef) {
+              self.$refs[self.editQuestionInfo.initiatedByBtnRef]?.focus();
+            } else {
+              self.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+            }
+          });
+        });
+      },
+      openNewAnswerModal(initiatedBtnRef = null) {
         this.editQuestionInfo.questionDef = {
           id: null,
           question: '',
@@ -140,6 +159,7 @@ limitations under the License.
           }],
         };
         this.editQuestionInfo.showDialog = true;
+        this.editQuestionInfo.initiatedByBtnRef = initiatedBtnRef;
       },
       loadQuestions() {
         this.isLoading = true;

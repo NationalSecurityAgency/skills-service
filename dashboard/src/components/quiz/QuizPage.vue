@@ -49,7 +49,7 @@ limitations under the License.
                @quiz-saved="updateQuizDef"
                @hidden="handleHideQuizEdit"/>
 
-    <navigation v-if="!loadingQuizSummary" :nav-items="[
+    <navigation :nav-items="[
           {name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions'},
           {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers'},
           {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics'},

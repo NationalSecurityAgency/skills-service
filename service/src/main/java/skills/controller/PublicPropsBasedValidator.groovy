@@ -54,6 +54,13 @@ class PublicPropsBasedValidator {
             throw new SkillQuizException("[${fieldName}] must not be less than [${minLen}] chars.", quizId)
         }
     }
+    void quizValidationMaxIntValue(PublicProps.UiProp prop, String fieldName, int value, String quizId) {
+        int maxVal = publicProps.getInt(prop)
+        if (value > maxVal) {
+            throw new SkillQuizException("[${fieldName}] must be <= [${maxVal}]", quizId)
+        }
+    }
+
 
     void validateMinStrLength(PublicProps.UiProp prop, String fieldName, String value) {
         SkillsValidator.isNotBlank(value, fieldName)

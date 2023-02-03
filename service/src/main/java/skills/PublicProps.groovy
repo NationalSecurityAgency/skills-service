@@ -61,6 +61,9 @@ class PublicProps {
         allowedAttachmentFileTypes,
         maxAttachmentSize,
         attachmentWarningMessage,
+        maxQuizDefsPerAdmin,
+        maxQuestionsPerQuiz,
+        maxQuizTextAnswerLength,
     }
 
     @Autowired

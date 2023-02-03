@@ -18,7 +18,7 @@ import utcPlugin from 'dayjs/plugin/utc';
 
 dayjs.extend(utcPlugin);
 
-describe('Quiz Tests', () => {
+describe('Quiz CRUD Tests', () => {
 
     const quizTableSelector = '[data-cy="quizDeffinitionsTable"]';
     beforeEach(() => {

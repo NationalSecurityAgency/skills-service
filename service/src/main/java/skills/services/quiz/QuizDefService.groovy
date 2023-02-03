@@ -403,7 +403,9 @@ class QuizDefService {
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
 
-        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question)
+        propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question, quizDef.quizId)
+        int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
+        propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxQuestionsPerQuiz, "Number of Questions", numQuestions + 1, quizDef.quizId)
         CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question)
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
@@ -411,12 +413,13 @@ class QuizDefService {
 
         if (questionDefRequest.questionType != QuizQuestionType.TextInput) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
+            QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {
                 QuizValidator.isNotBlank(it.answer, "answers.answer", quizId)
+                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
             }
         }
         if (quizDef.type == QuizDefParent.QuizType.Quiz) {
-            QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) != null, "For quiz.type of Quiz must set isCorrect=true on at least 1 question", quizId)
 
             if (questionDefRequest.questionType == QuizQuestionType.MultipleChoice) {
@@ -465,7 +468,7 @@ class QuizDefService {
         propsBasedValidator.quizValidationMinStrLength(PublicProps.UiProp.minNameLength, "Quiz Name", quizDefRequest.name, quizId)
 
         if (quizDefRequest.description) {
-            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Quiz Description", quizDefRequest.description)
+            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Quiz Description", quizDefRequest.description, quizId)
         }
 
         QuizValidator.isNotBlank(quizDefRequest.type, "Type")

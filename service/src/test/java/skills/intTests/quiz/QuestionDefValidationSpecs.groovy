@@ -63,7 +63,7 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("questionType=[TextInput] is not supported for quiz.type of Quiz")
     }
 
-    def "quiz SingleChoice question must have at lest 2 answers"() {
+    def "quiz SingleChoice question must have at least 2 answers"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)
@@ -74,12 +74,34 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("Must have at least 2 answers")
     }
 
-    def "quiz MultipleChoice question must have at lest 2 answers"() {
+    def "quiz MultipleChoice question must have at least 2 answers"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.MultipleChoice)
         when:
         skillsService.createQuizQuestionDefs([question])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Must have at least 2 answers")
+    }
+
+    def "survey SingleChoice question must have at least 2 answers"() {
+        def survey = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(survey)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)
+        when:
+        skillsService.createQuizQuestionDef(question)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Must have at least 2 answers")
+    }
+
+    def "survey MultipleChoice question must have at least 2 answers"() {
+        def survey = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(survey)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.MultipleChoice)
+        when:
+        skillsService.createQuizQuestionDef(question)
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Must have at least 2 answers")
@@ -137,5 +159,36 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("answers.answer was not provided")
     }
 
+    def "quiz may not have more than 500 questions" () {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        500.times {
+            def q = QuizDefFactory.createChoiceQuestion(1, it)
+            skillsService.createQuizQuestionDef(q)
+        }
+
+        when:
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 501))
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Number of Questions] must be <= [500]")
+        skillsClientException.message.contains("quizId:${quiz.quizId}")
+    }
+
+    def "answer text <= 2000 chars"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+
+        when:
+        question.answers[0].answer = (1..2001).collect { "a" }.join("")
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Answer] must not exceed [2000] chars")
+    }
+
 }
+
 

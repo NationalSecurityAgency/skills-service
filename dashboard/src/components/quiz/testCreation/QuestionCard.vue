@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="border pb-2">
-    <div class="row">
+    <div class="row" :data-cy="`questionDisplayCard-${questionNum}`">
       <div class="col">
 
         <b-row :no-gutters="true" class="mb-3">
@@ -29,11 +29,11 @@ limitations under the License.
 <!--            <div class="mt-2">Question <span class="font-weight-bold">#{{question.displayOrder + 1}}</span></div>-->
 
             <div class="px-2 py-1">
-              <markdown-text :text="question.question"/>
+              <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
               <div v-if="!isTextInputType" class="mt-1 pl-1">
-                <div v-for="(a) in question.answers" :key="a.id" class="row no-gutters">
-                  <div class="col-auto pb-1">
+                <div v-for="(a, index) in question.answers" :key="a.id" class="row no-gutters">
+                  <div class="col-auto pb-1" :data-cy="`answerDisplay-${index}`">
                     <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
                                            font-size="1.3rem"/>
                   </div>

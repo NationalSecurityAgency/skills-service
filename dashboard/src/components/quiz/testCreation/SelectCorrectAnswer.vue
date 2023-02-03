@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <span v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0"
-        aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}">
-    <i v-if="!selected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
-    <i v-if="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+  <span v-on:keydown.space="flipSelected" @click="flipSelected" :tabindex="readOnly ? -1 : 0"
+        aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}" data-cy="selectCorrectAnswer">
+    <i v-if="!selected" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+    <i v-if="selected" data-cy="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
   </span>
 </template>
 

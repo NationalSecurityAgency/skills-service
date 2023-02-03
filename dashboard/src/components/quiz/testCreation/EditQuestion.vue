@@ -19,6 +19,7 @@ limitations under the License.
              :no-close-on-backdrop="true" :centered="true"
              header-bg-variant="info"
              @hide="publishHidden"
+             @shown="showQuestion = true"
              header-text-variant="light" no-fade>
       <skills-spinner :is-loading="loading"/>
       <b-container v-if="!loading" fluid>
@@ -26,14 +27,14 @@ limitations under the License.
           <span class="font-weight-bold text-primary">Question:</span>
         </div>
 
-        <ValidationProvider rules="required|maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-          <markdown-editor v-if="questionDefInternal"
+        <ValidationProvider rules="required|maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Question">
+          <markdown-editor v-if="showQuestion && questionDefInternal"
                            :resizable="true"
                            v-focus
                            markdownHeight="150px"
                            v-model="questionDefInternal.question"
-                           data-cy="skillDescription"/>
-          <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
+                           data-cy="questionText"/>
+          <small role="alert" class="form-text text-danger" data-cy="questionTextErr">{{ errors[0] }}</small>
         </ValidationProvider>
 
         <div class="mt-3 mb-2">
@@ -68,14 +69,14 @@ limitations under the License.
             <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
           </div>
           <div v-for="(answer, index) in questionDefInternal.answers" :key="index">
-            <div class="row no-gutters mt-2">
+            <div class="row no-gutters mt-2" :data-cy="`answer-${index}`">
               <div class="col-auto">
                 <select-correct-answer v-if="isQuizType" v-model="answer.isCorrect" class="mr-2" @selected="updateNumQuestionWithContent"/>
               </div>
               <div class="col">
                   <input class="form-control" type="text" v-model="answer.answer"
                          placeholder="Enter an answer"
-                         data-cy="testName"
+                         data-cy="answerText"
                          id="testNameInput"
                          aria-errormessage="testNameError"
                          aria-describedby="testNameError"/>
@@ -84,12 +85,14 @@ limitations under the License.
                 <b-button variant="outline-info"
                           :disabled="noMoreAnswers"
                           :aria-label="`Add New Answer at index ${index}`"
+                          data-cy="addNewAnswer"
                           @click="addNewAnswer(index)">
                   <i class="fas fa-plus"></i>
                 </b-button>
                 <b-button variant="outline-info"
                           :disabled="twoOrLessQuestions"
                           :aria-label="`Delete Answer at index ${index}`"
+                          data-cy="removeAnswer"
                           @click="removeAnswer(index)">
                   <i class="fas fa-minus"></i>
                 </b-button>
@@ -119,11 +122,11 @@ limitations under the License.
         <b-button v-if="!loading" variant="success" size="sm" class="float-right"
                   @click="handleSubmit(saveAnswer)"
                   :disabled="invalid"
-                  data-cy="saveAnswerButton">
+                  data-cy="saveAnswerBtn">
           <span>Save</span>
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe"
-                  data-cy="closeQuizButton">
+                  data-cy="closeQuestionBtn">
           Cancel
         </b-button>
       </div>
@@ -159,6 +162,7 @@ limitations under the License.
       return {
         loading: false,
         show: this.value,
+        showQuestion: false,
         questionDefInternal: {},
         questionType: {
           options: [{
