@@ -58,7 +58,6 @@ limitations under the License.
           },
           xaxis: {
             type: 'category',
-            categories: ['ABC123', 'DEF456'],
             title: {
               text: '# of Users',
             },
@@ -75,7 +74,7 @@ limitations under the License.
             },
           },
           dataLabels: {
-            enabled: true,
+            enabled: false,
           },
           legend: {
             show: true,
@@ -91,24 +90,22 @@ limitations under the License.
         this.loading = true;
         MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { skillId: this.$route.params.subjectId, userTagKey: this.tag.key })
           .then((dataFromServer) => {
-            console.log(dataFromServer);
             if (dataFromServer && Object.keys(dataFromServer).length > 0) {
               const tags = Object.keys(dataFromServer);
-              const series = [];
-              tags.forEach((tag) => {
-                const levels = Object.keys(dataFromServer[item]);
-                const data = [];
-                levels.forEach((level) => {
-                  const dataItem = {
-                    x: `Level ${level}`,
-                    y: dataFromServer[item][level],
-                  };
-                  data.push(dataItem);
-                });
-                series.push({ name: item, data });
-              });
-              console.log(series);
-              this.series = series;
+              if (tags) {
+                this.chartOptions.xaxis.categories = tags;
+                const numberOfLevels = Object.keys(dataFromServer[tags[0]]).length;
+                const series = [];
+
+                for (let level = numberOfLevels; level >= 1; level -= 1) {
+                  const dataForLevel = [];
+                  tags.forEach((tag) => {
+                    dataForLevel.push(dataFromServer[tag][level]);
+                  });
+                  series.push({ name: `Level ${level}`, data: dataForLevel });
+                }
+                this.series = series;
+              }
             }
             this.loading = false;
           });
