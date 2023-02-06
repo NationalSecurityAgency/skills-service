@@ -518,6 +518,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             where 
                 ua.skillId = sd.skillId and
                 ua.projectId = :projectId and
+                sd.projectId = :projectId and
                 sd.type = :containerType
             group by ua.skillId, ua.level    
            ''')
