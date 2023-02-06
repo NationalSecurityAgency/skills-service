@@ -148,6 +148,39 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         err.message.contains("explanation:Invitation Code has already been used, errorCode:ClaimedInvitationCode")
     }
 
+    def "can invite a user again after revocation"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["jdoe@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()
+        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        createAcctService.joinProject(proj.projectId, inviteCode)
+
+        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, "jdoe@email.foo")
+
+        when:
+        def result = skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["jdoe@email.foo"]])
+
+        then:
+        result
+        result.projectId == proj.projectId
+        result.successful.size() == 1
+        result.successful[0] == "jdoe@email.foo"
+    }
+
     def "invalid invite cannot be used"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)

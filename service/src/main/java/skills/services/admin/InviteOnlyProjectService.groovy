@@ -44,6 +44,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.ProjectAccessTokenRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
 import skills.utils.Expiration
 import skills.utils.ExpirationUtils
@@ -103,6 +104,9 @@ class InviteOnlyProjectService {
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     /**
      * Generates an invite token for a specific project
@@ -320,8 +324,10 @@ class InviteOnlyProjectService {
     @Transactional
     void removeUserFromProject(String projectId, String userId) {
         String currentUserId = userInfoService.getCurrentUserId()
+        def userAttrs = userAttrsRepo.findByUserId(userId)
         log.info("user [{}] has removed access to project [{}] for user [{}]", currentUserId, projectId, userId)
         accessSettingsStorageService.deleteUserRole(userId, projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
+        deleteInvite(projectId, userAttrs.email)
     }
 
     @Transactional
