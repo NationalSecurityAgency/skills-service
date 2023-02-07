@@ -246,7 +246,7 @@ class InviteOnlyProjectService {
 
         log.info("user [{}] has claimed project invite code [{}] for project [{}]", userId, token, projectId)
 
-        projectAccessTokenRepo.save(projectAccessToken)
+        projectAccessTokenRepo.deleteByToken(projectAccessToken.token)
         GrantedAuthoritiesUpdater.addUserRoleToCurrentUser(newRole)
     }
 
