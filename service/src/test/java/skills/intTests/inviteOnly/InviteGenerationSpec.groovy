@@ -145,7 +145,7 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
 
         then:
         def err = thrown(SkillsClientException)
-        err.message.contains("explanation:Invitation Code has already been used, errorCode:ClaimedInvitationCode")
+        err.message.contains("explanation:Invitation Code does not exist for Project, errorCode:InvalidInvitationCode")
     }
 
     def "can invite a user again after revocation"() {
@@ -208,7 +208,7 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
 
         then:
         def err = thrown(SkillsClientException)
-        err.message.contains("explanation:Invitation Code has already been used, errorCode:ClaimedInvitationCode")
+        err.message.contains("explanation:Invitation Code does not exist for Project, errorCode:InvalidInvitationCode")
     }
 
     def "cannot use invite for a different project"() {

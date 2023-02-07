@@ -246,7 +246,7 @@ class InviteOnlyProjectService {
 
         log.info("user [{}] has claimed project invite code [{}] for project [{}]", userId, token, projectId)
 
-        projectAccessTokenRepo.save(projectAccessToken)
+        projectAccessTokenRepo.deleteByToken(projectAccessToken.token)
         GrantedAuthoritiesUpdater.addUserRoleToCurrentUser(newRole)
     }
 
@@ -324,10 +324,8 @@ class InviteOnlyProjectService {
     @Transactional
     void removeUserFromProject(String projectId, String userId) {
         String currentUserId = userInfoService.getCurrentUserId()
-        def userAttrs = userAttrsRepo.findByUserId(userId)
         log.info("user [{}] has removed access to project [{}] for user [{}]", currentUserId, projectId, userId)
         accessSettingsStorageService.deleteUserRole(userId, projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
-        deleteInvite(projectId, userAttrs.email)
     }
 
     @Transactional
