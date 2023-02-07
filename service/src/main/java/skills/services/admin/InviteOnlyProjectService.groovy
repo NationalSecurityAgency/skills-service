@@ -324,10 +324,8 @@ class InviteOnlyProjectService {
     @Transactional
     void removeUserFromProject(String projectId, String userId) {
         String currentUserId = userInfoService.getCurrentUserId()
-        def userAttrs = userAttrsRepo.findByUserId(userId)
         log.info("user [{}] has removed access to project [{}] for user [{}]", currentUserId, projectId, userId)
         accessSettingsStorageService.deleteUserRole(userId, projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
-        deleteInvite(projectId, userAttrs.email)
     }
 
     @Transactional

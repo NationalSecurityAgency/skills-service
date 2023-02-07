@@ -130,11 +130,7 @@ class AccessSettingsController {
             throw new SkillException("Cannot delete roles for myself. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)
         }
 
-        if(roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
-             inviteOnlyProjectService.removeUserFromProject(projectId, userId)
-        } else {
-            accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName)
-        }
+        accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userIdLower)) {
             User user = userRepo.findByUserId(userIdLower)
