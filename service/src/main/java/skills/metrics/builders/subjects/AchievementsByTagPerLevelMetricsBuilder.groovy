@@ -42,9 +42,10 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
         def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, SkillDef.ContainerType.Subject, skillId, props.userTagKey);
 
         HashMap<String, HashMap<Integer, Integer>> users = new HashMap<String, HashMap<Integer, Integer>>();
-
+        def totalLevels = 0;
         userCount.sort({it.userTag}).forEach( it -> {
             HashMap<Integer, Integer> userInfo = new HashMap<String, Integer>();
+            totalLevels = it.level > totalLevels ? it.level : totalLevels
             userInfo.put(it.level, it.numberUsers);
             if(users[it.userTag]) {
                 def tag = users[it.userTag];
@@ -57,7 +58,7 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
         adjustCountsToOnlyCountLastLevel(users)
 
-        return users;
+        return [ totalLevels: totalLevels, data: users ];
     }
 
     private void adjustCountsToOnlyCountLastLevel(users) {

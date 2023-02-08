@@ -36,7 +36,6 @@ limitations under the License.
         loading: true,
         chartOptions: {
           chart: {
-            stacked: true,
             height: 250,
             width: 250,
             type: 'bar',
@@ -49,6 +48,9 @@ limitations under the License.
           plotOptions: {
             bar: {
               horizontal: true,
+              dataLabels: {
+                position: 'bottom',
+              },
             },
           },
           stroke: {
@@ -57,7 +59,6 @@ limitations under the License.
             colors: ['transparent'],
           },
           xaxis: {
-            type: 'category',
             title: {
               text: '# of Users',
             },
@@ -74,10 +75,36 @@ limitations under the License.
             },
           },
           dataLabels: {
-            enabled: false,
+            enabled: true,
+            textAnchor: 'start',
+            offsetX: 0,
+            style: {
+              colors: ['#17a2b8'],
+              fontSize: '14px',
+              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontWeight: 'bold',
+            },
+            formatter(val, opt) {
+              return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${val} users`;
+            },
+            dropShadow: {
+              enabled: true,
+            },
+            background: {
+              enabled: true,
+              foreColor: '#ffffff',
+              padding: 10,
+              borderRadius: 2,
+              borderWidth: 1,
+              borderColor: '#686565',
+              opacity: 1,
+              dropShadow: {
+                enabled: false,
+              },
+            },
           },
           legend: {
-            show: true,
+            show: false,
           },
         },
       };
@@ -90,19 +117,27 @@ limitations under the License.
         this.loading = true;
         MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { skillId: this.$route.params.subjectId, userTagKey: this.tag.key })
           .then((dataFromServer) => {
-            if (dataFromServer && Object.keys(dataFromServer).length > 0) {
-              const tags = Object.keys(dataFromServer);
+            if (dataFromServer && Object.keys(dataFromServer.data).length > 0) {
+              const userData = dataFromServer.data;
+              const tags = Object.keys(userData);
+
               if (tags) {
                 this.chartOptions.xaxis.categories = tags;
-                const numberOfLevels = Object.keys(dataFromServer[tags[0]]).length;
+                const numberOfLevels = dataFromServer.totalLevels;
                 const series = [];
 
-                for (let level = numberOfLevels; level >= 1; level -= 1) {
+                for (let level = 1; level <= numberOfLevels; level += 1) {
                   const dataForLevel = [];
                   tags.forEach((tag) => {
-                    dataForLevel.push(dataFromServer[tag][level]);
+                    if (userData[tag][level] > 0) {
+                      dataForLevel.push(userData[tag][level]);
+                    } else {
+                      dataForLevel.push(0);
+                    }
                   });
-                  series.push({ name: `Level ${level}`, data: dataForLevel });
+                  if (dataForLevel.length > 0) {
+                    series.push({ name: `Level ${level}`, data: dataForLevel });
+                  }
                 }
                 this.series = series;
               }
