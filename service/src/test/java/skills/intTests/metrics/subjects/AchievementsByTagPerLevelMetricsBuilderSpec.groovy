@@ -74,7 +74,8 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         def result = builder.build(proj.projectId, builder.id, props)
 
         then:
-        result['ABCDE'] == [1: 2, 2: 0, 3: 0, 4: 1]
-        result['DEFGH'] == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
+        result.totalLevels == 5
+        result.data['ABCDE'] == [1: 2, 2: 0, 3: 0, 4: 1]
+        result.data['DEFGH'] == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
     }
 }
