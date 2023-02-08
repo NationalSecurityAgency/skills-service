@@ -20,6 +20,8 @@ import skills.services.quiz.QuizQuestionType
 
 @Canonical
 class QuizAnswerDefRequest {
+    // optional id in case the question is being edited
+    Integer id
     String answer
     Boolean isCorrect
 }

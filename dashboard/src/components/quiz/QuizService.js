@@ -50,8 +50,16 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}/questions`)
       .then((response) => response.data);
   },
+  getQuizQuestionDef(quizId, questionId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/questions/${questionId}`)
+      .then((response) => response.data);
+  },
   saveQuizQuestionDef(quizId, newQuestionDef) {
-    return axios.post(`/admin/quiz-definitions/${quizId}/questions/create`, newQuestionDef)
+    return axios.post(`/admin/quiz-definitions/${quizId}/create-question`, newQuestionDef)
+      .then((response) => response.data);
+  },
+  updateQuizQuestionDef(quizId, existingQuestionDef) {
+    return axios.post(`/admin/quiz-definitions/${quizId}/questions/${existingQuestionDef.id}`, existingQuestionDef)
       .then((response) => response.data);
   },
   updateQuizQuestionDisplaySortOrder(quizId, questionId, newDisplayOrderIndex) {
@@ -70,6 +78,10 @@ export default {
   },
   getQuizSettings(quizId) {
     return axios.get(`/admin/quiz-definitions/${quizId}/settings`)
+      .then((response) => response.data);
+  },
+  deleteQuizQuestion(quizId, questionId) {
+    return axios.delete(`/admin/quiz-definitions/${quizId}/questions/${questionId}`)
       .then((response) => response.data);
   },
 };

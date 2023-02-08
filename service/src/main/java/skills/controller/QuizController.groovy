@@ -72,11 +72,19 @@ class QuizController {
         return quizDefService.getQuizDefSummary(quizId)
     }
 
-    @RequestMapping(value = "/{quizId}/questions/create", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/{quizId}/create-question", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     QuizQuestionDefResult saveQuestionDef(@PathVariable("quizId") String quizId,
                                           @RequestBody QuizQuestionDefRequest questionDefRequest) {
         return quizDefService.saveQuestion(quizId, questionDefRequest)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizQuestionDefResult updateQuestionDef(@PathVariable("quizId") String quizId,
+                                            @PathVariable("questionId") Integer questionId,
+                                            @RequestBody QuizQuestionDefRequest questionDefRequest) {
+        return quizDefService.saveQuestion(quizId, questionDefRequest, questionId)
     }
 
     @RequestMapping(value = "/{quizId}/questions/{questionRefId}", method = [RequestMethod.DELETE], produces = "application/json")
@@ -104,6 +112,13 @@ class QuizController {
     QuizQuestionsResult getQuestionDefs(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuestionDefs(quizId)
     }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    QuizQuestionDefResult getQuestionDef(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return quizDefService.getQuestionDef(quizId, questionId)
+    }
+
 
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

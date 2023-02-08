@@ -48,6 +48,9 @@ limitations under the License.
       selected(newValue) {
         this.$emit('input', newValue);
       },
+      value(newValue) {
+        this.selected = newValue;
+      },
     },
     methods: {
       flipSelected() {

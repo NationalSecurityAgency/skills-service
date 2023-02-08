@@ -26,6 +26,9 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
     @Nullable
     List<QuizAnswerDef> findAllByQuizIdIgnoreCase(String quizId)
 
+    @Nullable
+    List<QuizAnswerDef> findAllByQuestionRefId(Integer questionRefId)
+
     static interface AnswerDefPartialInfo {
         String getIsCorrectAnswer()
         String getQuizId()

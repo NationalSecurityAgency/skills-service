@@ -15,6 +15,7 @@
  */
 package skills.services.quiz
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -228,36 +229,35 @@ class QuizDefService {
     }
 
     @Transactional()
-    QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest) {
+    QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest, Integer existingQuestionId = null) {
         QuizDef quizDef = findQuizDef(quizId)
         validate(quizDef, questionDefRequest)
 
         lockingService.lockQuizDef(quizDef.quizId)
 
-        Integer maxExistingDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(quizDef.quizId)
-        int displayOrder = maxExistingDisplayOrder != null ? maxExistingDisplayOrder + 1 : 0
+        QuizQuestionDef savedQuestion
+        List<QuizAnswerDef> savedAnswers
 
-        QuizQuestionType questionType = questionDefRequest.questionType
-        if (!questionType || (questionType != QuizQuestionType.TextInput && quizDef.type != QuizDefParent.QuizType.Survey)) {
-            questionType = questionDefRequest.answers.count { it.isCorrect } > 1 ?
-                    QuizQuestionType.MultipleChoice : QuizQuestionType.SingleChoice
+        boolean isEdit = existingQuestionId != null
+        if (isEdit) {
+            savedQuestion = updateQuizQuestionDef(quizId, existingQuestionId, questionDefRequest)
+            savedAnswers = updateQuizQuestionAnswerDefs(savedQuestion, questionDefRequest)
+        } else {
+            savedQuestion = createQuizQuestionDef(quizDef, questionDefRequest)
+            savedAnswers = createQuizQuestionAnswerDefs(questionDefRequest, savedQuestion)
         }
 
-        QuizQuestionDef questionDef = new QuizQuestionDef(
-                quizId: quizDef.quizId,
-                question: questionDefRequest.question,
-                type: questionType,
-                displayOrder: displayOrder,
-        )
-        QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
+        return convert(savedQuestion, savedAnswers)
+    }
 
-        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
-
+    @Profile
+    private List<QuizAnswerDef> createQuizQuestionAnswerDefs(QuizQuestionDefRequest questionDefRequest, QuizQuestionDef savedQuestion) {
         List<QuizAnswerDef> answerDefs
+        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         if (isTextInputQuestion) {
             answerDefs = [
                     new QuizAnswerDef(
-                            quizId: quizDef.quizId,
+                            quizId: savedQuestion.quizId,
                             questionRefId: savedQuestion.id,
                             answer: null,
                             isCorrectAnswer: false,
@@ -267,7 +267,7 @@ class QuizDefService {
         } else {
             answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
                 new QuizAnswerDef(
-                        quizId: quizDef.quizId,
+                        quizId: savedQuestion.quizId,
                         questionRefId: savedQuestion.id,
                         answer: answerDefRequest.answer,
                         isCorrectAnswer: answerDefRequest.isCorrect,
@@ -276,8 +276,74 @@ class QuizDefService {
             }
         }
         List<QuizAnswerDef> savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
+        return savedAnswers
+    }
 
-        return convert(savedQuestion, savedAnswers)
+    @Profile
+    private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
+        boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
+        List<QuizAnswerDef> savedAnswers
+        List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
+        if (isTextInputQuestion) {
+            QuizAnswerDef qToUpdate = existingAnswerDefs[0]
+            qToUpdate.answer = null
+            qToUpdate.isCorrectAnswer = false
+            savedAnswers = [quizAnswerRepo.saveAndFlush(qToUpdate)]
+            if (existingAnswerDefs.size() > 1) {
+                List<Integer> idsToRemove = existingAnswerDefs.subList(1, existingAnswerDefs.size()).collect { it.id }
+                quizAnswerRepo.deleteAllById(idsToRemove)
+            }
+        } else {
+            List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, Integer index ->
+                QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
+                if (answerDef) {
+                    answerDef.answer = answerDefRequest.answer
+                    answerDef.isCorrectAnswer = answerDefRequest.isCorrect
+                    answerDef.displayOrder = index + 1
+                } else {
+                    answerDef = new QuizAnswerDef(
+                            quizId: savedQuestion.quizId,
+                            questionRefId: savedQuestion.id,
+                            answer: answerDefRequest.answer,
+                            isCorrectAnswer: answerDefRequest.isCorrect,
+                            displayOrder: index + 1,
+                    )
+                }
+                return answerDef
+            }
+            List<Integer> idsToRemove = existingAnswerDefs.findAll { QuizAnswerDef existingQ ->
+                !answerDefs.find { QuizAnswerDef newQ -> existingQ.id == newQ.id }
+            }.collect { it.id }
+            if (idsToRemove) {
+                quizAnswerRepo.deleteAllById(idsToRemove)
+            }
+            savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
+        }
+        return savedAnswers
+    }
+
+    @Profile
+    private QuizQuestionDef createQuizQuestionDef(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
+        Integer maxExistingDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(quizDef.quizId)
+        int displayOrder = maxExistingDisplayOrder != null ? maxExistingDisplayOrder + 1 : 0
+
+        QuizQuestionDef questionDef = new QuizQuestionDef(
+                quizId: quizDef.quizId,
+                question: questionDefRequest.question,
+                type: questionDefRequest.questionType,
+                displayOrder: displayOrder,
+        )
+        QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
+        return  savedQuestion
+    }
+
+    @Profile
+    private QuizQuestionDef updateQuizQuestionDef(String quizId, int existingQuestionId, QuizQuestionDefRequest questionDefRequest) {
+        QuizQuestionDef existing = getQuestingDef(quizId, existingQuestionId)
+        existing.question = questionDefRequest.question
+        existing.type = questionDefRequest.questionType
+        QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(existing)
+        return savedQuestion
     }
 
     @Transactional
@@ -316,6 +382,29 @@ class QuizDefService {
         }.sort({ it.displayOrder })
 
         return new QuizQuestionsResult(quizType: quizDef.type, questions: questions)
+    }
+
+    @Transactional
+    @Profile
+    QuizQuestionDefResult getQuestionDef(String quizId, Integer questionId) {
+        QuizQuestionDef questionDef = getQuestingDef(quizId, questionId)
+        List<QuizAnswerDef> answerDefs = quizAnswerRepo.findAllByQuestionRefId(questionDef.id)
+        QuizQuestionDefResult res = convert(questionDef, answerDefs)
+        return res
+    }
+
+    @Profile
+    private QuizQuestionDef getQuestingDef(String quizId, int questionId) {
+        QuizDef quizDef = findQuizDef(quizId)
+        Optional<QuizQuestionDef> questionRes = quizQuestionRepo.findById(questionId)
+        if (questionRes.isEmpty()) {
+            throw new SkillQuizException("Provided question id [${questionId}] does not exist", quizId);
+        }
+        QuizQuestionDef questionDef = questionRes.get()
+        if (quizDef.quizId != questionDef.quizId) {
+            throw new SkillQuizException("Provided question id [${questionId}] does not exist in quiz [${quizId}]", quizId)
+        }
+        return questionDef
     }
 
     @Transactional
@@ -376,7 +465,7 @@ class QuizDefService {
                 id: savedQuestion.id,
                 question: savedQuestion.question,
                 questionType: savedQuestion.type,
-                answers: savedAnswers.collect { convert (it)},
+                answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
         )
     }

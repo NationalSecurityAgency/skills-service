@@ -19,8 +19,10 @@ limitations under the License.
                      title="Questions"
                      action="Question"
                      @add-action="openNewAnswerModal"
+                     :is-loading="isLoading"
                      aria-label="new question"/>
 
+    <b-overlay :show="operationInProgress" rounded="sm">
     <b-card body-class="p-0" footer-bg-variant="white">
       <skills-spinner :is-loading="isLoading" />
       <div v-if="!isLoading">
@@ -28,9 +30,6 @@ limitations under the License.
                      data-cy="noQuestionsYet"
                      title="No Questions Yet..." message="Create a question to get started."/>
         <div v-if="hasData" id="questionsCard">
-<!--          <div class="p-2 text-right">-->
-<!--            <b-button variant="outline-info"><i class="far fa-minus-square"></i> Collapse All</b-button>-->
-<!--          </div>-->
           <div v-for="(q, index) in questions" :key="q.id" :id="q.id">
             <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
               <template #overlay>
@@ -42,9 +41,14 @@ limitations under the License.
                   </div>
                 </div>
               </template>
-              <question-card :question="q" :quiz-type="quizType" :question-num="index+1"></question-card>
+              <question-card
+                @edit-question="initiatedEditQuizDef"
+                @delete-question="deleteQuestion"
+                @sort-change-requested="handleKeySortRequest"
+                :question="q"
+                :quiz-type="quizType"
+                :question-num="index+1"/>
             </b-overlay>
-            <!--        <hr v-if="index + 1 < questions.length"/>-->
           </div>
         </div>
       </div>
@@ -61,11 +65,12 @@ limitations under the License.
         </div>
       </template>
     </b-card>
+    </b-overlay>
 
     <edit-question v-if="editQuestionInfo.showDialog" v-model="editQuestionInfo.showDialog"
                    :is-edit="editQuestionInfo.isEdit"
                    @question-saved="questionDefSaved"
-                   @hidden="handleNewQuestionBtnFocus"
+                   @hidden="handleEditQuestionModalClose"
                    :question-def="editQuestionInfo.questionDef"/>
   </div>
 </template>
@@ -95,6 +100,7 @@ limitations under the License.
     data() {
       return {
         isLoading: false,
+        operationInProgress: false,
         quizId: this.$route.params.quizId,
         quizType: null,
         questions: [],
@@ -124,11 +130,49 @@ limitations under the License.
       ]),
       questionDefSaved(questionDef) {
         const questionDefWithQuizId = ({ ...questionDef, quizId: this.quizId });
-        QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
-          .then((res) => {
-            this.loadQuizSummary({ quizId: this.quizId }).then(() => this.handleNewQuestionBtnFocus());
-            this.questions.push(res);
-          });
+        this.operationInProgress = true;
+        if (questionDef.id) {
+          QuizService.updateQuizQuestionDef(this.quizId, questionDefWithQuizId)
+            .then((res) => {
+              this.questions = this.questions.map((q) => {
+                if (q.id === res.id) {
+                  return res;
+                }
+                return q;
+              });
+              this.loadQuizSummary({ quizId: this.quizId })
+                .then(() => this.handleEditQuestionBtnFocus(questionDef));
+            }).finally(() => { this.operationInProgress = false; });
+        } else {
+          QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
+            .then((res) => {
+              this.questions.push(res);
+              this.loadQuizSummary({ quizId: this.quizId })
+                .then(() => this.handleNewQuestionBtnFocus());
+            }).finally(() => { this.operationInProgress = false; });
+        }
+      },
+      initiatedEditQuizDef(questionDef) {
+        this.editQuestionInfo.questionDef = { ...questionDef, quizId: this.quizId, quizType: this.quizType };
+        this.editQuestionInfo.isEdit = true;
+        this.editQuestionInfo.showDialog = true;
+        this.editQuestionInfo.initiatedByBtnRef = null;
+      },
+      deleteQuestion(questionDef) {
+        this.operationInProgress = true;
+        QuizService.deleteQuizQuestion(this.quizId, questionDef.id)
+          .then(() => {
+            this.questions = this.questions.filter((q) => q.id !== questionDef.id);
+            this.loadQuizSummary({ quizId: this.quizId })
+              .then(() => this.handleNewQuestionBtnFocus());
+          }).finally(() => { this.operationInProgress = false; });
+      },
+      handleEditQuestionModalClose(questionDef) {
+        if (questionDef.id) {
+          this.handleEditQuestionBtnFocus(questionDef);
+        } else {
+          this.handleNewQuestionBtnFocus();
+        }
       },
       handleNewQuestionBtnFocus() {
         const self = this;
@@ -138,6 +182,16 @@ limitations under the License.
               self.$refs[self.editQuestionInfo.initiatedByBtnRef]?.focus();
             } else {
               self.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+            }
+          });
+        });
+      },
+      handleEditQuestionBtnFocus(questionDef) {
+        this.$nextTick(() => {
+          this.$nextTick(() => {
+            const editBtn = document.getElementById(`editQuestion_${questionDef.id}`);
+            if (editBtn) {
+              editBtn.focus();
             }
           });
         });
@@ -158,15 +212,16 @@ limitations under the License.
             isCorrect: false,
           }],
         };
-        this.editQuestionInfo.showDialog = true;
+        this.editQuestionInfo.isEdit = false;
         this.editQuestionInfo.initiatedByBtnRef = initiatedBtnRef;
+        this.editQuestionInfo.showDialog = true;
       },
       loadQuestions() {
         this.isLoading = true;
         QuizService.getQuizQuestionDefs(this.quizId)
           .then((res) => {
-            this.questions = res.questions;
             this.quizType = res.quizType;
+            this.questions = res.questions;
           })
           .finally(() => {
             this.isLoading = false;
@@ -193,14 +248,37 @@ limitations under the License.
           });
         }
       },
+      handleKeySortRequest(sortRequestInfo) {
+        console.log(sortRequestInfo);
+        const { question, newIndex } = sortRequestInfo;
+        if (newIndex >= 0 && newIndex < this.questions.length) {
+          this.operationInProgress = true;
+          QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, question.id, newIndex)
+            .then(() => {
+              this.questions = this.questions.filter((q) => q.id !== question.id);
+              this.questions.splice(newIndex, 0, question);
+            })
+            .finally(() => {
+              this.operationInProgress = false;
+              this.$nextTick(() => {
+                this.$nextTick(() => {
+                  const editBtn = document.getElementById(`questionSortControl-${question.id}`);
+                  if (editBtn) {
+                    editBtn.focus();
+                  }
+                });
+              });
+            });
+        }
+      },
       sortOrderUpdate(updateEvent) {
-        const { id } = updateEvent.item;
-        this.sortOrder.loadingQuestionId = id;
-        this.sortOrder.loading = true;
-        QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
-          .finally(() => {
-            this.sortOrder.loading = false;
-          });
+          const { id } = updateEvent.item;
+          this.sortOrder.loadingQuestionId = id;
+          this.sortOrder.loading = true;
+          QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
+            .finally(() => {
+              this.sortOrder.loading = false;
+            });
       },
     },
   };

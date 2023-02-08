@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
+  <ValidationObserver ref="observer" v-slot="{errors, invalid}" slim>
     <b-modal id="questionEditModal" size="xl" :title="title" v-model="show"
              :no-close-on-backdrop="true" :centered="true"
              header-bg-variant="info"
@@ -22,7 +22,7 @@ limitations under the License.
              @shown="showQuestion = true"
              header-text-variant="light" no-fade>
       <skills-spinner :is-loading="loading"/>
-      <b-container v-if="!loading" fluid>
+      <b-container v-if="!loading" fluid data-cy="editQuestionModal">
         <div class="mb-2">
           <span class="font-weight-bold text-primary">Question:</span>
         </div>
@@ -68,51 +68,18 @@ limitations under the License.
           <div class="mb-1" v-if="isQuizType">
             <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
           </div>
-          <div v-for="(answer, index) in questionDefInternal.answers" :key="index">
-            <div class="row no-gutters mt-2" :data-cy="`answer-${index}`">
-              <div class="col-auto">
-                <select-correct-answer v-if="isQuizType" v-model="answer.isCorrect" class="mr-2" @selected="updateNumQuestionWithContent"/>
-              </div>
-              <div class="col">
-                  <input class="form-control" type="text" v-model="answer.answer"
-                         placeholder="Enter an answer"
-                         data-cy="answerText"
-                         id="testNameInput"
-                         aria-errormessage="testNameError"
-                         aria-describedby="testNameError"/>
-              </div>
-              <b-button-group class="ml-2">
-                <b-button variant="outline-info"
-                          :disabled="noMoreAnswers"
-                          :aria-label="`Add New Answer at index ${index}`"
-                          data-cy="addNewAnswer"
-                          @click="addNewAnswer(index)">
-                  <i class="fas fa-plus"></i>
-                </b-button>
-                <b-button variant="outline-info"
-                          :disabled="twoOrLessQuestions"
-                          :aria-label="`Delete Answer at index ${index}`"
-                          data-cy="removeAnswer"
-                          @click="removeAnswer(index)">
-                  <i class="fas fa-minus"></i>
-                </b-button>
-              </b-button-group>
-            </div>
-          </div>
-          <div v-if="noMoreAnswers" class="alert alert-warning mt-2">
-            <i class="fas fa-exclamation-triangle" /> Cannot exceed maximum of <b-badge>{{ maxAnswersAllowed }}</b-badge> answers per question.
-            <b-button variant="outline-info" :disabled="true" size="sm" aria-label="Add New Answer"><i class="fas fa-plus"></i></b-button> button was disabled.
-          </div>
-          <div v-if="customValidation.show" class="alert alert-warning mt-2">
-            <div v-if="customValidation.numAnswersWithContent < 2">
-              <i class="fas fa-exclamation-triangle" /> Must enter at least <b-badge>2</b-badge> answers.
-            </div>
-            <div v-if="!customValidation.passedAtLeastOneCorrectAnswerSelected" class="mt-2">
-              <i class="fas fa-exclamation-triangle" /> Must select at least <b-badge>1</b-badge> correct answer!
-            </div>
-            <div v-if="customValidation.emptyQuestionSetToBeCorrect" class="mt-2">
-              <i class="fas fa-exclamation-triangle" /> Empty question <b>cannot</b> be a correct selection.
-            </div>
+          <ValidationProvider
+            rules="atLeastOneCorrectAnswer|atLeastTwoAnswersFilledIn|correctAnswersMustHaveText|maxNumQuestions"
+            :debounce="200"
+            :immediate="false"
+            name="Answers">
+              <configure-answers v-model="questionDefInternal.answers" :quiz-type="questionDef.quizType" />
+          </ValidationProvider>
+        </div>
+
+        <div v-if="submitButtonClicked && invalid" class="alert alert-danger mt-3" data-cy="editQuestionsErrs">
+          <div v-for="(error, propertyName) in errors" :key="propertyName">
+            <span v-if="error">{{ error[0] }}</span>
           </div>
         </div>
 
@@ -120,9 +87,8 @@ limitations under the License.
 
       <div slot="modal-footer" class="w-100">
         <b-button v-if="!loading" variant="success" size="sm" class="float-right"
-                  @click="handleSubmit(saveAnswer)"
-                  :disabled="invalid"
-                  data-cy="saveAnswerBtn">
+                  @click="saveAnswer"
+                  data-cy="saveQuestionBtn">
           <span>Save</span>
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe"
@@ -139,13 +105,14 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
-  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
   import QuestionType from '@/common-components/quiz/QuestionType';
+  import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers';
+  import { extend } from 'vee-validate';
 
   export default {
     name: 'EditQuestion',
     components: {
-      SelectCorrectAnswer,
+      ConfigureAnswers,
       MarkdownEditor,
       SkillsSpinner,
       VueSelect,
@@ -184,19 +151,13 @@ limitations under the License.
             icon: 'fas fa-tasks',
           },
         },
-        customValidation: {
-          show: false,
-          startUpdatingShowFlag: false,
-          numAnswersWithContent: 0,
-          atLeastOneCorrectAnswerSelected: false,
-          emptyQuestionSetToBeCorrect: false,
-        },
+        submitButtonClicked: false,
       };
     },
     mounted() {
       if (this.isEdit) {
         this.loading = true;
-        QuizService.getQuizDef(this.quiz.quizId)
+        QuizService.getQuizQuestionDef(this.questionDef.quizId, this.questionDef.id)
           .then((resQuizDef) => {
             this.setInternalQuestionDef(resQuizDef);
           })
@@ -207,16 +168,11 @@ limitations under the License.
       } else {
         this.setInternalQuestionDef(this.questionDef);
       }
+      this.registerValidators();
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
-      },
-      'questionDefInternal.answers': {
-        handler: function updateNumQuestionWithContent() {
-          this.updateNumQuestionWithContent();
-        },
-        deep: true,
       },
     },
     computed: {
@@ -233,18 +189,10 @@ limitations under the License.
         return this.questionDef.quizType;
       },
       title() {
-        return this.isEdit ? `Editing Existing ${this.quizType} Question` : `New ${this.quizType} Question`;
-      },
-      twoOrLessQuestions() {
-        const { answers } = this.questionDefInternal;
-        return !answers || answers?.length <= 2;
+        return this.isEdit ? 'Editing Existing Question' : 'New Question';
       },
       maxAnswersAllowed() {
         return this.$store.getters.config.maxAnswersPerQuizQuestion;
-      },
-      noMoreAnswers() {
-        const { answers } = this.questionDefInternal;
-        return answers && answers?.length >= this.maxAnswersAllowed;
       },
     },
     methods: {
@@ -254,43 +202,6 @@ limitations under the License.
           ...questionDef,
         };
       },
-      selectSurveyQuestionType(selected) {
-        this.surveyInfo.selectedType = selected.id;
-      },
-      addNewAnswer(index) {
-        const newQuestion = {
-          id: null,
-          answer: '',
-          isCorrect: false,
-        };
-        this.questionDefInternal.answers.splice(index + 1, 0, newQuestion);
-      },
-      removeAnswer(index) {
-        this.questionDefInternal.answers = this.questionDefInternal.answers.filter((item, arrIndex) => arrIndex !== index);
-      },
-      updateNumQuestionWithContent() {
-        let numAnswersWithContent = 0;
-        let passedAtLeastOneCorrectAnswerSelected = false;
-        let emptyQuestionSetToBeCorrect = false;
-        const { answers } = this.questionDefInternal;
-        if (answers) {
-          numAnswersWithContent = answers.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
-          passedAtLeastOneCorrectAnswerSelected = this.isSurveyType || answers.find((a) => a.isCorrect) !== undefined;
-          emptyQuestionSetToBeCorrect = answers.find((a) => a.isCorrect && (!a.answer || a.answer.trim().length === 0)) !== undefined;
-        }
-        this.customValidation.numAnswersWithContent = numAnswersWithContent;
-        this.customValidation.passedAtLeastOneCorrectAnswerSelected = passedAtLeastOneCorrectAnswerSelected;
-        this.customValidation.emptyQuestionSetToBeCorrect = emptyQuestionSetToBeCorrect;
-        if (this.customValidation.startUpdatingShowFlag) {
-          this.customValidation.show = !this.isCustomValidationValid();
-        }
-      },
-      isCustomValidationValid() {
-        if (this.isQuestionTypeTextInput) {
-          return true;
-        }
-        return this.customValidation.numAnswersWithContent >= 2 && this.customValidation.passedAtLeastOneCorrectAnswerSelected && !this.customValidation.emptyQuestionSetToBeCorrect;
-      },
       closeMe(e) {
         this.show = false;
         this.publishHidden(e);
@@ -299,46 +210,73 @@ limitations under the License.
         if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', this.quizInternal);
+          this.$emit('hidden', this.questionDefInternal);
         }
       },
       saveAnswer() {
+        this.submitButtonClicked = true;
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
-              if (!this.isCustomValidationValid()) {
-                this.customValidation.show = true;
-                this.customValidation.startUpdatingShowFlag = true;
-              } else {
-                const { answers } = this.questionDefInternal;
-                const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
-                const numCorrect = answers.filter((a) => a.isCorrect).length;
-                let questionType = this.questionType.selectedType.id;
-                if (this.isQuizType) {
-                  questionType = numCorrect > 1 ? QuestionType.MultipleChoice : QuestionType.SingleChoice;
-                }
-
-                const questionDefRes = {
-                  question: this.questionDefInternal.question,
-                  questionType,
-                  answers: removeEmptyQuestions,
-                };
-                this.$emit('question-saved', questionDefRes);
-                this.closeMe();
+              const { answers } = this.questionDefInternal;
+              const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
+              const numCorrect = answers.filter((a) => a.isCorrect).length;
+              let questionType = this.questionType.selectedType.id;
+              if (this.isQuizType) {
+                questionType = numCorrect > 1 ? QuestionType.MultipleChoice : QuestionType.SingleChoice;
               }
+
+              const questionDefRes = {
+                id: this.questionDefInternal.id,
+                question: this.questionDefInternal.question,
+                questionType,
+                answers: removeEmptyQuestions,
+              };
+              this.$emit('question-saved', questionDefRes);
+              this.closeMe();
             }
           });
       },
-    },
-    performValidation() {
-      setTimeout(() => {
-        this.$nextTick(() => {
-          const { observer } = this.$refs;
-          if (observer) {
-            observer.validate({ silent: false });
-          }
+      performValidation() {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const { observer } = this.$refs;
+            if (observer) {
+              observer.validate({ silent: false });
+            }
+          });
+        }, 600);
+      },
+      registerValidators() {
+        const self = this;
+        extend('atLeastOneCorrectAnswer', {
+          message: () => 'Must have at least 1 correct answer selected',
+          validate(value) {
+            const numCorrect = value.filter((a) => a.isCorrect).length;
+            return numCorrect >= 1;
+          },
         });
-      }, 600);
+        extend('atLeastTwoAnswersFilledIn', {
+          message: () => 'Must have at least 2 answers',
+          validate(value) {
+            const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
+            return numWithContent >= 2;
+          },
+        });
+        extend('correctAnswersMustHaveText', {
+          message: () => 'Answers labeled as correct must have text',
+          validate(value) {
+            const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
+            return correctWithoutText === 0;
+          },
+        });
+        extend('maxNumQuestions', {
+          message: () => `Exceeded maximum number of [${self.maxAnswersAllowed}] answers`,
+          validate(value) {
+            return value && value?.length <= self.maxAnswersAllowed;
+          },
+        });
+      },
     },
   };
 </script>

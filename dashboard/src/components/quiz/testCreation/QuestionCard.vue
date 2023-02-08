@@ -14,20 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="border pb-2">
+  <div class="border pb-2" data-cy="questionDisplayCard">
     <div class="row" :data-cy="`questionDisplayCard-${questionNum}`">
       <div class="col">
 
         <b-row :no-gutters="true" class="mb-3">
           <b-col cols="auto">
-            <div class="sort-control mr-3"><i class="fas fa-arrows-alt"/></div>
+            <div :id="`questionSortControl-${question.id}`"
+                 class="sort-control mr-3"
+                 @click.prevent.self
+                 tabindex="0"
+                 aria-label="Questions Sort Control. Press up or down to change the order of this question."
+                 role="button"
+                 @keyup.down="move(1)"
+                 @keyup.up="move(-1)"
+                 data-cy="sortControlHandle"><i class="fas fa-arrows-alt"/></div>
           </b-col>
-<!--          <b-col cols="auto">-->
-<!--            <div class="h5 mt-2 d-inline-block"><b-badge pill variant="info">{{questionNum}}</b-badge></div>-->
-<!--          </b-col>-->
           <b-col class="">
-<!--            <div class="mt-2">Question <span class="font-weight-bold">#{{question.displayOrder + 1}}</span></div>-->
-
             <div class="px-2 py-1">
               <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
@@ -37,7 +40,7 @@ limitations under the License.
                     <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
                                            font-size="1.3rem"/>
                   </div>
-                  <div class="col ml-2 pb-1"><div class="answerText align-middle">{{ a.answer }}</div>
+                  <div class="col ml-2 pb-1"><div class="answerText align-middle" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
                   </div>
                 </div>
               </div>
@@ -56,22 +59,35 @@ limitations under the License.
       </div>
       <div class="col-auto">
         <b-button-group size="sm" class="ml-1 mt-2 mr-3">
-          <b-button variant="outline-primary" :data-cy="`editSkillButton_${question.questionId}`"
-                    :aria-label="'edit Skill '+question.questionId" :ref="'edit_'+question.questionId"
-                    title="Edit Skill">
+          <b-button variant="outline-primary"
+                    :data-cy="`editQuestionButton_${questionNum}`"
+                    :aria-label="`Edit Question Number ${questionNum}`"
+                    :id="`editQuestion_${question.id}`"
+                    ref="editQuestionBtn"
+                    @click="editQuestion"
+                    title="Edit Question">
             Edit <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
-          <b-button @click="deleteSkill(question.questionId)" variant="outline-primary"
-                    :data-cy="`deleteSkillButton_${question.questionId}`"
-                    :aria-label="'delete Skill '+question.questionId"
-                    title="Delete Skill">
+          <b-button @click="showDeleteDialog = true"
+                    variant="outline-primary"
+                    ref="deleteQuestionBtn"
+                    :data-cy="`deleteQuestionButton_${questionNum}`"
+                    :aria-label="`delete question number ${questionNum}`"
+                    title="Delete Question">
             Delete <i class="text-warning fas fa-trash" aria-hidden="true"/>
           </b-button>
         </b-button-group>
-
-<!--        <span class="expand-collapse-control" v-b-toggle="`collapse-${question.id}`"><i class="far fa-minus-square"></i></span>-->
       </div>
     </div>
+
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="deletedQuestion" @hidden="handleDeleteCancelled">
+      <p>
+        This will remove <span class="text-primary font-weight-bold">Question #{{ questionNum }}.</span>
+      </p>
+      <div>
+        Any any associated answers and metrics for this questions will also be removed. Please proceed with caution.
+      </div>
+    </removal-validation>
   </div>
 </template>
 
@@ -79,14 +95,20 @@ limitations under the License.
   import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import QuestionType from '@/common-components/quiz/QuestionType';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
 
   export default {
     name: 'QuestionCard',
-    components: { MarkdownText, SelectCorrectAnswer },
+    components: { RemovalValidation, MarkdownText, SelectCorrectAnswer },
     props: {
       quizType: String,
       question: Object,
       questionNum: Number,
+    },
+    data() {
+      return {
+        showDeleteDialog: false,
+      };
     },
     computed: {
       isSingleChoiceType() {
@@ -94,6 +116,21 @@ limitations under the License.
       },
       isTextInputType() {
         return this.question.questionType === QuestionType.TextInput;
+      },
+    },
+    methods: {
+      editQuestion() {
+        this.$emit('edit-question', this.question);
+      },
+      deletedQuestion() {
+        this.$emit('delete-question', this.question);
+      },
+      handleDeleteCancelled() {
+        this.$refs.deleteQuestionBtn.focus();
+      },
+      move(changeIndexBy) {
+        console.log(`move by ${changeIndexBy}`);
+        this.$emit('sort-change-requested', { question: this.question, newIndex: this.questionNum + changeIndexBy - 1 });
       },
     },
   };
@@ -114,17 +151,11 @@ limitations under the License.
   border-bottom-right-radius: .25rem !important
 }
 
-//.expand-collapse-control i {
-//  padding: 0.5rem;
-//  font-size: 1.3rem;
-//  color: map_get($theme-colors, info) !important;;
-//  top: 0rem;
-//  left: 0rem;
-//  border-bottom: 1px solid #e8e8e8;
-//  border-left: 1px solid #e8e8e8;
-//  background-color: #fbfbfb !important;
-//  border-bottom-left-radius: .25rem !important
-//}
+.sort-control:hover, .sort-control i:hover {
+  cursor: grab !important;
+  color: $info !important;
+  font-size: 1.5rem;
+}
 
 .answerText {
   font-size: 0.9rem;

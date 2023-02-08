@@ -60,24 +60,6 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         quizDefSummary.numQuestions == 0
     }
 
-    def "create quiz-survey definition"() {
-        def quiz = QuizDefFactory.createQuizSurvey(1)
-
-        when:
-        def newQuiz = skillsService.createQuizDef(quiz)
-
-        def quizDefs = skillsService.getQuizDefs()
-
-        then:
-        newQuiz.body.quizId == quiz.quizId
-        newQuiz.body.name == quiz.name
-        newQuiz.body.type == QuizDefParent.QuizType.Survey.toString()
-
-        quizDefs.quizId == [quiz.quizId]
-        quizDefs.name == [quiz.name]
-        quizDefs.type == [QuizDefParent.QuizType.Survey.toString()]
-    }
-
     def "remove quiz definition"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         def quiz2 = QuizDefFactory.createQuiz(2)
@@ -245,6 +227,40 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         questions[1].answers.isCorrect == question2.answers.isCorrect
     }
 
+    def "get single quiz question"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question1 = QuizDefFactory.createChoiceQuestion(1, 1, 2)
+        skillsService.createQuizQuestionDef(question1)
+        def question2 = QuizDefFactory.createChoiceQuestion(1, 2, 3, QuizQuestionType.MultipleChoice)
+        question2.answers[1].isCorrect = true
+        skillsService.createQuizQuestionDef(question2)
+
+        when:
+        def res = skillsService.getQuizQuestionDefs(quiz.quizId, )
+        def questions = res.questions.collect {
+            skillsService.getQuizQuestionDef(quiz.quizId, it.id)
+        }
+        then:
+        res.quizType == 'Quiz'
+        questions.size() == 2
+        questions[0].id
+        questions[1].id
+        questions.question == [question1.question, question2.question]
+        questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
+
+        questions[0].answers[0].id
+        questions[0].answers[1].id
+        questions[0].answers.answer == question1.answers.answer
+        questions[0].answers.isCorrect == question1.answers.isCorrect
+
+        questions[1].answers[0].id
+        questions[1].answers[1].id
+        questions[1].answers[2].id
+        questions[1].answers.answer == question2.answers.answer
+        questions[1].answers.isCorrect == question2.answers.isCorrect
+    }
+
     def "change quiz questions display order"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
@@ -289,6 +305,222 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         quizDefSummary.name == quiz.name
         quizDefSummary.type == quiz.type
         quizDefSummary.numQuestions == 5
+    }
+
+    def "update question definition - change answers text and correct selection"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(questionDef).body
+        q2.question = "New Cool Questions?"
+        q2.answers[0].answer = "New answer 1"
+        q2.answers[2].answer = "New answer 3"
+        q2.answers[0].isCorrect = false
+        q2.answers[1].isCorrect = true
+        q2.answers[2].isCorrect = false
+        q2.answers[3].isCorrect = false
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+        def updatedQuestions = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        updatedQuestion.question == "New Cool Questions?"
+        updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
+        updatedQuestion.answers.answer == ["New answer 1", "Answer #2", "New answer 3", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [false, true, false, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
+
+        updatedQuestions.questions.question == ["This is questions #1", "New Cool Questions?"]
+        updatedQuestions.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.SingleChoice.toString()]
+        updatedQuestions.questions[1].answers.answer == ["New answer 1", "Answer #2", "New answer 3", "Answer #4"]
+        updatedQuestions.questions[1].answers.isCorrect == [false, true, false, false]
+        updatedQuestions.questions[1].answers.displayOrder == [1, 2, 3, 4]
+    }
+
+    def "update question definition - change correct answers and question type - SingleChoice -> MultipleChoice"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(questionDef).body
+        q2.questionType = QuizQuestionType.MultipleChoice.toString()
+        q2.answers[0].isCorrect = false
+        q2.answers[1].isCorrect = false
+        q2.answers[2].isCorrect = true
+        q2.answers[3].isCorrect = true
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+        def updatedQuestions = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
+        updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [false, false, true, true]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
+
+        updatedQuestions.questions.question == ["This is questions #1", "This is questions #2"]
+        updatedQuestions.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
+        updatedQuestions.questions[1].answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
+        updatedQuestions.questions[1].answers.isCorrect == [false, false, true, true]
+        updatedQuestions.questions[1].answers.displayOrder == [1, 2, 3, 4]
+    }
+
+    def "update question definition - change correct answers and question type - MultipleChoice -> SingleChoice"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.MultipleChoice)).body
+        q2.questionType = QuizQuestionType.SingleChoice.toString()
+        q2.answers[0].isCorrect = false
+        q2.answers[1].isCorrect = false
+        q2.answers[2].isCorrect = true
+        q2.answers[3].isCorrect = false
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
+        updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [false, false, true, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
+    }
+
+    def "update question definition - one answer was removed"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)).body
+        q2.answers.remove(0)
+        q2.answers[0].isCorrect = true
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
+        updatedQuestion.answers.answer == ["Answer #2", "Answer #3", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [true, false, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3]
+    }
+
+    def "update question definition - one answer was added at the end"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)).body
+        q2.answers.add([
+                answer: "New",
+                isCorrect: false,
+        ])
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
+        updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4", "New"]
+        updatedQuestion.answers.isCorrect == [true, false, false, false, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4, 5]
+    }
+
+    def "update question definition - one answer was added in the middle"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)).body
+        q2.answers.add(1, [
+                answer: "New",
+                isCorrect: false,
+        ])
+        q2.quizId = quiz.quizId
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
+        updatedQuestion.answers.answer == ["Answer #1", "New", "Answer #2", "Answer #3", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [true, false, false, false, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4, 5]
+    }
+
+    def "update question definition - one answer was added, one question was removed and type was changed"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)).body
+        q2.answers.remove(2)
+        q2.answers.add(0, [
+                answer: "New",
+                isCorrect: false,
+        ])
+        q2.answers[0].isCorrect = true
+        q2.answers[1].isCorrect = true
+        q2.answers[2].isCorrect = true
+        q2.answers[3].isCorrect = false
+        q2.quizId = quiz.quizId
+        q2.questionType = QuizQuestionType.MultipleChoice.toString()
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
+        updatedQuestion.answers.answer == ["New", "Answer #1", "Answer #2", "Answer #4"]
+        updatedQuestion.answers.isCorrect == [true, true, true, false]
+        updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
+    }
+
+    def "update question definition - all questions replaced"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+        def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body
+        def q2 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice)).body
+        q2.answers = [[
+                answer: "n1",
+                isCorrect: false,
+        ], [
+                answer: "n2",
+                isCorrect: true,
+        ], [
+                answer: "n3",
+                isCorrect: true,
+        ]]
+        q2.quizId = quiz.quizId
+        q2.questionType = QuizQuestionType.MultipleChoice.toString()
+        skillsService.updateQuizQuestionDef(q2)
+
+        when:
+        def updatedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, q2.id)
+
+        then:
+        updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
+        updatedQuestion.answers.answer == ["n1", "n2", "n3"]
+        updatedQuestion.answers.isCorrect == [false, true, true]
+        updatedQuestion.answers.displayOrder == [1, 2, 3]
     }
 
 }

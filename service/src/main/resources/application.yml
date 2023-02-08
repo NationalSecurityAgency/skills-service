@@ -116,7 +116,7 @@ skills:
       maxProjectsPerAdmin: 25
       maxQuizDefsPerAdmin: 1000
       maxQuestionsPerQuiz: 500
-      maxAnswersPerQuizQuestion: 20
+      maxAnswersPerQuizQuestion: 10
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100

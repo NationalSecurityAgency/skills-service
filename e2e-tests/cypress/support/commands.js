@@ -266,27 +266,27 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo) => {
 });
 
 Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
-        question: `This is a question # ${quizNum}`,
+        question: `This is a question # ${questionNum}`,
         questionType: 'SingleChoice',
         answers: [{
-            answer: 'First Answer',
-            isCorrect: true,
+            answer: `Question ${questionNum} - First Answer`,
+            isCorrect: questionNum == 1 || questionNum > 3 ? true : false,
         }, {
-            answer: 'Second Answer',
-            isCorrect: false,
+            answer: `Question ${questionNum} - Second Answer`,
+            isCorrect: questionNum == 2 ? true : false,
         }, {
-            answer: 'Third Answer',
-            isCorrect: false,
+            answer: `Question ${questionNum} - Third Answer`,
+            isCorrect: questionNum == 3 ? true : false,
         }],
     }, overrideProps));
 });
 
 Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
-        question: `This is a question # ${quizNum}`,
+        question: `This is a question # ${questionNum}`,
         questionType: 'MultipleChoice',
         answers: [{
             answer: 'First Answer',
@@ -305,7 +305,7 @@ Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questi
 });
 
 Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${questionNum}`,
         questionType: 'MultipleChoice',
@@ -323,7 +323,7 @@ Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, ques
 });
 
 Cypress.Commands.add("createTextInputQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/questions/create`, Object.assign({
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${quizNum}`,
         questionType: 'TextInput',

@@ -1618,7 +1618,11 @@ class SkillsService {
         wsHelper.appPost("/quizDefExist", [name: quizName])
     }
     def createQuizQuestionDef(Map props) {
-        String url = "${getQuizDefUrl(props.quizId)}/questions/create"
+        String url = "${getQuizDefUrl(props.quizId)}/create-question"
+        return wsHelper.adminPost(url, props)
+    }
+    def updateQuizQuestionDef(Map props) {
+        String url = "${getQuizDefUrl(props.quizId)}/questions/${props.id}"
         return wsHelper.adminPost(url, props)
     }
     def createQuizQuestionDefs(List<Map> questions) {
@@ -1643,6 +1647,11 @@ class SkillsService {
 
     def getQuizQuestionDefs(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/questions"
+        return wsHelper.adminGet(url)
+    }
+
+    def getQuizQuestionDef(String quizId, Integer questionId) {
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionId}"
         return wsHelper.adminGet(url)
     }
 

@@ -189,6 +189,40 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("[Answer] must not exceed [2000] chars")
     }
 
+    def "try to retrieve quiz with bad question id"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        skillsService.getQuizQuestionDef(quiz1.quizId, 10000)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.resBody.contains("Provided question id [10000] does not exist")
+    }
+
+    def "try to retrieve quiz with question id from another quiz"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+        skillsService.createQuizQuestionDef(question)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+        def question2 = QuizDefFactory.createChoiceQuestion(2, 1)
+        skillsService.createQuizQuestionDef(question2)
+
+        def quiz2Questions = skillsService.getQuizQuestionDefs(quiz2.quizId)
+        when:
+        skillsService.getQuizQuestionDef(quiz1.quizId, quiz2Questions.questions[0].id)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.resBody.contains("Provided question id [${quiz2Questions.questions[0].id}] does not exist in quiz [${quiz1.quizId}]")
+    }
+
 }
 
 
