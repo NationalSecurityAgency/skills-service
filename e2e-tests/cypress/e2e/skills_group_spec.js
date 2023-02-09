@@ -318,7 +318,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
         cy.addSkillToGroupViaUI('group1', 1);
-        cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('50');
+        cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('100');
     });
 
     it('all skills can be deleted from a group', () => {
@@ -761,7 +761,7 @@ describe('Skills Group Tests', () => {
 
         // add
         cy.addSkillToGroupViaUI('group1', 4, false)
-        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '350');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '400');
         cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '3');
     })
