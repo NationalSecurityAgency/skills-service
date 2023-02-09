@@ -114,7 +114,7 @@ limitations under the License.
     data() {
       return {
         loading: false,
-        expirationTime: 'PT8H',
+        expirationTime: 'P7D',
         currentEmails: '',
         invalidEmails: '',
         maxRecipients: 50,
