@@ -130,7 +130,6 @@ limitations under the License.
         this.$refs.deleteQuestionBtn.focus();
       },
       move(changeIndexBy) {
-        console.log(`move by ${changeIndexBy}`);
         this.$emit('sort-change-requested', { question: this.question, newIndex: this.questionNum + changeIndexBy - 1 });
       },
     },

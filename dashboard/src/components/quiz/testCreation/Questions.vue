@@ -255,7 +255,6 @@ limitations under the License.
         }
       },
       handleKeySortRequest(sortRequestInfo) {
-        console.log(sortRequestInfo);
         const { question, newIndex } = sortRequestInfo;
         if (newIndex >= 0 && newIndex < this.questions.length) {
           this.operationInProgress = true;
