@@ -310,13 +310,13 @@ Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, ques
         question: `This is a question # ${questionNum}`,
         questionType: 'MultipleChoice',
         answers: [{
-            answer: 'First Answer',
+            answer: `Question ${questionNum} - First Answer`,
             isCorrect: false,
         }, {
-            answer: 'Second Answer',
+            answer: `Question ${questionNum} - Second Answer`,
             isCorrect: false,
         }, {
-            answer: 'Third Answer',
+            answer: `Question ${questionNum} - Third Answer`,
             isCorrect: false,
         }],
     }, overrideProps));

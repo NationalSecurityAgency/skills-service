@@ -44,6 +44,7 @@ limitations under the License.
           <div class="col">
             <vue-select :options="questionType.options"
                         :clearable="false"
+                        v-on:input="questionTypeChanged"
                         data-cy="answerTypeSelector"
                         v-model="questionType.selectedType">
               <template v-slot:option="option">
@@ -202,6 +203,7 @@ limitations under the License.
           isEdit: this.isEdit,
           ...questionDef,
         };
+        this.questionType.selectedType = this.questionType.options.find((o) => o.id === questionDef.questionType);
         this.loading = false;
       },
       closeMe(e) {
@@ -213,6 +215,21 @@ limitations under the License.
           e.preventDefault();
         } else {
           this.$emit('hidden', this.questionDefInternal);
+        }
+      },
+      questionTypeChanged(inputItem) {
+        if (this.isSurveyType
+          && inputItem.id !== QuestionType.TextInput
+          && (!this.questionDefInternal.answers || this.questionDefInternal.answers.length < 2)) {
+          this.questionDefInternal.answers = [{
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }, {
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }];
         }
       },
       saveAnswer() {
@@ -232,7 +249,7 @@ limitations under the License.
                 id: this.questionDefInternal.id,
                 question: this.questionDefInternal.question,
                 questionType,
-                answers: removeEmptyQuestions,
+                answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
               };
               this.$emit('question-saved', questionDefRes);
               this.closeMe();
