@@ -40,14 +40,14 @@ limitations under the License.
         <div class="mt-3 mb-2">
           <span class="font-weight-bold text-primary">Answers:</span>
         </div>
-
-        <div v-if="isSurveyType" class="row mb-2 no-gutters">
+        <div v-if="questionDef.quizType === 'Survey'" class="row mb-2 no-gutters">
           <div class="col">
             <vue-select :options="questionType.options"
                         :clearable="false"
+                        data-cy="answerTypeSelector"
                         v-model="questionType.selectedType">
               <template v-slot:option="option">
-                <div class="p-1">
+                <div class="p-1" :data-cy="`selectionItem_${option.id}`">
                   <i :class="option.icon" style="min-width: 1.2rem" class="border rounded p-1 mr-2"></i>
                   <span class="">{{ option.label }}</span>
                 </div>
@@ -60,6 +60,7 @@ limitations under the License.
           <b-form-textarea
             id="textarea"
             placeholder="Users will be required to enter text."
+            data-cy="textAreaPlaceHolder"
             :disabled="true"
             rows="3"
             max-rows="6"/>
@@ -127,7 +128,7 @@ limitations under the License.
     },
     data() {
       return {
-        loading: false,
+        loading: true,
         show: this.value,
         showQuestion: false,
         questionDefInternal: {},
@@ -201,6 +202,7 @@ limitations under the License.
           isEdit: this.isEdit,
           ...questionDef,
         };
+        this.loading = false;
       },
       closeMe(e) {
         this.show = false;
@@ -252,6 +254,9 @@ limitations under the License.
         extend('atLeastOneCorrectAnswer', {
           message: () => 'Must have at least 1 correct answer selected',
           validate(value) {
+            if (self.isSurveyType) {
+              return true;
+            }
             const numCorrect = value.filter((a) => a.isCorrect).length;
             return numCorrect >= 1;
           },
@@ -266,6 +271,9 @@ limitations under the License.
         extend('correctAnswersMustHaveText', {
           message: () => 'Answers labeled as correct must have text',
           validate(value) {
+            if (self.isSurveyType) {
+              return true;
+            }
             const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
             return correctWithoutText === 0;
           },

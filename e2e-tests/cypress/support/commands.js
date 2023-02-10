@@ -325,7 +325,7 @@ Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, ques
 Cypress.Commands.add("createTextInputQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
-        question: `This is a question # ${quizNum}`,
+        question: `This is a question # ${questionNum}`,
         questionType: 'TextInput',
     }, overrideProps));
 });

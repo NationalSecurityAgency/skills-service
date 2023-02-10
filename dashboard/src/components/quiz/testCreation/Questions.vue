@@ -54,7 +54,7 @@ limitations under the License.
       </div>
 
       <template #footer>
-        <div class="text-right">
+        <div v-if="!isLoading" class="text-right">
           <b-button ref="newQuestionOnBottomBtn"
                     data-cy="newQuestionOnBottomBtn"
                     variant="outline-primary"
@@ -99,7 +99,7 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: false,
+        isLoading: true,
         operationInProgress: false,
         quizId: this.$route.params.quizId,
         quizType: null,
@@ -140,6 +140,9 @@ limitations under the License.
                 }
                 return q;
               });
+              if (this.questions && this.questions.length === 1) {
+                this.enableDropAndDrop();
+              }
               this.loadQuizSummary({ quizId: this.quizId })
                 .then(() => this.handleEditQuestionBtnFocus(questionDef));
             }).finally(() => { this.operationInProgress = false; });
@@ -147,6 +150,9 @@ limitations under the License.
           QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
             .then((res) => {
               this.questions.push(res);
+              if (this.questions && this.questions.length === 1) {
+                this.enableDropAndDrop();
+              }
               this.loadQuizSummary({ quizId: this.quizId })
                 .then(() => this.handleNewQuestionBtnFocus());
             }).finally(() => { this.operationInProgress = false; });

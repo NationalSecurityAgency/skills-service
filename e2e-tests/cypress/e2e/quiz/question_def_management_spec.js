@@ -18,7 +18,7 @@ import utcPlugin from 'dayjs/plugin/utc';
 
 dayjs.extend(utcPlugin);
 
-describe('Question CRUD Tests', () => {
+describe('Quiz Question CRUD Tests', () => {
 
     beforeEach(() => {
         Cypress.Commands.add('validateDisplayAnswer', (qNum, aNum, selected, isSingleChoice) => {
@@ -540,6 +540,32 @@ describe('Question CRUD Tests', () => {
 
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
+    });
+
+    it('creating 2nd question enables drag-and-drop', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.get('[data-cy="questionText"]').type('question # 1')
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.get('[data-cy="questionText"]').type('question # 2')
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
+
+        cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2']);
+        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1']);
     });
 
     it('user keyboard to sort questions', function () {

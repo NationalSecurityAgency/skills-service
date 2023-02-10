@@ -49,6 +49,7 @@ limitations under the License.
                   id="textarea"
                   placeholder="Users will be required to enter text."
                   :disabled="true"
+                  data-cy="textAreaPlaceHolder"
                   rows="2"
                   max-rows="4"/>
               </div>
