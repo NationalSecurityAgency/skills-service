@@ -17,7 +17,7 @@ package skills.storage.model.auth
 
 import groovy.transform.ToString
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = 'users')

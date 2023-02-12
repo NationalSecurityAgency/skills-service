@@ -15,7 +15,7 @@
  */
 package skills.tasks.config
 
-import com.github.kagkarlsson.scheduler.Serializer
+import com.github.kagkarlsson.scheduler.serializer.Serializer;
 import com.github.kagkarlsson.scheduler.boot.config.DbSchedulerCustomizer
 import com.github.kagkarlsson.scheduler.task.ExecutionComplete
 import com.github.kagkarlsson.scheduler.task.ExecutionOperations

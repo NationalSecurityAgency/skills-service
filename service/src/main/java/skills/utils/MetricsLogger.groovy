@@ -35,7 +35,7 @@ import skills.controller.request.model.PageVisitRequest
 import skills.controller.result.model.RequestResult
 import skills.services.events.SkillEventResult
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Component
 @Slf4j

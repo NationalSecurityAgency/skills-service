@@ -31,8 +31,8 @@ import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 import skills.storage.repos.UserAttrsRepo
 
-import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.*

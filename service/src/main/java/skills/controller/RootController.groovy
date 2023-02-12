@@ -110,7 +110,7 @@ class RootController {
         return accessSettingsStorageService.getRootUsers()
     }
 
-    @PostMapping('/users/')
+    @PostMapping('/users')
     @ResponseBody
     List<UserInfoRes> getNonRootUsers(@RequestBody SuggestRequest suggestRequest,
                                       @RequestParam(required = false, value = "userSuggestOption") String userSuggestOption) {

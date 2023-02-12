@@ -17,13 +17,17 @@ package skills.auth
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.DependsOn
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
 import org.springframework.security.access.AccessDecisionManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.stereotype.Component
+import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
 import skills.storage.model.auth.RoleName
 
 @Component
+@DependsOn('inviteOnlyProjectAuthorizationManager')
 class PortalWebSecurityHelper {
 
     @Value('#{"${server.port:8080}"}')
@@ -39,17 +43,19 @@ class PortalWebSecurityHelper {
     String prometheusPath
 
     @Autowired
-    AccessDecisionManager accessDecisionManager
+    InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
         http.csrf().disable()
 
         if (publiclyExposePrometheusMetrics) {
-            http.authorizeRequests().antMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
+            http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
         }
 
-        http.authorizeRequests().antMatchers("/", "/favicon.ico",
+        http.authorizeHttpRequests((authorize) ->
+            authorize
+                .requestMatchers("/", "/favicon.ico",
                     "/icons/**", "/static/**",
                     "/skilltree.ico",
                     "/error", "/oauth/**",
@@ -62,12 +68,13 @@ class PortalWebSecurityHelper {
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset",
                     "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
-            .antMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name())
-            .antMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
-            .antMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
-            .antMatchers('/root/**').hasRole('SUPER_DUPER_USER')
-            .antMatchers("/${managementPath}/**").hasRole('SUPER_DUPER_USER')
-            .anyRequest().authenticated().accessDecisionManager(accessDecisionManager)
+                .requestMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name())
+                .requestMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
+                .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
+                .requestMatchers('/root/**').hasRole('SUPER_DUPER_USER')
+                .requestMatchers("/${managementPath}/**").hasRole('SUPER_DUPER_USER')
+                .anyRequest().access(inviteOnlyProjectAuthorizationManager)
+        )
         http.headers().frameOptions().disable()
 
         return http

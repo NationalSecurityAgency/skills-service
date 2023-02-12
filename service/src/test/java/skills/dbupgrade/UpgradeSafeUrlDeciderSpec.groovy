@@ -54,7 +54,7 @@ class UpgradeSafeUrlDeciderSpec extends Specification {
         "/app/userInfo" | HttpMethod.POST | false
         "/app/users/suggestDashboardUsers" | HttpMethod.POST | true
         "/app/users/projects/foooo/suggestClientUsers" | HttpMethod.POST | true
-        "/app/users/suggestClientUsers/" | HttpMethod.POST | true
+        "/app/users/suggestClientUsers" | HttpMethod.POST | true
         "/app/users/suggestPkiUsers" | HttpMethod.POST | true
         "/oauth/token" | HttpMethod.POST | true
     }

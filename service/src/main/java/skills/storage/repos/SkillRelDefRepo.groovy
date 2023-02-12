@@ -130,12 +130,14 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         subj1.skillId as subjectSkillId,
         pd.name as copiedFromProjectName,
         case when es is not null then true else false end as sharedToCatalog
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd, SkillDef subj1, SkillRelDef srd2
+    from SkillRelDef srd
+        join SkillDef sd1 on sd1.id = srd.parent.id
+        join SkillDef sd2 on sd2.id = srd.child.id
+        join SkillDef subj1 on subj1.projectId = sd2.projectId
+        join SkillRelDef srd2 on subj1.id = srd2.parent.id and sd2.id = srd2.child.id 
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
-        where sd1 = srd.parent and sd2 = srd.child and srd.type=?3 
-              and sd1.projectId=?1 and sd1.skillId=?2
-              and subj1.type='Subject' and subj1 = srd2.parent and sd2 = srd2.child and subj1.projectId=?1''')
+    where sd1.projectId=?1 and sd1.skillId=?2 and srd.type=?3 and subj1.type='Subject' and subj1.projectId=?1''')
     List<SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select 
@@ -160,11 +162,12 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFromProjectId as copiedFromProjectId,
         pd.name as copiedFromProjectName,
         case when es is not null then true else false end as sharedToCatalog
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd
+    from SkillRelDef srd
+        join SkillDef sd1 on sd1.id = srd.parent.id
+        join SkillDef sd2 on sd2.id = srd.child.id
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
-        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
-              and sd1.projectId=?1 and sd1.skillId=?2
+    where sd1.projectId=?1 and sd1.skillId=?2 and srd.type in ?3
     ''')
     List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes)
 
@@ -316,14 +319,14 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd1.totalPoints as totalPoints,
         sd1.type as skillType,
         
-        sd2.id as id,
-        sd2.name as name, 
-        sd2.skillId as skillId, 
-        subj2.skillId as subjectId,
-        sd2.projectId as projectId, 
-        sd2.pointIncrement as pointIncrement,
-        sd2.totalPoints as totalPoints,
-        sd2.type as skillType
+        sd2.id as id2,
+        sd2.name as name2, 
+        sd2.skillId as skillId2, 
+        subj2.skillId as subjectId2,
+        sd2.projectId as projectId2, 
+        sd2.pointIncrement as pointIncrement2,
+        sd2.totalPoints as totalPoints2,
+        sd2.type as skillType2
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd, 
              SkillDef subj1, SkillRelDef subj1Rel,
              SkillDef subj2, SkillRelDef subj2Rel  

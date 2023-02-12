@@ -15,8 +15,8 @@
  */
 package skills.utils
 
-import org.apache.http.NameValuePair
-import org.apache.http.client.utils.URLEncodedUtils
+import org.apache.hc.core5.http.NameValuePair
+import org.apache.hc.core5.net.URLEncodedUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist

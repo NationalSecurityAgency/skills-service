@@ -15,8 +15,8 @@
  */
 package skills.storage.model
 
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 
 class ImportedSkill implements Serializable{
 

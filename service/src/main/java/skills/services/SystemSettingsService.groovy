@@ -27,7 +27,7 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.settings.SystemSettings
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.time.Duration
 import java.time.format.DateTimeParseException
 import java.util.concurrent.atomic.AtomicReference

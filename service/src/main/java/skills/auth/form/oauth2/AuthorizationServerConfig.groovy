@@ -15,148 +15,122 @@
  */
 package skills.auth.form.oauth2
 
+import com.nimbusds.jose.jwk.JWKSet
+import com.nimbusds.jose.jwk.RSAKey
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet
+import com.nimbusds.jose.jwk.source.JWKSource
+import com.nimbusds.jose.proc.SecurityContext
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
-import org.springframework.core.io.ClassPathResource
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.core.annotation.Order
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken
-import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.common.exceptions.InvalidRequestException
-import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer
-import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer
-import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
-import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer
-import org.springframework.security.oauth2.provider.ClientDetails
-import org.springframework.security.oauth2.provider.ClientDetailsService
-import org.springframework.security.oauth2.provider.ClientRegistrationException
-import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.security.oauth2.provider.client.BaseClientDetails
-import org.springframework.security.oauth2.provider.token.*
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore
-import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory
+import org.springframework.security.oauth2.core.*
+import org.springframework.security.oauth2.jwt.JwtClaimsSet
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientCredentialsAuthenticationToken
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
+import org.springframework.security.web.SecurityFilterChain
 import skills.auth.SecurityMode
-import skills.storage.model.ProjDef
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.ProjDef
+
+import java.security.KeyPair
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
+import java.time.Duration
 
 @Configuration
 @Conditional(SecurityMode.FormAuth)
-@EnableAuthorizationServer
-class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+@Slf4j
+class AuthorizationServerConfig {
 
     public static final String SKILLS_PROXY_USER = 'proxy_user'
 
-    @Value('#{"${security.oauth2.jwt.keystore.resource:jwtkeys.jks}"}')
-    private String jwtKeystoreResource
-
-    @Value('#{"${security.oauth2.jwt.keystore.password:password}"}')
-    private String jwtKeystorePassword
-
-    @Value('#{"${security.oauth2.jwt.keystore.alias:jwtkeys}"}')
-    private String jwtKeystoreAlias
-
-    @Value('#{"${security.oauth2.jwt.accessTokenValiditySeconds:43200}"}') // default 12 hours.
-    private int accessTokenValiditySeconds
-
     @Autowired
-    private AuthenticationManager authenticationManager
+    KeyStoreKeyFactory keyStoreKeyFactory
 
-    @Override
-    void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints
-                .authenticationManager(this.authenticationManager)
-                .tokenStore(tokenStore())
-                .tokenServices(tokenServices())
-                .tokenEnhancer(tokenEnhancer())
-    }
+    @Bean('authServerSecurityFilterChain')
+    @Order(100)
+    SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+            throws Exception {
 
-    @Override
-    void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
-        oauthServer
-                // we're allowing access to the token only for clients with 'ROLE_TRUSTED_CLIENT' authority
-                .tokenKeyAccess("hasAuthority('ROLE_TRUSTED_CLIENT')")
-                .checkTokenAccess("hasAuthority('ROLE_TRUSTED_CLIENT')")
-    }
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http)
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
 
-    @Override
-    void configure(ClientDetailsServiceConfigurer configurer) throws Exception {
-        configurer.withClientDetails(skillsClientDetailsService())
+        return http.build()
     }
 
     @Bean
-    TokenStore tokenStore() {
-        return new JwtTokenStore(accessTokenConverter())
-    }
-
-    @Bean
-    JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter()
-        jwtAccessTokenConverter.setAccessTokenConverter(new DefaultAccessTokenConverter() {
-            @Override
-            OAuth2Authentication extractAuthentication(Map<String, ?> claims) {
-                OAuth2Authentication authentication = super.extractAuthentication(claims)
-                authentication.setDetails(claims)
-                return authentication
+    OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
+        def log = this.log
+        OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer = context -> {
+            JwtClaimsSet.Builder claims = context.getClaims()
+            // Customize claims
+            JwtEncodingContext ctx = context;
+            if (ctx.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
+                OAuth2ClientCredentialsAuthenticationToken authToken = ctx.getAuthorizationGrant()
+                String proxyUser = authToken.getAdditionalParameters().get(SKILLS_PROXY_USER)
+                if (proxyUser) {
+                    claims.claim(SKILLS_PROXY_USER, proxyUser);
+                } else {
+                    log.warn("No $SKILLS_PROXY_USER found on OAuth2 request.")
+                    OAuth2Error error = new OAuth2Error(
+                            OAuth2ErrorCodes.INVALID_REQUEST,
+                            "client_credentials grant_type must specify $SKILLS_PROXY_USER field",
+                            null)
+                    throw new OAuth2AuthenticationException(error)
+                }
             }
-        })
 
-        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource(jwtKeystoreResource), jwtKeystorePassword.toCharArray())
-        jwtAccessTokenConverter.setKeyPair(keyStoreKeyFactory.getKeyPair(jwtKeystoreAlias))
-
-        return jwtAccessTokenConverter
-    }
-
-    @Bean
-    TokenEnhancer tokenEnhancer() {
-        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain()
-        tokenEnhancerChain.setTokenEnhancers([new SkillsProxyUserTokenEnhancer(), accessTokenConverter()])
-        return tokenEnhancerChain
-    }
-
-    @Bean
-    @Primary
-    DefaultTokenServices tokenServices() {
-        DefaultTokenServices defaultTokenServices = new DefaultTokenServices()
-        defaultTokenServices.setTokenStore(tokenStore())
-        defaultTokenServices.setTokenEnhancer(tokenEnhancer())
-        defaultTokenServices.setAccessTokenValiditySeconds(accessTokenValiditySeconds)
-        return defaultTokenServices
-    }
-
-    @Bean
-    SkillsClientDetailsService skillsClientDetailsService() {
-        return new SkillsClientDetailsService()
-    }
-
-    @Slf4j
-    static class SkillsProxyUserTokenEnhancer implements TokenEnhancer {
-        @Override
-        OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-            OAuth2AccessToken result = new DefaultOAuth2AccessToken(accessToken)
-            String proxyUser = authentication.getOAuth2Request().requestParameters.get(SKILLS_PROXY_USER)
-            if (proxyUser) {
-                Map<String, Object> info = new LinkedHashMap<String, Object>(accessToken.getAdditionalInformation())
-                info.put(SKILLS_PROXY_USER, proxyUser)
-                result.setAdditionalInformation(info)
-            } else {
-                log.warn("No $SKILLS_PROXY_USER found on OAuth2 request.")
-                throw new InvalidRequestException(("client_credentials grant_type must specify $SKILLS_PROXY_USER field"))
-            }
-            return result
         }
+        return jwtCustomizer
     }
 
-    static class SkillsClientDetailsService implements ClientDetailsService {
+    @Bean
+    JWKSource<SecurityContext> jwkSource() {
+        KeyPair keyPair = keyStoreKeyFactory.getJwtKeyPair()
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic()
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate()
+        RSAKey rsaKey = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+//                .keyID(UUID.randomUUID().toString())
+                .build()
+        JWKSet jwkSet = new JWKSet(rsaKey)
+        return new ImmutableJWKSet<>(jwkSet)
+    }
+
+    @Bean
+    AuthorizationServerSettings authorizationServerSettings() {
+        // customize endpoint for backwards compatibility (new default endpoint is /oauth2/token)
+        return AuthorizationServerSettings.builder()
+                .tokenEndpoint("/oauth/token").build()
+    }
+
+    @Bean
+    RegisteredClientRepository registeredClientRepository() {
+        return new SkillsRegisteredClientRepository()
+    }
+
+    static class SkillsRegisteredClientRepository implements RegisteredClientRepository {
+
         @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
         private String resourceId
+
+        @Value('#{"${security.oauth2.jwt.accessTokenValiditySeconds:43200}"}') // default 12 hours.
+        private int accessTokenValiditySeconds
 
         @Autowired
         private ProjDefAccessor projDefAccessor
@@ -165,18 +139,41 @@ class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
         PasswordEncoder passwordEncoder
 
         @Override
-        ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+        RegisteredClient findById(String id) {
+            return loadRegisteredClient(id)
+        }
+
+        @Override
+        RegisteredClient findByClientId(String clientId) {
+            return loadRegisteredClient(clientId)
+        }
+
+        private RegisteredClient loadRegisteredClient(String clientId) {
             ProjDef projDef = projDefAccessor.getProjDef(clientId)
 
-            BaseClientDetails result = new BaseClientDetails()
-            result.setClientId(clientId)
-            result.setScope(["read", "write"])
-            result.setAutoApproveScopes(result.getScope())
-            result.setAuthorizedGrantTypes(["client_credentials"])
-            result.setAuthorities([new SimpleGrantedAuthority("ROLE_TRUSTED_CLIENT")])
-            result.setResourceIds([resourceId])
-            result.setClientSecret(passwordEncoder.encode(projDef.clientSecret))
-            return result
+            RegisteredClient registeredClient = RegisteredClient.withId(clientId)
+                    .clientId(clientId)
+                    .clientSecret(passwordEncoder.encode(projDef.clientSecret))
+                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+//                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                    .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+//                    .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
+//                    .redirectUri("http://127.0.0.1:8080/authorized")
+//                    .scope(OidcScopes.OPENID)
+//                    .scope(OidcScopes.PROFILE)
+                    .scope("read")
+                    .scope("write")
+//                    .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+                    .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofSeconds(accessTokenValiditySeconds)).build())
+                    .build()
+
+            return registeredClient
+        }
+
+        @Override
+        void save(RegisteredClient registeredClient) {
+            throw new UnsupportedOperationException()
         }
     }
 }

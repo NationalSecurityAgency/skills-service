@@ -16,16 +16,16 @@
 package skills.auth.pki
 
 import groovy.util.logging.Slf4j
-import org.apache.http.client.HttpClient
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.config.RegistryBuilder
-import org.apache.http.conn.socket.PlainConnectionSocketFactory
-import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
-import org.apache.http.ssl.SSLContexts
+import org.apache.hc.client5.http.classic.HttpClient
+import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -38,6 +38,7 @@ import skills.auth.SecurityMode
 
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
+import java.util.concurrent.TimeUnit
 
 /**
  * This Configuration exposes a RestTemplate the uses a apache HttpClient 4.5.  This RestTemplate can be @Autowrired
@@ -59,9 +60,9 @@ class HttpClientRestTemplateConfig {
     static class HttpClientConfig {
         Integer maxTotal = 20
         Integer defaultMaxPerRoute = 20
-        Integer connectionRequestTimeout = 2000
-        Integer connectTimeout = 2000
-        Integer socketTimeout = 2000
+        Long connectionRequestTimeout = 2000
+        Long connectTimeout = 2000
+        Long socketTimeout = 2000
     }
 
     @Bean
@@ -87,22 +88,21 @@ class HttpClientRestTemplateConfig {
     @Bean
     RequestConfig requestConfig() {
         RequestConfig result = RequestConfig.custom()
-                .setConnectionRequestTimeout(httpClientConfig.connectionRequestTimeout)
-                .setConnectTimeout(httpClientConfig.connectTimeout)
-                .setSocketTimeout(httpClientConfig.socketTimeout)
+                .setConnectionRequestTimeout(httpClientConfig.connectionRequestTimeout, TimeUnit.MILLISECONDS)
+                .setConnectTimeout(httpClientConfig.connectTimeout, TimeUnit.MILLISECONDS)
+                .setResponseTimeout(httpClientConfig.socketTimeout, TimeUnit.MILLISECONDS)
                 .build()
         return result
     }
 
     @Bean
-    CloseableHttpClient httpClient(PoolingHttpClientConnectionManager poolingHttpClientConnectionManager, RequestConfig requestConfig) {
-        CloseableHttpClient result = HttpClients.custom()
-                .setSSLHostnameVerifier(new NoopHostnameVerifier())
+    HttpClient httpClient(PoolingHttpClientConnectionManager poolingHttpClientConnectionManager, RequestConfig requestConfig) {
+        return HttpClients.custom()
+//                .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .useSystemProperties()
                 .setConnectionManager(poolingHttpClientConnectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .build()
-        return result
     }
 
     @Bean

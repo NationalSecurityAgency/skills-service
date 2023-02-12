@@ -20,7 +20,7 @@ import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import skills.storage.converters.BooleanConverter
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @CompileStatic
 @MappedSuperclass

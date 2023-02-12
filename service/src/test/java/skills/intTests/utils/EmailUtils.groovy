@@ -19,10 +19,10 @@ import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.GreenMailUtil
 import groovy.transform.ToString
 
-import javax.mail.BodyPart
-import javax.mail.Message
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
+import jakarta.mail.BodyPart
+import jakarta.mail.Message
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 
 class EmailUtils {
 

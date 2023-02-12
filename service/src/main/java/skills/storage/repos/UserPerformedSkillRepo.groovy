@@ -176,7 +176,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
-        from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+        from SkillRelDef srd, SkillDef sdChild, SkillDef sdParent
             inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
         where 
             srd.parent=sdParent.id and 

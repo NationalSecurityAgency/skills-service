@@ -18,7 +18,7 @@ package skills.storage.model
 import groovy.transform.ToString
 import skills.storage.converters.BooleanConverter
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @ToString
 @Table(name="project_access_token")

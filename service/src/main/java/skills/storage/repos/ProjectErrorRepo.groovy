@@ -17,11 +17,12 @@ package skills.storage.repos
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.ProjectError
 
-interface ProjectErrorRepo extends PagingAndSortingRepository<ProjectError, Long> {
+interface ProjectErrorRepo extends CrudRepository<ProjectError, Long>, PagingAndSortingRepository<ProjectError, Long> {
 
     @Nullable
     Page<ProjectError> findAllByProjectId(String projectId, Pageable pageRequest)

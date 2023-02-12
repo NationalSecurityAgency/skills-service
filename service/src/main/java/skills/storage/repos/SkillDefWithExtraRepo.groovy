@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.lang.Nullable
 import skills.skillLoading.model.SkillBadgeSummary
@@ -27,17 +28,19 @@ import skills.storage.model.SkillRelDef
 
 import java.util.stream.Stream
 
-interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithExtra, Integer> {
+import static skills.storage.model.SkillDef.*
 
-    List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+interface SkillDefWithExtraRepo extends CrudRepository<SkillDefWithExtra, Integer>, PagingAndSortingRepository<SkillDefWithExtra, Integer> {
 
-    List<SkillDefWithExtra> findAllByProjectIdAndTypeAndEnabled(@Nullable String id, SkillDef.ContainerType type, String enabled)
+    List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, ContainerType type)
+
+    List<SkillDefWithExtra> findAllByProjectIdAndTypeAndEnabled(@Nullable String id, ContainerType type, String enabled)
 
     @Nullable
-    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, SkillDef.ContainerType type)
+    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndType(@Nullable String id, String skillId, ContainerType type)
 
     @Nullable
-    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<SkillDef.ContainerType> type)
+    SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<ContainerType> type)
 
     @Nullable
     SkillDefWithExtra findByProjectIdAndSkillId(String id, String skillId)
@@ -47,9 +50,9 @@ interface SkillDefWithExtraRepo extends PagingAndSortingRepository<SkillDefWithE
         String getDescription()
         String getHelpUrl()
         Date getAchievedOn()
-        SkillDef.SelfReportingType getSelfReportingType()
+        SelfReportingType getSelfReportingType()
         Integer getCopiedFrom()
-        SkillDef.ContainerType getType()
+        ContainerType getType()
         String getEnabled()
         String getJustificationRequired()
     }

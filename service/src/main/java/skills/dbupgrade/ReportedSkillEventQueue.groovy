@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component
 import skills.controller.AddSkillHelper
 import skills.controller.exceptions.SkillException
 
-import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths

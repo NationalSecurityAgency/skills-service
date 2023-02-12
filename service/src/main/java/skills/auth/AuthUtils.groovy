@@ -18,7 +18,7 @@ package skills.auth
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 

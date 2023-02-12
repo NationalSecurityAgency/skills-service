@@ -15,14 +15,14 @@
  */
 package skills.controller
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import skills.auth.AuthMode
 import skills.auth.UserInfo
 import skills.auth.form.CreateAccountController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import spock.lang.Specification
-
-import javax.servlet.http.HttpServletResponse
 
 class CreateAccountControllerSpec extends Specification {
 
@@ -32,8 +32,9 @@ class CreateAccountControllerSpec extends Specification {
         CreateAccountController createAccountController = new CreateAccountController(oAuthOnly: true)
 
         UserInfo userInfo = Mock()
+        HttpServletRequest httpServletRequest = Mock()
         HttpServletResponse httpServletResponse = Mock()
-        createAccountController.createAppUser(userInfo, httpServletResponse)
+        createAccountController.createAppUser(userInfo, httpServletRequest, httpServletResponse)
 
         then:
         SkillException e = thrown(SkillException)
@@ -47,8 +48,9 @@ class CreateAccountControllerSpec extends Specification {
         CreateAccountController createAccountController = new CreateAccountController(authMode: AuthMode.PKI)
 
         UserInfo userInfo = Mock()
+        HttpServletRequest httpServletRequest = Mock()
         HttpServletResponse httpServletResponse = Mock()
-        createAccountController.createAppUser(userInfo, httpServletResponse)
+        createAccountController.createAppUser(userInfo, httpServletRequest, httpServletResponse)
 
         then:
         SkillException e = thrown(SkillException)

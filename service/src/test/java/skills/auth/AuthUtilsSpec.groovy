@@ -18,7 +18,7 @@ package skills.auth
 
 import spock.lang.Specification
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 import java.nio.charset.StandardCharsets
 
 class AuthUtilsSpec extends Specification {

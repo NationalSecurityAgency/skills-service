@@ -15,7 +15,7 @@
  */
 package skills.storage.model;
 
-import javax.persistence.Lob;
+import jakarta.persistence.Lob;
 
 public interface ProjectSummaryResult {
     public abstract int getProjectRefId();

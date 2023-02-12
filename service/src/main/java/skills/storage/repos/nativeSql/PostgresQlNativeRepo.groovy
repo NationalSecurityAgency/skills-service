@@ -27,10 +27,10 @@ import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserPointsRepo
 
-import javax.persistence.EntityManager
-import javax.persistence.ParameterMode
-import javax.persistence.PersistenceContext
-import javax.persistence.Query
+import jakarta.persistence.EntityManager
+import jakarta.persistence.ParameterMode
+import jakarta.persistence.PersistenceContext
+import jakarta.persistence.Query
 import java.util.stream.Stream
 
 @Conditional(DBConditions.PostgresQL)

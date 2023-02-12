@@ -24,9 +24,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 @Configuration
-class CachingConfiguration implements WebMvcConfigurer{
-
-
+class CachingConfiguration implements WebMvcConfigurer {
 
     public static final Duration MAX_AGE = Duration.of(14, ChronoUnit.DAYS)
     public static final Duration LONG_MAX_AGE = Duration.of(90, ChronoUnit.DAYS)

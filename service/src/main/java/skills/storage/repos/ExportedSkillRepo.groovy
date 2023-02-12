@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
@@ -26,7 +27,7 @@ import skills.storage.model.ExportedSkillTiny
 import skills.storage.model.ImportExportStats
 import skills.storage.model.SkillDefWithExtra
 
-interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, Integer> {
+interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, PagingAndSortingRepository<ExportedSkill, Integer> {
 
     @Nullable
     @Query('''select 'true' from ExportedSkill es where es.projectId = ?1 and es.skill.skillId = ?2''')
@@ -61,8 +62,8 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         join ProjDef project on project.projectId = es.projectId
         join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
-        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(es.skill.skillId) and localSkillOnId.projectId = ?1)
-        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(es.skill.name) and localSkillOnName.projectId = ?1)
+        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(srd.child.skillId) and localSkillOnId.projectId = ?1)
+        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(srd.child.name) and localSkillOnName.projectId = ?1)
         where 
              es.projectId <> ?1 and
              not exists (select 1 from SkillDef sd where sd.projectId = ?1 and sd.copiedFrom = es.skill.id)
@@ -94,8 +95,8 @@ interface ExportedSkillRepo extends PagingAndSortingRepository<ExportedSkill, In
         join ProjDef project on project.projectId = es.projectId
         join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
-        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(es.skill.skillId) and localSkillOnId.projectId = :projectId)
-        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(es.skill.name) and localSkillOnName.projectId = :projectId)
+        left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(srd.child.skillId) and localSkillOnId.projectId = :projectId)
+        left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(srd.child.name) and localSkillOnName.projectId = :projectId)
         where
             es.projectId <> :projectId and 
             not exists (select 1 from SkillDef sd where sd.projectId = :projectId and sd.copiedFrom = es.skill.id) and

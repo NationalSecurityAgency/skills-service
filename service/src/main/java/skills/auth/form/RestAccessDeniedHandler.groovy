@@ -29,9 +29,9 @@ import skills.auth.SecurityMode
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
 
-import javax.servlet.ServletException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.ServletException
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
@@ -44,7 +44,7 @@ class RestAccessDeniedHandler implements AccessDeniedHandler {
     @Override
     void handle(final HttpServletRequest request, final HttpServletResponse response, final AccessDeniedException ex) throws IOException, ServletException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]")
+        log.warn("Access Denied User [${authentication}], reqested resource [${request.getServletPath()}]", ex)
         AccessDeniedExplanation explanation = new AccessDeniedExplanationGenerator().generateExplanation(request.getServletPath(), ex)
         response.setStatus(HttpServletResponse.SC_FORBIDDEN)
         if(explanation) {

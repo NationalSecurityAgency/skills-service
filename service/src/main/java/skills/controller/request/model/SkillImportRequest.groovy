@@ -17,7 +17,7 @@ package skills.controller.request.model
 
 import groovy.transform.Canonical
 
-import javax.persistence.Column
+import jakarta.persistence.Column
 
 @Canonical
 class SkillImportRequest extends SkillRequest{

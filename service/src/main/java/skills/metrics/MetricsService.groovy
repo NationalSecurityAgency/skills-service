@@ -24,7 +24,7 @@ import skills.controller.exceptions.SkillException
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.ProjectMetricsBuilder
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Service
 @Slf4j

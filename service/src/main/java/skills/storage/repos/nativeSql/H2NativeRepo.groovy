@@ -35,9 +35,9 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.UserPointsRepo
 
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
-import javax.persistence.Query
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
+import jakarta.persistence.Query
 import java.util.stream.Stream
 
 @Conditional(DBConditions.H2)
@@ -532,7 +532,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         // find existing event
         String exists = '''
-        SELECT id FROM user_events WHERE project_id = :projectId AND skill_ref_id = :skillRefId AND user_id = :userId AND event_Time = :start AND week_number = :weekNumber AND event_type = :type
+        SELECT id FROM user_events WHERE project_id = :projectId AND skill_ref_id = :skillRefId AND user_id = :userId AND event_time = :start AND week_number = :weekNumber AND event_type = :type
         '''
         Query existsQuery = entityManager.createNativeQuery(exists)
         existsQuery.setParameter("projectId", projectId)

@@ -15,16 +15,18 @@
  */
 package skills.auth.form
 
-
 import groovy.util.logging.Slf4j
+import jakarta.servlet.ServletException
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.*
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -32,27 +34,27 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
-import org.springframework.session.web.http.CookieSerializer
-import org.springframework.session.web.http.DefaultCookieSerializer
+import org.springframework.security.web.context.DelegatingSecurityContextRepository
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
 import skills.auth.SecurityMode
+import skills.auth.UserAuthService
 import skills.auth.form.oauth2.OAuth2UserConverterService
-
-import javax.servlet.ServletException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import skills.auth.form.oauth2.OAuthUtils
 
 @Conditional(SecurityMode.FormAuth)
 @Component
 @Configuration
 @Slf4j
-class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
+class FormSecurityConfiguration {
 
     public static final String SKILLS_REDIRECT_URI = 'skillsRedirectUri'
 
@@ -90,15 +92,20 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder)
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Autowired
+    @Lazy
+    SecurityContextRepository securityContextRepository
+
+    @Bean('formSecurityFilterChain')
+    @Order(103)
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring FORM authorization mode")
 
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
         .and()
-                .securityContext().securityContextRepository(httpSessionSecurityContextRepository())
+                .securityContext().securityContextRepository(securityContextRepository)// httpSessionSecurityContextRepository())
         .and()
                 .exceptionHandling()
                 .accessDeniedHandler(restAccessDeniedHandler)
@@ -119,25 +126,30 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .failureHandler(restAuthenticationFailureHandler)
                     .authorizationEndpoint()
                         .authorizationRequestRepository(skillsClientOAuth2AuthorizationRequestRepository)
+
+        http.build()
     }
 
-    @Override
     @Bean(name = 'defaultAuthManager')
     @Primary
     @Lazy
-    AuthenticationManager authenticationManagerBean() throws Exception {
+    AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
         // provides the default AuthenticationManager as a Bean
-        return super.authenticationManagerBean()
+        return http.getSharedObject(AuthenticationManager.class);
     }
 
     @Bean
+    @Conditional(SecurityMode.FormAuth)
     UserDetailsService localUserDetailsService() {
         new LocalUserDetailsService()
     }
 
     @Bean
-    SkillsHttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
-        return new SkillsHttpSessionSecurityContextRepository()
+    SecurityContextRepository httpSessionSecurityContextRepository(OAuthUtils oAuthUtils, UserAuthService userAuthService) {
+        new DelegatingSecurityContextRepository(
+                new RequestAttributeSecurityContextRepository(),
+                new SkillsHttpSessionSecurityContextRepository(oAuthUtils: oAuthUtils, userAuthService: userAuthService)
+        )
     }
 
     @Bean(name = 'oauth2UserConverters')
@@ -156,11 +168,6 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     AuthenticationFailureHandler authenticationFailureHandler() {
         return new SimpleUrlAuthenticationFailureHandler()
-    }
-
-    @Bean
-    CookieSerializer cookieSerializer() {
-        return new DefaultCookieSerializer(sameSite: 'None')
     }
 
     @Component
@@ -210,6 +217,14 @@ class FormSecurityConfiguration extends WebSecurityConfigurerAdapter {
             if (skillsRedirectUri) {
                 request.getSession(false).setAttribute(SKILLS_REDIRECT_URI, skillsRedirectUri)
             }
+        }
+        @Override
+        OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request, HttpServletResponse response) {
+            return httpSessionOAuth2AuthorizationRequestRepository.removeAuthorizationRequest(request, response)
+        }
+
+        OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
+            return httpSessionOAuth2AuthorizationRequestRepository.loadAuthorizationRequest(request)
         }
     }
 

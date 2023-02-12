@@ -37,7 +37,7 @@ import skills.skillLoading.SkillsLoader
 import skills.skillLoading.model.MyProgressSummary
 import skills.skillLoading.model.SkillBadgeSummary
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/api")

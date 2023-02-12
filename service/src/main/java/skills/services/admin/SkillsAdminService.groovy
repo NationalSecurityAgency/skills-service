@@ -45,7 +45,6 @@ import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -105,9 +104,6 @@ class SkillsAdminService {
 
     @Autowired
     SkillCatalogService skillCatalogService
-
-    @Autowired
-    QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
@@ -754,7 +750,7 @@ class SkillsAdminService {
                 selfReportingType: partial.getSelfReportingType(),
                 numSkillsRequired: partial.getNumSkillsRequired(),
                 enabled: Boolean.valueOf(partial.enabled),
-                readOnly: partial.readOnly,
+                readOnly: Boolean.valueOf(partial.readOnly),
                 copiedFromProjectId: partial.copiedFromProjectId,
                 copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
                 sharedToCatalog: partial.sharedToCatalog,

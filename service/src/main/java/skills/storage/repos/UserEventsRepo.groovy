@@ -31,7 +31,7 @@ import skills.storage.model.UserEvent
 import skills.storage.model.UserMetrics
 import skills.storage.model.WeekCountItem
 
-import javax.persistence.QueryHint
+import jakarta.persistence.QueryHint
 import java.util.stream.Stream
 
 @CompileStatic

@@ -29,7 +29,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
 
-import javax.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMessage
 import java.time.Duration
 
 

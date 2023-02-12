@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.ResourceUtils
 import skills.auth.SecurityMode
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)

@@ -17,15 +17,14 @@
         <!--suppress UnresolvedMavenProperty -->
         <nexusServer>${nexus.url}</nexusServer>
         <main.basedir>${project.basedir}</main.basedir>
-        <java.version>1.11</java.version>
+        <java.version>17</java.version>
 
         <!-- can NOT name it groovy.version as spock's dependency picks it up-->
-        <groovy.version>3.0.7</groovy.version>
-        <groovy.eclipse.compiler.version>3.6.0-03</groovy.eclipse.compiler.version>
-        <groovy.eclipse.batch.version>3.0.7-01</groovy.eclipse.batch.version>
+        <groovy.version>4.0.7</groovy.version>
+        <groovy.eclipse.compiler.version>3.8.0</groovy.eclipse.compiler.version>
+        <groovy.eclipse.batch.version>4.0.7-02</groovy.eclipse.batch.version>
 
-        <spock.myVersion>2.0-M4-groovy-3.0</spock.myVersion>
-        <java.version>11</java.version>
+        <spock.myVersion>2.4-M1-groovy-4.0</spock.myVersion>
 
         <flywaydb.version>6.5.5</flywaydb.version>
 
@@ -36,20 +35,19 @@
         <frontend-maven-plugin.version>1.10.3</frontend-maven-plugin.version>
         <node.version>v14.18.1</node.version>
 
-        <httpclient.version>4.5.13</httpclient.version>
         <guava.version>29.0-jre</guava.version>
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the spring-boot-starter-parent definition -->
-        <springboot.version>2.6.13</springboot.version>
+        <springboot.version>3.0.2</springboot.version>
 
-        <greenmail.version>1.6.11</greenmail.version>
+        <greenmail.version>2.0.0-alpha-3</greenmail.version>
         <wiremock.version>2.27.2</wiremock.version>
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
 
         <log4j2.version>2.17.0</log4j2.version>
-        <micrometer-registry.version>1.8.1</micrometer-registry.version>
+        <micrometer-registry.version>1.10.3</micrometer-registry.version>
 
-        <db-scheduler.version>10.5</db-scheduler.version>
+        <db-scheduler.version>11.6</db-scheduler.version>
 
         <caffeine.version>3.1.1</caffeine.version>
 
@@ -60,7 +58,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <!-- !!!!!IMPORTANT!!!!!: when changing this version make sure to also update springboot.version property -->
-        <version>2.6.13</version>
+        <version>3.0.2</version>
         <relativePath/>
     </parent>
 
