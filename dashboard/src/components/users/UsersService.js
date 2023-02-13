@@ -55,8 +55,4 @@ export default {
   getUserTags(userId) {
     return axios.get(`/app/userInfo/userTags/${userId}`).then((response) => response.data);
   },
-
-  createTag(userId, tagKey, tags) {
-    return axios.post(`/root/users/${encodeURIComponent(userId)}/tags/${encodeURIComponent(tagKey)}`, { tags });
-  },
 };

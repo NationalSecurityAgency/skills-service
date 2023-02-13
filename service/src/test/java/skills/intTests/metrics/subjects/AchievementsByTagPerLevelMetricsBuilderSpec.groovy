@@ -70,7 +70,7 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         assert skillsService.addSkill(skill, users[6], new Date()).body.skillApplied
 
         when:
-        def props = ["skillId": subj.subjectId, "userTagKey": "someTag"]
+        def props = ["subjectId": subj.subjectId, "userTagKey": "someTag"]
         def result = builder.build(proj.projectId, builder.id, props)
 
         then:

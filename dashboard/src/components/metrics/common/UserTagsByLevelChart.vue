@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="`Levels by ${tag.label}`" data-cy="numUsersByTag">
+  <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" data-cy="numUsersByTag">
     <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
       <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
@@ -115,7 +115,7 @@ limitations under the License.
     methods: {
       loadData() {
         this.loading = true;
-        MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { skillId: this.$route.params.subjectId, userTagKey: this.tag.key })
+        MetricsService.loadChart(this.$route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { subjectId: this.$route.params.subjectId, userTagKey: this.tag.key })
           .then((dataFromServer) => {
             if (dataFromServer && Object.keys(dataFromServer.data).length > 0) {
               const userData = dataFromServer.data;

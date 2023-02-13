@@ -535,20 +535,18 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     )
 
     @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers, ut.value as userTag 
-            from UserAchievement as ua, SkillDef as sd 
+            from UserAchievement as ua 
             join UserTag ut on ut.userId = ua.userId
             where 
-                ua.skillId = sd.skillId and
-                ua.skillId = :skillId and
+                ua.skillId = :subjectId and
                 ua.projectId = :projectId and
-                sd.type = :containerType and
-                ut.key = :userTagKey
+                ut.key = :userTagKey and
+                ua.level is not null
             group by ua.skillId, ua.level, ut.value
            ''')
     List<LevelAndTagCount> countNumUsersPerSubjectTagAndLevel(
             @Param("projectId") String projectId,
-            @Param("containerType") SkillDef.ContainerType containerType,
-            @Param("skillId") String skillId,
+            @Param("subjectId") String subjectId,
             @Param("userTagKey") String userTagKey
     )
 

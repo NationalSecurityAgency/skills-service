@@ -37,14 +37,12 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        String skillId = MetricsParams.getSkillId(projectId, chartId, props);
+        def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, props.subjectId, props.userTagKey);
 
-        def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, SkillDef.ContainerType.Subject, skillId, props.userTagKey);
-
-        HashMap<String, HashMap<Integer, Integer>> users = new HashMap<String, HashMap<Integer, Integer>>();
+        Map users = new HashMap<String, Map>();
         def totalLevels = 0;
         userCount.sort({it.userTag}).forEach( it -> {
-            HashMap<Integer, Integer> userInfo = new HashMap<String, Integer>();
+            Map userInfo = new HashMap<String, Integer>();
             totalLevels = it.level > totalLevels ? it.level : totalLevels
             userInfo.put(it.level, it.numberUsers);
             if(users[it.userTag]) {

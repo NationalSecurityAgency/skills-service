@@ -104,13 +104,12 @@ limitations under the License.
     },
     mounted() {
       const tags = [];
-      const userPageTags = this.$store.getters.config.userPageTagsToDisplay;
+      const userPageTags = this.$store.getters.config.projectMetricsTagCharts;
       if (userPageTags) {
-        const tagSections = userPageTags.split('|');
+        const tagSections = JSON.parse(userPageTags);
         tagSections.forEach((section) => {
-          const [key, label] = section.split('/');
           tags.push({
-            key, label,
+            key: section.key, label: section.tagLabel,
           });
         });
       }
