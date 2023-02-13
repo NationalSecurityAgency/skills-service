@@ -44,6 +44,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.ProjectAccessTokenRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
 import skills.utils.Expiration
 import skills.utils.ExpirationUtils
@@ -103,6 +104,9 @@ class InviteOnlyProjectService {
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     /**
      * Generates an invite token for a specific project
@@ -242,7 +246,7 @@ class InviteOnlyProjectService {
 
         log.info("user [{}] has claimed project invite code [{}] for project [{}]", userId, token, projectId)
 
-        projectAccessTokenRepo.save(projectAccessToken)
+        projectAccessTokenRepo.deleteByToken(projectAccessToken.token)
         GrantedAuthoritiesUpdater.addUserRoleToCurrentUser(newRole)
     }
 
