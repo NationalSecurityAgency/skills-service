@@ -26,18 +26,25 @@ limitations under the License.
               @input="quizSelected"
               class="ml-2"
               data-cy="quizSelector">
-      <template #option="{ name, type }">
-        <span class="text-secondary">{{ type }}:</span><span class="h6 ml-2">{{ name }}</span>
+      <template #option="{ name, type, quizId }">
+        <div :data-cy="`availableQuizSelection-${quizId}`">
+          <span class="text-secondary">{{ type }}:</span><span class="h6 ml-2">{{ name }}</span>
+        </div>
       </template>
       <template #selected-option-container="{ option }">
-        <div class="p-1">
+        <div class="p-1" :data-cy="`quizSelected-${option.quizId}`">
           <span class="text-secondary">{{ option.type }}:</span><span class="ml-1">{{ option.name }}</span>
         </div>
       </template>
       <template #no-options>
-        <div class="text-left pl-3 pb-2">
-          <div>You currently do not administer any quizzes or surveys.</div>
-          <div>Please navigate to the <router-link target="_blank" :to="{ name: 'QuizzesAndSurveys' }" class="skills-underline-container">Quizzes and Surveys <i class="fas fa-external-link-alt text-secondary" aria-hidden="true"></i></router-link> page to start creating.</div>
+        <div class="text-left pl-3 pb-2" data-cy="quizSelectHasNoValues">
+          <div v-if="noQuizzes">
+            <div>You currently do not administer any quizzes or surveys.</div>
+            <div>Please navigate to the <router-link target="_blank" :to="{ name: 'QuizzesAndSurveys' }" class="skills-underline-container">Quizzes and Surveys <i class="fas fa-external-link-alt text-secondary" aria-hidden="true"></i></router-link> page to start creating.</div>
+          </div>
+          <div v-else>
+            No results. Please refine your search string.
+          </div>
         </div>
       </template>
     </v-select>
@@ -70,6 +77,11 @@ limitations under the License.
     mounted() {
       this.selectedInternal = this.value;
       this.loadData();
+    },
+    computed: {
+      noQuizzes() {
+        return this.availableQuizzes && this.availableQuizzes.length === 0;
+      },
     },
     methods: {
       loadData() {

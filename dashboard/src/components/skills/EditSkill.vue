@@ -98,6 +98,7 @@ limitations under the License.
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
+                         :disabled="skillInternal && skillInternal.selfReportingType && skillInternal.selfReportingType === 'Quiz'"
                          :aria-label="`Occurrences to Completion values must range between 1 and ${maxPointIncrement}`"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small role="alert" class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
@@ -212,6 +213,7 @@ limitations under the License.
                                        @shown="tooltipShowing=true"
                                        @hidden="tooltipShowing=false"
                                        @justificationRequiredChanged="updateJustificationRequired"
+                                       @input="selfReportTypeChanged"
                                        @quizIdChanged="updateQuizId"
                                        @quizIdCleared="clearQuizId"
             />
@@ -506,6 +508,11 @@ limitations under the License.
       },
       clearQuizId() {
         this.skillInternal.quizId = null;
+      },
+      selfReportTypeChanged(newType) {
+        if (newType === 'Quiz') {
+          this.skillInternal.numPerformToCompletion = 1;
+        }
       },
       setupValidation() {
         const self = this;

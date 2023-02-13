@@ -162,6 +162,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFromProjectId as copiedFromProjectId,
         pd.name as copiedFromProjectName,
         qDef.quizId as quizId,
+        qDef.type as quizType,
         qDef.name as quizName,
         case when es is not null then true else false end as sharedToCatalog
     from SkillRelDef srd

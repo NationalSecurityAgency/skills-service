@@ -32,4 +32,5 @@ interface SkillDefPartial extends SkillDefSkinny{
     Boolean getSharedToCatalog()
     String getQuizId()
     String getQuizName()
+    QuizDefParent.QuizType getQuizType()
 }

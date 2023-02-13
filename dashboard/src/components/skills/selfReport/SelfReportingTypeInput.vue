@@ -59,10 +59,10 @@ limitations under the License.
           <template>
             <div class="row m-0 no-gutters">
               <div class="col-12 col-lg-auto">
-                <b-form-radio class="" value="Quiz" :disabled="!selfReport.enabled">Quiz/Survey</b-form-radio>
+                <b-form-radio class="" value="Quiz" :disabled="!selfReport.enabled" data-cy="quizRadio">Quiz/Survey</b-form-radio>
               </div>
               <div class="col pl-2">
-                <quiz-selector v-if="quizSelected" :initiallySelectedQuizId="skill.quizId" @changed="quizIdSelected"/>
+                <quiz-selector v-if="selfReport.enabled && quizSelected" :initiallySelectedQuizId="skill.quizId" @changed="quizIdSelected" />
               </div>
             </div>
           </template>

@@ -24,17 +24,246 @@ describe('Quiz Skill Assignment Tests', () => {
 
     });
 
-    it('create quiz', function () {
+    it('assign quiz to skill', function () {
         cy.createProject(1)
         cy.createSubject(1,1)
 
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
-        for (let i = 2; i < 21; i++) {
-            cy.createQuizDef(i, {name: `Great Tests # ${i}`});
-        }
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="numPerformToCompletion"]').type('5')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+
+        cy.get('[data-cy="quizSelector"]').should('not.exist')
+        cy.get('[data-cy="quizRadio"]').click({ force: true })
+        cy.get('[data-cy="saveSkillButton"]').should('be.disabled')
+        cy.get('[data-cy="quizSelected-quiz1"]').should('not.exist')
+
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
+        cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Test Your Trivia Knowledge').click()
+        cy.url().should('include', '/administrator/quizzes/quiz1');
+        cy.get('[data-cy="pageHeaderStat_Type"] [data-cy="statPreformatted"]').should('have.text', 'Quiz')
     });
 
+    it('edit skill modal - set occurrences to 1 when quiz type is selected', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
 
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="numPerformToCompletion"]').type('5')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 15)
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({ force: true });
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 15)
+
+        cy.get('[data-cy="quizRadio"]').click({ force: true })
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').click({ force: true });
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
+
+        cy.get('[data-cy="numPerformToCompletion"]').type('2')
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 12)
+
+        cy.get('[data-cy="quizRadio"]').click({ force: true })
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
+    });
+
+    it('edit existing skill - remove quiz assignment by disabling self report type', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('be.checked');
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
+        cy.get('[data-cy="selfReportEnableCheckbox"]').uncheck({ force: true });
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('be.disabled');
+        cy.get('[data-cy="quizSelector"]').should('not.exist')
+
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="selfReportCell-skill1"]').contains('Disabled')
+    });
+
+    it('edit existing skill - remove quiz assignment by changing self report type', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('be.checked');
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({ force: true });
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
+
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('not.be.checked');
+        cy.get('[data-cy="quizSelector"]').should('not.exist')
+
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="selfReportCell-skill1"]').contains('Honor System')
+    });
+
+    it('edit existing skill - change quiz id', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1);
+        cy.createSurveyDef(2);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz2"]').click()
+        cy.get('[data-cy="quizSelected-quiz2"]')
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')
+        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('This is survey 2').click()
+        cy.url().should('include', '/administrator/quizzes/quiz2');
+        cy.get('[data-cy="pageHeaderStat_Type"] [data-cy="statPreformatted"]').should('have.text', 'Survey')
+
+    });
+
+    it('user has no quizzes to assign', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="quizRadio"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+
+        cy.get('[data-cy="quizSelectHasNoValues"]').contains('You currently do not administer any')
+        cy.get('[data-cy="quizSelectHasNoValues"] a')
+            .should('have.attr', 'href')
+            .and('eq', '/administrator/quizzes')
+    });
+
+    it('search quizzes and surveys when selecting', function () {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        for (let i = 1; i < 15; i++) {
+            if (i % 2 === 0) {
+                cy.createSurveyDef(i);
+            } else {
+                cy.createQuizDef(i);
+            }
+        }
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="quizRadio"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').contains('This is quiz 1')
+        cy.get('[data-cy="availableQuizSelection-quiz2"]').contains('This is survey 2')
+        cy.get('[data-cy="availableQuizSelection-quiz3"]')
+        cy.get('[data-cy="availableQuizSelection-quiz4"]')
+        cy.get('[data-cy="availableQuizSelection-quiz5"]')
+        cy.get('[data-cy="availableQuizSelection-quiz6"]')
+        cy.get('[data-cy="availableQuizSelection-quiz7"]')
+        cy.get('[data-cy="availableQuizSelection-quiz8"]')
+        cy.get('[data-cy="availableQuizSelection-quiz9"]')
+        cy.get('[data-cy="availableQuizSelection-quiz10"]')
+        cy.get('[data-cy="availableQuizSelection-quiz11"]')
+        cy.get('[data-cy="availableQuizSelection-quiz12"]')
+        cy.get('[data-cy="availableQuizSelection-quiz13"]')
+        cy.get('[data-cy="availableQuizSelection-quiz14"]')
+
+        cy.get('[data-cy="quizSelector"]').type('1')
+
+        cy.get('[data-cy="availableQuizSelection-quiz1"]')
+        cy.get('[data-cy="availableQuizSelection-quiz2"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz3"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz4"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz5"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz6"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz7"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz8"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz9"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz10"]')
+        cy.get('[data-cy="availableQuizSelection-quiz11"]')
+        cy.get('[data-cy="availableQuizSelection-quiz12"]')
+        cy.get('[data-cy="availableQuizSelection-quiz13"]')
+        cy.get('[data-cy="availableQuizSelection-quiz14"]')
+
+        cy.get('[data-cy="quizSelector"]').type('2')
+
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz2"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz3"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz4"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz5"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz6"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz7"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz8"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz9"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz10"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz11"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz12"]')
+        cy.get('[data-cy="availableQuizSelection-quiz13"]').should('not.exist')
+        cy.get('[data-cy="availableQuizSelection-quiz14"]').should('not.exist')
+
+        cy.get('[data-cy="quizSelector"]').type('a')
+        cy.get('[data-cy="quizSelectHasNoValues"]').contains('No results')
+    });
 
 });

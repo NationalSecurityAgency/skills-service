@@ -698,6 +698,7 @@ class SkillsAdminService {
             QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.id)
             res.quizId = quizIdAndName.getQuizId()
             res.quizName = quizIdAndName.getQuizName()
+            res.quizType = quizIdAndName.getQuizType()
         }
         res.name = InputSanitizer.unsanitizeName(res.name)
         res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
@@ -762,6 +763,7 @@ class SkillsAdminService {
                 reusedSkill: reusedSkill,
                 quizId: partial.getQuizId(),
                 quizName: partial.getQuizName(),
+                quizType: partial.getQuizType(),
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

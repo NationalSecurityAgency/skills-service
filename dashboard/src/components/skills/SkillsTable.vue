@@ -308,9 +308,9 @@ limitations under the License.
           </div>
         </template>
         <template v-slot:cell(selfReportingType)="data">
-          <div v-if="data.item.selfReportingType === 'Quiz'">
+          <div v-if="data.item.selfReportingType === 'Quiz'" :data-cy="`selfReportCell-${data.item.skillId}-quiz`">
             <div>
-              Test-Based Validation
+              {{data.item.quizType}}-Based Validation
             </div>
             <div class="text-secondary">
               via
@@ -324,7 +324,7 @@ limitations under the License.
             </div>
           </div>
           <div v-else>
-            <span v-if="data.item.isSkillType">{{ getSelfReportingTypePretty(data.item.selfReportingType) }}</span>
+            <span v-if="data.item.isSkillType"  :data-cy="`selfReportCell-${data.item.skillId}`">{{ getSelfReportingTypePretty(data.item.selfReportingType) }}</span>
             <span v-if="data.item.isGroupType" class="text-secondary">N/A</span>
           </div>
         </template>

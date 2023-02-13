@@ -22,6 +22,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.quizLoading.QuizSettings
+import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -49,10 +50,40 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skill.quizId == quiz.body.quizId
         skill.quizName == quiz.body.name
+        skill.quizType == QuizDefParent.QuizType.Quiz.toString()
 
         skills[0].selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skills[0].quizId == quiz.body.quizId
         skills[0].quizName == quiz.body.name
+        skills[0].quizType == QuizDefParent.QuizType.Quiz.toString()
+    }
+
+    def "assign survey to skill"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuizSurvey(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill = skillsService.getSkill(skillWithQuiz)
+        def skills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill.quizId == quiz.body.quizId
+        skill.quizName == quiz.body.name
+        skill.quizType == QuizDefParent.QuizType.Survey.toString()
+
+        skills[0].selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skills[0].quizId == quiz.body.quizId
+        skills[0].quizName == quiz.body.name
+        skills[0].quizType == QuizDefParent.QuizType.Survey.toString()
     }
 
     def "update quiz for an existing skill"() {

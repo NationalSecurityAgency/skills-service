@@ -17,6 +17,7 @@ package skills.controller.result.model
 
 import jakarta.persistence.Convert
 import skills.storage.converters.BooleanConverter
+import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 
 class SkillDefPartialRes extends SkillDefSkinnyRes{
@@ -60,4 +61,5 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     // utilized when selfReportingType=quiz
     String quizId
     String quizName
+    QuizDefParent.QuizType quizType
 }
