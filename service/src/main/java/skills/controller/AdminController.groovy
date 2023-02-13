@@ -599,6 +599,10 @@ class AdminController {
         skillRequest.enabled = skillRequest.enabled == null ? "true" : skillRequest.enabled
 
         saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
+
+        if (skillRequest.quizId) {
+            SkillsValidator.isTrue(skillRequest.numPerformToCompletion == 1, "When quizId is provided numPerformToCompletion must be equal 1", projectId, skillId)
+        }
     }
 
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')

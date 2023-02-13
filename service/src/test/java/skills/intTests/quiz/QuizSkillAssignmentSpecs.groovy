@@ -17,8 +17,11 @@ package skills.intTests.quiz
 
 
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
+import skills.quizLoading.QuizSettings
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -89,6 +92,88 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills_after[0].selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skills_after[0].quizId == quiz1.body.quizId
         skills_after[0].quizName == quiz1.body.name
+    }
+
+    def "skill with a quiz must only have 1 occurrence"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 2, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("When quizId is provided numPerformToCompletion must be equal 1")
+        e.message.contains("skillId:${skillWithQuiz.skillId}")
+    }
+
+    def "quiz assignment is removed"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill = skillsService.getSkill(skillWithQuiz)
+        when:
+        skillWithQuiz.quizId = null
+        skillWithQuiz.selfReportingType = null
+
+        skillsService.createSkill(skillWithQuiz)
+        def skill1 = skillsService.getSkill(skillWithQuiz)
+
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill.quizId == quiz.body.quizId
+        skill.quizName == quiz.body.name
+
+        !skill1.selfReportingType
+        !skill1.quizId
+        !skill1.quizName
+    }
+
+    def "quiz assignment is changed to another self report type"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill = skillsService.getSkill(skillWithQuiz)
+        when:
+        skillWithQuiz.quizId = null
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createSkill(skillWithQuiz)
+        def skill1 = skillsService.getSkill(skillWithQuiz)
+
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill.quizId == quiz.body.quizId
+        skill.quizName == quiz.body.name
+
+        skill1.selfReportingType  == SkillDef.SelfReportingType.Approval.toString()
+        !skill1.quizId
+        !skill1.quizName
     }
 
 }
