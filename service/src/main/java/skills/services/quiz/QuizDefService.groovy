@@ -411,7 +411,7 @@ class QuizDefService {
     QuizMetrics getMetrics(String quizId) {
         List<LabeledCount> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
 
-        int total = quizCounts.collect { it.getCount() }.sum()
+        int total = quizCounts ? quizCounts.collect { it.getCount() }.sum() : 0
         LabeledCount numPassedCount = quizCounts.find{
             UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getLabel())
         }

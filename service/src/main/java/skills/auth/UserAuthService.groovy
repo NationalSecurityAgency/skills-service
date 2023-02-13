@@ -16,6 +16,7 @@
 package skills.auth
 
 import callStack.profiler.Profile
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
@@ -46,6 +47,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
+import skills.storage.repos.QuizToSkillDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
@@ -90,6 +92,9 @@ class UserAuthService {
 
     @Autowired(required = false)  // only for SecurityMode.FormAuth
     SecurityContextRepository securityContextRepository
+
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
 
     @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
     Boolean verifyEmailAddresses
@@ -177,15 +182,51 @@ class UserAuthService {
 
     private Collection<GrantedAuthority> convertRoles(List<UserRole> roles) {
         Collection<GrantedAuthority> grantedAuthorities = EMPTY_ROLES
+        List<UserRole> addedRoles
         if (!CollectionUtils.isEmpty(roles)) {
             grantedAuthorities = new ArrayList<GrantedAuthority>(roles.size())
             for (UserRole role : roles) {
                 if (shouldAddRole(role)) {
+                    addedRoles = addedRoles ?: []
+                    addedRoles.add(role)
                     grantedAuthorities.add(new UserSkillsGrantedAuthority(role))
                 }
             }
+            UserRole quizReadOnlyRole = checkQuizReadOnlyRole(roles, addedRoles)
+            if (quizReadOnlyRole) {
+                grantedAuthorities.add(new UserSkillsGrantedAuthority(quizReadOnlyRole))
+            }
         }
         return grantedAuthorities
+    }
+
+    /**
+     * quiz read only role is assigned if
+     * - the user is not already quiz admin (of course!)
+     * - this user is an admin of a project where quiz was associated to a skill;
+     *   in this case project admin is allowed to view (but not mutate) quiz definition
+     */
+    @CompileStatic
+    private UserRole checkQuizReadOnlyRole(List<UserRole> roles, List<UserRole> addedRoles) {
+        UserRole role
+        HttpServletRequest request = getServletRequest()
+        String quizId = AuthUtils.getQuizIdFromRequest(request)
+        String method = request.method
+        boolean isGetMethod =  method && method == HttpMethod.GET.toString()
+        if (isGetMethod && quizId) {
+            boolean isNotQuizAdmin = !addedRoles?.find { it.roleName == RoleName.ROLE_QUIZ_ADMIN }
+            if (isNotQuizAdmin) {
+                List<UserRole> projectAdminRoles = roles.findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
+                if (projectAdminRoles) {
+                    List<String> projectIds = projectAdminRoles.collect { it.projectId }
+                    if (quizToSkillDefRepo.existQuizIdToOneOfTheProjectIdsAssociation(quizId, projectIds)) {
+                        role = new UserRole(userId: projectAdminRoles.first().userId, quizId: quizId, roleName: RoleName.ROLE_QUIZ_READ_ONLY)
+                    }
+                }
+            }
+        }
+
+        return role
     }
 
     private boolean shouldAddRole(UserRole userRole) {

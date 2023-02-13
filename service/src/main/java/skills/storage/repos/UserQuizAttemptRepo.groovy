@@ -25,6 +25,7 @@ import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
 interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
+    @Nullable
     @Query('''select
         quizAttempt.status as label, count(quizAttempt.id) as count
         from UserQuizAttempt quizAttempt, QuizDef quizDef

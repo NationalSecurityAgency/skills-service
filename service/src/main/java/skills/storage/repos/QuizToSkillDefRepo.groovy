@@ -57,5 +57,13 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     List<QuizNameAndId> getQuizInfoSkillIdRef(List<Integer> skillIdRef)
 
     void deleteBySkillRefId(Integer skillRefId)
+
+    @Query('''select count(quiz) > 0
+            from QuizToSkillDef qToS, QuizDef  quiz, SkillDef  skill
+            where quiz.id = qToS.quizRefId
+                and skill.id = qToS.skillRefId
+                and quiz.quizId = ?1
+                and skill.projectId in ?2 ''')
+    boolean existQuizIdToOneOfTheProjectIdsAssociation(String quizId, List<String> projectIds)
 }
 
