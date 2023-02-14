@@ -75,7 +75,11 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
         result.totalLevels == 5
-        result.data['ABCDE'] == [1: 2, 2: 0, 3: 0, 4: 1]
-        result.data['DEFGH'] == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
+        result.data[0].value == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
+        result.data[0].tag == 'DEFGH'
+        result.data[0].totalUsers == 4
+        result.data[1].value == [1: 2, 2: 0, 3: 0, 4: 1]
+        result.data[1].tag == 'ABCDE'
+        result.data[1].totalUsers == 3
     }
 }

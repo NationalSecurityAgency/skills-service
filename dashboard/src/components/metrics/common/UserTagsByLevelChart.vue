@@ -122,15 +122,16 @@ limitations under the License.
               const tags = Object.keys(userData);
 
               if (tags) {
-                this.chartOptions.xaxis.categories = tags;
+                const categories = userData.map((a) => a.tag);
+                this.chartOptions.xaxis.categories = categories;
                 const numberOfLevels = dataFromServer.totalLevels;
                 const series = [];
 
                 for (let level = 1; level <= numberOfLevels; level += 1) {
                   const dataForLevel = [];
                   tags.forEach((tag) => {
-                    if (userData[tag][level] > 0) {
-                      dataForLevel.push(userData[tag][level]);
+                    if (userData[tag].value[level] > 0) {
+                      dataForLevel.push(userData[tag].value[level]);
                     } else {
                       dataForLevel.push(0);
                     }

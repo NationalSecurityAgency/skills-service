@@ -56,13 +56,23 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
         adjustCountsToOnlyCountLastLevel(users)
 
-        return [ totalLevels: totalLevels, data: users ];
+        def userList = []
+        users.keySet().forEach{ key ->
+            def totalUsers = users[key].totalUsers
+            users[key].remove('totalUsers')
+            def item = [ tag: key, value: users[key], totalUsers: totalUsers]
+            userList.push(item)
+        }
+        def topUsers = userList.sort{ it -> it.totalUsers }.reverse().take(20)
+
+        return [ totalLevels: totalLevels, data: topUsers ];
     }
 
     private void adjustCountsToOnlyCountLastLevel(users) {
         def tags = users.keySet();
         tags.forEach( tag -> {
             def levels = users[tag].size()
+            users[tag]['totalUsers'] = users[tag][1]
             for (int i = levels; i > 1; i--) {
                 for (int j = i - 1; j >= 1; j--) {
                     users[tag][j] = users[tag][j] - users[tag][i]
