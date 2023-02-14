@@ -29,6 +29,7 @@ import subjectSkills from './modules/subjectSkills';
 import myProgress from './modules/myProgress';
 import finalizeInfo from './modules/finalizeInfo';
 import quiz from './modules/quiz';
+import quizConfig from './modules/quizConfig';
 
 Vue.use(Vuex);
 
@@ -77,5 +78,6 @@ export default new Vuex.Store({
     myProgress,
     finalizeInfo,
     quiz,
+    quizConfig,
   },
 });

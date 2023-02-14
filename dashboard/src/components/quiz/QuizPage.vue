@@ -15,9 +15,9 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="loadingQuizSummary" :options="headerOptions">
+    <page-header :loading="isLoading" :options="headerOptions">
       <div slot="subSubTitle">
-        <b-button-group class="mt-1" size="sm">
+        <b-button-group v-if="!isReadOnlyQuiz" class="mt-1" size="sm">
           <b-button ref="editQuizButton"
                     class="btn btn-outline-primary"
                     size="sm"
@@ -27,10 +27,9 @@ limitations under the License.
                     :aria-label="`edit Quiz ${quizId}`">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
-          <b-button ref="shareProjectButton"
-                    data-cy="shareProjBtn"
+          <b-button ref="shareQuizButton"
+                    data-cy="shareQuizBtn"
                     variant="outline-primary"
-                    v-skills="'ShareProject'"
                     :aria-label="`Share ${quizId} quiz with users`">
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
@@ -40,6 +39,9 @@ limitations under the License.
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
+        <div class="mt-2">
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userQuizRole | userRole }}</span>
+        </div>
       </div>
     </page-header>
 
@@ -49,12 +51,7 @@ limitations under the License.
                @quiz-saved="updateQuizDef"
                @hidden="handleHideQuizEdit"/>
 
-    <navigation :nav-items="[
-          {name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions'},
-          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers'},
-          {name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics'},
-          {name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings'},
-        ]">
+    <navigation v-if="!isLoading" :nav-items="navItems">
     </navigation>
   </div>
 </template>
@@ -65,11 +62,13 @@ limitations under the License.
   import PageHeader from '@/components/utils/pages/PageHeader';
   import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
   import QuizService from '@/components/quiz/QuizService';
+  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizPage',
+    mixins: [QuizConfigMixin],
     components: {
       EditQuiz,
       PageHeader,
@@ -77,7 +76,6 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: false,
         quizId: this.$route.params.quizId,
         editQuizInfo: {
           showDialog: false,
@@ -93,6 +91,23 @@ limitations under the License.
         'quizSummary',
         'loadingQuizSummary',
       ]),
+      isLoading() {
+        return this.loadingQuizSummary || this.isLoadingQuizConfig;
+      },
+      navItems() {
+        const res = [
+          { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
+          { name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers' },
+          { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
+        ];
+
+        if (!this.isReadOnlyQuiz) {
+          res.push({ name: 'Access', iconClass: 'fas fa-shield-alt skills-color-access', page: 'QuizAccessPage' });
+          res.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings' });
+        }
+
+        return res;
+      },
       headerOptions() {
         if (!this.quizSummary) {
           return {};

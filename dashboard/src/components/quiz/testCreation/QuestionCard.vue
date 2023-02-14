@@ -19,7 +19,7 @@ limitations under the License.
       <div class="col">
 
         <b-row :no-gutters="true" class="mb-3">
-          <b-col cols="auto">
+          <b-col v-if="!isReadOnlyQuiz" cols="auto">
             <div :id="`questionSortControl-${question.id}`"
                  class="sort-control mr-3"
                  @click.prevent.self
@@ -30,7 +30,7 @@ limitations under the License.
                  @keyup.up="move(-1)"
                  data-cy="sortControlHandle"><i class="fas fa-arrows-alt"/></div>
           </b-col>
-          <b-col class="">
+          <b-col :class="{ 'ml-3': isReadOnlyQuiz }">
             <div class="px-2 py-1">
               <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
@@ -58,7 +58,7 @@ limitations under the License.
         </b-row>
 
       </div>
-      <div class="col-auto">
+      <div v-if="!isReadOnlyQuiz" class="col-auto">
         <b-button-group size="sm" class="ml-1 mt-2 mr-3">
           <b-button variant="outline-primary"
                     :data-cy="`editQuestionButton_${questionNum}`"
@@ -97,9 +97,11 @@ limitations under the License.
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import QuestionType from '@/common-components/quiz/QuestionType';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
 
   export default {
     name: 'QuestionCard',
+    mixins: [QuizConfigMixin],
     components: { RemovalValidation, MarkdownText, SelectCorrectAnswer },
     props: {
       quizType: String,

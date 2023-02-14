@@ -17,7 +17,8 @@ package skills.quizLoading
 
 enum QuizSettings {
     MaxNumAttempts('quizNumberOfAttempts'),
-    MinNumQuestionsToPass('quizPassingReq');
+    MinNumQuestionsToPass('quizPassingReq'),
+    QuizUserRole('quizUserRole');
 
     String setting;
 

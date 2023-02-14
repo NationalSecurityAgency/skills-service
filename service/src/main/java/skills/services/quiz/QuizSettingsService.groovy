@@ -21,13 +21,18 @@ import org.apache.commons.lang3.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.QuizSettingsRes
+import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
+import skills.services.settings.Settings
 import skills.storage.model.QuizSetting
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizQuestionDefRepo
 import skills.storage.repos.QuizSettingsRepo
@@ -44,6 +49,9 @@ class QuizSettingsService {
 
     @Autowired
     QuizQuestionDefRepo quizQuestionDefRepo
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Transactional
     void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests) {
@@ -96,6 +104,14 @@ class QuizSettingsService {
         List<QuizSettingsRes> res = quizSettings.collect {
             new QuizSettingsRes(setting: it.setting, value: it.value, created: it.created, updated: it.updated)
         } ?: []
+
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        List<String> usrRoles = currentUser.authorities.collect { it.authority.toUpperCase() }
+        if (usrRoles.contains(RoleName.ROLE_QUIZ_ADMIN.toString())) {
+            res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_ADMIN.toString()))
+        } else if (usrRoles.contains(RoleName.ROLE_QUIZ_READ_ONLY.toString())) {
+            res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_READ_ONLY.toString()))
+        }
 
         return res.sort({ it.setting })
     }

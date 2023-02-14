@@ -186,6 +186,9 @@ router.beforeEach((to, from, next) => {
           store.dispatch('loadProjConfigState', { projectId: to.params.projectId });
         }
       }
+      if (to.path.startsWith('/administrator/quizzes/') && to.params.quizId && to.params.quizId !== from.params.quizId) {
+        store.dispatch('loadQuizConfigState', { quizId: to.params.quizId });
+      }
       if (to.matched.some((record) => record.meta.requiresAuth)) {
         // this route requires auth, check if logged in if not, redirect to login page.
         if (!isLoggedIn()) {

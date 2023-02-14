@@ -20,7 +20,14 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkills
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 class QuizSettingsSpecs extends DefaultIntSpec {
 
@@ -39,8 +46,8 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings.setting == ['name1', 'name2', 'name3']
-        settings.value == ['val1', 'val2', 'val3']
+        settings.setting == ['name1', 'name2', 'name3', QuizSettings.QuizUserRole.setting]
+        settings.value == ['val1', 'val2', 'val3', RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
     def "existing settings are updated and new are inserted"() {
@@ -63,8 +70,8 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings.setting == ['name1', 'name2', 'name3', 'name4']
-        settings.value == ['val1', 'updated', 'val3', 'val4']
+        settings.setting == ['name1', 'name2', 'name3', 'name4', QuizSettings.QuizUserRole.setting]
+        settings.value == ['val1', 'updated', 'val3', 'val4', RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
     def "validation - setting has to be provided"() {
@@ -124,11 +131,11 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings_t0.setting == [QuizSettings.MaxNumAttempts.setting]
-        settings_t0.value == ['12']
+        settings_t0.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting]
+        settings_t0.value == ['12', RoleName.ROLE_QUIZ_ADMIN.toString()]
 
-        settings_t1.setting == [QuizSettings.MaxNumAttempts.setting]
-        settings_t1.value == ['-1']
+        settings_t1.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting]
+        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
     def "validation: valid MaxNumAttempts setting - must be > -1"() {
@@ -184,11 +191,11 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting]
-        settings_t0.value == ['2']
+        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
+        settings_t0.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
 
-        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting]
-        settings_t1.value == ['-1']
+        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
+        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
     def "validation: valid MinNumQuestionsToPass setting - must be > -1"() {
@@ -298,16 +305,57 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         skillsService.deleteQuizQuestionDef(quiz.quizId,  quizInfo.questions[2].id)
         def settings_t3 = skillsService.getQuizSettings(quiz.quizId)
         then:
-        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting]
-        settings_t0.value == ['3']
+        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
+        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString()]
 
-        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting]
-        settings_t1.value == ['2']
+        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
+        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
 
-        settings_t2.setting == [QuizSettings.MinNumQuestionsToPass.setting]
-        settings_t2.value == ['1']
+        settings_t2.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
+        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString()]
 
-        !settings_t3
+        settings_t3.setting == [QuizSettings.QuizUserRole.setting]
+        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
+
+    def "get user admin role"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        def settings = skillsService.getQuizSettings(quiz.quizId)
+        then:
+        settings.setting == [QuizSettings.QuizUserRole.setting]
+        settings.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
+    }
+
+    def "get user read only role"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkills(skills)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+        skillsService.addProjectAdmin(proj.projectId, otherUser.userName)
+
+        when:
+        def settings = otherUser.getQuizSettings(quiz.quizId)
+        then:
+        settings.setting == [QuizSettings.QuizUserRole.setting]
+        settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString()]
+    }
+
 }
 

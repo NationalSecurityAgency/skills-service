@@ -93,6 +93,7 @@ import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
 import QuizSettings from '@/components/quiz/QuizSettings';
 import QuizUsers from '@/components/quiz/QuizUsers';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
+import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 
 Vue.use(Router);
 
@@ -954,6 +955,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Quiz Users',
+          },
+        },
+      }, {
+        name: 'QuizAccessPage',
+        path: 'access',
+        component: QuizAccessPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Access',
           },
         },
       }, {

@@ -17,10 +17,19 @@ limitations under the License.
   <div>
     <sub-page-header ref="subPageHeader"
                      title="Questions"
-                     action="Question"
-                     @add-action="openNewAnswerModal"
                      :is-loading="isLoading"
-                     aria-label="new question"/>
+                     aria-label="new question">
+      <b-button v-if="!isReadOnlyQuiz"
+                id="btn_Questions"
+                ref="btn_Questions"
+                @click="openNewAnswerModal()"
+                variant="outline-primary"
+                size="sm"
+                data-cy="btn_Questions"
+                aria-label="Create new Question" role="button">
+        <span class="d-none d-sm-inline">Question</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+      </b-button>
+    </sub-page-header>
 
     <b-overlay :show="operationInProgress" rounded="sm">
     <b-card body-class="p-0" footer-bg-variant="white">
@@ -53,8 +62,8 @@ limitations under the License.
         </div>
       </div>
 
-      <template #footer>
-        <div v-if="!isLoading" class="text-right">
+      <template v-if="!isLoading && !isReadOnlyQuiz" #footer>
+        <div class="text-right">
           <b-button ref="newQuestionOnBottomBtn"
                     data-cy="newQuestionOnBottomBtn"
                     variant="outline-primary"
@@ -85,11 +94,13 @@ limitations under the License.
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
   import QuestionType from '@/common-components/quiz/QuestionType';
+  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'Questions',
+    mixins: [QuizConfigMixin],
     components: {
       NoContent2,
       SkillsSpinner,
