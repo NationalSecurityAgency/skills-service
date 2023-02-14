@@ -118,6 +118,7 @@ class RestTemplateWrapper extends RestTemplate {
 //                .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .useSystemProperties()
                 .setConnectionManager(poolingHttpClientConnectionManager())
+                .disableAutomaticRetries()
 //                .setDefaultRequestConfig(requestConfig)
                 .build()
     }
