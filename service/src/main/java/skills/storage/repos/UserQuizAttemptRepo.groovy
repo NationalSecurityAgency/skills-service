@@ -15,10 +15,12 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.controller.result.model.QuizRun
 import skills.storage.model.LabeledCount
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
@@ -77,5 +79,34 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
             and quizDef.quizId = ?3
      ''')
     boolean existsByUserIdAndIdAndQuizId(String userId, Integer id, String quizId)
+
+    @Query('''select count(quizAttempt)
+        from UserQuizAttempt quizAttempt, QuizDef quizDef
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizDef.quizId = ?1
+     ''')
+    long countByQuizId(String quizId)
+
+    @Query('''select count(quizAttempt)
+        from UserQuizAttempt quizAttempt, QuizDef quizDef, UserAttrs userAttrs
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizAttempt.userId = userAttrs.userId
+            and lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%'))
+            and quizDef.quizId = ?1
+     ''')
+    Integer countQuizRuns(String quizId, String userQuery)
+
+    @Query('''select quizAttempt.started as started,
+                    quizAttempt.completed as completed,
+                    quizAttempt.status as status,
+                    userAttrs.userId as userId,
+                    userAttrs.userIdForDisplay as userIdForDisplay
+        from UserQuizAttempt quizAttempt, QuizDef quizDef, UserAttrs userAttrs
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizAttempt.userId = userAttrs.userId
+            and lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%'))
+            and quizDef.quizId = ?1
+     ''')
+    List<QuizRun> findQuizRuns(String quizId, String userQuery, PageRequest pageRequest)
 
 }

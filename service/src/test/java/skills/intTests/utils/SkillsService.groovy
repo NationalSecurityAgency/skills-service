@@ -1675,6 +1675,11 @@ class SkillsService {
         return wsHelper.apiGet(url)
     }
 
+    def getQuizRuns(String quizId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "") {
+        String url = "${getQuizDefUrl(quizId)}/runs"
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
+    }
+
     @Deprecated
     def reportQuizAttempt(String quizId, def quizAttemptReq) {
         String url = "/quizzes/${quizId}/attempt"

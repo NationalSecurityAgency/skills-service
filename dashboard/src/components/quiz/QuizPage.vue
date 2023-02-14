@@ -33,7 +33,7 @@ limitations under the License.
                     :aria-label="`Share ${quizId} quiz with users`">
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
-          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId }, query: { preview: 'true' }}"
+          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
                     data-cy="quizPreview"
                     variant="outline-primary" :aria-label="`Preview Quiz ${quizId}`">
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
@@ -97,7 +97,7 @@ limitations under the License.
       navItems() {
         const res = [
           { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
-          { name: 'Users', iconClass: 'fa-users skills-color-users', page: 'QuizUsers' },
+          { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizUsers' },
           { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
         ];
 

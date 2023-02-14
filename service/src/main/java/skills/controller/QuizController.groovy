@@ -17,6 +17,7 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
@@ -31,6 +32,9 @@ import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizSettingsService
+
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
 
 @RestController
 @RequestMapping("/admin/quiz-definitions")
@@ -124,6 +128,22 @@ class QuizController {
     @ResponseBody
     QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
         return quizDefService.getMetrics(quizId);
+    }
+
+    @RequestMapping(value = "/{quizId}/runs", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getQuizRuns(@PathVariable("quizId") String quizId,
+                            @RequestParam String query,
+                            @RequestParam int limit,
+                            @RequestParam int page,
+                            @RequestParam String orderBy,
+                            @RequestParam Boolean ascending) {
+        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
+        QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
+        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
+        QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return quizDefService.getQuizRuns(quizId, query, pageRequest);
     }
 
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

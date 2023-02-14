@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
@@ -405,6 +406,23 @@ class QuizDefService {
             throw new SkillQuizException("Provided question id [${questionId}] does not exist in quiz [${quizId}]", quizId)
         }
         return questionDef
+    }
+
+    @Transactional
+    TableResult getQuizRuns(String quizId, String query, PageRequest pageRequest) {
+        long totalCount = userQuizAttemptRepo.countByQuizId(quizId)
+        if (totalCount == 0) {
+            return new TableResult(totalCount: totalCount, count: 0, data: [])
+        }
+
+        query = query ?: ''
+        List<QuizRun> quizRuns = userQuizAttemptRepo.findQuizRuns(quizId, query, pageRequest)
+        int count = totalCount > pageRequest.pageSize ? totalCount : quizRuns.size()
+        if (totalCount > pageRequest.pageSize && query) {
+            count = userQuizAttemptRepo.countQuizRuns(quizId, query)
+        }
+
+        return new TableResult(totalCount: totalCount, data: quizRuns, count: count)
     }
 
     @Transactional
