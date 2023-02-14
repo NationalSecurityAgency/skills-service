@@ -76,14 +76,16 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
     @Override
     DeferredSecurityContext loadDeferredContext(HttpServletRequest request) {
         Supplier<SecurityContext> supplier = () -> {
-            SecurityContext context = super.loadDeferredContext(request).get()
-            Authentication auth = context?.getAuthentication()
-            if (auth) {
-                auth = convertAuthentication(auth)
-                context = SecurityContextHolder.createEmptyContext();
-                context.setAuthentication(auth)
+            synchronized (this) {
+                SecurityContext context = super.loadDeferredContext(request).get()
+                Authentication auth = context?.getAuthentication()
+                if (auth) {
+                    auth = convertAuthentication(auth)
+                    context = SecurityContextHolder.createEmptyContext();
+                    context.setAuthentication(auth)
+                }
+                return context
             }
-            return context
         }
         return new SupplierDeferredSecurityContext(supplier, SecurityContextHolder.getContextHolderStrategy());
     }
