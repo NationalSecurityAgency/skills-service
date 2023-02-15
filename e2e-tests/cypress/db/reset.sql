@@ -12,15 +12,15 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
-delete from PROJECT_DEFINITION where PROJECT_ID <> 'Inception';
-delete from USER_ATTRS where USER_ID <> 'root@skills.org' and USER_ID <> 'skills@skills.org';
-delete from USER_ROLES where USER_ID = 'skills@skills.org' and (ROLE_NAME = 'ROLE_SUPER_DUPER_USER' OR ROLE_NAME = 'ROLE_SUPERVISOR' OR ROLE_NAME = 'ROLE_PROJECT_ADMIN' OR ROLE_NAME = 'ROLE_PRIVATE_PROJECT_USER');
-delete from USER_ROLES where USER_ID = 'root@skills.org' and ROLE_NAME = 'ROLE_SUPERVISOR';
-delete from GLOBAL_BADGE_LEVEL_DEFINITION;
-delete from SKILL_DEFINITION where PROJECT_ID is null;
+delete from project_definition where project_id <> 'Inception';
+delete from user_attrs where user_id <> 'root@skills.org' and user_id <> 'skills@skills.org';
+delete from user_roles where user_id = 'skills@skills.org' and (role_name = 'ROLE_SUPER_DUPER_USER' OR role_name = 'ROLE_SUPERVISOR' OR role_name = 'ROLE_PROJECT_ADMIN' OR role_name = 'ROLE_PRIVATE_PROJECT_USER');
+delete from user_roles where user_id = 'root@skills.org' and role_name = 'ROLE_SUPERVISOR';
+delete from global_badge_level_definition;
+delete from skill_definition where project_id is null;
 delete from user_achievement;
-delete from SETTINGS where setting_group <> 'project.inception' or setting_group is null;
-delete from user_points where PROJECT_ID = 'Inception';
-delete from user_achievement where PROJECT_ID = 'Inception';
-delete from user_performed_skill where PROJECT_ID = 'Inception';
-delete from user_events where PROJECT_ID = 'Inception';
+delete from settings where setting_group <> 'project.inception' or setting_group is null;
+delete from user_points where project_id = 'Inception';
+delete from user_achievement where project_id = 'Inception';
+delete from user_performed_skill where project_id = 'Inception';
+delete from user_events where project_id = 'Inception';

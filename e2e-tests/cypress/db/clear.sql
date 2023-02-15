@@ -12,10 +12,9 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
-delete from PROJECT_DEFINITION;
-delete from USER_ATTRS;
-delete from USER_ROLES;
-delete from USER_ROLES;
-delete from GLOBAL_BADGE_LEVEL_DEFINITION;
-delete from SKILL_DEFINITION;
-delete from SETTINGS;
+delete from project_definition;
+delete from user_attrs;
+delete from user_roles;
+delete from global_badge_level_definition;
+delete from skill_definition;
+delete from settings;
