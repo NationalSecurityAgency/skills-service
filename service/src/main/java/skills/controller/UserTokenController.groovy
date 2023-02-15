@@ -27,6 +27,7 @@ import jakarta.servlet.http.Part
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Conditional
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService
@@ -242,7 +243,7 @@ class UserTokenController {
 
         @Override
         String getMethod() {
-            return request.getMethod()
+            return HttpMethod.POST.toString() //request.getMethod()
         }
 
         @Override
