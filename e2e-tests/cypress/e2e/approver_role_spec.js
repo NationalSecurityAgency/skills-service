@@ -495,7 +495,7 @@ describe('Approver Role Tests', () => {
     it('approver role does not have settings button on self report page', function () {
         const runCheck = (projNum, assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
-            cy.visit(`/administrator/projects/proj${projNum}/self-report/`);
+            cy.visit(`/administrator/projects/proj${projNum}/self-report`);
             cy.wait(`@getSettingsProj${projNum}`);
             cy.get('[data-cy="confApprovalWorkloadConfBtn"]').should(`${chainerPrepend}exist`)
         }
