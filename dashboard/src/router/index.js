@@ -91,7 +91,7 @@ import QuizPage from '@/components/quiz/QuizPage';
 import Questions from '@/components/quiz/testCreation/Questions';
 import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
 import QuizSettings from '@/components/quiz/QuizSettings';
-import QuizUsers from '@/components/quiz/QuizUsers';
+import QuizRunsHistoryPage from '@/components/quiz/runsHistory/QuizRunsHistoryPage';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 
@@ -948,13 +948,13 @@ const router = new Router({
           },
         },
       }, {
-        name: 'QuizUsers',
-        path: 'users',
-        component: QuizUsers,
+        name: 'QuizRunsHistoryPage',
+        path: 'runs',
+        component: QuizRunsHistoryPage,
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Quiz Users',
+            message: 'Quiz Runs History',
           },
         },
       }, {

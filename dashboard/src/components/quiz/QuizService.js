@@ -72,6 +72,10 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}/metrics`)
       .then((response) => response.data);
   },
+  getQuizRunsHistory(quizId, params) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/runs`, { params })
+      .then((response) => response.data);
+  },
   saveQuizSettings(quizId, settings) {
     return axios.post(`/admin/quiz-definitions/${quizId}/settings`, settings)
       .then((response) => response.data);

@@ -97,7 +97,7 @@ limitations under the License.
       navItems() {
         const res = [
           { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
-          { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizUsers' },
+          { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizRunsHistoryPage' },
           { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
         ];
 
