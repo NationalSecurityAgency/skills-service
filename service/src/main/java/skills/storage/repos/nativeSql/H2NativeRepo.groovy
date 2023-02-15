@@ -66,7 +66,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
         String q = '''
-        merge into USER_POINTS(id, points) key(id)
+        merge into user_points(id, points) key(id)
         SELECT b.id, b.points - a.points as points
         FROM user_points a, user_points b
         WHERE a.user_id = b.user_id
@@ -85,7 +85,7 @@ class H2NativeRepo implements NativeQueriesRepo {
     @Override
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType) {
         String q = '''
-        merge into USER_POINTS (id, points) key (id)
+        merge into user_points (id, points) key (id)
     select points.id, sum.sumPoints
     from (select user_id sumUserId, SUM(pointsInner.points) sumPoints
           from user_points pointsInner
