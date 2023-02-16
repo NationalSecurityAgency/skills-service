@@ -121,7 +121,7 @@ limitations under the License.
           class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
         </p>
         <div>
-          Deletion <b>cannot</b> be undone and permanently removes all of the underlying questoins
+          Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
           as well as users' achievements, stats and metrics. Proceed with caution!
         </div>
       </removal-validation>

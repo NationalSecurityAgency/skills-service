@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header title="Runs"/>
+  <sub-page-header title="Results"/>
 
   <b-card body-class="p-0">
     <div>
@@ -31,7 +31,7 @@ limitations under the License.
           <b-button variant="outline-info" @click="applyFilters" data-cy="userFilterBtn"><i
             class="fa fa-filter" aria-hidden="true"/> Filter
           </b-button>
-          <b-button variant="outline-info" @click="resetFilter" class="ml-1" data-cy="userResetBtn"><i
+          <b-button ref="filterResetBtn" variant="outline-info" @click="resetFilter" class="ml-1" data-cy="userResetBtn"><i
             class="fa fa-times" aria-hidden="true"/> Reset
           </b-button>
         </div>
@@ -55,7 +55,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(userIdForDisplay)="data">
-          <div class="row">
+          <div class="row" :data-cy="`row${data.index}-userCell`">
             <div class="col">
               <span v-if="data.item.userIdForDisplayHtml" v-html="data.item.userIdForDisplayHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span>
             </div>
@@ -88,14 +88,29 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(controls)="data">
-          <b-button variant="outline-danger" size="sm">
-            <i class="fas fa-trash" aria-hidden="true"/><span class="sr-only">delete quiz run for {{ data.item.userIdForDisplay}}</span>
+          <b-button :data-cy="`row${data.index}-deleteBtn`"
+                    :ref="`deleteAttempt-${data.item.attemptId}`"
+                    @click="initiateDelete(data.item)"
+                    variant="outline-danger"
+                    size="sm">
+            <i class="fas fa-trash" aria-hidden="true"/><span class="sr-only">delete quiz result for {{ data.item.userIdForDisplay}}</span>
           </b-button>
         </template>
 
       </skills-b-table>
     </div>
   </b-card>
+
+  <removal-validation v-if="deleteQuizRunInfo.showDialog" v-model="deleteQuizRunInfo.showDialog"
+                      @do-remove="deleteRun" @hidden="focusOnRefId(`deleteAttempt-${deleteQuizRunInfo.quizRun.attemptId}`)">
+    <p>
+      This will remove the {{ quizType }} result for <span
+      class="text-primary font-weight-bold">{{ deleteQuizRunInfo.quizRun.userIdForDisplay }}</span> user.
+    </p>
+    <div>
+      Deletion <b>cannot</b> be undone and permanently removes all of the underlying user's answers.
+    </div>
+  </removal-validation>
 </div>
 </template>
 
@@ -107,13 +122,17 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import dayjs from '@/common-components/DayJsCustomizer';
+  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizRunsHistoryPage',
     components: {
-      DateCell, SkillsBTable, SubPageHeader,
+      DateCell,
+      SkillsBTable,
+      SubPageHeader,
+      RemovalValidation,
     },
     data() {
       return {
@@ -167,6 +186,10 @@ limitations under the License.
               possiblePageSizes: [10, 20, 50],
             },
           },
+        },
+        deleteQuizRunInfo: {
+          showDialog: false,
+          quizRun: {},
         },
       };
     },
@@ -241,6 +264,25 @@ limitations under the License.
         const endDate = completed ? dayjs(completed) : dayjs();
         const diff = endDate.diff(startDate);
         return diff;
+      },
+      focusOnRefId(refId) {
+        this.$nextTick(() => {
+          const ref = this.$refs[refId];
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
+      initiateDelete(quizRun) {
+        this.deleteQuizRunInfo.quizRun = quizRun;
+        this.deleteQuizRunInfo.showDialog = true;
+      },
+      deleteRun() {
+        this.table.options.busy = true;
+        QuizService.deleteQuizRunHistoryItem(this.quizId, this.deleteQuizRunInfo.quizRun.attemptId)
+          .then(() => {
+            this.loadData().then(() => this.focusOnRefId('filterResetBtn'));
+          });
       },
     },
   };

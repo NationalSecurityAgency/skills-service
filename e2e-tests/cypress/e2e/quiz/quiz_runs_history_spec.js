@@ -64,6 +64,45 @@ describe('Quiz Runs History Tests', () => {
         ], 10);
     });
 
+    it('delete a run', function () {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}]);
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.get('[data-cy="row0-userCell"]').contains('user3')
+        cy.get('[data-cy="row1-userCell"]').contains('user2')
+        cy.get('[data-cy="row2-userCell"]').contains('user1')
+
+        cy.get('[data-cy="row1-deleteBtn"]').click()
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove the Survey result for user2 user')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="removeButton"]').click()
+
+        cy.get('[data-cy="row0-userCell"]').contains('user3')
+        cy.get('[data-cy="row1-userCell"]').contains('user1')
+        cy.get('[data-cy="row2-userCell"]').should('not.exist')
+        cy.get('[data-cy="userResetBtn"]').should('have.focus')
+    });
+
+    it('canceling delete returns focus to the delete button', function () {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}]);
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.get('[data-cy="row1-deleteBtn"]').click()
+        cy.get('[data-cy="closeRemovalSafetyCheck"]').click()
+        cy.get('[data-cy="row1-deleteBtn"]').should('have.focus')
+
+        cy.get('[data-cy="row1-deleteBtn"]').click()
+        cy.get('.modal-header [aria-label="Close"]').click()
+        cy.get('[data-cy="row1-deleteBtn"]').should('have.focus')
+    });
+
 
 
 

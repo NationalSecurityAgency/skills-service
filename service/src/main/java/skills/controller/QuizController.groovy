@@ -146,6 +146,13 @@ class QuizController {
         return quizDefService.getQuizRuns(quizId, query, pageRequest);
     }
 
+    @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")
+    @ResponseBody
+    RequestResult deleteQuizRun(@PathVariable("quizId") String quizId, @PathVariable("attemptId") Integer attemptId) {
+        quizDefService.deleteQuizRun(quizId, attemptId)
+        return RequestResult.success()
+    }
+
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,

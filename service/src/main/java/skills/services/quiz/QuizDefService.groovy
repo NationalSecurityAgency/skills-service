@@ -426,6 +426,22 @@ class QuizDefService {
     }
 
     @Transactional
+    void deleteQuizRun(String quizId, Integer attemptId) {
+        Optional<UserQuizAttempt> optionalUserQuizAttempt = userQuizAttemptRepo.findById(attemptId)
+        if (!optionalUserQuizAttempt.isPresent()) {
+            throw new SkillQuizException("Quiz attempt with id [${attemptId}] does not exist", ErrorCode.BadParam)
+        }
+        UserQuizAttempt userQuizAttempt = optionalUserQuizAttempt.get()
+        QuizDef quizDef1 = findQuizDef(quizId)
+        if (quizDef1.id != userQuizAttempt.quizDefinitionRefId) {
+            throw new SkillQuizException("Provided attempt id [${attemptId}] does not belong to quiz [${quizId}]", quizId, ErrorCode.BadParam)
+        }
+
+        userQuizAttemptRepo.delete(userQuizAttempt)
+        log.info("Removed [{}]", userQuizAttempt.toString())
+    }
+
+    @Transactional
     QuizMetrics getMetrics(String quizId) {
         List<LabeledCount> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
 

@@ -18,6 +18,7 @@ package skills.controller.result.model
 import skills.storage.model.UserQuizAttempt
 
 interface QuizRun {
+    Integer getAttemptId()
     String getUserId()
     String getUserIdForDisplay()
     Date getStarted()

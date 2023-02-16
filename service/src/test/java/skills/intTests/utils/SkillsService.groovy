@@ -1680,6 +1680,11 @@ class SkillsService {
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
     }
 
+    def deleteQuizRun(String quizId, Integer quizAttemptId) {
+        String url = "${getQuizDefUrl(quizId)}/runs/${quizAttemptId}"
+        wsHelper.adminDelete(url)
+    }
+
     @Deprecated
     def reportQuizAttempt(String quizId, def quizAttemptReq) {
         String url = "/quizzes/${quizId}/attempt"

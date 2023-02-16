@@ -16,12 +16,26 @@
 package skills.intTests.quiz
 
 import groovy.json.JsonOutput
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.storage.model.UserQuizAttempt
+import skills.storage.repos.UserQuizAnswerAttemptRepo
+import skills.storage.repos.UserQuizAttemptRepo
+import skills.storage.repos.UserQuizQuestionAttemptRepo
 import spock.lang.IgnoreIf
 
 class QuizRunsSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
+    UserQuizQuestionAttemptRepo userQuizQuestionAttemptRepo
+
+    @Autowired
+    UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
 
     def "get quiz runs page"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
@@ -140,6 +154,86 @@ class QuizRunsSpecs extends DefaultIntSpec {
         ]
     }
 
+    def "delete quiz run"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(10, true)
+        users.eachWithIndex { it, index ->
+            runQuiz(it, quiz, quizInfo, index % 2 == 0)
+        }
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        assert userQuizAttemptRepo.findAll().find({it.id == quizRuns.data[1].attemptId})
+        assert userQuizQuestionAttemptRepo.findAll().find({it.userQuizAttemptRefId == quizRuns.data[1].attemptId})
+        assert userQuizAnswerAttemptRepo.findAll().find({it.userQuizAttemptRefId == quizRuns.data[1].attemptId})
+        when:
+        skillsService.deleteQuizRun(quiz.quizId, quizRuns.data[1].attemptId)
+        def quizRunsAfter = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        then:
+        quizRuns.totalCount == users.size()
+        quizRuns.count == users.size()
+        quizRuns.data.userId == users
+
+        quizRunsAfter.totalCount == users.size() - 1
+        quizRunsAfter.count == users.size() - 1
+        quizRunsAfter.data.userId == [users[0], users[2..users.size()-1]].flatten()
+
+        !userQuizAttemptRepo.findAll().find({it.id == quizRuns.data[1].attemptId})
+        !userQuizQuestionAttemptRepo.findAll().find({it.userQuizAttemptRefId == quizRuns.data[1].attemptId})
+        !userQuizAnswerAttemptRepo.findAll().find({it.userQuizAttemptRefId == quizRuns.data[1].attemptId})
+    }
+
+    def "delete quiz run validation: attempt id does not exist"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(1, true)
+        users.eachWithIndex { it, index ->
+            runQuiz(it, quiz, quizInfo, index % 2 == 0)
+        }
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        def badAttemptId = quizRuns.data[0].attemptId+1
+        when:
+        skillsService.deleteQuizRun(quiz.quizId, badAttemptId)
+        then:
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Quiz attempt with id [${badAttemptId}] does not exist")
+    }
+
+    def "delete quiz run validation: attempt id is for a different quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quiz1 = QuizDefFactory.createQuiz(2, "Fancy Description")
+        skillsService.createQuizDef(quiz1)
+        def questions1 = QuizDefFactory.createChoiceQuestions(2, 2, 2)
+        skillsService.createQuizQuestionDefs(questions1)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(1, true)
+        users.eachWithIndex { it, index ->
+            runQuiz(it, quiz, quizInfo, index % 2 == 0)
+        }
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        when:
+        skillsService.deleteQuizRun(quiz1.quizId, quizRuns.data[0].attemptId)
+        then:
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Provided attempt id [${quizRuns.data[0].attemptId}] does not belong to quiz [${quiz1.quizId}]")
+    }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body

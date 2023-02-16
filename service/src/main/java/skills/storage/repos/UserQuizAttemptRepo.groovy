@@ -96,7 +96,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''')
     Integer countQuizRuns(String quizId, String userQuery)
 
-    @Query('''select quizAttempt.started as started,
+    @Query('''select quizAttempt.id as attemptId,
+                    quizAttempt.started as started,
                     quizAttempt.completed as completed,
                     quizAttempt.status as status,
                     userAttrs.userId as userId,
