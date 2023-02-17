@@ -19,11 +19,26 @@ describe('Metrics Tests - Skills', () => {
 
     const waitForSnap = 4000;
 
+    before(() => {
+        Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
+            cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags });
+        });
+    })
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
         });
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply({
+                body: {
+                    projectMetricsTagCharts: '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]'
+                },
+            });
+        })
+            .as('getConfig');
     });
 
     it('stat cards with zero activity', () => {
@@ -647,5 +662,89 @@ describe('Metrics Tests - Skills', () => {
             ],
         ]);
 
+    });
+
+    it('number of users by tag', {
+        retries: {
+            runMode: 0,
+            openMode: 0
+        }
+    }, () => {
+        cy
+            .intercept('/admin/projects/proj1/metrics/skillAchievementsByTagBuilder**')
+            .as('skillAchievementsByTagBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 1;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '1000',
+                numPerformToCompletion: '2',
+            });
+        }
+        ;
+
+        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
+        const numDays = 6;
+
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.login(vars.rootUser, vars.defaultPass);
+            });
+
+        // Add users who achieved the skill
+        for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
+            for (let userCounter = 1; userCounter <= dayCounter; userCounter += 1) {
+                const userId = `user-${userCounter}achieved@skills.org`;
+
+                cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                    {
+                        userId: userId,
+                        timestamp: m.clone()
+                            .add(dayCounter, 'day')
+                            .format('x')
+                    });
+
+                cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+            }
+        }
+
+        // Add users in progress
+        for (let userCounter = numDays; userCounter <= 10; userCounter += 1) {
+            const userId = `user-${userCounter}achieved@skills.org`;
+
+            cy.request('POST', `/api/projects/proj1/skills/skill1`,
+                {
+                    userId: userId,
+                    timestamp: m.clone()
+                        .add(1, 'day')
+                        .format('x')
+                });
+
+            cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+        }
+
+        cy.logout();
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.login(vars.defaultUser, vars.defaultPass);
+            });
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        cy.wait('@getConfig');
+        cy.clickNav('Metrics');
+        cy.wait('@skillAchievementsByTagBuilder');
+
+        cy.wait(waitForSnap);
+        cy.matchSnapshotImageForElement('[data-cy=numUsersByTag]');
     });
 });

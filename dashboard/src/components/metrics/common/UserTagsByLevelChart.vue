@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" data-cy="numUsersByTag">
+  <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" :data-cy="`numUsersByTag-${tag.key}`">
     <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
       <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
     </metrics-overlay>
