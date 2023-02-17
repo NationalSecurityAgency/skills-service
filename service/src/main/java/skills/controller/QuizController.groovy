@@ -59,7 +59,7 @@ class QuizController {
 
 
     @RequestMapping(value = "/{quizId}", method = RequestMethod.DELETE)
-    void deleteProject(@PathVariable("quizId") String quizId) {
+    void deleteQuiz(@PathVariable("quizId") String quizId) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         quizDefService.deleteQuiz(quizId)
     }
@@ -179,6 +179,13 @@ class QuizController {
         return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
     }
 
+
+    @RequestMapping(value = "/{quizId}/attempts/{quizAttemptId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    UserGradedQuizQuestionsResult getUsersGradedResult(@PathVariable("quizId") String quizId,
+                                         @PathVariable("quizAttemptId") Integer quizAttemptId) {
+        return quizDefService.getUsersGradedResult(quizId, quizAttemptId);
+    }
 
     @RequestMapping(value = "/{quizId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveQuizSettings(@PathVariable("quizId") String quizId, @RequestBody List<QuizSettingsRequest> values) {

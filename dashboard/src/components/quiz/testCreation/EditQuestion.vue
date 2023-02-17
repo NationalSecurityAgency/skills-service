@@ -203,7 +203,7 @@ limitations under the License.
           isEdit: this.isEdit,
           ...questionDef,
         };
-        this.questionType.selectedType = this.questionType.options.find((o) => o.id === questionDef.questionType);
+        this.questionType.selectedType = this.questionType.options.find((o) => o.id === questionDef.type);
         this.loading = false;
       },
       closeMe(e) {

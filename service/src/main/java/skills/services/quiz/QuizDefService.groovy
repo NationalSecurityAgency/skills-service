@@ -94,6 +94,9 @@ class QuizDefService {
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         boolean isRoot = userInfoService.isCurrentUserASuperDuperUser()
@@ -135,6 +138,15 @@ class QuizDefService {
         assert quizId
         QuizDefWithDescription quizDefWithDescription = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         return convert(quizDefWithDescription)
+    }
+
+    @Profile
+    private UserQuizAttempt findUserQuizAttempt(int quizAttemptId) {
+        Optional<UserQuizAttempt> optionalUserQuizAttempt = userQuizAttemptRepo.findById(quizAttemptId)
+        if (!optionalUserQuizAttempt.isPresent()) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
+        }
+        return optionalUserQuizAttempt.get()
     }
 
     @Transactional(readOnly = true)
@@ -512,6 +524,63 @@ class QuizDefService {
                 displayOrder: savedAnswer.displayOrder,
         )
     }
+
+    @Transactional
+    UserGradedQuizQuestionsResult getUsersGradedResult(String quizId, Integer quizAttemptId) {
+        QuizDef quizDef = findQuizDef(quizId)
+        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
+        UserQuizAttempt userQuizAttempt = findUserQuizAttempt(quizAttemptId)
+        if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
+        }
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(userQuizAttempt.userId)
+        List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
+
+        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
+        List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
+        Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy {it.questionRefId }
+
+        List<QuizQuestionDefResult> questions = dbQuestionDefs
+                .sort { it.displayOrder }
+                .collect { QuizQuestionDef questionDef ->
+                    List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
+
+                    List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
+                        UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
+                        return new UserGradedQuizAnswerResult(
+                                id: answerDef.id,
+                                answer: foundSelected?.answerText,
+                                isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
+                                isSelected: foundSelected != null,
+                        )
+                    }
+
+                    UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id}
+                    boolean isCorrect
+                    if (userQuizQuestionAttempt?.status != null) {
+                        isCorrect = userQuizQuestionAttempt.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                    } else {
+                        isCorrect = isSurvey ? true : !answers.find { it.isConfiguredCorrect != it.isSelected}
+                    }
+                    return new UserGradedQuizQuestionResult(
+                            id: questionDef.id,
+                            question: questionDef.question,
+                            questionType: questionDef.type,
+                            answers: answers,
+                            isCorrect: isCorrect,
+                    )
+                }
+
+
+        return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
+                userId: userAttrs.userId,
+                userIdForDisplay: userAttrs.userIdForDisplay,
+                status: userQuizAttempt.status,
+                questions: questions,
+        )
+    }
+
 
     private QuizDef findQuizDef(String quizId) {
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)

@@ -27,12 +27,12 @@ limitations under the License.
                     :aria-label="`edit Quiz ${quizId}`">
             <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
           </b-button>
-          <b-button ref="shareQuizButton"
-                    data-cy="shareQuizBtn"
-                    variant="outline-primary"
-                    :aria-label="`Share ${quizId} quiz with users`">
-            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
+<!--          <b-button ref="shareQuizButton"-->
+<!--                    data-cy="shareQuizBtn"-->
+<!--                    variant="outline-primary"-->
+<!--                    :aria-label="`Share ${quizId} quiz with users`">-->
+<!--            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>-->
+<!--          </b-button>-->
           <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
                     data-cy="quizPreview"
                     variant="outline-primary" :aria-label="`Preview Quiz ${quizId}`">

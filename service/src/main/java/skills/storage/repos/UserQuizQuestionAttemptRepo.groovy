@@ -19,6 +19,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import skills.storage.model.UserQuizQuestionAttempt
 
+import javax.annotation.Nullable
+
 interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAttempt, Long> {
 
     interface IdAndStatusCount {
@@ -44,5 +46,8 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
         group by answerAttempt.quizAnswerDefinitionRefId, answerAttempt.status
      ''')
     List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId)
+
+    @Nullable
+    List<UserQuizQuestionAttempt> findAllByUserQuizAttemptRefId(Integer userQuizAttemptRefId)
 
 }

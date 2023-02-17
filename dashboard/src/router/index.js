@@ -92,6 +92,7 @@ import Questions from '@/components/quiz/testCreation/Questions';
 import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
 import QuizSettings from '@/components/quiz/QuizSettings';
 import QuizRunsHistoryPage from '@/components/quiz/runsHistory/QuizRunsHistoryPage';
+import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 
@@ -955,6 +956,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Quiz Results History',
+          },
+        },
+      }, {
+        name: 'QuizSingleRunPage',
+        path: 'results/:runId',
+        component: QuizSingleRunPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Single Result',
           },
         },
       }, {
