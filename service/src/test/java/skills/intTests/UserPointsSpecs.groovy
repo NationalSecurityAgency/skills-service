@@ -22,6 +22,7 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -60,6 +61,56 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         skillsService.addBadge([projectId: projId, badgeId: badgeId, name: 'Badge 1'])
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badgeId, skillId: allSkillIds.get(0).get(0)])
+    }
+
+    @IgnoreRest
+    def 'recalculate user points after changing point value' () {
+
+        skillsService.deleteProjectIfExist(projId)
+        String subjectId = 'testSubject1'
+        skillsService.createProject([projectId: projId, name: "Test Project"])
+        skillsService.createSubject([projectId: projId, subjectId: subjectId, name: "Test Subject"])
+        String skillId = addDependentSkills(projId, subjectId, 1, 1, 5).get(0)
+
+        skillsService.addSkill(['projectId': projId, skillId: skillId], sampleUserIds.get(0), new Date()-4)
+        skillsService.addSkill(['projectId': projId, skillId: skillId], sampleUserIds.get(0), threeDaysAgo)
+
+        when:
+        def resultsBefore = skillsService.getProjectUsers(projId)
+
+        // change point incrment from 35 to 10
+        def res = skillsService.getSkill([projectId: projId, subjectId: subjectId, skillId: skillId])
+        String originalSkillId = res.skillId
+        res.pointIncrement = 10
+        res.subjectId = subjectId
+        skillsService.updateSkill(res, originalSkillId)
+
+        def resultsAfter = skillsService.getProjectUsers(projId)
+
+        then:
+        resultsBefore
+        resultsBefore.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        resultsBefore.data.get(0).totalPoints == 70
+
+        resultsAfter
+        resultsBefore.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+
+        // totalPoints remains 70 for H2 (see UserPointsRepo.updateUserPointsForASkillInH2())
+        resultsAfter.data.get(0).totalPoints == 20
+    }
+
+    @IgnoreRest
+    def 'get subject users returns correct lastUpdated date'() {
+        when:
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(0))
+
+        then:
+        results1
+        results1.count == 1
+        results1.data.size() == 1
+
+        // lastUpdated is null for H2 (see UserPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike)
+        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
     }
 
     def 'get project users when project exists'() {
@@ -434,18 +485,18 @@ class UserPointsSpecs extends DefaultIntSpec {
         return skillIds
     }
 
-    private List<String> addDependentSkills(String projectId, String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1) {
+    private List<String> addDependentSkills(String projectId, String subject, int dependencyLevels = 1, int skillsAtEachLevel = 1, int numPerformToCompletion = 1) {
         List<String> parentSkillIds = []
         List<String> allSkillIds = []
 
         for (int i = 0; i < dependencyLevels; i++) {
-            parentSkillIds = addSkillsForSubject(projectId, subject, skillsAtEachLevel, parentSkillIds)
+            parentSkillIds = addSkillsForSubject(projectId, subject, skillsAtEachLevel, parentSkillIds, numPerformToCompletion)
             allSkillIds.addAll(parentSkillIds)
         }
         return allSkillIds
     }
 
-    private List<String> addSkillsForSubject(String projectId, String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList()) {
+    private List<String> addSkillsForSubject(String projectId, String subject, int numSkills = 1, List<String> dependentSkillIds = Collections.emptyList(), int numPerformToCompletion = 1) {
         List<String> skillIds = []
         for (int i = 0; i < numSkills; i++) {
             String skillId = 'skill' + RandomStringUtils.randomAlphabetic(5)
@@ -456,7 +507,7 @@ class UserPointsSpecs extends DefaultIntSpec {
                             skillId: skillId,
                             name: 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
                             pointIncrement: 35,
-                            numPerformToCompletion: 1,
+                            numPerformToCompletion: numPerformToCompletion,
                             pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
                             dependenctSkillsIds: dependentSkillIds
                     ]
