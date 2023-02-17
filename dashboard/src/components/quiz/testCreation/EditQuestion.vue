@@ -185,7 +185,7 @@ limitations under the License.
         return this.questionDef.quizType === 'Quiz';
       },
       isQuestionTypeTextInput() {
-        return this.questionType.selectedType.id === QuestionType.TextInput;
+        return this.questionType.selectedType && this.questionType.selectedType.id === QuestionType.TextInput;
       },
       quizType() {
         return this.questionDef.quizType;
@@ -240,7 +240,7 @@ limitations under the License.
               const { answers } = this.questionDefInternal;
               const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
               const numCorrect = answers.filter((a) => a.isCorrect).length;
-              let questionType = this.questionType.selectedType.id;
+              let questionType = this.questionType.selectedType?.id;
               if (this.isQuizType) {
                 questionType = numCorrect > 1 ? QuestionType.MultipleChoice : QuestionType.SingleChoice;
               }

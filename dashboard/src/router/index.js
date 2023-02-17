@@ -949,12 +949,12 @@ const router = new Router({
         },
       }, {
         name: 'QuizRunsHistoryPage',
-        path: 'runs',
+        path: 'results',
         component: QuizRunsHistoryPage,
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Quiz Runs History',
+            message: 'Quiz Results History',
           },
         },
       }, {

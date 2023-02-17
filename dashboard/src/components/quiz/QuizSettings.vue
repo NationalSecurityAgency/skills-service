@@ -207,24 +207,27 @@ limitations under the License.
         return QuizService.getQuizSettings(this.quizId)
           .then((settings) => {
             if (settings) {
-              const confSettings = Object.values(this.settings);
-              settings.forEach((s) => {
-                const found = confSettings.find((confS) => s.setting === confS.setting);
-                if (s.setting === this.settings.numAttempts.setting) {
-                  if (s.value === '-1') {
-                    found.value = '3';
-                    found.lastLoadedValue = '3';
-                    this.settings.numAttempts.unlimited = true;
-                    this.settings.numAttempts.lastLoadedUnlimited = true;
+              const settingsKeys = Object.keys(this.settings);
+              settingsKeys.forEach((key) => {
+                const settingValue = this.settings[key];
+                const foundFromServer = settings.find((confS) => settingValue.setting === confS.setting);
+                if (foundFromServer) {
+                  if (foundFromServer.setting === this.settings.numAttempts.setting) {
+                    if (foundFromServer.value === '-1') {
+                      this.settings.numAttempts.value = '3';
+                      this.settings.numAttempts.lastLoadedValue = '3';
+                      this.settings.numAttempts.unlimited = true;
+                      this.settings.numAttempts.lastLoadedUnlimited = true;
+                    } else {
+                      this.settings.numAttempts.value = foundFromServer.value;
+                      this.settings.numAttempts.lastLoadedValue = foundFromServer.value;
+                      this.settings.numAttempts.unlimited = false;
+                      this.settings.numAttempts.lastLoadedUnlimited = false;
+                    }
                   } else {
-                    found.value = s.value;
-                    found.lastLoadedValue = s.value;
-                    this.settings.numAttempts.unlimited = false;
-                    this.settings.numAttempts.lastLoadedUnlimited = false;
+                    this.settings[key].value = foundFromServer.value;
+                    this.settings[key].lastLoadedValue = foundFromServer.value;
                   }
-                } else {
-                  found.value = s.value;
-                  found.lastLoadedValue = s.value;
                 }
               });
             }
