@@ -66,6 +66,7 @@ limitations under the License.
                       @group-saved="skillCreatedOrUpdated" @hidden="focusOnNewGroupButton"/>
     <import-from-catalog v-if="importCatalog.show" v-model="importCatalog.show" :current-project-skills="skills"
                          @to-import="importFromCatalog" @hidden="focusOnImportFromCatalogButton"/>
+
   </div>
 </template>
 
