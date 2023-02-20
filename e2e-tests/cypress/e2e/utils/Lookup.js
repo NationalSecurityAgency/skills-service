@@ -24,7 +24,7 @@ export default {
                 throw `Invalid db [${db}]. Valid values are 'h2' and 'postgres'`;
             }
         } else {
-            db = 'h2';
+            db = 'postgres';
         }
         cy.log(`db is [${db}]`);
         return cy.wrap(db);
