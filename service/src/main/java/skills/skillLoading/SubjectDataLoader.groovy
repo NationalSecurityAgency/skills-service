@@ -165,9 +165,9 @@ class SubjectDataLoader {
             def tagWithSkillIds = skillDefRepo.getTagsForSkillsWithSkillId(projectId, skillIds);
             def tagsById = tagWithSkillIds.groupBy{ it.skillId }
             skillsAndPoints.forEach{ it ->
-                it.tags = tagsById[it.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}
+                it.tags = tagsById[it.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}.sort { a, b -> a.tagValue <=> b.tagValue }
                 it.children.forEach{ child ->
-                    child.tags = tagsById[child.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}
+                    child.tags = tagsById[child.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}.sort { a, b -> a.tagValue <=> b.tagValue }
                 }
             }
         }
