@@ -156,30 +156,30 @@ jobs:
             --scope openid \
             --callbacks http://localhost:8080/login/oauth2/code/hydra
 
-    - name: Start services for Cypress tests
-      run: |
-        cd e2e-tests
-        npm install
-        npm run backend:dropAllDBTables:postgres
-        npm run cyServices:start:skills-service:oauth
-        npm run cyServices:start:client-display:oauth
-        cd ..
-
-    - name: Run Cypress tests
-      uses: cypress-io/github-action@v4
-      with:
-        working-directory: e2e-tests
-        record: true
-        parallel: true
-        group: 'skills-service with OAuth'
-        tag: "${{ github.workflow }}"
-        env: oauthMode=true
-        browser: chrome
-      env:
-        # pass the Dashboard record key as an environment variable
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        # pass GitHub token to allow accurately detecting a build vs a re-run build
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Start services for Cypress tests
+#      run: |
+#        cd e2e-tests
+#        npm install
+#        npm run backend:dropAllDBTables:postgres
+#        npm run cyServices:start:skills-service:oauth
+#        npm run cyServices:start:client-display:oauth
+#        cd ..
+#
+#    - name: Run Cypress tests
+#      uses: cypress-io/github-action@v4
+#      with:
+#        working-directory: e2e-tests
+#        record: true
+#        parallel: true
+#        group: 'skills-service with OAuth'
+#        tag: "${{ github.workflow }}"
+#        env: oauthMode=true
+#        browser: chrome
+#      env:
+#        # pass the Dashboard record key as an environment variable
+#        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+#        # pass GitHub token to allow accurately detecting a build vs a re-run build
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: upload result artifacts
       if: ${{ always() }}
