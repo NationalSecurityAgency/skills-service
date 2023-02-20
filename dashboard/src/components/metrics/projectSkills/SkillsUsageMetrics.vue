@@ -22,7 +22,7 @@ limitations under the License.
         </b-form-group>
       </div>
       <div class="col-md" data-cy="skillsNavigator-filters">
-        <b-form-group label="Tag Filters"  label-class="text-muted">
+        <b-form-group label="Skill Usage Filters"  label-class="text-muted">
           <b-form-checkbox v-model="filters.overlookedTag" inline>
             <b-badge variant="danger" class="ml-2">Overlooked Skill</b-badge>
           </b-form-checkbox>
@@ -38,7 +38,16 @@ limitations under the License.
           <b-form-checkbox v-model="filters.neverReported" inline>
             <b-badge variant="warning" class="ml-2">Never Reported</b-badge>
           </b-form-checkbox>
-          <div class="text-muted small">Please Note: Tags become more meaningful with extensive usage</div>
+          <div class="text-muted small">Please Note: These filters become more meaningful with extensive usage</div>
+        </b-form-group>
+      </div>
+    </div>
+    <div class="row px-3 pt-3">
+      <div class="col">
+        <b-form-group label="Skill Tags"  label-class="text-muted">
+          <b-form-checkbox v-for="tag in tags" :key="tag.tagId" inline>
+            <b-badge variant="info" class="ml-2">{{tag.tagValue}}</b-badge>
+          </b-form-checkbox>
         </b-form-group>
       </div>
     </div>
@@ -98,6 +107,10 @@ limitations under the License.
           </div>
         </div>
       </template>
+
+      <template v-slot:cell(skillTags)="data">
+        <b-badge v-for="tag in data.value" :key="tag.tagId" variant="info" class="ml-2">{{ tag.tagValue }}</b-badge>
+      </template>
     </skills-b-table>
   </metrics-card>
 </template>
@@ -156,6 +169,11 @@ limitations under the License.
               sortable: true,
               label: 'Last Achieved',
             },
+            {
+              key: 'skillTags',
+              sortable: true,
+              label: 'Tags',
+            },
           ],
           pagination: {
             currentPage: 1,
@@ -167,6 +185,7 @@ limitations under the License.
         },
         items: [],
         originalItems: [],
+        tags: [],
       };
     },
     mounted() {
@@ -190,6 +209,7 @@ limitations under the License.
         MetricsService.loadChart(this.$route.params.projectId, 'skillUsageNavigatorChartBuilder')
           .then((dataFromServer) => {
             this.items = SkillsUsageHelper.addTags(dataFromServer.skills);
+            this.tags = dataFromServer.tags;
             this.originalItems = this.items;
             this.tableOptions.pagination.totalRows = this.items.length;
             this.tableOptions.busy = false;
