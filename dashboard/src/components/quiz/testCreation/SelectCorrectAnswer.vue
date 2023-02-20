@@ -16,8 +16,15 @@ limitations under the License.
 <template>
   <span v-on:keydown.space="flipSelected" @click="flipSelected" :tabindex="readOnly ? -1 : 0"
         aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}" data-cy="selectCorrectAnswer">
-    <i v-if="!selected" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
-    <i v-if="selected" data-cy="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+    <b-overlay :show="readOnly && markIncorrect" variant="transparent"
+               opacity="0">
+            <template #overlay>
+              <i v-if="selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
+              <i v-else class="fa fa-check text-danger" style="font-size: 1rem;" data-cy="missedSelection"></i>
+            </template>
+      <i v-if="!selected" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+      <i v-if="selected" data-cy="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+    </b-overlay>
   </span>
 </template>
 
@@ -35,6 +42,10 @@ limitations under the License.
         default: '2.1rem',
       },
       isRadioIcon: {
+        type: Boolean,
+        default: false,
+      },
+      markIncorrect: {
         type: Boolean,
         default: false,
       },

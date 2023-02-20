@@ -153,6 +153,13 @@ class QuizController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    UserGradedQuizQuestionsResult getUsersGradedResult(@PathVariable("quizId") String quizId,
+                                                       @PathVariable("attemptId") Integer attemptId) {
+        return quizDefService.getUsersGradedResult(quizId, attemptId);
+    }
+
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
@@ -177,14 +184,6 @@ class QuizController {
                                          @PathVariable("userId") String userId,
                                          @PathVariable("quizAttempId") Integer quizAttemptId) {
         return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
-    }
-
-
-    @RequestMapping(value = "/{quizId}/attempts/{quizAttemptId}", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    UserGradedQuizQuestionsResult getUsersGradedResult(@PathVariable("quizId") String quizId,
-                                         @PathVariable("quizAttemptId") Integer quizAttemptId) {
-        return quizDefService.getUsersGradedResult(quizId, quizAttemptId);
     }
 
     @RequestMapping(value = "/{quizId}/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

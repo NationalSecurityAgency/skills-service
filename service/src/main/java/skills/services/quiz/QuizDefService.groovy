@@ -546,11 +546,12 @@ class QuizDefService {
                 .collect { QuizQuestionDef questionDef ->
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
+                    boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
-                                answer: foundSelected?.answerText,
+                                answer: isTextInput ? foundSelected?.answerText : answerDef.answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: foundSelected != null,
                         )
@@ -572,13 +573,29 @@ class QuizDefService {
                     )
                 }
 
+        Integer numQuestionsToPass = userQuizAttempt.numQuestionsToPass
+        if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS) {
+            Integer confNumQuestionsPass = getMinNumQuestionsToPassSetting(quizDef.id)
+            if (confNumQuestionsPass > 0) {
+                numQuestionsToPass = confNumQuestionsPass
+            }
+        }
 
         return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
                 status: userQuizAttempt.status,
                 questions: questions,
+                numQuestionsToPass: numQuestionsToPass,
+                started: userQuizAttempt.started,
+                completed: userQuizAttempt.completed,
         )
+    }
+
+    @Profile
+    private Integer getMinNumQuestionsToPassSetting(Integer quizRefId) {
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizRefId)
+        return quizSetting ? Integer.valueOf(quizSetting.value) : -1
     }
 
 

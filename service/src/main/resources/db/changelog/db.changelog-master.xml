@@ -2107,6 +2107,10 @@
             </column>
             <column name="completed" type="DATETIME" />
 
+            <column name="num_questions_to_pass" type="int">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>

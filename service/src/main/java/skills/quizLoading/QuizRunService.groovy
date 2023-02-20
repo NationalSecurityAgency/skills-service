@@ -151,7 +151,7 @@ class QuizRunService {
                 new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: it.getAnswerText())
             }
 
-            log.info("Continued existing quiz attempt {}", inProgressAttempt)
+            log.info("Continued executing quiz attempt {}", inProgressAttempt)
             return new QuizAttemptStartResult(
                     id: inProgressAttempt.id,
                     inProgressAlready: true,
@@ -165,10 +165,13 @@ class QuizRunService {
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         QuizValidator.isTrue(numQuestions > 0, "Must have at least 1 question declared in order to start.", quizDef.quizId)
 
+        Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
+        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numQuestions;
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
                 userId: userId,
                 quizDefinitionRefId: quizDef.id,
                 status: UserQuizAttempt.QuizAttemptStatus.INPROGRESS,
+                numQuestionsToPass: minNumQuestionsToPass,
                 started: new Date())
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
@@ -348,12 +351,14 @@ class QuizRunService {
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
         int numCorrect = gradedQuestions.count { it.isCorrect }
-        Integer minUmQuestionsToPass = getMinNumQuestionsToPassSetting(quizDef.id)
-        boolean quizPassed = minUmQuestionsToPass > 0 ? numCorrect >= minUmQuestionsToPass : numCorrect == gradedQuestions.size()
+        Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
+        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : gradedQuestions.size();
+        boolean quizPassed = numCorrect >= minNumQuestionsToPass
         QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, gradedQuestions: gradedQuestions)
 
         userQuizAttempt.status = quizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
         userQuizAttempt.completed = new Date()
+        userQuizAttempt.numQuestionsToPass = minNumQuestionsToPass
         quizAttemptRepo.save(userQuizAttempt)
 
         gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)

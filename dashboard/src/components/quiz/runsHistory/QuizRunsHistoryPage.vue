@@ -60,7 +60,8 @@ limitations under the License.
               <span v-if="data.item.userIdForDisplayHtml" v-html="data.item.userIdForDisplayHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span>
             </div>
             <div class="col-auto">
-              <b-button variant="outline-info" size="sm">
+              <b-button variant="outline-info" size="sm" :data-cy="`row${data.index}-viewRun`"
+                        :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.attemptId } }">
                 <i class="fas fa-list-ul" aria-hidden="true"/><span class="sr-only">view run details</span>
               </b-button>
             </div>
@@ -68,15 +69,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(status)="data">
-          <div v-if="data.value === 'FAILED'" class="text-danger">
-            <i class="far fa-times-circle" aria-hidden="true"></i> Failed
-          </div>
-          <div v-if="data.value === 'PASSED'" class="text-success">
-            <i class="fas fa-check-double" aria-hidden="true"></i> <span v-if="quizType === 'Survey'">Completed</span><span v-else>Passed</span>
-          </div>
-          <div v-if="data.value === 'INPROGRESS'" class="text-info">
-            <i class="fas fa-running" aria-hidden="true"></i> In Progress
-          </div>
+          <quiz-run-status :quiz-type="quizType" :status="data.value" />
         </template>
 
         <template v-slot:cell(runtime)="data">
@@ -123,12 +116,14 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import dayjs from '@/common-components/DayJsCustomizer';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizRunsHistoryPage',
     components: {
+      QuizRunStatus,
       DateCell,
       SkillsBTable,
       SubPageHeader,

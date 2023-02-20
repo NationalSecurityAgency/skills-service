@@ -18,6 +18,7 @@ package skills.intTests.quiz
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.UserAttrs
@@ -52,11 +53,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.questionType == questions.questionType
         quizAttemptRes.questions.isCorrect == [true, true]
 
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[1].answers.isSelected == [true, false]
     }
@@ -91,11 +92,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, true]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [true, false, true, false]
 
@@ -131,11 +132,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, true]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, true]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [true, false, true, false]
 
@@ -170,11 +171,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, false]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [false, true, true, false]
     }
@@ -208,11 +209,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, true]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [true, false, true, false]
     }
@@ -245,11 +246,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, false]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, true]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [true, false, false, false]
     }
@@ -281,11 +282,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, false]
-        quizAttemptRes.questions[0].answers.answer == [null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, true]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
         quizAttemptRes.questions[1].answers.isSelected == [false, false, false, false]
     }
@@ -323,11 +324,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
         quizAttemptRes.questions.isCorrect == [true, true, true]
 
-        quizAttemptRes.questions[0].answers.answer == [null, null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, true, true]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [false, false, false, false]
         quizAttemptRes.questions[1].answers.isSelected == [false, false, false, true]
 
@@ -367,11 +368,11 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
         quizAttemptRes.questions.isCorrect == [true, true, true]
 
-        quizAttemptRes.questions[0].answers.answer == [null, null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, true, true]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [false, false, false, false]
         quizAttemptRes.questions[1].answers.isSelected == [false, false, false, false]
 
@@ -408,17 +409,47 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
         quizAttemptRes.questions.isCorrect == [true, true, true]
 
-        quizAttemptRes.questions[0].answers.answer == [null, null, null]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
         quizAttemptRes.questions[0].answers.isSelected == [false, false, false]
 
-        quizAttemptRes.questions[1].answers.answer == [null, null, null, null]
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
         quizAttemptRes.questions[1].answers.isConfiguredCorrect == [false, false, false, false]
         quizAttemptRes.questions[1].answers.isSelected == [false, false, false, false]
 
         quizAttemptRes.questions[2].answers.answer == [null]
         quizAttemptRes.questions[2].answers.isConfiguredCorrect == [false]
         quizAttemptRes.questions[2].answers.isSelected == [false]
+    }
+
+    def "number of required questions to pass changed in the middle of the quiz run"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        when:
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '1'],
+        ])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '2'],
+        ])
+        def quizAttemptRes1 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
+        then:
+        quizAttemptRes.numQuestionsToPass == 2
+        quizAttemptRes1.numQuestionsToPass == 1
     }
 }
 

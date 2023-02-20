@@ -76,6 +76,10 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}/runs`, { params })
       .then((response) => response.data);
   },
+  getSingleQuizHistoryRun(quizId, attemptId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/runs/${attemptId}`)
+      .then((response) => response.data);
+  },
   deleteQuizRunHistoryItem(quizId, attemptId) {
     return axios.delete(`/admin/quiz-definitions/${quizId}/runs/${attemptId}`)
       .then((response) => response.data);

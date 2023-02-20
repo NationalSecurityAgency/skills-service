@@ -1676,7 +1676,7 @@ class SkillsService {
     }
 
     def getQuizAttemptResult(String quizId, Integer attemptId) {
-        String url = "${getQuizDefUrl(quizId)}/attempts/${attemptId}"
+        String url = "${getQuizDefUrl(quizId)}/runs/${attemptId}"
         return wsHelper.adminGet(url)
     }
 

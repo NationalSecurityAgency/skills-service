@@ -25,4 +25,7 @@ class UserGradedQuizQuestionsResult {
     QuizDefParent.QuizType quizType
     List<UserGradedQuizQuestionResult> questions
     UserQuizAttempt.QuizAttemptStatus status
+    Integer numQuestionsToPass
+    Date started
+    Date completed
 }

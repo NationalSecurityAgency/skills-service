@@ -46,6 +46,10 @@ class UserQuizAttempt {
     Date started
     Date completed
 
+    // store a copy of this configured param at the time of the quiz run
+    // update at the start and the end of the run
+    Integer numQuestionsToPass
+
     @Column(name="created", updatable = false, insertable = false)
     Date created
 

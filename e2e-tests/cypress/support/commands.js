@@ -235,8 +235,9 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
     cy.request(`/admin/quiz-definitions/${quizId}/questions`)
         .then((response) => {
             // cy.log(JSON.stringify(response.body, null, 2));
-            const questionAnswers = response.body.questions.map((qDef, questionIndex) => {
-                // cy.log(`qDef=${qDef}, questionIndex=${questionIndex}`);
+            const questionAnswers = response.body.questions.slice(0, quizAttemptInfo.length).map((qDef, questionIndex) => {
+                // cy.log(`qDef=${JSON.stringify(qDef)}, questionIndex=${questionIndex}`);
+                expect(quizAttemptInfo, 'should never happen as the code selects sublist based on [quizAttemptInfo] parameter!').to.have.length.greaterThan(questionIndex)
                 const answerIndexes = quizAttemptInfo[questionIndex];
                 // cy.log(JSON.stringify(answerIndexes, null, 2));
                 const { answers } = qDef;
@@ -244,9 +245,10 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                     const foundAnswer = answers[aIndex];
                     return foundAnswer.id;
                 });
-                return selectedAnswerIds;
-            })
-                .flat();
+                const isTextInputQuestion = qDef.questionType === 'TextInput'
+                const answerText = isTextInputQuestion ? `This is answer for question # ${questionIndex}` : null
+                return { answerIds: selectedAnswerIds, isTextInputQuestion , answerText };
+            }).flat();
 
             // cy.log(JSON.stringify(questionAnswers, null, 2));
 
@@ -254,9 +256,11 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                 .then((response) => {
                     const attemptId = response.body.id;
 
-                    const allRequests = questionAnswers.map((answerId) => {
-                        return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true });
-                    });
+                    const allRequests = questionAnswers.map((answer) => {
+                        return answer.answerIds.map((answerId) => {
+                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
+                        });
+                    }).flat();
                     Promise.all(allRequests)
                         .then(() => {
                             if (shouldComplete) {
