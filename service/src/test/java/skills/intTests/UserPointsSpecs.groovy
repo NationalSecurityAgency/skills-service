@@ -22,7 +22,6 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -63,7 +62,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badgeId, skillId: allSkillIds.get(0).get(0)])
     }
 
-    @IgnoreRest
     def 'recalculate user points after changing point value' () {
 
         skillsService.deleteProjectIfExist(projId)
@@ -99,7 +97,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         resultsAfter.data.get(0).totalPoints == 20
     }
 
-    @IgnoreRest
     def 'get subject users returns correct lastUpdated date'() {
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(0))
