@@ -115,7 +115,7 @@ describe('Metrics Using User Tags Tests', () => {
             // cy.validateTable(userTagsTableSelector, expected, 10);
         });
 
-        if (!Cypress.env('db') || Cypress.env('db') !== 'postgres') {
+        if (Cypress.env('db') !== 'postgres') {
             it('user tag table - ability to sort by tag', () => {
                 cy.visit('/administrator/projects/proj1/');
                 cy.wait('@getConfig');

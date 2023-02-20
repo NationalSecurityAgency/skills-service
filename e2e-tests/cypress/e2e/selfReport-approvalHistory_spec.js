@@ -232,7 +232,7 @@ describe('Self Report Approval History Tests', () => {
             .should('not.exist');
     });
 
-    if (!Cypress.env('db') || Cypress.env('db') !== 'postgres') {
+    if (Cypress.env('db') !== 'postgres') {
         it('approved and rejected requests - sorting', () => {
             cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
             cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
