@@ -120,10 +120,13 @@ jobs:
         mvn --version
         java -version
 
-    - uses: actions/download-artifact@v2
-      with:
-        name: service jar
-        path: ./service/target/
+#    - uses: actions/download-artifact@v2
+#      with:
+#        name: service jar
+#        path: ./service/target/
+
+    - name: Check running containers
+      run: docker ps -a
 
     - name: run hyrda oauth service
       run: |
