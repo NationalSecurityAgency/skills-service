@@ -97,6 +97,11 @@ class SkillTagService {
     }
 
     @Transactional
+    List<SkillTag> getTagsForSkill(String projectId, String skillId) {
+        skillDefRepo.getTagsForSkillWithSkillId(projectId, skillId)
+    }
+
+    @Transactional
     List<SkillDefPartial> getSkillsForTag(String projectId, String tagId) {
         return skillRelDefRepo.getChildrenPartial(projectId, tagId, SkillRelDef.RelationshipType.Tag)
     }

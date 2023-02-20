@@ -189,7 +189,7 @@ limitations under the License.
         this.tableOptions.busy = true;
         MetricsService.loadChart(this.$route.params.projectId, 'skillUsageNavigatorChartBuilder')
           .then((dataFromServer) => {
-            this.items = SkillsUsageHelper.addTags(dataFromServer);
+            this.items = SkillsUsageHelper.addTags(dataFromServer.skills);
             this.originalItems = this.items;
             this.tableOptions.pagination.totalRows = this.items.length;
             this.tableOptions.busy = false;
