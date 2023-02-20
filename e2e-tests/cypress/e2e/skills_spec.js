@@ -137,6 +137,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
     cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion cannot exceed 10000.').should('be.visible');
     cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+    cy.get('[data-cy=timeWindowCheckbox').click({force: true});
     cy.get('[data-cy=maxOccurrences]').type('{selectall}{del}');
     cy.get('[data-cy=skillMaxOccurrencesError]').contains('Window\'s Max Occurrences is required').should('be.visible');
     cy.get('[data-cy=saveSkillButton]').should('be.disabled');
@@ -231,7 +232,7 @@ describe('Skills Tests', () => {
     cy.wait('@loadSubject');
 
         cy.get('[data-cy="newSkillButton"]').click();
-        cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
+        cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
         cy.get('#skillName').type('Skill 1')
 
     cy.clickSave()
@@ -239,12 +240,12 @@ describe('Skills Tests', () => {
 
 
     cy.get(selectorSkillsRowToggle).click()
-    cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('50 Points');
+    cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points');
 
     cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
     cy.wait('@getSkill')
 
-    cy.get(selectorOccurrencesToCompletion).should('have.value', '5')
+    cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
     cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
     cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
 
@@ -252,7 +253,7 @@ describe('Skills Tests', () => {
     cy.wait('@postNewSkill');
 
     cy.get(selectorSkillsRowToggle).click()
-    cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points')
+    cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('1,000 Points')
   });
 
   it('create skill with special chars', () => {

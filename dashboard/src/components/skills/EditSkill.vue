@@ -343,11 +343,11 @@ limitations under the License.
           projectId: this.projectId,
           subjectId: this.subjectId,
           name: '',
-          pointIncrement: 10,
-          numPerformToCompletion: 5,
+          pointIncrement: 100,
+          numPerformToCompletion: 1,
           pointIncrementIntervalHrs: 8,
           pointIncrementIntervalMins: 0,
-          timeWindowEnabled: true,
+          timeWindowEnabled: false,
           numPointIncrementMaxOccurrences: 1,
           description: null,
           helpUrl: null,
@@ -360,14 +360,14 @@ limitations under the License.
           projectId: this.projectId,
           subjectId: this.subjectId,
           name: '',
-          pointIncrement: 10,
-          numPerformToCompletion: 5,
+          pointIncrement: 100,
+          numPerformToCompletion: 1,
           // Time Window - represented in hrs + mins;
           // 0  for both means 'disabled' and that
           // the action can be performed right away
           pointIncrementIntervalHrs: 8,
           pointIncrementIntervalMins: 0,
-          timeWindowEnabled: true,
+          timeWindowEnabled: false,
           // Max Occurrences Within Window
           numPointIncrementMaxOccurrences: 1,
           description: null,

@@ -35,11 +35,13 @@ limitations under the License.
     </div>
     <dashboard-footer />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
+    <scroll-to-top />
   </div>
 </template>
 
 <script>
   import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
+  import ScrollToTop from '@/common-components/utilities/ScrollToTop';
   import HeaderView from './components/header/Header';
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';
@@ -61,6 +63,7 @@ limitations under the License.
       HeaderView,
       LoadingContainer,
       PkiAppBootstrap,
+      ScrollToTop,
     },
     data() {
       return {

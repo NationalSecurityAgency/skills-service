@@ -120,6 +120,69 @@ class NumUsersPerSubjectPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         subj2Res.numUsersPerLevels[4].numberUsers == 0
     }
 
+    def "num users per level with users in other projects"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+
+        def subj1 = SkillsFactory.createSubject(2, 1)
+        subj1.subjectId = subj.subjectId
+        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 2, 1)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        List<String> users = new ArrayList<>(getRandomUsers(10))
+        List<String> usersCopy = new ArrayList<>(users)
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 4, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, [:])
+        def proj2Res = skillsService.getMetricsData(proj2.projectId, metricsId, [:])
+        then:
+        res.size() == 1
+        def subj1Res = res.find( { it.subject == 'Test Subject #1'})
+        subj1Res
+        subj1Res.numUsersPerLevels.size() == 5
+        subj1Res.numUsersPerLevels[0].level == 1
+        subj1Res.numUsersPerLevels[0].numberUsers == 2
+        subj1Res.numUsersPerLevels[1].level == 2
+        subj1Res.numUsersPerLevels[1].numberUsers == 1
+        subj1Res.numUsersPerLevels[2].level == 3
+        subj1Res.numUsersPerLevels[2].numberUsers == 4
+        subj1Res.numUsersPerLevels[3].level == 4
+        subj1Res.numUsersPerLevels[3].numberUsers == 0
+        subj1Res.numUsersPerLevels[4].level == 5
+        subj1Res.numUsersPerLevels[4].numberUsers == 0
+
+        def subj2Res = proj2Res.find( { it.subject == 'Test Subject #1'})
+        subj2Res
+        subj2Res.numUsersPerLevels.size() == 5
+        subj2Res.numUsersPerLevels[0].level == 1
+        subj2Res.numUsersPerLevels[0].numberUsers == 1
+        subj2Res.numUsersPerLevels[1].level == 2
+        subj2Res.numUsersPerLevels[1].numberUsers == 0
+        subj2Res.numUsersPerLevels[2].level == 3
+        subj2Res.numUsersPerLevels[2].numberUsers == 0
+        subj2Res.numUsersPerLevels[3].level == 4
+        subj2Res.numUsersPerLevels[3].numberUsers == 0
+        subj2Res.numUsersPerLevels[4].level == 5
+        subj2Res.numUsersPerLevels[4].numberUsers == 0
+    }
+
     def "num users per level - more than just default levels"() {
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(20)

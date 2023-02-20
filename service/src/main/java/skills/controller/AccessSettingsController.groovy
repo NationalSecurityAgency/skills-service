@@ -34,6 +34,7 @@ import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
 import skills.services.FeatureService
 import skills.services.SkillApprovalService
+import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.ProjDef
@@ -78,6 +79,9 @@ class AccessSettingsController {
 
     @Autowired
     FeatureService featureService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -125,6 +129,7 @@ class AccessSettingsController {
         if (currentUser?.toLowerCase() == userIdLower) {
             throw new SkillException("Cannot delete roles for myself. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)
         }
+
         accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userIdLower)) {
