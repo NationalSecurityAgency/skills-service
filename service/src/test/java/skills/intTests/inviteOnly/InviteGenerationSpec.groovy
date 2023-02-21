@@ -18,6 +18,7 @@ package skills.intTests.inviteOnly
 import com.google.common.collect.Sets
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -159,26 +160,28 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.createSkill(skill)
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
 
-        SkillsService createAcctService = createService()
-        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
+        String userId = getRandomUsers(1, true).first()
+        String userEmail = EmailUtils.generateEmaillAddressFor(userId)
+        SkillsService createAcctService = createService(userId)
+//        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
 
-        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["jdoe@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [userEmail]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
         def email = greenMail.getReceivedMessages()
         String inviteCode = extractInviteFromEmail(email[0].content.toString())
         createAcctService.joinProject(proj.projectId, inviteCode)
 
-        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, "jdoe@email.foo")
+        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, userId)
 
         when:
-        def result = skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["jdoe@email.foo"]])
+        def result = skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [userEmail]])
 
         then:
         result
         result.projectId == proj.projectId
         result.successful.size() == 1
-        result.successful[0] == "jdoe@email.foo"
+        result.successful[0] == userEmail
     }
 
     def "invalid invite cannot be used"() {
