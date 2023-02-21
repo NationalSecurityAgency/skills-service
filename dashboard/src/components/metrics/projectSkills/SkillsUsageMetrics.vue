@@ -42,10 +42,10 @@ limitations under the License.
         </b-form-group>
       </div>
     </div>
-    <div class="row px-3 pt-3">
+    <div class="row px-3" v-if="tags.length > 0">
       <div class="col">
         <b-form-group label="Skill Tags"  label-class="text-muted">
-          <b-form-checkbox v-for="tag in tags" :key="tag.tagId" inline>
+          <b-form-checkbox v-for="tag in tags" :key="tag.tagId" inline v-model="filters.skillTags[tag.tagId]">
             <b-badge variant="info" class="ml-2">{{tag.tagValue}}</b-badge>
           </b-form-checkbox>
         </b-form-group>
@@ -134,6 +134,7 @@ limitations under the License.
           topSkillTag: false,
           neverAchieved: false,
           neverReported: false,
+          skillTags: [],
         },
         tableOptions: {
           busy: false,
@@ -202,6 +203,7 @@ limitations under the License.
         this.filters.overlookedTag = false;
         this.filters.topSkillTag = false;
         this.filters.highActivityTag = false;
+        this.filters.skillTags = [];
         this.items = this.originalItems;
       },
       loadData() {

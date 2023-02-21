@@ -122,6 +122,19 @@ export default {
     if (filters.highActivityTag && !item.isHighActivityTag) {
       return false;
     }
+
+    const filterTags = Object.keys(filters.skillTags).filter((key) => filters.skillTags[key] === true);
+    if (filterTags.length > 0) {
+      const skillTags = item.skillTags.map((tag) => tag.tagId);
+      if (skillTags.length === 0) {
+        return false;
+      }
+      const tagsFilteredBy = filterTags.filter((tag) => skillTags.includes(tag));
+      if (tagsFilteredBy.length === 0) {
+        return false;
+      }
+    }
+
     return true;
   },
 };
