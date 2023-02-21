@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpStatus
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -42,9 +43,11 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.bind.annotation.ResponseStatus
 import skills.auth.SecurityMode
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.ProjDef
+import skills.storage.repos.ProjDefRepo
 
 import java.security.KeyPair
 import java.security.interfaces.RSAPrivateKey
@@ -136,6 +139,9 @@ class AuthorizationServerConfig {
         private ProjDefAccessor projDefAccessor
 
         @Autowired
+        private ProjDefRepo projDefRepo
+
+        @Autowired
         PasswordEncoder passwordEncoder
 
         @Override
@@ -149,7 +155,10 @@ class AuthorizationServerConfig {
         }
 
         private RegisteredClient loadRegisteredClient(String clientId) {
-            ProjDef projDef = projDefAccessor.getProjDef(clientId)
+            ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(clientId) //projDefAccessor.getProjDef(clientId)
+            if (!projDef) {
+                throw new UnknownClientIdException("Invalid clientId [${clientId}]")
+            }
 
             RegisteredClient registeredClient = RegisteredClient.withId(clientId)
                     .clientId(clientId)
@@ -174,6 +183,14 @@ class AuthorizationServerConfig {
         @Override
         void save(RegisteredClient registeredClient) {
             throw new UnsupportedOperationException()
+        }
+    }
+
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    static class UnknownClientIdException extends RuntimeException {
+
+        UnknownClientIdException(String message)  {
+            super(message);
         }
     }
 }
