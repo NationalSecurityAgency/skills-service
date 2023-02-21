@@ -203,7 +203,8 @@ limitations under the License.
           isEdit: this.isEdit,
           ...questionDef,
         };
-        this.questionType.selectedType = this.questionType.options.find((o) => o.id === questionDef.type);
+        const qType = questionDef.type ? questionDef.type : questionDef.questionType;
+        this.questionType.selectedType = this.questionType.options.find((o) => o.id === qType);
         this.loading = false;
       },
       closeMe(e) {
@@ -252,7 +253,7 @@ limitations under the License.
                 answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
               };
               this.$emit('question-saved', questionDefRes);
-              this.closeMe();
+              this.show = false;
             }
           });
       },

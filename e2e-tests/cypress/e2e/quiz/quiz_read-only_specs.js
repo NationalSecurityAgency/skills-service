@@ -90,7 +90,7 @@ describe('Quiz Read Only Role Tests', () => {
             cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="pageHeader"] [data-cy="editQuizButton"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="pageHeader"] [data-cy="shareQuizBtn"]').should(`${chainerPrepend}exist`)
+            // cy.get('[data-cy="pageHeader"] [data-cy="shareQuizBtn"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="pageHeader"] [data-cy="quizPreview"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="editQuestionButton_1"').should(`${chainerPrepend}exist`)

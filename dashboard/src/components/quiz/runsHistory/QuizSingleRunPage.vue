@@ -25,13 +25,13 @@ limitations under the License.
     <skills-spinner v-if="loading" :is-loading="loading"/>
     <div v-if="!loading">
       <div class="row h-100">
-        <div class="col">
+        <div class="col-md-6 col-xl mb-2">
           <b-card class="h-100">
             <div class="text-uppercase text-secondary">User</div>
             <div class="text-primary font-weight-bold">{{ runInfo.userIdForDisplay }}</div>
           </b-card>
         </div>
-        <div class="col" data-cy="quizRunStatus">
+        <div class="col-md-6 col-xl mb-2" data-cy="quizRunStatus">
           <b-card class="h-100">
             <div class="text-uppercase text-secondary">Status</div>
             <div class="text-primary font-weight-bold"><quiz-run-status :quiz-type="runInfo.quizType" :status="runInfo.status" /></div>
@@ -39,14 +39,16 @@ limitations under the License.
             <div v-if="runInfo.status === 'FAILED'">Missed by <span class="text-danger font-italic">{{ runInfo.numQuestionsToPass - numQuestionsRight }}</span> questions</div>
           </b-card>
         </div>
-        <div v-if="runInfo.quizType === 'Quiz'" class="col" data-cy="numQuestionsToPass">
+        <div v-if="runInfo.quizType === 'Quiz'"
+             class="col-md-6 col-xl mb-2"
+             data-cy="numQuestionsToPass">
           <b-card class="h-100">
             <div class="text-uppercase text-secondary">Questions</div>
             <div class="text-primary font-weight-bold"><b-badge variant="success">{{ numQuestionsRight }}</b-badge> / <b-badge>{{ runInfo.questions.length }}</b-badge></div>
             <div>Need <span class="text-info font-italic">{{ runInfo.numQuestionsToPass }}</span> questions to pass</div>
           </b-card>
         </div>
-        <div class="col">
+        <div class="col-md-6 col-xl mb-2">
           <b-card class="h-100">
             <div class="text-uppercase text-secondary">Runtime</div>
             <div class="text-primary font-weight-bold">{{ quizRuntime | duration }}</div>

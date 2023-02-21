@@ -105,8 +105,8 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
 
@@ -139,16 +139,16 @@ describe('Client Display Quiz Tests', () => {
             correct: true,
             answers: [{
                 num: 1,
-                selected: true,
-                wrongSelection: false,
-                missedSelection: false
-            }, {
-                num: 2,
                 selected: false,
                 wrongSelection: false,
                 missedSelection: false
             }, {
                 num: 2,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
                 selected: false,
                 wrongSelection: false,
                 missedSelection: false
@@ -159,17 +159,17 @@ describe('Client Display Quiz Tests', () => {
             correct: true,
             answers: [{
                 num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
                 selected: true,
-                wrongSelection: false,
-                missedSelection: false
-            }, {
-                num: 2,
-                selected: false,
-                wrongSelection: false,
-                missedSelection: false
-            }, {
-                num: 2,
-                selected: false,
                 wrongSelection: false,
                 missedSelection: false
             }]

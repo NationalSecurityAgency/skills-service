@@ -64,7 +64,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     const tableSelector = '[data-cy="quizRunsHistoryTable"]'
 
     it('quiz run history table paging', function () {
-        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.visit('/administrator/quizzes/quiz1/results');
 
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
@@ -83,7 +83,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
     it('sort by user', function () {
-        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector)
@@ -106,7 +106,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
     it('sort by status', function () {
-        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector)
@@ -129,7 +129,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
     it('quiz run history page size', function () {
-        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`).select('20');
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
@@ -148,7 +148,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
     it('filter by user name', function () {
-        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         cy.get('[data-cy="userNameFilter"]').type(' SeR1{enter}')
         cy.validateTable(tableSelector, [

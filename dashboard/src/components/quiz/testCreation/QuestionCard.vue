@@ -19,7 +19,7 @@ limitations under the License.
       <div class="col">
 
         <b-row :no-gutters="true" class="mb-3">
-          <b-col v-if="!isReadOnlyQuiz" cols="auto">
+          <b-col v-if="isDragAndDropControlsVisible" cols="auto">
             <div :id="`questionSortControl-${question.id}`"
                  class="sort-control mr-3"
                  @click.prevent.self
@@ -30,7 +30,7 @@ limitations under the License.
                  @keyup.up="move(-1)"
                  data-cy="sortControlHandle"><i class="fas fa-arrows-alt"/></div>
           </b-col>
-          <b-col :class="{ 'ml-3': isReadOnlyQuiz }">
+          <b-col :class="{ 'ml-3': !isDragAndDropControlsVisible }">
             <div class="px-2 py-1">
               <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
@@ -107,6 +107,7 @@ limitations under the License.
       quizType: String,
       question: Object,
       questionNum: Number,
+      showDragAndDropControls: Boolean,
     },
     data() {
       return {
@@ -119,6 +120,9 @@ limitations under the License.
       },
       isTextInputType() {
         return this.question.questionType === QuestionType.TextInput;
+      },
+      isDragAndDropControlsVisible() {
+        return !this.isReadOnlyQuiz && this.showDragAndDropControls;
       },
     },
     methods: {

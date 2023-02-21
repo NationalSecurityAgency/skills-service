@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions">
+    <page-header :loading="loadingQuizSummary || isLoadingQuizConfig" :options="headerOptions">
       <div slot="subSubTitle">
         <b-button-group v-if="!isReadOnlyQuiz" class="mt-1" size="sm">
           <b-button ref="editQuizButton"
@@ -51,7 +51,7 @@ limitations under the License.
                @quiz-saved="updateQuizDef"
                @hidden="handleHideQuizEdit"/>
 
-    <navigation v-if="!isLoading" :nav-items="navItems">
+    <navigation v-if="!this.isLoadingQuizConfig" :nav-items="navItems">
     </navigation>
   </div>
 </template>
@@ -91,9 +91,6 @@ limitations under the License.
         'quizSummary',
         'loadingQuizSummary',
       ]),
-      isLoading() {
-        return this.loadingQuizSummary || this.isLoadingQuizConfig;
-      },
       navItems() {
         const res = [
           { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },

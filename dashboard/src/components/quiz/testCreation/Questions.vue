@@ -33,7 +33,7 @@ limitations under the License.
 
     <b-overlay :show="operationInProgress" rounded="sm">
     <b-card body-class="p-0" footer-bg-variant="white">
-      <skills-spinner :is-loading="isLoading" />
+      <skills-spinner :is-loading="isLoading" class="mb-5"/>
       <div v-if="!isLoading">
         <no-content2 v-if="!hasData" class="my-5"
                      data-cy="noQuestionsYet"
@@ -56,6 +56,7 @@ limitations under the License.
                 @sort-change-requested="handleKeySortRequest"
                 :question="q"
                 :quiz-type="quizType"
+                :show-drag-and-drop-controls="questions && questions.length > 1"
                 :question-num="index+1"/>
             </b-overlay>
           </div>
@@ -165,7 +166,9 @@ limitations under the License.
                 this.enableDropAndDrop();
               }
               this.loadQuizSummary({ quizId: this.quizId })
-                .then(() => this.handleNewQuestionBtnFocus());
+                .then(() => {
+                  this.handleNewQuestionBtnFocus();
+                });
             }).finally(() => { this.operationInProgress = false; });
         }
       },
@@ -198,7 +201,7 @@ limitations under the License.
             if (this.editQuestionInfo.initiatedByBtnRef) {
               self.$refs[self.editQuestionInfo.initiatedByBtnRef]?.focus();
             } else {
-              self.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+              self.$refs.btn_Questions?.focus();
             }
           });
         });

@@ -434,9 +434,17 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
+        cy.get(q1Card).should('exist')
+        cy.get(q2Card).should('exist')
+
         cy.get('[data-cy="deleteQuestionButton_2"]').click()
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
         cy.get('[data-cy="removeButton"]').click()
+
+        cy.get(q1Card).should('not.exist')
+        cy.get(q2Card).should('not.exist')
 
         cy.get('[data-cy="deleteQuestionButton_2"]').should('not.exist')
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '1')
@@ -479,11 +487,17 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
 
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
+
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
         cy.get('[data-cy="questionText"]').type('question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get(q1Card).should('not.exist')
+        cy.get(q2Card).should('not.exist')
 
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').should('exist')
@@ -492,8 +506,8 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="selectionItem_TextInput"]').click()
         cy.get('[data-cy="saveQuestionBtn"]').click()
 
-        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
-        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
+        cy.get(q1Card).should('exist')
+        cy.get(q2Card).should('exist')
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2']);
         cy.get(q1Card).dragAndDrop(q2Card);
