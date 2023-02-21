@@ -653,7 +653,7 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 
     @Query(value = '''
 select count(distinct ua) as userCount, ut.value as tagValue
-from UserAchievement ua, UserTag ut
+from UserAchievement ua
 join UserTag ut on ut.userId = ua.userId
 where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
 ''')
