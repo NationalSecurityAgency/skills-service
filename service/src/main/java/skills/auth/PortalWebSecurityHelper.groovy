@@ -58,7 +58,7 @@ class PortalWebSecurityHelper {
                     "/createRootAccount", '/grantFirstRoot',
                     '/userExists/**', "/app/userInfo",
                     "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
-                    "index.html", "/public/**",
+                    "/index.html", "index.html", "/public/**",
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset",
                     "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
