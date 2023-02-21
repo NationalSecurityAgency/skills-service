@@ -47,6 +47,7 @@ import org.springframework.web.context.request.RequestContextListener
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
 
@@ -100,6 +101,9 @@ class SecurityConfiguration {
         @Autowired
         AccessDeniedHandler accessDeniedHandler
 
+        @Autowired
+        InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
+
         @Bean('corsSecurityFilterChain')
         @Order(102)
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -116,6 +120,17 @@ class SecurityConfiguration {
                         .and()
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+
+            return http.build()
+        }
+
+        @Bean('inviteOnlyFilterChain')
+        @Order(104)
+        SecurityFilterChain inviteOnlyFilterChain(HttpSecurity http) throws Exception {
+            http.authorizeHttpRequests((authorize) ->
+                authorize
+                    .anyRequest().access(inviteOnlyProjectAuthorizationManager)
+            )
 
             return http.build()
         }

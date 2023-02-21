@@ -15,15 +15,12 @@
  */
 package skills.auth
 
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.DependsOn
-import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
-import org.springframework.security.access.AccessDecisionManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.stereotype.Component
-import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
 import skills.storage.model.auth.RoleName
 
 @Component
@@ -41,9 +38,6 @@ class PortalWebSecurityHelper {
 
     @Value('#{"${management.endpoints.web.path-mapping.prometheus:prometheus}"}')
     String prometheusPath
-
-    @Autowired
-    InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
@@ -73,7 +67,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                 .requestMatchers('/root/**').hasRole('SUPER_DUPER_USER')
                 .requestMatchers("/${managementPath}/**").hasRole('SUPER_DUPER_USER')
-                .anyRequest().access(inviteOnlyProjectAuthorizationManager)
+                .anyRequest().authenticated()
         )
         http.headers().frameOptions().disable()
 
