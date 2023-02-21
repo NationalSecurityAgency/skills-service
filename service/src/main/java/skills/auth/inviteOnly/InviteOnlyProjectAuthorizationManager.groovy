@@ -26,14 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
-import org.springframework.security.access.vote.RoleVoter
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.web.FilterInvocation
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
-import org.springframework.security.web.access.intercept.RequestMatcherDelegatingAuthorizationManager
 import org.springframework.security.web.util.UrlUtils
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
@@ -81,8 +79,11 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     @Lazy
     UserAuthService userAuthService
 
+    AuthenticatedAuthorizationManager authenticatedAuthorizationManager
+
     @PostConstruct
     void init() {
+        authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsApiRequestMatcher = new AntPathRequestMatcher("/api/*projects/**")
         privateProjects = Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(privateProjectsCacheExpirationTime))
@@ -95,6 +96,11 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
 
         HttpServletRequest request = authorizationContext.getRequest()
         log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
+        AuthorizationDecision authenticatedDecision = authenticatedAuthorizationManager.check(authentication, authorizationContext)
+        if (!authenticatedDecision.isGranted()) {
+            log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
+            return authenticatedDecision
+        }
         if (projectsApiRequestMatcher.matches(request)) {
 
             AuthorizationDecision vote = null //ACCESS_ABSTAIN
