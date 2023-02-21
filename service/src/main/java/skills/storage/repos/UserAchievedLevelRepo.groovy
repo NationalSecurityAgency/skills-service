@@ -29,6 +29,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.model.DayCountItem
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserTagCount
 
 @CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>, JpaSpecificationExecutor<UserAchievement> {
@@ -513,6 +514,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         Long getNumberUsers()
     }
 
+    static interface LevelAndTagCount {
+        String getSkillId()
+        String getUserTag()
+        Integer getLevel()
+        Long getNumberUsers()
+    }
+
     @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers 
             from UserAchievement as ua, SkillDef as sd 
             where 
@@ -525,6 +533,22 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     List<SkillAndLevelUserCount> countNumUsersPerContainerTypeAndLevel(
             @Param("projectId") String projectId,
             @Param("containerType") SkillDef.ContainerType containerType
+    )
+
+    @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers, ut.value as userTag 
+            from UserAchievement as ua 
+            join UserTag ut on ut.userId = ua.userId
+            where 
+                ua.skillId = :subjectId and
+                ua.projectId = :projectId and
+                ut.key = :userTagKey and
+                ua.level is not null
+            group by ua.skillId, ua.level, ut.value
+           ''')
+    List<LevelAndTagCount> countNumUsersPerSubjectTagAndLevel(
+            @Param("projectId") String projectId,
+            @Param("subjectId") String subjectId,
+            @Param("userTagKey") String userTagKey
     )
 
     @Query('''select count(distinct ua.userId) from UserAchievement ua
@@ -624,6 +648,13 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 ''')
     SkillStatsItem calculateNumAchievedAndLastAchieved(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
+    @Query(value = '''
+select count(distinct ua) as userCount, ut.value as tagValue
+from UserAchievement ua, UserTag ut
+join UserTag ut on ut.userId = ua.userId
+where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
+''')
+    List<UserTagCount> countNumAchievedByUserTag(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("userTagKey") String userTagKey)
 
     @Query(value = '''select count(ua) as totalCount,
                       sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,

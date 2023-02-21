@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.DayCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserTagCount
 
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
@@ -43,6 +44,18 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.performedOn = ?4''')
     @Nullable
     List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
+
+    @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue from UserPerformedSkill u, UserTag ut
+              join UserTag ut on ut.userId = u.userId
+              where 
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?1 and
+                s.skillId = ?2 and
+                s.enabled = 'true'
+              ) and ut.key = ?3 group by ut.value order by userCount desc''')
+    @Nullable
+    List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey, Pageable pageable)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)
