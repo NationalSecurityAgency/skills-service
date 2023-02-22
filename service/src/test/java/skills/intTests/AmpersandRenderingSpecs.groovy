@@ -552,10 +552,10 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, "skillUsageNavigatorChartBuilder", [:])
 
         then:
-        res.find {it.skillName == "A & B"}
-        res.find {it.skillName == "A &B"}
-        res.find {it.skillName == "A& B"}
-        res.find {it.skillName == "A&B"}
+        res.skills.find {it.skillName == "A & B"}
+        res.skills.find {it.skillName == "A &B"}
+        res.skills.find {it.skillName == "A& B"}
+        res.skills.find {it.skillName == "A&B"}
     }
 
     def "userAchievementsChartBuilder should unescape ampersands in names"() {

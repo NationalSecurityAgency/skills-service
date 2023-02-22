@@ -39,7 +39,7 @@ describe('Metrics Tests - Skills', () => {
 
     it('skills table - format column with numbers', () => {
 
-        const res = [{
+        const res = { skills: [{
             'skillId': 'skill1',
             'skillName': 'Very Great Skill # 1',
             'subjectId': 'subj1',
@@ -55,7 +55,7 @@ describe('Metrics Tests - Skills', () => {
             'numUsersInProgress': 2783,
             'lastReportedTimestamp': null,
             'lastAchievedTimestamp': null
-        }];
+        }], tags: [] };
 
         cy.intercept({
             path: '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**',
