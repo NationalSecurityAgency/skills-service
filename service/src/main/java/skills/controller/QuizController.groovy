@@ -31,7 +31,9 @@ import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
+import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.storage.model.auth.RoleName
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -50,6 +52,9 @@ class QuizController {
 
     @Autowired
     QuizSettingsService quizSettingsService
+
+    @Autowired
+    QuizRoleService quizRoleService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -201,6 +206,36 @@ class QuizController {
     List<QuizSettingsRes> getQuizSettings(@PathVariable("quizId") String quizId) {
         QuizValidator.isNotNull(quizId, "QuizId")
         return quizSettingsService.getSettings(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult addQuizRole(@PathVariable("quizId") String quizId,
+                          @PathVariable("userKey") String userKey,
+                          @PathVariable("roleName") RoleName roleName) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotNull(userKey, "userKey")
+        QuizValidator.isNotNull(roleName, "roleName")
+
+        quizRoleService.addQuizRole(userKey, quizId, roleName)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/{quizId}/userRoles", method = RequestMethod.GET)
+    List<UserRoleRes> getQuizUserRoles(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        return quizRoleService.getQuizUserRoles(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/users/{userKey}/roles/{roleName}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult deleteQuizRole(@PathVariable("quizId") String quizId,
+                              @PathVariable("userKey") String userKey,
+                              @PathVariable("roleName") RoleName roleName) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotNull(userKey, "userKey")
+        QuizValidator.isNotNull(roleName, "roleName")
+
+        quizRoleService.deleteQuizRole(userKey, quizId, roleName)
+        return RequestResult.success()
     }
 
 }

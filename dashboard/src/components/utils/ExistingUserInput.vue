@@ -20,6 +20,7 @@ limitations under the License.
     </b-dropdown>
 
     <v-select :options="suggestions"
+              id="existingUserInputVSelect"
               v-model="userQuery"
               :placeholder="placeholder"
               :multiple="allowMultipleSelections"
@@ -256,6 +257,17 @@ limitations under the License.
             this.onUserSelected(userId);
           }
         }
+      },
+      focus() {
+        this.$nextTick(() => {
+          const vSelectElement = document.getElementById('existingUserInputVSelect');
+          if (vSelectElement) {
+            const foundInput = vSelectElement.querySelector('input');
+            if (foundInput) {
+              foundInput.focus();
+            }
+          }
+        });
       },
     },
   };

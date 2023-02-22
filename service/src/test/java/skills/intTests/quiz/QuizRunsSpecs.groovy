@@ -204,7 +204,6 @@ class QuizRunsSpecs extends DefaultIntSpec {
         when:
         skillsService.deleteQuizRun(quiz.quizId, badAttemptId)
         then:
-        then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Quiz attempt with id [${badAttemptId}] does not exist")
     }

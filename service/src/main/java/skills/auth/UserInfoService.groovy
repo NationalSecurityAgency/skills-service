@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestClientException
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException

@@ -150,4 +150,11 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     boolean existsByUserIdAndRoleName(String userId, RoleName roleName)
 
     int countByRoleName(RoleName roleName)
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.quizId = ?1''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByQuizId(String quizId)
 }

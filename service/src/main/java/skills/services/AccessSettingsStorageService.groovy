@@ -104,6 +104,11 @@ class AccessSettingsStorageService {
         return tableResult
     }
 
+    List<UserRoleRes> findAllQuizRoles(String quizId) {
+        List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByQuizId(quizId)
+        return rolesFromDB.collect { convert(it)}
+    }
+
     @Transactional(readOnly = true)
     TableResult getUserRolesForProjectId(String projectId, String roleName, String userIdQuery, PageRequest pagingRequest) {
         //account for userId query
@@ -229,9 +234,17 @@ class AccessSettingsStorageService {
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserId(userId?.toLowerCase())
         UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
+
+        userRoleRepository.delete(userRole)
+        log.debug("Deleted userRole [{}]", userRole)
+    }
+
+    void deleteQuizUserRole(String userId, String quizId, RoleName roleName) {
+        log.debug('Deleting user-role for userId [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
+        assert userRole, "DELETE FAILED -> no user-role with quiz id [$quizId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
         log.debug("Deleted userRole [{}]", userRole)
@@ -296,7 +309,9 @@ class AccessSettingsStorageService {
         if (user) {
             // check that the new user role does not already exist
             UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
-            assert !existingUserRole, "CREATE FAILED -> user-role with quiz id [$quizId], userIdLower [$userIdLower] and roleName [$roleName] already exists"
+            if (existingUserRole) {
+                throw new SkillQuizException("CREATE FAILED -> user-role with quiz id [$quizId], userIdLower [$userIdLower] and roleName [$roleName] already exists", quizId, ErrorCode.BadParam)
+            }
         } else {
             throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
         }

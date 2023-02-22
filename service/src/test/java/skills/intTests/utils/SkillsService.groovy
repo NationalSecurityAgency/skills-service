@@ -25,6 +25,8 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
 
+import javax.management.relation.Role
+
 @Slf4j
 class SkillsService {
 
@@ -1644,6 +1646,22 @@ class SkillsService {
                 newDisplayOrderIndex: newDisplayOrderIndex,
         ]);
     }
+
+    def addQuizUserRole(String quizId, String userId, String role) {
+        String url = "${getQuizDefUrl(quizId)}/users/${userId}/roles/${role}"
+        return wsHelper.adminPost(url, [])
+    }
+
+    def deleteQuizUserRole(String quizId, String userId, String role) {
+        String url = "${getQuizDefUrl(quizId)}/users/${userId}/roles/${role}"
+        return wsHelper.adminDelete(url)
+    }
+
+    def getQuizUserRoles(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/userRoles"
+        return wsHelper.adminGet(url)
+    }
+
 
     def getQuizQuestionDefs(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/questions"

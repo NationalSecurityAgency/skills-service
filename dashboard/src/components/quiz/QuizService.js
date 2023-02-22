@@ -96,4 +96,18 @@ export default {
     return axios.delete(`/admin/quiz-definitions/${quizId}/questions/${questionId}`)
       .then((response) => response.data);
   },
+  getQuizUserRoles(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/userRoles`)
+      .then((response) => response.data);
+  },
+  addQuizAdmin(quizId, userId) {
+    const adminRole = 'ROLE_QUIZ_ADMIN';
+    return axios.post(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
+      .then((response) => response.data);
+  },
+  deleteQuizAdmin(quizId, userId) {
+    const adminRole = 'ROLE_QUIZ_ADMIN';
+    return axios.delete(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
+      .then((response) => response.data);
+  },
 };
