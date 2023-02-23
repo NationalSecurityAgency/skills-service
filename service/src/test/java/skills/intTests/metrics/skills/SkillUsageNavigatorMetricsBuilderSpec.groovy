@@ -16,13 +16,21 @@
 package skills.intTests.metrics.skills
 
 import groovy.time.TimeCategory
+import org.springframework.beans.factory.annotation.Autowired
+import skills.PublicProps
+import skills.controller.request.model.SkillsTagRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import skills.services.admin.SkillTagService
+import skills.utils.InputSanitizer
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
+
+    @Autowired
+    SkillTagService skillTagService
 
     String metricsId = "skillUsageNavigatorChartBuilder"
 
@@ -130,6 +138,54 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+    }
+
+    def "skills with usage, achievements and tags"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> days
+
+        use(TimeCategory) {
+            days = (5..0).collect { int day -> day.days.ago }
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        SkillsTagRequest skillsTagRequest = new SkillsTagRequest()
+        skillsTagRequest.tagId = "testtag"
+        skillsTagRequest.tagValue = "Test Tag"
+        skillsTagRequest.skillIds = skills.collect{ it -> it.skillId }
+        skillTagService.addTag(proj.projectId, skillsTagRequest)
+
+        SkillsTagRequest secondSkillsTagRequest = new SkillsTagRequest()
+        secondSkillsTagRequest.tagId = "newtag"
+        secondSkillsTagRequest.tagValue = "New Tag"
+        secondSkillsTagRequest.skillIds = skills[0..4].collect{ it -> it.skillId }
+        skillTagService.addTag(proj.projectId, secondSkillsTagRequest)
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        res.skills.size() == 10
+        res.tags.size() == 2
+        res.tags == [[tagValue: 'New Tag', tagId: 'newtag'], [tagValue: 'Test Tag', tagId: 'testtag']]
     }
 
     def "group skills with usage and achievements"() {

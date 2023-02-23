@@ -486,7 +486,7 @@ describe('Metrics Tests - Skills', () => {
         cy.validateTable(tableSelector, [...lastReportedExpected].reverse());
     });
 
-    it('skills table - tag filtering', () => {
+    it('skills table - skill usage filtering', () => {
         // have to make viewport very wide so all the tags are on the same line
         // looks like there is an issue with cypress not being able to click on a tag
         // if it's pushed to the 2nd line
@@ -766,4 +766,94 @@ describe('Metrics Tests - Skills', () => {
             .should('have.length', 1);
     });
 
+    it('skills table - tag filtering', () => {
+        // have to make viewport very wide so all the tags are on the same line
+        // looks like there is an issue with cypress not being able to click on a tag
+        // if it's pushed to the 2nd line
+        cy.viewport(2048, 1024);
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+            .as('skillUsageNavigatorChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 17;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: skillsCounter < 17 ? '1' : '2',
+            });
+        }
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+        const skip = [3, 6];
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            if (!skip.includes(skillsCounter)) {
+                for (let i = 0; i < skillsCounter; i += 1) {
+                    cy.request('POST', `/api/projects/proj1/skills/skill${skillsCounter}`,
+                        {
+                            userId: `user${i}achieved@skills.org`,
+                            timestamp: m.clone()
+                                .subtract(skillsCounter, 'day')
+                                .format('x')
+                        });
+                }
+            }
+        }
+
+        let skills = [];
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            skills.push(`skill${skillsCounter}`);
+        }
+
+        cy.addTagToSkills(1, skills, 1);
+        cy.addTagToSkills(1, ['skill3', 'skill6'], 2);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Skills]')
+            .click();
+        cy.wait('@skillUsageNavigatorChartBuilder');
+
+        cy.get('[data-cy=skillTag-filters').should('exist');
+        cy.get('[data-cy=skillTag-filters').contains('TAG 2').click({force: true});
+
+        cy.get('[data-cy=skillsNavigator-filterBtn]')
+            .click();
+
+        const tableSelector = '[data-cy=skillsNavigator-table]';
+
+        cy.get(`${tableSelector} th`)
+            .contains('Skill')
+            .click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill # 3'
+            }, {
+                colIndex: 1,
+                value: 'Overlooked Skill'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill # 6'
+            }, {
+                colIndex: 1,
+                value: 'Overlooked Skill'
+            }],
+        ]);
+
+        cy.get('[data-cy=skillsNavigator-resetBtn]')
+            .click();
+        cy.get('[data-cy=skillsBTableTotalRows]')
+            .contains(17);
+
+    });
 });

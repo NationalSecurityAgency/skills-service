@@ -44,7 +44,7 @@ limitations under the License.
     </div>
     <div class="row px-3" v-if="tags.length > 0">
       <div class="col">
-        <b-form-group label="Skill Tags"  label-class="text-muted">
+        <b-form-group label="Skill Tags" label-class="text-muted" data-cy="skillTag-filters">
           <b-form-checkbox v-for="tag in tags" :key="tag.tagId" inline v-model="filters.skillTags[tag.tagId]">
             <b-badge variant="info" class="ml-2">{{tag.tagValue}}</b-badge>
           </b-form-checkbox>
