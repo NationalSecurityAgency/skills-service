@@ -7,7 +7,7 @@ module.exports = defineConfig({
   numTestsKeptInMemory: 50,
   chromeWebSecurity: false,
   retries: {
-    runMode: 2,
+    runMode: 0,
     openMode: 0,
   },
   lighthouse: {

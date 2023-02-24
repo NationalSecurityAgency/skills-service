@@ -28,6 +28,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         String getQuizName()
         String getQuizId()
         QuizDefParent.QuizType getQuizType()
+        Integer getNumQuestions()
     }
 
     static interface ProjectIdAndSkillId {
@@ -36,10 +37,16 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     }
 
     @Nullable
-    @Query('''select q.quizId as quizId, q.name as quizName, q.type as quizType, qToS.skillRefId as skillRefId
-            from QuizToSkillDef qToS, QuizDef q 
+    @Query('''select q.quizId as quizId,
+                     q.name as quizName,
+                     q.type as quizType,
+                     qToS.skillRefId as skillRefId, 
+                     count(question.id) as numQuestions
+            from QuizToSkillDef qToS, QuizDef q
+                left join QuizQuestionDef question on (q.quizId = question.quizId)
             where qToS.skillRefId = ?1
-                and q.id = qToS.quizRefId''')
+                and q.id = qToS.quizRefId
+            group by q.quizId''')
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
     @Nullable
@@ -50,10 +57,16 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     List<ProjectIdAndSkillId> getSkillsForQuiz(Integer quizRefId)
 
     @Nullable
-    @Query('''select q.quizId as quizId, q.name as quizName, q.type as quizType, qToS.skillRefId as skillRefId
-            from QuizToSkillDef qToS, QuizDef q 
+    @Query('''select q.quizId as quizId, 
+                    q.name as quizName,
+                    q.type as quizType,
+                    qToS.skillRefId as skillRefId,
+                    count(question.id) as numQuestions
+            from QuizToSkillDef qToS, QuizDef q
+             left join QuizQuestionDef question on (q.quizId = question.quizId) 
             where qToS.skillRefId in ?1
-                and q.id = qToS.quizRefId''')
+                and q.id = qToS.quizRefId
+            group by q.quizId''')
     List<QuizNameAndId> getQuizInfoSkillIdRef(List<Integer> skillIdRef)
 
     void deleteBySkillRefId(Integer skillRefId)

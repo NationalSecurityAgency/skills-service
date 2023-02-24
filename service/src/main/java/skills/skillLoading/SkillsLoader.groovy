@@ -569,8 +569,9 @@ class SkillsLoader {
                 requestedOn: skillApproval?.requestedOn?.time,
                 rejectedOn: skillApproval?.rejectedOn?.time,
                 rejectionMsg: skillApproval?.rejectionMsg,
-                quizId: skillDefAndUserPoints.quizId,
-                quizName: skillDefAndUserPoints.quizName,
+                quizId: skillDefAndUserPoints?.quizId,
+                quizName: skillDefAndUserPoints?.quizName,
+                numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
         )
 
         return selfReportingInfo
@@ -595,6 +596,7 @@ class SkillsLoader {
                 rejectionMsg: skillApproval?.rejectionMsg,
                 quizId: quizNameAndId?.quizId,
                 quizName: quizNameAndId?.quizName,
+                numQuizQuestions: quizNameAndId?.numQuestions ?: 0,
         )
 
         return selfReportingInfo

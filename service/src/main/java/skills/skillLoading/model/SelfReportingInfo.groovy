@@ -33,4 +33,5 @@ class SelfReportingInfo {
     // only applicable to when selfReportingType == SelfReportingType.Quiz
     String quizId
     String quizName
+    Integer numQuizQuestions
 }

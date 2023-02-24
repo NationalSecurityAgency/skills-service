@@ -76,6 +76,7 @@ class SubjectDataLoader {
         String quizId
         QuizDefParent.QuizType quizType
         String quizName
+        Integer quizNumQuestions
 
         SkillDependencySummary dependencyInfo
 
@@ -201,6 +202,7 @@ class SubjectDataLoader {
                         it.quizId = quizNameAndId.quizId
                         it.quizName = quizNameAndId.quizName
                         it.quizType = quizNameAndId.quizType
+                        it.quizNumQuestions = quizNameAndId.numQuestions
                     } else {
                         log.error("Failed to find quiz for skill ref id [{}]. This is likely an issue with the data and a record is missing in the QuizToSkillDef or SkillDef's SelfReportingType.Quiz is not correct.", it.skillDef.id)
                     }

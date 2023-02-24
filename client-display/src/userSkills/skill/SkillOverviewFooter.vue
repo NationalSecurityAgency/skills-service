@@ -15,84 +15,101 @@ limitations under the License.
 */
 <template>
   <div>
-    <div class="row pt-2">
-      <div class="col-auto text-left">
-        <div class="btn-group" role="group" aria-label="Basic example">
-          <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info skills-theme-btn">
-            <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
-          </a>
-          <button v-if="selfReport.available && !isQuizOrSurveySkill" class="btn btn-outline-info skills-theme-btn"
-                  :disabled="selfReportDisabled"
-                  @click="showSelfReportModal"
-                  data-cy="selfReportBtn">
-            <i class="fas fa-check-square mr-1"></i>
-            I did it
-          </button>
+    <div v-if="isQuizOrSurveySkill" class="mb-2 alert alert-info">
+      <div class="row">
+        <div class="col font-italic pt-1" data-cy="quizAlert">
+          <i class="fas fa-user-check font-size-2" aria-hidden="true"></i>
+          {{ isSurveySkill ? 'Complete' : 'Pass'}} the<span
+            v-if="skillInternal.selfReporting.numQuizQuestions && skillInternal.selfReporting.numQuizQuestions > 0">&nbsp;{{
+            skillInternal.selfReporting.numQuizQuestions
+          }}-question</span>&nbsp;<b>{{ skillInternal.selfReporting.quizName }}</b>&nbsp;{{ isSurveySkill ? 'Survey' : 'Quiz'}} and earn <span class="font-size-1"><b-badge
+            variant="info">{{ skillInternal.totalPoints | number }}</b-badge></span> points!
+        </div>
+        <div class="col-auto text-right">
           <b-button v-if="selfReport.available && isQuizOrSurveySkill"
                     class="skills-theme-btn"
                     :disabled="selfReportDisabled"
-                    variant="outline-info"
+                    variant="info"
                     @click="navToQuiz"
                     data-cy="takeQuizBtn">
-            <i class="fas fa-check-square mr-1"></i>
             <span v-if="isQuizSkill">Take Quiz</span>
             <span v-if="isSurveySkill">Complete Survey</span>
+            <i class="far fa-arrow-alt-circle-right ml-1"></i>
           </b-button>
-        </div>
-      </div>
-      <div v-if="isQuizOrSurveySkill" class="col text-right">
-        <div class="font-italic text-secondary">
-          <i class="fas fa-user-edit text-info mr-1" style="font-size: 1.2rem;"></i>
-          <span v-if="isQuizSkill">Quiz</span><span v-if="isSurveySkill">Survey</span> Completion<span v-if="!selfReportDisabled"> Required</span>:
-        </div>
-        <div>
-          <span v-if="selfReportDisabled"
-              class="font-weight-bold text-primary"  style="font-size: 1rem;">{{ skillInternal.selfReporting.quizName }}</span>
-          <b-button v-else variant="link"
-                    tag="a"
-                    class="p-0"
-                    @click="navToQuiz"
-                    data-cy="quizLink">
-            <span class="font-weight-bold text-primary" style="font-size: 1rem;">{{
-                skillInternal.selfReporting.quizName
-              }}</span>
-          </b-button>
-        </div>
-      </div>
-      <div v-if="isPendingApproval()" class="col text-right" data-cy="pendingApprovalStatus">
-        <div>
-          <i class="far fa-clock"></i> Pending Approval
-        </div>
-        <div>
-          Submitted <span class="text-info">{{ skillInternal.selfReporting.requestedOn | relativeTime}}</span>
-        </div>
-      </div>
-      <div v-if="isRejected" class="col text-right"  data-cy="approvalRejectedStatus">
-        <div class="text-danger">
-          <i class="fas fa-ban"></i> Approval Rejected
-        </div>
-        <div>
-          Rejected <span class="text-info">{{ skillInternal.selfReporting.rejectedOn | relativeTime}}</span>
         </div>
       </div>
     </div>
-    <div v-if="isRejected" class="alert alert-danger mt-2"  data-cy="selfReportRejectedAlert">
+    <div v-if="isHonorSystem && selfReport.available" class="mb-2 alert alert-info">
       <div class="row">
+        <div class="col font-italic pt-1" data-cy="honorSystemAlert">
+          <i class="fas fa-user-shield font-size-2" aria-hidden="true"></i>
+          This skill can be submitted under the <span class="font-size-1">Honor System</span>, claim <span class="font-size-1"><b-badge variant="info">{{ skillInternal.pointIncrement | number }}</b-badge></span> points once you've completed the skill.
+        </div>
         <div class="col-auto">
-          <i class="fas fa-heart-broken" style="font-size: 1.5rem;"></i>
-        </div>
-        <div class="col">
-          <div>
-            Unfortunately your request from <b>{{ skillInternal.selfReporting.requestedOn | formatDate('MM/DD/YYYY') }}</b> was rejected. The reason is:
-            <b>"{{ skillInternal.selfReporting.rejectionMsg }}"</b>
-          </div>
-        </div>
-        <div class="col-auto text-right">
-          <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="showRejectionModal">
-            <i class="fas fa-check"></i> I got it!
-          </button>
+          <b-button class="skills-theme-btn"
+                    :disabled="selfReportDisabled"
+                    variant="info"
+                    @click="reportSkill(null)"
+                    data-cy="claimPointsBtn">
+            Claim Points
+            <i class="fas fa-check-double ml-1" aria-hidden="true"></i>
+          </b-button>
         </div>
       </div>
+    </div>
+    <div v-if="isApprovalRequired && selfReport.available && !selfReportDisabled && !isRejected" class="mb-2 alert alert-info">
+      <div class="row">
+        <div class="col font-italic pt-1" data-cy="requestApprovalAlert">
+          <i class="fas fa-traffic-light font-size-2" aria-hidden="true"></i>
+          This skill requires <span class="font-size-1">approval</span>.
+          Request <span class="font-size-1"><b-badge variant="info">{{ skillInternal.pointIncrement | number }}</b-badge></span> points once you've completed the skill.
+        </div>
+        <div class="col-auto">
+          <b-button v-if="!showApprovalJustification"
+                    ref="beginRequestBtn"
+                    class="skills-theme-btn"
+                    :disabled="selfReportDisabled"
+                    variant="info"
+                    @click="showApprovalJustification = true"
+                    data-cy="requestApprovalBtn">
+            Begin Request
+            <i class="far fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
+          </b-button>
+        </div>
+      </div>
+      <b-overlay :show="requestApprovalLoading">
+        <justification-input v-if="showApprovalJustification"
+                           class="mt-1"
+                           @report-skill="reportSkill"
+                           @cancel="showApprovalJustification = false; focusOnRef('beginRequestBtn')"
+                           :skill="skillInternal"
+                           :is-approval-required="isApprovalRequired"
+                           :is-honor-system="isHonorSystem"
+                           :is-justitification-required="isJustificationRequired" />
+      </b-overlay>
+    </div>
+    <div v-if="isPendingApproval() && selfReport.msgHidden" class="mb-2 alert alert-info font-italic" data-cy="pendingApprovalStatus">
+      <i class="far fa-clock font-size-2" aria-hidden="true" /> This skill is <span class="font-size-1 normal-font">pending approval</span>.
+        Submitted <span class="text-info">{{ skillInternal.selfReporting.requestedOn | relativeTime}}</span>.
+    </div>
+    <div v-if="isRejected" class="alert alert-danger mt-2"  data-cy="selfReportRejectedAlert">
+      <b-overlay :show="removeRejectionLoading"
+                 spinner-type="grow"
+                 spinner-small
+                 variant="transparent">
+        <div class="row">
+          <div class="col">
+            <i class="fas fa-heart-broken font-size-2" aria-hidden=""></i>
+            Unfortunately your request from <b>{{ skillInternal.selfReporting.requestedOn | formatDate('MM/DD/YYYY') }}</b> was rejected <span class="text-info">{{ skillInternal.selfReporting.rejectedOn | relativeTime}}</span>. The reason is:
+            <b>"{{ skillInternal.selfReporting.rejectionMsg }}"</b>
+          </div>
+          <div class="col-auto text-right">
+            <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="removeRejection">
+              <i class="fas fa-check" aria-hidden="true"></i> I got it!
+            </button>
+          </div>
+        </div>
+      </b-overlay>
     </div>
 
     <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="selfReportError">
@@ -121,61 +138,41 @@ limitations under the License.
         </div>
         <div class="col-auto">
           <button type="button" class="close" data-dismiss="alert" aria-label="Close"
-                  @click="selfReport.msgHidden = true">
-            <i class="fas fa-times-circle"></i>
+                  @click="selfReport.msgHidden = true" data-cy="dismissSuccessfulSubmissionBtn">
+            <i class="fas fa-times-circle" aria-hidden="true"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <self-report-skill-modal v-if="selfReportModalVisible" @report-skill="reportSkill" @cancel="selfReportModalVisible = false"
-        ref="selfReportModal"
-        :skill="skillInternal"
-        :is-approval-required="isApprovalRequired"
-        :is-honor-system="isHonorSystem"
-        :is-justitification-required="isJustificationRequired" />
-
-    <b-modal id="clearRejectionMsgDialog"
-             title="CLEAR APPROVAL REJECTION"
-             :no-close-on-backdrop="true"
-             v-model="clearRejectionModalVisible">
-      <modal-positioner :y-offset="rejectionDialogYOffset" />
-      <div class="row p-2" data-cy="clearRejectionMsgDialog">
-        <div class="col-auto text-center">
-          <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem"></i>
-        </div>
-        <div class="col">
-          This action will <b class="text-danger">permanently</b> remove the rejection and its message. <span class="text-danger">Are you sure</span>?
+    <div class="row pt-2">
+      <div class="col-auto text-left">
+        <div class="btn-group" role="group" aria-label="Skills Buttons">
+          <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href" target="_blank" rel="noopener" class="btn btn-outline-info skills-theme-btn">
+            <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
+          </a>
         </div>
       </div>
-      <template #modal-footer>
-        <button type="button" class="btn btn-outline-danger text-uppercase" @click="clearRejectionModalVisible=false">
-          <i class="fas fa-times-circle"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-outline-success text-uppercase" @click="removeRejection(); clearRejectionModalVisible=false;" data-cy="removeRejectionBtn">
-          <i class="fas fa-arrow-alt-circle-right"></i> Remove
-        </button>
-      </template>
-    </b-modal>
+    </div>
   </div>
 </template>
 
 <script>
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import UserSkillsService from '../service/UserSkillsService';
-  import SelfReportSkillModal from './SelfReportSkillModal';
-  import ModalPositioner from './ModalPositioner';
+  import JustificationInput from './JustificationInput';
 
   export default {
     name: 'SkillOverviewFooter',
     mixins: [NavigationErrorMixin],
-    components: { ModalPositioner, SelfReportSkillModal },
+    components: { JustificationInput },
     props: ['skill'],
     data() {
       return {
         skillInternal: {},
-        selfReportModalVisible: false,
-        clearRejectionModalVisible: false,
+        showApprovalJustification: false,
+        requestApprovalLoading: false,
+        removeRejectionLoading: false,
         rejectionDialogYOffset: 0,
         approvalRequestedMsg: '',
         selfReport: {
@@ -227,12 +224,6 @@ limitations under the License.
       },
     },
     methods: {
-      showSelfReportModal(event) {
-        this.selfReportModalVisible = true;
-        this.$nextTick(() => {
-          this.$refs.selfReportModal.updatePosition(event.pageY);
-        });
-      },
       navToQuiz() {
         this.handlePush({
           name: 'quizPage',
@@ -240,10 +231,6 @@ limitations under the License.
             skillInternal: this.skillInternal.subjectId, skillId: this.skillInternal.skillId, quizId: this.skillInternal.selfReporting.quizId, skill: this.skillInternal,
           },
         });
-      },
-      showRejectionModal(event) {
-        this.clearRejectionModalVisible = true;
-        this.rejectionDialogYOffset = event.pageY;
       },
       isPendingApproval() {
         const res = this.skillInternal.selfReporting && this.skillInternal.selfReporting.requestedOn !== null && this.skillInternal.selfReporting.requestedOn !== undefined && !this.isRejected;
@@ -262,17 +249,21 @@ limitations under the License.
         return this.selfReport.res && this.selfReport.res.explanation.includes('was already performed');
       },
       removeRejection() {
+        this.removeRejectionLoading = true;
         UserSkillsService.removeApprovalRejection(this.skillInternal.selfReporting.approvalId)
           .then(() => {
             this.skillInternal.selfReporting.rejectedOn = null;
             this.skillInternal.selfReporting.rejectedMsg = null;
             this.skillInternal.selfReporting.requestedOn = null;
+          }).finally(() => {
+            this.removeRejectionLoading = false;
           });
       },
       reportSkill(approvalRequestedMsg) {
         this.errNotification.enable = false;
         this.errNotification.msg = '';
 
+        this.requestApprovalLoading = true;
         UserSkillsService.reportSkill(this.skillInternal.skillId, approvalRequestedMsg)
           .then((res) => {
             if (res.explanation.includes('This skill was already submitted for approval and is still pending approval')
@@ -307,7 +298,7 @@ limitations under the License.
               });
             }
           }).finally(() => {
-            this.selfReportModalVisible = false;
+            this.requestApprovalLoading = false;
           });
       },
       testWasTaken(testResult) {
@@ -323,9 +314,23 @@ limitations under the License.
           this.$emit('points-earned', res.pointsEarned);
         }
       },
+      focusOnRef(ref) {
+        this.$nextTick(() => {
+          this.$refs[ref]?.focus();
+        });
+      },
     },
   };
 </script>
 
 <style scoped>
+.font-size-1 {
+  font-size: 1rem
+}
+.font-size-2 {
+  font-size: 1.2rem
+}
+.normal-font {
+  font-style: normal;
+}
 </style>
