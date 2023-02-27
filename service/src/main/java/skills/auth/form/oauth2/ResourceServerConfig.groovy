@@ -47,7 +47,6 @@ import skills.auth.UserInfo
 
 @Conditional(SecurityMode.FormAuth)
 @Configuration
-//@EnableResourceServer
 class ResourceServerConfig {
 
     @Autowired
@@ -102,7 +101,6 @@ class ResourceServerConfig {
                 if (projectId && auth && auth.principal instanceof UserInfo) {
                     String proxyingSystemId = ((UserInfo) auth.principal).proxyingSystemId
                     if (projectId != proxyingSystemId) {
-//                        throw new AccessDeniedException("Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]");
                         OAuth2Error error = new BearerTokenError(
                                 OAuth2ErrorCodes.INVALID_CLIENT,
                                 HttpStatus.FORBIDDEN,
