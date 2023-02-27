@@ -98,7 +98,6 @@ class HttpClientRestTemplateConfig {
     @Bean
     HttpClient httpClient(PoolingHttpClientConnectionManager poolingHttpClientConnectionManager, RequestConfig requestConfig) {
         return HttpClients.custom()
-//                .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .useSystemProperties()
                 .setConnectionManager(poolingHttpClientConnectionManager)
                 .setDefaultRequestConfig(requestConfig)
