@@ -211,7 +211,7 @@ class UserAuthService {
         UserRole role
         HttpServletRequest request = getServletRequest()
         String quizId = AuthUtils.getQuizIdFromRequest(request)
-        String method = request.method
+        String method = request?.method
         boolean isGetMethod =  method && method == HttpMethod.GET.toString()
         if (isGetMethod && quizId) {
             boolean isNotQuizAdmin = !addedRoles?.find { it.roleName == RoleName.ROLE_QUIZ_ADMIN }

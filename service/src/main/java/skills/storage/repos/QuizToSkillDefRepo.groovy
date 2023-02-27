@@ -38,9 +38,9 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     @Nullable
     @Query('''select q.quizId as quizId,
-                     q.name as quizName,
-                     q.type as quizType,
-                     qToS.skillRefId as skillRefId, 
+                     max(q.name) as quizName,
+                     max(q.type) as quizType,
+                     max(qToS.skillRefId) as skillRefId, 
                      count(question.id) as numQuestions
             from QuizToSkillDef qToS, QuizDef q
                 left join QuizQuestionDef question on (q.quizId = question.quizId)
@@ -58,9 +58,9 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     @Nullable
     @Query('''select q.quizId as quizId, 
-                    q.name as quizName,
-                    q.type as quizType,
-                    qToS.skillRefId as skillRefId,
+                    max(q.name) as quizName,
+                    max(q.type) as quizType,
+                    max(qToS.skillRefId) as skillRefId,
                     count(question.id) as numQuestions
             from QuizToSkillDef qToS, QuizDef q
              left join QuizQuestionDef question on (q.quizId = question.quizId) 
