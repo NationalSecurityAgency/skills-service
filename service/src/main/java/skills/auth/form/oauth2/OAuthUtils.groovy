@@ -74,7 +74,6 @@ class OAuthUtils {
 
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
         } else {
-//            throw new AccessDeniedException("JWT token missing request claim ${AuthorizationServerConfig.SKILLS_PROXY_USER}")
             OAuth2Error error = new OAuth2Error(
                     OAuth2ErrorCodes.INVALID_TOKEN,
                     "client_credentials grant_type must specify${AuthorizationServerConfig.SKILLS_PROXY_USER} field",
