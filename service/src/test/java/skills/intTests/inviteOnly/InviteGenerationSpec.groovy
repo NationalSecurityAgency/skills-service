@@ -163,7 +163,6 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         String userId = getRandomUsers(1, true).first()
         String userEmail = EmailUtils.generateEmaillAddressFor(userId)
         SkillsService createAcctService = createService(userId)
-//        createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
 
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [userEmail]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
