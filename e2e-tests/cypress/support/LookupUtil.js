@@ -19,9 +19,9 @@ export default {
         let db = Cypress.env('db');
 
         if (db) {
-            const isValid = ['postgres', 'h2'].includes(db);
+            const isValid = ['postgres'].includes(db);
             if (!isValid) {
-                throw `Invalid db [${db}]. Valid values are 'h2' and 'postgres'`;
+                throw `Invalid db [${db}]. Valid values are 'postgres'`;
             }
         } else {
             db = 'postgres';
