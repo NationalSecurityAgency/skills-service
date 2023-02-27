@@ -64,11 +64,9 @@ class KeyStoreKeyFactory {
         try {
             synchronized (lock) {
                 if (store == null) {
-                    synchronized (lock) {
-                        store = KeyStore.getInstance("jks");
-                        inputStream = resource.getInputStream();
-                        store.load(inputStream, password);
-                    }
+                    store = KeyStore.getInstance("jks");
+                    inputStream = resource.getInputStream();
+                    store.load(inputStream, password);
                 }
             }
             RSAPrivateCrtKey key = (RSAPrivateCrtKey) store.getKey(jwtKeystoreAlias, password);
