@@ -232,7 +232,7 @@ describe('Self Report Approval History Tests', () => {
             .should('not.exist');
     });
 
-    it.only('approved and rejected requests - sorting', () => {
+    it('approved and rejected requests - sorting', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
