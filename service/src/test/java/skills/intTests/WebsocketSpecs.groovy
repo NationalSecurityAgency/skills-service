@@ -410,13 +410,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         subjSummaryRes.get(4).levelPoints == 0
     }
 
-    def void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {
-//        SSLContextBuilder builder = new SSLContextBuilder()
-//        def keyStore = certificateRegistry.getCertificate(user)
-//        builder.loadKeyMaterial(keyStore.getURL(), "skillspass".toCharArray(), "skillspass".toCharArray())
-//        ClassPathResource trustResource = new ClassPathResource("/certs/truststore.jks")
-//        assert trustResource.exists(), "could not find truststore ${trustResource.getPath()} on the classpath"
-//        builder.loadTrustMaterial(trustResource.getURL(), "skillspass".toCharArray())
+    void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {
 
         Resource resource = certificateRegistry.getCertificate(user)
         KeyStore keyStore = KeyStore.getInstance("PKCS12")
