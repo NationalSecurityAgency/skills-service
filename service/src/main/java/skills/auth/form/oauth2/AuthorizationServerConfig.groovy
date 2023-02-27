@@ -109,7 +109,6 @@ class AuthorizationServerConfig {
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate()
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
-//                .keyID(UUID.randomUUID().toString())
                 .build()
         JWKSet jwkSet = new JWKSet(rsaKey)
         return new ImmutableJWKSet<>(jwkSet)
@@ -155,7 +154,7 @@ class AuthorizationServerConfig {
         }
 
         private RegisteredClient loadRegisteredClient(String clientId) {
-            ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(clientId) //projDefAccessor.getProjDef(clientId)
+            ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(clientId)
             if (!projDef) {
                 throw new UnknownClientIdException("Invalid clientId [${clientId}]")
             }
@@ -164,16 +163,10 @@ class AuthorizationServerConfig {
                     .clientId(clientId)
                     .clientSecret(passwordEncoder.encode(projDef.clientSecret))
                     .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                     .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//                    .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
-//                    .redirectUri("http://127.0.0.1:8080/authorized")
-//                    .scope(OidcScopes.OPENID)
-//                    .scope(OidcScopes.PROFILE)
                     .scope("read")
                     .scope("write")
-//                    .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                     .tokenSettings(TokenSettings.builder().accessTokenTimeToLive(Duration.ofSeconds(accessTokenValiditySeconds)).build())
                     .build()
 
