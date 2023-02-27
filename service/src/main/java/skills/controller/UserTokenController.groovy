@@ -82,7 +82,6 @@ class UserTokenController {
     }
 
     private TokenFilterChain getTokenEndpointFilterChain(String endpoint) {
-//        def authServerContextFilter = authServerSecurityFilterChain.getFilters().find { it.class == AuthorizationServerContextFilter }
         def authServerContextFilter = authServerSecurityFilterChain.getFilters().find { it.class.simpleName == 'AuthorizationServerContextFilter' }
         OAuth2TokenEndpointFilter existingTokenEndpointFilter = authServerSecurityFilterChain.getFilters().find { it.class == OAuth2TokenEndpointFilter }
         OAuth2TokenEndpointFilter currentTokenEndpointFilter = new OAuth2TokenEndpointFilter(existingTokenEndpointFilter.authenticationManager, endpoint)
