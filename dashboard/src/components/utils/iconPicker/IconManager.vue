@@ -55,19 +55,20 @@ limitations under the License.
           <template slot="title">
             <i class="fas fa-wrench"></i> Custom
           </template>
-          <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ errors }" rules="image|imageDimensions|duplicateFilename">
+          <div data-cy="customIconUpload">
+            <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ errors }" rules="image|imageDimensions|duplicateFilename">
             <file-upload
                          :name="'customIcon'"
                          @file-selected="customIconUploadRequest"
                         :disable-input="disableCustomUpload"/>
             <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
 
-            <b-alert show variant="danger" v-show="errors[0]" class="text-center">
+            <b-alert show variant="danger" v-show="errors[0]" class="text-center" data-cy="customIconErr">
               <i class="fas fa-exclamation-circle"/> {{ errors[0] }} <i class="fas fa-exclamation-circle"/>
             </b-alert>
           </ValidationProvider>
 
-          <div class="row text-info justify-content-center mt-4">
+            <div class="row text-info justify-content-center mt-4">
             <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">
               <div class="icon-item">
                 <a
@@ -87,6 +88,7 @@ limitations under the License.
                 </span>
               </div>
             </div>
+          </div>
           </div>
         </b-tab>
       </b-tabs>

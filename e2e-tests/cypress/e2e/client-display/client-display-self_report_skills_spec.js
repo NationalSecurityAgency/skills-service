@@ -283,10 +283,10 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('requires approval');
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('Submitted successfully!');
 
         // refresh the page and validate that submit button is disabled and approval status is still displayed
         cy.cdVisit('/');
@@ -296,10 +296,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="pendingApprovalStatus"]').contains('pending approval')
 
         // approve and then visit page again
         cy.approveRequest();

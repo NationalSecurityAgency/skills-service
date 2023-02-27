@@ -523,7 +523,7 @@ describe('Skills Tests', () => {
 
     cy.clickButton('Add');
     cy.wait('@addUser');
-    cy.get('.text-danger', {timeout: 5 * 1000}).contains("Wasn't able to add points for");
+    cy.get('[data-cy="addedUserEventsInfo"]').contains("Wasn't able to add points for");
   });
 
   it('Add Skill Event - user names cannot have spaces', () => {

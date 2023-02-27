@@ -832,9 +832,7 @@ describe('Client Display Tests', () => {
             .contains('66% Complete');
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
-        cy.get('[data-cy=selfReportBtn]')
-            .click();
-        cy.get('[data-cy=selfReportSubmitBtn]')
+        cy.get('[data-cy=claimPointsBtn]')
             .click();
         cy.get('.skills-badge')
             .contains('100% Complete');
