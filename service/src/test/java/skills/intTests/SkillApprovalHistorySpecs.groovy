@@ -506,36 +506,19 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         skillNameDesc.data.collect { it.skillId } == [skills[6].skillId, skills[5].skillId, skills[4].skillId, skills[3].skillId, skills[2].skillId]
 
 
-        // postgres and h2 sort differently on nulls
         List rejectedOnAsc_rejectedOn = rejectedOnAsc.data.collect { it.rejectedOn }
         List rejectedOnDesc_rejectedOn = rejectedOnDesc.data.collect { it.rejectedOn }
-//        boolean isPostgres = System.getProperty("spring.datasource.url")?.contains('postgresql')
-//        if (!isPostgres) {
-            assert rejectedOnAsc_rejectedOn[0] != null
-            assert rejectedOnAsc_rejectedOn[1] != null
-            assert rejectedOnAsc_rejectedOn[2] != null
-            assert rejectedOnAsc_rejectedOn[3] == null
-            assert rejectedOnAsc_rejectedOn[4] == null
+        assert rejectedOnAsc_rejectedOn[0] != null
+        assert rejectedOnAsc_rejectedOn[1] != null
+        assert rejectedOnAsc_rejectedOn[2] != null
+        assert rejectedOnAsc_rejectedOn[3] == null
+        assert rejectedOnAsc_rejectedOn[4] == null
 
-            assert rejectedOnDesc_rejectedOn[0] == null
-            assert rejectedOnDesc_rejectedOn[1] == null
-            assert rejectedOnDesc_rejectedOn[2] == null
-            assert rejectedOnDesc_rejectedOn[3] == null
-            assert rejectedOnDesc_rejectedOn[4] != null
-
-//        } else {
-//            assert rejectedOnAsc_rejectedOn[0] == null
-//            assert rejectedOnAsc_rejectedOn[1] == null
-//            assert rejectedOnAsc_rejectedOn[2] == null
-//            assert rejectedOnAsc_rejectedOn[3] == null
-//            assert rejectedOnAsc_rejectedOn[4] != null
-//
-//            assert rejectedOnDesc_rejectedOn[0] != null
-//            assert rejectedOnDesc_rejectedOn[1] != null
-//            assert rejectedOnDesc_rejectedOn[2] != null
-//            assert rejectedOnDesc_rejectedOn[3] == null
-//            assert rejectedOnDesc_rejectedOn[4] == null
-//        }
+        assert rejectedOnDesc_rejectedOn[0] == null
+        assert rejectedOnDesc_rejectedOn[1] == null
+        assert rejectedOnDesc_rejectedOn[2] == null
+        assert rejectedOnDesc_rejectedOn[3] == null
+        assert rejectedOnDesc_rejectedOn[4] != null
 
         requestedOnAsc.data.collect { it.requestedOn } == requestedOnAsc.data.collect { it.requestedOn }.sort()
         requestedOnDesc.data.collect { it.requestedOn } == requestedOnDesc.data.collect { it.requestedOn }.sort().reverse()
