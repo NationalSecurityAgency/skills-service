@@ -19,7 +19,7 @@ import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = 'project_definition')

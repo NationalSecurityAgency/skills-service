@@ -24,7 +24,7 @@ import org.springframework.core.io.support.ResourcePatternUtils
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.security.KeyStore
 import java.security.Principal
 import java.security.cert.X509Certificate

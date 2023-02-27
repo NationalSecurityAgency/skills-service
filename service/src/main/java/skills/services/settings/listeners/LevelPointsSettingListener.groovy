@@ -29,7 +29,7 @@ import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Slf4j
 @Component

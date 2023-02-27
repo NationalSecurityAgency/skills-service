@@ -18,7 +18,7 @@ package skills.services.admin;
 import com.google.common.hash.Hashing;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 

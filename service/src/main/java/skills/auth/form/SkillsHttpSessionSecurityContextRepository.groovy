@@ -16,22 +16,27 @@
 package skills.auth.form
 
 import groovy.util.logging.Slf4j
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpSession
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.log.LogMessage
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.DeferredSecurityContext
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.user.OAuth2User
-import org.springframework.security.oauth2.provider.OAuth2Authentication
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.context.HttpRequestResponseHolder
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.NullSecurityContextRepository
+import org.springframework.security.web.context.SupplierDeferredSecurityContext
 import skills.auth.UserInfo
 import skills.auth.form.oauth2.OAuthUtils
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import java.util.function.Supplier
 
 /**
  * this class is responsible for converting OAuth2 authenticated principal's to UserInfo objects
@@ -59,23 +64,47 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
         } else {
             // Let the parent class actually get the SecurityContext from the HTTPSession first.
             Authentication auth = super.loadContext(requestResponseHolder)?.getAuthentication()
-            if (auth && auth instanceof OAuth2Authentication) {
-                // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
-                // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
-                // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
-                auth = oAuthUtils.convertToSkillsAuth(auth)
-            } else if (auth && auth instanceof OAuth2AuthenticationToken && auth.principal instanceof OAuth2User) {
-                auth = oAuthUtils.convertToSkillsAuth(auth)
-            } else if (auth && auth.principal instanceof UserInfo) {
-                // reload the granted_authorities for this skills user if loaded from the HTTP Session)
-                UserInfo userInfo = auth.principal
-                userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
-                auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
+            if (auth) {
+                auth = convertAuthentication(auth)
+                context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(auth)
             }
-            context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(auth)
         }
         return context
+    }
+
+    @Override
+    DeferredSecurityContext loadDeferredContext(HttpServletRequest request) {
+        Supplier<SecurityContext> supplier = () -> {
+            synchronized (this) {
+                SecurityContext context = super.loadDeferredContext(request).get()
+                Authentication auth = context?.getAuthentication()
+                if (auth) {
+                    auth = convertAuthentication(auth)
+                    context = SecurityContextHolder.createEmptyContext();
+                    context.setAuthentication(auth)
+                }
+                return context
+            }
+        }
+        return new SupplierDeferredSecurityContext(supplier, SecurityContextHolder.getContextHolderStrategy());
+    }
+
+    private Authentication convertAuthentication(Authentication auth) {
+        if (auth && auth instanceof JwtAuthenticationToken) {
+            // JwtAuthenticationToken is used when then the OAuth2 client uses the client_credentials grant_type we
+            // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
+            // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
+            auth = oAuthUtils.convertToSkillsAuth(auth)
+        } else if (auth && auth instanceof OAuth2AuthenticationToken && auth.principal instanceof OAuth2User) {
+            auth = oAuthUtils.convertToSkillsAuth(auth)
+        } else if (auth && auth.principal instanceof UserInfo) {
+            // reload the granted_authorities for this skills user if loaded from the HTTP Session)
+            UserInfo userInfo = auth.principal
+            userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+            auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
+        }
+        return auth
     }
 
     @Override
@@ -91,7 +120,7 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
     private boolean isProxyiedAuth(SecurityContext context, HttpServletRequest request) {
         Authentication auth = context.authentication
         return (auth &&
-                (auth instanceof OAuth2Authentication ||
+                (auth instanceof JwtAuthenticationToken ||
                         (auth.principal &&
                                 auth.principal instanceof skills.auth.UserInfo &&
                                 auth.principal.isProxied()

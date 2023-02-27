@@ -35,7 +35,6 @@ import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
-import skills.storage.repos.QueuedSkillUpdateRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -109,9 +108,6 @@ class SkillEventsTransactionalService {
 
     @Autowired
     SkillDefRepo skillDefRepo
-
-    @Autowired
-    QueuedSkillUpdateRepo queuedSkillUpdateRepo
 
     @Autowired
     TaskSchedulerService taskSchedulerService
@@ -330,9 +326,9 @@ class SkillEventsTransactionalService {
     }
 
     @Profile
-    private long getNumExistingSkills(String userId, String projectId, String skillId) {
+    private Long getNumExistingSkills(String userId, String projectId, String skillId) {
         Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
-        return numExistingSkills ?: 0 // account for null
+        return numExistingSkills ?: 0l // account for null
     }
 
     @Profile

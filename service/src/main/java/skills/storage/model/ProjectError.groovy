@@ -20,7 +20,7 @@ import org.hibernate.annotations.Where
 import skills.storage.model.CustomIcon
 import skills.storage.model.SkillDef
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = 'project_error')

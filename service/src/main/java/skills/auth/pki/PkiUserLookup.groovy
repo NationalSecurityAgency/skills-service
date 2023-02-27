@@ -32,8 +32,8 @@ import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
-import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import java.util.concurrent.TimeUnit
 
 @Component

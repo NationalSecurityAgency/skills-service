@@ -25,7 +25,7 @@ import skills.auth.SkillsAuthorizationException
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 
-import javax.annotation.Resource
+import jakarta.annotation.Resource
 
 @Component
 @Conditional(SecurityMode.FormAuth)

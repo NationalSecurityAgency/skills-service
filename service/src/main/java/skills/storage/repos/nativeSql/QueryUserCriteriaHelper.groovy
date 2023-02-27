@@ -19,7 +19,7 @@ package skills.storage.repos.nativeSql
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
 
-import javax.persistence.Query
+import jakarta.persistence.Query
 
 class QueryUserCriteriaHelper {
 

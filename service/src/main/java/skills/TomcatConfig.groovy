@@ -85,7 +85,7 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
 
     static class DnConverter extends AccessConverter {
 
-        static final String CERT_HEADER = 'javax.servlet.request.X509Certificate'
+        static final String CERT_HEADER = 'jakarta.servlet.request.X509Certificate'
 
         @Override
         String convert(IAccessEvent accessEvent) {
@@ -100,11 +100,11 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
         private String getSubjectDN(IAccessEvent accessEvent) {
             def certificateAttr = accessEvent.getRequest().getAttribute(CERT_HEADER)
             if (certificateAttr instanceof X509Certificate) {
-                return certificateAttr?.getSubjectDN()?.name
+                return certificateAttr?.getSubjectX500Principal()?.name
             } else if (certificateAttr instanceof X509Certificate[]) {
                 // use the first one
                 if (certificateAttr.length > 0) {
-                    return certificateAttr[0]?.getSubjectDN()?.name
+                    return certificateAttr[0]?.getSubjectX500Principal()?.name
                 }
             }
         }

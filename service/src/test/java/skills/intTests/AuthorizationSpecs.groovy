@@ -242,7 +242,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown()
-        ex.getMessage().contains('error:invalid_token')
+        ex.res['WWW-Authenticate'].contains('error="invalid_token"')
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -257,7 +257,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown()
-        ex.getMessage().contains('error:invalid_token')
+        ex.res['WWW-Authenticate'].contains('error="invalid_token"')
     }
 
     def 'admin - user cannot get another user\'s project level if they are not an admin for said project'() {

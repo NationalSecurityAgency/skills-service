@@ -16,7 +16,6 @@
 package skills.intTests.utils
 
 import callStack.profiler.Profile
-import com.github.jknack.handlebars.Options
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
@@ -31,7 +30,6 @@ class SkillsService {
     WSHelper wsHelper
 
     CertificateRegistry certificateRegistry = null
-    Options handlebarOptions = null
 
     WaitForAsyncTasksCompletion waitForAsyncTasksCompletion //optionally configured
 
@@ -53,13 +51,11 @@ class SkillsService {
 
     SkillsService(String username, String password, String firstName, String lastName, String service, CertificateRegistry certificateRegistry) {
         this.certificateRegistry = certificateRegistry
-        handlebarOptions = new Options.Builder(null, null, null, null, null).build()
         wsHelper = new WSHelper(username: username, password: password, skillsService: service, firstName: firstName, lastName: lastName, certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
     SkillsService(UseParams userParams, String service, CertificateRegistry certificateRegistry) {
         this.certificateRegistry = certificateRegistry
-        handlebarOptions = new Options.Builder(null, null, null, null, null).build()
         wsHelper = new WSHelper(username: userParams.username,
                 password: userParams.password,
                 skillsService: service,
@@ -700,17 +696,17 @@ class SkillsService {
     }
 
     def suggestDashboardUsers(String query) {
-        String url = "/users/suggestDashboardUsers/"
+        String url = "/users/suggestDashboardUsers"
         wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
     def suggestClientUsersForProject(String projectId, String query){
-        String url = "/users/projects/${projectId}/suggestClientUsers/".toString()
+        String url = "/users/projects/${projectId}/suggestClientUsers".toString()
         wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
     def suggestClientUsers(String query){
-        String url = "/users/suggestClientUsers/".toString()
+        String url = "/users/suggestClientUsers".toString()
         wsHelper.appPost(url, [suggestQuery: query])?.body
     }
 
@@ -1053,7 +1049,7 @@ class SkillsService {
     }
 
     def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {
-        String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics/"
+        String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics"
         wsHelper.adminGet(endpoint, props)
     }
 
@@ -1102,7 +1098,7 @@ class SkillsService {
     }
 
     def getNonRootUsers(String query) {
-        return wsHelper.rootPost("/users/", [suggestQuery: query])?.body
+        return wsHelper.rootPost("/users", [suggestQuery: query])?.body
     }
 
     def saveUserTag(String userId, String tagKey, List<String> tags) {
@@ -1135,7 +1131,7 @@ class SkillsService {
     }
 
     def getUsersWithoutRole(String role, String usernameQuery) {
-        String url = "/users/without/role/${role}/"
+        String url = "/users/without/role/${role}"
         return wsHelper.rootPost(url, [suggestQuery: usernameQuery])?.body
     }
 
@@ -1709,7 +1705,6 @@ class SkillsService {
                 assert cert, "no certificate found for ${userId}"
             }
             String dn = certificateRegistry.loadDNFromCert(cert)
-//            dn = StringHelpers.slugify.apply(dn, handlebarOptions)
             return dn ?: userId
         }
     }

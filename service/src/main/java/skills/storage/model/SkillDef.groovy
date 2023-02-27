@@ -18,20 +18,20 @@ package skills.storage.model
 import groovy.transform.CompileStatic
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Table
 
 @Entity()
 @Table(name = 'skill_definition')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
 class SkillDef extends SkillDefParent {
-    static enum ContainerType {
+    public static enum ContainerType {
         Subject, Skill, Badge, GlobalBadge, SkillsGroup, Tag
     }
 
-    static enum SelfReportingType {
+    public static enum SelfReportingType {
         Approval,
         HonorSystem,
     }

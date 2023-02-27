@@ -34,7 +34,7 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.MetricsLogger
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.util.concurrent.Callable
 
 @Component

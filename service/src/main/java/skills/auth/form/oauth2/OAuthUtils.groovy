@@ -16,22 +16,23 @@
 package skills.auth.form.oauth2
 
 import groovy.util.logging.Slf4j
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.oauth2.core.OAuth2Error
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes
 import org.springframework.security.oauth2.core.user.OAuth2User
-import org.springframework.security.oauth2.provider.OAuth2Authentication
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
-
-import javax.servlet.http.HttpServletRequest
-import javax.transaction.Transactional
 
 @Component
 @Conditional(SecurityMode.FormAuth)
@@ -47,20 +48,19 @@ class OAuthUtils {
     @Autowired
     OAuthRequestedMatcher oAuthRequestedMatcher
 
-    Authentication convertToSkillsAuth(OAuth2Authentication auth) {
-        // OAuth2Authentication is used when then the OAuth2 client uses the client_credentials grant_type we
+    Authentication convertToSkillsAuth(JwtAuthenticationToken auth) {
+        // JwtAuthenticationToken is used when then the OAuth2 client uses the client_credentials grant_type we
         // look for a custom "proxy_user" field where the trusted client must specify the skills user that the
         // request is being performed on behalf of.  The proxy_user field is required for client_credentials grant_type
         Authentication skillsAuth
-        OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) auth.getDetails()
-        Map claims = oauthDetails.getDecodedDetails()
+        Map claims = auth.token.claims
         if (claims && claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)) {
             String proxyUserId = claims.get(AuthorizationServerConfig.SKILLS_PROXY_USER)
             log.debug("Loading proxyUser [{}]", proxyUserId)
             UserInfo currentUser = new UserInfo(
                     username: proxyUserId,
                     proxied: true,
-                    proxyingSystemId: auth.principal,
+                    proxyingSystemId: auth.name,
                     firstName: "${proxyUserId.substring(0,1)}.",
                     lastName: proxyUserId
             )
@@ -69,12 +69,16 @@ class OAuthUtils {
             UserInfo existingUser = userAuthService.get(currentUser)
             if (existingUser) {
                 currentUser = existingUser
-                currentUser.proxyingSystemId = auth.principal
+                currentUser.proxyingSystemId = auth.name
             }
 
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)
         } else {
-            throw new InvalidTokenException("client_credentials grant_type must specify $AuthorizationServerConfig.SKILLS_PROXY_USER field")
+            OAuth2Error error = new OAuth2Error(
+                    OAuth2ErrorCodes.INVALID_TOKEN,
+                    "client_credentials grant_type must specify${AuthorizationServerConfig.SKILLS_PROXY_USER} field",
+                    null)
+            throw new OAuth2AuthenticationException(error)
         }
         return skillsAuth
     }

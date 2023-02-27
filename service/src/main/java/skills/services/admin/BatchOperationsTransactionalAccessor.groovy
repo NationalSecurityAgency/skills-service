@@ -27,7 +27,7 @@ import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 @Slf4j

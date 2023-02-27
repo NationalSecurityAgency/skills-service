@@ -733,8 +733,11 @@ describe('Client Display Tests', () => {
             .as('getDependencies');
         cy.cdVisit('/subjects/subj1/skills/skill4');
         cy.wait('@getToken')
-            .its('response.body')
-            .should('have.property', 'proxy_user', Cypress.env('proxyUser'));
+          .its('response.body')
+          .should('have.property', 'access_token');
+        cy.get('@getToken')
+          .its('response.body')
+          .should('have.property', 'token_type', 'Bearer');
         cy.wait('@getDependencies')
             .its('request.headers')
             .should('have.property', 'authorization');
@@ -749,7 +752,10 @@ describe('Client Display Tests', () => {
             cy.cdVisit('/subjects/subj1/skills/skill4?loginAsUser=user7');
             cy.wait('@getToken')
                 .its('response.body')
-                .should('have.property', 'proxy_user', 'user7');
+                .should('have.property', 'access_token');
+            cy.get('@getToken')
+                .its('response.body')
+                .should('have.property', 'token_type', 'Bearer')
             cy.wait('@getDependencies')
                 .its('request.headers')
                 .should('have.property', 'authorization');

@@ -42,7 +42,7 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.nativeSql.DBConditions
 import spock.lang.Ignore
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import javax.sql.DataSource
 
 @Deprecated

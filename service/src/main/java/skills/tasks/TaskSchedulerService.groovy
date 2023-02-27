@@ -28,7 +28,7 @@ import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.ProjectInviteCleanup
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.time.Instant
 
 @Service

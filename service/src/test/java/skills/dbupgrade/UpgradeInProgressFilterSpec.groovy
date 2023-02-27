@@ -32,8 +32,8 @@ import skills.services.events.SkillEventResult
 import spock.lang.IgnoreRest
 import spock.lang.Specification
 
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletResponse
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 

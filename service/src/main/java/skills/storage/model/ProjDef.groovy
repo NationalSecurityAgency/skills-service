@@ -19,9 +19,9 @@ import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Table
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Table
 
 @Entity
 @Table(name = 'project_definition')

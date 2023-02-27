@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: '11.X.X' # The JDK version to make available on the path.
+          java-version: '18' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
@@ -77,6 +77,24 @@ jobs:
         # run 6 copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6]
 
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: skillsPassword
+          POSTGRES_DB: skills
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
     steps:
     - name: Install Emoji Support
       run: sudo apt-get install fonts-noto-color-emoji
@@ -95,7 +113,7 @@ jobs:
 
     - uses: actions/setup-java@v1
       with:
-        java-version: '11.X.X' # The JDK version to make available on the path.
+        java-version: '18' # The JDK version to make available on the path.
 
     - name: Print Versions
       run: |
@@ -139,6 +157,7 @@ jobs:
       run: |
         cd e2e-tests
         npm install
+        npm run backend:dropAllDBTables:postgres
         npm run cyServices:start:skills-service:oauth
         npm run cyServices:start:client-display:oauth
         cd ..

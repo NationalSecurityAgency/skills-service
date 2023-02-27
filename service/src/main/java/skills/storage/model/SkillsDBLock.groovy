@@ -17,7 +17,7 @@ package skills.storage.model
 
 import skills.storage.converters.BooleanConverter
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name = 'skills_db_locks')

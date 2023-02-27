@@ -24,7 +24,7 @@ import skills.intTests.utils.SkillsService
 class UserTagSpecs extends DefaultIntSpec {
 
     def "get user tags"() {
-        String user = "testUser"
+        String user = getRandomUsers(1, true).first()
         createService(user)
 
         def proj1 = SkillsFactory.createProject(1)
@@ -40,7 +40,7 @@ class UserTagSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(user, 'someTag', tags)
 
         when:
-        def userTags = skillsService.getUserTags("testuser")
+        def userTags = skillsService.getUserTags(user)
 
         then:
         userTags[0]

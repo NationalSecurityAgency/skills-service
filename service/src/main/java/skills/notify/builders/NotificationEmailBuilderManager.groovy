@@ -15,15 +15,13 @@
  */
 package skills.notify.builders
 
+import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
-import org.thymeleaf.context.Context
-import org.thymeleaf.spring5.SpringTemplateEngine
+import org.thymeleaf.spring6.SpringTemplateEngine
 import skills.storage.model.Notification
-import groovy.util.logging.Slf4j
-
-import javax.annotation.PostConstruct
 
 @Service
 @Slf4j

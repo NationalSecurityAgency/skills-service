@@ -56,6 +56,7 @@ import skills.utils.InputSanitizer
 import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
+import static skills.storage.model.SkillDef.*
 
 @Component
 @CompileStatic
@@ -277,8 +278,8 @@ class SkillsLoader {
         }
 
         //these probably need to exclude badges where enabled = FALSE
-        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, SkillDef.ContainerType.Badge)
-        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, SkillDef.ContainerType.Badge)
+        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
+        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, ContainerType.Badge)
 
         // add in global badge counts
         numBadgesAchieved += achievedLevelRepository.countAchievedGlobalBadgeForUserIntersectingProjectId(userId, projDef.projectId)
@@ -339,13 +340,13 @@ class SkillsLoader {
 
     @Profile
     private List<SkillDef> loadSubjectsFromDB(ProjDef projDef) {
-        return skillDefRepo.findAllByProjectIdAndType(projDef.projectId, SkillDef.ContainerType.Subject)
+        return skillDefRepo.findAllByProjectIdAndType(projDef.projectId, ContainerType.Subject)
     }
 
     @Transactional(readOnly = true)
     List<SkillBadgeSummary> loadBadgeSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
         ProjDef projDef = getProjDef(userId, projectId)
-        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge)
+        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, ContainerType.Badge)
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
@@ -359,7 +360,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, String projectId, Integer version = Integer.MAX_VALUE){
-        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndTypeAndEnabled(null, SkillDef.ContainerType.GlobalBadge, Boolean.TRUE.toString())
+        List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndTypeAndEnabled(null, ContainerType.GlobalBadge, Boolean.TRUE.toString())
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
@@ -452,7 +453,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
-        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
 
@@ -587,7 +588,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSubjectSummary loadSubject(String projectId, String userId, String subjectId, Integer version = -1, Boolean loadSkills = true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Subject])
+        SkillDefWithExtra subjectDef = getSkillDefWithExtra(userId, projectId, subjectId, [ContainerType.Subject])
 
         if (version == -1 || subjectDef.version <= version) {
             return loadSubjectSummary(projDef, userId, subjectDef, version, loadSkills)
@@ -625,10 +626,10 @@ class SkillsLoader {
         List<SkillDescription> res = []
         dbRes.each {
             SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval = approvalLookup?.get(it.getSkillId())?.sort({ it.skillApproval.requestedOn})?.reverse()?.get(0)
-            if (it.type != SkillDef.ContainerType.SkillsGroup || Boolean.valueOf(it.enabled)) {
+            if (it.type != ContainerType.SkillsGroup || Boolean.valueOf(it.enabled)) {
                 SkillDescription skillDescription = createSkillDescription(it, helpUrlRootSetting, skillApproval)
                 res << skillDescription
-                if (it.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(it.enabled)) {
+                if (it.type == ContainerType.SkillsGroup && Boolean.valueOf(it.enabled)) {
                     skillGroupIds << skillDescription.skillId
                 }
             }
@@ -669,7 +670,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillBadgeSummary loadBadge(String projectId, String userId, String subjectId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
         ProjDef projDef = getProjDef(userId, projectId)
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, [SkillDef.ContainerType.Badge])
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, projectId, subjectId, [ContainerType.Badge])
 
         return loadBadgeSummary(projDef, userId, badgeDef, version,loadSkills)
     }
@@ -677,7 +678,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillGlobalBadgeSummary loadGlobalBadge(String userId, String originatingProject, String badgeSkillId, Integer version = Integer.MAX_VALUE, boolean loadSkills=true) {
-        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, [SkillDef.ContainerType.GlobalBadge])
+        SkillDefWithExtra badgeDef = getSkillDefWithExtra(userId, null, badgeSkillId, [ContainerType.GlobalBadge])
 
         return loadGlobalBadgeSummary(userId, originatingProject, badgeDef, version,loadSkills)
     }
@@ -897,8 +898,8 @@ class SkillsLoader {
         int numChildSkills = skillDefRepo.countGlobalChildren(badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
 
         List<UserAchievement> achievedLevels = achievedLevelRepository.findAllProjectLevelsByUserId(userId)
-        Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievedLevels?.groupBy { it.projectId }
-                ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
+        Map<String, Integer> userProjectLevels = (Map<String, Integer>) (achievedLevels?.groupBy { it.projectId }
+                ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]})
 
         List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(badgeDefinition.skillId)
         List<ProjectLevelSummary> projectLevels = []
@@ -1007,7 +1008,7 @@ class SkillsLoader {
                 }
             }
 
-            if (skillDef.type == SkillDef.ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
+            if (skillDef.type == ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
                 SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1030,7 +1031,7 @@ class SkillsLoader {
                 skillsSummary.points = skillsSummary.children ? skillsSummary.children.collect({it.points}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsSummary.todaysPoints = skillsSummary.children ? skillsSummary.children.collect({it.todaysPoints}).sort().takeRight(numSkillsRequired).sum() as Integer: 0
                 skillsRes << skillsSummary
-            } else if (skillDef.type == SkillDef.ContainerType.Skill) {
+            } else if (skillDef.type == ContainerType.Skill) {
                 boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDef.skillId)
 
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
@@ -1121,7 +1122,7 @@ class SkillsLoader {
         }
     }
 
-    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<SkillDef.ContainerType> containerTypes) {
+    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<ContainerType> containerTypes) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
 
         if (!skillDef) {

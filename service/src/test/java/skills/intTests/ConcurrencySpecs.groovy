@@ -33,7 +33,6 @@ import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import spock.lang.IgnoreIf
 
-import javax.transaction.Transactional
 import java.util.concurrent.atomic.AtomicInteger
 
 @Slf4j
@@ -88,7 +87,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.join(5000)
         }
 
-        // should not throw an exception of javax.persistence.NonUniqueResultException: query did not return a unique result
+        // should not throw an exception of jakarta.persistence.NonUniqueResultException: query did not return a unique result
         settingsToSave.each {
             skillsService.getSetting(proj1.projectId, it.setting)
         }

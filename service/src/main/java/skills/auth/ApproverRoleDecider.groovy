@@ -20,7 +20,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import skills.storage.model.auth.UserRole
 
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
 
 @Slf4j
 @Component

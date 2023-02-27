@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 
-import javax.persistence.LockModeType
+import jakarta.persistence.LockModeType
 
 interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
 

@@ -88,11 +88,11 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getChildAchievedSkillId()
     }
 
-    @Query(''' select sdParent
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserAchievement ua on sdParent.id = ua.skillRefId and ua.userId=?1
-      where srd.parent=sdParent.id and srd.child=sdChild.id and
-      sdChild.projectId=?2 and sdChild.skillId=?3 and ua.id is null and srd.type=?4''')
+    @Query(value = ''' select sdParent
+    from skill_relationship_definition srd, skill_definition sdChild, skill_definition sdParent
+        left join user_achievement ua on sdParent.id = ua.skill_ref_id and ua.user_id=?1
+    where srd.parent_ref_id=sdParent.id and srd.child_ref_id=sdChild.id and
+      sdChild.project_id=?2 and sdChild.skill_id=?3 and ua.id is null and srd.type=?4''', nativeQuery = true)
     List<SkillDef> findNonAchievedParents(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query(''' select sdChild
@@ -458,7 +458,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Query('''select ua.achievedOn as achievedOn, ua.userId as userId, ua.level as level, ua.skillId as skillId,
             sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay
-            from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillRefId = sd.id 
+            from UserAttrs uAttrs, UserAchievement ua 
+                left join SkillDef sd on ua.skillRefId = sd.id 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -483,7 +484,9 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("includeOverallType") String includeOverallType,
             @Param("pageable") Pageable pageable)
 
-    @Query('''select count(uAttrs) from UserAchievement ua, UserAttrs uAttrs left join SkillDef sd on ua.skillRefId = sd.id 
+    @Query('''select count(uAttrs) 
+            from UserAttrs uAttrs, 
+                UserAchievement ua left join SkillDef sd on ua.skillRefId = sd.id 
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -650,7 +653,7 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 
     @Query(value = '''
 select count(distinct ua) as userCount, ut.value as tagValue
-from UserAchievement ua, UserTag ut
+from UserAchievement ua
 join UserTag ut on ut.userId = ua.userId
 where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
 ''')

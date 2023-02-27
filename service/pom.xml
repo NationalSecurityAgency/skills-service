@@ -21,11 +21,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>3.10.3</version>
-        </dependency>
-        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.15</version>
@@ -57,20 +52,32 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>2.3.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>jakarta.activation</artifactId>
+            <version>2.0.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-client</artifactId>
+            <artifactId>spring-security-oauth2-authorization-server</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-jose</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security.oauth.boot</groupId>
-            <artifactId>spring-security-oauth2-autoconfigure</artifactId>
-            <version>2.6.6</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -82,31 +89,25 @@
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovy.version}</version>
-            <type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-test</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.groovy</groupId>
-                    <artifactId>groovy-testng</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+<!--            <version>${groovy.version}</version>-->
         </dependency>
 
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-datetime</artifactId>
-            <version>${groovy.version}</version>
+<!--            <version>${groovy.version}</version>-->
         </dependency>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-dateutil</artifactId>
-            <version>${groovy.version}</version>
+<!--            <version>${groovy.version}</version>-->
+        </dependency>
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy-json</artifactId>
+<!--            <version>${groovy.version}</version>-->
         </dependency>
 
         <dependency>
@@ -184,10 +185,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -213,7 +210,7 @@
         </dependency>
 
 <!--        <dependency>-->
-<!--            <groupId>org.codehaus.groovy</groupId>-->
+<!--            <groupId>org.apache.groovy</groupId>-->
 <!--            <artifactId>groovy</artifactId>-->
 <!--            <version>${groovy.version}</version>-->
 <!--            <scope>test</scope>-->
@@ -236,9 +233,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -298,12 +294,12 @@
         </dependency>
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
+            <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
         </dependency>
 
@@ -383,45 +379,85 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.13.1</version>
                 <configuration>
-                    <compilerId>groovy-eclipse-compiler</compilerId>
-                    <compilerArguments>
-                        <indy/>
-                        <configScript>config.groovy</configScript>
-                    </compilerArguments>
+                    <sources>
+                        <source>
+                            <directory>${project.basedir}/src/main/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+<!--                                <include>**/*.java</include>-->
+                            </includes>
+                        </source>
+                    </sources>
+                    <testSources>
+                        <testSource>
+                            <directory>${project.basedir}/src/test/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+<!--                                <include>**/*.java</include>-->
+                            </includes>
+                        </testSource>
+                    </testSources>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>${groovy.eclipse.compiler.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>${groovy.eclipse.batch.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.groovy</groupId>
-                        <artifactId>groovy-all</artifactId>
-                        <version>${groovy.version}</version>
-                        <type>pom</type>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.codehaus.groovy</groupId>
-                                <artifactId>groovy-testng</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-configuration-processor</artifactId>
-                        <version>${springboot.version}</version>
-                    </dependency>
-                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>addSources</goal>
+                            <goal>addTestSources</goal>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>compileTests</goal>
+                            <goal>removeStubs</goal>
+                            <goal>removeTestStubs</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.10.1</version>-->
+<!--                <configuration>-->
+<!--                    <compilerId>groovy-eclipse-compiler</compilerId>-->
+<!--                    <compilerArguments>-->
+<!--                        <indy/>-->
+<!--                        <configScript>config.groovy</configScript>-->
+<!--                    </compilerArguments>-->
+<!--                </configuration>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-compiler</artifactId>-->
+<!--                        <version>${groovy.eclipse.compiler.version}</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.codehaus.groovy</groupId>-->
+<!--                        <artifactId>groovy-eclipse-batch</artifactId>-->
+<!--                        <version>${groovy.eclipse.batch.version}</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.apache.groovy</groupId>-->
+<!--                        <artifactId>groovy-all</artifactId>-->
+<!--                        <version>${groovy.version}</version>-->
+<!--                        <type>pom</type>-->
+<!--                        <exclusions>-->
+<!--                            <exclusion>-->
+<!--                                <groupId>org.codehaus.groovy</groupId>-->
+<!--                                <artifactId>groovy-testng</artifactId>-->
+<!--                            </exclusion>-->
+<!--                        </exclusions>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.springframework.boot</groupId>-->
+<!--                        <artifactId>spring-boot-configuration-processor</artifactId>-->
+<!--                        <version>${springboot.version}</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -569,6 +605,7 @@
                                 <includedLicense>The GNU General Public License (GPL) Version 2 with FOSS exception</includedLicense>
                                 <includedLicense>Common Development and Distribution License / The GNU General Public License (GPL) Version 2 with the Classpath Exception</includedLicense>
                                 <includedLicense>CC0 1.0 Universal</includedLicense>
+                                <includedLicense>The BSD License</includedLicense>
                                 <includedLicense>The 2-Clause BSD License</includedLicense>
                                 <includedLicense>The 3-Clause BSD License</includedLicense>
                                 <includedLicense>Common Development and Distribution License 1.0 (CDDL-1.0)</includedLicense>
@@ -580,6 +617,7 @@
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache Public License 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache 2</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|The Apache License, Version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License 2.0</licenseMerge>
@@ -589,7 +627,7 @@
                                 <licenseMerge>The MIT License|MIT license</licenseMerge>
                                 <licenseMerge>The MIT License|MIT-0</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2 with the Classpath Exception|GPL2 w/ CPE</licenseMerge>
-                                <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0|EPL 1.0</licenseMerge>
                                 <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License - v 2.0</licenseMerge>
                                 <licenseMerge>The BSD License|BSD</licenseMerge>
                                 <licenseMerge>The BSD License|BSD License</licenseMerge>
@@ -599,7 +637,8 @@
                                 <licenseMerge>CC0 1.0 Universal|CC0</licenseMerge>
                                 <licenseMerge>CC0 1.0 Universal|Public Domain, per Creative Commons CC0</licenseMerge>
                                 <licenseMerge>The 2-Clause BSD License|BSD-2-Clause|BSD 2-Clause License</licenseMerge>
-                                <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License|The BSD 3-Clause License</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License|The BSD 3-Clause License|BSD-3-Clause</licenseMerge>
+                                <licenseMerge>The 3-Clause BSD License|BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)</licenseMerge>
                                 <licenseMerge>Common Development and Distribution License 1.0 (CDDL-1.0)|Common Development and Distribution License (CDDL) v1.0</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Lesser General Public License v2.1 or later</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Library General Public License v2.1 or later</licenseMerge>

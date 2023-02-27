@@ -182,7 +182,7 @@ Cypress.Commands.add("resetEmail", () => {
 
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/projects/proj${projNum}/`, Object.assign({
+    cy.request('POST', `/app/projects/proj${projNum}`, Object.assign({
         projectId: `proj${projNum}`,
         name: `This is project ${projNum}`
     }, overrideProps));

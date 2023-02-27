@@ -16,19 +16,27 @@
 package skills.intTests.utils
 
 import groovy.util.logging.Slf4j
-import org.apache.http.client.HttpClient
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier
-import org.apache.http.impl.client.HttpClientBuilder
+import org.apache.hc.client5.http.classic.HttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.http.*
 import org.springframework.http.client.*
 import org.springframework.http.converter.GenericHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.lang.Nullable
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
 import java.nio.charset.Charset
 
@@ -103,9 +111,28 @@ class RestTemplateWrapper extends RestTemplate {
     }
 
     HttpClient getHttpClient() {
-        return HttpClientBuilder.create()
-                .setSSLHostnameVerifier(new AllowAllHostnameVerifier())
+        return HttpClients.custom()
+                .useSystemProperties()
+                .setConnectionManager(poolingHttpClientConnectionManager())
+                .disableAutomaticRetries()
                 .build()
+    }
+
+    PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
+        SSLContext sslContext = SSLContexts.createSystemDefault()
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(
+                sslContext,
+                ['TLSv1.2'] as String[],
+                null,
+                allowAllHosts);
+
+        PoolingHttpClientConnectionManager result =
+                new PoolingHttpClientConnectionManager(RegistryBuilder.create()
+                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                        .register("https", sslConnectionSocketFactory).build())
+
+        return result
     }
 
     void auth(String skillsServiceUrl, String username, String password, String firstName, String lastName, String email=null) {
@@ -124,7 +151,6 @@ class RestTemplateWrapper extends RestTemplate {
                 assert authResponse.statusCode == HttpStatus.OK, 'authentication failed: ' + authResponse.statusCode
 
                 authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
-//        assert authenticationToken, 'no authentication token was provided!'
             }
         }
         authenticated = true
@@ -185,7 +211,7 @@ class RestTemplateWrapper extends RestTemplate {
     }
 
     @Override
-    <T> ResponseEntity<T> patchForObject(String url, Object request, Class<T> response, Object... uriVariables) {
+    <T> T patchForObject(String url, @Nullable Object request, Class<T> response, Object... uriVariables) {
         return restTemplate.exchange(url, HttpMethod.PATCH, getAuthEntity(String.class, request), response)
     }
 

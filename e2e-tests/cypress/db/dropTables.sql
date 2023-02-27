@@ -12,58 +12,64 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
-drop table databasechangeloglock;
+drop table IF EXISTS databasechangeloglock CASCADE;
 
-drop table databasechangelog;
+drop table IF EXISTS databasechangelog CASCADE;
 
-drop table skills_db_locks;
+drop table IF EXISTS skills_db_locks CASCADE;
 
-drop table skill_relationship_definition;
+drop table IF EXISTS skill_relationship_definition CASCADE;
 
-drop table skill_share_definition;
+drop table IF EXISTS skill_share_definition CASCADE;
 
-drop table user_roles;
+drop table IF EXISTS user_roles CASCADE;
 
-drop table user_performed_skill;
+drop table IF EXISTS user_performed_skill CASCADE;
 
-drop table user_points;
+drop table IF EXISTS user_points CASCADE;
 
-drop table user_achievement;
+drop table IF EXISTS user_achievement CASCADE;
 
-drop table settings;
+drop table IF EXISTS settings CASCADE;
 
-drop table global_badge_level_definition;
+drop table IF EXISTS global_badge_level_definition CASCADE;
 
-drop table level_definition;
+drop table IF EXISTS level_definition CASCADE;
 
-drop table user_events;
+drop table IF EXISTS user_events CASCADE;
 
-drop table skill_approval;
+drop table IF EXISTS skill_approval CASCADE;
 
-drop table exported_skills;
+drop table IF EXISTS exported_skills CASCADE;
 
-drop table skill_updated_queue;
+drop table IF EXISTS skill_updated_queue CASCADE;
 
-drop table skill_definition;
+drop table IF EXISTS skill_definition CASCADE;
 
-drop table custom_icons;
+drop table IF EXISTS custom_icons CASCADE;
 
-drop table project_error;
+drop table IF EXISTS project_error CASCADE;
 
-drop table project_access_token;
+drop table IF EXISTS project_access_token CASCADE;
 
-drop table project_definition;
+drop table IF EXISTS project_definition CASCADE;
 
-drop table user_token;
+drop table IF EXISTS user_token CASCADE;
 
-drop table notifications;
+drop table IF EXISTS notifications CASCADE;
 
-drop table users;
+drop table IF EXISTS users CASCADE;
 
-drop table user_tags;
+drop table IF EXISTS user_tags CASCADE;
 
-drop table user_attrs;
+drop table IF EXISTS user_attrs CASCADE;
 
-drop table scheduled_tasks;
+drop table IF EXISTS scheduled_tasks CASCADE;
+
+drop table IF EXISTS client_preferences CASCADE;
+
+drop table IF EXISTS attachments CASCADE;
+
+drop table IF EXISTS skill_approval_conf CASCADE;
 
 drop function IF EXISTS f_select_lock_and_insert;

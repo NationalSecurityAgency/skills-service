@@ -24,7 +24,7 @@ import skills.auth.AuthMode
 import skills.auth.pki.PkiUserLookup
 import skills.storage.repos.ProjDefRepo
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 
 @Slf4j
 @Component

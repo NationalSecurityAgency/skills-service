@@ -26,7 +26,7 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SubjectRequest
 import skills.utils.InputSanitizer
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 

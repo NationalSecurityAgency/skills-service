@@ -17,6 +17,9 @@ package skills.auth
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
+import jakarta.servlet.ServletException
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -27,16 +30,16 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.access.AccessDeniedHandlerImpl
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.security.web.firewall.HttpFirewall
 import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.stereotype.Component
@@ -46,10 +49,6 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import skills.auth.util.AccessDeniedExplanation
 import skills.auth.util.AccessDeniedExplanationGenerator
-
-import javax.servlet.ServletException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Component
 @Configuration('securityConfig')
@@ -78,7 +77,7 @@ class SecurityConfiguration {
     @Component
     @Configuration
     @Order(99)
-    static class CorsSecurityConfiguration extends WebSecurityConfigurerAdapter {
+    static class CorsSecurityConfiguration {
 
         @Value('#{securityConfig.authMode}}')
         AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
@@ -90,7 +89,7 @@ class SecurityConfiguration {
         private RestAuthenticationEntryPoint restAuthenticationEntryPoint
 
         @Autowired(required = false)  // not required for PKI_AUTH
-        HttpSessionSecurityContextRepository securityContextRepository
+        SecurityContextRepository securityContextRepository
 
         @Autowired
         PasswordEncoder passwordEncoder
@@ -101,11 +100,10 @@ class SecurityConfiguration {
         @Autowired
         AccessDeniedHandler accessDeniedHandler
 
-        AccessDeniedExplanationGenerator explanationGenerator = new AccessDeniedExplanationGenerator()
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/api/**").cors()
+        @Bean('corsSecurityFilterChain')
+        @Order(102)
+        SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.securityMatcher("/api/**").cors()
             portalWebSecurityHelper.configureHttpSecurity(http)
                     .securityContext().securityContextRepository(securityContextRepository)
             .and()
@@ -118,6 +116,8 @@ class SecurityConfiguration {
                         .and()
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+
+            return http.build()
         }
     }
 
@@ -168,7 +168,7 @@ class SecurityConfiguration {
                 if (explanation) {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN)
                     String asJson = objectMapper.writeValueAsString(explanation)
-                    response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE)
                     response.setContentLength(asJson.bytes.length)
                     response.getWriter().print(asJson)
                     response.getWriter().flush()

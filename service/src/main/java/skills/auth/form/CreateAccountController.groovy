@@ -42,8 +42,8 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.OAuth2Provider
 import skills.services.PasswordManagementService
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 //@Conditional(SecurityConfiguration.FormAuth)
 @RestController
@@ -80,7 +80,7 @@ class CreateAccountController {
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
-    void createAppUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+    void createAppUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
         if (oAuthOnly || authMode == AuthMode.PKI) {
             throw new SkillException("Username/Password account creation is disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
@@ -93,20 +93,20 @@ class CreateAccountController {
         if (verifyEmailAddresses) {
             passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.email)
         } else {
-            userAuthService.autologin(userInfo, password)
+            userAuthService.autologin(userInfo, password, request, response)
         }
     }
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createRootAccount")
-    void createRootUser(@RequestBody UserInfo userInfo, HttpServletResponse response) {
+    void createRootUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
         // initial root user does not require email verification, email settings need to be configured first
         userInfo.emailVerified = true
         userInfo = createUser(userInfo)
         userAuthService.grantRoot(userInfo.username)
-        userAuthService.autologin(userInfo, password)
+        userAuthService.autologin(userInfo, password, request, response)
     }
 
     private UserInfo createUser(UserInfo userInfo) {

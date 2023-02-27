@@ -168,5 +168,7 @@ db-scheduler:
   threads: 3
 ---
 spring:
-  profiles: default
+  config:
+    activate:
+      on-profile: default
 ---

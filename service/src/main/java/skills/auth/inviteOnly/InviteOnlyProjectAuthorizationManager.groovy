@@ -19,14 +19,20 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
+import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
-import org.springframework.security.access.vote.RoleVoter
+import org.springframework.core.annotation.Order
+import org.springframework.security.authorization.AuthenticatedAuthorizationManager
+import org.springframework.security.authorization.AuthorizationDecision
+import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.web.FilterInvocation
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext
+import org.springframework.security.web.util.UrlUtils
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
@@ -35,8 +41,8 @@ import skills.auth.UserInfo
 import skills.auth.UserSkillsGrantedAuthority
 import skills.storage.model.auth.RoleName
 
-import javax.annotation.PostConstruct
 import java.time.Duration
+import java.util.function.Supplier
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -49,7 +55,8 @@ import java.util.regex.Pattern
 @CompileStatic
 @Slf4j
 @Component
-class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
+@Order(99)
+class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private static final Pattern PROJECT_ID = ~/(?i)\/api\/(?:my)?projects\/([^\/]+).*/
 
@@ -60,10 +67,10 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
     private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
 
     @Value('#{"${skills.config.privateProject.cache-expiration-time:PT5M}"}')
-    String privateProjectsCacheExpirationTime="PT5M"
+    String privateProjectsCacheExpirationTime = "PT5M"
 
     @Value('#{"${skills.config.privateProject.cache-refresh-time:PT30S}"}')
-    String privateProjectCacheRefreshTime="PT90S"
+    String privateProjectCacheRefreshTime = "PT90S"
 
     @Autowired
     PrivateProjectCacheLoader cacheLoader
@@ -72,8 +79,11 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
     @Lazy
     UserAuthService userAuthService
 
+    AuthenticatedAuthorizationManager authenticatedAuthorizationManager
+
     @PostConstruct
-    public void init() {
+    void init() {
+        authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsApiRequestMatcher = new AntPathRequestMatcher("/api/*projects/**")
         privateProjects = Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(privateProjectsCacheExpirationTime))
@@ -82,40 +92,42 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
     }
 
     @Override
-    int vote(Authentication authentication, Object object, Collection collection) {
-        if ((!object instanceof FilterInvocation)) {
-            return ACCESS_ABSTAIN
+    AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+
+        HttpServletRequest request = authorizationContext.getRequest()
+        log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
+        AuthorizationDecision authenticatedDecision = authenticatedAuthorizationManager.check(authentication, authorizationContext)
+        if (!authenticatedDecision.isGranted()) {
+            log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
+            return authenticatedDecision
         }
-        FilterInvocation filterInvocation = (FilterInvocation)object
+        if (projectsApiRequestMatcher.matches(request)) {
 
-        int vote = ACCESS_ABSTAIN
+            AuthorizationDecision vote = null //ACCESS_ABSTAIN
 
-        log.debug("evaluating request [{}] for invite-only protection", filterInvocation.getRequest().getRequestURI())
-        if (projectsApiRequestMatcher.matches(filterInvocation.getRequest())) {
-            log.debug("filterInvocation.request [{}] should be protected", filterInvocation.getRequest().getRequestURI())
-            String projectId = extractProjectId(filterInvocation)
+            log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
+            String projectId = extractProjectId(request)
             Boolean isInviteOnly = privateProjects.get(projectId)
-            if (isInviteOnly && !isContactUrl(filterInvocation)) {
+            if (isInviteOnly && !isContactUrl(request)) {
                 log.debug("project id [{}] requires invite only access", projectId)
-                Collection<? extends GrantedAuthority> authorities = getAuthorities(authentication)
-                vote = ACCESS_DENIED;
+                Collection<? extends GrantedAuthority> authorities = getAuthorities(authentication.get())
+                vote = new AuthorizationDecision(false) //ACCESS_DENIED;
                 // Attempt to find a matching granted authority
                 for (GrantedAuthority authority : authorities) {
                     if (authority instanceof UserSkillsGrantedAuthority && isPermitted(projectId, authority)) {
-                        return ACCESS_GRANTED;
+                        return new AuthorizationDecision(true) //ACCESS_GRANTED;
                     }
                 }
-                log.debug("user [{}] is not permitted to access project [{}]", authentication.getPrincipal(), projectId)
-
+                log.debug("user [{}] is not permitted to access project [{}]", authentication.get().getPrincipal(), projectId)
                 throw new InviteOnlyAccessDeniedException("Access is denied", projectId)
             }
-        }
 
-        return vote
+            return vote
+        }
     }
 
-    private static String extractProjectId(FilterInvocation filterInvocation) {
-        String url = filterInvocation.getRequestUrl();
+    private String extractProjectId(HttpServletRequest request) {
+        String url = getRequestUrl(request)
         Matcher pid = PROJECT_ID.matcher(url)
         if (pid.matches()) {
             return pid.group(1)
@@ -123,8 +135,8 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
         return StringUtils.EMPTY
     }
 
-    private boolean isContactUrl(FilterInvocation filterInvocation) {
-        String url = filterInvocation.getRequestUrl()
+    private boolean isContactUrl(HttpServletRequest request) {
+        String url = getRequestUrl(request)
         log.debug("checking to see if url [{}] matches path [{}]", url, CONTACT_EXCEPTION.toString())
         Matcher contact = CONTACT_EXCEPTION.matcher(url)
         if (contact) {
@@ -133,6 +145,9 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
         return false
     }
 
+    private String getRequestUrl(HttpServletRequest request) {
+        return UrlUtils.buildRequestUrl(request);
+    }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Authentication authentication) {
         Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities()
@@ -160,5 +175,4 @@ class InviteOnlyProjectAccessDecisionVoter extends RoleVoter {
         }
         return false
     }
-
 }

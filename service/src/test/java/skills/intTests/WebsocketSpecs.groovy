@@ -16,9 +16,11 @@
 package skills.intTests
 
 import groovy.util.logging.Slf4j
-import org.apache.http.ssl.SSLContextBuilder
+import org.apache.hc.client5.http.ssl.TrustAllStrategy
+import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.lang.Nullable
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.stomp.StompHeaders
@@ -39,9 +41,10 @@ import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserRepo
-import spock.lang.IgnoreRest
 
+import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
+import java.security.KeyStore
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -407,16 +410,20 @@ class WebsocketSpecs extends DefaultIntSpec {
         subjSummaryRes.get(4).levelPoints == 0
     }
 
-    def void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {
-        SSLContextBuilder builder = new SSLContextBuilder()
-        def keyStore = certificateRegistry.getCertificate(user)
-        builder.loadKeyMaterial(keyStore.getURL(), "skillspass".toCharArray(), "skillspass".toCharArray())
-        ClassPathResource trustResource = new ClassPathResource("/certs/truststore.jks")
-        assert trustResource.exists(), "could not find truststore ${trustResource.getPath()} on the classpath"
-        builder.loadTrustMaterial(trustResource.getURL(), "skillspass".toCharArray())
+    void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {
+
+        Resource resource = certificateRegistry.getCertificate(user)
+        KeyStore keyStore = KeyStore.getInstance("PKCS12")
+        keyStore.load(resource.getInputStream(), "skillspass".toCharArray())
+
+        KeyStore trustStore = KeyStore.getInstance("JKS")
+        trustStore.load(new ClassPathResource("/certs/truststore.jks").getInputStream(), "skillspass".toCharArray())
+        SSLContext sslContext = SSLContexts.custom()
+                .loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE)
+                .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build()
 
         def userProps = [:]
-        userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", builder.build())
+        userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", sslContext)
         standardWebSocketClient.setUserProperties(userProps)
     }
 }

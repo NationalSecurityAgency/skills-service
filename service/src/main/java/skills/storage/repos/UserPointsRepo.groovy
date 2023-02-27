@@ -720,28 +720,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Modifying
     @Query(value = '''
-            WITH skill AS (
-                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
-                       point_increment as pointIncrement
-                from skill_definition
-                where project_id = :projectId and skill_id = :skillId
-            ),
-            userPoints AS (
-                SELECT ups.user_id, sum(skill.pointIncrement) as newPoints
-                FROM user_performed_skill ups, skill
-                where ups.skill_ref_id = skill.id
-                group by ups.user_id
-            )
-            UPDATE user_points
-            SET points = (select userPoints.newPoints from userPoints where userPoints.user_id = user_points.user_id)
-            where project_id = :projectId
-                and skill_id = :skillId
-                and exists( select * from userPoints where userPoints.user_id = user_points.user_id)''', nativeQuery=true)
-    void updateUserPointsForASkillInH2(@Param("projectId") String projectId, @Param("skillId") String skillId)
-
-
-    @Modifying
-    @Query(value = '''
             WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
                        child.point_increment as pointIncrement
@@ -785,28 +763,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 where up.user_id = pointsToUpdate.user_id
                 and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
     void updateUserPointsForProject(@Param("projectId") String projectId)
-
-    @Modifying
-    @Query(value = '''
-               WITH pointsToUpdate as (
-                    select up.user_id, sum(up.points) as newPoints
-                    from skill_definition sd,
-                         user_points up
-                    where sd.id = up.skill_ref_id
-                      and sd.project_id = :projectId
-                      and sd.type = 'Subject'
-                    group by up.user_id
-                )
-                update user_points up
-                set points = (select pointsToUpdate.newPoints
-                              from pointsToUpdate
-                              where up.user_id = pointsToUpdate.user_id)
-                where up.project_id = :projectId
-                  and up.skill_id is null
-                  and exists(select *
-                             from pointsToUpdate
-                             where up.user_id = pointsToUpdate.user_id);''', nativeQuery=true)
-    void updateUserPointsForProjectInH2(@Param("projectId") String projectId)
 
     @Modifying
     @Query(value = '''
@@ -854,29 +810,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 )
             ''', nativeQuery = true)
     void removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
-
-    @Modifying
-    @Query(value = '''
-             WITH pointsToUpdate as (
-                select up.user_id userId, sum(up.points) as newPoints
-                from skill_definition parent,
-                     skill_relationship_definition rel,
-                     skill_definition child,
-                     user_points up
-                where parent.project_id = :projectId
-                  and parent.skill_id = :skillId
-                  and rel.parent_ref_id = parent.id
-                  and rel.child_ref_id = child.id
-                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
-                  and child.type = 'Skill'
-                  and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
-                  and child.id = up.skill_ref_id
-                group by up.user_id
-            )
-            update user_points up set points = (select pointsToUpdate.newPoints from pointsToUpdate where pointsToUpdate.userId = up.user_id)
-            where up.project_id = :projectId and up.skill_id = :skillId
-              and exists (select * from pointsToUpdate where pointsToUpdate.userId = up.user_id);''', nativeQuery=true)
-    void updateSubjectUserPointsInH2(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     @Modifying
     @Query('''delete from UserPoints where projectId = :projectId and points = 0''')

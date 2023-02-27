@@ -19,12 +19,17 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
-import org.apache.http.client.HttpClient
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory
-import org.apache.http.conn.ssl.TrustAllStrategy
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.ssl.SSLContextBuilder
-import org.apache.http.ssl.TrustStrategy
+import org.apache.hc.client5.http.classic.HttpClient
+import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.TrustAllStrategy
+import org.apache.hc.core5.http.config.RegistryBuilder
+import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
@@ -35,6 +40,8 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
 import java.security.KeyStore
 
 @Slf4j
@@ -66,14 +73,22 @@ class WSHelper {
 
             KeyStore trustStore = KeyStore.getInstance("JKS")
             trustStore.load(new ClassPathResource("/certs/truststore.jks").getInputStream(), "skillspass".toCharArray())
-
-            SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(new SSLContextBuilder()
+            SSLContext sslContext = SSLContexts.custom()
                     .loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE)
-                    .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build())
-
-            HttpClient client = HttpClients.custom().setSSLSocketFactory(socketFactory).build()
+                    .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build()
+            HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(                sslContext,
+                    ['TLSv1.2'] as String[],
+                    null,
+                    allowAllHosts)
+            PoolingHttpClientConnectionManager connectionManager =
+                    new PoolingHttpClientConnectionManager(RegistryBuilder.create()
+                            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                            .register("https", sslConnectionSocketFactory).build())
+            HttpClient client = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
+                    .build()
             HttpComponentsClientHttpRequestFactory requestFactory = new  HttpComponentsClientHttpRequestFactory(client)
-
             restTemplate = new RestTemplate(requestFactory)
         } else {
             restTemplate = new RestTemplate()
@@ -328,11 +343,16 @@ class WSHelper {
             } catch (Exception e) {
                 res['body'] = resBody
             }
+            if (responseEntity.headers) {
+                res.putAll(responseEntity.headers.toSingleValueMap())
+            }
 
             if (throwExceptionOnFailure) {
                 String msg = "Bad request for [$url]. Res: ${res['body']} code=${responseEntity.statusCode}"
                 log.error(msg)
-                throw new SkillsClientException(msg, url, responseEntity.statusCode)
+                SkillsClientException ex = new SkillsClientException(msg, url, responseEntity.statusCode)
+                ex.res = res
+                throw ex
 //                throw new IllegalStateException("Request [$url] failed. Res: ${res['body']}".toString())
             }
 

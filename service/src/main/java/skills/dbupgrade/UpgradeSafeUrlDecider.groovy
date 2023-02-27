@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import skills.controller.AdminController
 
-import javax.annotation.PostConstruct
+import jakarta.annotation.PostConstruct
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import java.util.regex.Matcher

@@ -24,9 +24,10 @@ import org.springframework.util.unit.DataSize
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.Attachment
 
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
-import javax.persistence.Query
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
+import jakarta.persistence.Query
+import skills.utils.GroovyToJavaByteUtils
 
 @Slf4j
 class AttachmentSpecs extends DefaultIntSpec {
@@ -42,13 +43,8 @@ class AttachmentSpecs extends DefaultIntSpec {
 
     def "upload attachment"() {
         String filename = 'test-pdf.pdf'
-        byte[] bytes = 'Test is a test'.getBytes('UTF-8')
-        Resource resource = new ByteArrayResource(bytes) {
-            @Override
-            String getFilename() {
-                return filename
-            }
-        }
+        String contents = 'Test is a test'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
         when:
         def result = skillsService.uploadAttachment(resource)
@@ -57,20 +53,15 @@ class AttachmentSpecs extends DefaultIntSpec {
         result
         result.success
         result.contentType == "application/pdf"
-        result.size == bytes.length
+        result.size == contents.getBytes().length
         result.filename == filename
         result.href ==~ /^\/api\/download\/[^\/]+\/test-pdf.pdf$/
     }
 
     def "upload and then download attachment"() {
         String filename = 'test-pdf.pdf'
-        byte[] bytes = 'Test is a test'.getBytes('UTF-8')
-        Resource resource = new ByteArrayResource(bytes) {
-            @Override
-            String getFilename() {
-                return filename
-            }
-        }
+        String contents = 'Test is a test'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
         when:
         def uploadResult = skillsService.uploadAttachment(resource)
@@ -80,12 +71,12 @@ class AttachmentSpecs extends DefaultIntSpec {
         uploadResult
         uploadResult.success
         uploadResult.contentType == "application/pdf"
-        uploadResult.size == bytes.length
+        uploadResult.size == contents.getBytes().length
         uploadResult.filename == filename
         uploadResult.href ==~ /^\/api\/download\/[^\/]+\/test-pdf.pdf$/
 
         file
-        file.bytes == bytes
+        file.bytes == contents.getBytes()
     }
 
     def "upload all valid attachment mime types"() {
@@ -93,14 +84,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         List results = []
         allowedAttachmentFileTypes.each { fileType ->
             String filename = "test${fileType}"
-            byte[] bytes = 'Test is a test'.getBytes('UTF-8')
-            Resource resource = new ByteArrayResource(bytes) {
-                @Override
-                String getFilename() {
-                    return filename
-                }
-            }
-            resources.add(resource)
+            resources.add(GroovyToJavaByteUtils.toByteArrayResource('Test is a test', filename))
         }
 
         when:
@@ -116,13 +100,7 @@ class AttachmentSpecs extends DefaultIntSpec {
 
     def "attempt to upload attachment with invalid mime-type"() {
         String filename = 'test-zip.zip'
-        byte[] bytes = 'Test is a test'.getBytes('UTF-8')
-        Resource resource = new ByteArrayResource(bytes) {
-            @Override
-            String getFilename() {
-                return filename
-            }
-        }
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource('Test is a test', filename)
 
         when:
         def result = skillsService.uploadAttachment(resource)
@@ -138,14 +116,7 @@ class AttachmentSpecs extends DefaultIntSpec {
     def "attempt to upload attachment with size greater than max allowed"() {
         String filename = 'test-zip.zip'
         Integer fileSize = maxAttachmentSize.toBytes()//+1
-        byte[] bytes = new byte[fileSize]
-        new Random().nextBytes(bytes)
-        Resource resource = new ByteArrayResource(bytes) {
-            @Override
-            String getFilename() {
-                return filename
-            }
-        }
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileSize, filename)
 
         when:
         def result = skillsService.uploadAttachment(resource)
@@ -167,14 +138,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         List<Resource> resources = []
         allowedAttachmentFileTypes.each { fileType ->
             String filename = "test${fileType}"
-            byte[] bytes = 'Test is a test'.getBytes('UTF-8')
-            Resource resource = new ByteArrayResource(bytes) {
-                @Override
-                String getFilename() {
-                    return filename
-                }
-            }
-            resources.add(resource)
+            resources.add(GroovyToJavaByteUtils.toByteArrayResource('Test is a test', filename))
         }
 
         when:

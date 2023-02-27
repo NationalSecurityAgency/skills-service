@@ -42,7 +42,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 @Slf4j

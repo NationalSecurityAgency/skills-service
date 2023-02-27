@@ -32,46 +32,6 @@ on:
 
 
 jobs:
-  service-tests-against-h2:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: '14'
-
-      - uses: actions/setup-java@v1
-        with:
-          java-version: '11.X.X' # The JDK version to make available on the path.
-
-      - name: Print Versions
-        run: |
-          mvn --version
-          java -version
-
-      - name: Cache local Maven repository
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Build skills-service
-        run: mvn --batch-mode install
-        env:
-          SPRING_PROFILES_ACTIVE: pki
-
-      - name: upload result artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: CI result artifacts
-          path: |
-            ./service/target/*.log
-
 
   service-against-postgresql:
     runs-on: ubuntu-latest
@@ -102,7 +62,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: '11.X.X' # The JDK version to make available on the path.
+          java-version: '18' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |

@@ -16,23 +16,37 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
+import jakarta.servlet.*
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpSession
+import jakarta.servlet.http.HttpUpgradeHandler
+import jakarta.servlet.http.Part
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Conditional
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
-import org.springframework.security.oauth2.common.OAuth2AccessToken
-import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter
+import org.springframework.security.oauth2.core.AuthorizationGrantType
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod
+import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
+import org.springframework.security.oauth2.server.authorization.web.OAuth2TokenEndpointFilter
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.bind.annotation.*
 import skills.auth.SecurityMode
 import skills.auth.UserInfoService
-import skills.auth.form.jwt.JwtHelper
+import skills.auth.form.oauth2.AuthorizationServerConfig
 import skills.services.inception.InceptionProjectService
+
+import java.security.Principal
 
 @Conditional(SecurityMode.FormAuth)
 @RestController
@@ -41,32 +55,58 @@ import skills.services.inception.InceptionProjectService
 class UserTokenController {
 
     @Autowired
-    TokenEndpoint tokenEndpoint
+    @Qualifier('authServerSecurityFilterChain')
+    SecurityFilterChain authServerSecurityFilterChain
+
+    @Autowired
+    RegisteredClientRepository registeredClientRepository
 
     @Autowired
     InMemoryOAuth2AuthorizedClientService authorizedClientService
 
     @Autowired
-    JwtHelper jwtHelper
-
-    @Autowired
-    private JwtAccessTokenConverter jwtAccessTokenConverter;
-
-    @Autowired
-    private DefaultTokenServices tokenServices
-
-    @Autowired
     private UserInfoService userInfoService
+
+    private Map<String, TokenFilterChain> tokenFilterChainMap = [:]
+
+    public static final String INCEPTION_USER_TOKEN_ENDPOINT = '/app/projects/Inception/users/{userId}/token'
+    public static final String CURRENT_USER_TOKEN_ENDPOINT = '/api/projects/{projectId}/token'
+    public static final String PROJECT_USER_TOKEN_ENDPOINT = '/admin/projects/{projectId}/token/{userId}'
+
+    @PostConstruct
+    void init() {
+        List<String> tokenEndpoints = [INCEPTION_USER_TOKEN_ENDPOINT, CURRENT_USER_TOKEN_ENDPOINT, PROJECT_USER_TOKEN_ENDPOINT]
+        tokenEndpoints.each { endpoint ->
+            tokenFilterChainMap.put(endpoint, getTokenEndpointFilterChain(endpoint))
+        }
+    }
+
+    private TokenFilterChain getTokenEndpointFilterChain(String endpoint) {
+        def authServerContextFilter = authServerSecurityFilterChain.getFilters().find { it.class.simpleName == 'AuthorizationServerContextFilter' }
+        OAuth2TokenEndpointFilter existingTokenEndpointFilter = authServerSecurityFilterChain.getFilters().find { it.class == OAuth2TokenEndpointFilter }
+        OAuth2TokenEndpointFilter currentTokenEndpointFilter = new OAuth2TokenEndpointFilter(existingTokenEndpointFilter.authenticationManager, endpoint)
+        return new TokenFilterChain([authServerContextFilter, currentTokenEndpointFilter])
+    }
+
+    private void setOAuth2ClientAuthenticationToken(String clientId) {
+        RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId)
+        assert registeredClient
+        OAuth2ClientAuthenticationToken clientAuth = new OAuth2ClientAuthenticationToken(registeredClient, ClientAuthenticationMethod.CLIENT_SECRET_BASIC, registeredClient.clientSecret)
+        clientAuth.authenticated = true
+        SecurityContextHolder.clearContext()
+        SecurityContextHolder.getContext().setAuthentication(clientAuth)
+    }
 
     /**
      * token for inception
      * @param userId
      * @return
      */
-    @RequestMapping(value = "/app/projects/Inception/users/{userId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = INCEPTION_USER_TOKEN_ENDPOINT, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("userId") String userId) {
-        return createSkillsProxyToken(InceptionProjectService.inceptionProjectId, userId)
+    void getInceptionUserToken(HttpServletRequest request, HttpServletResponse response, @PathVariable("userId") String userId) {
+        setOAuth2ClientAuthenticationToken(InceptionProjectService.inceptionProjectId)
+        tokenFilterChainMap.get(INCEPTION_USER_TOKEN_ENDPOINT).init().doFilter(new TokenServletRequestWrapper(request, userId), response)
     }
 
     /**
@@ -75,10 +115,10 @@ class UserTokenController {
      * @param projectId
      * @return
      */
-    @RequestMapping(value = "/api/projects/{projectId}/token", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = CURRENT_USER_TOKEN_ENDPOINT, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CrossOrigin(allowCredentials = 'true', originPatterns = ['*'])
-    ResponseEntity getSelfUserToken(@PathVariable("projectId") String projectId) {
+    void getSelfUserToken(HttpServletRequest request, HttpServletResponse response, @PathVariable("projectId") String projectId) {
         Object authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId
         if (authentication.credentials instanceof OAuth2AuthenticationToken && authentication.isAuthenticated()) {
@@ -90,7 +130,8 @@ class UserTokenController {
             userId = userInfoService.currentUserId
             log.debug("Creating self-proxy OAuth Token for current user [{}] and project [{}]", userId, projectId)
         }
-        return createSkillsProxyToken(projectId, userId)
+        setOAuth2ClientAuthenticationToken(projectId)
+        tokenFilterChainMap.get(CURRENT_USER_TOKEN_ENDPOINT).init().doFilter(new TokenServletRequestWrapper(request, userId), response)
     }
 
     /**
@@ -99,18 +140,224 @@ class UserTokenController {
      * @param userId
      * @return
      */
-    @RequestMapping(value = "/admin/projects/{projectId}/token/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = PROJECT_USER_TOKEN_ENDPOINT, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    ResponseEntity<OAuth2AccessToken> getUserToken(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
-        return createSkillsProxyToken(projectId, userId)
+    void getUserToken(HttpServletRequest request, HttpServletResponse response, @PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
+        setOAuth2ClientAuthenticationToken(projectId)
+        tokenFilterChainMap.get(PROJECT_USER_TOKEN_ENDPOINT).init().doFilter(new TokenServletRequestWrapper(request, userId), response)
     }
 
-    private ResponseEntity<OAuth2AccessToken> createSkillsProxyToken(String projectId, String userId) {
-        skills.controller.exceptions.SkillsValidator.isNotBlank(projectId, "Project Id")
-        skills.controller.exceptions.SkillsValidator.isNotBlank(userId, "User Id")
+    static class TokenFilterChain implements FilterChain {
+        private int currentPosition = 0
+        List<Filter> filters
 
-        UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(projectId, null, [])
-        Map<String, String> parameters = [grant_type: 'client_credentials', proxy_user: userId]
-        return tokenEndpoint.postAccessToken(principal, parameters)
+        TokenFilterChain(List<Filter> filters) {
+            this.filters = filters
+        }
+
+        TokenFilterChain init() {
+            this.currentPosition = 0
+            return this
+        }
+
+        @Override
+        void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException, ServletException {
+            if (currentPosition < filters.size()) {
+                currentPosition++
+                filters.get(currentPosition-1).doFilter(servletRequest, servletResponse, this)
+            }
+        }
+    }
+
+    static class TokenServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {
+        final String proxyUser
+
+        @Delegate
+        final HttpServletRequest request
+
+        TokenServletRequestWrapper(HttpServletRequest request, String proxyUser) {
+            super(request)
+            this.request = request
+            this.proxyUser = proxyUser
+        }
+
+        @Override
+        String getParameter(String name) {
+            return getParameterMap().get(name)?.first()
+        }
+
+        @Override
+        Map<String, String[]> getParameterMap() {
+            Map<String, String[]> parameterMap = [:]
+            parameterMap.put(OAuth2ParameterNames.GRANT_TYPE, [AuthorizationGrantType.CLIENT_CREDENTIALS.getValue()] as String[])
+            parameterMap.put(AuthorizationServerConfig.SKILLS_PROXY_USER, [proxyUser] as String[])
+            parameterMap.putAll(super.getParameterMap())
+            return parameterMap
+        }
+
+        @Override
+        Enumeration<String> getParameterNames() {
+            return Collections.enumeration(getParameterMap().keySet())
+        }
+
+        @Override
+        String[] getParameterValues(String name) {
+            return getParameterMap().get(name) as String[]
+        }
+
+        @Override
+        String getAuthType() {
+            return request.getAuthType()
+        }
+
+        @Override
+        Cookie[] getCookies() {
+            return request.getCookies()
+        }
+
+        @Override
+        long getDateHeader(String name) {
+            return request.getDateHeader(name)
+        }
+
+        @Override
+        String getHeader(String name) {
+            return request.getHeader(name)
+        }
+
+        @Override
+        Enumeration<String> getHeaders(String name) {
+            return request.getHeaders(name)
+        }
+
+        @Override
+        Enumeration<String> getHeaderNames() {
+            return request.getHeaderNames()
+        }
+
+        @Override
+        int getIntHeader(String name) {
+            return request.getIntHeader(name)
+        }
+
+        @Override
+        String getMethod() {
+            return HttpMethod.POST.toString() //request.getMethod()
+        }
+
+        @Override
+        String getPathInfo() {
+            return request.getPathInfo()
+        }
+
+        @Override
+        String getPathTranslated() {
+            return request.getPathTranslated()
+        }
+
+        @Override
+        String getContextPath() {
+            return request.getContextPath()
+        }
+
+        @Override
+        String getQueryString() {
+            return request.getQueryString()
+        }
+
+        @Override
+        String getRemoteUser() {
+            return request.getRemoteUser()
+        }
+
+        @Override
+        boolean isUserInRole(String role) {
+            return request.isUserInRole(role)
+        }
+
+        @Override
+        Principal getUserPrincipal() {
+            return request.getUserPrincipal()
+        }
+
+        @Override
+        String getRequestedSessionId() {
+            return request.getRequestedSessionId()
+        }
+
+        @Override
+        String getRequestURI() {
+            return request.getRequestURI()
+        }
+
+        @Override
+        StringBuffer getRequestURL() {
+            return request.getRequestURL()
+        }
+
+        @Override
+        String getServletPath() {
+            return request.getServletPath()
+        }
+
+        @Override
+        HttpSession getSession(boolean create) {
+            return request.getSession(create)
+        }
+
+        @Override
+        HttpSession getSession() {
+            return request.getSession()
+        }
+
+        @Override
+        String changeSessionId() {
+            return request.changeSessionId()
+        }
+
+        @Override
+        boolean isRequestedSessionIdValid() {
+            return request.isRequestedSessionIdValid()
+        }
+
+        @Override
+        boolean isRequestedSessionIdFromCookie() {
+            return request.isRequestedSessionIdFromCookie()
+        }
+
+        @Override
+        boolean isRequestedSessionIdFromURL() {
+            return request.isRequestedSessionIdFromURL()
+        }
+
+        @Override
+        boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+            return request.authenticate(response)
+        }
+
+        @Override
+        void login(String username, String password) throws ServletException {
+            request.login(username, password)
+        }
+
+        @Override
+        void logout() throws ServletException {
+            request.logout()
+        }
+
+        @Override
+        Collection<Part> getParts() throws IOException, ServletException {
+            return request.getParts()
+        }
+
+        @Override
+        Part getPart(String name) throws IOException, ServletException {
+            return request.getPart(name)
+        }
+
+        @Override
+        <T extends HttpUpgradeHandler> T upgrade(Class<T> httpUpgradeHandlerClass) throws IOException, ServletException {
+            return request.upgrade(httpUpgradeHandlerClass)
+        }
     }
 }

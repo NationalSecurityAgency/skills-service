@@ -17,7 +17,7 @@ package skills.storage.model
 
 import groovy.transform.ToString
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @Entity
 @Table(name='global_badge_level_definition')

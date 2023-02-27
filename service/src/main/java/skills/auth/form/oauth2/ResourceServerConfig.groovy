@@ -15,70 +15,113 @@
  */
 package skills.auth.form.oauth2
 
+import com.nimbusds.jose.jwk.source.JWKSource
+import com.nimbusds.jose.proc.SecurityContext
+import groovy.util.logging.Slf4j
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.core.annotation.Order
+import org.springframework.core.convert.converter.Converter
+import org.springframework.http.HttpStatus
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices
-import org.springframework.security.oauth2.provider.token.TokenStore
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.oauth2.core.OAuth2Error
+import org.springframework.security.oauth2.core.OAuth2ErrorCodes
+import org.springframework.security.oauth2.jwt.*
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration
+import org.springframework.security.oauth2.server.resource.BearerTokenError
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
+import skills.auth.AuthUtils
 import skills.auth.PortalWebSecurityHelper
-import skills.auth.SecurityConfiguration
 import skills.auth.SecurityMode
+import skills.auth.UserInfo
 
 @Conditional(SecurityMode.FormAuth)
 @Configuration
-@EnableResourceServer
-class ResourceServerConfig extends ResourceServerConfigurerAdapter {
-
-    @Value('#{"${security.oauth2.resource.id:skills-service-oauth}"}')
-    private String resourceId
-
-    // The DefaultTokenServices bean provided at the AuthorizationConfig
-    @Autowired
-    private DefaultTokenServices tokenServices
-
-    // The TokenStore bean provided at the AuthorizationConfig
-    @Autowired
-    private TokenStore tokenStore
+class ResourceServerConfig {
 
     @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
-    skills.auth.form.SkillsHttpSessionSecurityContextRepository securityContextRepository
+    SecurityContextRepository securityContextRepository
 
     @Autowired
     OAuthUtils oAuthUtils
 
-    @Autowired
-    @Qualifier('skillsOAuth2AuthManager')
-    AuthenticationManager authenticationManager
-
-
-    // To allow the ResourceServerConfigurerAdapter to understand the token,
-    // it must share the same characteristics with AuthorizationServerConfigurerAdapter.
-    // So, we must wire it up the beans in the ResourceServerSecurityConfigurer.
-    @Override
-    void configure(ResourceServerSecurityConfigurer resources) {
-        resources
-                .resourceId(resourceId)
-                .tokenServices(tokenServices)
-                .tokenStore(tokenStore)
-                .authenticationManager(authenticationManager)
+    @Bean('resourceServerSecurityFilterChain')
+    @Order(101)
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        portalWebSecurityHelper.configureHttpSecurity(
+            http.securityContext((securityContext) ->
+                securityContext.securityContextRepository(securityContextRepository)
+            ).securityMatcher(oAuthUtils.oAuthRequestedMatcher)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                    .jwt(jwt -> jwt
+                            .jwtAuthenticationConverter(new SkillsJwtAuthenticationConverter(oAuthUtils))
+                    )
+                )
+        )
+        return http.build()
     }
 
-    @Override
-    void configure(HttpSecurity http) throws Exception {
-        portalWebSecurityHelper.configureHttpSecurity(
-                http.securityContext().securityContextRepository(securityContextRepository)
-        .and()
-                .requestMatcher(oAuthUtils.oAuthRequestedMatcher)
-        )
+    @Bean
+    JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+        NimbusJwtDecoder jwtDecoder = OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource)
+        jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>([JwtValidators.createDefault(), new JwtClaimValidator<>(AuthorizationServerConfig.SKILLS_PROXY_USER, Objects::nonNull)]))
+        return jwtDecoder
+    }
+
+    @Slf4j
+    static class SkillsJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+        private OAuthUtils oAuthUtils
+
+        private JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter()
+
+        SkillsJwtAuthenticationConverter(OAuthUtils oAuthUtils) {
+            this.oAuthUtils = oAuthUtils
+        }
+
+        @Override
+        AbstractAuthenticationToken convert(Jwt jwt) {
+            AbstractAuthenticationToken auth = jwtAuthenticationConverter.convert(jwt)
+            if (auth.isAuthenticated()) {
+                String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
+                auth = oAuthUtils.convertToSkillsAuth(auth)
+                if (projectId && auth && auth.principal instanceof UserInfo) {
+                    String proxyingSystemId = ((UserInfo) auth.principal).proxyingSystemId
+                    if (projectId != proxyingSystemId) {
+                        OAuth2Error error = new BearerTokenError(
+                                OAuth2ErrorCodes.INVALID_CLIENT,
+                                HttpStatus.FORBIDDEN,
+                                "Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]",
+                                null)
+                        throw new OAuth2AuthenticationException(error)
+                    }
+                }
+            }
+            return auth
+        }
+
+        HttpServletRequest getServletRequest() {
+            HttpServletRequest httpServletRequest
+            try {
+                ServletRequestAttributes currentRequestAttributes = RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes
+                httpServletRequest = currentRequestAttributes.getRequest()
+            } catch (Exception e) {
+                log.debug("Unable to current request attributes. Error Recieved [$e]")
+            }
+            return httpServletRequest
+        }
     }
 }

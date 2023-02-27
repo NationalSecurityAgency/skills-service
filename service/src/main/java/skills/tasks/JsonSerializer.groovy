@@ -17,7 +17,7 @@ package skills.tasks
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kagkarlsson.scheduler.Serializer
+import com.github.kagkarlsson.scheduler.serializer.Serializer;
 import groovy.util.logging.Slf4j
 
 @Slf4j

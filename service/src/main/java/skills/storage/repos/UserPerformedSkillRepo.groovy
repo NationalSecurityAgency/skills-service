@@ -45,7 +45,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Nullable
     List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
 
-    @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue from UserPerformedSkill u, UserTag ut
+    @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue 
+              from UserPerformedSkill u
               join UserTag ut on ut.userId = u.userId
               where 
               u.skillRefId in (
@@ -176,7 +177,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
-        from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+        from SkillRelDef srd, SkillDef sdChild, SkillDef sdParent
             inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
         where 
             srd.parent=sdParent.id and 

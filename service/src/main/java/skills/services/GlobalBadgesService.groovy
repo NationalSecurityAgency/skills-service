@@ -45,6 +45,8 @@ import skills.storage.model.SkillRelDef.RelationshipType
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
+import static skills.storage.model.SkillDef.*
+
 @Service
 @Slf4j
 class GlobalBadgesService {
@@ -111,11 +113,11 @@ class GlobalBadgesService {
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
-        badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
     }
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String subjectName) {
-        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(null, subjectName, SkillDef.ContainerType.GlobalBadge)
+        return skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(null, subjectName, ContainerType.GlobalBadge)
     }
 
     @Transactional(readOnly = true)
@@ -129,12 +131,12 @@ class GlobalBadgesService {
         SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
         SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
 
-        assignGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
+        assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
     }
 
     @Transactional()
     void addProjectLevelToBadge(String badgeId, String projectId, Integer level) {
-        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, ContainerType.GlobalBadge)
         if (!badgeSkillDef) {
             throw new SkillException("Failed to find global badge [${badgeId}]")
         }
@@ -162,7 +164,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void changeProjectLevelOnBadge(String badgeId, String projectId, Integer existingLevel, Integer newLevel) {
-        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, ContainerType.GlobalBadge)
         if (!badgeSkillDef) {
             throw new SkillException("Failed to find global badge [${badgeId}]")
         }
@@ -215,39 +217,39 @@ class GlobalBadgesService {
 
     @Transactional()
     void removeSkillFromBadge(String badgeId, projectId, String skillId) {
-        removeGraphRelationship(badgeId, SkillDef.ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
+        removeGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
 
         SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
         badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
     }
 
     @Transactional
-    void assignGraphRelationship(String badgeSkillId, SkillDef.ContainerType skillType, String projectId,
+    void assignGraphRelationship(String badgeSkillId, ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType) {
         ruleSetDefGraphService.assignGraphRelationship(null, badgeSkillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
-    void removeGraphRelationship(String skillId, SkillDef.ContainerType skillType, String projectId,
+    void removeGraphRelationship(String skillId, ContainerType skillType, String projectId,
                                  String relationshipSkillId, RelationshipType relationshipType){
         ruleSetDefGraphService.removeGraphRelationship(null, skillId, skillType, projectId, relationshipSkillId, relationshipType)
     }
 
     @Transactional
     void deleteBadge(String badgeId) {
-        badgeAdminService.deleteBadge(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        badgeAdminService.deleteBadge(null, badgeId, ContainerType.GlobalBadge)
     }
 
     @Transactional(readOnly = true)
     List<GlobalBadgeResult> getBadges() {
-        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, SkillDef.ContainerType.GlobalBadge)
+        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, ContainerType.GlobalBadge)
         List<GlobalBadgeResult> res = badges.collect { convertToBadge(it, true) }
         return res?.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
     GlobalBadgeResult getBadge(String badgeId) {
-        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, ContainerType.GlobalBadge)
         if (skillDef) {
             return convertToBadge(skillDef, true)
         }
@@ -256,7 +258,7 @@ class GlobalBadgesService {
     @Transactional
     void setBadgeDisplayOrder(String badgeId, ActionPatchRequest badgePatchRequest) {
         lockingService.lockGlobalBadges()
-        List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  SkillDef.ContainerType.GlobalBadge)
+        List<SkillDef> badges = skillDefRepo.findAllByProjectIdAndType(null,  ContainerType.GlobalBadge)
         if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == badgePatchRequest.action) {
             displayOrderService.updateDisplayOrderByUsingNewIndex(badgeId, badges, badgePatchRequest)
         }
@@ -264,7 +266,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType.Skill, query)
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
@@ -277,7 +279,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     List<SkillDefPartialRes> getSkillsForBadge(String badgeId) {
-        return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
+        return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
     }
 
     @Transactional(readOnly = true)
@@ -323,7 +325,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     List<Integer> globalBadgesSkillIsUsedIn(String projectId, String skillId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
         List<Integer> globalBadgeIds = skillRelDefRepo.getGlobalBadgeIdsForSkill(skillDef.id)
         globalBadgeIds.addAll(skillRelDefRepo.getGlobalBadgeLevelIdsForSkill(projectId))
         return globalBadgeIds
@@ -331,7 +333,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     boolean isSkillUsedInGlobalBadge(String projectId, String skillId) {
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdAndTypeIn(projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
         assert skillDef, "Skill [${skillId}] for project [${projectId}] does not exist"
         return isSkillUsedInGlobalBadge(skillDef)
     }
@@ -344,7 +346,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     boolean isSubjectUsedInGlobalBadge(String projectId, String skillId) {
-        SkillDef subjectSkillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, SkillDef.ContainerType.Subject)
+        SkillDef subjectSkillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, ContainerType.Subject)
         assert subjectSkillDef, "Skill [${skillId}] for project [${projectId}] does not exist"
         return isSubjectUsedInGlobalBadge(subjectSkillDef)
     }

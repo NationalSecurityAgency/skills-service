@@ -28,7 +28,7 @@ import skills.controller.result.model.SettingsResult
 import skills.services.SystemSettingsService
 import skills.services.settings.SettingsService
 
-import javax.mail.MessagingException
+import jakarta.mail.MessagingException
 import java.util.concurrent.TimeUnit
 
 @Service

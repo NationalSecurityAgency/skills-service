@@ -18,12 +18,13 @@ package skills.auth.pki
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.*
+import org.springframework.core.annotation.Order
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.NullSecurityContextRepository
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
@@ -33,10 +34,7 @@ import skills.auth.SecurityMode
 @Conditional(SecurityMode.PkiAuth)
 @Component
 @Configuration
-class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-//    @Autowired
-//    UserDetailsService userDetailsService
+class PkiSecurityConfiguration {
 
     @Bean
     @Conditional(SecurityMode.PkiAuth)
@@ -54,8 +52,9 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .userDetailsService(pkiUserDetailsService())
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean('pkiSecurityFilterChain')
+    @Order(103)
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring PKI authorization mode")
 
         // Portal endpoints config
@@ -65,15 +64,16 @@ class PkiSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .subjectPrincipalRegex(/(.*)/)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        }
 
-    @Override
+        http.build()
+    }
+
     @Bean(name = 'defaultAuthManager')
     @Primary
     @Lazy
-    AuthenticationManager authenticationManagerBean() throws Exception {
+    AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
         // provides the default AuthenticationManager as a Bean
-        return super.authenticationManagerBean()
+        return http.getSharedObject(AuthenticationManager.class);
     }
 
     @Bean

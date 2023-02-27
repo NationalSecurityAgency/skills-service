@@ -41,7 +41,7 @@ import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
 import skills.utils.InputSanitizer
 
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/app")

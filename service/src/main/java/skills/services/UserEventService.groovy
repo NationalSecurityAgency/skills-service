@@ -30,14 +30,16 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.Stream
+
+import static skills.storage.model.SkillDef.*
 
 @Component
 @Slf4j
@@ -66,7 +68,7 @@ class UserEventService {
     @Autowired
     LockingService lockingService
 
-    private static final List<SkillDef.ContainerType> ALLOWABLE_CONTAINER_TYPES = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.Subject]
+    private static final List<ContainerType> ALLOWABLE_CONTAINER_TYPES = [ContainerType.Skill, ContainerType.Subject]
 
     /**
      * Returns the daily user interaction counts for a skill or subject whether the skill was applied or not.
@@ -95,7 +97,7 @@ class UserEventService {
         Integer rawId = skillDef.id
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream
-            if (SkillDef.ContainerType.Skill == skillDef.type) {
+            if (ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getEventCountForSkill(rawId, start, eventType)
             } else {
                 stream = userEventsRepo.getEventCountForSubject(rawId, start, eventType)
@@ -104,7 +106,7 @@ class UserEventService {
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCountItem> stream
-            if (SkillDef.ContainerType.Skill == skillDef.type) {
+            if (ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getEventCountForSkillGroupedByWeek(rawId, start)
             } else {
                 stream = userEventsRepo.getEventCountForSubjectGroupedByWeek(rawId, start)
@@ -142,7 +144,7 @@ class UserEventService {
 
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream
-            if (SkillDef.ContainerType.Skill == skillDef.type) {
+            if (ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType)
             } else {
                 stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType)
@@ -151,7 +153,7 @@ class UserEventService {
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCountItem> stream
-            if (SkillDef.ContainerType.Skill == skillDef.type) {
+            if (ContainerType.Skill == skillDef.type) {
                 stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start)
             } else {
                 stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start)
