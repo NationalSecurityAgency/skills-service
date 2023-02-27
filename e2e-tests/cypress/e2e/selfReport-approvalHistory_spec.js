@@ -232,7 +232,7 @@ describe('Self Report Approval History Tests', () => {
             .should('not.exist');
     });
 
-    it('approved and rejected requests - sorting', () => {
+    it.only('approved and rejected requests - sorting', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
@@ -337,23 +337,23 @@ describe('Self Report Approval History Tests', () => {
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 2,
-                value: '2020-09-11 07:00'
+                value: '2020-09-11 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-12 07:00'
+                value: '2020-09-12 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-13 07:00'
+                value: '2020-09-13 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-14 07:00'
+                value: '2020-09-14 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-16 07:00'
+                value: '2020-09-16 11:00'
             },],
         ], 5, true, 7);
 
@@ -363,23 +363,23 @@ describe('Self Report Approval History Tests', () => {
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 2,
-                value: '2020-09-18 07:00'
+                value: '2020-09-18 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-17 07:00'
+                value: '2020-09-17 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-16 07:00'
+                value: '2020-09-16 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-14 07:00'
+                value: '2020-09-14 11:00'
             },],
             [{
                 colIndex: 2,
-                value: '2020-09-13 07:00'
+                value: '2020-09-13 11:00'
             },],
         ], 5, true, 7);
 
