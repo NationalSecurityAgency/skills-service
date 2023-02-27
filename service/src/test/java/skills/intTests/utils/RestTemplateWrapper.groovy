@@ -111,15 +111,10 @@ class RestTemplateWrapper extends RestTemplate {
     }
 
     HttpClient getHttpClient() {
-//        return HttpClientBuilder.create()
-//                .setSSLHostnameVerifier(new AllowAllHostnameVerifier())
-//                .build()
         return HttpClients.custom()
-//                .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .useSystemProperties()
                 .setConnectionManager(poolingHttpClientConnectionManager())
                 .disableAutomaticRetries()
-//                .setDefaultRequestConfig(requestConfig)
                 .build()
     }
 
@@ -137,8 +132,6 @@ class RestTemplateWrapper extends RestTemplate {
                         .register("http", PlainConnectionSocketFactory.getSocketFactory())
                         .register("https", sslConnectionSocketFactory).build())
 
-//        result.setMaxTotal(this.httpClientConfig.getMaxTotal())
-//        result.setDefaultMaxPerRoute(this.httpClientConfig.getDefaultMaxPerRoute())
         return result
     }
 
@@ -158,7 +151,6 @@ class RestTemplateWrapper extends RestTemplate {
                 assert authResponse.statusCode == HttpStatus.OK, 'authentication failed: ' + authResponse.statusCode
 
                 authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
-//        assert authenticationToken, 'no authentication token was provided!'
             }
         }
         authenticated = true
