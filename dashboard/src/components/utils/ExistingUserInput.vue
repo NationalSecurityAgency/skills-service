@@ -262,8 +262,9 @@ limitations under the License.
         }
       },
       focus() {
+        const elementId = this.existingUserInputId;
         this.$nextTick(() => {
-          const vSelectElement = document.getElementById('existingUserInputVSelect');
+          const vSelectElement = document.getElementById(elementId);
           if (vSelectElement) {
             const foundInput = vSelectElement.querySelector('input');
             if (foundInput) {

@@ -451,10 +451,10 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
-        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the test')
+        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="quizFailed"]')
 
         cy.get('[data-cy="quizCompletion"] [data-cy="runQuizAgainBtn"]').should('not.exist')

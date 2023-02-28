@@ -15,11 +15,11 @@ limitations under the License.
 */
 <template>
   <b-card body-class="text-left" data-cy="quizCompletion">
-    <div class="h5">
+    <div class="h4">
       <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-        <i class="fas fa-handshake"></i> Thank you completing the test!
+        <i class="fas fa-handshake text-info"></i> Thank you for completing the {{ quizInfo.quizType }}!
       </slot>
-      <span v-else><i class="fas fa-handshake"></i> Thank you for completing the test!</span>
+      <span v-else><i class="fas fa-handshake text-info"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
     </div>
     <div class="mb-1 mt-4 h2">
       <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
