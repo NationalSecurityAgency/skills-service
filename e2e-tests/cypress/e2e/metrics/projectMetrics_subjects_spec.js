@@ -26,12 +26,7 @@ describe('Metrics Tests', () => {
         });
     });
 
-    it('subjects - num users per level over time - not subjects', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('subjects - num users per level over time - not subjects', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Subjects]')

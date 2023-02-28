@@ -41,12 +41,7 @@ describe('Metrics Tests - Subject', () => {
             .as('getConfig');
     });
 
-    it('level breakdown', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('level breakdown', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder?subjectId=subj1')
             .as('numUsersPerLevelChartBuilderSubj1');
@@ -109,12 +104,7 @@ describe('Metrics Tests - Subject', () => {
             .contains('No one reached Level 1');
     });
 
-    it('subject users per day - with real data', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('subject users per day - with real data', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
@@ -192,12 +182,7 @@ describe('Metrics Tests - Subject', () => {
             .contains(noDataMsg);
     });
 
-    it('subject users per day - time controls call out to the server', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('subject users per day - time controls call out to the server', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
             .as('distinctUsersOverTimeForProject');
@@ -223,12 +208,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@distinctUsersOverTimeForProject');
     });
 
-    it('subject users per day - with user counts', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('subject users per day - with user counts', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
                 {

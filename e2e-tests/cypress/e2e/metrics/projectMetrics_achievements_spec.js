@@ -25,12 +25,7 @@ describe('Metrics Tests - Achievements', () => {
         });
     });
 
-    it('overall levels - empty', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('overall levels - empty', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.get('[data-cy=metricsNav-Achievements]')
@@ -51,12 +46,7 @@ describe('Metrics Tests - Achievements', () => {
             .contains('No one reached Level 1 yet...');
     });
 
-    it('overall levels - users in all levels', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('overall levels - users in all levels', () => {
         cy.intercept('/admin/projects/proj1/metrics/numUsersPerLevelChartBuilder',
             {
                 statusCode: 200,

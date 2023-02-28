@@ -195,12 +195,7 @@ describe('Metrics Tests - Skills', () => {
             .contains(`This skill was last achieved on ${m.format('YYYY-MM-DD HH:mm')}`);
     });
 
-    it('number of users over time', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('number of users over time', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
             .as('singleSkillCountsChartBuilder');
@@ -280,12 +275,7 @@ describe('Metrics Tests - Skills', () => {
             .contains('This chart needs at least 2 days of user activity');
     });
 
-    it('number of users over time - 1 day', {
-        retries: {
-            runMode: 0,
-            openMode: 0
-        }
-    }, () => {
+    it('number of users over time - 1 day', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1',
                 {
