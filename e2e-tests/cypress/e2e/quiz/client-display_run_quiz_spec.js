@@ -180,7 +180,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
     });
 
-    it.only('wrong anders are accurately depicted on the result screen', () => {
+    it('wrong anders are accurately depicted on the result screen', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
@@ -248,7 +248,7 @@ describe('Client Display Quiz Tests', () => {
         });
     });
 
-    it.only('quiz attempts been exhausted', () => {
+    it('quiz attempts been exhausted', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.setQuizMaxNumAttempts(1, 1)
