@@ -225,7 +225,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionsErrs"]').should('not.exist')
         cy.get('[data-cy="saveQuestionBtn"]').click()
         cy.get('[data-cy="editQuestionsErrs"]').contains('Answers labeled as correct must have text')
-        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="editQuestionsErrs"]').should('not.exist')
     });
 

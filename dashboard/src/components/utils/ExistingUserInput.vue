@@ -20,7 +20,7 @@ limitations under the License.
     </b-dropdown>
 
     <v-select :options="suggestions"
-              id="existingUserInputVSelect"
+              :id="existingUserInputId"
               v-model="userQuery"
               :placeholder="placeholder"
               :multiple="allowMultipleSelections"
@@ -144,6 +144,9 @@ limitations under the License.
     computed: {
       emptySlot() {
         return this.isFetching ? 'loading...' : 'No results found';
+      },
+      existingUserInputId() {
+        return `existingUserInputVSelect${(this.userType !== CLIENT) ? this.userType : ''}`;
       },
       suggestUrl() {
         let suggestUrl;

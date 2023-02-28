@@ -183,10 +183,10 @@ describe('Client Display Accessibility tests', () => {
         cy.customA11y();
         cy.customLighthouse();
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('exist');
+        cy.get('[data-cy="requestApprovalAlert"]')
+            .contains('This skill requires approval. Request 100 points once you\'ve completed the skill.')
         cy.wait(500); // sometimes modal takes a bit to render
         cy.customA11y();
         cy.customLighthouse();
