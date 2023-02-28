@@ -146,13 +146,13 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         when:
         def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
-        res.isReusedSkill == [false, false, false]
-        res.numUsersInProgress == [1, 0, 0]
-        res.numUserAchieved == [2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, null, null]
+        res.skills.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
+        res.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
+        res.skills.isReusedSkill == [false, false, false]
+        res.skills.numUsersInProgress == [1, 0, 0]
+        res.skills.numUserAchieved == [2, 0, 0]
+        res.skills.lastReportedTimestamp == [dates[4].time, null, null]
+        res.skills.lastAchievedTimestamp == [dates[3].time, null, null]
     }
 
     def "metrics endpoint ignores reused group skills"() {
@@ -187,13 +187,13 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         when:
         def res = skillsService.getMetricsData(p1.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
-        res.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
-        res.isReusedSkill == [false, false, false]
-        res.numUsersInProgress == [1, 0, 0]
-        res.numUserAchieved == [2, 0, 0]
-        res.lastReportedTimestamp == [dates[4].time, null, null]
-        res.lastAchievedTimestamp == [dates[3].time, null, null]
+        res.skills.skillName == [p1Skills[0].name, p1Skills[1].name, p1Skills[2].name]
+        res.skills.skillId == [p1Skills[0].skillId, p1Skills[1].skillId, p1Skills[2].skillId,]
+        res.skills.isReusedSkill == [false, false, false]
+        res.skills.numUsersInProgress == [1, 0, 0]
+        res.skills.numUserAchieved == [2, 0, 0]
+        res.skills.lastReportedTimestamp == [dates[4].time, null, null]
+        res.skills.lastAchievedTimestamp == [dates[3].time, null, null]
     }
 
     def "users endpoints for reused skills"() {

@@ -19,7 +19,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.builders.ProjectMetricsBuilder
+import skills.services.admin.SkillTagService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.skillLoading.model.SkillTag
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.utils.InputSanitizer
 
@@ -29,6 +31,9 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
+
+    @Autowired
+    SkillTagService skillTagService
 
     @Override
     String getId() {
@@ -44,13 +49,16 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
         Long lastReportedTimestamp
         Long lastAchievedTimestamp
         Boolean isReusedSkill
+        List <SkillTag> skillTags
     }
 
-    List<SkillUsageNavigatorItem> build(String projectId, String chartId, Map<String, String> props) {
+    def build(String projectId, String chartId, Map<String, String> props) {
         def res = userAchievedRepo.findAllForSkillsNavigator(projectId)
-        return res.collect {
+        def skillTags = skillTagService.getTagsForProject(projectId)
+        def results = res.collect {
             Integer numAchieved = it.getNumUserAchieved() ?: 0
             Integer numProgress = it.getNumUsersInProgress() ?: 0
+            List <SkillTag> tags = skillTagService.getTagsForSkill(projectId, it.getSkillId())
             new SkillUsageNavigatorItem(
                     skillId: it.getSkillId(),
                     skillName: SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(it.getSkillName())),
@@ -60,7 +68,10 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
                     lastReportedTimestamp: it.getLastReported()?.time,
                     lastAchievedTimestamp: it.getLastAchieved()?.time,
                     isReusedSkill: SkillReuseIdUtil.isTagged(it.skillId),
+                    skillTags: tags
             )
         }?.sort({ it.skillId })
+
+        return [ skills: results, tags: skillTags ]
     }
 }

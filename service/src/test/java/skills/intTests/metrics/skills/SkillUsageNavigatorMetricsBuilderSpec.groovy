@@ -16,13 +16,21 @@
 package skills.intTests.metrics.skills
 
 import groovy.time.TimeCategory
+import org.springframework.beans.factory.annotation.Autowired
+import skills.PublicProps
+import skills.controller.request.model.SkillsTagRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
+import skills.services.admin.SkillTagService
+import skills.utils.InputSanitizer
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
+
+    @Autowired
+    SkillTagService skillTagService
 
     String metricsId = "skillUsageNavigatorChartBuilder"
 
@@ -37,7 +45,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
         then:
-        !res
+        res == [ skills: [], tags: [] ]
     }
 
     def "one empty skill"() {
@@ -53,13 +61,13 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
         then:
-        res.size() == 1
-        res[0].skillId == 'skill1'
-        res[0].skillName == 'Test Skill 1'
-        res[0].numUserAchieved == 0
-        res[0].numUsersInProgress == 0
-        !res[0].lastReportedTimestamp
-        !res[0].lastAchievedTimestamp
+        res.skills.size() == 1
+        res.skills[0].skillId == 'skill1'
+        res.skills[0].skillName == 'Test Skill 1'
+        res.skills[0].numUserAchieved == 0
+        res.skills[0].numUsersInProgress == 0
+        !res.skills[0].lastReportedTimestamp
+        !res.skills[0].lastAchievedTimestamp
     }
 
     def "skills with usage and achievements"() {
@@ -93,43 +101,91 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        res.size() == 10
-        def skill1 = res.find { it.skillId == 'skill1' }
+        res.skills.size() == 10
+        def skill1 = res.skills.find { it.skillId == 'skill1' }
         skill1.subjectId == subj.subjectId
         skill1.numUserAchieved == 1
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
         new Date(skill1.lastAchievedTimestamp) == days[5]
 
-        def skill2 = res.find { it.skillId == 'skill2' }
+        def skill2 = res.skills.find { it.skillId == 'skill2' }
         skill2.numUserAchieved == 0
         skill2.numUsersInProgress == 5
         new Date(skill2.lastReportedTimestamp) == days[5]
         !skill2.lastAchievedTimestamp
 
-        def skill3 = res.find { it.skillId == 'skill3' }
+        def skill3 = res.skills.find { it.skillId == 'skill3' }
         skill3.numUserAchieved == 0
         skill3.numUsersInProgress == 5
         new Date(skill3.lastReportedTimestamp) == days[5]
         !skill3.lastAchievedTimestamp
 
-        def skill4 = res.find { it.skillId == 'skill4' }
+        def skill4 = res.skills.find { it.skillId == 'skill4' }
         skill4.numUserAchieved == 0
         skill4.numUsersInProgress == 5
         new Date(skill4.lastReportedTimestamp) == days[5]
         !skill4.lastAchievedTimestamp
 
-        def skill5 = res.find { it.skillId == 'skill5' }
+        def skill5 = res.skills.find { it.skillId == 'skill5' }
         skill5.numUserAchieved == 0
         skill5.numUsersInProgress == 5
         new Date(skill5.lastReportedTimestamp) == days[5]
         !skill5.lastAchievedTimestamp
 
-        def skill6 = res.find { it.skillId == 'skill6' }
+        def skill6 = res.skills.find { it.skillId == 'skill6' }
         skill6.numUserAchieved == 0
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+    }
+
+    def "skills with usage, achievements and tags"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> days
+
+        use(TimeCategory) {
+            days = (5..0).collect { int day -> day.days.ago }
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        SkillsTagRequest skillsTagRequest = new SkillsTagRequest()
+        skillsTagRequest.tagId = "testtag"
+        skillsTagRequest.tagValue = "Test Tag"
+        skillsTagRequest.skillIds = skills.collect{ it -> it.skillId }
+        skillTagService.addTag(proj.projectId, skillsTagRequest)
+
+        SkillsTagRequest secondSkillsTagRequest = new SkillsTagRequest()
+        secondSkillsTagRequest.tagId = "newtag"
+        secondSkillsTagRequest.tagValue = "New Tag"
+        secondSkillsTagRequest.skillIds = skills[0..4].collect{ it -> it.skillId }
+        skillTagService.addTag(proj.projectId, secondSkillsTagRequest)
+
+        Map props = [:]
+        props[MetricsParams.P_SKILL_ID] = skills[0].skillId
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        res.skills.size() == 10
+        res.tags.size() == 2
+        res.tags == [[tagValue: 'New Tag', tagId: 'newtag'], [tagValue: 'Test Tag', tagId: 'testtag']]
     }
 
     def "group skills with usage and achievements"() {
@@ -167,39 +223,39 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        res.size() == 10
-        def skill1 = res.find { it.skillId == 'skill1' }
+        res.skills.size() == 10
+        def skill1 = res.skills.find { it.skillId == 'skill1' }
         skill1.subjectId == subj.subjectId
         skill1.numUserAchieved == 1
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
         new Date(skill1.lastAchievedTimestamp) == days[5]
 
-        def skill2 = res.find { it.skillId == 'skill2' }
+        def skill2 = res.skills.find { it.skillId == 'skill2' }
         skill2.numUserAchieved == 0
         skill2.numUsersInProgress == 5
         new Date(skill2.lastReportedTimestamp) == days[5]
         !skill2.lastAchievedTimestamp
 
-        def skill3 = res.find { it.skillId == 'skill3' }
+        def skill3 = res.skills.find { it.skillId == 'skill3' }
         skill3.numUserAchieved == 0
         skill3.numUsersInProgress == 5
         new Date(skill3.lastReportedTimestamp) == days[5]
         !skill3.lastAchievedTimestamp
 
-        def skill4 = res.find { it.skillId == 'skill4' }
+        def skill4 = res.skills.find { it.skillId == 'skill4' }
         skill4.numUserAchieved == 0
         skill4.numUsersInProgress == 5
         new Date(skill4.lastReportedTimestamp) == days[5]
         !skill4.lastAchievedTimestamp
 
-        def skill5 = res.find { it.skillId == 'skill5' }
+        def skill5 = res.skills.find { it.skillId == 'skill5' }
         skill5.numUserAchieved == 0
         skill5.numUsersInProgress == 5
         new Date(skill5.lastReportedTimestamp) == days[5]
         !skill5.lastAchievedTimestamp
 
-        def skill6 = res.find { it.skillId == 'skill6' }
+        def skill6 = res.skills.find { it.skillId == 'skill6' }
         skill6.numUserAchieved == 0
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
@@ -232,15 +288,16 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId
 
         when:
-        def res = skillsService.getMetricsData(proj.projectId, metricsId, props).sort { it.skillId }
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        res.skills = res.skills.sort { it.skillId }
 
         then:
-        res.size() == 5
-        res[0].skillId == 'skill1'
-        res[0].numUserAchieved == 1
-        res[0].numUsersInProgress == 1
-        new Date(res[0].lastReportedTimestamp) == days[3]
-        new Date(res[0].lastAchievedTimestamp) == days[1]
+        res.skills.size() == 5
+        res.skills[0].skillId == 'skill1'
+        res.skills[0].numUserAchieved == 1
+        res.skills[0].numUsersInProgress == 1
+        new Date(res.skills[0].lastReportedTimestamp) == days[3]
+        new Date(res.skills[0].lastAchievedTimestamp) == days[1]
     }
 
     def "skills with usage and achievements - include catalog skills"() {
@@ -305,39 +362,39 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        res.size() == 10
-        def skill1 = res.find { it.skillId == 'skill1' }
+        res.skills.size() == 10
+        def skill1 = res.skills.find { it.skillId == 'skill1' }
         skill1.subjectId == subj.subjectId
         skill1.numUserAchieved == 1
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
         new Date(skill1.lastAchievedTimestamp) == days[5]
 
-        def skill2 = res.find { it.skillId == 'skill2' }
+        def skill2 = res.skills.find { it.skillId == 'skill2' }
         skill2.numUserAchieved == 0
         skill2.numUsersInProgress == 5
         new Date(skill2.lastReportedTimestamp) == days[5]
         !skill2.lastAchievedTimestamp
 
-        def skill3 = res.find { it.skillId == 'skill3' }
+        def skill3 = res.skills.find { it.skillId == 'skill3' }
         skill3.numUserAchieved == 0
         skill3.numUsersInProgress == 5
         new Date(skill3.lastReportedTimestamp) == days[5]
         !skill3.lastAchievedTimestamp
 
-        def skill4 = res.find { it.skillId == 'skill4' }
+        def skill4 = res.skills.find { it.skillId == 'skill4' }
         skill4.numUserAchieved == 0
         skill4.numUsersInProgress == 5
         new Date(skill4.lastReportedTimestamp) == days[5]
         !skill4.lastAchievedTimestamp
 
-        def skill5 = res.find { it.skillId == 'skill5' }
+        def skill5 = res.skills.find { it.skillId == 'skill5' }
         skill5.numUserAchieved == 0
         skill5.numUsersInProgress == 5
         new Date(skill5.lastReportedTimestamp) == days[5]
         !skill5.lastAchievedTimestamp
 
-        def skill6 = res.find { it.skillId == 'p2skill_0' }
+        def skill6 = res.skills.find { it.skillId == 'p2skill_0' }
         skill6.numUserAchieved == 0
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
@@ -392,39 +449,39 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        res.size() == 10
-        def skill1 = res.find { it.skillId == 'skill1' }
+        res.skills.size() == 10
+        def skill1 = res.skills.find { it.skillId == 'skill1' }
         skill1.subjectId == subj.subjectId
         skill1.numUserAchieved == 1
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
         new Date(skill1.lastAchievedTimestamp) == days[5]
 
-        def skill2 = res.find { it.skillId == 'skill2' }
+        def skill2 = res.skills.find { it.skillId == 'skill2' }
         skill2.numUserAchieved == 0
         skill2.numUsersInProgress == 5
         new Date(skill2.lastReportedTimestamp) == days[5]
         !skill2.lastAchievedTimestamp
 
-        def skill3 = res.find { it.skillId == 'skill3' }
+        def skill3 = res.skills.find { it.skillId == 'skill3' }
         skill3.numUserAchieved == 0
         skill3.numUsersInProgress == 5
         new Date(skill3.lastReportedTimestamp) == days[5]
         !skill3.lastAchievedTimestamp
 
-        def skill4 = res.find { it.skillId == 'skill4' }
+        def skill4 = res.skills.find { it.skillId == 'skill4' }
         skill4.numUserAchieved == 0
         skill4.numUsersInProgress == 5
         new Date(skill4.lastReportedTimestamp) == days[5]
         !skill4.lastAchievedTimestamp
 
-        def skill5 = res.find { it.skillId == 'skill5' }
+        def skill5 = res.skills.find { it.skillId == 'skill5' }
         skill5.numUserAchieved == 0
         skill5.numUsersInProgress == 5
         new Date(skill5.lastReportedTimestamp) == days[5]
         !skill5.lastAchievedTimestamp
 
-        def skill6 = res.find { it.skillId == 'skill6' }
+        def skill6 = res.skills.find { it.skillId == 'skill6' }
         skill6.numUserAchieved == 0
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
@@ -463,13 +520,13 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name]
-        res.skillId == [p1Skills[0].skillId]
-        res.isReusedSkill == [false]
-        res.numUsersInProgress == [1]
-        res.numUserAchieved == [2]
-        res.lastReportedTimestamp == [dates[4].time]
-        res.lastAchievedTimestamp == [dates[3].time]
+        res.skills[0].skillName == p1Skills[0].name
+        res.skills[0].skillId == p1Skills[0].skillId
+        res.skills[0].isReusedSkill == false
+        res.skills[0].numUsersInProgress == 1
+        res.skills[0].numUserAchieved == 2
+        res.skills[0].lastReportedTimestamp == dates[4].time
+        res.skills[0].lastAchievedTimestamp == dates[3].time
     }
 
     def "metrics endpoint returns proper counts for imported group skills"() {
@@ -507,12 +564,12 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
         then:
-        res.skillName == [p1Skills[0].name]
-        res.skillId == [p1Skills[0].skillId]
-        res.isReusedSkill == [false]
-        res.numUsersInProgress == [1]
-        res.numUserAchieved == [2]
-        res.lastReportedTimestamp == [dates[4].time]
-        res.lastAchievedTimestamp == [dates[3].time]
+        res.skills[0].skillName == p1Skills[0].name
+        res.skills[0].skillId == p1Skills[0].skillId
+        res.skills[0].isReusedSkill == false
+        res.skills[0].numUsersInProgress == 1
+        res.skills[0].numUserAchieved == 2
+        res.skills[0].lastReportedTimestamp == dates[4].time
+        res.skills[0].lastAchievedTimestamp == dates[3].time
     }
 }
