@@ -64,10 +64,11 @@ describe('Quiz Runs History Tests', () => {
 
 
     it('format total runtime and start time', function () {
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1/results**', (req) => {
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs?*', (req) => {
             req.reply({
                 body: {
                     'data': [{
+                        'attemptId' : 1, // will not lead to anything sadly
                         'status': 'PASSED',
                         'userId': 'user1',
                         'userIdForDisplay': 'user1',

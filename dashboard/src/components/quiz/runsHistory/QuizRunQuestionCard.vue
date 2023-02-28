@@ -21,7 +21,7 @@ limitations under the License.
       </div>
       <div class="row no-gutters">
       <div class="col-auto py-2 pr-2">
-        <b-overlay :show="isWrong" variant="transparent" opacity="0">
+        <b-overlay :show="!isSurvey && isWrong" variant="transparent" opacity="0">
           <template #overlay>
             <i class="fa fa-ban text-danger" style="font-size: 1.9rem; opacity: 0.8" data-cy="wrongAnswer"></i>
           </template>
@@ -37,7 +37,7 @@ limitations under the License.
               <select-correct-answer :value="a.isSelected"
                                      :read-only="true"
                                      :is-radio-icon="isSingleChoiceType"
-                                     :markIncorrect="hasAnswer && a.isConfiguredCorrect !== a.isSelected"
+                                     :markIncorrect="!isSurvey && hasAnswer && a.isConfiguredCorrect !== a.isSelected"
                                      font-size="1.3rem"/>
             </div>
             <div class="col ml-2 pb-1"><div class="answerText align-middle" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
@@ -84,6 +84,9 @@ limitations under the License.
       },
       isWrong() {
         return this.question.answers.find((a) => this.hasAnswer && a.isConfiguredCorrect !== a.isSelected) !== undefined;
+      },
+      isSurvey() {
+        return this.quizType === 'Survey';
       },
     },
     methods: {
