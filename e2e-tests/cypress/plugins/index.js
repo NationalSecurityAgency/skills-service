@@ -92,6 +92,28 @@ module.exports = (on, config) => {
 
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
+
+        // this plugin redirects browser's console error log statements to
+        // cypress console
+        const logToOutput = require('cypress-log-to-output')
+        logToOutput.install(on, (_, event) => {
+            // if (event.type === 'error') {
+            //     const foundValue = event.args.find((a) => a.value);
+            //     if (foundValue) {
+            //         return true;
+            //     }
+            //     return false
+            // }
+            // return false
+            return true;
+        })
+        launchOptions.args = logToOutput.browserLaunchHandler(
+            browser,
+            launchOptions.args
+        )
+        // end of cypress-log-to-output plugin
+
+        return launchOptions
     });
 
     if (config.experimentalRunEvents) {
