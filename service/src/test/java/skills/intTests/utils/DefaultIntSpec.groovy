@@ -109,6 +109,8 @@ class DefaultIntSpec extends Specification {
 
     private UserUtil userUtil
 
+    Set<String> userAttrsCreated = []
+
     @PostConstruct
     def init(){
         userUtil = new UserUtil(certificateRegistry: certificateRegistry)
@@ -254,17 +256,20 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                try {
-                    UserAttrs userAttrs = new UserAttrs()
-                    userAttrs.userId = it.toLowerCase()
-                    userAttrs.userIdForDisplay = it
-                    userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
-                    userAttrs.firstName = "${it.toUpperCase()}_first"
-                    userAttrs.lastName = "${it.toUpperCase()}_last"
-                    userAttrs.userTagsLastUpdated = new Date()
-                    userAttrsRepo.save(userAttrs)
-                } catch (Exception e) {
-                    throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
+                if (!(this.userAttrsCreated.contains(it))) {
+                    try {
+                        UserAttrs userAttrs = new UserAttrs()
+                        userAttrs.userId = it.toLowerCase()
+                        userAttrs.userIdForDisplay = it
+                        userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
+                        userAttrs.firstName = "${it.toUpperCase()}_first"
+                        userAttrs.lastName = "${it.toUpperCase()}_last"
+                        userAttrs.userTagsLastUpdated = new Date()
+                        userAttrsRepo.save(userAttrs)
+                        userAttrsCreated.add(it)
+                    } catch (Exception e) {
+                        throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
+                    }
                 }
             }
 
