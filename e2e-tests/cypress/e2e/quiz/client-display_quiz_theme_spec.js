@@ -36,7 +36,9 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1?enableTheme=true');
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        cy.get('[data-cy="quizSplashScreen"]').contains('Trivia Knowledge');
+        cy.matchSnapshotImage(`quiz-splash-screen`);
     });
 });
 

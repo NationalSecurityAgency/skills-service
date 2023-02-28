@@ -256,17 +256,14 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                 .then((response) => {
                     const attemptId = response.body.id;
 
-                    const allRequests = questionAnswers.map((answer) => {
-                        return answer.answerIds.map((answerId) => {
-                            return cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
-                        });
-                    }).flat();
-                    Promise.all(allRequests)
-                        .then(() => {
-                            if (shouldComplete) {
-                                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
-                            }
-                        });
+                    questionAnswers.forEach((answer) => {
+                            answer.answerIds.forEach((answerId) => {
+                                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
+                            });
+                        })
+                    if (shouldComplete) {
+                        cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
+                    }
                 });
         });
 });
