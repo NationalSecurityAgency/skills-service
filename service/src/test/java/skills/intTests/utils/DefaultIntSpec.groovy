@@ -109,8 +109,6 @@ class DefaultIntSpec extends Specification {
 
     private UserUtil userUtil
 
-    Set<String> userAttrsCreated = []
-
     @PostConstruct
     def init(){
         userUtil = new UserUtil(certificateRegistry: certificateRegistry)
@@ -256,7 +254,7 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                if (!(this.userAttrsCreated.contains(it))) {
+                if (!(userAttrsRepo.findByUserId(it))) {
                     try {
                         UserAttrs userAttrs = new UserAttrs()
                         userAttrs.userId = it.toLowerCase()
@@ -266,7 +264,6 @@ class DefaultIntSpec extends Specification {
                         userAttrs.lastName = "${it.toUpperCase()}_last"
                         userAttrs.userTagsLastUpdated = new Date()
                         userAttrsRepo.save(userAttrs)
-                        userAttrsCreated.add(it)
                     } catch (Exception e) {
                         throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
                     }
