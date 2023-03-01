@@ -27,7 +27,7 @@ import skills.storage.model.QuizDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
 
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 @Slf4j

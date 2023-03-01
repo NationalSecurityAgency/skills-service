@@ -18,7 +18,7 @@ package skills.storage.model
 import groovy.transform.CompileStatic
 import org.springframework.data.annotation.LastModifiedDate
 
-import javax.persistence.*
+import jakarta.persistence.*
 
 @CompileStatic
 @MappedSuperclass
