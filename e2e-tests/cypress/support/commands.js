@@ -181,7 +181,7 @@ Cypress.Commands.add("resetEmail", () => {
 });
 
 Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/quiz-definitions/quiz${quizNum}/`, Object.assign({
+    cy.request('POST', `/app/quiz-definitions/quiz${quizNum}`, Object.assign({
         quizId: `quizId${quizNum}`,
         name: `This is quiz ${quizNum}`,
         type: 'Quiz',
@@ -190,7 +190,7 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
 });
 
 Cypress.Commands.add("createSurveyDef", (surveyNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/quiz-definitions/quiz${surveyNum}/`, Object.assign({
+    cy.request('POST', `/app/quiz-definitions/quiz${surveyNum}`, Object.assign({
         quizId: `quiz${surveyNum}`,
         name: `This is survey ${surveyNum}`,
         type: 'Survey',
