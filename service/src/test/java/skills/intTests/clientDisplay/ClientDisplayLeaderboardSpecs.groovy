@@ -567,7 +567,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
     private List<String> createUsers(int num){
         // it's important to remove default user since test rely on timestamps of creation
         // and default user is created at the starts of the tests
-        List<String> res = getRandomUsers(num+1).findAll { it != "skills@skills.org"}
+        List<String> res = getRandomUsers(num+1, false).findAll { it != "skills@skills.org"}
         if ( res.size() > num) {
             res = res.subList(0, num)
         }
