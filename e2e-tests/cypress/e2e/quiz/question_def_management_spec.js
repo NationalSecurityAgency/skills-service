@@ -487,11 +487,13 @@ describe('Quiz Question CRUD Tests', () => {
         // initiate via bottom btn
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="closeQuestionBtn"]').click()
+        cy.get('[data-cy="closeQuestionBtn"]').should('not.exist')
         cy.get('[data-cy="editQuestionButton_2"]').should('have.focus')
 
         // using modal X on the top right
         cy.get('[data-cy="editQuestionButton_1"]').click();
         cy.get('.modal-header [aria-label="Close"]').click()
+        cy.get('.modal-header [aria-label="Close"]').should('not.exist')
         cy.get('[data-cy="editQuestionButton_1"]').should('have.focus')
     });
 
