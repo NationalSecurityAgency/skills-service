@@ -114,7 +114,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="catalogImportStatus"]')
             .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.');
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="catalogImportStatus"]')
-            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.');
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can be self-reported via the button below.');
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="catalogImportStatus"]')
             .should('not.exist');
 
@@ -139,7 +139,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2 in This is project 2');
         cy.get('[data-cy="catalogImportStatus"]')
-            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.');
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can be self-reported via the button below.');
         cy.get('[data-cy="claimPointsBtn"]')
             .should('be.enabled');
 
