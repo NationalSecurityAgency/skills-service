@@ -51,7 +51,7 @@ limitations under the License.
         <div class="col-md-6 col-xl mb-2">
           <b-card class="h-100">
             <div class="text-uppercase text-secondary">Runtime</div>
-            <div class="text-primary font-weight-bold">{{ quizRuntime | duration }}</div>
+            <div class="text-primary font-weight-bold">{{ runInfo.started | duration(runInfo.completed) }}</div>
           </b-card>
         </div>
       </div>
@@ -72,7 +72,6 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import QuizRunQuestionCard from '@/components/quiz/runsHistory/QuizRunQuestionCard';
   import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
-  import dayjs from '@/common-components/DayJsCustomizer';
 
   export default {
     name: 'QuizRunsHistoryPage',
@@ -113,13 +112,6 @@ limitations under the License.
           return 1;
         });
         return nums.reduce((partialSum, a) => partialSum + a, 0);
-      },
-      quizRuntime() {
-        const { started, completed } = this.runInfo;
-        const startDate = dayjs(started);
-        const endDate = completed ? dayjs(completed) : dayjs();
-        const diff = endDate.diff(startDate);
-        return diff;
       },
     },
     methods: {

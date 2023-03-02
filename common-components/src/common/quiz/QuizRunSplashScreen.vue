@@ -22,7 +22,7 @@ limitations under the License.
       </div>
       <slot v-if="!quizInfo.userQuizPassed" name="aboveTitle" />
       <div class="mb-1 mt-4 h2">
-        <span class="font-weight-bold text-success">{{ quizInfo.name }}</span>
+        <span class="font-weight-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
       </div>
     </div>
 

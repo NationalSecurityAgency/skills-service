@@ -37,6 +37,7 @@ import {
 } from 'vee-validate';
 import en from 'vee-validate/dist/locale/en.json';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
+import TimeDurationFilter from '@/common-components/filter/TimeDurationFilter';
 import '@/common-components/filter/ByteFilter';
 import App from '@/App';
 import router from '@/router';
@@ -66,6 +67,7 @@ Vue.use(OverlayPlugin);
 Vue.use(FiltersPlugin);
 Vue.use(CollapsePlugin);
 Vue.use(LinkPlugin);
+Vue.use(TimeDurationFilter);
 
 localize({
   en,

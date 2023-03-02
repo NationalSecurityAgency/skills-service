@@ -73,7 +73,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(runtime)="data">
-          {{ quizRuntime(data.item) | duration }}
+          {{ data.item.started | duration(data.item.completed) }}
         </template>
 
         <template v-slot:cell(started)="data">
@@ -114,7 +114,6 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
-  import dayjs from '@/common-components/DayJsCustomizer';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
 
@@ -252,13 +251,6 @@ limitations under the License.
         // set to the first page
         this.table.options.pagination.currentPage = 1;
         this.loadData();
-      },
-      quizRuntime(quiz) {
-        const { started, completed } = quiz;
-        const startDate = dayjs(started);
-        const endDate = completed ? dayjs(completed) : dayjs();
-        const diff = endDate.diff(startDate);
-        return diff;
       },
       focusOnRefId(refId) {
         this.$nextTick(() => {

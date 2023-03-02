@@ -25,7 +25,7 @@ limitations under the License.
                 @cancelled="done">
         <template slot="splashPageTitle">
           <div class="mb-4">
-            <i class="fas fa-glass-cheers text-info" style="font-size: 1.5rem;"></i> You will earn <b-badge variant="success">
+            <i class="fas fa-glass-cheers text-info skills-theme-quiz-correct-answer" style="font-size: 1.5rem;"></i> You will earn <b-badge variant="success">
             <animated-number :num="skillInternal.pointIncrement"></animated-number></b-badge> points for
             <span class="font-weight-bold text-primary" style="font-size: 1.2rem">{{ skillInternal.skill }}</span>
             skill by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this quiz</span>.
@@ -33,7 +33,7 @@ limitations under the License.
         </template>
         <template slot="completeAboveTitle">
           <div class="mb-4">
-            <i class="fas fa-glass-cheers text-info" style="font-size: 1.5rem;"></i> Congrats!! You just earned <b-badge variant="success">
+            <i class="fas fa-glass-cheers text-info skills-theme-quiz-correct-answer" style="font-size: 1.5rem;"></i> Congrats!! You just earned <b-badge variant="success">
             <animated-number :num="skillInternal.pointIncrement"></animated-number></b-badge> points for
             <span class="font-weight-bold text-primary" style="font-size: 1.2rem">{{ skillInternal.skill }}</span>
             skill by <span v-if="isSurveySkill">completing the survey</span><span v-else>passing the test</span>.

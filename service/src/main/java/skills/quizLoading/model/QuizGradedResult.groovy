@@ -21,4 +21,6 @@ class QuizGradedResult {
     Boolean passed
     List<QuizQuestionGradedResult> gradedQuestions
     List<SkillEventResult> associatedSkillResults
+    Date started
+    Date completed
 }

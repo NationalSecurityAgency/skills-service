@@ -18,15 +18,16 @@ limitations under the License.
        v-on:keydown.space="flipSelected"
        @click="flipSelected"
        tabindex="0"
-       :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable' : !a.isGraded }"
+       :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
+       :style="styleObject"
        aria-label="Select as the correct answer">
       <div class="row no-gutters" :data-cy="`selected_${selected}`">
         <div class="col-auto">
           <b-overlay v-if="a.isGraded && a.selected !== a.isCorrect" show variant="transparent"
                      opacity="0">
             <template #overlay>
-              <i v-if="a.selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
-              <i v-else class="fa fa-check text-danger" style="font-size: 1rem;" data-cy="missedSelection"></i>
+              <i v-if="a.selected" class="fa fa-ban text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
+              <i v-else class="fa fa-check text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection"></i>
             </template>
             <span class="checkmark">
                <i :class="selectionIconObject" />
@@ -68,12 +69,34 @@ limitations under the License.
     computed: {
       selectionIconObject() {
         return {
-          'text-success': this.selected,
+          'text-success skills-theme-quiz-selected-answer': this.selected,
           'far fa-square': this.canSelectMoreThanOne && !this.selected,
           'far fa-check-square': this.canSelectMoreThanOne && this.selected,
           'far fa-circle': !this.canSelectMoreThanOne && !this.selected,
           'far fa-check-circle': !this.canSelectMoreThanOne && this.selected,
         };
+      },
+      themePrimaryColor() {
+        return this.$store.state.themeModule?.textPrimaryColor;
+      },
+      themeBackgroundColor() {
+        return this.$store.state.themeModule?.backgroundColor;
+      },
+      themeTilesBackgroundColor() {
+        return this.$store.state.themeModule?.tiles?.backgroundColor;
+      },
+      styleObject() {
+        let res = {};
+        if (this.selected) {
+          if (this.themePrimaryColor) {
+            res = { ...res, 'background-color': this.themePrimaryColor };
+          }
+          const color = this.themeTilesBackgroundColor ? this.themeTilesBackgroundColor : this.themeBackgroundColor;
+          if (color) {
+            res = { ...res, color };
+          }
+        }
+        return res;
       },
     },
     methods: {

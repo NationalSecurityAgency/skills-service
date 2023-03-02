@@ -17,19 +17,19 @@ limitations under the License.
   <b-card body-class="text-left" data-cy="quizCompletion">
     <div class="h4">
       <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-        <i class="fas fa-handshake text-info"></i> Thank you for completing the {{ quizInfo.quizType }}!
+        <i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!
       </slot>
-      <span v-else><i class="fas fa-handshake text-info"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
+      <span v-else><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
     </div>
     <div class="mb-1 mt-4 h2">
-      <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
+      <span class="font-weight-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
       <div class="h2 d-inline-block ml-2">
         <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning" data-cy="quizFailed"><i class="far fa-times-circle"></i> Failed</b-badge>
         <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success" data-cy="quizPassed"><i class="fas fa-check-double"></i> Passed</b-badge>
       </div>
     </div>
     <b-card-group deck>
-      <b-card bg-variant="light" class="text-center" data-cy="numCorrectInfoCard">
+      <b-card bg-variant="light" class="text-center skills-card-theme-border" data-cy="numCorrectInfoCard">
         <b-card-text>
           <div class="h3" data-cy="numCorrect">
             <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
@@ -40,7 +40,7 @@ limitations under the License.
           </div>
         </b-card-text>
       </b-card>
-      <b-card bg-variant="light" class="text-center" data-cy="percentCorrectInfoCard">
+      <b-card bg-variant="light" class="text-center skills-card-theme-border" data-cy="percentCorrectInfoCard">
         <b-card-text>
           <div class="h3">
             <span data-cy="percentCorrect">{{ quizResult.percentCorrect }}%</span>
@@ -51,7 +51,18 @@ limitations under the License.
         </b-card-text>
       </b-card>
 
-      <b-card v-if="!quizResult.gradedRes.passed" bg-variant="light" class="text-center" data-cy="numAttemptsInfoCard">
+      <b-card v-if="quizResult.gradedRes.passed" bg-variant="light" class="text-center skills-card-theme-border" data-cy="quizRuntime">
+        <b-card-text>
+          <div class="h3" data-cy="title">
+            {{ quizResult.gradedRes.started | duration(quizResult.gradedRes.completed) }}
+          </div>
+          <div class="text-secondary mt-2" data-cy="subTitle">
+           Time to Complete
+          </div>
+        </b-card-text>
+      </b-card>
+
+      <b-card v-if="!quizResult.gradedRes.passed" bg-variant="light" class="text-center skills-card-theme-border" data-cy="numAttemptsInfoCard">
         <b-card-text>
           <div class="h3" data-cy="title">
             <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity"></i> Attempts</span>
@@ -70,12 +81,12 @@ limitations under the License.
 
     <div v-if="!quizResult.gradedRes.passed" class="mt-4">
       <div class="my-2" v-if="numAttemptsLeft > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
-      <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
-      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
+      <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
     </div>
 
     <div v-if="quizResult.gradedRes.passed" class="mt-4">
-      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
     </div>
   </b-card>
 </template>

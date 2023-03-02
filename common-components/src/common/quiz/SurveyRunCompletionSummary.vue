@@ -22,29 +22,32 @@ limitations under the License.
     </div>
 
     <div class="mb-1 mt-4 h2">
-      <span class="font-weight-bold text-success mb-2">{{ quizInfo.name }}</span>
+      <span class="font-weight-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
     </div>
 
     <div class="row">
       <div class="col-auto">
-        <b-card class="text-center" body-class="pt-2 pb-1">
-          <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;"></i>
+        <b-card class="text-center skills-card-theme-border" body-class="pt-2 pb-1">
+          <i class="fas fa-question-circle text-info skills-theme-quiz-correct-answer" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Questions:</span>
           <span class="text-uppercase ml-1 font-weight-bold">{{ quizInfo.questions.length }}</span>
         </b-card>
       </div>
       <div class="col-auto">
-        <b-card class="text-center" body-class="pt-2 pb-1">
-          <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
+        <b-card class="text-center skills-card-theme-border" body-class="pt-2 pb-1">
+          <i class="fas fa-business-time text-info skills-theme-quiz-correct-answer" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Completed In:</span>
-          <span class="text-uppercase ml-1 font-weight-bold">1 minute</span>
+          <span class="text-uppercase ml-1 font-weight-bold">{{ quizResult.gradedRes.started | duration(quizResult.gradedRes.completed) }}</span>
         </b-card>
       </div>
       <div class="col"></div>
     </div>
 
     <div class="mt-5">
-      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold" data-cy="closeSurveyBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+      <b-button variant="outline-success"
+                @click="close"
+                class="text-uppercase font-weight-bold skills-theme-btn"
+                data-cy="closeSurveyBtn"><i class="fas fa-times-circle"></i> Close</b-button>
     </div>
   </b-card>
 </template>

@@ -362,6 +362,8 @@ class QuizRunService {
         quizAttemptRepo.save(userQuizAttempt)
 
         gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)
+        gradedResult.started = userQuizAttempt.started
+        gradedResult.completed = userQuizAttempt.completed
         return gradedResult
     }
 
