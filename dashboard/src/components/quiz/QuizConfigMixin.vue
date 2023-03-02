@@ -34,7 +34,7 @@ limitations under the License.
         return this.quizConfig && UserRolesUtil.isQuizReadOnlyRole(this.quizConfig.quizUserRole);
       },
       userQuizRole() {
-        return this.quizConfig && this.quizConfig.quizUserRole;
+        return this.$store.getters.quizConfig?.quizUserRole;
       },
     },
   };

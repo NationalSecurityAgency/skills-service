@@ -465,7 +465,8 @@ describe('Subjects Tests', () => {
         //subject 2
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
-        cy.realPress('Escape');
+        cy.get('[data-cy=subjectNameInput]').realPress('Escape');
+        cy.get('[data-cy=subjectNameInput]').should('not.exist')
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();

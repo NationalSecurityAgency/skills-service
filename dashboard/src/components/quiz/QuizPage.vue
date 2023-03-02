@@ -39,7 +39,7 @@ limitations under the License.
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </b-button>
         </b-button-group>
-        <div class="mt-2">
+        <div class="mt-2" v-if="!isLoadingQuizConfig">
           <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userQuizRole | userRole }}</span>
         </div>
       </div>
