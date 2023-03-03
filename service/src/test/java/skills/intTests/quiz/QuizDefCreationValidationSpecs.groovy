@@ -198,5 +198,6 @@ class QuizDefCreationValidationSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Not supported quiz type [Some] please select one from [Survey, Quiz]")
     }
+
 }
 

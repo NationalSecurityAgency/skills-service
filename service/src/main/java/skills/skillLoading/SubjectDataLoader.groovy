@@ -192,11 +192,11 @@ class SubjectDataLoader {
         if(projectId) {
             List<SkillsAndPoints> quizBasedSkills = skillsAndPoints.findAll({ it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz})
             if (quizBasedSkills) {
-                List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.id}
+                List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.copiedFrom ?: it.skillDef.id }
                 List<QuizToSkillDefRepo.QuizNameAndId> quizInfo = quizToSkillDefRepo.getQuizInfoSkillIdRef(skillRefIds)
                 Map<Integer, List<QuizToSkillDefRepo.QuizNameAndId>> bySkillRefId = quizInfo.groupBy() { it.getSkillRefId() }
                 quizBasedSkills.each {
-                    List<QuizToSkillDefRepo.QuizNameAndId> found = bySkillRefId[it.skillDef.id]
+                    List<QuizToSkillDefRepo.QuizNameAndId> found = bySkillRefId[it.skillDef.copiedFrom ?: it.skillDef.id]
                     if (found) {
                         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = found.first()
                         it.quizId = quizNameAndId.quizId

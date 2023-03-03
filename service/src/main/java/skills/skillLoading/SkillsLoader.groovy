@@ -514,7 +514,7 @@ class SkillsLoader {
         }
 
         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz ?
-            quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDef.id) : null
+            quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDef.copiedFrom ?: skillDef.id) : null
 
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(crossProjectId ?: projectId, PROP_HELP_URL_ROOT)
         String copiedFromProjectName = skillDef.copiedFromProjectId ? projDefRepo.getProjectName(skillDef.copiedFromProjectId).getProjectName() : null

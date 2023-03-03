@@ -60,13 +60,13 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     @Query('''select q.quizId as quizId, 
                     max(q.name) as quizName,
                     max(q.type) as quizType,
-                    max(qToS.skillRefId) as skillRefId,
+                    qToS.skillRefId as skillRefId,
                     count(question.id) as numQuestions
             from QuizToSkillDef qToS, QuizDef q
              left join QuizQuestionDef question on (q.quizId = question.quizId) 
             where qToS.skillRefId in ?1
                 and q.id = qToS.quizRefId
-            group by q.quizId''')
+            group by q.quizId, qToS.skillRefId''')
     List<QuizNameAndId> getQuizInfoSkillIdRef(List<Integer> skillIdRef)
 
     void deleteBySkillRefId(Integer skillRefId)

@@ -39,6 +39,7 @@ class QuizToSkillService {
 
     @Transactional
     void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId) {
+        assert quizId
         Integer skillRef = savedSkill.id
         QuizDef quizDef = getQuizDef(quizId)
 
@@ -52,6 +53,12 @@ class QuizToSkillService {
         if (!quizNameAndId || quizIdUpdated) {
             quizToSkillDefRepo.save(new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef))
         }
+    }
+
+    @Transactional
+    void removeQuizToSkillAssignment(Integer skillRef) {
+        quizToSkillDefRepo.deleteBySkillRefId(skillRef)
+        quizToSkillDefRepo.flush()
     }
 
     QuizToSkillDefRepo.QuizNameAndId getQuizIdForSkillRefId(Integer skillRefId) {

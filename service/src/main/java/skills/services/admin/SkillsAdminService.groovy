@@ -175,6 +175,7 @@ class SkillsAdminService {
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
         final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
+        final boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest;
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
@@ -228,6 +229,10 @@ class SkillsAdminService {
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
             }
 
+            if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
+                quizToSkillService.removeQuizToSkillAssignment(skillDefinition.id)
+            }
+
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
 
             skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
@@ -273,7 +278,7 @@ class SkillsAdminService {
                     justificationRequired: justificationRequired,
             )
 
-            if (skillRequest instanceof SkillImportRequest) {
+            if (isSkillCatalogImport) {
                 skillDefinition.copiedFrom = skillRequest.copiedFrom
                 skillDefinition.readOnly = skillRequest.readOnly
                 skillDefinition.copiedFromProjectId = skillRequest.copiedFromProjectId
@@ -293,7 +298,7 @@ class SkillsAdminService {
             skillsGroupSkillDef = savedSkill
         }
 
-        if (selfReportingType == SkillDef.SelfReportingType.Quiz) {
+        if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
             quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId)
         }
 
@@ -695,7 +700,7 @@ class SkillsAdminService {
             res.groupId = skillsGroup.skillId
         }
         if (skillDef.selfReportingType == SelfReportingType.Quiz) {
-            QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.id)
+            QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.copiedFrom ?: skillDef.id)
             res.quizId = quizIdAndName.getQuizId()
             res.quizName = quizIdAndName.getQuizName()
             res.quizType = quizIdAndName.getQuizType()

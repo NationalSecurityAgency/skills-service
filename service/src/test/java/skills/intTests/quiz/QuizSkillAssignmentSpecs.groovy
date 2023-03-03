@@ -17,18 +17,28 @@ package skills.intTests.quiz
 
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.quizLoading.QuizSettings
 import skills.storage.model.QuizDefParent
+import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
+import skills.storage.repos.QuizDefRepo
+import skills.storage.repos.QuizToSkillDefRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class QuizSkillAssignmentSpecs extends DefaultIntSpec {
+
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
+    QuizDefRepo quizDefRepo
 
     def "assign quiz to skill"() {
         def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
@@ -159,24 +169,28 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz)
 
         def skill = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs = quizToSkillDefRepo.findAll()
         when:
         skillWithQuiz.quizId = null
         skillWithQuiz.selfReportingType = null
 
         skillsService.createSkill(skillWithQuiz)
         def skill1 = skillsService.getSkill(skillWithQuiz)
-
+        List<QuizToSkillDef> quizToSkillDefs_t1 = quizToSkillDefRepo.findAll()
         then:
         skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skill.quizId == quiz.body.quizId
         skill.quizName == quiz.body.name
+        quizToSkillDefs
+        quizToSkillDefs.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill.skillId]
 
         !skill1.selfReportingType
         !skill1.quizId
         !skill1.quizName
+        !quizToSkillDefs_t1
     }
 
-    def "quiz assignment is changed to another self report type"() {
+    def "quiz assignment is changed to Approval self-report type"() {
         def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
 
         def proj = createProject(1)
@@ -190,22 +204,136 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz)
 
         def skill = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs = quizToSkillDefRepo.findAll()
         when:
         skillWithQuiz.quizId = null
         skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Approval
-
         skillsService.createSkill(skillWithQuiz)
         def skill1 = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs_t1 = quizToSkillDefRepo.findAll()
 
         then:
         skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
         skill.quizId == quiz.body.quizId
         skill.quizName == quiz.body.name
+        quizToSkillDefs
+        quizToSkillDefs.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill.skillId]
 
         skill1.selfReportingType  == SkillDef.SelfReportingType.Approval.toString()
         !skill1.quizId
         !skill1.quizName
+        !quizToSkillDefs_t1
     }
 
+    def "quiz assignment is changed to Honor self-report type"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs = quizToSkillDefRepo.findAll()
+        when:
+        skillWithQuiz.quizId = null
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.HonorSystem
+
+        skillsService.createSkill(skillWithQuiz)
+        def skill1 = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs_t1 = quizToSkillDefRepo.findAll()
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill.quizId == quiz.body.quizId
+        skill.quizName == quiz.body.name
+        quizToSkillDefs
+        quizToSkillDefs.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill.skillId]
+
+        skill1.selfReportingType  == SkillDef.SelfReportingType.HonorSystem.toString()
+        !skill1.quizId
+        !skill1.quizName
+        !quizToSkillDefs_t1
+    }
+
+    def "quiz assignment is changed to survey"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        def survey = skillsService.createQuizDef(QuizDefFactory.createQuizSurvey(2))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs = quizToSkillDefRepo.findAll()
+        when:
+        skillWithQuiz.quizId = survey.body.quizId
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+
+        skillsService.createSkill(skillWithQuiz)
+        def skill1 = skillsService.getSkill(skillWithQuiz)
+        List<QuizToSkillDef> quizToSkillDefs_t1 = quizToSkillDefRepo.findAll()
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()
+        skill.quizId == quiz.body.quizId
+        skill.quizName == quiz.body.name
+        quizToSkillDefs
+        quizToSkillDefs.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill.skillId]
+        quizToSkillDefs.collect { quizDefRepo.findById(it.quizRefId).get().quizId } == [quiz.body.quizId]
+
+        skill1.selfReportingType  == SkillDef.SelfReportingType.Quiz.toString()
+        skill1.quizId == survey.body.quizId
+        skill1.quizName == survey.body.name
+        quizToSkillDefs_t1.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill.skillId]
+        quizToSkillDefs_t1.collect { quizDefRepo.findById(it.quizRefId).get().quizId } == [survey.body.quizId]
+    }
+
+    def "when associating to a skill if quizId is set then selfReportType must equal 'Quiz'"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        when:
+        skillWithQuiz.selfReportingType = null
+        skillsService.createSkill(skillWithQuiz)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("When quizId is provided then selfReportingType must equal 'Quiz'")
+    }
+
+    def "when associating to a skill if selfReportType='Quiz' then quizId must be set"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+
+        when:
+        skillWithQuiz.quizId = null
+        skillsService.createSkill(skillWithQuiz)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("When selfReportingType=Quiz then quizId param must not be blank")
+    }
 }
 
