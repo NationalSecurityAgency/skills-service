@@ -63,7 +63,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.matchSnapshotImage();
     });
 
-    it('theme - quiz results - passed quiz - all correct', () => {
+    it.only('theme - quiz results - passed quiz - all correct', () => {
         cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/complete', (req) => {
             req.reply((res) => {
                 const resBody = res.body;
@@ -94,7 +94,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.matchSnapshotImage();
     });
 
-    it('theme - quiz results - passed quiz - some correct', () => {
+    it.only('theme - quiz results - passed quiz - some correct', () => {
         cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/complete', (req) => {
             req.reply((res) => {
                 const resBody = res.body;

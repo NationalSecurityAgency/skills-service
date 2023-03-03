@@ -643,7 +643,18 @@ limitations under the License.
                 pointIncrement: parseInt(this.skillInternal.pointIncrement, 10),
                 numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
               };
-              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
+              const isQuiz = this.skillInternal.selfReportingType === 'Quiz';
+              const quizId = isQuiz ? this.skillInternal.quizId : null;
+              const quizName = isQuiz ? this.skillInternal.quizName : null;
+              const quizType = isQuiz ? this.skillInternal.quizType : null;
+              this.$emit('skill-saved', {
+                isEdit: this.isEdit,
+                ...this.skillInternal,
+                groupId: this.groupId,
+                quizId,
+                quizName,
+                quizType,
+              });
               this.publishHidden({ saved: true });
             }
           });
