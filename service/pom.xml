@@ -372,7 +372,6 @@
                             <directory>${project.basedir}/src/main/java</directory>
                             <includes>
                                 <include>**/*.groovy</include>
-<!--                                <include>**/*.java</include>-->
                             </includes>
                         </source>
                     </sources>
@@ -381,7 +380,6 @@
                             <directory>${project.basedir}/src/test/java</directory>
                             <includes>
                                 <include>**/*.groovy</include>
-<!--                                <include>**/*.java</include>-->
                             </includes>
                         </testSource>
                     </testSources>
