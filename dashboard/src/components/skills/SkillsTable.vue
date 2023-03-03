@@ -312,10 +312,10 @@ limitations under the License.
             <div>
               {{data.item.quizType}}-Based Validation
             </div>
-            <div class="text-secondary">
+            <div v-if="!data.item.isCatalogSkill" class="text-secondary">
               via
             </div>
-            <div>
+            <div v-if="!data.item.isCatalogSkill">
               <router-link
                 :to="{ name:'Questions', params: { quizId: data.item.quizId } }"
                 tag="a">

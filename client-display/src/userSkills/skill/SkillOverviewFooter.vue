@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <div v-if="isQuizOrSurveySkill" class="mb-2 alert alert-info">
+    <div v-if="isQuizOrSurveySkill && selfReport.available" class="mb-2 alert alert-info">
       <div class="row">
         <div class="col font-italic pt-1" data-cy="quizAlert">
           <i class="fas fa-user-check font-size-2" aria-hidden="true"></i>

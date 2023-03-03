@@ -114,6 +114,58 @@ class QuizDefAuthSpecs extends DefaultIntSpec {
         }
     }
 
+    def "if quiz is assigned to skill, although any project admin in that project gets a read-only view of the quiz, catalog imported skills do not get the same treatment"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def questionDefs = skillsService.getQuizQuestionDefs(quiz1.quizId)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skillsService.createSkills(skills)
+        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+
+        SkillsService otherUser = createService(user)
+        def proj2 = createProject(2)
+        def proj2_subj = createSubject(2, 1)
+        otherUser.createProjectAndSubjectAndSkills(proj2, proj2_subj, [])
+
+        when:
+        otherUser.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, [
+                [projectId: proj.projectId, skillId: skills[0].skillId],
+                [projectId: proj.projectId, skillId: skills[1].skillId],
+                [projectId: proj.projectId, skillId: skills[2].skillId],
+        ])
+        otherUser.finalizeSkillsImportFromCatalog(proj2.projectId)
+        then:
+
+        validateForbidden { otherUser.getQuizDef(quiz1.quizId) }
+        validateForbidden { otherUser.getQuizQuestionDefs(quiz1.quizId) }
+        validateForbidden { otherUser.getQuizQuestionDef(quiz1.quizId, questionDefs.questions[0].id) }
+        validateForbidden { otherUser.getQuizSettings(quiz1.quizId) }
+        validateForbidden { otherUser.getQuizMetrics(quiz1.quizId) }
+        validateForbidden { otherUser.getQuizDefSummary(quiz1.quizId) }
+
+        validateForbidden { otherUser.removeQuizDef(quiz1.quizId) }
+        validateForbidden { otherUser.createQuizDef(quiz1, quiz1.quizId) }
+        validateForbidden { otherUser.createQuizQuestionDefs(questions) }
+        validateForbidden { otherUser.deleteQuizQuestionDef(quiz1.quizId, questionDefs.questions[0].id) }
+        validateForbidden {
+            otherUser.saveQuizSettings(quiz1.quizId, [
+                    [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '2'],
+            ])
+        }
+    }
+
     private boolean validateForbidden(Closure c) {
         try {
             c.call()

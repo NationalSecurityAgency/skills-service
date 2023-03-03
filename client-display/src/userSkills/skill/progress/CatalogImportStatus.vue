@@ -18,7 +18,7 @@ limitations under the License.
     <i class="fas fa-exclamation-circle"></i>
     <span v-if="skill.selfReporting && skill.selfReporting.enabled">
       This {{ skillDisplayName.toLowerCase() }} is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this {{ projectDisplayName.toLowerCase() }}!
-      This {{ skillDisplayName.toLowerCase() }} can be self-reported via the button below.
+      <span v-if="!skill.achievedOn">This {{ skillDisplayName.toLowerCase() }} can be self-reported via the button below.</span>
     </span>
     <span v-else>
       This {{ skillDisplayName.toLowerCase() }} is originally defined in <span class="font-weight-bold font-italic">{{ skill.copiedFromProjectName }}</span> and re-used in this {{ projectDisplayName.toLowerCase() }}!
