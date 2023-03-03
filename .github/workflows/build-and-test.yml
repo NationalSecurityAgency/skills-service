@@ -58,7 +58,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '18' # The JDK version to make available on the path.
+          java-version: '19' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
@@ -126,11 +126,11 @@ jobs:
     - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: '18' # The JDK version to make available on the path.
+        java-version: '19' # The JDK version to make available on the path.
 
     - uses: s4u/setup-maven-action@v1.6.0
       with:
-        java-version: '18' # The JDK version to make available on the path.
+        java-version: '19' # The JDK version to make available on the path.
 
     - name: Print Versions
       run: |
@@ -220,7 +220,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '18' # The JDK version to make available on the path.
+          java-version: '19' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
