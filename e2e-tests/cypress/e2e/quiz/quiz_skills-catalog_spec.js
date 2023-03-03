@@ -118,7 +118,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.get('[data-cy="quizAlert"]').should('not.exist')
     });
 
-    it.only('display imported quiz-based skills on subject page', function () {
+    it('display imported quiz-based skills on subject page', function () {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
 
