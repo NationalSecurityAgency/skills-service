@@ -62,7 +62,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: '18' # The JDK version to make available on the path.
+          java-version: '19' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |

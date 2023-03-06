@@ -17,7 +17,7 @@
         <!--suppress UnresolvedMavenProperty -->
         <nexusServer>${nexus.url}</nexusServer>
         <main.basedir>${project.basedir}</main.basedir>
-        <java.version>17</java.version>
+        <java.version>19</java.version>
 
         <!-- can NOT name it groovy.version as spock's dependency picks it up-->
         <groovy.version>4.0.7</groovy.version>

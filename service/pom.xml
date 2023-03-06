@@ -91,23 +91,19 @@
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
-<!--            <version>${groovy.version}</version>-->
         </dependency>
 
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-datetime</artifactId>
-<!--            <version>${groovy.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-dateutil</artifactId>
-<!--            <version>${groovy.version}</version>-->
         </dependency>
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy-json</artifactId>
-<!--            <version>${groovy.version}</version>-->
         </dependency>
 
         <dependency>
@@ -209,13 +205,6 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.apache.groovy</groupId>-->
-<!--            <artifactId>groovy</artifactId>-->
-<!--            <version>${groovy.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>dev.skilltreeplatform</groupId>
             <artifactId>call-stack-profiler</artifactId>
@@ -299,11 +288,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.groovy</groupId>
-            <artifactId>groovy</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.owasp.encoder</groupId>
             <artifactId>encoder</artifactId>
             <version>${owasp.encoder.version}</version>
@@ -381,14 +365,13 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.13.1</version>
+                <version>2.1.0</version>
                 <configuration>
                     <sources>
                         <source>
                             <directory>${project.basedir}/src/main/java</directory>
                             <includes>
                                 <include>**/*.groovy</include>
-<!--                                <include>**/*.java</include>-->
                             </includes>
                         </source>
                     </sources>
@@ -397,7 +380,6 @@
                             <directory>${project.basedir}/src/test/java</directory>
                             <includes>
                                 <include>**/*.groovy</include>
-<!--                                <include>**/*.java</include>-->
                             </includes>
                         </testSource>
                     </testSources>

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:18.0.2.1_1-jdk-jammy
+FROM eclipse-temurin:19-jdk-jammy
 
 # install netcat so start script can use nc command to wait for DB to come up
 RUN apt-get update && apt-get install -y \
