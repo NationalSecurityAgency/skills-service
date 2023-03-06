@@ -99,37 +99,15 @@ class QuizDefService {
 
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
-        boolean isRoot = userInfoService.isCurrentUserASuperDuperUser()
-
         UserInfo userInfo = userInfoService.currentUser
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
         List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
-            res.addAll(fromDb.collect {convert(it) })
+            fromDb = fromDb.sort { a, b -> b.created <=> a.created }
+            res.addAll(fromDb.collect { convert(it) })
         }
-
-
-//        Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
-//        List<ProjectResult> finalRes
-//        if (isRoot) {
-//            finalRes = loadProjectsForRoot(projectIdSortOrder, userId)
-//        } else {
-//            // sql join with UserRoles and there is 1-many relationship that needs to be normalized
-//            List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)
-//            finalRes = projects?.unique({ it.projectId })?.collect({
-//                ProjectResult res = convert(it, projectIdSortOrder)
-//                return res
-//            })
-//        }
-//
-//        finalRes.sort() { it.displayOrder }
-//
-//        if (finalRes) {
-//            finalRes.first().isFirst = true
-//            finalRes.last().isLast = true
-
         return res
     }
 
