@@ -371,6 +371,39 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.countSkillsForQuiz(survey2.body.quizId) == 3
         skillsService.countSkillsForQuiz(quiz3.body.quizId) == 2
     }
+
+    def "skill with quiz assignment is removed"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+        skillsService.createSkill(skillWithQuiz)
+
+        def skill2WithQuiz = createSkill(1, 1, 2, 1, 1, 480, 200)
+        skill2WithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skill2WithQuiz.quizId = quiz.body.quizId
+        skillsService.createSkill(skill2WithQuiz)
+        when:
+        List<SkillDef> quizToSkillDefsSkills = quizToSkillDefRepo.findAll().collect { skillDefRepo.findById(it.skillRefId).get() }
+        def skills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        skillsService.deleteSkill(skillWithQuiz)
+        def skills_t1 = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        List<QuizToSkillDef> quizToSkillDefs_t1 = quizToSkillDefRepo.findAll()
+        then:
+        skills.quizId == [quiz.body.quizId, quiz.body.quizId]
+        skills_t1.quizId == [quiz.body.quizId]
+
+        quizToSkillDefsSkills.skillId == [skillWithQuiz.skillId, skill2WithQuiz.skillId].sort()
+
+        quizToSkillDefs_t1.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill2WithQuiz.skillId]
+        quizToSkillDefs_t1.collect { quizDefRepo.findById(it.quizRefId).get().quizId } == [quiz.body.quizId]
+    }
 }
+
 
 
