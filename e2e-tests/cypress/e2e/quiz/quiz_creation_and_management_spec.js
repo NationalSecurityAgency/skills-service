@@ -432,5 +432,20 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="closeRemovalSafetyCheck"]').click()
         cy.get('[data-cy="deleteQuizButton_quiz1"]').should('have.focus')
     });
+
+    it('not allowed to delete quiz if associated to skills', function () {
+        cy.createQuizDef(1);
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="deleteQuizButton_quiz1"]').click()
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('Cannot remove the quiz since it is currently assigned to 1 skill')
+        cy.get('[data-cy="currentValidationText"]').should('not.exist')
+        cy.get('[data-cy="removeButton"]').should('not.exist')
+        cy.get('[data-cy="closeRemovalSafetyCheck"]').should('be.enabled')
+    });
 });
 

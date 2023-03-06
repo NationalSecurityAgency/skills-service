@@ -97,6 +97,9 @@ class QuizDefService {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         UserInfo userInfo = userInfoService.currentUser
@@ -630,8 +633,18 @@ class QuizDefService {
 
     @Transactional()
     void deleteQuiz(String quizId) {
-        int numRemoved = quizDefRepo.deleteByQuizIdIgnoreCase(quizId)
+        QuizDef quizDef = findQuizDef(quizId)
+        if (quizToSkillDefRepo.countByQuizRefId(quizDef.id) > 0) {
+            throw new SkillQuizException("Not allowed to remove quiz when assigned to at least 1 skill", quizDef.quizId, ErrorCode.InternalError)
+        }
+        int numRemoved = quizDefRepo.deleteByQuizIdIgnoreCase(quizDef.quizId)
         log.debug("Deleted project with id [{}]. Removed [{}] record", quizId, numRemoved)
+    }
+
+    @Transactional()
+    Integer countNumSkillsQuizAssignedTo(String quizId) {
+        QuizDef quizDef = findQuizDef(quizId)
+        return quizToSkillDefRepo.countByQuizRefId(quizDef.id);
     }
 
     @Transactional(readOnly = true)

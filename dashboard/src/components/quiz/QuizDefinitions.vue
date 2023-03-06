@@ -13,21 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/*
-Copyright 2020 SkillTree
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-https://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 <template>
   <div style="min-height: 20rem;">
     <skills-spinner :is-loading="loading" class="my-5"/>
@@ -115,14 +100,23 @@ limitations under the License.
                  @quiz-saved="updateQuizDef"
                  @hidden="focusOnRefId(`edit_${$event.quizId}`)"/>
       <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
+                          :removal-not-available="deleteQuizInfo.disableDelete"
                           @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
-        <p>
-          This will remove <span
-          class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
-        </p>
-        <div>
-          Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
-          as well as users' achievements, stats and metrics. Proceed with caution!
+        <skills-spinner :is-loading="deleteQuizInfo.loadingDeleteCheck" class="my-4"/>
+        <div v-if="!deleteQuizInfo.loadingDeleteCheck">
+          <div v-if="deleteQuizInfo.disableDelete">
+            Cannot remove the quiz since it is currently assigned to <b-badge>{{ deleteQuizInfo.numSkillsAssignedTo }}</b-badge> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
+          </div>
+          <div v-if="!deleteQuizInfo.disableDelete">
+            <p>
+              This will remove <span
+              class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
+            </p>
+            <div>
+              Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
+              as well as users' achievements, stats and metrics. Proceed with caution!
+            </div>
+          </div>
         </div>
       </removal-validation>
   </div>
@@ -192,6 +186,9 @@ limitations under the License.
         deleteQuizInfo: {
           showDialog: false,
           quizDef: {},
+          disableDelete: true,
+          numSkillsAssignedTo: 0,
+          loadingDeleteCheck: true,
         },
         editQuizInfo: {
           showDialog: false,
@@ -285,6 +282,14 @@ limitations under the License.
       showDeleteWarningModal(quizDef) {
         this.deleteQuizInfo.quizDef = quizDef;
         this.deleteQuizInfo.showDialog = true;
+        this.deleteQuizInfo.loadingDeleteCheck = true;
+        this.deleteQuizInfo.disableDelete = true;
+        QuizService.countNumSkillsQuizAssignedTo(quizDef.quizId)
+          .then((res) => {
+            this.deleteQuizInfo.numSkillsAssignedTo = res;
+            this.deleteQuizInfo.disableDelete = res > 0;
+            this.deleteQuizInfo.loadingDeleteCheck = false;
+          });
       },
       deleteQuiz() {
         this.options.busy = true;

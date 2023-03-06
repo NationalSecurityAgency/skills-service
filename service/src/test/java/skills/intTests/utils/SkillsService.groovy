@@ -1595,6 +1595,9 @@ class SkillsService {
     def getQuizDef(String quizId) {
         wsHelper.adminGet(getQuizDefUrl(quizId))
     }
+    def countSkillsForQuiz(String quizId) {
+        wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills-count")
+    }
     def getQuizDefSummary(String quizId) {
         wsHelper.adminGet("${getQuizDefUrl(quizId)}/summary")
     }

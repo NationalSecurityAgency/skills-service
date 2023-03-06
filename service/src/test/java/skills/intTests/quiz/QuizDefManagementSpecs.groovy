@@ -20,7 +20,11 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
-import skills.storage.model.QuizDefParent
+import skills.storage.model.SkillDef
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
 class QuizDefManagementSpecs extends DefaultIntSpec {
@@ -73,6 +77,26 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         then:
         quizDefs.quizId == [quiz2.quizId, quiz1.quizId]
         quizDefsAfter.quizId == [quiz2.quizId]
+    }
+
+    def "removing quiz definition is not allowed if it's associated to a skill"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createSkill(skillWithQuiz)
+
+        when:
+        skillsService.removeQuizDef(quiz.quizId)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Not allowed to remove quiz when assigned to at least 1 skill")
     }
 
     def "update quiz definition name and description"() {

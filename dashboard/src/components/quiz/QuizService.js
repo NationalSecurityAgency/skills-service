@@ -34,6 +34,10 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}`)
       .then((response) => response.data);
   },
+  countNumSkillsQuizAssignedTo(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/skills-count`)
+      .then((response) => response.data);
+  },
   getQuizDefSummary(quizId) {
     return axios.get(`/admin/quiz-definitions/${quizId}/summary`)
       .then((response) => response.data);

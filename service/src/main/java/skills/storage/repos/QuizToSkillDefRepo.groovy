@@ -71,6 +71,8 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     void deleteBySkillRefId(Integer skillRefId)
 
+    Integer countByQuizRefId(Integer quizRefId)
+
     @Query('''select count(quiz) > 0
             from QuizToSkillDef qToS, QuizDef  quiz, SkillDef  skill
             where quiz.id = qToS.quizRefId

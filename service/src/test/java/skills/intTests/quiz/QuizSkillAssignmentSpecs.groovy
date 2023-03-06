@@ -335,5 +335,42 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("When selfReportingType=Quiz then quizId param must not be blank")
     }
+
+    def "count num of skills quiz is assigned to"() {
+        Closure associateQuizToSkill = { Integer projNum, Integer skillNum, String quizId ->
+            def skillWithQuiz = createSkill(projNum, 1, skillNum, 1, 1, 480, 200)
+            skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+            skillWithQuiz.quizId = quizId
+            return skillWithQuiz
+        }
+
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        def survey2 = skillsService.createQuizDef(QuizDefFactory.createQuizSurvey(2))
+        def quiz3 = skillsService.createQuizDef(QuizDefFactory.createQuiz(3))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+
+        when:
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [
+                associateQuizToSkill.call(1, 1, quiz.body.quizId),
+                associateQuizToSkill.call(1, 2, survey2.body.quizId),
+                associateQuizToSkill.call(1, 3, quiz3.body.quizId),
+        ])
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [
+                associateQuizToSkill.call(2, 1, survey2.body.quizId),
+                associateQuizToSkill.call(2, 2, quiz3.body.quizId),
+                associateQuizToSkill.call(2, 3, survey2.body.quizId),
+        ])
+
+        then:
+        skillsService.countSkillsForQuiz(quiz.body.quizId) == 1
+        skillsService.countSkillsForQuiz(survey2.body.quizId) == 3
+        skillsService.countSkillsForQuiz(quiz3.body.quizId) == 2
+    }
 }
+
 
