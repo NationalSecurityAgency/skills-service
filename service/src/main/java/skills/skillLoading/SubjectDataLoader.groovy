@@ -190,7 +190,10 @@ class SubjectDataLoader {
     @Profile
     private List<SkillsAndPoints> handleSkillQuizInfo(String projectId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
-            List<SkillsAndPoints> quizBasedSkills = skillsAndPoints.findAll({ it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz})
+            List<SkillsAndPoints> allSkillAndPoints = (List<SkillsAndPoints>)skillsAndPoints
+                    .collect { SkillsAndPoints skAndPts -> (skAndPts.skillDef.type == SkillDef.ContainerType.SkillsGroup) ? skAndPts.children : skAndPts }
+                    .flatten()
+            List<SkillsAndPoints> quizBasedSkills = allSkillAndPoints.findAll { it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz}
             if (quizBasedSkills) {
                 List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.copiedFrom ?: it.skillDef.id }
                 List<QuizToSkillDefRepo.QuizNameAndId> quizInfo = quizToSkillDefRepo.getQuizInfoSkillIdRef(skillRefIds)

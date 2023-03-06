@@ -71,7 +71,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         skillsService.removeQuizDef(quiz1.quizId)
         def quizDefsAfter = skillsService.getQuizDefs()
         then:
-        quizDefs.quizId == [quiz1.quizId, quiz2.quizId]
+        quizDefs.quizId == [quiz2.quizId, quiz1.quizId]
         quizDefsAfter.quizId == [quiz2.quizId]
     }
 
@@ -90,11 +90,11 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         def quizDefsAfter = skillsService.getQuizDefs()
 
         then:
-        quizDefs.quizId == [quiz1.quizId, quiz2.quizId]
-        quizDefs.name == [quiz1.name, originalQuiz2Name]
+        quizDefs.quizId == [quiz2.quizId, quiz1.quizId]
+        quizDefs.name == [originalQuiz2Name, quiz1.name]
 
-        quizDefsAfter.quizId == [quiz1.quizId, quiz2.quizId]
-        quizDefsAfter.name == [quiz1.name, "Cool New Name"]
+        quizDefsAfter.quizId == [quiz2.quizId, quiz1.quizId]
+        quizDefsAfter.name == ["Cool New Name", quiz1.name]
     }
 
     def "update quiz definition id"() {
@@ -110,8 +110,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz2, originalQuizId)
         def quizDefsAfter = skillsService.getQuizDefs()
         then:
-        quizDefs.quizId == [quiz1.quizId, originalQuizId]
-        quizDefsAfter.quizId == [quiz1.quizId, "newid"]
+        quizDefs.quizId == [originalQuizId, quiz1.quizId]
+        quizDefsAfter.quizId == ["newid", quiz1.quizId]
     }
 
     def "quiz id exist"() {

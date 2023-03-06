@@ -129,6 +129,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFromProjectId as copiedFromProjectId,
         subj1.skillId as subjectSkillId,
         pd.name as copiedFromProjectName,
+        qDef.quizId as quizId,
+        qDef.type as quizType,
+        qDef.name as quizName,
         case when es is not null then true else false end as sharedToCatalog
     from SkillRelDef srd
         join SkillDef sd1 on sd1.id = srd.parent.id
@@ -137,6 +140,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         join SkillRelDef srd2 on subj1.id = srd2.parent.id and sd2.id = srd2.child.id 
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
+        left join QuizToSkillDef qToSkill on qToSkill.skillRefId = (case when sd2.copiedFrom is not null then sd2.copiedFrom else sd2.id end)
+        left join QuizDef qDef on qDef.id = qToSkill.quizRefId
     where sd1.projectId=?1 and sd1.skillId=?2 and srd.type=?3 and subj1.type='Subject' and subj1.projectId=?1''')
     List<SkillDefPartial> getChildrenPartial(String projectId, String parentSkillId, SkillRelDef.RelationshipType type)
 
