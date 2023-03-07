@@ -41,6 +41,7 @@ import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserRepo
+import spock.lang.IgnoreIf
 
 import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
@@ -85,7 +86,6 @@ class WebsocketSpecs extends DefaultIntSpec {
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
-        boolean skillsAdded = false
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults)
 
         when:
@@ -96,14 +96,10 @@ class WebsocketSpecs extends DefaultIntSpec {
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
-        skillsAdded = true
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
+
         then:
-        interaction {
-            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
-                validateResults(subjSummaryRes, wsResults)
-            }
-        }
+        validateResults(subjSummaryRes, wsResults)
     }
 
     def "Non-notified badge achievements are notified when user connects to websocket" () {
@@ -126,7 +122,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
         wsResults.find{it.skillId=='badge1'}.success
@@ -170,8 +166,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
         CountDownLatch messagesReceived2 = setupWebsocketConnection(wsResults2, false, false, 1, 'skills2@skills.org')
-        messagesReceived.await(45, TimeUnit.SECONDS)
-        messagesReceived2.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
+        messagesReceived2.await(5, TimeUnit.SECONDS)
 
         then:
         wsResults
@@ -206,7 +202,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -233,7 +229,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
         when:
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, false, false, 1, 'skills@skills.org')
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
         wsResults[0].success
@@ -245,11 +241,11 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults[0].completed?.find {it.type == CompletionItem.CompletionItemType.Overall && it.level == 3 }
     }
 
+   @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
    def "achieve subject's level - validate via xhr streaming"(){
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
-        boolean skillsAdded = false
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true)
 
         when:
@@ -259,22 +255,17 @@ class WebsocketSpecs extends DefaultIntSpec {
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
-        skillsAdded = true
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
-        interaction {
-            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
-                validateResults(subjSummaryRes, wsResults)
-            }
-        }
+        validateResults(subjSummaryRes, wsResults)
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "achieve subject's level - validate via xhr polling"(){
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
-        boolean skillsAdded = false
         CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true)
 
         when:
@@ -284,15 +275,10 @@ class WebsocketSpecs extends DefaultIntSpec {
             addSkillRes << skillsService.addSkill([projectId: projId, skillId: subj1.get(it).skillId], sampleUserIds.get(0), dates.get(it))
             subjSummaryRes << skillsService.getSkillSummary(sampleUserIds.get(0), projId, subj1.get(it).subjectId)
         }
-        skillsAdded = true
-        messagesReceived.await(45, TimeUnit.SECONDS)
+        messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
-        interaction {
-            if (skillsAdded) { // interaction closure seemed to be getting called before the "when:" block
-                validateResults(subjSummaryRes, wsResults)
-            }
-        }
+        validateResults(subjSummaryRes, wsResults)
     }
 
 
@@ -340,74 +326,77 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
+        StompHeaders connectHeaders = new StompHeaders()
         if(!certificateRegistry) {
             String secret = skillsService.getClientSecret(projId)
             skillsService.setProxyCredentials(projId, secret)
             String token = skillsService.wsHelper.getTokenForUser(userId)
-            headers.add('Authorization', "Bearer ${token}")
+            connectHeaders.add('Authorization', "Bearer ${token}")
         }
         String protocol = xhr ? 'http' : 'ws'
         if (certificateRegistry) {
             protocol+="s"
         }
-        stompSession = stompClient.connect("${protocol}://localhost:${localPort}/skills-websocket", headers, sessionHandler).get()
+        stompSession = stompClient.connectAsync("${protocol}://localhost:${localPort}/skills-websocket", headers, connectHeaders, sessionHandler).get()
         return messagesReceived
     }
 
-    private validateResults(List subjSummaryRes, List<SkillEventResult> wsResults) {
+    private boolean validateResults(List subjSummaryRes, List<SkillEventResult> wsResults) {
+        assert wsResults && wsResults.size() == 5
         wsResults.sort {it.skillId}
         wsResults.each {
             assert it.skillApplied
             assert it.explanation == "Skill event was applied"
         }
-        !wsResults.get(0).completed
-        wsResults.get(0).skillId == "${subj1.get(0).skillId}"
-        wsResults.get(0).name == "${subj1.get(0).name}"
-        wsResults.get(0).pointsEarned == 10
-        subjSummaryRes.get(0).skillsLevel == 0
-        subjSummaryRes.get(0).points == 10
-        subjSummaryRes.get(0).todaysPoints == 0
-        subjSummaryRes.get(0).levelPoints == 10
+        assert !wsResults.get(0).completed
+        assert wsResults.get(0).skillId == "${subj1.get(0).skillId}"
+        assert wsResults.get(0).name == "${subj1.get(0).name}"
+        assert wsResults.get(0).pointsEarned == 10
+        assert subjSummaryRes.get(0).skillsLevel == 0
+        assert subjSummaryRes.get(0).points == 10
+        assert subjSummaryRes.get(0).todaysPoints == 0
+        assert subjSummaryRes.get(0).levelPoints == 10
 
-        !wsResults.get(1).completed
-        wsResults.get(1).skillId == "${subj1.get(1).skillId}"
-        wsResults.get(1).name == "${subj1.get(1).name}"
-        wsResults.get(1).pointsEarned == 10
-        subjSummaryRes.get(1).skillsLevel == 0
-        subjSummaryRes.get(1).points == 20
-        subjSummaryRes.get(1).todaysPoints == 0
-        subjSummaryRes.get(1).levelPoints == 20
+        assert !wsResults.get(1).completed
+        assert wsResults.get(1).skillId == "${subj1.get(1).skillId}"
+        assert wsResults.get(1).name == "${subj1.get(1).name}"
+        assert wsResults.get(1).pointsEarned == 10
+        assert subjSummaryRes.get(1).skillsLevel == 0
+        assert subjSummaryRes.get(1).points == 20
+        assert subjSummaryRes.get(1).todaysPoints == 0
+        assert subjSummaryRes.get(1).levelPoints == 20
 
-        !wsResults.get(2).completed
-        wsResults.get(2).skillId == "${subj1.get(2).skillId}"
-        wsResults.get(2).name == "${subj1.get(2).name}"
-        wsResults.get(2).pointsEarned == 10
-        subjSummaryRes.get(2).skillsLevel == 0
-        subjSummaryRes.get(2).points == 30
-        subjSummaryRes.get(2).todaysPoints == 0
-        subjSummaryRes.get(2).levelPoints == 30
+        assert !wsResults.get(2).completed
+        assert wsResults.get(2).skillId == "${subj1.get(2).skillId}"
+        assert wsResults.get(2).name == "${subj1.get(2).name}"
+        assert wsResults.get(2).pointsEarned == 10
+        assert subjSummaryRes.get(2).skillsLevel == 0
+        assert subjSummaryRes.get(2).points == 30
+        assert subjSummaryRes.get(2).todaysPoints == 0
+        assert subjSummaryRes.get(2).levelPoints == 30
 
-        !wsResults.get(3).completed
-        wsResults.get(3).skillId == "${subj1.get(3).skillId}"
-        wsResults.get(3).name == "${subj1.get(3).name}"
-        wsResults.get(3).pointsEarned == 10
-        subjSummaryRes.get(3).skillsLevel == 0
-        subjSummaryRes.get(3).points == 40
-        subjSummaryRes.get(3).todaysPoints == 0
-        subjSummaryRes.get(3).levelPoints == 40
+        assert !wsResults.get(3).completed
+        assert wsResults.get(3).skillId == "${subj1.get(3).skillId}"
+        assert wsResults.get(3).name == "${subj1.get(3).name}"
+        assert wsResults.get(3).pointsEarned == 10
+        assert subjSummaryRes.get(3).skillsLevel == 0
+        assert subjSummaryRes.get(3).points == 40
+        assert subjSummaryRes.get(3).todaysPoints == 0
+        assert subjSummaryRes.get(3).levelPoints == 40
 
-        wsResults.get(4).completed.size() == 1
-        wsResults.get(4).skillId == "${subj1.get(4).skillId}"
-        wsResults.get(4).name == "${subj1.get(4).name}"
-        wsResults.get(4).pointsEarned == 10
-        wsResults.get(4).completed.get(0).type == CompletionItem.CompletionItemType.Subject
-        wsResults.get(4).completed.get(0).level == 1
-        wsResults.get(4).completed.get(0).id == "subj1"
+        assert wsResults.get(4).completed.size() == 1
+        assert wsResults.get(4).skillId == "${subj1.get(4).skillId}"
+        assert wsResults.get(4).name == "${subj1.get(4).name}"
+        assert wsResults.get(4).pointsEarned == 10
+        assert wsResults.get(4).completed.get(0).type == CompletionItem.CompletionItemType.Subject
+        assert wsResults.get(4).completed.get(0).level == 1
+        assert wsResults.get(4).completed.get(0).id == "subj1"
 
-        subjSummaryRes.get(4).skillsLevel == 1
-        subjSummaryRes.get(4).points == 50
-        subjSummaryRes.get(4).todaysPoints == 10
-        subjSummaryRes.get(4).levelPoints == 0
+        assert subjSummaryRes.get(4).skillsLevel == 1
+        assert subjSummaryRes.get(4).points == 50
+        assert subjSummaryRes.get(4).todaysPoints == 10
+        assert subjSummaryRes.get(4).levelPoints == 0
+        return true
     }
 
     void configureSsl(StandardWebSocketClient standardWebSocketClient, String user) {

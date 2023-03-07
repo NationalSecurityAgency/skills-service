@@ -60,14 +60,14 @@ class ResourceServerConfig {
 
     @Bean('resourceServerSecurityFilterChain')
     @Order(101)
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, SkillsJwtAuthenticationConverter skillsJwtAuthenticationConverter) throws Exception {
         portalWebSecurityHelper.configureHttpSecurity(
             http.securityContext((securityContext) ->
                 securityContext.securityContextRepository(securityContextRepository)
             ).securityMatcher(oAuthUtils.oAuthRequestedMatcher)
                 .oauth2ResourceServer(oauth2 -> oauth2
                     .jwt(jwt -> jwt
-                            .jwtAuthenticationConverter(new SkillsJwtAuthenticationConverter(oAuthUtils))
+                            .jwtAuthenticationConverter(skillsJwtAuthenticationConverter)
                     )
                 )
         )
@@ -79,6 +79,11 @@ class ResourceServerConfig {
         NimbusJwtDecoder jwtDecoder = OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource)
         jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>([JwtValidators.createDefault(), new JwtClaimValidator<>(AuthorizationServerConfig.SKILLS_PROXY_USER, Objects::nonNull)]))
         return jwtDecoder
+    }
+
+    @Bean
+    SkillsJwtAuthenticationConverter skillsJwtAuthenticationConverter() {
+        return new SkillsJwtAuthenticationConverter(oAuthUtils)
     }
 
     @Slf4j
