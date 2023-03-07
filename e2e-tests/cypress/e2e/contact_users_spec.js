@@ -32,7 +32,9 @@ describe('Contact Project Users Specs', () => {
             body: {
                 host: 'localhost',
                 port: 1026,
-                'protocol': 'smtp'
+                'protocol': 'smtp',
+                publicUrl: 'http://localhost:8082/',
+                fromEmail: 'noreploy@skilltreeemail.org',
             },
         });
 
@@ -40,9 +42,7 @@ describe('Contact Project Users Specs', () => {
             method: 'POST',
             url: '/root/saveSystemSettings',
             body: {
-                publicUrl: 'http://localhost:8082/',
                 resetTokenExpiration: 'PT2H',
-                fromEmail: 'noreploy@skilltreeemail.org',
             }
         });
 
