@@ -105,7 +105,7 @@ class FormSecurityConfiguration {
         portalWebSecurityHelper.configureHttpSecurity(http)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
         .and()
-                .securityContext().securityContextRepository(securityContextRepository)// httpSessionSecurityContextRepository())
+                .securityContext().securityContextRepository(securityContextRepository)
         .and()
                 .exceptionHandling()
                 .accessDeniedHandler(restAccessDeniedHandler)
