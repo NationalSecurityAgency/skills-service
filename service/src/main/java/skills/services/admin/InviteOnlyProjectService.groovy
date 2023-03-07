@@ -270,7 +270,7 @@ class InviteOnlyProjectService {
         final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
         String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
 
-        if (!settingsResult) {
+        if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send project invite email")
         }
 

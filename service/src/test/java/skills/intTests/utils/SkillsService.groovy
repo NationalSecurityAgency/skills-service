@@ -1294,11 +1294,9 @@ class SkillsService {
         return wsHelper.rootGet('/getEmailSettings')
     }
 
-    def saveSystemSettings(String publicUrl, String resetTokenExpiration, String fromEmail, String customHeader, String customFooter) {
+    def saveSystemSettings(String resetTokenExpiration, String customHeader, String customFooter) {
         return wsHelper.rootPost('/saveSystemSettings',
-                [publicUrl: publicUrl,
-                 resetTokenExpiration: resetTokenExpiration,
-                 fromEmail           : fromEmail,
+                [resetTokenExpiration: resetTokenExpiration,
                  customHeader: customHeader,
                  customFooter: customFooter])
     }
