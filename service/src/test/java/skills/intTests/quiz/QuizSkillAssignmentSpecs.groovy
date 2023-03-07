@@ -15,14 +15,12 @@
  */
 package skills.intTests.quiz
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
-import skills.quizLoading.QuizSettings
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef

@@ -298,10 +298,6 @@ class SkillsAdminService {
             skillsGroupSkillDef = savedSkill
         }
 
-        if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
-            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId)
-        }
-
         if (!isEdit) {
             if (isSkillsGroupChild) {
                 skillsGroupAdminService.addSkillToSkillsGroup(savedSkill.projectId, groupId, savedSkill.skillId)
@@ -339,6 +335,10 @@ class SkillsAdminService {
                 )
             }
             saveSkillTmpRes.isImportedByOtherProjects = skillDefRepo.isCatalogSkillImportedByOtherProjects(savedSkill.id)
+        }
+
+        if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
+            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId)
         }
 
         log.debug("Saved [{}]", savedSkill)

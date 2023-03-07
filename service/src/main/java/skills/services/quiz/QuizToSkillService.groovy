@@ -15,12 +15,15 @@
  */
 package skills.services.quiz
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillQuizException
+import skills.services.RuleSetDefGraphService
+import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
@@ -37,6 +40,12 @@ class QuizToSkillService {
     @Autowired
     QuizToSkillDefRepo quizToSkillDefRepo
 
+    @Autowired
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+
+    @Autowired
+    RuleSetDefGraphService ruleSetDefGraphService
+
     @Transactional
     void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId) {
         assert quizId
@@ -52,7 +61,28 @@ class QuizToSkillService {
 
         if (!quizNameAndId || quizIdUpdated) {
             quizToSkillDefRepo.save(new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef))
+            updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
         }
+    }
+
+    @Profile
+    private void updateAffectedUserPointsAndAchievements(QuizDef quizDef, SkillDef savedSkill) {
+        Integer skillRef = savedSkill.id
+
+        batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
+        batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
+        batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
+
+        if (savedSkill.groupId) {
+            SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillRef)
+            if (group) {
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
+            }
+        }
+
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillRef)
+        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(savedSkill.projectId)
     }
 
     @Transactional
