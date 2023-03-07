@@ -87,9 +87,7 @@ class SystemSettingsService {
     @Transactional
     void save(SystemSettings settings) {
         List<GlobalSettingsRequest> toSave = []
-        saveButRemoveIfEmpty(Settings.GLOBAL_PUBLIC_URL, settings.publicUrl)
 
-        saveButRemoveIfEmpty(Settings.GLOBAL_FROM_EMAIL, settings.fromEmail)
         saveButRemoveIfEmpty(Settings.GLOBAL_USER_AGREEMENT, settings.userAgreement)
         saveButRemoveIfEmpty(Settings.GLOBAL_USER_AGREEMENT_VERSION, settings.userAgreemmentVersion)
         saveFooterButRemoveIfEmpty(Settings.GLOBAL_CUSTOM_HEADER, settings.customHeader, "Custom Header")

@@ -49,6 +49,8 @@ class EmailSettingsService {
     static final String passwordSetting = 'email.password'
     static final String authSetting = 'email.auth'
     static final String tlsEnableSetting = 'email.tls.enable'
+    static final String fromEmail = 'email.fromEmail'
+    static final String publicUrl = 'email.publicUrl'
 
     static final String htmlHeader = 'email.htmlHeader'
     static final String htmlFooter = 'email.htmlFooter'
@@ -63,10 +65,6 @@ class EmailSettingsService {
 
     EmailConfigurationResult updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
         EmailConfigurationResult configurationSuccessful = configureMailSender(emailConnectionInfo)
-        SystemSettings settings = systemSettingsService.get()
-        settings.publicUrl = emailConnectionInfo.publicUrl
-        settings.fromEmail = emailConnectionInfo.fromEmail
-        systemSettingsService.save(settings)
         storeSettings(emailConnectionInfo)
         return configurationSuccessful;
     }
@@ -135,6 +133,8 @@ class EmailSettingsService {
                 (passwordSetting) : emailConnectionInfo.password,
                 (authSetting)     : emailConnectionInfo.authEnabled?.toString(),
                 (tlsEnableSetting): emailConnectionInfo.tlsEnabled?.toString(),
+                (fromEmail) : emailConnectionInfo.fromEmail,
+                (publicUrl) : emailConnectionInfo.publicUrl,
         ])
     }
 
@@ -146,9 +146,6 @@ class EmailSettingsService {
     EmailConnectionInfo convert(List<SettingsResult> emailGroupSettings) {
         EmailConnectionInfo info = new EmailConnectionInfo()
         if (emailGroupSettings) {
-            SystemSettings settings = systemSettingsService.get()
-            info.publicUrl = settings.publicUrl
-            info.fromEmail = settings.fromEmail
 
             def mappedSettings = emailGroupSettings.collectEntries() {
                 [it.setting, it.value]
@@ -173,6 +170,12 @@ class EmailSettingsService {
             }
             if (mappedSettings[(tlsEnableSetting)]) {
                 info.tlsEnabled = Boolean.valueOf(mappedSettings[(tlsEnableSetting)])
+            }
+            if (mappedSettings[(fromEmail)]) {
+                info.fromEmail = mappedSettings[(fromEmail)]
+            }
+            if (mappedSettings[(publicUrl)]) {
+                info.publicUrl = mappedSettings[(publicUrl)]
             }
         }
         return info
