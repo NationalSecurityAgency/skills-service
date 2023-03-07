@@ -142,7 +142,7 @@ class EmailNotifier implements Notifier {
     private SettingsInit getEmailConfig() {
         List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup)
         JavaMailSender senderForBatch = emailSettingsService.getMailSender(emailSettingsService.convert(emailSettings))
-        String fromEmail = systemSettingsService.get()?.fromEmail
+        String fromEmail = emailSettings.find { it.setting == EmailSettingsService.fromEmail }?.value ?: null
 
         Formatting formatting = new Formatting(
                 htmlHeader: emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null,

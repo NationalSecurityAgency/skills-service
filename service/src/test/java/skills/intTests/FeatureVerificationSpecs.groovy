@@ -49,12 +49,10 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
                 "port"       : ServerSetupTest.SMTP.port,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : "http://localhost:${localPort}/".toString(),
+                "fromEmail"  : "noreply@skilltreeemail.com"
         ])
-        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName,
-                ["setting": Settings.GLOBAL_PUBLIC_URL.settingName, "value": "http://localhost:${localPort}/".toString()])
-        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_FROM_EMAIL.settingName,
-                ["setting": Settings.GLOBAL_FROM_EMAIL.settingName, "value": "noreply@skilltreeemail.com"])
 
         when:
 

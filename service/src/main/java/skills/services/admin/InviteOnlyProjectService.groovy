@@ -264,17 +264,16 @@ class InviteOnlyProjectService {
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
         SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
 
-        final SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
         final List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
 
         final String htmlHeader =  emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null
         final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
+        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
 
         if (!settingsResult) {
             throw new SkillException("No public URL is configured for the system, unable to send project invite email")
         }
 
-        String publicUrl = settingsResult.value
         if (!publicUrl.endsWith("/")){
             publicUrl += "/"
         }
@@ -410,17 +409,16 @@ class InviteOnlyProjectService {
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
         SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
 
-        final SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
         final List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
 
         final String htmlHeader =  emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null
         final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
 
-        if (!settingsResult) {
+        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
+        if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send project invite email")
         }
 
-        String publicUrl = settingsResult.value
         if (!publicUrl.endsWith("/")){
             publicUrl += "/"
         }

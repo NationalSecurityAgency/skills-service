@@ -51,17 +51,9 @@ class SystemSettingsService {
     @Transactional(readOnly = true)
     SystemSettings get() {
         SystemSettings settings = new SystemSettings()
-        SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        if (result) {
-            settings.publicUrl = result.value
-        }
-        result = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
+        SettingsResult result = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
         if (result) {
             settings.resetTokenExpiration = result.value
-        }
-        result = settingsService.getGlobalSetting(Settings.GLOBAL_FROM_EMAIL.settingName)
-        if (result) {
-            settings.fromEmail = result.value
         }
         result = settingsService.getGlobalSetting(Settings.GLOBAL_USER_AGREEMENT.settingName)
         if (result) {
