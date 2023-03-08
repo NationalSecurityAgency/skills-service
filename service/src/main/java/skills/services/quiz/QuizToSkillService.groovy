@@ -18,6 +18,7 @@ package skills.services.quiz
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
@@ -27,8 +28,10 @@ import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
+import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
+import skills.storage.repos.UserQuizAttemptRepo
 
 @Service
 @Slf4j
@@ -41,13 +44,16 @@ class QuizToSkillService {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
+    UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
 
     @Transactional
-    void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId) {
+    void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId, boolean awardSkillForQuizCompletion = true) {
         assert quizId
         Integer skillRef = savedSkill.id
         QuizDef quizDef = getQuizDef(quizId)
@@ -61,7 +67,9 @@ class QuizToSkillService {
 
         if (!quizNameAndId || quizIdUpdated) {
             quizToSkillDefRepo.save(new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef))
-            updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
+            if (awardSkillForQuizCompletion) {
+                updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
+            }
         }
     }
 
@@ -69,20 +77,23 @@ class QuizToSkillService {
     private void updateAffectedUserPointsAndAchievements(QuizDef quizDef, SkillDef savedSkill) {
         Integer skillRef = savedSkill.id
 
-        batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
-        batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
-        batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
+        List<UserQuizAttempt> firstPassedRun = quizAttemptRepo.findByQuizRefIdByStatus(quizDef.id, UserQuizAttempt.QuizAttemptStatus.PASSED, PageRequest.of(0, 1))
+        if (firstPassedRun) {
+            batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
+            batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
+            batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
 
-        if (savedSkill.groupId) {
-            SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillRef)
-            if (group) {
-                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
+            if (savedSkill.groupId) {
+                SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillRef)
+                if (group) {
+                    batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
+                }
             }
-        }
 
-        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillRef)
-        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
-        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(savedSkill.projectId)
+            SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillRef)
+            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(savedSkill.projectId)
+        }
     }
 
     @Transactional

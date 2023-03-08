@@ -20,6 +20,7 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
@@ -32,6 +33,7 @@ import skills.controller.request.model.EditLevelRequest
 import skills.controller.request.model.NextLevelRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SkillsActionRequest
 import skills.controller.request.model.SubjectRequest
@@ -49,14 +51,19 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.ProjDef
+import skills.storage.model.QuizDef
 import skills.storage.model.Setting
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizToSkillDefRepo
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.UserQuizAttemptRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
@@ -95,6 +102,15 @@ class ProjectCopyService {
     SkillRelDefRepo skillRelDefRepo
 
     @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+
+    @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
     @Autowired
@@ -114,6 +130,10 @@ class ProjectCopyService {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
 
     @Transactional
     @Profile
@@ -135,6 +155,7 @@ class ProjectCopyService {
         saveBadgesAndTheirSkills(fromProject, toProj)
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
+        handleQuizBasedUserPointsAndAchievements(toProj)
     }
 
     @Profile
@@ -277,6 +298,30 @@ class ProjectCopyService {
     }
 
     @Profile
+    private void handleQuizBasedUserPointsAndAchievements(ProjDef toProj) {
+        String projectId = toProj.projectId
+        List<Integer> skillIdsWithQuiz = quizToSkillDefRepo.getSkillRefIdsWithQuizByProjectId(projectId)
+        if (skillIdsWithQuiz) {
+            List<UserQuizAttempt> firstPassedRun = userQuizAttemptRepo.findByInSkillRefIdAndByStatus(skillIdsWithQuiz, UserQuizAttempt.QuizAttemptStatus.PASSED, PageRequest.of(0, 1))
+            if (firstPassedRun) {
+                batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzesForProject(projectId)
+                batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzesForProject(projectId)
+                batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(projectId)
+
+                List<SkillDef> skillGroups = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.SkillsGroup)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
+
+                List<SkillDef> subjects = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
+                subjects.each { subject ->
+                    batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+                }
+
+                batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
+            }
+        }
+    }
+
+    @Profile
     private void saveDependencies(ProjDef fromProject, toProj) {
         List<SkillsDepsService.GraphSkillDefEdge> edges = skillsDepsService.loadGraphEdges(fromProject.projectId, SkillRelDef.RelationshipType.Dependence)
         List<SkillsDepsService.GraphSkillDefEdge> localOnlyEdges = edges.findAll { SkillsDepsService.GraphSkillDefEdge graphSkillDefEdge ->
@@ -333,13 +378,18 @@ class ProjectCopyService {
         skillDefs?.findAll { it.enabled == "true" && (!it.copiedFrom) }
                 .sort { it.displayOrder }
                 .each { SkillDefWithExtra fromSkill ->
-                    SkillRequest skillRequest = new SkillRequest()
+                    SkillProjectCopyRequest skillRequest = new SkillProjectCopyRequest()
                     Props.copy(fromSkill, skillRequest)
                     skillRequest.projectId = desProjectId
                     skillRequest.subjectId = subjectId
                     skillRequest.type = fromSkill.type?.toString()
                     skillRequest.version = 0
                     skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
+                    if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
+                        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)
+                        skillRequest.quizId = quizNameAndId.quizId
+                    }
+
                     if (fromSkill.type != SkillDef.ContainerType.SkillsGroup) {
                         skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
                     }

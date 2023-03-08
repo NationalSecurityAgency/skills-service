@@ -30,6 +30,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
+import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
@@ -338,7 +339,8 @@ class SkillsAdminService {
         }
 
         if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
-            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId)
+            boolean awardSkillForQuizCompletion = !(skillRequest instanceof SkillProjectCopyRequest)
+            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId, awardSkillForQuizCompletion)
         }
 
         log.debug("Saved [{}]", savedSkill)

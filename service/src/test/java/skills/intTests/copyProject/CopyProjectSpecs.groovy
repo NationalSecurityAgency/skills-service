@@ -16,11 +16,13 @@
 package skills.intTests.copyProject
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.Settings
 import skills.skillLoading.RankingLoader
+import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import static skills.intTests.utils.SkillsFactory.*
@@ -544,6 +546,41 @@ class CopyProjectSpecs extends DefaultIntSpec {
         def projects = rootUser.getProjects()
         then:
         projects.projectId == [p1.projectId, projToCopy.projectId]
+    }
+
+    // there are also a number of tests validating that users' quiz achievements are reflected in the copied project
+    // these tests were added to QuizSkillAssignmentAndUserAchievementsSpecs
+    def "quiz-based skills are copied"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def survey = QuizDefFactory.createQuizSurvey(2)
+        skillsService.createQuizDef(survey)
+        def surveyQuestions = [QuizDefFactory.createSingleChoiceSurveyQuestion(2, 1, 2)]
+        skillsService.createQuizQuestionDefs(surveyQuestions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[3].quizId = survey.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(proj.projectId, projToCopy)
+
+        def apiSkills = skillsService.getSkillSummary(skillsService.userName, projToCopy.projectId, subj.subjectId)
+        then:
+        apiSkills.skills.selfReporting?.type == [SkillDef.SelfReportingType.Quiz.toString(), SkillDef.SelfReportingType.HonorSystem.toString(), null, QuizDefParent.QuizType.Survey.toString(), null]
+        apiSkills.skills.selfReporting?.quizId == [quiz.quizId, null, null, survey.quizId, null]
+        apiSkills.skills.selfReporting?.quizName == [quiz.name, null, null, survey.name, null]
+        apiSkills.skills.selfReporting?.numQuizQuestions == [5, 0, null, 1, null]
     }
 
     static class Edge {

@@ -17,6 +17,7 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.controller.result.model.SettingsResult
@@ -29,8 +30,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
-
-import jakarta.transaction.Transactional
 
 @Service
 @Slf4j
@@ -164,10 +163,27 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
+    void createSkillUserPointsFromPassedQuizzesForProject(String projectId) {
+        log.info("Creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createSkillUserPointsFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
+    }
+
+
+    @Transactional
+    @Profile
     void createUserPerformedEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
         log.info("Creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
         userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId)
-        log.info("Completed reating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+        log.info("Completed creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+    }
+
+    @Transactional
+    @Profile
+    void createUserPerformedEntriesFromPassedQuizzesForProject(String projectId) {
+        log.info("Creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createUserPerformedEntriesFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
     }
 
     @Transactional
@@ -176,6 +192,14 @@ class BatchOperationsTransactionalAccessor {
         log.info("Creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
         userPointsRepo.createUserAchievementsFromPassedQuizzes(quizRefId, skillRefId)
         log.info("Completed creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
+    }
+
+    @Transactional
+    @Profile
+    void createUserAchievementsFromPassedQuizzes(String projectId) {
+        log.info("Creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createUserAchievementsFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
     }
 
     @Transactional
