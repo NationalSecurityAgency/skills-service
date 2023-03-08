@@ -54,7 +54,7 @@ limitations under the License.
       </template>
     </quiz-run-completion-summary>
 
-    <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult)" class="mb-4" data-cy="quizRunQuestions">
+    <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult) && showQuestions" class="mb-4" data-cy="quizRunQuestions">
       <div class="row border-bottom py-2 mb-3" data-cy="subPageHeader">
         <div class="col">
           <div class="h4 text-success font-weight-bold skills-page-title-text-color" data-cy="quizName">{{ quizInfo.name }}</div>
@@ -167,6 +167,10 @@ limitations under the License.
         const unique = values.filter((v, i, a) => a.indexOf(v) === i);
         return unique && unique.length > 0 ? unique : null;
       },
+      showQuestions() {
+        return !this.quizResult
+          || (this.quizResult && this.quizResult.gradedRes && this.quizResult.gradedRes.gradedQuestions && this.quizResult.gradedRes.gradedQuestions.length > 0);
+      },
     },
     methods: {
       loadData() {
@@ -238,31 +242,36 @@ limitations under the License.
       reportTestRunToBackend() {
         return QuizRunService.completeQuizAttempt(this.quizId, this.quizAttemptId)
           .then((gradedRes) => {
-            const numCorrect = gradedRes.gradedQuestions.filter((q) => q.isCorrect).length;
-            const numTotal = gradedRes.gradedQuestions.length;
-            const numQuestionsToPass = this.quizInfo.minNumQuestionsToPass > 0 ? this.quizInfo.minNumQuestionsToPass : numTotal;
+            const numTotal = this.quizInfo.questions.length;
+            const numCorrect = numTotal - gradedRes.numQuestionsGotWrong;
             const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
             this.quizResult = {
               gradedRes,
               numCorrect,
               numTotal,
               percentCorrect,
-              missedBy: numQuestionsToPass - numCorrect,
+              missedBy: gradedRes.numQuestionsGotWrong,
             };
 
-            const updatedQuizInfo = ({ ...this.quizInfo });
-            updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
-              const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
+            if (gradedRes.gradedQuestions && gradedRes.gradedQuestions.length > 0) {
+              const updatedQuizInfo = ({ ...this.quizInfo });
+              updatedQuizInfo.questions = updatedQuizInfo.questions.map((q) => {
+                const gradedQuestion = gradedRes.gradedQuestions.find((gradedQ) => gradedQ.questionId === q.id);
 
-              const answerOptions = q.answerOptions.map((a) => ({
+                const answerOptions = q.answerOptions.map((a) => ({
                   ...a,
                   selected: gradedQuestion.selectedAnswerIds.includes(a.id),
                   isGraded: true,
                   isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
-              }));
-              return ({ ...q, gradedInfo: gradedQuestion, answerOptions });
-            });
-            this.quizInfo = updatedQuizInfo;
+                }));
+                return ({
+                  ...q,
+                  gradedInfo: gradedQuestion,
+                  answerOptions,
+                });
+              });
+              this.quizInfo = updatedQuizInfo;
+            }
           });
       },
       tryAgain() {

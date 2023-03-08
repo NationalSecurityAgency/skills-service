@@ -62,12 +62,11 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
 
         then:
         gradedQuizAttempt.passed == false
-        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
-        gradedQuizAttempt.gradedQuestions.isCorrect == [true, false]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+        gradedQuizAttempt.numQuestionsGotWrong == 1
+        !gradedQuizAttempt.gradedQuestions
 
         gradedQuizAttempt1.passed == true
+        gradedQuizAttempt1.numQuestionsGotWrong == 0
         gradedQuizAttempt1.gradedQuestions.questionId == quizInfo.questions.id
         gradedQuizAttempt1.gradedQuestions.isCorrect == [true, true]
         gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]

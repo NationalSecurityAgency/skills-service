@@ -43,11 +43,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         then:
         gradedQuizAttempt.passed == true
-        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
-        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true, true]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[2].id]
-        gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds == [quizInfo.questions[2].answerOptions[0].id]
+        !gradedQuizAttempt.gradedQuestions
         gradedQuizAttempt.started
         gradedQuizAttempt.completed
     }

@@ -180,10 +180,11 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
     });
 
-    it('wrong anders are accurately depicted on the result screen', () => {
+    it('wrong answers are accurately depicted on the result screen', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.setQuizMaxNumAttempts(1, 1)
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -375,6 +376,8 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('2 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 3 attempts')
+
+        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
     });
 
     it('two attempts are used when max attempts is configured', () => {
@@ -401,6 +404,8 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
+
+        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
     });
 
     it('passed quiz cannot be attempted again', () => {

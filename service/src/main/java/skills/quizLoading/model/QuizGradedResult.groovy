@@ -19,6 +19,7 @@ import skills.services.events.SkillEventResult
 
 class QuizGradedResult {
     Boolean passed
+    Integer numQuestionsGotWrong
     List<QuizQuestionGradedResult> gradedQuestions
     List<SkillEventResult> associatedSkillResults
     Date started

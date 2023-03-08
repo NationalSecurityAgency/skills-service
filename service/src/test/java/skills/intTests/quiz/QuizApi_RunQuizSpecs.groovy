@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.repos.*
@@ -56,6 +57,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         then:
         gradedQuizAttempt.passed == true
+        gradedQuizAttempt.numQuestionsGotWrong == 0
         gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
         gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
         gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
@@ -76,10 +78,43 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         then:
         gradedQuizAttempt.passed == false
-        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
-        gradedQuizAttempt.gradedQuestions.isCorrect == [true, false]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
+        gradedQuizAttempt.numQuestionsGotWrong == 1
+        !gradedQuizAttempt.gradedQuestions
+    }
+
+    def "run quiz - fail quiz - graded questions are returned if there are no more attempts available"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MaxNumAttempts.setting, value: '2'],
+        ])
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        // attempt2
+        def quizAttempt2 =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo.questions[1].answerOptions[1].id)
+        def gradedQuizAttempt2 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt2.id).body
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.numQuestionsGotWrong == 1
+        !gradedQuizAttempt.gradedQuestions
+
+        //  more more attempts left
+        gradedQuizAttempt2.passed == false
+        gradedQuizAttempt2.numQuestionsGotWrong == 1
+        gradedQuizAttempt2.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt2.gradedQuestions.isCorrect == [true, false]
+        gradedQuizAttempt2.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt2.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
     }
 
     def "answer is updated when reporting a different answer for a single-choice answer"() {
