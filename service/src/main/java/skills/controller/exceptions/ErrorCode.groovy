@@ -54,4 +54,5 @@ enum ErrorCode {
     ProjectInviteAlreadyExists,
     UserQuizAttemptsExhausted,
     SurveyCanOnlyBeTakenOnce,
+    SkillEventForQuizSkillIsNotAllowed,
 }

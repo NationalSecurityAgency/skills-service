@@ -48,6 +48,8 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
         gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[2].id]
         gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds == [quizInfo.questions[2].answerOptions[0].id]
+        gradedQuizAttempt.started
+        gradedQuizAttempt.completed
     }
 
     def "restart survey attempt"() {

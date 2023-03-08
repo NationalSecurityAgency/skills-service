@@ -401,6 +401,27 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         quizToSkillDefs_t1.collect { skillDefRepo.findById(it.skillRefId).get().skillId } == [skill2WithQuiz.skillId]
         quizToSkillDefs_t1.collect { quizDefRepo.findById(it.quizRefId).get().quizId } == [quiz.body.quizId]
     }
+
+    def "reporting skill events directly are not allowed for a quiz-based skill"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+        skillsService.createSkill(skillWithQuiz)
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skillWithQuiz.skillId])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot report skill events directly to a quiz-based skill")
+        skillsClientException.message.contains("errorCode:SkillEventForQuizSkillIsNotAllowed")
+
+    }
 }
 
 

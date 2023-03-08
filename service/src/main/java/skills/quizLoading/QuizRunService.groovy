@@ -375,7 +375,7 @@ class QuizRunService {
             if (skills){
                 skills.each {
                     SkillEventResult skillEventResult = skillEventsService.reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, false, userQuizAttempt.completed,
-                            new SkillEventsService.SkillApprovalParams(disableChecks: true))
+                            new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
                     res.add(skillEventResult)
                 }
             }

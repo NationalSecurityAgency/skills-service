@@ -45,6 +45,7 @@ class SkillEventsService {
 
     static class SkillApprovalParams {
         boolean disableChecks = false
+        boolean isFromPassingQuiz = false
         String approvalRequestedMsg
 
         SkillApprovalParams(){}

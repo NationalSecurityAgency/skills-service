@@ -48,6 +48,8 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes.started
+        quizAttemptRes.completed
         quizAttemptRes.questions.id == quizInfo.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == questions.questionType
