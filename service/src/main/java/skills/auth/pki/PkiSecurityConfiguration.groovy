@@ -26,6 +26,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.NullSecurityContextRepository
+import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityMode
@@ -54,7 +55,7 @@ class PkiSecurityConfiguration {
 
     @Bean('pkiSecurityFilterChain')
     @Order(103)
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
         log.info("Configuring PKI authorization mode")
 
         // Portal endpoints config
@@ -64,7 +65,8 @@ class PkiSecurityConfiguration {
                 .subjectPrincipalRegex(/(.*)/)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-
+                .and()
+                .securityContext().securityContextRepository(securityContextRepository)
         http.build()
     }
 
@@ -77,7 +79,7 @@ class PkiSecurityConfiguration {
     }
 
     @Bean
-    NullSecurityContextRepository httpSessionSecurityContextRepository() {
+    SecurityContextRepository httpSessionSecurityContextRepository() {
         return new NullSecurityContextRepository()
     }
 }

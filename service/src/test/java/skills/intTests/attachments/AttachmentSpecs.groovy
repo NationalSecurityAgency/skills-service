@@ -114,8 +114,8 @@ class AttachmentSpecs extends DefaultIntSpec {
     }
 
     def "attempt to upload attachment with size greater than max allowed"() {
-        String filename = 'test-zip.zip'
-        Integer fileSize = maxAttachmentSize.toBytes()//+1
+        String filename = 'test-zip.pdf'
+        Integer fileSize = maxAttachmentSize.toBytes()+1
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileSize, filename)
 
         when:

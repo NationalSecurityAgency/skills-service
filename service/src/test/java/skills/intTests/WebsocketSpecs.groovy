@@ -16,17 +16,23 @@
 package skills.intTests
 
 import groovy.util.logging.Slf4j
+import org.apache.hc.client5.http.classic.HttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
 import org.apache.hc.client5.http.ssl.TrustAllStrategy
+import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.lang.Nullable
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
-import org.springframework.messaging.simp.stomp.StompHeaders
-import org.springframework.messaging.simp.stomp.StompSession
-import org.springframework.messaging.simp.stomp.StompSessionHandler
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
+import org.springframework.messaging.simp.stomp.*
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
@@ -41,8 +47,8 @@ import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserRepo
-import spock.lang.IgnoreIf
 
+import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
 import java.security.KeyStore
@@ -69,9 +75,9 @@ class WebsocketSpecs extends DefaultIntSpec {
     def setup() {
         skillsService.deleteProjectIfExist(projId)
         sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
-        subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-        subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
-        subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1] }
+        subj1 = (1..5).collect { [projectId: projId, subjectId: "subj1", skillId: "s1${it}".toString(), name: "subj1 ${it}".toString(), type: "Skill", pointIncrement: 10, numPerformToCompletion: 10, pointIncrementInterval: 8 * 60, numMaxOccurrencesIncrementInterval: 1] }
+        subj2 = (1..4).collect { [projectId: projId, subjectId: "subj2", skillId: "s2${it}".toString(), name: "subj2 ${it}".toString(), type: "Skill", pointIncrement: 5, numPerformToCompletion: 10, pointIncrementInterval: 8 * 60, numMaxOccurrencesIncrementInterval: 1] }
+        subj3 = (1..5).collect { [projectId: projId, subjectId: "subj3", skillId: "s3${it}".toString(), name: "subj3 ${it}".toString(), type: "Skill", pointIncrement: 20, numPerformToCompletion: 10, totalPoints: 200, pointIncrementInterval: 8 * 60, numMaxOccurrencesIncrementInterval: 1] }
         skillsService.createSchema([subj1, subj2, subj3])
         if (!skillsService.isRoot()) {
             skillsService.grantRoot()
@@ -82,7 +88,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         stompSession?.disconnect()
     }
 
-   def "achieve subject's level - validate via websocket"(){
+    def "achieve subject's level - validate via websocket"() {
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
@@ -102,7 +108,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         validateResults(subjSummaryRes, wsResults)
     }
 
-    def "Non-notified badge achievements are notified when user connects to websocket" () {
+    def "Non-notified badge achievements are notified when user connects to websocket"() {
         given:
 
         def badge = SkillsFactory.createBadge()
@@ -112,8 +118,8 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badge.badgeId, skillId: subj2.get(0).skillId])
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date() - it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date() - it)
         }
 
         skillsService.updateBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
@@ -125,14 +131,14 @@ class WebsocketSpecs extends DefaultIntSpec {
         messagesReceived.await(5, TimeUnit.SECONDS)
 
         then:
-        wsResults.find{it.skillId=='badge1'}.success
-        wsResults.find{it.skillId=='badge1'}.completed
-        wsResults.find{it.skillId=='badge1'}.completed.size() == 1
-        wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.Badge
-        wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
+        wsResults.find { it.skillId == 'badge1' }.success
+        wsResults.find { it.skillId == 'badge1' }.completed
+        wsResults.find { it.skillId == 'badge1' }.completed.size() == 1
+        wsResults.find { it.skillId == 'badge1' }.completed[0].type == CompletionItem.CompletionItemType.Badge
+        wsResults.find { it.skillId == 'badge1' }.completed[0].name == badge.name
     }
 
-    def "Non-notified global badge achievements are notified when user connects to websocket" () {
+    def "Non-notified global badge achievements are notified when user connects to websocket"() {
         given:
 
         def badge = SkillsFactory.createBadge()
@@ -148,13 +154,13 @@ class WebsocketSpecs extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: projId, badgeId: badge2.badgeId, skillId: subj2.get(1).skillId])
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(0).skillId], 'skills@skills.org', new Date() - it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(0).skillId], 'skills@skills.org', new Date() - it)
         }
 
         (0..9).each {
-            skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], 'skills2@skills.org', new Date()-it)
-            skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], 'skills2@skills.org', new Date()-it)
+            skillsService.addSkill([projectId: projId, skillId: subj1.get(1).skillId], 'skills2@skills.org', new Date() - it)
+            skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], 'skills2@skills.org', new Date() - it)
         }
 
         skillsService.createGlobalBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
@@ -172,21 +178,21 @@ class WebsocketSpecs extends DefaultIntSpec {
         then:
         wsResults
         wsResults2
-        wsResults.find{it.skillId=='badge1'}.success
-        wsResults.find{it.skillId=='badge1'}.completed
-        wsResults.find{it.skillId=='badge1'}.completed.size() == 1
-        wsResults.find{it.skillId=='badge1'}.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
-        wsResults.find{it.skillId=='badge1'}.completed[0].name == badge.name
-        !wsResults.find{it.skillId=='badge2'}
-        wsResults2.find{it.skillId=='badge2'}.success
-        wsResults2.find{it.skillId=='badge2'}.completed
-        wsResults2.find{it.skillId=='badge2'}.completed.size() == 1
-        wsResults2.find{it.skillId=='badge2'}.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
-        wsResults2.find{it.skillId=='badge2'}.completed[0].name == badge2.name
-        !wsResults2.find{it.skillId=='badge1'}
+        wsResults.find { it.skillId == 'badge1' }.success
+        wsResults.find { it.skillId == 'badge1' }.completed
+        wsResults.find { it.skillId == 'badge1' }.completed.size() == 1
+        wsResults.find { it.skillId == 'badge1' }.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
+        wsResults.find { it.skillId == 'badge1' }.completed[0].name == badge.name
+        !wsResults.find { it.skillId == 'badge2' }
+        wsResults2.find { it.skillId == 'badge2' }.success
+        wsResults2.find { it.skillId == 'badge2' }.completed
+        wsResults2.find { it.skillId == 'badge2' }.completed.size() == 1
+        wsResults2.find { it.skillId == 'badge2' }.completed[0].type == CompletionItem.CompletionItemType.GlobalBadge
+        wsResults2.find { it.skillId == 'badge2' }.completed[0].name == badge2.name
+        !wsResults2.find { it.skillId == 'badge1' }
     }
 
-    def "non-notified skill achievements are notified when user connects to websocket" () {
+    def "non-notified skill achievements are notified when user connects to websocket"() {
         def subj = SkillsFactory.createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 150)
         skillsService.createSubject(subj)
@@ -209,12 +215,12 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults[0].completed
         wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
         wsResults[0].completed.size() == 4
-        wsResults[0].completed?.find{it.id=='skill1'}.type == CompletionItem.CompletionItemType.Skill
-        wsResults[0].completed?.find{it.id=='skill1'}.name == skill.name
+        wsResults[0].completed?.find { it.id == 'skill1' }.type == CompletionItem.CompletionItemType.Skill
+        wsResults[0].completed?.find { it.id == 'skill1' }.name == skill.name
         wsResults[0].completed?.findAll { it.type == CompletionItem.CompletionItemType.Subject }.size() == 3
     }
 
-    def "non-notified project level achievements are notified when user connects to websocket" () {
+    def "non-notified project level achievements are notified when user connects to websocket"() {
         def subj = SkillsFactory.createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1, 1, 0, 4, 0, 1800)
         skillsService.createSubject(subj)
@@ -236,13 +242,12 @@ class WebsocketSpecs extends DefaultIntSpec {
         wsResults[0].completed
         wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
         wsResults[0].completed.size() == 6
-        wsResults[0].completed?.findAll {it.type == CompletionItem.CompletionItemType.Overall}?.size() == 2
-        wsResults[0].completed?.find {it.type == CompletionItem.CompletionItemType.Overall && it.level == 2 }
-        wsResults[0].completed?.find {it.type == CompletionItem.CompletionItemType.Overall && it.level == 3 }
+        wsResults[0].completed?.findAll { it.type == CompletionItem.CompletionItemType.Overall }?.size() == 2
+        wsResults[0].completed?.find { it.type == CompletionItem.CompletionItemType.Overall && it.level == 2 }
+        wsResults[0].completed?.find { it.type == CompletionItem.CompletionItemType.Overall && it.level == 3 }
     }
 
-   @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-   def "achieve subject's level - validate via xhr streaming"(){
+    def "achieve subject's level - validate via xhr streaming"() {
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
@@ -261,8 +266,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         validateResults(subjSummaryRes, wsResults)
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "achieve subject's level - validate via xhr polling"(){
+    def "achieve subject's level - validate via xhr polling"() {
         given:
         List subjSummaryRes = []
         List<SkillEventResult> wsResults = []
@@ -282,18 +286,22 @@ class WebsocketSpecs extends DefaultIntSpec {
     }
 
 
-
-    private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr=false, boolean xhrPolling=false, int count=5, String userId=null) {
+    private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr = false, boolean xhrPolling = false, int count = 5, String userId = null) {
         CountDownLatch messagesReceived = new CountDownLatch(count)
         List<Transport> transports = []
 
         // setup websocket connection for sampleUserIds[0]
-        if(userId == null) {
+        if (userId == null) {
             userId = sampleUserIds.get(0)
         }
 
         if (xhr) {
-            RestTemplateXhrTransport xhrTransport = new RestTemplateXhrTransport()
+            RestTemplateXhrTransport xhrTransport
+            if (certificateRegistry) {
+                xhrTransport = new RestTemplateXhrTransport(configureSslRestTemplate(userId))
+            } else {
+                xhrTransport = new RestTemplateXhrTransport()
+            }
             xhrTransport.xhrStreamingDisabled = xhrPolling
             transports.add(xhrTransport)
         } else {
@@ -323,11 +331,23 @@ class WebsocketSpecs extends DefaultIntSpec {
             void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                 session.subscribe("/user/queue/${projId}-skill-updates", this)
             }
+
+            @Override
+            void handleException(StompSession session, @Nullable StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
+                log.error('handleException', exception)
+                throw exception
+            }
+
+            @Override
+            void handleTransportError(StompSession session, Throwable exception) {
+                log.error('handleTransportError', exception)
+                throw exception
+            }
         }
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders()
         StompHeaders connectHeaders = new StompHeaders()
-        if(!certificateRegistry) {
+        if (!certificateRegistry) {
             String secret = skillsService.getClientSecret(projId)
             skillsService.setProxyCredentials(projId, secret)
             String token = skillsService.wsHelper.getTokenForUser(userId)
@@ -335,7 +355,7 @@ class WebsocketSpecs extends DefaultIntSpec {
         }
         String protocol = xhr ? 'http' : 'ws'
         if (certificateRegistry) {
-            protocol+="s"
+            protocol += "s"
         }
         stompSession = stompClient.connectAsync("${protocol}://localhost:${localPort}/skills-websocket", headers, connectHeaders, sessionHandler).get()
         return messagesReceived
@@ -343,7 +363,7 @@ class WebsocketSpecs extends DefaultIntSpec {
 
     private boolean validateResults(List subjSummaryRes, List<SkillEventResult> wsResults) {
         assert wsResults && wsResults.size() == 5
-        wsResults.sort {it.skillId}
+        wsResults.sort { it.skillId }
         wsResults.each {
             assert it.skillApplied
             assert it.explanation == "Skill event was applied"
@@ -414,5 +434,35 @@ class WebsocketSpecs extends DefaultIntSpec {
         def userProps = [:]
         userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", sslContext)
         standardWebSocketClient.setUserProperties(userProps)
+    }
+
+    RestTemplate configureSslRestTemplate(String user) {
+
+        Resource resource = certificateRegistry.getCertificate(user)
+        KeyStore keyStore = KeyStore.getInstance("PKCS12")
+        keyStore.load(resource.getInputStream(), "skillspass".toCharArray())
+
+        KeyStore trustStore = KeyStore.getInstance("JKS")
+        trustStore.load(new ClassPathResource("/certs/truststore.jks").getInputStream(), "skillspass".toCharArray())
+        SSLContext sslContext = SSLContexts.custom()
+                .loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE)
+                .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build()
+
+        def userProps = [:]
+        userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", sslContext)
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext,
+                ['TLSv1.2'] as String[],
+                null,
+                allowAllHosts)
+        PoolingHttpClientConnectionManager connectionManager =
+                new PoolingHttpClientConnectionManager(RegistryBuilder.create()
+                        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                        .register("https", sslConnectionSocketFactory).build())
+        HttpClient client = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .build()
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client)
+        return new RestTemplate(requestFactory)
     }
 }

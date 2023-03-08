@@ -36,17 +36,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver
 import org.springframework.security.web.FilterInvocation
 import org.springframework.stereotype.Component
-
-//import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor
-//import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails
-//import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetailsSource
-//import org.springframework.security.oauth2.provider.authentication.TokenExtractor
-
 import skills.auth.SecurityMode
 import skills.auth.form.oauth2.AuthorizationServerConfig
-
-//import skills.auth.form.oauth2.SkillsOAuth2AuthenticationManager
-
 import skills.auth.form.oauth2.ResourceServerConfig
 
 import java.lang.reflect.Proxy
