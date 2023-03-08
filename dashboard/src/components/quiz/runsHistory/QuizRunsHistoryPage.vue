@@ -73,7 +73,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(runtime)="data">
-          {{ data.item.started | duration(data.item.completed) }}
+          <span :data-cy="`row${data.index}-runtime`">{{ data.item.started | duration(data.item.completed) }}</span>
         </template>
 
         <template v-slot:cell(started)="data">

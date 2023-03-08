@@ -62,21 +62,48 @@ describe('Quiz Runs History Tests', () => {
         ], 10);
     });
 
-
     it('format total runtime and start time', function () {
+        const runs = [
+            { 'started': '2023-02-15T22:52:53.990+00:00', 'completed': '2023-02-15T22:52:53.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user1' },
+            { 'started': '2023-02-15T22:52:53.990+00:00', 'completed': '2023-02-15T22:52:53.995+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user2' },
+            { 'started': '2023-02-15T22:52:53.990+00:00', 'completed': '2023-02-15T22:52:54.989+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user3' },
+            { 'started': '2023-02-15T22:52:53.990+00:00', 'completed': '2023-02-15T22:52:54.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:52:24.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:53:00.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:53:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:53:02.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:53:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:54:00.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:54:02.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T22:55:00.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:02:00.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:02:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:51:33.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:52:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:53:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:52:01.990+00:00', 'completed': '2023-02-15T23:54:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T22:01:01.990+00:00', 'completed': '2023-02-15T23:34:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T20:01:01.990+00:00', 'completed': '2023-02-15T22:00:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T20:01:01.990+00:00', 'completed': '2023-02-15T22:01:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T20:01:01.990+00:00', 'completed': '2023-02-15T22:02:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-15T11:00:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-15T11:01:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-15T11:35:34.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-16T01:01:01.989+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-16T01:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2023-02-16T13:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2023-02-15T01:01:01.990+00:00', 'completed': '2024-02-14T13:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2024-02-15T01:01:01.990+00:00', 'completed': '2025-02-15T01:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2024-02-15T01:01:01.990+00:00', 'completed': '2025-05-12T01:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2024-02-15T01:01:01.990+00:00', 'completed': '2026-01-15T01:00:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+            { 'started': '2024-02-15T01:01:01.990+00:00', 'completed': '2026-02-15T01:01:01.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user4' },
+        ];
         cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs?*', (req) => {
             req.reply({
                 body: {
-                    'data': [{
-                        'attemptId' : 1, // will not lead to anything sadly
-                        'status': 'PASSED',
-                        'userId': 'user1',
-                        'userIdForDisplay': 'user1',
-                        'completed': '2023-02-15T22:52:53.990+00:00',
-                        'started': '2023-02-15T21:45:50.917+00:00'
-                    }],
-                    'count': 1,
-                    'totalCount': 1
+                    'data': runs,
+                    'count': runs.length,
+                    'totalCount': runs.length
                 },
             });
         }).as('quizRuns')
@@ -86,10 +113,41 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.visit('/administrator/quizzes/quiz1/results');
         cy.wait('@quizRuns')
+        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`).select('50');
 
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 2, value: '1 hour and 7 minutes' }, { colIndex: 3, value: '2023-02-15 21:45' }],
-        ], 10);
+        cy.get('[data-cy="row0-runtime"]').should('have.text', '0 ms')
+        cy.get('[data-cy="row1-runtime"]').should('have.text', '5 ms')
+        cy.get('[data-cy="row2-runtime"]').should('have.text', '999 ms')
+        cy.get('[data-cy="row3-runtime"]').should('have.text', '1 second')
+        cy.get('[data-cy="row4-runtime"]').should('have.text', '23 seconds')
+        cy.get('[data-cy="row5-runtime"]').should('have.text', '59 seconds')
+        cy.get('[data-cy="row6-runtime"]').should('have.text', '1 minute and 0 seconds')
+        cy.get('[data-cy="row7-runtime"]').should('have.text', '1 minute and 1 second')
+        cy.get('[data-cy="row8-runtime"]').should('have.text', '1 minute and 33 seconds')
+        cy.get('[data-cy="row9-runtime"]').should('have.text', '1 minute and 59 seconds')
+        cy.get('[data-cy="row10-runtime"]').should('have.text', '2 minutes and 1 second')
+        cy.get('[data-cy="row11-runtime"]').should('have.text', '2 minutes and 59 seconds')
+        cy.get('[data-cy="row12-runtime"]').should('have.text', '9 minutes and 59 seconds')
+        cy.get('[data-cy="row13-runtime"]').should('have.text', '10 minutes')
+        cy.get('[data-cy="row14-runtime"]').should('have.text', '59 minutes')
+        cy.get('[data-cy="row15-runtime"]').should('have.text', '1 hour and 0 minutes')
+        cy.get('[data-cy="row16-runtime"]').should('have.text', '1 hour and 1 minute')
+        cy.get('[data-cy="row17-runtime"]').should('have.text', '1 hour and 2 minutes')
+        cy.get('[data-cy="row18-runtime"]').should('have.text', '1 hour and 33 minutes')
+        cy.get('[data-cy="row19-runtime"]').should('have.text', '1 hour and 59 minutes')
+        cy.get('[data-cy="row20-runtime"]').should('have.text', '2 hours and 0 minutes')
+        cy.get('[data-cy="row21-runtime"]').should('have.text', '2 hours and 1 minute')
+        cy.get('[data-cy="row22-runtime"]').should('have.text', '9 hours and 59 minutes')
+        cy.get('[data-cy="row23-runtime"]').should('have.text', '10 hours')
+        cy.get('[data-cy="row24-runtime"]').should('have.text', '10 hours')
+        cy.get('[data-cy="row25-runtime"]').should('have.text', '23 hours')
+        cy.get('[data-cy="row26-runtime"]').should('have.text', '1 day')
+        cy.get('[data-cy="row27-runtime"]').should('have.text', '1 day')
+        cy.get('[data-cy="row28-runtime"]').should('have.text', '364 days')
+        cy.get('[data-cy="row29-runtime"]').should('have.text', '1 year')
+        cy.get('[data-cy="row30-runtime"]').should('have.text', '1 year')
+        cy.get('[data-cy="row31-runtime"]').should('have.text', '1 year')
+        cy.get('[data-cy="row32-runtime"]').should('have.text', '2 years')
     });
 
     it('delete a run', function () {
