@@ -35,7 +35,7 @@ limitations under the License.
             <b-badge variant="success">{{ quizResult.numCorrect }}</b-badge> out of <b-badge>{{ quizResult.numTotal }}</b-badge>
           </div>
           <div class="text-secondary mt-2" data-cy="subTitleMsg">
-            <span v-if="quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
+            <span v-if="!quizResult.gradedRes.passed && quizResult.missedBy > 0">Missed by <b-badge variant="warning">{{ quizResult.missedBy }}</b-badge> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
             <span v-else>Well done!</span>
           </div>
         </b-card-text>
