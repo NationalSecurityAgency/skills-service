@@ -788,6 +788,91 @@ describe('Settings Tests', () => {
             .contains('FOOTER');
     });
 
+    it('Updating system settings does not reset email settings', () => {
+        cy.intercept('GET', '/root/getEmailSettings')
+            .as('loadEmailSettings');
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+        cy.intercept('GET', '/public/config')
+            .as('loadConfig');
+        cy.intercept('GET', '/root/getSystemSettings')
+            .as('loadSystemSettings');
+
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
+            .click();
+        cy.get('[data-cy="nav-Email"]')
+            .click();
+        cy.wait('@loadEmailSettings');
+
+        cy.get$('[data-cy=hostInput]')
+            .type('{selectall}localhost');
+        cy.get$('[data-cy=portInput]')
+            .type('{selectall}1026');
+        cy.get$('[data-cy=protocolInput]')
+            .type('{selectall}smtp');
+        cy.get$('[data-cy=publicUrlInput]')
+            .type('{selectall}http://localhost:8082');
+        cy.get$('[data-cy=fromEmailInput]')
+            .type('{selectall}foo@skilltree.madeup');
+        cy.get$('[data-cy=emailSettingsTest]')
+            .click();
+        cy.get$('[data-cy=emailSettingsSave]')
+            .click();
+
+        cy.get('[data-cy="nav-System"]')
+            .click();
+        cy.visit('/settings/email');
+        cy.wait('@loadEmailSettings');
+        cy.get('[data-cy=hostInput]')
+            .should('have.value', 'localhost');
+        cy.get('[data-cy=portInput]')
+            .should('have.value', '1026');
+        cy.get('[data-cy=protocolInput]')
+            .should('have.value', 'smtp');
+        cy.get('[data-cy=publicUrlInput]')
+            .should('have.value', 'http://localhost:8082');
+        cy.get('[data-cy=fromEmailInput]')
+            .should('have.value', 'foo@skilltree.madeup');
+
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
+            .click();
+        cy.get('[data-cy="nav-System"]')
+            .click();
+
+        cy.wait('@loadSystemSettings');
+
+        cy.get$('[data-cy=customHeader')
+            .type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get$('[data-cy=customFooter')
+            .type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get$('[data-cy=saveSystemSettings]')
+            .click();
+
+        cy.get('[data-cy="nav-System"]')
+            .click();
+        cy.visit('/settings/email');
+        cy.wait('@loadEmailSettings');
+        cy.get('[data-cy=hostInput]')
+            .should('have.value', 'localhost');
+        cy.get('[data-cy=portInput]')
+            .should('have.value', '1026');
+        cy.get('[data-cy=protocolInput]')
+            .should('have.value', 'smtp');
+        cy.get('[data-cy=publicUrlInput]')
+            .should('have.value', 'http://localhost:8082');
+        cy.get('[data-cy=fromEmailInput]')
+            .should('have.value', 'foo@skilltree.madeup');
+
+    })
+
     it('System Settings - script tags not allowed in footer/header', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
