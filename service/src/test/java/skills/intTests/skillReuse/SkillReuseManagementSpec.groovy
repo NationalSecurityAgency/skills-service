@@ -315,9 +315,9 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subj2_before.skills[0].totalPoints == 6 * 33
         subj2_before.skills[0].pointIncrementInterval == 520
         subj2_before.skills[0].maxOccurrencesWithinIncrementInterval == 2
+        !subj2_before.skills[0].selfReporting.enabled
         subj2_desc_before[0].description == "Original Desc"
         subj2_desc_before[0].href == "http://veryOriginal.com"
-        !subj2_desc_before[0].selfReporting.enabled
 
         projStat_before.numSubjects == 2
         projStat_before.numSkills == 3
@@ -344,10 +344,10 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subj2.skills[0].totalPoints == 10 * 22
         subj2.skills[0].pointIncrementInterval == 600
         subj2.skills[0].maxOccurrencesWithinIncrementInterval == 1
+        subj2.skills[0].selfReporting.enabled
+        subj2.skills[0].selfReporting.type == "Approval"
         subj2_desc[0].description == "New Desc"
         subj2_desc[0].href == "http://sonew.com"
-        subj2_desc[0].selfReporting.enabled
-        subj2_desc[0].selfReporting.type == "Approval"
 
         projStat.numSubjects == 2
         projStat.numSkills == 3

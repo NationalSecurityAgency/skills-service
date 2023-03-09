@@ -21,8 +21,11 @@ import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
+import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
+
+import javax.management.relation.Role
 
 @Slf4j
 class SkillsService {
@@ -1584,6 +1587,164 @@ class SkillsService {
         body.extensionDuration = isoDuration
         body.recipientEmail = recipientEmail
         return wsHelper.adminPost("/projects/${projectId}/invites/extend", body)
+    }
+
+    def getQuizDefs() {
+        wsHelper.appGet("/quiz-definitions")
+    }
+    def getQuizDef(String quizId) {
+        wsHelper.adminGet(getQuizDefUrl(quizId))
+    }
+    def countSkillsForQuiz(String quizId) {
+        wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills-count")
+    }
+    def getQuizDefSummary(String quizId) {
+        wsHelper.adminGet("${getQuizDefUrl(quizId)}/summary")
+    }
+    def createQuizDef(Map props, String originalQuizId = null) {
+        if (originalQuizId) {
+            return wsHelper.adminPost(getQuizDefUrl(originalQuizId), props)
+        }
+        return wsHelper.appPost(getQuizDefUrl(props.quizId), props)
+    }
+    def removeQuizDef(String quizId) {
+        wsHelper.adminDelete(getQuizDefUrl(quizId))
+    }
+
+    def reportQuizAttemptForUser(String userId, String quizId, def attemptInfo) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
+        wsHelper.adminPost(url, attemptInfo)
+    }
+
+    def quizIdExist(String quizId) {
+        wsHelper.appPost("/quizDefExist", [quizId: quizId])
+    }
+    def quizNameExist(String quizName) {
+        wsHelper.appPost("/quizDefExist", [name: quizName])
+    }
+    def createQuizQuestionDef(Map props) {
+        String url = "${getQuizDefUrl(props.quizId)}/create-question"
+        return wsHelper.adminPost(url, props)
+    }
+    def updateQuizQuestionDef(Map props) {
+        String url = "${getQuizDefUrl(props.quizId)}/questions/${props.id}"
+        return wsHelper.adminPost(url, props)
+    }
+    def createQuizQuestionDefs(List<Map> questions) {
+        questions.each {
+            createQuizQuestionDef(it)
+        }
+    }
+    def deleteQuizQuestionDef(String quizId, Integer questionRefId) {
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionRefId}"
+        return wsHelper.adminDelete(url)
+    }
+
+    def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
+        assert quizId
+        assert questionId
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionId}"
+        wsHelper.adminPatch(url, [
+                action: ActionPatchRequest.ActionType.NewDisplayOrderIndex.toString(),
+                newDisplayOrderIndex: newDisplayOrderIndex,
+        ]);
+    }
+
+    def addQuizUserRole(String quizId, String userId, String role) {
+        String url = "${getQuizDefUrl(quizId)}/users/${userId}/roles/${role}"
+        return wsHelper.adminPost(url, [])
+    }
+
+    def deleteQuizUserRole(String quizId, String userId, String role) {
+        String url = "${getQuizDefUrl(quizId)}/users/${userId}/roles/${role}"
+        return wsHelper.adminDelete(url)
+    }
+
+    def getQuizUserRoles(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/userRoles"
+        return wsHelper.adminGet(url)
+    }
+
+
+    def getQuizQuestionDefs(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/questions"
+        return wsHelper.adminGet(url)
+    }
+
+    def getQuizQuestionDef(String quizId, Integer questionId) {
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionId}"
+        return wsHelper.adminGet(url)
+    }
+
+    def getQuizMetrics(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/metrics"
+        return wsHelper.adminGet(url)
+    }
+
+    def saveQuizSettings(String quizId, List settings) {
+        String url = "${getQuizDefUrl(quizId)}/settings"
+        return wsHelper.adminPost(url, settings)
+    }
+
+    def getQuizSettings(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/settings"
+        return wsHelper.adminGet(url)
+    }
+
+    def getQuizInfo(String quizId) {
+        String url = "/quizzes/${quizId}"
+        return wsHelper.apiGet(url)
+    }
+
+    def getQuizAttemptResult(String quizId, Integer attemptId) {
+        String url = "${getQuizDefUrl(quizId)}/runs/${attemptId}"
+        return wsHelper.adminGet(url)
+    }
+
+    def getQuizRuns(String quizId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "") {
+        String url = "${getQuizDefUrl(quizId)}/runs"
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
+    }
+
+    def deleteQuizRun(String quizId, Integer quizAttemptId) {
+        String url = "${getQuizDefUrl(quizId)}/runs/${quizAttemptId}"
+        wsHelper.adminDelete(url)
+    }
+
+    @Deprecated
+    def reportQuizAttempt(String quizId, def quizAttemptReq) {
+        String url = "/quizzes/${quizId}/attempt"
+        return wsHelper.apiPost(url, quizAttemptReq)
+    }
+
+    def startQuizAttempt(String quizId) {
+        String url = "/quizzes/${quizId}/attempt"
+        return wsHelper.apiPost(url, [])
+    }
+    def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId, Map params = [isSelected:true]) {
+        String url = "/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}"
+        return wsHelper.apiPost(url, params)
+    }
+    def completeQuizAttempt(String quizId, Integer attemptId) {
+        String url = "/quizzes/${quizId}/attempt/${attemptId}/complete"
+        return wsHelper.apiPost(url, [])
+    }
+
+    def startQuizAttemptForUserId(String quizId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
+        return wsHelper.adminPost(url, [])
+    }
+    def reportQuizAnswerForUserId(String quizId, Integer attemptId, Integer answerId, String userId, Map params = [isSelected:true]) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}"
+        return wsHelper.adminPost(url, params)
+    }
+    def completeQuizAttemptForUserId(String quizId, Integer attemptId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete"
+        return wsHelper.adminPost(url, [])
+    }
+
+    private String getQuizDefUrl(String quizId) {
+        return "/quiz-definitions/${quizId}".toString()
     }
 
     private String getProjectUrl(String project) {

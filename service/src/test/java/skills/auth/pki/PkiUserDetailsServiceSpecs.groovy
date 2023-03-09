@@ -16,6 +16,7 @@
 package skills.auth.pki
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.userdetails.UserDetails
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.intTests.utils.DefaultIntSpec
@@ -53,13 +54,15 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
         int numThreads = 8
         AtomicInteger exceptioncount = new AtomicInteger()
         List<String> userIdsToSave = (0..100).collect { "User${it}".toString() }
+        List<UserDetails> collectedUserDetails = Collections.synchronizedList([])
         when:
         List<Thread> threads = (1..numThreads).collect {
             Thread.start {
                 PkiUserDetailsService pkiUserDetailsService = new PkiUserDetailsService(userAuthService: userAuthService, pkiUserLookup: pkiUserLookup)
                 userIdsToSave.each {
                     try {
-                        pkiUserDetailsService.loadUserByUsername(it)
+                        UserDetails userDetails = pkiUserDetailsService.loadUserByUsername(it)
+                        collectedUserDetails.add(userDetails)
                     } catch (Throwable t){
                         exceptioncount.incrementAndGet()
                     }
@@ -71,6 +74,7 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
         }
 
         then:
+        collectedUserDetails
         List<String> allDbUserIds = userAttrsRepo.findAll().collect({it.userId})
         userIdsToSave.each { String userIdToSearch ->
             assert allDbUserIds.contains(userIdToSearch.toLowerCase()), "[$userIdToSearch] userId does not exist in UserAttrs table"

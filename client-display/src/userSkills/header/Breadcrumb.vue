@@ -41,7 +41,7 @@ limitations under the License.
       return {
         items: [],
         homeLabel: 'Overview',
-        idsToExcludeFromPath: ['subjects', 'skills', 'crossProject', 'dependency', 'global'],
+        idsToExcludeFromPath: ['subjects', 'skills', 'crossProject', 'dependency', 'global', 'quizzes'],
         keysToExcludeFromPath: [], // will be unnecessary key for global badges
         ignoreNext: false,
       };
@@ -101,7 +101,12 @@ limitations under the License.
         return `${prefix}${arr.slice(0, endIndex).join('/')}`;
       },
       prepKey(key) {
-        const res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
+        let res = key;
+        if (key.endsWith('zes')) {
+          res = key.substring(0, key.length - 3);
+        } else {
+          res = key.endsWith('s') ? key.substring(0, key.length - 1) : key;
+        }
         return this.capitalize(this.substituteCustomLabels(res));
       },
       substituteCustomLabels(label) {

@@ -48,7 +48,7 @@ limitations under the License.
         </div>
 
         <div class="row text-center justify-content-center">
-          <div v-for="(stat) in stats" :key="stat.label" class="col" style="min-width: 10rem;">
+          <div v-for="(stat) in stats" :key="stat.label" class="col mt-1" style="min-width: 10rem;">
             <div :data-cy="`pagePreviewCardStat_${stat.label}`"
                  class="border rounded stat-card h-100">
               <i :class="stat.icon"></i>

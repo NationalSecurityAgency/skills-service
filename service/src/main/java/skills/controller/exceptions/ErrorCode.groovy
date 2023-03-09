@@ -40,6 +40,7 @@ enum ErrorCode {
     ExportToCatalogNotAllowed,
     DependenciesNotAllowed,
     MaxProjectsThreshold,
+    MaxQuizDefThreshold,
     MaxBadgesThreshold,
     MaxSkillsThreshold,
     MaxSubjectsThreshold,
@@ -50,5 +51,8 @@ enum ErrorCode {
     UserRoleAlreadyAssigned,
     NotYourInvitationCode,
     ExpiredProjectInvite,
-    ProjectInviteAlreadyExists
+    ProjectInviteAlreadyExists,
+    UserQuizAttemptsExhausted,
+    SurveyCanOnlyBeTakenOnce,
+    SkillEventForQuizSkillIsNotAllowed,
 }

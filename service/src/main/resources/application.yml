@@ -114,6 +114,9 @@ skills:
       maxTimeWindowInMinutes: 43200
       docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
+      maxQuizDefsPerAdmin: 1000
+      maxQuestionsPerQuiz: 500
+      maxAnswersPerQuizQuestion: 10
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100
@@ -132,6 +135,8 @@ skills:
       minNameLength: 3
       maxBadgeNameLength: 50
       maxProjectNameLength: 50
+      maxQuizNameLength: 75
+      maxQuizTextAnswerLength: 2000
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
       maxLevelNameLength: 50

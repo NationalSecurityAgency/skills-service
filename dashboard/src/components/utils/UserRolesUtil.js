@@ -21,4 +21,12 @@ export default class UserRolesUtil {
   static isApproverRole(role) {
     return role && role === 'ROLE_PROJECT_APPROVER';
   }
+
+  static isQuizAdminRole(role) {
+    return role && role === 'ROLE_QUIZ_ADMIN';
+  }
+
+  static isQuizReadOnlyRole(role) {
+    return role && role === 'ROLE_QUIZ_READ_ONLY';
+  }
 }

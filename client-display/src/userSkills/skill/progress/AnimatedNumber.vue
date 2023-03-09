@@ -22,6 +22,10 @@ limitations under the License.
     name: 'AnimatedNumber',
     props: {
       num: Number,
+      timeout: {
+        type: Number,
+        default: 20,
+      },
     },
     data() {
       return {
@@ -48,7 +52,7 @@ limitations under the License.
               change = change >= 0 ? Math.ceil(change) : Math.floor(change);
               this.displayNumber += change;
             }
-          }, 20);
+          }, this.timeout);
         }
       },
     },

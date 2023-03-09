@@ -55,6 +55,11 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String userId
     }
 
+    static class DomainSpecificQuizErrBody extends BasicErrBody {
+        String quizId
+        String userId
+    }
+
     @ExceptionHandler(SkillException)
     protected ResponseEntity<Object> handleSkillException(Exception ex, WebRequest webRequest) {
         Object body
@@ -79,6 +84,48 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
                     log.warn(msg.toString() + ", exception message: [" + ex.message + "]")
                 }
             } else if (ex.logLevel == SkillException.SkillExceptionLogLevel.INFO) {
+                if (ex.printStackTrace) {
+                    log.info(msg.toString(), ex)
+                } else {
+                    log.info(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            }
+
+            if (NOT_FOUND_CODES.contains(ex.errorCode)) {
+                status = HttpStatus.NOT_FOUND
+            }
+
+        } else {
+            log.error("Unexpected exception type [${ex?.class?.simpleName}], ${buildRequestInfo(webRequest)}", ex)
+        }
+        return new ResponseEntity(body, status)
+    }
+
+
+    @ExceptionHandler(SkillQuizException)
+    protected ResponseEntity<Object> handleQuizException(Exception ex, WebRequest webRequest) {
+        Object body
+        HttpStatus status = HttpStatus.BAD_REQUEST
+        if (ex instanceof SkillQuizException) {
+            body = new DomainSpecificQuizErrBody(userId: ex.userId, quizId: ex.quizId, explanation: ex.message, errorCode: ex.errorCode.name())
+            String msg = "Exception for: quizId=[${ex.quizId}], ${buildRequestInfo(webRequest)}"
+            if (ex.userId) {
+                msg = "${msg}, userId=[${ex.userId}]"
+            }
+
+            if ( ex.logLevel == SkillQuizException.SkillExceptionLogLevel.ERROR){
+                if (ex.printStackTrace) {
+                    log.error(msg.toString(), ex)
+                } else {
+                    log.error(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillQuizException.SkillExceptionLogLevel.WARN) {
+                if (ex.printStackTrace) {
+                    log.warn(msg.toString(), ex)
+                } else {
+                    log.warn(msg.toString() + ", exception message: [" + ex.message + "]")
+                }
+            } else if (ex.logLevel == SkillQuizException.SkillExceptionLogLevel.INFO) {
                 if (ex.printStackTrace) {
                     log.info(msg.toString(), ex)
                 } else {

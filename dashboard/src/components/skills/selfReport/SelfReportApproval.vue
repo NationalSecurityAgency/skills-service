@@ -326,6 +326,7 @@ limitations under the License.
               setTimeout(() => this.$announcer.polite(`rejected ${ids.length} skill approval request${ids.length > 1 ? 's' : ''}`), 0);
             });
             this.$emit('approval-action', 'rejected');
+            this.reject.rejectMsg = '';
           });
       },
       checkEmailSubscriptionStatus() {

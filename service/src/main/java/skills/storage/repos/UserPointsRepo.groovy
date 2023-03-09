@@ -55,6 +55,149 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
+    @Query(value = '''insert into user_points (user_id, project_id, skill_ref_id, skill_id, points, created, updated)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   skill.point_increment as points,
+                   q_attempt.completed   as created,
+                   q_attempt.completed   as updated
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and q_attempt.quiz_definition_ref_id = :quizRefId
+              and skill.id = :skillRefId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_points innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                )''', nativeQuery = true)
+    void createSkillUserPointsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+
+    @Modifying
+    @Query(value = '''insert into user_points (user_id, project_id, skill_ref_id, skill_id, points, created, updated)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   skill.point_increment as points,
+                   q_attempt.completed   as created,
+                   q_attempt.completed   as updated
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and skill.project_id = :projectId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_points innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                )''', nativeQuery = true)
+    void createSkillUserPointsFromPassedQuizzesForProject(@Param('projectId') String projectId)
+
+    @Modifying
+    @Query(value = '''insert into user_performed_skill (user_id, project_id, skill_ref_id, skill_id, performed_on)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   q_attempt.completed   as performed_on
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and q_attempt.quiz_definition_ref_id = :quizRefId
+              and skill.id = :skillRefId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_performed_skill innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                );''', nativeQuery = true)
+    void createUserPerformedEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+
+    @Modifying
+    @Query(value = '''insert into user_performed_skill (user_id, project_id, skill_ref_id, skill_id, performed_on)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   q_attempt.completed   as performed_on
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and skill.project_id = :projectId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_performed_skill innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                );''', nativeQuery = true)
+    void createUserPerformedEntriesFromPassedQuizzesForProject(@Param('projectId') String projectId)
+
+    @Modifying
+    @Query(value = '''insert into user_achievement (user_id, project_id, skill_ref_id, skill_id, points_when_achieved, notified, achieved_on)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   skill.point_increment as points_when_achieved,
+                   'false'               as notified,
+                   q_attempt.completed   as achieved_on
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and q_attempt.quiz_definition_ref_id = :quizRefId
+              and skill.id = :skillRefId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_achievement innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                );''', nativeQuery = true)
+    void createUserAchievementsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+
+    @Modifying
+    @Query(value = '''insert into user_achievement (user_id, project_id, skill_ref_id, skill_id, points_when_achieved, notified, achieved_on)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   skill.skill_id        as skill_id,
+                   skill.point_increment as points_when_achieved,
+                   'false'               as notified,
+                   q_attempt.completed   as achieved_on
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and skill.project_id = :projectId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_achievement innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                );''', nativeQuery = true)
+    void createUserAchievementsFromPassedQuizzesForProject(@Param('projectId') String projectId)
+
+    @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, points, project_id)
             SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id
             FROM user_points up, skill_definition sd
@@ -85,7 +228,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
           )
         group by up.user_id;
             ''', nativeQuery = true)
-    void createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
+    Integer createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
 
     @Nullable
     @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId is null''')
@@ -337,7 +480,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
-    left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.projectId=?2 and approval.rejectedOn=null and approval.approverUserId=null
+    left join SkillApproval approval on (
+            (sdChild.id = approval.skillRefId OR sdChild.copiedFrom = approval.skillRefId)
+            and approval.userId=?1
+            and (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
+      )
       where srd.parent=sdParent.id and  srd.child=sdChild.id and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)

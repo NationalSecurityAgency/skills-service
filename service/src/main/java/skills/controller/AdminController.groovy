@@ -598,6 +598,15 @@ class AdminController {
         // default to enabled
         skillRequest.enabled = skillRequest.enabled == null ? "true" : skillRequest.enabled
 
+        if (skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
+            SkillsValidator.isTrue(StringUtils.isNotBlank(skillRequest.quizId), "When selfReportingType=Quiz then quizId param must not be blank", projectId, skillId)
+        }
+
+        if (skillRequest.quizId) {
+            SkillsValidator.isTrue(skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString(), "When quizId is provided then selfReportingType must equal 'Quiz'", projectId, skillId)
+            SkillsValidator.isTrue(skillRequest.numPerformToCompletion == 1, "When quizId is provided numPerformToCompletion must be equal 1", projectId, skillId)
+        }
+
         saveSkillService.saveSkillAndSchedulePropagationToImportedSkills(skillId, skillRequest, true, groupId)
     }
 

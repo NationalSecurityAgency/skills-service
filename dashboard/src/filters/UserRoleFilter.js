@@ -19,11 +19,14 @@ const userRoleFormatter = (value) => {
   if (value === 'ROLE_PROJECT_APPROVER') {
     return 'Approver';
   }
-  if (value === 'ROLE_PROJECT_ADMIN') {
+  if (value === 'ROLE_PROJECT_ADMIN' || value === 'ROLE_QUIZ_ADMIN') {
     return 'Admin';
   }
   if (value === 'ROLE_SUPER_DUPER_USER') {
     return 'Root';
+  }
+  if (value === 'ROLE_QUIZ_READ_ONLY') {
+    return 'Read Only';
   }
   return value;
 };

@@ -98,6 +98,7 @@ limitations under the License.
                          id="numPerformToCompletion"
                          aria-describedby="skillOccurrencesError"
                          aria-errormessage="skillOccurrencesError"
+                         :disabled="skillInternal && skillInternal.selfReportingType && skillInternal.selfReportingType === 'Quiz'"
                          :aria-label="`Occurrences to Completion values must range between 1 and ${maxPointIncrement}`"
                          :aria-invalid="errors && errors.length > 0"/>
                   <small role="alert" class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
@@ -212,6 +213,9 @@ limitations under the License.
                                        @shown="tooltipShowing=true"
                                        @hidden="tooltipShowing=false"
                                        @justificationRequiredChanged="updateJustificationRequired"
+                                       @input="selfReportTypeChanged"
+                                       @quizIdChanged="updateQuizId"
+                                       @quizIdCleared="clearQuizId"
             />
 
             <hr class="mt-0"/>
@@ -352,6 +356,8 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          justificationRequired: false,
+          quizId: null,
           type: 'Skill',
         },
         skillInternal: {
@@ -373,6 +379,8 @@ limitations under the License.
           description: null,
           helpUrl: null,
           selfReportingType: null,
+          justificationRequired: false,
+          quizId: null,
           type: 'Skill',
         },
         canEditSkillId: false,
@@ -495,6 +503,17 @@ limitations under the License.
       updateJustificationRequired(value) {
         this.skillInternal.justificationRequired = value;
       },
+      updateQuizId(quizId) {
+        this.skillInternal.quizId = quizId;
+      },
+      clearQuizId() {
+        this.skillInternal.quizId = null;
+      },
+      selfReportTypeChanged(newType) {
+        if (newType === 'Quiz') {
+          this.skillInternal.numPerformToCompletion = 1;
+        }
+      },
       setupValidation() {
         const self = this;
         extend('uniqueName', {
@@ -560,6 +579,16 @@ limitations under the License.
           },
         });
 
+        extend('selfReportQuiz', {
+          message: (field) => `Test was not selected for the ${field}`,
+          validate() {
+            if (self.skillInternal.selfReportingType === 'Quiz' && !self.skillInternal.quizId) {
+              return false;
+            }
+            return true;
+          },
+        });
+
         const validateWindow = (windowHours, windowMinutes, validator) => {
           let hours = 0;
           let minutes = 0;
@@ -614,7 +643,18 @@ limitations under the License.
                 pointIncrement: parseInt(this.skillInternal.pointIncrement, 10),
                 numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
               };
-              this.$emit('skill-saved', { isEdit: this.isEdit, ...this.skillInternal, groupId: this.groupId });
+              const isQuiz = this.skillInternal.selfReportingType === 'Quiz';
+              const quizId = isQuiz ? this.skillInternal.quizId : null;
+              const quizName = isQuiz ? this.skillInternal.quizName : null;
+              const quizType = isQuiz ? this.skillInternal.quizType : null;
+              this.$emit('skill-saved', {
+                isEdit: this.isEdit,
+                ...this.skillInternal,
+                groupId: this.groupId,
+                quizId,
+                quizName,
+                quizType,
+              });
               this.publishHidden({ saved: true });
             }
           });

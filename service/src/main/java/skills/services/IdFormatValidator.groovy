@@ -17,11 +17,15 @@ package skills.services
 
 import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
+import skills.controller.exceptions.ErrorCode
 
 @CompileStatic
 class IdFormatValidator {
 
     static void validate(String id, Boolean allowPercent=false) {
+        if (id?.equalsIgnoreCase("undefined")) {
+            throw new skills.controller.exceptions.SkillException("Bad Id [$id] - this is not an allowed value.", null, null, ErrorCode.BadParam)
+        }
         if (!isAlphanumericOrUnderscoreOrPercent(id, allowPercent)) {
             throw new skills.controller.exceptions.SkillException("Bad Id [$id] - must be alpha numeric - no spaces or special characters.")
         }

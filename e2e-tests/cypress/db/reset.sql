@@ -13,6 +13,7 @@
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
 delete from project_definition where project_id <> 'Inception';
+delete from quiz_definition;
 delete from user_attrs where user_id <> 'root@skills.org' and user_id <> 'skills@skills.org';
 delete from user_roles where user_id = 'skills@skills.org' and (role_name = 'ROLE_SUPER_DUPER_USER' OR role_name = 'ROLE_SUPERVISOR' OR role_name = 'ROLE_PROJECT_ADMIN' OR role_name = 'ROLE_PRIVATE_PROJECT_USER');
 delete from user_roles where user_id = 'root@skills.org' and role_name = 'ROLE_SUPERVISOR';

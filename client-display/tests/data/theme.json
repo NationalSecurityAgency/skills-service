@@ -38,5 +38,10 @@
     "backgroundColorSecondary": "#a37ee6",
     "foregroundColor": "#fdfbfb"
   },
-  "graphLegendBorderColor": "1px solid grey"
+  "graphLegendBorderColor": "1px solid grey",
+  "quiz": {
+    "incorrectAnswerColor": "#d67070",
+    "correctAnswerColor": "#93f193",
+    "selectedAnswerColor": "#2c9a2c"
+  }
 }

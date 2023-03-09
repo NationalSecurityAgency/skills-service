@@ -19,14 +19,20 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.storage.model.ProjDef
+import skills.storage.model.QuizDef
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizDefRepo
 
 @Component
 class ServiceValidatorHelper {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    QuizDefRepo quizDefRepo
 
     void validateProjectIdDoesNotExist(String projectId) {
         ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectId)
@@ -39,6 +45,20 @@ class ServiceValidatorHelper {
         ProjDef nameExist = projDefRepo.findByNameIgnoreCase(projectName)
         if (nameExist) {
             throw new SkillException("Project with name [${projectName}] already exists! Sorry!", projectId, null, ErrorCode.ConstraintViolation)
+        }
+    }
+
+    void validateQuizIdDoesNotExist(String quizId) {
+        QuizDef idExist = quizDefRepo.findByQuizIdIgnoreCase(quizId)
+        if (idExist) {
+            throw new SkillQuizException("Quiz with id [${quizId}] already exists! Sorry!", quizId, ErrorCode.ConstraintViolation)
+        }
+    }
+
+    void validateQuizNameDoesNotExist(String quizName, String quizId) {
+        QuizDef nameExist = quizDefRepo.findByNameIgnoreCase(quizName)
+        if (nameExist) {
+            throw new SkillQuizException("Quiz with name [${quizName}] already exists! Sorry!", quizId, ErrorCode.ConstraintViolation)
         }
     }
 

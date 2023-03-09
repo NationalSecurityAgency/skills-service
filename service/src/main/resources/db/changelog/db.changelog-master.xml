@@ -1932,7 +1932,6 @@
                                  referencedTableName="project_definition"/>
     </changeSet>
 
-
     <changeSet id="36" author="skills team">
         <createTable tableName="attachments">
             <column name="id" type="int" autoIncrement="true">
@@ -1957,6 +1956,425 @@
                      tableName="attachments">
             <column name="filename" type="varchar(255)"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="37" author="skills team">
+        <createTable tableName="quiz_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_quiz_definition_quiz_id"
+                     tableName="quiz_definition" unique="true">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_quiz_definition_name"
+                     tableName="quiz_definition" unique="true">
+            <column name="name" type="varchar(255)"/>
+        </createIndex>
+
+        <addColumn tableName="user_roles">
+            <!-- optional -->
+            <column name="quiz_id" type="varchar(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="quizDefs_lock"/>
+        </insert>
+
+        <createTable tableName="quiz_question_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <createIndex indexName="fk_quiz_question_definition_quiz_id"
+                     tableName="quiz_question_definition" unique="false">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="quiz_question_definition"
+                                 constraintName="fk_quiz_question_definition_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+
+        <createTable tableName="quiz_answer_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="question_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="answer" type="text" />
+            <column name="is_correct_answer" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="display_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="fk_quiz_answer_definition_question_ref_id"
+                     tableName="quiz_answer_definition" unique="false">
+            <column name="question_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="question_ref_id"
+                                 baseTableName="quiz_answer_definition"
+                                 constraintName="fk_quiz_answer_definition_question_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_question_definition"/>
+
+        <createIndex indexName="fk_quiz_answer_definition_quiz_id"
+                     tableName="quiz_answer_definition" unique="false">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="quiz_answer_definition"
+                                 constraintName="fk_quiz_answer_definition_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+
+        <createTable tableName="user_quiz_attempt">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_definition_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="started" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="completed" type="DATETIME" />
+
+            <column name="num_questions_to_pass" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="user_quiz_attempt_status"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="fk_user_quiz_attempt_quiz_definition_ref_id"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="quiz_definition_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_definition_ref_id"
+                                 baseTableName="user_quiz_attempt"
+                                 constraintName="fk_quiz_user_quiz_attempt_quiz_definition_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_definition"/>
+
+        <createIndex indexName="fk_user_quiz_attempt_user_id"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_quiz_attempt"
+                                 constraintName="fk_user_quiz_attempt_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createTable tableName="user_quiz_question_attempt">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_quiz_attempt_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quiz_question_definition_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="user_quiz_question_attempt_status"
+                     tableName="user_quiz_question_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="fk_user_quiz_question_attempt_user_quiz_attempt_ref_id"
+                     tableName="user_quiz_question_attempt" unique="false">
+            <column name="user_quiz_attempt_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_quiz_attempt_ref_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_user_quiz_attempt_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_quiz_attempt"/>
+
+        <createIndex indexName="fk_user_quiz_question_attempt_quiz_question_definition_ref_id"
+                     tableName="user_quiz_question_attempt" unique="false">
+            <column name="quiz_question_definition_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_question_definition_ref_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_quiz_question_definition_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_question_definition"/>
+
+        <createIndex indexName="fk_user_quiz_question_attempt_user_id"
+                     tableName="user_quiz_question_attempt" unique="false">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_quiz_question_attempt"
+                                 constraintName="fk_user_quiz_question_attempt_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createTable tableName="user_quiz_answer_attempt">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_quiz_attempt_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quiz_answer_definition_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="answer" type="text" />
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="user_quiz_answer_attempt_status"
+                     tableName="user_quiz_answer_attempt" unique="false">
+            <column name="status" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="fk_user_quiz_answer_attempt_user_quiz_attempt_ref_i"
+                     tableName="user_quiz_answer_attempt" unique="false">
+            <column name="user_quiz_attempt_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_quiz_attempt_ref_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_user_quiz_attempt_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_quiz_attempt"/>
+
+        <createIndex indexName="fk_user_quiz_answer_attempt_user_quiz_answer_definition_ref_id"
+                     tableName="user_quiz_answer_attempt" unique="false">
+            <column name="quiz_answer_definition_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_answer_definition_ref_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_quiz_answer_definition_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_answer_definition"/>
+
+        <createIndex indexName="fk_user_quiz_answer_attempt_user_id"
+                     tableName="user_quiz_answer_attempt" unique="false">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_quiz_answer_attempt"
+                                 constraintName="fk_user_quiz_answer_attempt_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createTable tableName="quiz_to_skill_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="quiz_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="fk_quiz_to_skill_definition_quiz_ref_id"
+                     tableName="quiz_to_skill_definition" unique="false">
+            <column name="quiz_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_ref_id"
+                                 baseTableName="quiz_to_skill_definition"
+                                 constraintName="fk_quiz_to_skill_definition_quiz_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_definition"/>
+
+        <createIndex indexName="fk_quiz_to_skill_definition_skill_ref_id"
+                     tableName="quiz_to_skill_definition" unique="true">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="quiz_to_skill_definition"
+                                 constraintName="fk_quiz_to_skill_definition_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+
+        <createTable tableName="quiz_settings">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="setting" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quiz_ref_id" type="int" />
+            <column name="user_ref_id" type="int" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex indexName="index_quiz_settings_setting"
+                     tableName="quiz_settings">
+            <column name="setting" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="fk_quiz_settings_quiz_ref_id"
+                     tableName="quiz_settings">
+            <column name="quiz_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="quiz_ref_id"
+                                 baseTableName="quiz_settings"
+                                 constraintName="fk_quiz_settings_quiz_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="quiz_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_ref_id"
+                                 baseTableName="quiz_settings"
+                                 constraintName="fk_quiz_settings_user_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_attrs"/>
     </changeSet>
 
 </databaseChangeLog>

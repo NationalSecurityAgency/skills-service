@@ -181,6 +181,11 @@ class SkillEventsTransactionalService {
         if (Boolean.valueOf(skillDefinition.readOnly) && !skillDefinition.selfReportingType) {
             throw new SkillException("Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting", projectId, skillId, ErrorCode.ReadOnlySkill)
         }
+        if (!approvalParams.isFromPassingQuiz && skillDefinition.selfReportingType == SkillDef.SelfReportingType.Quiz) {
+            SkillException e = new SkillException("Cannot report skill events directly to a quiz-based skill. Can only achieve by completing quiz/survey.", projectId, skillId, ErrorCode.SkillEventForQuizSkillIsNotAllowed)
+            e.doNotRetry = true
+            throw e;
+        }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId
             skillDefinition = getCopiedFromSkillDef(skillDefinition, skillId)

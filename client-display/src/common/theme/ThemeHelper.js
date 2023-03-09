@@ -15,7 +15,7 @@
  */
 export default {
   nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors'],
-  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app.skills-display-container',
@@ -262,6 +262,23 @@ export default {
     skillTreeBrandColor: {
       selector: 'body #app .poweredByContainer .skills-theme-brand',
       styleName: 'color',
+    },
+    quiz: {
+      incorrectAnswerColor: {
+        selector: 'body #app .skills-theme-quiz-incorrect-answer',
+        styleName: 'color',
+      },
+      correctAnswerColor: {
+        selector: 'body #app .skills-theme-quiz-correct-answer',
+        styleName: 'color',
+      },
+      selectedAnswerColor: [{
+        selector: 'body #app .skills-theme-quiz-selected-answer',
+        styleName: 'color',
+      }, {
+        selector: 'body #app .skills-theme-quiz-selected-answer-row:hover',
+        styleName: 'border-color',
+      }],
     },
   },
 

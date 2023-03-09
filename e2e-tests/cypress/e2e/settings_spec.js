@@ -1158,6 +1158,7 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated')
 
         // click SkillTree logo and verify we are on the correct page
         cy.get('[data-cy="skillTreeLogo"]')
@@ -1186,6 +1187,7 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@saveUserInfo');
         cy.wait('@loadUserInfo');
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated')
 
         // click SkillTree logo and verify we are on the correct page
         cy.get('[data-cy="skillTreeLogo"]')

@@ -66,83 +66,94 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="requestApprovalBtn"]')
             .should('exist');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="requestApprovalAlert"]')
+            .contains('This skill requires approval. Request 100 points once you\'ve completed the skill.')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .should('exist');
-        cy.get('[data-cy="skillProgress_index-2"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="honorSystemAlert"]')
+            .contains('This skill can be submitted under the Honor System, claim 100 points once you\'ve completed the skill')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="claimPointsBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalAlert"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="honorSystemAlert"]')
             .should('not.exist');
 
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .should('exist');
+        cy.get('[data-cy="requestApprovalAlert"]')
+            .contains('This skill requires approval. Request 100 points once you\'ve completed the skill.')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .should('exist');
+        cy.get('[data-cy="honorSystemAlert"]')
+            .contains('This skill can be submitted under the Honor System, claim 100 points once you\'ve completed the skill')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(2);
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="requestApprovalAlert"]')
+            .should('not.exist');
+        cy.get('[data-cy="honorSystemAlert"]')
             .should('not.exist');
     });
 
     it('do not show report if skill is completed', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem',  numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem',  numPerformToCompletion: 1 });
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval',  numPerformToCompletion: 1 });
 
         cy.cdVisit('/');
-        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.clone()
-                .add(1, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.clone()
-                .add(2, 'day')
-                .format('x')
-        });
-
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('not.exist');
+        cy.get('[data-cy="selfReportHonorSystemTag"]')
+        cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
+
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy="selfReportApprovalTag"]')
+        cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
     });
 
     it('do not show report if skill has uncompleted dependencies', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' });
-        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
-
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem', numPerformToCompletion: 2 });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', numPerformToCompletion: 1 });
         cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`);
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('not.exist');
-
-        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.clone()
-                .add(1, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.clone()
-                .add(2, 'day')
-                .format('x')
-        });
+        cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
 
         cy.cdBack('Subject 1');
-        cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.enabled');
+        cy.cdClickSkill(1);
+        cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]').should('exist');
+
+        cy.cdBack('Subject 1');
+        cy.cdClickSkill(2);
+        cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
     });
 
     it('self report honor skill', () => {
@@ -155,13 +166,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 50 points will be awarded right away');
-        cy.get('[data-cy=charactersRemaining')
-            .should('not.exist');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
 
         cy.get('[data-cy="selfReportAlert"]')
@@ -177,16 +182,12 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.matchSnapshotImageForElement('[data-cy="skillProgressBar"]', 'Halfway_Progress');
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 50 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
 
         cy.get('[data-cy="selfReportAlert"]')
             .contains('You just earned 50 points and completed the skill!');
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('100');
@@ -221,11 +222,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 50 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
@@ -241,16 +238,12 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Halfway_Progress_On_Subj_Page');
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 50 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
             .contains('You just earned 50 points and completed the skill!');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('100');
@@ -277,36 +270,33 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
+            .contains('Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
 
         cy.get('[data-cy="selfReportAlert"]')
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('requires approval');
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('Submitted successfully!');
 
         // refresh the page and validate that submit button is disabled and approval status is still displayed
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="pendingApprovalStatus"]').contains('pending approval')
 
         // approve and then visit page again
         cy.approveRequest();
@@ -314,7 +304,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .should('not.exist');
@@ -339,10 +329,10 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with a justification and it will enter an approval queue.');
+            .contains('Submit with a justification and it will enter an approval queue');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.disabled');
 
@@ -358,25 +348,29 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
+
+        cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist')
+        cy.get('[data-cy="dismissSuccessfulSubmissionBtn"]').click()
         cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+            .contains('pending approval');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="selfReportAlert"]').should('not.exist')
 
         // refresh the page and validate that submit button is disabled and approval status is still displayed
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+            .contains('ending approval');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('Submitted a few seconds ago');
 
@@ -386,7 +380,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .should('not.exist');
@@ -408,12 +402,12 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+            .contains('pending approval');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('Submitted 5 days ago');
     });
@@ -428,14 +422,32 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+            .contains('pending approval');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="pendingApprovalStatus"]')
             .contains('Submitted 5 days ago');
+    });
+
+    it('self report - approval-based submission was cancelled - on subject page', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.get('[data-cy=toggleSkillDetails]')
+            .click();
+
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]').click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportSubmitBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]').should('not.exist')
+
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportApprovalCancelBtn"]').click()
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportApprovalCancelBtn"]').should('not.exist')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]').should('be.focused')
     });
 
     it('self report - skill was submitted for approval - on subject page skill header', () => {
@@ -467,18 +479,16 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="approvalPending"]').contains('Request Rejected')
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.enabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Rejected a few seconds ago');
         cy.get('[data-cy="selfReportRejectedAlert"]')
             .contains('The reason is: "Skill was rejected"');
+        cy.get('[data-cy="clearRejectionMsgBtn"]').should('be.enabled')
     });
 
     it('self report - skill was rejected - on subject page', () => {
@@ -501,14 +511,15 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="clearRejectionMsgBtn"]')
             .should('be.enabled');
+
+
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalRejectedStatus"]')
-            .contains('Rejected a few seconds ago');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalPending"]').contains('Request Rejected')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]')
             .contains('The reason is: "Skill was rejected"');
     });
@@ -522,38 +533,35 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
+        cy.get('[data-cy="selfReportRejectedAlert"]')
+            .contains('The reason is: "Skill was rejected"');
+        cy.get('[data-cy="clearRejectionMsgBtn"]').click()
 
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .click();
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
+            .contains('Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
 
         cy.get('[data-cy="selfReportAlert"]')
-            .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game!');
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+            .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
         cy.get('[data-cy="selfReportAlert"]')
             .should('not.exist');
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+            .contains('pending approval');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('Submitted a few seconds ago');
     });
@@ -570,130 +578,49 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .click();
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="clearRejectionMsgBtn"]')
+            .should('be.enabled');
 
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+            .contains('0');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalPending"]').contains('Request Rejected')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]')
+            .contains('The reason is: "Skill was rejected"');
+
+
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="clearRejectionMsgBtn"]').click()
+
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
+            .click();
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportSkillMsg"]')
+            .contains('Submit with an optional justification and it will enter an approval queue.');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportSubmitBtn"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .should('be.disabled');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .should('be.disabled');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pendingApprovalStatus"]')
+            .contains('pending approval');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="pendingApprovalStatus"]')
             .contains('Submitted a few seconds ago');
-    });
-
-    it('self report - delete rejection', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.submitForApproval();
-        cy.rejectRequest();
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .contains('The reason is: "Skill was rejected"');
-
-        cy.get('[data-cy="clearRejectionMsgBtn"]')
-            .click();
-        cy.get('[data-cy="clearRejectionMsgDialog"]')
-            .contains('This action will permanently remove the rejection and its message. Are you sure?');
-        cy.get('[data-cy="removeRejectionBtn"]')
-            .click();
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .should('not.exist');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .should('not.exist');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .should('not.exist');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .should('not.exist');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
-    });
-
-    it('self report - delete rejection - subject page', () => {
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.submitForApproval();
-        cy.rejectRequest();
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .contains('Approval Rejected');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .contains('The reason is: "Skill was rejected"');
-
-        cy.get('[data-cy="clearRejectionMsgBtn"]')
-            .click();
-        cy.get('[data-cy="clearRejectionMsgDialog"]')
-            .contains('This action will permanently remove the rejection and its message. Are you sure?');
-        cy.get('[data-cy="removeRejectionBtn"]')
-            .click();
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .should('not.exist');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .should('not.exist');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-
-        cy.get('[data-cy="approvalRejectedStatus"]')
-            .should('not.exist');
-        cy.get('[data-cy="selfReportRejectedAlert"]')
-            .should('not.exist');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalPending"]')
+            .contains('Pending Approval');
     });
 
     it('validate approval message if custom validator is configured', () => {
@@ -710,10 +637,12 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill requires approval. Submit with an optional justification and it will enter an approval queue.');
+            .contains('Submit with an optional justification and it will enter an approval queue.');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
 
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('some val');
@@ -756,13 +685,10 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
-        cy.get('[data-cy="skillProgress_index-0"]')
-            .contains('Self Reportable');
-        cy.get('[data-cy="skillProgress_index-1"]')
-            .contains('Self Reportable')
-            .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-2"]')
-            .contains('Self Reportable');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="selfReportApprovalTag"]').contains('Approval');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportApprovalTag"]').should('not.exist')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportHonorSystemTag"]').should('not.exist');
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="selfReportHonorSystemTag"]').contains('Honor');
 
         cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label');
 
@@ -780,16 +706,13 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Self Reportable');
+        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportApprovalTag"]').contains('Approval')
         cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview');
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
-
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Self Reportable')
-            .should('not.exist');
+        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportApprovalTag"]') .should('not.exist');
+        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportHonorSystemTag"]') .should('not.exist');
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
@@ -811,7 +734,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
@@ -822,9 +745,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="selfReportError"]')
             .contains('Insufficient project points, skill achievement is disallowed');
@@ -850,7 +771,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
@@ -861,9 +782,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
 
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="selfReportError"]')
             .contains('Insufficient Subject points, skill achievement is disallowed');
@@ -916,11 +835,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .eq(1)
             .contains('40 Points to Level 1');
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 50 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')

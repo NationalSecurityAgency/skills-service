@@ -20,7 +20,7 @@ import groovy.transform.ToString
 
 import jakarta.persistence.*
 
-@ToString
+@ToString(includeNames = true)
 @Entity
 @Table(name = 'user_roles')
 @Canonical
@@ -36,6 +36,7 @@ class UserRole implements Serializable {
     String userId
 
     String projectId
+    String quizId
 
     @Enumerated(EnumType.STRING)
     RoleName roleName

@@ -144,30 +144,15 @@ class SkillCatalogFinalizationService {
                 batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups)
                 log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
 
-                SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
-                boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
-
                 // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
                 subjects.each { SkillDef subject ->
-                    log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subject.skillId)
-                    batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, subject.skillId)
-                    log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subject.skillId)
-                    batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId)
-
-                    log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subject.skillId)
-                    batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(subject.projectId, subject.skillId)
-                    log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subject.skillId)
+                    batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
                 }
 
                 // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
-                log.info("Creating UserPoints for the new users for [{}] project", projectId)
-                batchOperationsTransactionalAccessor.createProjectUserPointsForTheNewUsers(projectId)
-                log.info("Updating UserPoints for the existing users for [{}] project", projectId)
-                batchOperationsTransactionalAccessor.updateUserPointsForProject(projectId)
-                log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
-                batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(projectId, pointsBased)
-                log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
+                batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
 
+                log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
                 finalizedSkillIds = disabledImportedSkills.collect {it.id }
                 batchOperationsTransactionalAccessor.enableSkills(disabledImportedSkills)
             } else {

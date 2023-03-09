@@ -170,7 +170,7 @@ jobs:
       if: ${{ always() }}
       uses: actions/upload-artifact@v3
       with:
-        name: CI result artifacts ${{ matrix.container }}
+        name: UI test artifacts (${{ matrix.containers }})
         path: |
           ./e2e-tests/logs
           ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
@@ -246,7 +246,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: CI result artifacts
+          name: Service test artifacts (${{ matrix.container }})
           path: |
             ./service/target/*.log
             ./e2e-tests/logs

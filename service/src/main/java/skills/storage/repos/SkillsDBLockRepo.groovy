@@ -32,11 +32,18 @@ interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
     SkillsDBLock findByLock(String lock)
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query('''select p 
+    @Query('''select p.id 
         from ProjDef p 
         where
             lower(p.projectId) = lower(?1)''')
-    ProjDef findByProjectIdIgnoreCase(String projectId)
+    Integer findByProjectIdIgnoreCase(String projectId)
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query('''select q.id 
+        from QuizDef q 
+        where
+            lower(q.quizId) = lower(?1)''')
+    Integer findByQuizDefIdIgnoreCase(String quizId)
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query('''select attrs.id 

@@ -80,7 +80,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back');
         cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown', 'buttons-skillsFilter');
         cy.cdClickSkill(1);
-        cy.matchSnapshotImageForElement('[data-cy="selfReportBtn"]', 'buttons-selfReport');
+        cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport');
 
         cy.cdVisit(url);
         cy.cdClickBadges();
@@ -100,7 +100,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back-darkTileBackground');
         cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown', 'buttons-skillsFilter-darkTileBackground');
         cy.cdClickSkill(1);
-        cy.matchSnapshotImageForElement('[data-cy="selfReportBtn"]', 'buttons-selfReport-darkTileBackground');
+        cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport-darkTileBackground');
 
         cy.cdVisit(url);
         cy.cdClickBadges();

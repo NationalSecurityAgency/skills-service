@@ -67,7 +67,9 @@ limitations under the License.
         if (!this.skill.selfReportingType) {
           return 'N/A';
         }
-
+        if (this.skill.selfReportingType === 'Quiz') {
+          return 'Quiz/Survey';
+        }
         return (this.skill.selfReportingType === 'Approval') ? 'Requires Approval' : 'Honor System';
       },
     },

@@ -14,24 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <span></span>
+  <div v-if="isLoading" class="d-flex justify-content-center mt-5">
+    <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+  </div>
 </template>
 
 <script>
-  import DevModeUtil from '@/dev/DevModeUtil';
-
   export default {
-    name: 'ModalPositioner',
-    props: ['yOffset'],
-    mounted() {
-      if (!DevModeUtil.isDevelopmentMode()) {
-        this.$nextTick(() => {
-          const modalElem = document.querySelector('.modal-dialog');
-          const elemHeight = 270;
-          const marginTop = `${this.yOffset - elemHeight}px`;
-          modalElem.style['margin-top'] = marginTop;
-        });
-      }
+    name: 'SkillsSpinner',
+    props: {
+      isLoading: Boolean,
     },
   };
 </script>
