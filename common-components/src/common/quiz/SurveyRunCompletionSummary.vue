@@ -34,7 +34,7 @@ limitations under the License.
         </b-card>
       </div>
       <div class="col-auto">
-        <b-card class="text-center skills-card-theme-border" body-class="pt-2 pb-1">
+        <b-card class="text-center skills-card-theme-border" body-class="pt-2 pb-1" data-cy="surveyRuntimeCard">
           <i class="fas fa-business-time text-info skills-theme-quiz-correct-answer" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Completed In:</span>
           <span class="text-uppercase ml-1 font-weight-bold">{{ quizResult.gradedRes.started | duration(quizResult.gradedRes.completed) }}</span>

@@ -199,7 +199,10 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points')
 
-        cy.matchSnapshotImage();
+        const snapshotOptions = {
+            blackout: ['[data-cy="surveyRuntimeCard"]'],
+        };
+        cy.matchSnapshotImage(snapshotOptions);
     });
 
     it('questions support markdown', () => {
