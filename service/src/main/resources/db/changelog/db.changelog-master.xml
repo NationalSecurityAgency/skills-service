@@ -2122,6 +2122,11 @@
                      tableName="user_quiz_attempt" unique="false">
             <column name="status" type="varchar(255)"/>
         </createIndex>
+
+        <createIndex indexName="fk_quiz_definition_ref_id_quiz_definition"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="quiz_definition_ref_id" type="int"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="quiz_definition_ref_id"
                                  baseTableName="user_quiz_attempt"
                                  constraintName="fk_quiz_user_quiz_attempt_quiz_definition_ref_id"
@@ -2129,6 +2134,11 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="quiz_definition"/>
+
+        <createIndex indexName="fk_user_id_user_attrs"
+                     tableName="user_quiz_attempt" unique="false">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="user_quiz_attempt"
                                  constraintName="fk_user_quiz_attempt_user_id"
