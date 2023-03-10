@@ -62,7 +62,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.customA11y();
     });
 
-    // it.only('new question modal', () => {
+    // it('new question modal', () => {
     //     cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
     //
     //     cy.visit('/administrator/quizzes/quiz1')
