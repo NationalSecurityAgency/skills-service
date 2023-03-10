@@ -15,7 +15,10 @@
  */
 package skills.intTests.quiz
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.springframework.security.core.userdetails.UserDetails
+import skills.auth.pki.PkiUserDetailsService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -24,6 +27,10 @@ import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
+import spock.lang.Ignore
+
+import java.util.concurrent.atomic.AtomicInteger
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkills
@@ -113,6 +120,74 @@ class QuizDefAuthSpecs extends DefaultIntSpec {
             ])
         }
     }
+
+    @Ignore
+    def "concurrent request to settings produce consistent results"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skillsService.createSkills(skills)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+        skillsService.addProjectAdmin(proj.projectId, otherUser.userName)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        otherUser.createQuizDef(quiz2)
+        def questions2 = QuizDefFactory.createChoiceQuestions(2, 2, 2)
+        otherUser.createQuizQuestionDefs(questions2)
+
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[1].quizId = quiz2.quizId
+        skillsService.createSkill(skills[1])
+
+        int numTimes = 100
+        AtomicInteger exceptioncount = new AtomicInteger()
+        List<String> exceptions = Collections.synchronizedList([])
+        List<Thread> threads = []
+        when:
+        10.times {
+            assert otherUser.getQuizSettings(quiz1.quizId).find { it.setting == QuizSettings.QuizUserRole.setting }.value == RoleName.ROLE_QUIZ_READ_ONLY.toString()
+            assert otherUser.getQuizSettings(quiz2.quizId).find { it.setting == QuizSettings.QuizUserRole.setting }.value == RoleName.ROLE_QUIZ_ADMIN.toString()
+        }
+        threads << Thread.start {
+            numTimes.times {
+                try {
+                    Thread.sleep(250)
+                    assert otherUser.getQuizSettings(quiz1.quizId).find { it.setting == QuizSettings.QuizUserRole.setting }.value == RoleName.ROLE_QUIZ_READ_ONLY.toString()
+                } catch (Throwable t) {
+                    exceptioncount.incrementAndGet()
+                    t.printStackTrace()
+                }
+            }
+        }
+        threads << Thread.start {
+            numTimes.times {
+                try {
+                    Thread.sleep(250)
+                    assert otherUser.getQuizSettings(quiz2.quizId).find { it.setting == QuizSettings.QuizUserRole.setting }.value == RoleName.ROLE_QUIZ_ADMIN.toString()
+                } catch (Throwable t) {
+                    exceptioncount.incrementAndGet()
+                    t.printStackTrace()
+                }
+            }
+        }
+        threads.each {
+            it.join(5000)
+        }
+        then:
+        exceptioncount.get() == 0
+    }
+
 
     def "if quiz is assigned to skill, although any project admin in that project gets a read-only view of the quiz, catalog imported skills do not get the same treatment"() {
         def quiz1 = QuizDefFactory.createQuiz(1)

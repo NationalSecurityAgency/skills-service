@@ -30,7 +30,10 @@ describe('Accessibility Quiz Tests', () => {
     it('new quiz modal', () => {
         cy.visit('/administrator/quizzes/')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('[data-cy="quizName"]')
+        cy.get('[data-cy="quizName"]').type('hello')
+        cy.get('[data-cy="quizDescription"]').type('hi')
+        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+
         // cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
