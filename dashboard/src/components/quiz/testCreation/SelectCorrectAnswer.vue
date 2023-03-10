@@ -24,7 +24,7 @@ limitations under the License.
          @click="flipSelected"
          :tabindex="readOnly ? -1 : 0"
          role="checkbox"
-         aria-label="Select as the correct answer"
+         :aria-label="`Select answer number ${answerNumber} as the correct answer`"
          :aria-checked="`${selected}`"
          :class="{ 'cursorPointer': !readOnly}"
          data-cy="selectCorrectAnswer">
@@ -54,6 +54,9 @@ limitations under the License.
       markIncorrect: {
         type: Boolean,
         default: false,
+      },
+      answerNumber: {
+        type: Number,
       },
     },
     data() {

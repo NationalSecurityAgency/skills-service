@@ -158,7 +158,12 @@ limitations under the License.
               }
               this.loadQuizSummary({ quizId: this.quizId })
                 .then(() => this.handleEditQuestionBtnFocus(questionDef));
-            }).finally(() => { this.operationInProgress = false; });
+            }).finally(() => {
+              this.operationInProgress = false;
+              this.$nextTick(() => {
+                this.$announcer.polite('Question was successfully updated.');
+              });
+            });
         } else {
           QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
             .then((res) => {
@@ -170,7 +175,12 @@ limitations under the License.
                 .then(() => {
                   this.handleNewQuestionBtnFocus();
                 });
-            }).finally(() => { this.operationInProgress = false; });
+            }).finally(() => {
+              this.operationInProgress = false;
+              this.$nextTick(() => {
+                this.$announcer.polite('Question was successfully saved.');
+              });
+            });
         }
       },
       initiatedEditQuizDef(questionDef) {
@@ -186,7 +196,12 @@ limitations under the License.
             this.questions = this.questions.filter((q) => q.id !== questionDef.id);
             this.loadQuizSummary({ quizId: this.quizId })
               .then(() => this.handleNewQuestionBtnFocus());
-          }).finally(() => { this.operationInProgress = false; });
+          }).finally(() => {
+            this.operationInProgress = false;
+            this.$nextTick(() => {
+              this.$announcer.polite('Question was successfully deleted.');
+            });
+          });
       },
       handleEditQuestionModalClose(questionDef) {
         if (questionDef.id) {

@@ -65,19 +65,21 @@ describe('Accessibility Quiz Tests', () => {
         cy.customA11y();
     });
 
-    // it('new question modal', () => {
-    //     cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
-    //
-    //     cy.visit('/administrator/quizzes/quiz1')
-    //     cy.get('[data-cy="noQuestionsYet"]')
-    //
-    //     cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
-    //     cy.get('[data-cy="answer-0"] [data-cy="answerText"]')
-    //
-    //     // cy.customLighthouse();
-    //     cy.injectAxe();
-    //     cy.customA11y();
-    // });
+    it('new question modal', () => {
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="noQuestionsYet"]')
+
+        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.get('[data-cy="questionText"]').type('hi')
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('answer1')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+
+        // cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
     //
     //
     //
