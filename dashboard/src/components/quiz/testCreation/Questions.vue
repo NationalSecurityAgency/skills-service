@@ -69,6 +69,7 @@ limitations under the License.
                     data-cy="newQuestionOnBottomBtn"
                     variant="outline-primary"
                     size="sm"
+                    aria-label="Create new question"
                     @click="openNewAnswerModal('newQuestionOnBottomBtn')">
             Question <i class="fas fa-plus-circle"/>
           </b-button>

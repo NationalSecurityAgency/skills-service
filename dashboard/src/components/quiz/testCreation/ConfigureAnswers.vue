@@ -24,7 +24,7 @@ limitations under the License.
           <input class="form-control" type="text" v-model="answer.answer"
                  placeholder="Enter an answer"
                  data-cy="answerText"
-                 id="testNameInput"
+                 :id="`answer${index}TextInput`"
                  aria-errormessage="testNameError"
                  aria-describedby="testNameError"/>
         </div>
