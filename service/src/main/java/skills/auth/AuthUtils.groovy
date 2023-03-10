@@ -25,7 +25,7 @@ import java.util.regex.Pattern
 @Slf4j
 @CompileStatic
 class AuthUtils {
-    static final Pattern PROJECT_ID_PATTERN = Pattern.compile("/\\S+?/projects/([^/]+).*\$")
+    static final Pattern PROJECT_ID_PATTERN = Pattern.compile("/\\S+?/(myprojects|projects)/([^/]+).*\$")
 
     // Example: /admin/projects/{projectId}/approvals/approve
     // Example: /admin/projects/{projectId}/approvals/reject
@@ -44,7 +44,7 @@ class AuthUtils {
             Matcher matcher = PROJECT_ID_PATTERN.matcher(servletPath)
             if (matcher.matches()) {
                 if (matcher.hasGroup()) {
-                    projectId = matcher.group(1)
+                    projectId = matcher.group(2)
                 } else {
                     log.warn("no projectId found for endpoint [$servletPath]?")
                 }
