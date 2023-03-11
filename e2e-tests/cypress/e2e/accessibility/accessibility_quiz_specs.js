@@ -22,7 +22,8 @@ describe('Accessibility Quiz Tests', () => {
     it('empty quiz definitions page', () => {
         cy.visit('/administrator/quizzes/')
         cy.get('[data-cy="noQuizzesYet"]')
-        // cy.customLighthouse();
+
+        cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
     });
@@ -34,7 +35,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.get('[data-cy="quizDescription"]').type('hi')
         cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
 
-        // cy.customLighthouse();
+        cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
     });
@@ -49,7 +50,7 @@ describe('Accessibility Quiz Tests', () => {
 
         cy.visit('/administrator/quizzes/')
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '6')
-        // cy.customLighthouse();
+        cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
     });
@@ -60,7 +61,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.visit('/administrator/quizzes/quiz1')
         cy.get('[data-cy="noQuestionsYet"]')
 
-        // cy.customLighthouse();
+        cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
     });
@@ -76,28 +77,80 @@ describe('Accessibility Quiz Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('answer1')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
-        // cy.customLighthouse();
+        cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
     });
-    //
-    //
-    //
-    // it('survey page with questions', () => {
-    //     cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
-    //     cy.createSurveyDef(1);
-    //     cy.createTextInputQuestionDef(1, 1);
-    //     cy.createSurveyMultipleChoiceQuestionDef(1, 2);
-    //     cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
-    //
-    //     cy.visit('/administrator/quizzes/quiz1')
-    //     cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '6')
-    //     // cy.customLighthouse();
-    //     cy.injectAxe();
-    //     cy.customA11y();
-    // });
 
+    it('new survey modal with TextInput question type', () => {
+        cy.createSurveyDef(1, {name: 'Test Your Trivia Knowledge'});
 
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="noQuestionsYet"]')
 
+        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_TextInput"]').click()
+        cy.get('[data-cy="textAreaPlaceHolder"]')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('survey page with questions', () => {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuestionButton_1"]').should('be.enabled')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('empty results page', () => {
+        cy.createSurveyDef(1, {name: 'Test Your Trivia Knowledge'});
+
+        cy.visit('/administrator/quizzes/quiz1/results')
+        cy.get('[data-cy="quizRunsHistoryTable"]').contains('There are no records to show')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('results page', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}], false);
+
+        cy.visit('/administrator/quizzes/quiz1/results')
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('single result run', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
+        cy.createTextInputQuestionDef(1, 3);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]}])
+
+        cy.visit('/administrator/quizzes/quiz1/results')
+        cy.get('[data-cy="row0-viewRun"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"]').contains('This is a question # 1')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
 
 });

@@ -71,7 +71,7 @@ limitations under the License.
                     size="sm"
                     aria-label="Create new question"
                     @click="openNewAnswerModal('newQuestionOnBottomBtn')">
-            Question <i class="fas fa-plus-circle"/>
+            Question <i class="fas fa-plus-circle" aria-hidden="true"/>
           </b-button>
         </div>
       </template>
@@ -301,6 +301,9 @@ limitations under the License.
                   if (editBtn) {
                     editBtn.focus();
                   }
+                  this.$nextTick(() => {
+                    this.$announcer.polite(`Sort order changed. This is now a question number ${newIndex + 1}`);
+                  });
                 });
               });
             });
@@ -313,6 +316,9 @@ limitations under the License.
           QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
             .finally(() => {
               this.sortOrder.loading = false;
+              this.$nextTick(() => {
+                this.$announcer.polite(`Sort order changed. This is now a question number ${updateEvent.newIndex + 1}`);
+              });
             });
       },
     },

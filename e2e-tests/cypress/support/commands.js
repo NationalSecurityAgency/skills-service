@@ -634,32 +634,34 @@ Cypress.Commands.add("getEmails", () => {
 });
 
 Cypress.Commands.add('customLighthouse', () => {
-    cy.closeToasts();
-    cy.wait(500);
+    if (Cypress.env('enableLighthouse')) {
+        cy.closeToasts();
+        cy.wait(500);
 
-    const lighthouseOptions = {
-        extends: 'lighthouse:default',
-        settings: {
-            emulatedFormFactor:'desktop',
-            maxWaitForFcp: 35 * 1000,
-            maxWaitForLoad: 45 * 1000,
-            formFactor: 'desktop',
-            screenEmulation: {
-                mobile: false,
-                disable: false,
-                width: Cypress.config('viewportWidth'),
-                height: Cypress.config('viewportHeight'),
-                deviceScaleRatio: 1,
+        const lighthouseOptions = {
+            extends: 'lighthouse:default',
+            settings: {
+                emulatedFormFactor: 'desktop',
+                maxWaitForFcp: 35 * 1000,
+                maxWaitForLoad: 45 * 1000,
+                formFactor: 'desktop',
+                screenEmulation: {
+                    mobile: false,
+                    disable: false,
+                    width: Cypress.config('viewportWidth'),
+                    height: Cypress.config('viewportHeight'),
+                    deviceScaleRatio: 1,
+                },
             },
-        },
+        }
+        cy.lighthouse({
+            "performance": 0,
+            "accessibility": 90,
+            "best-practices": 80,
+            "seo": 0,
+            "pwa": 0
+        }, {}, lighthouseOptions);
     }
-    cy.lighthouse({
-        "performance": 0,
-        "accessibility": 90,
-        "best-practices": 80,
-        "seo": 0,
-        "pwa": 0
-    }, {}, lighthouseOptions);
 })
 
 Cypress.Commands.add('customPa11y', (optsObj) => {

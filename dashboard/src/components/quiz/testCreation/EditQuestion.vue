@@ -58,8 +58,9 @@ limitations under the License.
         </div>
 
         <div v-if="isQuestionTypeTextInput" class="pl-3">
+          <label for="textInputPlaceholder" hidden>Text Input Answer Placeholder:</label>
           <b-form-textarea
-            id="textarea"
+            id="textInputPlaceholder"
             placeholder="Users will be required to enter text."
             data-cy="textAreaPlaceHolder"
             :disabled="true"

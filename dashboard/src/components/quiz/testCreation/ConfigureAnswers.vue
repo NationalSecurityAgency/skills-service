@@ -29,9 +29,7 @@ limitations under the License.
                  placeholder="Enter an answer"
                  data-cy="answerText"
                  :id="`answer${index}TextInput`"
-                 :aria-label="`Enter answer number ${index+1}`"
-                 aria-errormessage="testNameError"
-                 aria-describedby="testNameError"/>
+                 :aria-label="`Enter answer number ${index+1}`" />
         </div>
         <b-button-group class="ml-2">
           <b-button variant="outline-info"
