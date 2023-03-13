@@ -32,6 +32,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy
@@ -100,6 +102,9 @@ class UserAuthService {
     @Value('#{"${skills.authorization.verifyEmailAddresses:false}"}')
     Boolean verifyEmailAddresses
 
+    @Value('#{securityConfig.authMode}}')
+    AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
+
     private AutoLoginProcessor autoLoginProcessor
 
     @PostConstruct
@@ -156,7 +161,17 @@ class UserAuthService {
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo) {
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
-        return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        if (authMode == AuthMode.FORM) {
+            SecurityContext securityContext = SecurityContextHolder.getContext()
+            Authentication authentication = securityContext?.getAuthentication()
+            if (authentication && authentication instanceof UsernamePasswordAuthenticationToken && authentication.getPrincipal() instanceof UserInfo) {
+                Authentication updatedAuth = new UsernamePasswordAuthenticationToken(updatedUserInfo, authentication.getCredentials(), updatedUserInfo.getAuthorities())
+                securityContext.setAuthentication(updatedAuth)
+                securityContextRepository.saveContext(securityContext, servletRequest, servletResponse)
+            }
+        }
+        return updatedUserInfo
     }
 
     /**
@@ -261,6 +276,17 @@ class UserAuthService {
             log.warn("Unable to access current HttpServletRequest. Error Recieved [$e]", e)
         }
         return httpServletRequest
+    }
+
+    HttpServletResponse getServletResponse() {
+        HttpServletResponse httpServletResponse
+        try {
+            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
+            httpServletResponse = currentRequestAttributes?.getResponse()
+        } catch (Exception e) {
+            log.warn("Unable to access current HttpServletResponse. Error Recieved [$e]", e)
+        }
+        return httpServletResponse
     }
 
     @Transactional(readOnly = true)
