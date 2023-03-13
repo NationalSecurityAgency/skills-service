@@ -49,12 +49,10 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
                 "port"       : ServerSetupTest.SMTP.port,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : "http://localhost:${localPort}/".toString(),
+                "fromEmail"  : "noreply@skilltreeemail.com"
         ])
-        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName,
-                ["setting": Settings.GLOBAL_PUBLIC_URL.settingName, "value": "http://localhost:${localPort}/".toString()])
-        rootSkillsService.addOrUpdateGlobalSetting(Settings.GLOBAL_FROM_EMAIL.settingName,
-                ["setting": Settings.GLOBAL_FROM_EMAIL.settingName, "value": "noreply@skilltreeemail.com"])
 
         when:
 
@@ -65,8 +63,14 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
     }
 
     def "password reset disabled if email is not configured"(){
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
+        rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
+                "host"       : "localhost",
+                "port"       : ServerSetupTest.SMTP.port,
+                "protocol"   : "smtp",
+                "authEnabled": false,
+                "tlsEnabled" : false
+        ])
+
 
         when:
 
@@ -83,7 +87,8 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
                 "port"       : ServerSetupTest.SMTP.port,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : ""
         ])
 
         when:
@@ -118,18 +123,14 @@ class FeatureVerificationSpecs extends DefaultIntSpec {
         SkillsService rootSkillsService = createRootSkillService()
 
         when:
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
         rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
                 "host"       : "localhost",
                 "port"       : 3923,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "fromEmail"  : ""
         ])
-
-        rootSkillsService.addOrUpdateGlobalSetting("from_email",
-                ["setting": "from_email", "value": ""]) // empty string
 
         then:
         !skillsService.isFeatureEnabled("emailservice")

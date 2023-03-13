@@ -252,12 +252,10 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
                 "port"       : -1,
                 "protocol"   : "",
                 "authEnabled": "",
-                "tlsEnabled" : ""
+                "tlsEnabled" : "",
+                "publicUrl" : "",
+                "fromEmail" : ""
         ])
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": ''])
-        rootSkillsService.addOrUpdateGlobalSetting("from_email",
-                ["setting": "from_email", "value": ''])
 
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)

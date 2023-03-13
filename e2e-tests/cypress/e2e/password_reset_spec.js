@@ -32,7 +32,9 @@ describe('Password Reset Tests', () => {
             body: {
                 host: 'localhost',
                 port: 1026,
-                'protocol': 'smtp'
+                'protocol': 'smtp',
+                publicUrl: 'http://localhost:8082/',
+                fromEmail: 'noreploy@skilltreeemail.org',
             },
         });
 
@@ -40,9 +42,7 @@ describe('Password Reset Tests', () => {
             method: 'POST',
             url: '/root/saveSystemSettings',
             body: {
-                publicUrl: 'http://localhost:8082/',
                 resetTokenExpiration: 'PT2H',
-                fromEmail: 'noreploy@skilltreeemail.org',
             }
         });
 
@@ -259,7 +259,7 @@ describe('Password Reset Tests', () => {
 
         cy.request({
             method: 'POST',
-            url: '/root/saveSystemSettings',
+            url: '/root/saveEmailSettings',
             body: {
                 publicUrl: '',
             }

@@ -181,12 +181,10 @@ class DefaultIntSpec extends Specification {
                 "port"       : ServerSetupTest.SMTP.port,
                 "protocol"   : "smtp",
                 "authEnabled": false,
-                "tlsEnabled" : false
+                "tlsEnabled" : false,
+                "publicUrl"  : "http://localhost:${localPort}/".toString(),
+                "fromEmail"  : "resetspec@skilltreetests"
         ])
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
-        rootSkillsService.addOrUpdateGlobalSetting("from_email",
-                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
     }
 
 

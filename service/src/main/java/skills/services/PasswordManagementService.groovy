@@ -115,8 +115,6 @@ class PasswordManagementService {
         String email = attrs.email
         String name = "${attrs.firstName} ${attrs.lastName}"
 
-        SettingsResult settingsResult = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-
         List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
 
         Formatting formatting = new Formatting(
@@ -126,11 +124,11 @@ class PasswordManagementService {
                 plaintextFooter: emailSettings.find { it.setting == EmailSettingsService.plaintextFooter }?.value ?:null
         )
 
-        if (!settingsResult) {
+        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
+        if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send ${type} email")
         }
 
-        String publicUrl = settingsResult.value
         if (!publicUrl.endsWith("/")){
             publicUrl += "/"
         }

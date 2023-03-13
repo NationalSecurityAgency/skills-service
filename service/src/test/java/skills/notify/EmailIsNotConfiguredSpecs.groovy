@@ -40,24 +40,6 @@ class EmailIsNotConfiguredSpecs extends DefaultIntSpec {
         ))
 
         assert notificationsRepo.count() == 0
-        rootSkillsService.addOrUpdateGlobalSetting("public_url",
-                ["setting": "public_url", "value": "http://localhost:${localPort}/".toString()])
-
-        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [rootSkillsService.userName],
-                type: "ForTestNotificationBuilder",
-                keyValParams: [simpleParam: 'param value']
-        ))
-        assert notificationsRepo.count() == 0
-
-        rootSkillsService.addOrUpdateGlobalSetting("from_email",
-                ["setting": "from_email", "value": "resetspec@skilltreetests".toString()])
-        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [rootSkillsService.userName],
-                type: "ForTestNotificationBuilder",
-                keyValParams: [simpleParam: 'param value']
-        ))
-        assert notificationsRepo.count() == 0
 
         rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
                 "host"       : "localhost",
