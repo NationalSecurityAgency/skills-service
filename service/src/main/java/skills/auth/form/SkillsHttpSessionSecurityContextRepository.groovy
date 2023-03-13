@@ -100,7 +100,7 @@ class SkillsHttpSessionSecurityContextRepository extends HttpSessionSecurityCont
             auth = oAuthUtils.convertToSkillsAuth(auth)
         } else if (auth && auth.principal instanceof UserInfo) {
             // reload the granted_authorities for this skills user if loaded from the HTTP Session)
-            UserInfo userInfo = auth.principal
+            UserInfo userInfo = auth.principal.clone()
             userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
             auth = new UsernamePasswordAuthenticationToken(userInfo, auth.credentials, userInfo.authorities)
         }
