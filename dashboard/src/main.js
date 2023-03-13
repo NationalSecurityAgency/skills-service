@@ -59,6 +59,7 @@ import Vuex from 'vuex';
 import VueApexCharts from 'vue-apexcharts';
 import VueAnnouncer from '@vue-a11y/announcer';
 import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
+import TimeDurationFilter from '@/common-components/filter/TimeDurationFilter';
 import dayjs from '@/common-components/DayJsCustomizer';
 import '@/common-components/filter/ByteFilter';
 import PageVisitService from '@/components/PageVisitService';
@@ -113,6 +114,7 @@ Vue.use(FormGroupPlugin);
 Vue.use(FormDatepickerPlugin);
 Vue.use(ProgressPlugin);
 Vue.use(ListGroupPlugin);
+Vue.use(TimeDurationFilter);
 Vue.component('BIcon', BIcon);
 Vue.component('BIconQuestion', BIconQuestion);
 
@@ -185,6 +187,9 @@ router.beforeEach((to, from, next) => {
         if (isAdminPage(to) && to.params.projectId) {
           store.dispatch('loadProjConfigState', { projectId: to.params.projectId });
         }
+      }
+      if (to.path.startsWith('/administrator/quizzes/') && to.params.quizId && to.params.quizId !== from.params.quizId) {
+        store.dispatch('loadQuizConfigState', { quizId: to.params.quizId });
       }
       if (to.matched.some((record) => record.meta.requiresAuth)) {
         // this route requires auth, check if logged in if not, redirect to login page.

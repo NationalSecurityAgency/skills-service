@@ -22,6 +22,7 @@ import SkillsEntry from '@/SkillsEntry';
 import SubjectDetails from '@/userSkills/subject/SubjectDetails';
 import MyRankDetails from '@/userSkills/myRank/MyRankDetails';
 import SkillDetails from '@/userSkills/skill/SkillDetails';
+import QuizPage from '@/userSkills/skill/QuizPage';
 import BadgesDetails from '@/userSkills/badge/BadgesDetails';
 import GlobalBadgeDetails from '@/userSkills/badge/GlobalBadgeDetails';
 import BadgeDetails from '@/userSkills/badge/BadgeDetails';
@@ -103,6 +104,14 @@ const router = new VueRouter({
       name: 'skillDetails',
       meta: {
         title: `${skillPlaceholder} Details`,
+      },
+    },
+    {
+      path: '/subjects/:subjectId/skills/:skillId/quizzes/:quizId',
+      component: QuizPage,
+      name: 'quizPage',
+      meta: {
+        title: 'Quiz or Survey Run',
       },
     },
     {

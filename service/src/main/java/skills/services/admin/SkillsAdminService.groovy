@@ -30,6 +30,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
+import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
@@ -37,18 +38,11 @@ import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.quiz.QuizToSkillService
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.SkillDef
+import skills.storage.model.*
 import skills.storage.model.SkillDef.SelfReportingType
-import skills.storage.model.SkillDefPartial
-import skills.storage.model.SkillDefSkinny
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -73,6 +67,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
+    QuizToSkillService quizToSkillService
 
     @Autowired
     GlobalBadgesService globalBadgesService
@@ -179,6 +176,7 @@ class SkillsAdminService {
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
         final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
+        final boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest;
 
         SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
@@ -232,6 +230,10 @@ class SkillsAdminService {
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
             }
 
+            if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
+                quizToSkillService.removeQuizToSkillAssignment(skillDefinition.id)
+            }
+
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
 
             skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
@@ -277,7 +279,7 @@ class SkillsAdminService {
                     justificationRequired: justificationRequired,
             )
 
-            if (skillRequest instanceof SkillImportRequest) {
+            if (isSkillCatalogImport) {
                 skillDefinition.copiedFrom = skillRequest.copiedFrom
                 skillDefinition.readOnly = skillRequest.readOnly
                 skillDefinition.copiedFromProjectId = skillRequest.copiedFromProjectId
@@ -334,6 +336,11 @@ class SkillsAdminService {
                 )
             }
             saveSkillTmpRes.isImportedByOtherProjects = skillDefRepo.isCatalogSkillImportedByOtherProjects(savedSkill.id)
+        }
+
+        if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
+            boolean awardSkillForQuizCompletion = !(skillRequest instanceof SkillProjectCopyRequest)
+            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId, awardSkillForQuizCompletion)
         }
 
         log.debug("Saved [{}]", savedSkill)
@@ -694,6 +701,12 @@ class SkillsAdminService {
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
         }
+        if (skillDef.selfReportingType == SelfReportingType.Quiz) {
+            QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.copiedFrom ?: skillDef.id)
+            res.quizId = quizIdAndName.getQuizId()
+            res.quizName = quizIdAndName.getQuizName()
+            res.quizType = quizIdAndName.getQuizType()
+        }
         res.name = InputSanitizer.unsanitizeName(res.name)
         res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
         res.name = SkillReuseIdUtil.removeTag(res.name)
@@ -755,6 +768,9 @@ class SkillsAdminService {
                 copiedFromProjectName: InputSanitizer.unsanitizeName(partial.copiedFromProjectName),
                 sharedToCatalog: partial.sharedToCatalog,
                 reusedSkill: reusedSkill,
+                quizId: partial.getQuizId(),
+                quizName: partial.getQuizName(),
+                quizType: partial.getQuizType(),
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

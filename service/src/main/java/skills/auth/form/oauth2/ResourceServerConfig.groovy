@@ -49,14 +49,18 @@ import skills.auth.UserInfo
 @Configuration
 class ResourceServerConfig {
 
-    @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
-
-    @Autowired
     SecurityContextRepository securityContextRepository
+    OAuthUtils oAuthUtils
 
     @Autowired
-    OAuthUtils oAuthUtils
+    ResourceServerConfig(PortalWebSecurityHelper portalWebSecurityHelper,
+                         SecurityContextRepository securityContextRepository,
+                         OAuthUtils oAuthUtils) {
+        this.portalWebSecurityHelper = portalWebSecurityHelper
+        this.securityContextRepository = securityContextRepository
+        this.oAuthUtils = oAuthUtils
+    }
 
     @Bean('resourceServerSecurityFilterChain')
     @Order(101)

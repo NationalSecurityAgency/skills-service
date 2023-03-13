@@ -184,13 +184,7 @@ describe('Client Display Custom Label Tests', () => {
             .contains('Competency: subj3');
         cy.get('[data-cy=breadcrumb-skill1Subj3]')
             .contains('Course: skill1Subj3');
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('h5.modal-title')
-            .contains('REPORT COURSE');
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This course can be submitted under the Honor System and 100 points will be awarded right away!');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="selfReportAlert"]')
             .contains('You just earned 100 points!');
@@ -201,12 +195,8 @@ describe('Client Display Custom Label Tests', () => {
             .contains('Competency: subj3');
         cy.get('[data-cy=breadcrumb-skill2Subj3]')
             .contains('Course: skill2Subj3');
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
-        cy.get('h5.modal-title')
-            .contains('REPORT COURSE');
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This course requires approval. Submit with an optional justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
         cy.get('[data-cy="selfReportAlert"]')
@@ -218,12 +208,8 @@ describe('Client Display Custom Label Tests', () => {
             .contains('Competency: subj3');
         cy.get('[data-cy=breadcrumb-skill3Subj3]')
             .contains('Course: skill3Subj3');
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
-        cy.get('h5.modal-title')
-            .contains('REPORT COURSE');
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This course requires approval. Submit with a justification and it will enter an approval queue.');
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('some val');
         cy.get('[data-cy="selfReportSubmitBtn"]')

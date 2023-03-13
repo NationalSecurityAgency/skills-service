@@ -34,6 +34,7 @@ limitations under the License.
   import debounce from 'lodash/debounce';
 
   import { extend } from 'vee-validate';
+  import { required } from 'vee-validate/dist/rules';
   import ValidatorFactory from '@/common-components/validators/ValidatorFactory';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store/store';
@@ -173,6 +174,10 @@ limitations under the License.
             // eslint-disable-next-line global-require
             require('@/common-components/validators/CustomDescriptionValidator');
             extend('maxDescriptionLength', ValidatorFactory.newCharLengthValidator(store.getters.config.descriptionMaxLength));
+            extend('required', {
+              ...required,
+              message: '{_field_} is required',
+            });
           });
       },
       handleTheming(theme) {

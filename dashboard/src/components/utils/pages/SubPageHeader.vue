@@ -104,6 +104,14 @@ limitations under the License.
       addClicked() {
         this.$emit('add-action');
       },
+      focusOnActionBtn() {
+        this.$nextTick(() => {
+          const ref = this.$refs.actionButton;
+          if (ref) {
+            ref.focus();
+          }
+        });
+      },
     },
   };
 </script>

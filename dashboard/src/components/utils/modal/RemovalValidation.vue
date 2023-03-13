@@ -24,9 +24,8 @@ limitations under the License.
         <slot />
       </div>
 
-      <hr />
-
-      <div>
+      <div v-if="!removalNotAvailable" >
+        <hr />
         <p
           :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
           Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently
@@ -41,7 +40,7 @@ limitations under the License.
     </div>
 
     <div slot="modal-footer" class="w-100">
-      <b-button variant="danger" size="sm" class="float-right ml-2"
+      <b-button v-if="!removalNotAvailable" variant="danger" size="sm" class="float-right ml-2"
                 @click="removeAction" data-cy="removeButton" :disabled="removeDisabled"><i
         class="fas fa-trash"></i> Yes, Do Remove!
       </b-button>
@@ -64,6 +63,11 @@ limitations under the License.
         type: String,
         required: false,
         default: 'Delete Me',
+      },
+      removalNotAvailable: {
+        type: Boolean,
+        required: false,
+        default: false,
       },
     },
     data() {

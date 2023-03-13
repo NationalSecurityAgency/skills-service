@@ -65,7 +65,7 @@ export default {
         const copy = { ...skill };
         copy.meta = {
             complete: skill.points >= skill.totalPoints,
-            selfReported: skill.selfReporting !== null,
+            selfReported: skill.selfReporting && skill.selfReporting.enabled === true,
             withPointsToday: skill.todaysPoints > 0,
             withoutProgress: skill.points === 0,
             inProgress: skill.points > 0 && skill.points < skill.totalPoints,

@@ -24,13 +24,17 @@ import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
+import skills.controller.request.model.QuizDefExistsRequest
+import skills.controller.request.model.QuizDefRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.InviteTokenValidationResponse
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.QuizDefResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
@@ -39,6 +43,7 @@ import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
+import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
 
 import jakarta.servlet.http.HttpServletResponse
@@ -51,6 +56,9 @@ class ProjectController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    QuizDefService quizDefService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -76,6 +84,12 @@ class ProjectController {
     @ResponseBody
     List<ProjectResult> getProjects() {
         return projAdminService.getProjects()
+    }
+
+    @RequestMapping(value = "/quiz-definitions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<QuizDefResult> getQuizDefs() {
+        return quizDefService.getCurrentUsersTestDefs()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -116,6 +130,12 @@ class ProjectController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/quiz-definitions/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
+        return quizDefService.saveQuizDef(null, quizId, quizDefRequest)
+    }
+
     @RequestMapping(value = "/projects/{id}/join/{invite_code}", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     RequestResult joinProject(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
@@ -148,6 +168,23 @@ class ProjectController {
         }
 
         return projAdminService.existsByProjectName(InputSanitizer.sanitize(projectName))
+    }
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/quizDefExist", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    boolean doesQuizExist(@RequestBody QuizDefExistsRequest existsRequest) {
+        String quizId = existsRequest.quizId?.trim()
+        String name = existsRequest.name?.trim()
+
+        SkillsValidator.isTrue((quizId || name), "One of Quiz Id or Quiz Name must be provided.")
+        SkillsValidator.isTrue(!(quizId && name), "Only Quiz Id or Quiz Name may be provided, not both.")
+
+        if (quizId) {
+            return quizDefService.existsByQuizId(InputSanitizer.sanitize(quizId))
+        }
+
+        return quizDefService.existsByQuizName(InputSanitizer.sanitize(name))
     }
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")

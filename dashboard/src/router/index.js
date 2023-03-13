@@ -17,6 +17,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import AdminHomePage from '@/components/AdminHomePage';
 import MyProjects from '@/components/projects/MyProjects';
+import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage';
 import LoginForm from '@/components/access/Login';
 import RequestAccountForm from '@/components/access/RequestAccess';
 import ProjectPage from '@/components/projects/ProjectPage';
@@ -86,6 +87,14 @@ import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage';
 import ProjectErrorsPage from '@/components/projects/ProjectErrors';
 import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav';
 import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage';
+import QuizPage from '@/components/quiz/QuizPage';
+import Questions from '@/components/quiz/testCreation/Questions';
+import QuizMetrics from '@/components/quiz/metrics/QuizMetrics';
+import QuizSettings from '@/components/quiz/QuizSettings';
+import QuizRunsHistoryPage from '@/components/quiz/runsHistory/QuizRunsHistoryPage';
+import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage';
+import QuizRun from '@/components/quiz/QuizRunInDashboard';
+import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 
 Vue.use(Router);
 
@@ -109,6 +118,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Project Administrator',
+          },
+        },
+      }, {
+        name: 'QuizzesAndSurveys',
+        path: 'quizzes',
+        component: QuizDefinitionsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quizzes and Surveys',
           },
         },
       }, {
@@ -373,6 +392,17 @@ const router = new Router({
           nonAdmin: true,
           announcer: {
             message: 'My Progress Project',
+          },
+        },
+      }, {
+        name: 'QuizRun',
+        path: 'quizzes/:quizId',
+        component: QuizRun,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Test Run',
           },
         },
       }, {
@@ -885,6 +915,77 @@ const router = new Router({
           reportSkillId: 'VisitUserPerformedSkills',
           announcer: {
             message: 'User\'s Performed Skill EVents for Badge',
+          },
+        },
+      }],
+    },
+    {
+      path: '/administrator/quizzes/:quizId',
+      component: QuizPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Manage Test',
+        },
+      },
+      children: [{
+        name: 'Questions',
+        path: '',
+        component: Questions,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Test or Survey',
+          },
+        },
+      }, {
+        name: 'QuizMetrics',
+        path: 'metrics',
+        component: QuizMetrics,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Metrics',
+          },
+        },
+      }, {
+        name: 'QuizRunsHistoryPage',
+        path: 'results',
+        component: QuizRunsHistoryPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Results History',
+          },
+        },
+      }, {
+        name: 'QuizSingleRunPage',
+        path: 'results/:runId',
+        component: QuizSingleRunPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Single Result',
+          },
+        },
+      }, {
+        name: 'QuizAccessPage',
+        path: 'access',
+        component: QuizAccessPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Access',
+          },
+        },
+      }, {
+        name: 'QuizSettings',
+        path: 'settings',
+        component: QuizSettings,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz Settings',
           },
         },
       }],

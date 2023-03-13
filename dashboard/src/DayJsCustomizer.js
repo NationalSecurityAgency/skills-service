@@ -17,9 +17,11 @@ import { dayjs } from 'dayjs';
 import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import utcPlugin from 'dayjs/plugin/utc';
+import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(localizedFormatPlugin);
 dayjs.extend(relativeTimePlugin);
 dayjs.extend(utcPlugin);
+dayjs.extend(duration);
 
 export default dayjs;

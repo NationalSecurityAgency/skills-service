@@ -641,6 +641,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="invite-0-extension"]').eq(3).click();
         cy.wait('@extendInviteExpiration');
         cy.wait('@loadInviteStatus');
+        cy.contains('abc1@abc.org').should('be.visible');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in 8 days');
     });

@@ -349,11 +349,12 @@ describe('Subjects Tests', () => {
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
 
         cy.get('a.nav-link').contains('Custom').click();
+        cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
 
         const filename = 'invalid_file.txt';
         cy.get('input[type=file]').attachFile(filename);
 
-        cy.get('.alert-danger').contains('File is not an image format');
+        cy.get('[data-cy="customIconErr"]').contains('File is not an image format');
     });
 
     it('upload custom icon - server side error', () => {
@@ -464,7 +465,8 @@ describe('Subjects Tests', () => {
         //subject 2
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
-        cy.realPress('Escape');
+        cy.get('[data-cy=subjectNameInput]').realPress('Escape');
+        cy.get('[data-cy=subjectNameInput]').should('not.exist')
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();

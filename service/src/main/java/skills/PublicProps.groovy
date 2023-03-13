@@ -43,6 +43,7 @@ class PublicProps {
         minNameLength,
         maxBadgeNameLength,
         maxProjectNameLength,
+        maxQuizNameLength,
         maxSkillNameLength,
         maxSubjectNameLength,
         maxLevelNameLength,
@@ -60,6 +61,9 @@ class PublicProps {
         allowedAttachmentFileTypes,
         maxAttachmentSize,
         attachmentWarningMessage,
+        maxQuizDefsPerAdmin,
+        maxQuestionsPerQuiz,
+        maxQuizTextAnswerLength,
     }
 
     @Autowired

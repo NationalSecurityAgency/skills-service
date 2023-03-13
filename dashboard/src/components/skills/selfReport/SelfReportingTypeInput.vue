@@ -27,7 +27,7 @@ limitations under the License.
                                   @hidden="tooltipHidden"/>
       </label>
     </div>
-    <div class="col-12 col-lg-auto">
+    <div class="col-12 col-lg">
       <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0">
         <b-form-radio-group
           id="self-reporting-type"
@@ -54,6 +54,16 @@ limitations under the License.
                                           @shown="tooltipShown"
                                           @hidden="tooltipHidden"/>
               </label>
+            </div>
+          </template>
+          <template>
+            <div class="row m-0 no-gutters">
+              <div class="col-12 col-lg-auto">
+                <b-form-radio class="" value="Quiz" :disabled="!selfReport.enabled" data-cy="quizRadio">Quiz/Survey</b-form-radio>
+              </div>
+              <div class="col pl-2">
+                <quiz-selector v-if="selfReport.enabled && quizSelected" :initiallySelectedQuizId="skill.quizId" @changed="quizIdSelected" />
+              </div>
             </div>
           </template>
         </b-form-radio-group>
@@ -89,10 +99,11 @@ limitations under the License.
 <script>
   import SelfReportService from '@/components/skills/selfReport/SelfReportService';
   import InlineHelp from '@/components/utils/InlineHelp';
+  import QuizSelector from '@/components/skills/selfReport/QuizSelector';
 
   export default {
     name: 'SelfReportingTypeInput',
-    components: { InlineHelp },
+    components: { QuizSelector, InlineHelp },
     props: {
       value: String,
       skill: Object,
@@ -159,6 +170,9 @@ limitations under the License.
       justificationRequiredChanged(justificationRequired) {
         this.$emit('justificationRequiredChanged', justificationRequired);
       },
+      quizIdSelected(quizId) {
+        this.$emit('quizIdChanged', quizId);
+      },
       handleSelfReportingWarning() {
         if (this.isEdit) {
           this.selfReport.approvals.showWarning = false;
@@ -197,6 +211,9 @@ limitations under the License.
     computed: {
       approvalSelected() {
         return this.selfReport.selected === 'Approval';
+      },
+      quizSelected() {
+        return this.selfReport.selected === 'Quiz';
       },
     },
   };

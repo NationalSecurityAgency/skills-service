@@ -50,6 +50,12 @@ class LockingService {
         return res
     }
 
+    SkillsDBLock lockQuizDefs() {
+        SkillsDBLock res = skillsDBLockRepo.findByLock("quizDefs_lock")
+        assert res
+        return res
+    }
+
     SkillsDBLock lockGlobalBadges() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_badges_lock")
         assert res
@@ -75,9 +81,15 @@ class LockingService {
     }
 
     @Profile
-    ProjDef lockProject(String projectId) {
+    Integer lockProject(String projectId) {
         assert projectId
         return skillsDBLockRepo.findByProjectIdIgnoreCase(projectId)
+    }
+
+    @Profile
+    Integer lockQuizDef(String quizId) {
+        assert quizId
+        return skillsDBLockRepo.findByQuizDefIdIgnoreCase(quizId)
     }
 
     /**

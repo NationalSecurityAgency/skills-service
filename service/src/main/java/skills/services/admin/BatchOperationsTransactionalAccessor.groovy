@@ -17,17 +17,19 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.controller.result.model.SettingsResult
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
-
-import jakarta.transaction.Transactional
 
 @Service
 @Slf4j
@@ -54,6 +56,9 @@ class BatchOperationsTransactionalAccessor {
     @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
+    @Autowired
+    SettingsService settingsService
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -61,6 +66,54 @@ class BatchOperationsTransactionalAccessor {
             it.enabled = Boolean.TRUE.toString()
         }
         skillDefRepo.saveAll(disabledImportedSkills)
+    }
+
+    /**
+     * Handle subject after there has been user points change in one of its skills
+     * (1) create user points for new users
+     * (2) update existing
+     * (3) calculate achievements
+     */
+    @Transactional
+    void handlePointsAndAchievementsForSubject(SkillDef subject) {
+        String projectId = subject.projectId
+        String subjectId = subject.skillId
+
+        log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subjectId)
+        Integer numRows = createSubjectUserPointsForTheNewUsers(projectId, subjectId)
+        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, projectId, subjectId)
+
+        log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subjectId)
+        updateUserPointsForSubject(projectId, subjectId)
+
+        log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subjectId)
+        identifyAndAddSubjectLevelAchievements(subject.projectId, subjectId)
+        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subjectId)
+    }
+
+    /**
+     * Handle project after there has been user points change in one of its subjects or skills
+     * (1) create user points for new users
+     * (2) update existing
+     * (3) calculate achievements
+     * @param projectId
+     */
+    @Transactional
+    void handlePointsAndAchievementsForProject(String projectId) {
+        SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
+        boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
+
+        log.info("Creating UserPoints for the new users for [{}] project", projectId)
+        createProjectUserPointsForTheNewUsers(projectId)
+        log.info("Competed creating UserPoints for the new users for [{}] project", projectId)
+
+        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
+        updateUserPointsForProject(projectId)
+        log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
+
+        log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
+        identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        log.info("Completed identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
     }
 
     @Transactional
@@ -96,8 +149,57 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void createSubjectUserPointsForTheNewUsers(String toProjectId, String toSubjectId) {
+    Integer createSubjectUserPointsForTheNewUsers(String toProjectId, String toSubjectId) {
         userPointsRepo.createSubjectUserPointsForTheNewUsers(toProjectId, toSubjectId)
+    }
+
+    @Transactional
+    @Profile
+    void createSkillUserPointsFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
+        log.info("Creating UserPoints for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+        userPointsRepo.createSkillUserPointsFromPassedQuizzes(quizRefId, skillRefId)
+        log.info("Completed creating UserPoints for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+    }
+
+    @Transactional
+    @Profile
+    void createSkillUserPointsFromPassedQuizzesForProject(String projectId) {
+        log.info("Creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createSkillUserPointsFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
+    }
+
+
+    @Transactional
+    @Profile
+    void createUserPerformedEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
+        log.info("Creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+        userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId)
+        log.info("Completed creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+    }
+
+    @Transactional
+    @Profile
+    void createUserPerformedEntriesFromPassedQuizzesForProject(String projectId) {
+        log.info("Creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createUserPerformedEntriesFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
+    }
+
+    @Transactional
+    @Profile
+    void createUserAchievementsFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
+        log.info("Creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
+        userPointsRepo.createUserAchievementsFromPassedQuizzes(quizRefId, skillRefId)
+        log.info("Completed creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
+    }
+
+    @Transactional
+    @Profile
+    void createUserAchievementsFromPassedQuizzes(String projectId) {
+        log.info("Creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
+        userPointsRepo.createUserAchievementsFromPassedQuizzesForProject(projectId)
+        log.info("Completed creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
     }
 
     @Transactional
@@ -109,8 +211,10 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddGroupAchievements(List<SkillDef> groups) {
-        groups.each { skillsGroupSkillDef ->
+        groups.each { SkillDef skillsGroupSkillDef ->
             int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            log.info("Identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+                    skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
             userAchievedLevelRepo.identifyAndAddGroupAchievements(
                     skillsGroupSkillDef.projectId,
                     skillsGroupSkillDef.skillId,
@@ -118,6 +222,8 @@ class BatchOperationsTransactionalAccessor {
                     numSkillsRequired,
                     Boolean.FALSE.toString(),
             )
+            log.info("Finished identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+                    skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
         }
     }
 

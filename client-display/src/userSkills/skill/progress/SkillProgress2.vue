@@ -69,7 +69,12 @@ limitations under the License.
               </div>
 
               <b-badge v-if="skill.selfReporting && skill.selfReporting.enabled"
-                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden"><i class="fas fa-check-circle"></i> Self Reportable</b-badge>
+                  variant="success" style="font-size: 0.9rem" class="ml-2 overflow-hidden self-report-badge"><i class="fas fa-user-check mr-1"></i><span class="sr-spelled-out mr-1">Self Reportable:</span>
+                <span v-if="skill.selfReporting.type === 'Quiz'" data-cy="selfReportQuizTag"><span class="sr-spelled-out mr-1">Take </span>Quiz</span>
+                <span v-if="skill.selfReporting.type === 'Survey'" data-cy="selfReportSurveyTag"><span class="sr-spelled-out mr-1">Complete </span>Survey</span>
+                <span v-if="skill.selfReporting.type === 'HonorSystem'" data-cy="selfReportHonorSystemTag">Honor<span class="sr-spelled-out ml-1">System</span></span>
+                <span v-if="skill.selfReporting.type === 'Approval'" data-cy="selfReportApprovalTag"><span class="sr-spelled-out mr-1">Request</span>Approval</span>
+              </b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
                 <i class="fas fa-eye"></i> Last Viewed
@@ -91,7 +96,8 @@ limitations under the License.
           / {{ skill.totalPoints | number }} Points
         </div>
         <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && allowDrillDown" data-cy="approvalPending">
-          <i class="far fa-clock"></i> Pending Approval
+          <span v-if="!skill.selfReporting.rejectedOn"><i class="far fa-clock" aria-hidden="true"></i> Pending Approval</span>
+          <span v-else><i class="fas fa-heart-broken text-danger skills-theme-primary-color" aria-hidden="true"></i> Request Rejected</span>
         </div>
       </div>
     </div>
@@ -356,4 +362,21 @@ limitations under the License.
 .locked-text {
   font-size: 0.8rem;
 }
+
+.self-report-badge .sr-acronym {
+  display: inline-block;
+}
+
+.self-report-badge:hover .sr-acronym {
+  display: none;
+}
+
+.self-report-badge .sr-spelled-out {
+  display: none;
+}
+
+.self-report-badge:hover .sr-spelled-out {
+  display: inline-block;
+}
+
 </style>

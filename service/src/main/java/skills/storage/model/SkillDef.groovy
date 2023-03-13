@@ -34,5 +34,6 @@ class SkillDef extends SkillDefParent {
     public static enum SelfReportingType {
         Approval,
         HonorSystem,
+        Quiz
     }
 }

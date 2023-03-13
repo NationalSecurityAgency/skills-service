@@ -49,7 +49,7 @@ limitations under the License.
         </div>
       </ValidationObserver>
 
-      <div class="row mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key">
+      <div class="row mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
         <div class="col">
           <span :class="[user.success ? 'text-success' : 'text-danger']" style="font-weight: bolder">
             <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
@@ -57,7 +57,7 @@ limitations under the License.
               Added points for
             </span>
             <span v-else>
-              Wasn't able to add points for
+              Unable to add points for
             </span>
             <span>[{{user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
           </span><span v-if="!user.success"> - {{user.msg}}</span>
@@ -178,7 +178,8 @@ limitations under the License.
             this.currentSelectedUser = null;
           })
           .catch((e) => {
-            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+            const hasErrorCode = e.response.data && e.response.data.errorCode;
+            if (hasErrorCode && (e.response.data.errorCode === 'UserNotFound' || e.response.data.errorCode === 'SkillEventForQuizSkillIsNotAllowed')) {
               this.isSaving = false;
               const historyObj = {
                 success: false,

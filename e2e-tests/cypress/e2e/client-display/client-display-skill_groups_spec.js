@@ -22,11 +22,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.createSubject(1, 1);
 
         Cypress.Commands.add('reportHonorSkill', (skillNum) => {
-            cy.get(`[data-cy="group-group1_skillProgress-skill${skillNum}"] [data-cy="selfReportBtn"]`)
-                .click();
-            cy.get('[data-cy="selfReportSkillMsg"]')
-                .contains('This skill can be submitted under the Honor System and 100 points will be awarded right away');
-            cy.get('[data-cy="selfReportSubmitBtn"]')
+            cy.get(`[data-cy="group-group1_skillProgress-skill${skillNum}"] [data-cy="claimPointsBtn"]`)
                 .click();
             cy.get(`[data-cy="group-group1_skillProgress-skill${skillNum}"] [data-cy="selfReportAlert"]`)
                 .contains('Congrats! You just earned 100 points');
@@ -958,11 +954,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSkillMsg"]')
-            .contains('This skill can be submitted under the Honor System and 100 points will be awarded right away');
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="selfReportAlert"]')
             .contains('Congrats! You just earned 100 points');

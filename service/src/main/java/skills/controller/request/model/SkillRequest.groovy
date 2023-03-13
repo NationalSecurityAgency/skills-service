@@ -53,4 +53,7 @@ class SkillRequest {
 
     // true/false - whether or not a justification is required - self report approval skills only
     String justificationRequired
+
+    // required when selfReportingType=quiz
+    String quizId
 }

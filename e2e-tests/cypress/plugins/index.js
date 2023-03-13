@@ -92,6 +92,7 @@ module.exports = (on, config) => {
 
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
+        return launchOptions
     });
 
     if (config.experimentalRunEvents) {

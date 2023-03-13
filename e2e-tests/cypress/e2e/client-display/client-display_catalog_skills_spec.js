@@ -114,15 +114,15 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="catalogImportStatus"]')
             .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.');
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="catalogImportStatus"]')
-            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.');
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can be self-reported via the button below.');
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="catalogImportStatus"]')
             .should('not.exist');
 
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="claimPointsBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="claimPointsBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillDescription-skill3"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill3"] [data-cy="claimPointsBtn"]')
             .should('not.exist');
 
         // check single pages
@@ -131,7 +131,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .contains('Very Great Skill 1 in This is project 2');
         cy.get('[data-cy="catalogImportStatus"]')
             .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.');
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .should('not.exist');
 
         cy.cdBack('Subject 1');
@@ -139,8 +139,8 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2 in This is project 2');
         cy.get('[data-cy="catalogImportStatus"]')
-            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can can be self-reported via the "I did it" button below.');
-        cy.get('[data-cy="selfReportBtn"]')
+            .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can be self-reported via the button below.');
+        cy.get('[data-cy="claimPointsBtn"]')
             .should('be.enabled');
 
         cy.cdBack('Subject 1');
@@ -149,7 +149,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .contains('Very Great Skill 3');
         cy.get('[data-cy="catalogImportStatus"]')
             .should('not.exist');
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .should('not.exist');
     });
 
@@ -179,9 +179,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
 
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportAlert"]')
             .contains('Congrats! You just earned 100 points!');
@@ -191,9 +189,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
 
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
-            .click();
-        cy.get('[data-cy="selfReportSubmitBtn"]')
+        cy.get('[data-cy="claimPointsBtn"]')
             .click();
         cy.get('[data-cy="selfReportAlert"]')
             .contains('Congrats! You just earned 100 points and completed the skill!');
@@ -257,33 +253,33 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .click();
         cy.get('[data-cy="selfReportAlert"]')
             .contains('Submitted successfully');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('requires approval');
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.get('[data-cy="toggleSkillDetails"]')
             .click();
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
-            .should('be.disabled');
+            .contains('pending approval');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]')
+            .should('not.exist');
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="pendingApprovalStatus"]')
             .should('not.exist');
-        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="requestApprovalBtn"]')
             .should('be.enabled');
 
         cy.cdClickSkill(0);
         cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Pending Approval');
-        cy.get('[data-cy="selfReportBtn"]')
-            .should('be.disabled');
+            .contains('pending approval');
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .should('not.exist');
     });
 
     it('gracefully handle self-reporting for the imported skill which already has pending approval reported another way after the page was loaded', () => {
@@ -311,12 +307,12 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]');
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.waitForBackendAsyncTasksToComplete();
 
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"] ')
             .click();
@@ -326,7 +322,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdClickSkill(1);
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.waitForBackendAsyncTasksToComplete();
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"] ')
             .click();
@@ -365,14 +361,14 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdClickSubj(0);
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]');
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.waitForBackendAsyncTasksToComplete();
         cy.approveRequest(2);
         cy.waitForBackendAsyncTasksToComplete();
 
-        cy.get('[data-cy="skillDescription-skill1"] [data-cy="selfReportBtn"]')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"] ')
             .click();
@@ -384,7 +380,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
         cy.approveRequest(2);
         cy.waitForBackendAsyncTasksToComplete();
-        cy.get('[data-cy="selfReportBtn"]')
+        cy.get('[data-cy="requestApprovalBtn"]')
             .click();
         cy.get('[data-cy="selfReportSubmitBtn"] ')
             .click();

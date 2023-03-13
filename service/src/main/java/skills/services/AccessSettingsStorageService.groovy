@@ -31,6 +31,7 @@ import skills.auth.pki.PkiUserLookup
 import skills.controller.UserInfoController
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
@@ -101,6 +102,11 @@ class AccessSettingsStorageService {
             tableResult.count = res?.size()
         }
         return tableResult
+    }
+
+    List<UserRoleRes> findAllQuizRoles(String quizId) {
+        List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByQuizId(quizId)
+        return rolesFromDB.collect { convert(it)}
     }
 
     @Transactional(readOnly = true)
@@ -228,9 +234,17 @@ class AccessSettingsStorageService {
 
     private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        User user = userRepository.findByUserId(userId?.toLowerCase())
         UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
+
+        userRoleRepository.delete(userRole)
+        log.debug("Deleted userRole [{}]", userRole)
+    }
+
+    void deleteQuizUserRole(String userId, String quizId, RoleName roleName) {
+        log.debug('Deleting user-role for userId [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
+        assert userRole, "DELETE FAILED -> no user-role with quiz id [$quizId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
         log.debug("Deleted userRole [{}]", userRole)
@@ -287,6 +301,30 @@ class AccessSettingsStorageService {
         sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
         return userRole
     }
+
+    UserRole addQuizDefUserRole(String userId, String quizId, RoleName roleName) {
+        log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
+        String userIdLower = userId?.toLowerCase()
+        User user = userRepository.findByUserId(userIdLower)
+        if (user) {
+            // check that the new user role does not already exist
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
+            if (existingUserRole) {
+                throw new SkillQuizException("CREATE FAILED -> user-role with quiz id [$quizId], userIdLower [$userIdLower] and roleName [$roleName] already exists", quizId, ErrorCode.BadParam)
+            }
+        } else {
+            throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
+        }
+
+        UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, quizId: quizId)
+        userRoleRepository.save(userRole)
+        log.debug("Created userRole [{}]", userRole)
+
+//        log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
+//        sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
+        return userRole
+    }
+
 
     @Transactional()
     @Profile

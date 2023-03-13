@@ -57,6 +57,11 @@ limitations under the License.
           iconClass: 'fa-tasks skills-color-projects',
           page: 'AdminHomePage',
         });
+        items.push({
+          name: 'Quizzes and Surveys',
+          iconClass: 'fa-spell-check skills-color-subjects',
+          page: 'QuizzesAndSurveys',
+        });
 
         if (this.isSupervisor || this.isRoot) {
           items.push({
