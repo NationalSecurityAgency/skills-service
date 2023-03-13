@@ -53,7 +53,12 @@ class AuthUtils {
             Matcher matcher = pattern.matcher(servletPath)
             if (matcher.matches()) {
                 if (matcher.hasGroup()) {
-                    res = matcher.group(2)
+                    if (pattern.toString() == PROJECT_ID_PATTERN.toString()) {
+                        res = matcher.group(2)
+                    } else {
+                        res = matcher.group(1)
+                    }
+
                 } else {
                     log.warn("no {} found for endpoint [{}]?", label, servletRequest)
                 }
