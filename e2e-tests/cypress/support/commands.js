@@ -538,15 +538,21 @@ Cypress.Commands.add("assignCrossProjectDep", (proj1Num, skillNum1, proj2Num, sk
 
 
 Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
-    let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
-    if (date === 'now') {
-        m = moment.utc()
-    }
-    if (date === 'yesterday') {
-        m = moment.utc().subtract(1, 'day')
-    }
-    if (date === '2 days ago') {
-        m = moment.utc().subtract(2, 'day')
+    let timestamp = null
+    if (Number.isInteger(date)) {
+        timestamp = date;
+    } else {
+        let m = moment.utc(date, 'YYYY-MM-DD HH:mm');
+        if (date === 'now') {
+            m = moment.utc()
+        }
+        if (date === 'yesterday') {
+            m = moment.utc().subtract(1, 'day')
+        }
+        if (date === '2 days ago') {
+            m = moment.utc().subtract(2, 'day')
+        }
+        timestamp = m.clone().format('x')
     }
     let proj = '';
     if (!isNaN(parseFloat(project))) {
@@ -563,10 +569,12 @@ Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, use
     } else {
         skillId = skill;
     }
-    const body = {userId, timestamp: m.clone().format('x'), approvalRequestedMsg}
+    const url = `/api/projects/${proj}/skills/${skillId}`;
+    const body = {userId, timestamp, approvalRequestedMsg}
+    cy.log(`Report Skill Event: url=[${url}], failOnStatusCode=[${failOnError}], body: ${JSON.stringify(body)}`)
     cy.request({
         method: 'POST',
-        url: `/api/projects/${proj}/skills/${skillId}`,
+        url,
         failOnStatusCode: failOnError,
         body });
 });
@@ -1154,4 +1162,26 @@ Cypress.Commands.add('moveSkillIntoAnotherGroup', (projNum, skillNum, toSubjNum,
         groupId,
         skillIds: [`skill${skillNum}`]
     });
+});
+
+Cypress.Commands.add('beforeTestSuiteThatReusesData', () => {
+    Cypress.env('disableResetDb', true);
+    cy.resetDb();
+    cy.resetEmail();
+
+    cy.logout();
+    cy.fixture('vars.json')
+        .then((vars) => {
+            if (!Cypress.env('oauthMode')) {
+                cy.log('NOT in oauthMode, using form login');
+                cy.login(vars.defaultUser, vars.defaultPass);
+            } else {
+                cy.log('oauthMode, using loginBySingleSignOn');
+                cy.loginBySingleSignOn();
+            }
+        });
+});
+
+Cypress.Commands.add('afterTestSuiteThatReusesData', () => {
+    Cypress.env('disableResetDb', false);
 });
