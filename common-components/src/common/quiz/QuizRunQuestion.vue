@@ -39,7 +39,7 @@ limitations under the License.
               max-rows="20"/>
           <small :id="`question${num}_textInputAnswerErr`"
                  role="alert" class="form-text text-danger"
-                 :data-cy="`question${num}_textInputAnswerErr`">{{ errors[0] }}</small>
+                 data-cy="textInputAnswerErr">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
       <div v-else>
@@ -52,7 +52,7 @@ limitations under the License.
                               :can-select-more-than-one="isMultipleChoice"/>
             <small :id="`question${num}_multipleChoiceErr`"
                    role="alert" class="form-text text-danger"
-                   :data-cy="`question${num}_multipleChoiceErr`">{{ errors[0] }}</small>
+                   data-cy="choiceAnswerErr">{{ errors[0] }}</small>
           </ValidationProvider>
       </div>
       </ValidationObserver>
