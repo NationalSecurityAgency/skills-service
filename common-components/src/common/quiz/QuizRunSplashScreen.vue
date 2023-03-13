@@ -67,9 +67,15 @@ limitations under the License.
     </p>
 
     <div class="mt-5">
-      <b-button v-if="canStartQuiz" variant="outline-danger" @click="cancel" class="text-uppercase mr-2 skills-theme-btn" data-cy="cancelQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Cancel</i></b-button>
-      <b-button v-if="canStartQuiz" variant="outline-success" @click="start" class="text-uppercase skills-theme-btn" data-cy="startQuizAttempt"><i class="fas fa-play-circle" aria-hidden="true"> Start</i></b-button>
-      <b-button v-if="!canStartQuiz" variant="outline-primary" @click="cancel" class="text-uppercase mr-2 skills-theme-btn" data-cy="closeQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Close</i></b-button>
+      <b-button v-if="canStartQuiz" variant="outline-danger"
+                :aria-label="`Cancel ${quizInfo.quizType} run`"
+                @click="cancel" class="text-uppercase mr-2 skills-theme-btn" data-cy="cancelQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Cancel</i></b-button>
+      <b-button v-if="canStartQuiz" variant="outline-success"
+                :aria-label="`Start ${quizInfo.quizType} run`"
+                @click="start" class="text-uppercase skills-theme-btn" data-cy="startQuizAttempt"><i class="fas fa-play-circle" aria-hidden="true"> Start</i></b-button>
+      <b-button v-if="!canStartQuiz" variant="outline-primary"
+                :aria-label="`Close ${quizInfo.quizType} run`"
+                @click="cancel" class="text-uppercase mr-2 skills-theme-btn" data-cy="closeQuizAttempt"><i class="fas fas fa-times-circle" aria-hidden="true"> Close</i></b-button>
     </div>
   </b-card>
 </template>

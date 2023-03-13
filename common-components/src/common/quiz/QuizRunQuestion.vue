@@ -30,14 +30,16 @@ limitations under the License.
       <div v-if="isTextInput">
         <ValidationProvider rules="required|customDescriptionValidator" v-slot="{errors}" :name="`Answer to question #${num}`" :debounce="400" :immediate="false">
           <b-form-textarea
-              :id="`answer-${num}`"
+              :id="`question-${num}`"
               data-cy="textInputAnswer"
               v-model="answerText"
               :debounce="500"
               placeholder="Please enter your response here..."
               rows="2"
               max-rows="20"/>
-          <small role="alert" class="form-text text-danger" data-cy="textInputAnswerErr" id="skillPointIncrementError">{{ errors[0] }}</small>
+          <small :id="`question${num}_textInputAnswerErr`"
+                 role="alert" class="form-text text-danger"
+                 :data-cy="`question${num}_textInputAnswerErr`">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
       <div v-else>
@@ -48,7 +50,9 @@ limitations under the License.
                               v-model="answerOptions"
                               :q="q"
                               :can-select-more-than-one="isMultipleChoice"/>
-            <small role="alert" class="form-text text-danger" data-cy="choiceAnswerErr" id="skillPointIncrementError">{{ errors[0] }}</small>
+            <small :id="`question${num}_multipleChoiceErr`"
+                   role="alert" class="form-text text-danger"
+                   :data-cy="`question${num}_multipleChoiceErr`">{{ errors[0] }}</small>
           </ValidationProvider>
       </div>
       </ValidationObserver>

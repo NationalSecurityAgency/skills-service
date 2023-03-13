@@ -82,6 +82,7 @@ limitations under the License.
         <b-button variant="outline-info" @click="saveAndCloseThisRun"
                   class="text-uppercase mr-2 font-weight-bold skills-theme-btn"
                   :disabled="isCompleting"
+                  :aria-label="`Save and close this ${quizInfo.quizType}`"
                   data-cy="saveAndCloseQuizAttemptBtn">
           <i class="fas fa-save" aria-hidden="true"> Save and Close</i>
         </b-button>
@@ -89,6 +90,7 @@ limitations under the License.
           <b-button variant="outline-success"
                     @click="handleSubmit(completeTestRun)"
                     :disabled="isCompleting"
+                    :aria-label="`Done with ${quizInfo.quizType}`"
                     class="text-uppercase font-weight-bold skills-theme-btn"
                     data-cy="completeQuizBtn">
             <i class="fas fa-check-double" aria-hidden="true"></i> Done
