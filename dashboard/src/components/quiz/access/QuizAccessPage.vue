@@ -40,6 +40,7 @@ limitations under the License.
             <b-button variant="outline-hc"
                       ref="addUserBtn"
                       @click="addUserRole"
+                      aria-label="Add selected user as an admin of this quiz or survey"
                       :disabled="!userSelected || table.options.busy"
                       data-cy="addUserBtn">
               Add User <i class="fas fa-arrow-circle-right" aria-hidden="true"></i>

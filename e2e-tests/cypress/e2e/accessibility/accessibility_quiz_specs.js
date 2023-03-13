@@ -91,8 +91,10 @@ describe('Accessibility Quiz Tests', () => {
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_TextInput"]').click()
-        cy.get('[data-cy="textAreaPlaceHolder"]')
+        cy.get('[data-cy="textAreaPlaceHolder"]').should('be.visible')
+        cy.get('[data-cy="questionText"]').type('hi')
 
+        cy.wait(1111);
         cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
@@ -147,6 +149,31 @@ describe('Accessibility Quiz Tests', () => {
         cy.visit('/administrator/quizzes/quiz1/results')
         cy.get('[data-cy="row0-viewRun"]').click();
         cy.get('[data-cy="questionDisplayCard-1"]').contains('This is a question # 1')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('quiz access page', () => {
+        cy.createSurveyDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1/access')
+        cy.get('[data-cy="quizUserRoleTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
+
+    it('quiz access page', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
         cy.customLighthouse();
         cy.injectAxe();
