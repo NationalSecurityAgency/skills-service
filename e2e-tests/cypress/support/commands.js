@@ -217,7 +217,13 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
 
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
-        cy.login(vars.defaultUser, vars.defaultPass);
+        if (!Cypress.env('oauthMode')) {
+            cy.log('NOT in oauthMode, using form login')
+            cy.login(vars.defaultUser, vars.defaultPass);
+        } else {
+            cy.log('oauthMode, using loginBySingleSignOn')
+            cy.loginBySingleSignOn()
+        }
         cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete)
     });
 });
