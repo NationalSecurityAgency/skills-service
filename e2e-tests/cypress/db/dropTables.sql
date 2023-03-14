@@ -72,4 +72,20 @@ drop table IF EXISTS attachments CASCADE;
 
 drop table IF EXISTS skill_approval_conf CASCADE;
 
+drop table IF EXISTS quiz_answer_definition CASCADE;
+
+drop table IF EXISTS quiz_definition CASCADE;
+
+drop table IF EXISTS quiz_question_definition CASCADE;
+
+drop table IF EXISTS quiz_settings CASCADE;
+
+drop table IF EXISTS quiz_to_skill_definition CASCADE;
+
+drop table IF EXISTS user_quiz_answer_attempt CASCADE;
+
+drop table IF EXISTS user_quiz_attempt CASCADE;
+
+drop table IF EXISTS user_quiz_question_attempt CASCADE;
+
 drop function IF EXISTS f_select_lock_and_insert;

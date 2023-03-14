@@ -159,10 +159,10 @@ class UserAuthService {
 
     @Transactional
     @Profile
-    UserInfo createOrUpdateUser(UserInfo userInfo) {
+    UserInfo createOrUpdateUser(UserInfo userInfo, boolean refreshSecurityContext=true) {
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
         UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
-        if (authMode == AuthMode.FORM) {
+        if (authMode == AuthMode.FORM && refreshSecurityContext) {
             SecurityContext securityContext = SecurityContextHolder.getContext()
             Authentication authentication = securityContext?.getAuthentication()
             if (authentication && authentication instanceof UsernamePasswordAuthenticationToken && authentication.getPrincipal() instanceof UserInfo) {
