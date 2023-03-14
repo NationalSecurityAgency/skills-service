@@ -138,13 +138,17 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void copySkillUserPointsToTheImportedProjects(String toProjectId, List<Integer> fromSkillRefIds) {
+        log.info("Copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
         userPointsRepo.copySkillUserPointsToTheImportedProjects(toProjectId, fromSkillRefIds)
+        log.info("Done copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
     }
 
     @Transactional
     @Profile
-    void copySkillAchievementsToTheImportedProjects(List<Integer> fromSkillRefIds) {
+    void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
+        log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
         userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds)
+        log.info("Done copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
     }
 
     @Transactional
