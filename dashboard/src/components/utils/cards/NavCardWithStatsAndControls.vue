@@ -21,10 +21,10 @@ limitations under the License.
           <div class="media">
             <router-link v-if="options.icon" tag="a"
                          :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
-                         tabindex="-1" style="max-width:100px; max-height:100px; height:60px; width: 60px;">
+                         tabindex="-1" class="subject-icon-container">
               <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem; height: inherit; width: inherit;"
                    aria-hidden="true">
-                <i :class="[`${options.icon}`]" aria-hidden="true" style="height: 100%; width: 100%; background-size: cover; background-position: center; font-size:50px;"/>
+                <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
               </div>
             </router-link>
             <div class="media-body" style="min-width: 0px; margin-left: 8px;">
@@ -187,5 +187,21 @@ limitations under the License.
     cursor: grab !important;
     color: $info !important;
     font-size: 1.5rem;
+  }
+
+  .subject-icon {
+    height: 100%;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    font-size: 42px !important;
+    line-height: 58px;
+  }
+
+  .subject-icon-container {
+    max-width:100px;
+    max-height:100px;
+    height:60px;
+    width: 60px;
   }
 </style>
