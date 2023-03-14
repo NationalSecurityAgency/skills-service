@@ -445,10 +445,12 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=subjectNameInput]').should('be.visible');
         cy.get('[data-cy="closeSubjectButton"]').click()
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
@@ -456,21 +458,19 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject');
         cy.wait('@loadSubject');
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+        cy.get('[data-cy="markdownEditorInput"]').should('be.visible')
         cy.get('[aria-label=Close]').click();
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         //subject 2
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
-        cy.get('[data-cy=subjectNameInput]').should('be.visible');
-        cy.get('[data-cy=subjectNameInput]').realPress('Escape');
-        cy.get('[data-cy=subjectNameInput]').should('not.exist')
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
-
-        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
         cy.get('[data-cy=closeSubjectButton]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
@@ -478,10 +478,12 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject2');
         cy.wait('@loadSubject2');
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
         cy.get('[aria-label=Close]').click();
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
     });
 
