@@ -16,7 +16,9 @@ limitations under the License.
 <template>
   <div class="row no-gutters mb-4" :data-cy="`question_${num}`">
     <div class="col-auto pt-2 pr-2">
-      <b-badge class="d-inline-block" :variant="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'default'}`">{{ num }}</b-badge>
+      <b-badge class="d-inline-block"
+               :aria-label="questionNumAriaLabel"
+               :variant="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'default'}`">{{ num }}</b-badge>
       <span v-if="q.gradedInfo" class="ml-1 pt-1">
         <span v-if="q.gradedInfo.isCorrect" class="text-success skills-theme-quiz-correct-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
         <span v-if="!q.gradedInfo.isCorrect" class="text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
@@ -34,6 +36,7 @@ limitations under the License.
               data-cy="textInputAnswer"
               v-model="answerText"
               :debounce="500"
+              :aria-label="`Please enter text to answer question number ${num}`"
               placeholder="Please enter your response here..."
               rows="2"
               max-rows="20"/>
@@ -49,6 +52,7 @@ limitations under the License.
                               @selected-answer="selectionChanged"
                               v-model="answerOptions"
                               :q="q"
+                              :q-num="num"
                               :can-select-more-than-one="isMultipleChoice"/>
             <small :id="`question${num}_multipleChoiceErr`"
                    role="alert" class="form-text text-danger"
@@ -110,6 +114,17 @@ limitations under the License.
           return !this.answerText || this.answerText.trimEnd() === '';
         }
         return this.answerOptions.findIndex((a) => a.selected === true) < 0;
+      },
+      questionNumAriaLabel() {
+        let res = `Question number ${this.num}`;
+        if (this.q.gradedInfo) {
+          if (this.q.gradedInfo.isCorrect) {
+            res = `${res} was answered correctly`;
+          } else {
+            res = `${res} was answered incorrectly`;
+          }
+        }
+        return res;
       },
     },
     methods: {

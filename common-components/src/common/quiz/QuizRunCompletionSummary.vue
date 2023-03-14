@@ -15,17 +15,17 @@ limitations under the License.
 */
 <template>
   <b-card body-class="text-left" data-cy="quizCompletion">
-    <div class="h4">
+    <div class="h4" tabindex="-1" ref="completionSummaryTitle" data-cy="completionSummaryTitle">
       <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-        <i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!
+        <i class="fas fa-handshake text-info skills-page-title-text-color" aria-hidden="true"></i> Thank you for completing the {{ quizInfo.quizType }}!
       </slot>
       <span v-else><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
     </div>
     <div class="mb-1 mt-4 h2">
       <span class="font-weight-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
       <div class="h2 d-inline-block ml-2">
-        <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning" data-cy="quizFailed"><i class="far fa-times-circle"></i> Failed</b-badge>
-        <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success" data-cy="quizPassed"><i class="fas fa-check-double"></i> Passed</b-badge>
+        <b-badge v-if="!quizResult.gradedRes.passed" class="text-uppercase" variant="warning" data-cy="quizFailed"><i class="far fa-times-circle" aria-hidden="true"></i> Failed</b-badge>
+        <b-badge v-if="quizResult.gradedRes.passed" class="text-uppercase" variant="success" data-cy="quizPassed"><i class="fas fa-check-double" aria-hidden="true"></i> Passed</b-badge>
       </div>
     </div>
     <b-card-group deck>
@@ -65,7 +65,7 @@ limitations under the License.
       <b-card v-if="!quizResult.gradedRes.passed" bg-variant="light" class="text-center skills-card-theme-border" data-cy="numAttemptsInfoCard">
         <b-card-text>
           <div class="h3" data-cy="title">
-            <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity"></i> Attempts</span>
+            <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity" aria-hidden="true"></i> Attempts</span>
             <span v-if="!unlimitedAttempts">
               <span v-if="numAttemptsLeft === 0">No</span>
               <b-badge v-else variant="success">{{ numAttemptsLeft }}</b-badge> More Attempts
@@ -81,12 +81,12 @@ limitations under the License.
 
     <div v-if="!quizResult.gradedRes.passed" class="mt-4">
       <div class="my-2" v-if="numAttemptsLeft > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
-      <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
-      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
+      <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle" aria-hidden="true"></i> Close</b-button>
+      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo" aria-hidden="true"></i> Try Again</b-button>
     </div>
 
     <div v-if="quizResult.gradedRes.passed" class="mt-4">
-      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
+      <b-button variant="outline-success" @click="close" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle" aria-hidden="true"></i> Close</b-button>
     </div>
   </b-card>
 </template>
@@ -104,6 +104,9 @@ limitations under the License.
       },
       runAgain() {
         this.$emit('run-again');
+      },
+      focus() {
+        this.$nextTick(() => this.$refs.completionSummaryTitle.focus());
       },
     },
     computed: {

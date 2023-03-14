@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div v-if="errorsToShow" class="alert alert-danger" data-cy="questionErrors">
-    <i class="fas fa-exclamation-triangle"></i> Please fix the following:
+    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Please fix the following:
     <div v-for="e in (errorsToShow.length > 5 ? errorsToShow.slice(0, 3) : errorsToShow)" :key="e" class="ml-4">
       - {{ e }}
     </div>
@@ -26,8 +26,8 @@ limitations under the License.
         </div>
       </b-collapse>
       <b-link v-b-toggle.collapse-additional-errors>
-        <span v-if="!additionalErrorsShown"><i class="fas fa-arrow-alt-circle-down"></i> Expand {{ errorsToShow.length - 3 }} more...</span>
-        <span v-else><i class="fas fa-arrow-alt-circle-up"></i> Collapse</span>
+        <span v-if="!additionalErrorsShown"><i class="fas fa-arrow-alt-circle-down" aria-hidden="true"></i> Expand {{ errorsToShow.length - 3 }} more...</span>
+        <span v-else><i class="fas fa-arrow-alt-circle-up" aria-hidden="true"></i> Collapse</span>
       </b-link>
     </div>
   </div>
