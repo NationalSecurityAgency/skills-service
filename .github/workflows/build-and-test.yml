@@ -84,8 +84,6 @@ jobs:
 
   ui-tests-against-postgres:
     runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-18.14.1-chrome-110.0.5481.96-1-ff-109.0-edge-110.0.1587.41-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -116,8 +114,8 @@ jobs:
           - 5432:5432
 
     steps:
-#    - name: Install Emoji Support
-#      run: apt-get install fonts-noto-color-emoji
+    - name: Install Emoji Support
+      run: sudo apt-get install fonts-noto-color-emoji
 
     - uses: actions/checkout@v3
 
