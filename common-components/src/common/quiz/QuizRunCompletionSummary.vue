@@ -105,9 +105,6 @@ limitations under the License.
       runAgain() {
         this.$emit('run-again');
       },
-      focus() {
-        this.$nextTick(() => this.$refs.completionSummaryTitle.focus());
-      },
     },
     computed: {
       unlimitedAttempts() {

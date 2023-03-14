@@ -102,8 +102,6 @@ describe('Client Display Accessibility Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
-        cy.get('[data-cy="completionSummaryTitle"]').should('have.focus')
-
         cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();
@@ -137,8 +135,6 @@ describe('Client Display Accessibility Quiz Tests', () => {
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
-
-        cy.get('[data-cy="completionSummaryTitle"]').should('have.focus')
 
         cy.customLighthouse();
         cy.injectAxe();

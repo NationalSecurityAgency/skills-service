@@ -41,6 +41,7 @@ limitations under the License.
     </survey-run-completion-summary>
 
     <quiz-run-completion-summary
+        id="quizRunCompletionSummary"
         ref="quizRunCompletionSummary"
         v-if="!isSurveyType && quizResult && !splashScreen.show"
         class="mb-3"
@@ -228,7 +229,6 @@ limitations under the License.
         }
       },
       completeTestRun() {
-        const self = this;
         this.isCompleting = true;
         this.$refs.observer.validate().then((validationResults) => {
           if (validationResults) {
@@ -238,7 +238,10 @@ limitations under the License.
                   .finally(() => {
                     this.isCompleting = false;
                     if (!this.isSurveyType) {
-                      this.$nextTick(() => self.$refs.quizRunCompletionSummary?.focus());
+                      this.$nextTick(() => {
+                        const element = document.getElementById('quizRunCompletionSummary');
+                        element.scrollIntoView({ behavior: 'smooth' });
+                      });
                     }
                   });
               });
