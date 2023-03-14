@@ -494,7 +494,6 @@ describe('Subjects Tests', () => {
             name: "Subject 1"
         });
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
-
         cy.intercept('PUT', '/admin/projects/proj1/subjects/subj1/levels/edit/*').as('saveLevel');
 
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels').as('loadLevels');
