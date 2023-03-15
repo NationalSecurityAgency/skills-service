@@ -191,8 +191,10 @@ limitations under the License.
       },
       addUserRole() {
         this.table.options.busy = true;
-        const { userIdForDisplay, userId } = this.selectedUser;
-        QuizService.addQuizAdmin(this.quizId, userId)
+        const { userIdForDisplay, userId, dn } = this.selectedUser;
+        const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
+        const userIdParam = pkiAuthenticated ? dn : userId;
+        QuizService.addQuizAdmin(this.quizId, userIdParam)
           .then(() => {
             this.selectedUser = null;
             this.loadData()
