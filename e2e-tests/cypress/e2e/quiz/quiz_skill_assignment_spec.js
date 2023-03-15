@@ -284,4 +284,23 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="addedUserEventsInfo"]').contains('Unable to add points for [oTHIGHJK] - Cannot report skill events directly to a quiz-based skill');
     });
 
+    it('view skill overview where quiz/survey is assigned', function() {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSurveyDef(2, {name: 'Need to know Info'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Quiz', quizId: 'quiz2',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Quiz')
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Test Your Trivia Knowledge Quiz is passed!')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2');
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Survey')
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Need to know Info Survey is completed!')
+    });
+
 });
+
