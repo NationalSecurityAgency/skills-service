@@ -154,7 +154,6 @@ jobs:
       run: |
         mvn --version
         java -version
-
     - name: Prep Services for Cypress tests
       run: |
         cd e2e-tests
