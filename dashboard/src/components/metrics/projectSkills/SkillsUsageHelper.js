@@ -124,13 +124,16 @@ export default {
     }
 
     const filterTags = Object.keys(filters.skillTags).filter((key) => filters.skillTags[key] === true);
+
     if (filterTags.length > 0) {
       const skillTags = item.skillTags.map((tag) => tag.tagId);
+
       if (skillTags.length === 0) {
         return false;
       }
-      const tagsFilteredBy = filterTags.filter((tag) => skillTags.includes(tag));
-      if (tagsFilteredBy.length === 0) {
+
+      const tagCombination = filterTags.every((tag) => skillTags.includes(tag));
+      if (!tagCombination) {
         return false;
       }
     }

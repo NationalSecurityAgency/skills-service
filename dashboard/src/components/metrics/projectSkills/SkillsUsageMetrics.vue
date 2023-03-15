@@ -46,7 +46,9 @@ limitations under the License.
       <div class="col">
         <b-form-group label="Skill Tags" label-class="text-muted" data-cy="skillTag-filters">
           <b-form-checkbox v-for="tag in tags" :key="tag.tagId" inline v-model="filters.skillTags[tag.tagId]">
-            <b-badge variant="info" class="ml-2">{{tag.tagValue}}</b-badge>
+            <b-badge variant="info" class="ml-2">
+              <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{tag.tagValue}}
+            </b-badge>
           </b-form-checkbox>
         </b-form-group>
       </div>
@@ -71,6 +73,11 @@ limitations under the License.
                     variant="outline-info" size="sm" class="text-secondary"
                     v-b-tooltip.hover="'View Skill Metrics'"><i class="fa fa-chart-bar"/><span class="sr-only">view skill metrics</span></b-button>
         </b-button-group>
+        <div>
+          <b-badge v-for="tag in data.item.skillTags" :key="tag.tagId" variant="info" class="ml-2">
+            <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{ tag.tagValue }}
+          </b-badge>
+        </div>
       </template>
 
       <template v-slot:cell(numUserAchieved)="data">
@@ -106,10 +113,6 @@ limitations under the License.
             {{ data.value | timeFromNow }}
           </div>
         </div>
-      </template>
-
-      <template v-slot:cell(skillTags)="data">
-        <b-badge v-for="tag in data.value" :key="tag.tagId" variant="info" class="ml-2">{{ tag.tagValue }}</b-badge>
       </template>
     </skills-b-table>
   </metrics-card>
@@ -169,11 +172,6 @@ limitations under the License.
               key: 'lastAchievedTimestamp',
               sortable: true,
               label: 'Last Achieved',
-            },
-            {
-              key: 'skillTags',
-              sortable: true,
-              label: 'Tags',
             },
           ],
           pagination: {
