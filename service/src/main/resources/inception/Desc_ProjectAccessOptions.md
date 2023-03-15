@@ -49,4 +49,4 @@ Once a user has accepted an invitation to join a project configured for Invite O
 
 ## How To Earn Points
 
-To earn points for this skill please read about the different Access Options above and then click `I did it` button below.
+To earn points for this skill please read about the different Access Options above and then claim your points below.

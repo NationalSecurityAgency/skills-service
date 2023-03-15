@@ -58,4 +58,4 @@ Approach #1 has the same issues as the percentage based strategy. Approach #2 re
 
 ***
 
-To achieve this skill simply study the available percentage based and point-based strategies and then report completion via `I did it` button below! Thanks for reading!
+To achieve this skill simply study the available percentage-based and point-based strategies and then please claim your points below! Thank you for reading!
