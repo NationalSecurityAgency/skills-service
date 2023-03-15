@@ -19,6 +19,8 @@ limitations under the License.
       <quiz-run-answer
           :data-cy="`answer_${aIndex+1}`"
           :a="a"
+          :answer-num="aIndex+1"
+          :q-num="qNum"
           :can-select-more-than-one="canSelectMoreThanOne"
           @selection-changed="selectionChanged"/>
     </div>
@@ -35,6 +37,7 @@ limitations under the License.
     props: {
       value: Array,
       q: Object,
+      qNum: Number,
       canSelectMoreThanOne: Boolean,
     },
     data() {

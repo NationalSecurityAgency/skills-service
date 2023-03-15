@@ -17,24 +17,24 @@ limitations under the License.
   <div class="answer-row"
        v-on:keydown.space="flipSelected"
        @click="flipSelected"
-       tabindex="0"
+       :tabindex="a.isGraded ? -1 : 0"
        :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
        :style="styleObject"
-       aria-label="Select as the correct answer">
+       :aria-label="ariaLabel">
       <div class="row no-gutters" :data-cy="`selected_${selected}`">
         <div class="col-auto">
           <b-overlay v-if="a.isGraded && a.selected !== a.isCorrect" show variant="transparent"
                      opacity="0">
             <template #overlay>
-              <i v-if="a.selected" class="fa fa-ban text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
-              <i v-else class="fa fa-check text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection"></i>
+              <i v-if="a.selected" class="fa fa-ban text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection" aria-hidden="true"></i>
+              <i v-else class="fa fa-check text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection" aria-hidden="true"></i>
             </template>
             <span class="checkmark">
-               <i :class="selectionIconObject" />
+               <i :class="selectionIconObject" aria-hidden="true"/>
             </span>
           </b-overlay>
           <span v-else class="checkmark">
-               <i :class="selectionIconObject" />
+               <i :class="selectionIconObject" aria-hidden="true"/>
             </span>
         </div>
         <div class="col ml-2">
@@ -51,6 +51,8 @@ limitations under the License.
     props: {
       a: Object,
       value: Boolean,
+      answerNum: Number,
+      qNum: Number,
       canSelectMoreThanOne: {
         type: Boolean,
         default: true,
@@ -98,6 +100,24 @@ limitations under the License.
         }
         return res;
       },
+      ariaLabel() {
+        let res = `Answer number ${this.answerNum} of the question number ${this.qNum}. Currently ${!this.selected ? 'not ' : ''}selected.`;
+        if (this.a.isGraded) {
+          if (this.a.isCorrect && this.selected) {
+            res = `${res} Answer was correctly selected.`;
+          }
+          if (!this.a.isCorrect && this.selected) {
+            res = `${res} Answer was incorrectly selected.`;
+          }
+          if (this.a.isCorrect && !this.selected) {
+            res = `${res} Answer requires selection but was not selected.`;
+          }
+          if (!this.a.isCorrect && !this.selected) {
+            res = `${res} Answer does not require selection.`;
+          }
+        }
+        return res;
+      },
     },
     methods: {
       flipSelected() {
@@ -108,6 +128,7 @@ limitations under the License.
             id: this.a.id,
             selected: this.selected,
           });
+          this.$nextTick(() => this.$announcer.polite(`Selected answer number ${this.answerNum} as the correct answer for the question number ${this.qNum}`));
         }
       },
     },

@@ -447,5 +447,22 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="removeButton"]').should('not.exist')
         cy.get('[data-cy="closeRemovalSafetyCheck"]').should('be.enabled')
     });
+
+    it('closing modal returns focus on the "New Quiz/Survey button"', function () {
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="noQuizzesYet"]')
+
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+        cy.get('.modal-title').contains('New Quiz/Survey')
+
+        cy.get('[data-cy="closeQuizButton"]').click()
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
+
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+        cy.get('.modal-title').contains('New Quiz/Survey')
+
+        cy.get('.modal-header [aria-label="Close"]').click()
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
+    });
 });
 

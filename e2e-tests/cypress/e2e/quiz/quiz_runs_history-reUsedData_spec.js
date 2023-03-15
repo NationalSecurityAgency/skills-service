@@ -21,21 +21,7 @@ dayjs.extend(utcPlugin);
 describe('Quiz Runs History With Reused Data Tests', () => {
 
     before(() => {
-        Cypress.env('disableResetDb', true);
-        cy.resetDb();
-        cy.resetEmail();
-
-        cy.logout();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.log('NOT in oauthMode, using form login');
-                    cy.login(vars.defaultUser, vars.defaultPass);
-                } else {
-                    cy.log('oauthMode, using loginBySingleSignOn');
-                    cy.loginBySingleSignOn();
-                }
-            });
+       cy.beforeTestSuiteThatReusesData()
 
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
         cy.createQuizQuestionDef(1, 1)
@@ -54,7 +40,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
     after(() => {
-        Cypress.env('disableResetDb', false);
+        cy.afterTestSuiteThatReusesData()
     });
 
     beforeEach(() => {

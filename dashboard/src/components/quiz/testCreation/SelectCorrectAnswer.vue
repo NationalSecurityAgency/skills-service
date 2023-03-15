@@ -20,8 +20,14 @@ limitations under the License.
       <i v-if="selected" class="fa fa-ban text-danger" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
       <i v-else class="fa fa-check text-danger" style="font-size: 1rem;" data-cy="missedSelection"></i>
     </template>
-    <div v-on:keydown.space="flipSelected" @click="flipSelected" :tabindex="readOnly ? -1 : 0"
-        aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}" data-cy="selectCorrectAnswer">
+    <div v-on:keydown.space="flipSelected"
+         @click="flipSelected"
+         :tabindex="readOnly ? -1 : 0"
+         role="checkbox"
+         :aria-label="`Select answer number ${answerNumber} as the correct answer`"
+         :aria-checked="`${selected}`"
+         :class="{ 'cursorPointer': !readOnly}"
+         data-cy="selectCorrectAnswer">
       <i v-if="!selected" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
       <i v-if="selected" data-cy="selected" class="far text-success" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
     </div>
@@ -48,6 +54,9 @@ limitations under the License.
       markIncorrect: {
         type: Boolean,
         default: false,
+      },
+      answerNumber: {
+        type: Number,
       },
     },
     data() {

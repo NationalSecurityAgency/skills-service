@@ -30,10 +30,17 @@ limitations under the License.
 
       <div class="row pl-3 mb-3">
         <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="quizFilterBtn"><i
+          <b-button variant="outline-info"
+                    aria-label="Filter surveys and quizzes table"
+                    @click="applyFilters"
+                    data-cy="quizFilterBtn"><i
             class="fa fa-filter" aria-hidden="true"/> Filter
           </b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="quizResetBtn"><i
+          <b-button variant="outline-info"
+                    @click="reset"
+                    aria-label="Reset surveys and quizzes filter"
+                    class="ml-1"
+                    data-cy="quizResetBtn"><i
             class="fa fa-times" aria-hidden="true"/> Reset
           </b-button>
         </div>
@@ -98,7 +105,7 @@ limitations under the License.
                  :quiz="editQuizInfo.quizDef"
                  :is-edit="editQuizInfo.isEdit"
                  @quiz-saved="updateQuizDef"
-                 @hidden="focusOnRefId(`edit_${$event.quizId}`)"/>
+                 @hidden="handleEditQuizModalClose"/>
       <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
                           :removal-not-available="deleteQuizInfo.disableDelete"
                           @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
@@ -256,15 +263,19 @@ limitations under the License.
           .finally(() => {
             this.options.busy = false;
             this.loading = false;
-            if (isNewQuizDef) {
-              this.$emit('focus-on-new-button');
-            } else {
-              this.focusOnRefId(`edit_${quizDef.quizId}`);
-            }
+            this.handleEditQuizModalClose(quizDef);
             this.$nextTick(() => {
-              this.$announcer.polite(`${quizDef.type} ${quizDef.name} has been edited`);
+              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
             });
           });
+      },
+      handleEditQuizModalClose(quizDef) {
+        const isNewQuizDef = !quizDef.originalQuizId;
+        if (isNewQuizDef) {
+          this.$emit('focus-on-new-button');
+        } else {
+          this.focusOnRefId(`edit_${quizDef.quizId}`);
+        }
       },
       loadData() {
         this.loading = true;
@@ -303,6 +314,9 @@ limitations under the License.
           .finally(() => {
             this.options.busy = false;
             this.$emit('focus-on-new-button');
+            this.$nextTick(() => {
+              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
+            });
           });
       },
       focusOnRefId(refId) {

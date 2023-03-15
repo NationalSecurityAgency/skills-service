@@ -27,6 +27,7 @@ limitations under the License.
     </quiz-run-splash-screen>
 
     <survey-run-completion-summary
+        ref="surveyRunCompletionSummary"
         v-if="isSurveyType && quizResult && !splashScreen.show"
         class="mb-3"
         :quiz-info="quizInfo"
@@ -34,12 +35,14 @@ limitations under the License.
         @close="doneWithThisRun">
       <template slot="completeAboveTitle">
         <slot name="completeAboveTitle">
-          <i class="fas fa-handshake text-info"></i> Thank you for taking the time to complete the survey!
+          <i class="fas fa-handshake text-info" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
         </slot>
       </template>
     </survey-run-completion-summary>
 
     <quiz-run-completion-summary
+        id="quizRunCompletionSummary"
+        ref="quizRunCompletionSummary"
         v-if="!isSurveyType && quizResult && !splashScreen.show"
         class="mb-3"
         :quiz-info="quizInfo"
@@ -82,6 +85,7 @@ limitations under the License.
         <b-button variant="outline-info" @click="saveAndCloseThisRun"
                   class="text-uppercase mr-2 font-weight-bold skills-theme-btn"
                   :disabled="isCompleting"
+                  :aria-label="`Save and close this ${quizInfo.quizType}`"
                   data-cy="saveAndCloseQuizAttemptBtn">
           <i class="fas fa-save" aria-hidden="true"> Save and Close</i>
         </b-button>
@@ -89,6 +93,7 @@ limitations under the License.
           <b-button variant="outline-success"
                     @click="handleSubmit(completeTestRun)"
                     :disabled="isCompleting"
+                    :aria-label="`Done with ${quizInfo.quizType}`"
                     class="text-uppercase font-weight-bold skills-theme-btn"
                     data-cy="completeQuizBtn">
             <i class="fas fa-check-double" aria-hidden="true"></i> Done
@@ -98,12 +103,12 @@ limitations under the License.
       </ValidationObserver>
 
       <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
-        <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold skills-theme-btn"><i class="fas fa-times-circle"></i> Close</b-button>
+        <b-button variant="outline-success" @click="doneWithThisRun" class="text-uppercase font-weight-bold skills-theme-btn"><i class="fas fa-times-circle" aria-hidden="true"></i> Close</b-button>
       </div>
       <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-5">
         <div class="my-2" v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
-        <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle"></i> Close</b-button>
-        <b-button v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0" variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo"></i> Try Again</b-button>
+        <b-button variant="outline-danger"  @click="doneWithThisRun" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle" aria-hidden="true"></i> Close</b-button>
+        <b-button v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0" variant="outline-success" @click="tryAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo" aria-hidden="true"></i> Try Again</b-button>
       </div>
     </b-card>
 
@@ -232,6 +237,12 @@ limitations under the License.
                 this.reportTestRunToBackend()
                   .finally(() => {
                     this.isCompleting = false;
+                    if (!this.isSurveyType) {
+                      this.$nextTick(() => {
+                        const element = document.getElementById('quizRunCompletionSummary');
+                        element.scrollIntoView({ behavior: 'smooth' });
+                      });
+                    }
                   });
               });
           } else {

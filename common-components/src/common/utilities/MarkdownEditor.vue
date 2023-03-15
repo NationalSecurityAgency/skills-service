@@ -51,8 +51,8 @@ limitations under the License.
       rules="attachmentValidator" ref="provider" v-slot="{ errors }" name="Attachment">
       <input @change="attachFile" type="file" ref="fileInputRef"
              :aria-invalid="errors && errors.length > 0"
+             aria-label="ability to attach a file"
              aria-errormessage="attachmentError"
-             aria-describedby="attachmentError"
              :accept="allowedAttachmentFileTypes"
              hidden/>
       <small role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{errors[0]}}</small>
