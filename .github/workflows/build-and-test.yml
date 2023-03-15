@@ -160,7 +160,7 @@ jobs:
         cd e2e-tests
         ls
         npm install
-        npm run backend:dropAllDBTables:postgres
+        npm run backend:dropAllDBTables:postgresOnBridgeNetwork
         #  npm run cyServices:start
         cd ..
 

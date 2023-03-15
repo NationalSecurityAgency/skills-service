@@ -59,6 +59,7 @@
     "backend:setupInviteOnly:postgres": "export PGPASSWORD=skillsPassword && psql -U postgres -h localhost -d skills -f ./cypress/db/createInviteOnlyProject.sql",
     "backend:countScheduledTasks:postgres": "export PGPASSWORD=skillsPassword && psql -U postgres -h localhost -d skills -f ./cypress/db/countScheduledTasks.sql",
     "backend:dropAllDBTables:postgres": "export PGPASSWORD=skillsPassword && psql -U postgres -h localhost -d skills -f ./cypress/db/dropTables.sql",
+    "backend:dropAllDBTables:postgresOnBridgeNetwork": "export PGPASSWORD=skillsPassword && psql -U postgres -h postgres -d skills -f ./cypress/db/dropTables.sql",
     "client-display:serve": "cd ../client-display && npm prune && npm install && npm run serve",
     "client-display:serve:ci": "mkdir -p ./logs && npm run client-display:serve > ./logs/client-display.out &",
     "client-display:serve:ci:oauth": "mkdir -p ./logs && VUE_APP_AUTHENTICATION_URL=hydra npm run client-display:serve > ./logs/client-display.out &",
