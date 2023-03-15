@@ -35,7 +35,7 @@ As skill occurrences are reported to the original project they are also automati
 
 The one exception to this restriction is self-reported skills. Self-reported skills can be reported to the original skill OR to any of its imported copies. Regardless of whether it was reported against an imported copy or the natively declared skill, the points are applied to the original AND all of its copies (assuming points are due based on the current configuration and the reported user's prior contributions). When a self-reported skill occurrence is reported to the imported copy then the request is simply routed to the originally-declared skill. From there on the flow is identical to any skill occurrence that is being reported to the original skill.
 
-The Self-reporting `I did it` button is visualized for each imported skill in the `Skills Display` and Progress and Rankings views.
+Self-reporting buttons are visualized for each imported skill in the `Skills Display` and Progress and Rankings views.
 
 ### Catalog and Skills Dependencies
 

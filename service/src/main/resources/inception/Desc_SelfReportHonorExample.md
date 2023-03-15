@@ -1,6 +1,9 @@
-This Skill is an example of the `Self Reporting` feature. Click the **`I did it`** button below to receive points. The skill is configured under the 'Honor' system and the points will be awarded immediately. Enjoy!
+This Skill is an example of the `Self Reporting` feature. Click the **`Claim Points`** button below to receive points. The skill is configured under the 'Honor' system and the points will be awarded immediately. Enjoy!
 
-Self Report is a feature that empowers users to mark skills as completed directly in the SkillTree dashboard OR through the embedded Skills Display component. A project administrator can enable `Self Reporting` for a skill, set of skills or even all the skills in a project. Skills that have been configured with Self Reporting expose an `I did it` button, allowing users to self report completion of those skills.
+Self Report is a feature that empowers users to mark skills as completed directly in the SkillTree dashboard OR through
+the embedded Skills Display component. A project administrator can enable `Self Reporting` for a skill, set of skills or
+even all the skills in a project. Skills that have been configured with Self Reporting display a button allowing users
+to self report completion of those skills.
 
 There are two `Self report` types available:
 

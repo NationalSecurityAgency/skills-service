@@ -50,4 +50,5 @@ This approach delivers a number of benefits to a SkillTree integrator:
 
 ## How To Earn Points
 
-To earn points for this skill please propose SkillTree integration to another tool and then click `I did it` button below - in the `Message` field please let us know which application you suggested the integration to and any other details that you'd want SkillTree team to be aware of.
+To earn points for this skill please propose SkillTree integration to another tool and then click `Begin Request` button below - in the `Justification` field please let us know which application you suggested the integration to and any other details that you'd want SkillTree team to be aware of.
+

@@ -21,7 +21,7 @@ As skill occurrences are reported to the original skill they are also automatica
 
 The one exception to this restriction is self-reported skills. Self-reported skills can be reported to the original skill OR to any of its reused copies. Regardless of whether it was reported against a reused copy or the natively declared skill, the points are applied to the original AND all of its copies (assuming points are due based on the current configuration and the reported user's prior contributions). When a self-reported skill occurrence is reported to the reused copy then the request is simply routed to the originally-declared skill. From there on the flow is identical to any skill occurrence that is being reported to the original skill and for every reused instance the occurrence is queued up to be propagated to that reused skills. The queue is handled in an asynchronous manner so there is a small delay before the skill occurrence are reflected in the reused skills.
 
-The Self-reporting `I did it` button is displayed for each reused skill in the Skills Display and Progress and Rankings views.
+Self-Reporting buttons are displayed for each reused skill in the Skills Display and Progress and Rankings views.
 
 ### Other Considerations
 
