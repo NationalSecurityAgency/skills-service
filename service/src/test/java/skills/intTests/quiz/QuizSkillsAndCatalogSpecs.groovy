@@ -644,6 +644,12 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
         SkillsService otherUserService = createService(userId)
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
+        def userOverallProgress_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
+        def userOverallProgressProj2_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
+
+        def p1_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj.projectId, skills[0].skillId)
+        def p2_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj2.projectId, skills[0].skillId)
+
         def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
         otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
         otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
@@ -652,11 +658,104 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
 
         def p1_skillRes = skillsService.getSingleSkillSummary(otherUserService.userName, proj.projectId, skills[0].skillId)
         def p2_skillRes = skillsService.getSingleSkillSummary(otherUserService.userName, proj2.projectId, skills[0].skillId)
+
+        def userOverallProgress_t1 = skillsService.getSkillSummary(otherUserService.userName, proj.projectId)
+        def userOverallProgressProj2_t1 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
         then:
         gradedQuizAttempt.passed == true
+        p1_skillRes_t0.points ==  0
+        p2_skillRes_t0.points ==  0
         p1_skillRes.points ==  skills[0].pointIncrement
         p2_skillRes.points ==  skills[0].pointIncrement
+
+        userOverallProgress_t0.points == 0
+        userOverallProgress_t0.skillsLevel == 0
+
+        userOverallProgressProj2_t0.points == 0
+        userOverallProgressProj2_t0.skillsLevel == 0
+
+        userOverallProgress_t1.points == skills[0].pointIncrement
+        userOverallProgress_t1.skillsLevel == 2
+
+        userOverallProgressProj2_t1.skillsLevel == 2
+        userOverallProgressProj2_t1.points == skills[0].pointIncrement
     }
+
+    def "accomplish imported skill by assigning completed quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        String userId = getRandomUsers(1).first()
+        SkillsService otherUserService = createService(userId)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = otherUserService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createSkills(skills)
+
+        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+
+        def proj2 = createProject(2)
+        def proj2_subj = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, [])
+
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, [
+                [projectId: proj.projectId, skillId: skills[0].skillId],
+                [projectId: proj.projectId, skillId: skills[1].skillId],
+                [projectId: proj.projectId, skillId: skills[2].skillId],
+        ])
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+
+        when:
+        def p1_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj.projectId, skills[0].skillId)
+        def p2_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj2.projectId, skills[0].skillId)
+        def userOverallProgress_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
+        def userOverallProgressProj2_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
+
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkill(skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def p1_skillRes = skillsService.getSingleSkillSummary(otherUserService.userName, proj.projectId, skills[0].skillId)
+        def p2_skillRes = skillsService.getSingleSkillSummary(otherUserService.userName, proj2.projectId, skills[0].skillId)
+        def userOverallProgress_t1 = skillsService.getSkillSummary(otherUserService.userName, proj.projectId)
+        def userOverallProgressProj2_t1 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
+        def userOverallProgressProj2Subj1_t1 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId, proj2_subj.subjectId)
+        then:
+        gradedQuizAttempt.passed == true
+        p1_skillRes_t0.points ==  0
+        p2_skillRes_t0.points ==  0
+        p1_skillRes.points ==  skills[0].pointIncrement
+        p2_skillRes.points ==  skills[0].pointIncrement
+
+        userOverallProgress_t0.points == 0
+        userOverallProgress_t0.skillsLevel == 0
+
+        userOverallProgressProj2_t0.points == 0
+        userOverallProgressProj2_t0.skillsLevel == 0
+
+        userOverallProgress_t1.points == skills[0].pointIncrement
+        userOverallProgress_t1.skillsLevel == 2
+
+        userOverallProgressProj2_t1.skillsLevel == 2
+        userOverallProgressProj2_t1.points == skills[0].pointIncrement
+
+        userOverallProgressProj2Subj1_t1.skillsLevel == 2
+        userOverallProgressProj2Subj1_t1.points == skills[0].pointIncrement
+    }
+
 
 }
 

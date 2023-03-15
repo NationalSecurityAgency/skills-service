@@ -134,11 +134,8 @@ class SkillCatalogFinalizationService {
                 start = System.currentTimeMillis()
 
                 // 1. copy skill points and achievements
-                log.info("Copying [{}] skills UserPoints to the imported project [{}]", skillRefIds.size(), projectId)
                 batchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects(projectId, skillRefIds)
-                log.info("Copying [{}] skills achievements to the imported project [{}]", skillRefIds.size(), projectId)
-                batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
-                log.info("Completed import of skill's points and achievements for [{}] skills to [{}] project", skillRefIds.size(), projectId)
+                batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
 
                 log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
                 batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups)

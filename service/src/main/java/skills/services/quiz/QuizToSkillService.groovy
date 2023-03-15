@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.request.model.SkillImportRequest
+import skills.controller.request.model.SkillProjectCopyRequest
+import skills.controller.request.model.SkillRequest
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.model.QuizDef
@@ -53,10 +56,26 @@ class QuizToSkillService {
     RuleSetDefGraphService ruleSetDefGraphService
 
     @Transactional
-    void saveQuizToSkillAssignment(SkillDef savedSkill, String quizId, boolean awardSkillForQuizCompletion = true) {
-        assert quizId
+    void handleQuizToSkillRelationship(SkillDef savedSkill, SkillRequest skillRequest){
+        QuizDef quizDef = getQuizDef(skillRequest.quizId)
+
+        boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest
+        if (!isSkillCatalogImport) {
+            saveQuizToSkillAssignment(savedSkill, quizDef)
+            boolean isProjectCopyRequest = skillRequest instanceof SkillProjectCopyRequest
+            if (!isProjectCopyRequest && doesQuizHasAtLeastOneRun(quizDef)) {
+                updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
+            }
+        } else if (doesQuizHasAtLeastOneRun(quizDef)) {
+            List<Integer> fromSkillRefIds = [savedSkill.copiedFrom]
+            batchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects(savedSkill.projectId, fromSkillRefIds)
+            batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(savedSkill.projectId, fromSkillRefIds)
+            updateGroupSubjectAndProjectPointsAndAchievements(savedSkill)
+        }
+    }
+
+    private boolean saveQuizToSkillAssignment(SkillDef savedSkill, QuizDef quizDef) {
         Integer skillRef = savedSkill.id
-        QuizDef quizDef = getQuizDef(quizId)
 
         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(skillRef)
         boolean quizIdUpdated = quizNameAndId && quizNameAndId.getQuizId() != quizDef.quizId
@@ -67,33 +86,41 @@ class QuizToSkillService {
 
         if (!quizNameAndId || quizIdUpdated) {
             quizToSkillDefRepo.save(new QuizToSkillDef(quizRefId: quizDef.id, skillRefId: skillRef))
-            if (awardSkillForQuizCompletion) {
-                updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
-            }
+            return true;
         }
+
+        return false
     }
 
     @Profile
     private void updateAffectedUserPointsAndAchievements(QuizDef quizDef, SkillDef savedSkill) {
         Integer skillRef = savedSkill.id
 
+        batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
+        batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
+        batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
+
+        updateGroupSubjectAndProjectPointsAndAchievements(savedSkill)
+    }
+
+    private boolean doesQuizHasAtLeastOneRun(QuizDef quizDef) {
         List<UserQuizAttempt> firstPassedRun = quizAttemptRepo.findByQuizRefIdByStatus(quizDef.id, UserQuizAttempt.QuizAttemptStatus.PASSED, PageRequest.of(0, 1))
-        if (firstPassedRun) {
-            batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
-            batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
-            batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
+        return firstPassedRun
+    }
 
-            if (savedSkill.groupId) {
-                SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillRef)
-                if (group) {
-                    batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
-                }
+    private void updateGroupSubjectAndProjectPointsAndAchievements(SkillDef savedSkill) {
+        Integer skillRef = savedSkill.id
+
+        if (savedSkill.groupId) {
+            SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillRef)
+            if (group) {
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements([group])
             }
-
-            SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillRef)
-            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
-            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(savedSkill.projectId)
         }
+
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillRef)
+        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(savedSkill.projectId)
     }
 
     @Transactional

@@ -1,6 +1,9 @@
 To earn points please navigate to `Project -> Self Report.`
 
-Self Report is a feature that empowers users to mark skills as completed directly in the SkillTree dashboard OR through the embedded Skills Display component. A project administrator can enable `Self Reporting` for a skill, set of skills or even all the skills in a project. Skills that have been configured with Self Reporting expose an `I did it` button, allowing users to self report completion of those skills.
+Self Report is a feature that empowers users to mark skills as completed directly in the SkillTree dashboard OR through
+the embedded Skills Display component. A project administrator can enable `Self Reporting` for a skill, set of skills or
+even all the skills in a project. Skills that have been configured with Self Reporting display a button allowing users
+to self report completion of those skills.
 
 There are two `Self report` types available:
 
@@ -24,7 +27,8 @@ By default, Self Reporting is disabled when creating or modifying a skill. If yo
 
 ## Skills Display
 
-Once Self Reporting is enabled for a skill, users will see an `I did it` button on the Skills Display that will allow them to report the completion of that skill.
+Once Self Reporting is enabled for a skill, users will see a button on the Skills Display that will allow them to report
+the completion of that skill.
 
 You could create a project that consists purely of Self Reported skills! Alternatively you can have only some skills configured with Self Reporting or no skills at all.
 
@@ -32,7 +36,7 @@ You could create a project that consists purely of Self Reported skills! Alterna
 
 If a skill is configured with Self Reporting type of the `Approval Queue` then points will not be awarded right away but rather go through the simple approval workflow:
 
-1. User click `I did it` button and requests points
+1. User click `Begin Request` button and requests points
 2. Request appears on the project's Self Report page (see the Screenshot below)
 3. Project administrator approves or reject requests
 

@@ -1735,6 +1735,93 @@ class QuizSkillAssignmentAndUserAchievementsSpecs extends DefaultIntSpec {
         !skillAchievement_copy.level
     }
 
+    def "skills catalog: assign quiz to the original skill - validate imported skill's UserAchievement and UserPoints"() {
+        def quiz1 = createQuiz(1)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+
+        List<SkillsService> userServices = getRandomUsers(1).collect { createService(it) }
+        passQuiz(userServices[0], quiz1)
+
+        Integer skillRefId = skillDefRepo.findByProjectIdAndSkillId(proj.projectId, skills[0].skillId).id
+        when:
+        // proj 2
+        def proj2 = createProject(2)
+        def proj2_subj = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, [])
+        skillsService.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+
+        // set quiz which would cause all the points and achievements creation
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skillsService.createSkill(skills[0])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        List<UserPerformedSkill> userPerformedSkills_orig = userPerformedSkillRepo.findAll().findAll( { it.projectId == proj.projectId})
+        List<UserPoints> userPoints_orig = userPointsRepo.findAll().findAll( { it.projectId == proj.projectId})
+        List<UserAchievement> achievements_orig = userAchievedRepo.findAll().findAll( { it.projectId == proj.projectId})
+
+        List<UserPerformedSkill> userPerformedSkills_proj2 = userPerformedSkillRepo.findAll().findAll( { it.projectId == proj2.projectId})
+        List<UserPoints> userPoints_proj2 = userPointsRepo.findAll().findAll( { it.projectId == proj2.projectId})
+        List<UserAchievement> achievements_proj2 = userAchievedRepo.findAll().findAll( { it.projectId == proj2.projectId})
+
+        then:
+        userPerformedSkills_orig.size() == 1
+        userPerformedSkills_orig[0].userId == userServices[0].userName
+        userPerformedSkills_orig[0].skillId == skills[0].skillId
+        userPerformedSkills_orig[0].projectId == proj.projectId
+        userPerformedSkills_orig[0].skillRefId == skillRefId
+        userPerformedSkills_orig[0].performedOn
+
+        userPoints_orig.size() == 3 // 1 for project, 1 for subject and 1 for skill
+        UserPoints skillUserPoints = userPoints_orig.find { it.skillId == skills[0].skillId }
+        skillUserPoints.userId == userServices[0].userName
+        skillUserPoints.skillId == skills[0].skillId
+        skillUserPoints.projectId == proj.projectId
+        skillUserPoints.skillRefId == skillRefId
+        skillUserPoints.points == skills[0].pointIncrement
+
+        achievements_orig.size() == 3 // 1 for project, 1 for subject and 1 for skill
+        UserAchievement skillAchievement = achievements_orig.find { it.skillId == skills[0].skillId }
+        skillAchievement.userId == userServices[0].userName
+        skillAchievement.skillId == skills[0].skillId
+        skillAchievement.projectId == proj.projectId
+        skillAchievement.skillRefId == skillRefId
+        skillAchievement.pointsWhenAchieved == skills[0].pointIncrement
+        !skillAchievement.level
+
+        ///////////////////////////////
+        // project #2 with imported skills
+
+        // performed skills are not imported
+        userPerformedSkills_proj2.size() == 0
+
+        userPoints_proj2.size() == 3 // 1 for project, 1 for subject and 1 for skill
+        UserPoints skillUserPoints_copy = userPoints_proj2.find { it.skillId == skills[0].skillId }
+        skillUserPoints_copy.userId == userServices[0].userName
+        skillUserPoints_copy.skillId == skills[0].skillId
+        skillUserPoints_copy.projectId == proj2.projectId
+        skillUserPoints_copy.points == skills[0].pointIncrement
+        userPoints_proj2.points == [skills[0].pointIncrement, skills[0].pointIncrement, skills[0].pointIncrement]
+
+        achievements_proj2.size() == 3 // 1 for project, 1 for subject and 1 for skill
+        UserAchievement skillAchievement_copy = achievements_proj2.find { it.skillId == skills[0].skillId }
+        skillAchievement_copy.userId == userServices[0].userName
+        skillAchievement_copy.skillId == skills[0].skillId
+        skillAchievement_copy.projectId == proj2.projectId
+        skillAchievement_copy.pointsWhenAchieved == skills[0].pointIncrement
+        !skillAchievement_copy.level
+
+        // subject
+        achievements_proj2.find { it.skillId == proj2_subj.subjectId }.level == 1
+        // project
+        achievements_proj2.find { !it.skillId }.level == 1
+    }
 
     private def createQuiz(Integer num) {
         def quiz = QuizDefFactory.createQuiz(num)

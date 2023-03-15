@@ -41,6 +41,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizToSkillDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -86,6 +87,9 @@ class SkillCatalogService {
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
     SkillCatalogFinalizationService skillCatalogFinalizationService\
@@ -305,6 +309,10 @@ class SkillCatalogService {
         copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
+        if (original.selfReportingType && original.selfReportingType == SkillDef.SelfReportingType.Quiz) {
+            QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(original.id)
+            copy.quizId = quizNameAndId.quizId
+        }
         copy.enabled = Boolean.FALSE.toString()
         copy.name = newName
         copy.skillId = newSkillId
@@ -506,6 +514,10 @@ class SkillCatalogService {
             copy.numPerformToCompletion = og.totalPoints / og.pointIncrement
             copy.subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(imported.id)
             copy.selfReportingType = og.selfReportingType?.toString()
+            if (og.selfReportingType == SkillDef.SelfReportingType.Quiz) {
+                QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(og.id)
+                copy.quizId = quizNameAndId.quizId
+            }
             if (SkillReuseIdUtil.isTagged(imported.skillId)) {
                 Integer reuseCounter = SkillReuseIdUtil.extractReuseCounter(imported.skillId)
                 copy.skillId = SkillReuseIdUtil.addTag(og.skillId, reuseCounter)
