@@ -85,14 +85,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-#      - name: Build skills-service
-#        run: mvn --batch-mode install -DskipTests
+      - name: Build skills-service
+        run: mvn --batch-mode install -DskipTests
 
-#      - name: upload service jar
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: service jar
-#          path: ./service/target/*.jar
+      - name: upload service jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: service jar
+          path: ./service/target/*.jar
 
   ui-tests-against-postgres:
     runs-on: ubuntu-22.04
@@ -155,13 +155,20 @@ jobs:
         mvn --version
         java -version
 
+    - uses: actions/download-artifact@v3
+      with:
+        name: service jar
+        path: ./service/target/
+
     - name: Prep Services for Cypress tests
       run: |
         cd e2e-tests
         ls
+        sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
+        cat package.json
         npm install
-        npm run backend:dropAllDBTables:postgresOnBridgeNetwork
-        #  npm run cyServices:start
+        npm run backend:dropAllDBTables:postgres
+        npm run cyServices:start
         cd ..
 
     - name: Run Cypress tests
