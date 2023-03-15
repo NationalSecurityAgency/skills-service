@@ -54,7 +54,6 @@ jobs:
           apt-get install -y postgresql-client
           psql --version
           apt-get install fonts-noto-color-emoji
-          java -version
 
   build-skills-service-for-ui-tests:
     needs: [pre_job, test-out-container]
