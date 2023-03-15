@@ -43,9 +43,21 @@ jobs:
           github_token: ${{ github.token }}
           paths_ignore: '["**/README.md"]'
 
+  test-out-container:
+    runs-on: ubuntu-22.04
+    container:
+      image: cypress/browsers:node-18.14.1-chrome-110.0.5481.96-1-ff-109.0-edge-110.0.1587.41-1
+    steps:
+      - name: install things
+        run: |
+          apt-get update
+          apt-get install -y postgresql-client
+          psql --version
+          apt-get install fonts-noto-color-emoji
+          java -version
 
   build-skills-service-for-ui-tests:
-    needs: [pre_job]
+    needs: [pre_job, test-out-container]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
 
@@ -85,6 +97,8 @@ jobs:
 
   ui-tests-against-postgres:
     runs-on: ubuntu-22.04
+    container:
+      image: cypress/browsers:node-18.14.1-chrome-110.0.5481.96-1-ff-109.0-edge-110.0.1587.41-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -116,7 +130,7 @@ jobs:
 
     steps:
     - name: Install Emoji Support
-      run: sudo apt-get install fonts-noto-color-emoji
+      run: apt-get install fonts-noto-color-emoji
 
     - uses: actions/checkout@v3
 
@@ -183,7 +197,7 @@ jobs:
         npm run verifyThatNewSnapshotsAreNotCreated
 
   service-against-postgresql:
-    needs: [pre_job]
+    needs: [pre_job, test-out-container]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     strategy:
