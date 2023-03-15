@@ -299,15 +299,11 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree", "<div>header</div>", "<div>footer</div>")
+        skillsService.saveSystemSettings( "PT1H30M20S", "<div>header</div>", "<div>footer</div>")
         def systemSettings = skillsService.getSystemSettings()
 
         then:
-        systemSettings.publicUrl == "http://public"
         systemSettings.resetTokenExpiration == "PT1H30M20S"
-        systemSettings.fromEmail == "foo@skilltree"
         systemSettings.customHeader == "<div>header</div>"
         systemSettings.customFooter == "<div>footer</div>"
     }
@@ -318,7 +314,7 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public", "1H30M20S", "foo@skilltree", "<div/>", "<div/>")
+        skillsService.saveSystemSettings("1H30M20S", "<div/>", "<div/>")
         def systemSettings = skillsService.getSystemSettings()
 
         then:
@@ -332,9 +328,7 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree",
+        skillsService.saveSystemSettings("PT1H30M20S",
                 '<div><script type="text/javascript">alert("foo");</script></div>',
                 "<div/>")
         def systemSettings = skillsService.getSystemSettings()
@@ -350,9 +344,7 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree",
+        skillsService.saveSystemSettings("PT1H30M20S",
                 '<div/>',
                 "<div><script type=\"text/javascript\">alert(\"foo\");</script></div>")
         def systemSettings = skillsService.getSystemSettings()
@@ -370,9 +362,7 @@ class SettingsSpecs extends DefaultIntSpec {
         def header = (1..3001).collect{"A"}.join()
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree",
+        skillsService.saveSystemSettings("PT1H30M20S",
                 header,
                 "<div/>")
         def systemSettings = skillsService.getSystemSettings()
@@ -390,9 +380,7 @@ class SettingsSpecs extends DefaultIntSpec {
         def header = (1..3001).collect{"A"}.join()
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree",
+        skillsService.saveSystemSettings("PT1H30M20S",
                 '<div/>',
                 header)
         def systemSettings = skillsService.getSystemSettings()
@@ -408,25 +396,18 @@ class SettingsSpecs extends DefaultIntSpec {
         }
 
         when:
-        skillsService.saveSystemSettings("http://public",
-                "PT1H30M20S",
-                "foo@skilltree", "<div>header</div>", "<div>footer</div>")
+        skillsService.saveSystemSettings("PT1H30M20S",
+                "<div>header</div>", "<div>footer</div>")
         def systemSettings = skillsService.getSystemSettings()
 
 
-        skillsService.saveSystemSettings("",
-                "",
-                "", "", "")
+        skillsService.saveSystemSettings("", "", "")
         def systemSettingsAfterUpdate = skillsService.getSystemSettings()
         then:
-        systemSettings.publicUrl == "http://public"
         systemSettings.resetTokenExpiration == "PT1H30M20S"
-        systemSettings.fromEmail == "foo@skilltree"
         systemSettings.customHeader == "<div>header</div>"
         systemSettings.customFooter == "<div>footer</div>"
 
-        !systemSettingsAfterUpdate.fromEmail
-        !systemSettingsAfterUpdate.publicUrl
         !systemSettingsAfterUpdate.customHeader
         !systemSettingsAfterUpdate.customFooter
         !systemSettingsAfterUpdate.resetTokenExpiration

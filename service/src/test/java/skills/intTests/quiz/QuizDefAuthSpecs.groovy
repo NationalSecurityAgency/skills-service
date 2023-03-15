@@ -15,7 +15,10 @@
  */
 package skills.intTests.quiz
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.springframework.security.core.userdetails.UserDetails
+import skills.auth.pki.PkiUserDetailsService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -24,6 +27,10 @@ import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
+import spock.lang.Ignore
+
+import java.util.concurrent.atomic.AtomicInteger
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkills

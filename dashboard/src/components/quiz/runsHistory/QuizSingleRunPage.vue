@@ -16,7 +16,9 @@ limitations under the License.
 <template>
 <div>
   <sub-page-header title="Result">
-    <b-button :to="{ name: 'QuizRunsHistoryPage' }" variant="outline-primary" size="sm">
+    <b-button :to="{ name: 'QuizRunsHistoryPage' }"
+              :aria-label="`Return back to all the ${runInfo.quizType} results`"
+              variant="outline-primary" size="sm">
       <i class="fas fa-arrow-alt-circle-left" aria-hidden="true"/> Back
     </b-button>
   </sub-page-header>

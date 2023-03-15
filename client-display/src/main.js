@@ -16,6 +16,7 @@
 import VueApexCharts from 'vue-apexcharts';
 
 import Vue from 'vue';
+import VueAnnouncer from '@vue-a11y/announcer';
 import {
     ModalPlugin,
     DropdownPlugin,
@@ -68,6 +69,7 @@ Vue.use(FiltersPlugin);
 Vue.use(CollapsePlugin);
 Vue.use(LinkPlugin);
 Vue.use(TimeDurationFilter);
+Vue.use(VueAnnouncer);
 
 localize({
   en,

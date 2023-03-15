@@ -62,16 +62,7 @@ class FeatureService {
     }
 
     boolean isEmailServiceFeatureEnabled(String featureName = 'Email Service') {
-        List<Settings> expected = [Settings.GLOBAL_PUBLIC_URL, Settings.GLOBAL_FROM_EMAIL]
-        for (Settings setting : expected) {
-            SettingsResult settingRes = settingsService.getGlobalSetting(setting.settingName)
-            if (StringUtils.isEmpty(settingRes?.value)) {
-                log.warn("[${setting.settingName}] setting is not configured, please configure through Dashboard for ${featureName} feature to function")
-                return false
-            }
-        }
-
-        if (!emailSettingsService.fetchEmailSettings()?.host) {
+        if (!emailSettingsService.fetchEmailSettings()?.host || !emailSettingsService.fetchEmailSettings()?.publicUrl || !emailSettingsService.fetchEmailSettings()?.fromEmail) {
             log.warn("Email Settings are not configured or are invalid, please configure through Dashboard for ${featureName} feature to function")
             return false;
         }
@@ -80,13 +71,12 @@ class FeatureService {
     }
 
     String getPublicUrl() {
-        SettingsResult publicUrlSetting = settingsService.getGlobalSetting(Settings.GLOBAL_PUBLIC_URL.settingName)
-        if (!publicUrlSetting) {
-            log.warn("Skill approval notifications are disabled since global setting [${Settings.GLOBAL_PUBLIC_URL}] is NOT set")
+        String publicUrl = emailSettingsService.fetchEmailSettings()?.publicUrl
+        if (!publicUrl) {
+            log.warn("Skill approval notifications are disabled since email setting [${publicUrl}] is NOT set")
             return null
         }
 
-        String publicUrl = publicUrlSetting.value
         if (!publicUrl.endsWith("/")){
             publicUrl += "/"
         }

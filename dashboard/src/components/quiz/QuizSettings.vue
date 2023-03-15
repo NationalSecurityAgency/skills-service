@@ -36,20 +36,23 @@ limitations under the License.
       </div>
 
       <div class="row mt-3">
-        <div id="quizPassingReq" class="col col-md-3 text-secondary" >
+        <div id="quizMaxNumOfAttempts" class="col col-md-3 text-secondary" >
           Maximum Number of Attempts:
         </div>
         <div class="col">
           <div class="row">
             <div class="col-auto">
-              <b-form-checkbox v-model="settings.numAttempts.unlimited" name="Unlimited Attempts" data-cy="unlimitedAttemptsSwitch" switch>
+              <b-form-checkbox v-model="settings.numAttempts.unlimited"
+                               aria-label="Maximum Number of Attempts setting, unlimited number of attempts checkbox"
+                               name="Unlimited Attempts"
+                               data-cy="unlimitedAttemptsSwitch" switch>
                 Unlimited
               </b-form-checkbox>
             </div>
             <div class="col" v-if="!settings.numAttempts.unlimited">
               <ValidationProvider name="Number of Attempts" rules="optionalNumeric|required|min_value:1|max_value:1000" v-slot="{errors}">
               <b-form-input
-                aria-labelledby="quizPassingReq"
+                aria-labelledby="quizMaxNumOfAttempts"
                 data-cy="numAttemptsInput"
                 v-model="settings.numAttempts.value" />
                 <small role="alert" class="form-text text-danger" v-show="errors[0]">{{
@@ -77,7 +80,9 @@ limitations under the License.
             spinner-variant="primary"
             class="d-inline-block"
           >
-            <b-button variant="outline-success" @click="handleSubmit(saveSettings)" :disabled="invalid || !hasChanged" data-cy="saveSettingsBtn">
+            <b-button variant="outline-success" @click="handleSubmit(saveSettings)" :disabled="invalid || !hasChanged"
+                      aria-label="Save Settings"
+                      data-cy="saveSettingsBtn">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
           </b-overlay>
@@ -144,7 +149,7 @@ limitations under the License.
       },
       numRequiredQuestionsOptions() {
         const num = this.quizSummary.numQuestions;
-        const questionBasedOptions = Array.from({ length: num }, (_, index) => ({ value: `${index + 1}`, text: `${index + 1} Correct Questions` }));
+        const questionBasedOptions = Array.from({ length: num }, (_, index) => ({ value: `${index + 1}`, text: `${index + 1} Correct Question${index > 0 ? 's' : ''}` }));
         return [{ value: '-1', text: 'ALL Questions - 100%' }].concat(questionBasedOptions);
       },
       hasChanged() {
@@ -195,7 +200,9 @@ limitations under the License.
                 .then(() => {
                   this.isSaving = false;
                   this.showSavedMsg = true;
-                  this.$announcer.polite('Quiz Settings have been successfully saved');
+                  this.$nextTick(() => {
+                    this.$announcer.polite('Quiz Settings have been successfully saved');
+                  });
                   setTimeout(() => {
                     this.showSavedMsg = false;
                   }, 4000);

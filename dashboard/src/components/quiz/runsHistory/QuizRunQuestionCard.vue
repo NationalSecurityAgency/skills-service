@@ -25,7 +25,7 @@ limitations under the License.
           <template #overlay>
             <i class="fa fa-ban text-danger" style="font-size: 1.9rem; opacity: 0.8" data-cy="wrongAnswer"></i>
           </template>
-          <b-badge variant="primary">{{ questionNum }}</b-badge>
+          <b-badge variant="primary" :aria-label="`Question number ${questionNum}`">{{ questionNum }}</b-badge>
         </b-overlay>
       </div>
       <div class="col">

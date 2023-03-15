@@ -23,6 +23,7 @@ limitations under the License.
     <new-software-version-component/>
     <skills-spinner :loading="loadingConfig" />
     <router-view v-if="!loadingConfig"/>
+    <vue-announcer />
   </div>
 </template>
 

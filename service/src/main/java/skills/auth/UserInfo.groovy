@@ -15,11 +15,13 @@
  */
 package skills.auth
 
+import groovy.transform.AutoClone
 import groovy.transform.Canonical
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
 @Canonical
+@AutoClone
 class UserInfo implements UserDetails {
     private static final long serialVersionUID = 1L
 

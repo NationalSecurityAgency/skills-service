@@ -48,8 +48,9 @@ class EmailSendingService {
 
     void sendEmail(String subject, List<String> to, String htmlBody, String plainTextBody = null, Date sentDate = null, JavaMailSender sender = null, String sendFrom = null, List<String> ccRecipients) {
 
+        def emailSettingsInfo = emailSettings.fetchEmailSettings()
         if (!sendFrom) {
-            sendFrom = systemSettingsService.get()?.fromEmail
+            sendFrom = emailSettingsInfo.fromEmail
         }
 
         String fromEmail = sendFrom

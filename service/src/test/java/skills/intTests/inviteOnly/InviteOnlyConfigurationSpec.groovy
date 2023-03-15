@@ -61,4 +61,35 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         def err = thrown(SkillsClientException)
         err.message.contains("explanation:production.mode.enabled can only be enabled if invite_only is false")
     }
+
+    def "invite only project can access appropriate API functions"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        when:
+        def projectName = skillsService.lookupMyProjectName(proj.projectId)
+        def subjectDescriptions = skillsService.getSubjectDescriptions(proj.projectId, subj.subjectId)
+        def userLevels = skillsService.getUserLevel(proj.projectId)
+        def myProgress = skillsService.getMyProgressSummary()
+        def usersPerLevel = skillsService.getUsersPerLevel(proj.projectId)
+        def summary = skillsService.getSkillSummary(skillsService.userName, proj.projectId)
+        def otherSummary = skillsService.getSkillSummary(skillsService.userName, proj.projectId, subj.subjectId)
+
+        then:
+        projectName
+        subjectDescriptions
+        userLevels == 0
+        myProgress
+        usersPerLevel
+        summary
+        otherSummary
+    }
 }

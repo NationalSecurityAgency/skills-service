@@ -49,7 +49,7 @@ limitations under the License.
                         v-model="questionType.selectedType">
               <template v-slot:option="option">
                 <div class="p-1" :data-cy="`selectionItem_${option.id}`">
-                  <i :class="option.icon" style="min-width: 1.2rem" class="border rounded p-1 mr-2"></i>
+                  <i :class="option.icon" style="min-width: 1.2rem" class="border rounded p-1 mr-2" aria-hidden="true"></i>
                   <span class="">{{ option.label }}</span>
                 </div>
               </template>
@@ -58,8 +58,9 @@ limitations under the License.
         </div>
 
         <div v-if="isQuestionTypeTextInput" class="pl-3">
+          <label for="textInputPlaceholder" hidden>Text Input Answer Placeholder:</label>
           <b-form-textarea
-            id="textarea"
+            id="textInputPlaceholder"
             placeholder="Users will be required to enter text."
             data-cy="textAreaPlaceHolder"
             :disabled="true"
@@ -90,10 +91,12 @@ limitations under the License.
       <div slot="modal-footer" class="w-100">
         <b-button v-if="!loading" variant="success" size="sm" class="float-right"
                   @click="saveAnswer"
+                  aria-label="Save this question"
                   data-cy="saveQuestionBtn">
           <span>Save</span>
         </b-button>
         <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe"
+                  aria-label="Cancel and discard this question"
                   data-cy="closeQuestionBtn">
           Cancel
         </b-button>

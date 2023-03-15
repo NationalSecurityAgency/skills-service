@@ -93,7 +93,7 @@ class OAuthUtils {
             UserInfo currentUser = userConverter.convert(clientId, oAuth2User)
 
             // also create/update the UserInfo in the database.
-            currentUser = userAuthService.createOrUpdateUser(currentUser)
+            currentUser = userAuthService.createOrUpdateUser(currentUser, false)
 
             // Create new Authentication using UserInfo
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, auth, currentUser.authorities)

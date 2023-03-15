@@ -206,7 +206,6 @@ class QuizDefService {
             throw new SkillQuizException("Provided Question Definition ID [${quizQuestionDefId}] does not belong to the quiz [${quizDef.quizId}]", quizDef.quizId, ErrorCode.BadParam)
         }
 
-
         QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizDef.id)
         if (quizSetting) {
             Integer minNumQuestionsToPass = Integer.valueOf(quizSetting.value)
