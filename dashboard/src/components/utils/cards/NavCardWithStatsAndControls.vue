@@ -92,6 +92,7 @@ limitations under the License.
            class="position-absolute text-secondary px-2 py-1 sort-control"
            tabindex="0"
            :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
+           role="button"
            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </div>
   </div>

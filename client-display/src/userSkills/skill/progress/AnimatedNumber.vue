@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <span>{{ displayNumber | number }}</span>
+  <span :aria-label="displayNumber">{{ displayNumber | number }}</span>
 </template>
 
 <script>

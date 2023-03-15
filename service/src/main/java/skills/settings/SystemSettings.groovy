@@ -21,11 +21,8 @@ import groovy.transform.Canonical
 @Canonical
 class SystemSettings {
 
-    String publicUrl
     //iso 8601 period/duration string, e.g., PT2H30M45S
     String resetTokenExpiration
-    //from address used in all outgoing emails from the system
-    String fromEmail
     //html and in-line css to display a custom header in the dashboard application
     String customHeader
     //html and in-line css to display a custom footer in the dashboard application

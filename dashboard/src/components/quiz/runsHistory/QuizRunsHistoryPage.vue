@@ -28,10 +28,18 @@ limitations under the License.
 
       <div class="row pl-3 mb-3">
         <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="userFilterBtn"><i
+          <b-button variant="outline-info"
+                    @click="applyFilters"
+                    data-cy="userFilterBtn"
+                    :aria-label="`Filter ${quizType} results`"><i
             class="fa fa-filter" aria-hidden="true"/> Filter
           </b-button>
-          <b-button ref="filterResetBtn" variant="outline-info" @click="resetFilter" class="ml-1" data-cy="userResetBtn"><i
+          <b-button ref="filterResetBtn"
+                    variant="outline-info"
+                    @click="resetFilter"
+                    class="ml-1"
+                    :aria-label="`Reset filter for ${quizType} results`"
+                    data-cy="userResetBtn"><i
             class="fa fa-times" aria-hidden="true"/> Reset
           </b-button>
         </div>
@@ -53,6 +61,9 @@ limitations under the License.
         <template #head(started)="data">
           <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
+        <template #head(controls)="">
+          <span class="sr-only">Controls Heading - Not sortable</span>
+        </template>
 
         <template v-slot:cell(userIdForDisplay)="data">
           <div class="row" :data-cy="`row${data.index}-userCell`">
@@ -61,6 +72,7 @@ limitations under the License.
             </div>
             <div class="col-auto">
               <b-button variant="outline-info" size="sm" :data-cy="`row${data.index}-viewRun`"
+                        :aria-label="`View Run Details for user ${data.item.userIdForDisplay}`"
                         :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.attemptId } }">
                 <i class="fas fa-list-ul" aria-hidden="true"/><span class="sr-only">view run details</span>
               </b-button>
@@ -86,7 +98,7 @@ limitations under the License.
                     @click="initiateDelete(data.item)"
                     variant="outline-danger"
                     size="sm">
-            <i class="fas fa-trash" aria-hidden="true"/><span class="sr-only">delete quiz result for {{ data.item.userIdForDisplay}}</span>
+            <i class="fas fa-trash" aria-hidden="true"/><span class="sr-only">delete {{ quizType }} result for {{ data.item.userIdForDisplay}}</span>
           </b-button>
         </template>
 
@@ -268,7 +280,12 @@ limitations under the License.
         this.table.options.busy = true;
         QuizService.deleteQuizRunHistoryItem(this.quizId, this.deleteQuizRunInfo.quizRun.attemptId)
           .then(() => {
-            this.loadData().then(() => this.focusOnRefId('filterResetBtn'));
+            this.loadData().then(() => {
+              this.focusOnRefId('filterResetBtn');
+              this.$nextTick(() => {
+                this.$announcer.polite(`${this.quizType} Run for ${this.deleteQuizRunInfo.quizRun.userIdForDisplay} was successfully removed!`);
+              });
+            });
           });
       },
     },

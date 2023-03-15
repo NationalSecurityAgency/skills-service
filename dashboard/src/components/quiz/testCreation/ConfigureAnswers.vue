@@ -18,15 +18,18 @@ limitations under the License.
     <div v-for="(answer, index) in answersInternal" :key="index">
       <div class="row no-gutters mt-2" :data-cy="`answer-${index}`">
         <div class="col-auto">
-          <select-correct-answer :id="`answer=${index}`" v-if="isQuizType" v-model="answer.isCorrect" class="mr-2"/>
+          <select-correct-answer v-if="isQuizType"
+                                 :id="`answer=${index}`"
+                                 :answer-number="index+1"
+                                 v-model="answer.isCorrect"
+                                 class="mr-2"/>
         </div>
         <div class="col">
           <input class="form-control" type="text" v-model="answer.answer"
                  placeholder="Enter an answer"
                  data-cy="answerText"
-                 id="testNameInput"
-                 aria-errormessage="testNameError"
-                 aria-describedby="testNameError"/>
+                 :id="`answer${index}TextInput`"
+                 :aria-label="`Enter answer number ${index+1}`" />
         </div>
         <b-button-group class="ml-2">
           <b-button variant="outline-info"

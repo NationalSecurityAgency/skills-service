@@ -62,7 +62,7 @@ class PublicConfigSpecs extends DefaultIntSpec {
 
     def "public configs should include custom header/footer"() {
         skillsService.grantRoot()
-        skillsService.saveSystemSettings("http://not-real.fakefakefake", "PT1H", "noreply@fakefakefake", "<div>header</div>", "<div>footer</div>")
+        skillsService.saveSystemSettings("PT1H", "<div>header</div>", "<div>footer</div>")
         when:
         def configs = skillsService.getPublicConfigs()
 

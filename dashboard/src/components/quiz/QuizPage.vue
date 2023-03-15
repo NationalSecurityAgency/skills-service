@@ -150,7 +150,7 @@ limitations under the License.
             this.loadQuizSummary({ quizId: this.$route.params.quizId }).then(() => this.handleHideQuizEdit());
           }
           this.$nextTick(() => {
-            this.$announcer.polite(`${quizDef.type} ${quizDef.name} has been edited`);
+            this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
           });
         });
       },

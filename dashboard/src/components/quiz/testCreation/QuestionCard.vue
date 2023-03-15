@@ -45,10 +45,12 @@ limitations under the License.
                 </div>
               </div>
               <div v-if="isTextInputType">
+                <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
                 <b-form-textarea
-                  id="textarea"
+                  :id="`q${questionNum}textInputPlaceholder`"
                   placeholder="Users will be required to enter text."
                   :disabled="true"
+                  aria-hidden="true"
                   data-cy="textAreaPlaceHolder"
                   rows="2"
                   max-rows="4"/>
