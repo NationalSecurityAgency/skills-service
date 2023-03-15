@@ -894,7 +894,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         batchOperationsTransactionalAccessor.updateProjectsTotalPoints(project2.projectId)
         List<Integer> skillRefIds = [[projectId: project1.projectId, skillId: skill.skillId], [projectId: project3.projectId, skillId: skill7.skillId]].collect({ skillDefRepo.findByProjectIdAndSkillId(it.projectId, it.skillId).id })
         batchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects(project2.projectId, skillRefIds)
-        batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(skillRefIds)
+        batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(project2.projectId, skillRefIds)
 
         batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(project2.projectId, p2subj1.subjectId)
         batchOperationsTransactionalAccessor.updateUserPointsForSubject(project2.projectId, p2subj1.subjectId)

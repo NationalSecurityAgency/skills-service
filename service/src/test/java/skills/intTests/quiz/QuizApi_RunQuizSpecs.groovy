@@ -161,7 +161,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
         then:
         quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        quizAttemptAfterApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id]
+        quizAttemptAfterApdate.selectedAnswerIds.sort() == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id].sort()
     }
 
     def "answer is removed when reporting same answer for a multiple-choice answer with isSelected=false"() {
@@ -186,8 +186,8 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         def quizAttemptAfterApdate =  skillsService.startQuizAttempt(quiz.quizId).body
 
         then:
-        quizAttemptBeforeApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id, quizInfo.questions[0].answerOptions[2].id]
-        quizAttemptAfterApdate.selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[2].id]
+        quizAttemptBeforeApdate.selectedAnswerIds.sort() == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[1].id, quizInfo.questions[0].answerOptions[2].id].sort()
+        quizAttemptAfterApdate.selectedAnswerIds.sort() == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[0].answerOptions[2].id].sort()
     }
 
     def "removing quiz definition removes questions and answers definitions and attempts"() {

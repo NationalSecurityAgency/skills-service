@@ -72,6 +72,9 @@ class SkillsAdminService {
     QuizToSkillService quizToSkillService
 
     @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
     GlobalBadgesService globalBadgesService
 
     @Autowired
@@ -338,9 +341,8 @@ class SkillsAdminService {
             saveSkillTmpRes.isImportedByOtherProjects = skillDefRepo.isCatalogSkillImportedByOtherProjects(savedSkill.id)
         }
 
-        if (selfReportingType == SkillDef.SelfReportingType.Quiz && !isSkillCatalogImport) {
-            boolean awardSkillForQuizCompletion = !(skillRequest instanceof SkillProjectCopyRequest)
-            quizToSkillService.saveQuizToSkillAssignment(savedSkill, skillRequest.quizId, awardSkillForQuizCompletion)
+        if (selfReportingType == SkillDef.SelfReportingType.Quiz) {
+            quizToSkillService.handleQuizToSkillRelationship(savedSkill, skillRequest)
         }
 
         log.debug("Saved [{}]", savedSkill)
