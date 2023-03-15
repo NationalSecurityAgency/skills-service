@@ -44,6 +44,7 @@ class AuthUtilsSpec extends Specification {
         projectId | url
         "test"    | "/admin/projects/test/shared"
         "test"    | "/admin/projects/test/dependency/graph"
+        "test"    | "/admin/myprojects/test/name"
     }
 
     def "match self reporting approve or reject url only"() {
