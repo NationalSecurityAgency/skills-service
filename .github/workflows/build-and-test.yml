@@ -155,10 +155,10 @@ jobs:
         mvn --version
         java -version
 
-#    - uses: actions/download-artifact@v3
-#      with:
-#        name: service jar
-#        path: ./service/target/
+    #    - uses: actions/download-artifact@v3
+    #      with:
+    #        name: service jar
+    #        path: ./service/target/
 
     - name: Prep Services for Cypress tests
       run: |
