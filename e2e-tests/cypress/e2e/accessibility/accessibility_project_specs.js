@@ -152,8 +152,10 @@ describe('Accessibility Tests', () => {
 
     it('project - metrics', () => {
         cy.visit('/administrator/projects/proj1/metrics');
-        cy.contains('Users per day');
-        cy.contains('This chart needs at least 2 days of user activity.');
+        cy.get('[data-cy="metricsCard-header"').contains('Users per day');
+        cy.get('[data-cy="distinctNumUsersOverTime"]').contains('This chart needs at least 2 days of user activity.');
+        cy.get('[data-cy="projectLastReportedSkill"]')
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4')
 
         cy.customLighthouse();
         cy.injectAxe();
