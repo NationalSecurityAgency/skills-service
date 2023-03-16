@@ -21,13 +21,13 @@ limitations under the License.
           <div class="media">
             <router-link v-if="options.icon" tag="a"
                          :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
-                         tabindex="-1">
-              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem;"
+                         tabindex="-1" class="subject-icon-container">
+              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem; height: inherit; width: inherit;"
                    aria-hidden="true">
-                <i :class="[`${options.icon}`]" class="m-1" aria-hidden="true"/>
+                <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
               </div>
             </router-link>
-            <div class="media-body" style="min-width: 0px;">
+            <div class="media-body" style="min-width: 0px; margin-left: 8px;">
               <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
                 <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">{{
                     options.title
@@ -188,5 +188,21 @@ limitations under the License.
     cursor: grab !important;
     color: $info !important;
     font-size: 1.5rem;
+  }
+
+  .subject-icon {
+    height: 100%;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    font-size: 42px !important;
+    line-height: 58px;
+  }
+
+  .subject-icon-container {
+    max-width:100px;
+    max-height:100px;
+    height:60px;
+    width: 60px;
   }
 </style>
