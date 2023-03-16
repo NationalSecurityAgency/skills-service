@@ -515,7 +515,7 @@ describe('Client Display Survey Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.runQuizForUser(1, 'user0', [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [0]}]);
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="quizSplashScreen"]').contains('You already completed this survey')

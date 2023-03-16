@@ -101,13 +101,7 @@ beforeEach(function () {
         cy.logout();
 
         if (!Cypress.env('verifyEmail')) {
-            if (!Cypress.env('oauthMode')) {
-                cy.log('NOT in oauthMode, using form login')
-                cy.login(vars.defaultUser, vars.defaultPass);
-            } else {
-                cy.log('oauthMode, using loginBySingleSignOn')
-                cy.loginBySingleSignOn()
-            }
+            cy.loginAsAdminUser()
         }
     });
     cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`)

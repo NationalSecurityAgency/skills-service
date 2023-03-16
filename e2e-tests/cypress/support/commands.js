@@ -976,6 +976,19 @@ Cypress.Commands.add("loginAsDefaultUser", () => {
     });
 })
 
+Cypress.Commands.add("loginAsAdminUser", () => {
+    cy.fixture('vars.json').then((vars) => {
+        cy.request('POST', '/logout');
+        if (!Cypress.env('oauthMode')) {
+            cy.log('NOT in oauthMode, using form login')
+            cy.login(vars.defaultUser, vars.defaultPass);
+        } else {
+            cy.log('oauthMode, using loginBySingleSignOn')
+            cy.loginBySingleSignOn()
+        }
+    });
+})
+
 Cypress.Commands.add("loginAsProxyUser", () => {
     cy.fixture('vars.json')
         .then((vars) => {
