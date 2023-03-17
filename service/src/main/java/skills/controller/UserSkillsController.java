@@ -469,12 +469,11 @@ class UserSkillsController {
         return attachmentService.saveAttachment(file);
     }
 
-    @RequestMapping(value = "/download/{uuid}/{filename}", method = RequestMethod.GET)
+    @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
-                         @PathVariable("filename") String filename,
                          HttpServletResponse response) {
-        Attachment attachment = attachmentService.getAttachment(uuid, filename);
+        Attachment attachment = attachmentService.getAttachment(uuid);
         try (InputStream inputStream = attachment.getContent().getBinaryStream();
              OutputStream outputStream = response.getOutputStream()) {
             response.setContentType(attachment.getContentType());

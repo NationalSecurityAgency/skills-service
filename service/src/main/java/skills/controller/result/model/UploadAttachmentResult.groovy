@@ -16,8 +16,9 @@
 package skills.controller.result.model
 
 class UploadAttachmentResult {
-    String filename;
-    String contentType;
-    String href;
-    Long size;
+    String filename
+    String contentType
+    String href
+    Long size
+    String userId
 }

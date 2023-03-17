@@ -2377,4 +2377,10 @@
                                  referencedTableName="user_attrs"/>
     </changeSet>
 
+    <changeSet id="38" author="skills team">
+        <addColumn tableName="attachments">
+            <column name="user_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

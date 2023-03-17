@@ -55,7 +55,8 @@ class AttachmentSpecs extends DefaultIntSpec {
         result.contentType == "application/pdf"
         result.size == contents.getBytes().length
         result.filename == filename
-        result.href ==~ /^\/api\/download\/[^\/]+\/test-pdf.pdf$/
+        result.href ==~ /^\/api\/download\/[^\/]+$/
+        result.userId == skillsService.userName
     }
 
     def "upload and then download attachment"() {
@@ -73,7 +74,8 @@ class AttachmentSpecs extends DefaultIntSpec {
         uploadResult.contentType == "application/pdf"
         uploadResult.size == contents.getBytes().length
         uploadResult.filename == filename
-        uploadResult.href ==~ /^\/api\/download\/[^\/]+\/test-pdf.pdf$/
+        uploadResult.href ==~ /^\/api\/download\/[^\/]+$/
+        uploadResult.userId == skillsService.userName
 
         file
         file.bytes == contents.getBytes()

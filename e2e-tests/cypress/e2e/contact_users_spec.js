@@ -578,8 +578,7 @@ describe('Contact Project Users Specs', () => {
         const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
         cy.get(markdownInput).focus().selectFile('cypress/attachments/test-pdf.pdf', { action: 'drag-drop' })
 
-        cy.get('a[href$="test-pdf.pdf"]')
-          .should('not.exist');
+        cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)').should('not.exist');
     });
 
 });
