@@ -48,6 +48,8 @@ class Attachment {
 
     Long size;
 
+    String userId;
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
