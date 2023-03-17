@@ -15,9 +15,11 @@ limitations under the License.
 */
 <template>
   <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" :data-cy="`numUsersByTag-${tag.key}`">
-    <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
-      <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
-    </metrics-overlay>
+    <div style="max-height: 800px; overflow: auto;">
+      <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
+        <apexchart v-if="!loading" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
+      </metrics-overlay>
+    </div>
   </metrics-card>
 </template>
 
@@ -30,13 +32,22 @@ limitations under the License.
     name: 'UserTagsByLevelChart',
     components: { MetricsOverlay, MetricsCard },
     props: ['tag'],
+    computed: {
+      chartHeight() {
+        let height = 350;
+        if (this.chartOptions?.xaxis?.categories) {
+          const dataSize = this.chartOptions.xaxis.categories.length;
+          height = dataSize > 0 ? dataSize * 250 : 350;
+        }
+        return height;
+      },
+    },
     data() {
       return {
         series: [],
         loading: true,
         chartOptions: {
           chart: {
-            height: 250,
             width: 250,
             type: 'bar',
             toolbar: {
