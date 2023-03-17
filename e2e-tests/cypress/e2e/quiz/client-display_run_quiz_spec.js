@@ -258,7 +258,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.runQuizForUser(1, 'user0', [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
 
@@ -389,7 +389,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.runQuizForUser(1, 'user0', [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 1 / 1 questions')
@@ -417,7 +417,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.runQuizForUser(1, 'user0', [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [0]}]);
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="quizSplashScreen"]').contains('You already passed this quiz')
@@ -482,7 +482,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.runQuizForUser(1, 'user0', [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [0]}]);
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="quizSplashScreen"]').contains('You already passed this quiz')
