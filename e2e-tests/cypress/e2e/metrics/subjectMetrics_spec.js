@@ -368,7 +368,7 @@ describe('Metrics Tests - Subject', () => {
                             .format('x')
                       });
 
-                    cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+                    cy.addUserTag(userId, 'tagA', ['ABCDE', 'A', 'B', 'C']);
                 }
             }
 
@@ -384,7 +384,7 @@ describe('Metrics Tests - Subject', () => {
                         .format('x')
                   });
 
-                cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+                cy.addUserTag(userId, 'tagA', ['ABCDE']);
             }
 
             cy.logout();
