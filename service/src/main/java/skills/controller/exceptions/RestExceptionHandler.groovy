@@ -225,7 +225,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
         log.error("${buildRequestInfo(request)} Handling exception", ex)
-        return new ResponseEntity(body, headers, status);
+        return new ResponseEntity(body, headers, statusCode);
     }
 
     private String buildRequestInfo(WebRequest request) {

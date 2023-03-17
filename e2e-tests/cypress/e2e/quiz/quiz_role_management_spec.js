@@ -45,43 +45,49 @@ describe('Quiz User Role Management Tests', () => {
     });
 
     it('delete quiz admin', function () {
-        cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
+      cy.fixture('vars.json')
+        .then((vars) => {
+          cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
 
-        const pass = 'password';
-        cy.register('user1', pass);
-        cy.register('user2', pass);
-        cy.fixture('vars.json')
+          const pass = 'password';
+          cy.register('user1', pass);
+          cy.register('user2', pass);
+          cy.fixture('vars.json')
             .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.log('NOT in oauthMode, using form login');
-                    cy.login(vars.defaultUser, vars.defaultPass);
-                } else {
-                    cy.log('oauthMode, using loginBySingleSignOn');
-                    cy.loginBySingleSignOn();
-                }
+              if (!Cypress.env('oauthMode')) {
+                cy.log('NOT in oauthMode, using form login');
+                cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                cy.log('oauthMode, using loginBySingleSignOn');
+                cy.loginBySingleSignOn();
+              }
             });
-        cy.createQuizDef(1);
-        cy.createQuizQuestionDef(1, 1);
+          cy.createQuizDef(1);
+          cy.createQuizQuestionDef(1, 1);
 
-        cy.visit('/administrator/quizzes/quiz1/access');
-        cy.request('POST', `/admin/quiz-definitions/quiz1/users/user1/roles/ROLE_QUIZ_ADMIN`);
-        cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
+          const oauthMode = Cypress.env('oauthMode');
+          const defaultUser = oauthMode ? Cypress.env('proxyUser') : vars.defaultUser;
 
-        cy.get('[data-cy="quizAdmin_skills@skills.org"] [data-cy="removeUserBtn"]').should('be.disabled')
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
-        cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.visit('/administrator/quizzes/quiz1/access');
+          cy.request('POST', `/admin/quiz-definitions/quiz1/users/user1/roles/ROLE_QUIZ_ADMIN`);
+          cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
 
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
+          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This action will permanently remove user1 from having admin privileges.')
-        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="removeButton"]').click()
+          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
 
-        cy.get('[data-cy="quizAdmin_skills@skills.org"] [data-cy="removeUserBtn"]').should('be.disabled')
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('not.exist')
-        cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This action will permanently remove user1 from having admin privileges.')
+          cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+          cy.get('[data-cy="removeButton"]').click()
 
-        cy.get('[data-cy="existingUserInput"] input').should('have.focus')
+          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('not.exist')
+          cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+
+          cy.get('[data-cy="existingUserInput"] input').should('have.focus')
+        });
     })
 
     it('cancelling delete safety check returns focus to the delete button', function () {
@@ -126,7 +132,7 @@ describe('Quiz User Role Management Tests', () => {
                 cy.register('5user', pass);
 
                 const oauthMode = Cypress.env('oauthMode');
-                const defaultUser = oauthMode ? Cypress.env('proxyUser') : vars.defaultUser;
+                const defaultUserForDisplay = oauthMode ? 'foo' : vars.defaultUser;
                 if (!oauthMode) {
                     cy.log('NOT in oauthMode, using form login');
                     cy.login(vars.defaultUser, vars.defaultPass);
@@ -159,7 +165,7 @@ describe('Quiz User Role Management Tests', () => {
                     [{ colIndex: 0, value: '3user' }],
                     [{ colIndex: 0, value: '4user' }],
                     [{ colIndex: 0, value: '5user' }],
-                    [{ colIndex: 0, value: defaultUser }],
+                    [{ colIndex: 0, value: defaultUserForDisplay }],
                 ], 5);
             });
     })

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import skills.auth.UserInfoService
 import skills.controller.result.model.UploadAttachmentResult
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
@@ -29,23 +30,28 @@ import skills.storage.repos.AttachmentRepo
 class AttachmentService {
 
     @Autowired
-    AttachmentRepo attachmentRepo;
+    AttachmentRepo attachmentRepo
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Transactional
     UploadAttachmentResult saveAttachment(MultipartFile file) {
+        String userId = userInfoService.getCurrentUserId();
         String uuid = UUID.randomUUID().toString()
-        attachmentRepo.saveAttachment(file.originalFilename, file.contentType, uuid, file.size, file.inputStream);
+        attachmentRepo.saveAttachment(file.originalFilename, file.contentType, uuid, file.size, file.inputStream, userId);
         return new UploadAttachmentResult(
                 filename: file.originalFilename,
                 contentType: file.contentType,
-                href: "/api/download/${uuid}/${file.originalFilename}",
-                size: file.size
+                href: "/api/download/${uuid}",
+                size: file.size,
+                userId: userId,
         )
     }
 
     @Transactional(readOnly = true)
-    Attachment getAttachment(String uuid, String filename) {
-        return attachmentRepo.getAttachmentByUuidAndFilename(uuid, filename)
+    Attachment getAttachment(String uuid) {
+        return attachmentRepo.getAttachmentByUuidAndFilename(uuid)
     }
 
 }

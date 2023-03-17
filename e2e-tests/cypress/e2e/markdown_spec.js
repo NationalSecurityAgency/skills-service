@@ -84,13 +84,13 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('attachment-button')
         cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
 
-        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+        cy.get(markdownInput).get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
         cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();
-        cy.get('a[href$="test-pdf.pdf"]')
+        cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
     });
 
@@ -103,13 +103,13 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).focus().selectFile('cypress/attachments/test-pdf.pdf', { action: 'drag-drop' })
 
-        cy.get('a[href$="test-pdf.pdf"]')
+        cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
         cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();
-        cy.get('a[href$="test-pdf.pdf"]')
+        cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
     });
 
@@ -130,7 +130,7 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('attachment-button')
         cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
 
-        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+        cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7.25 KB] exceeds maximum file size [5 B]');
@@ -154,7 +154,7 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('attachment-button')
         cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
 
-        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+        cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('have.attr', 'target', '_blank');
         cy.get('[data-cy="attachmentWarningMessage"]').should('not.exist')
     });
@@ -172,7 +172,7 @@ describe('Markdown Tests', () => {
             mimeType: 'invalid/type'  // assign invalid mime-type
         }], { force: true })
 
-        cy.get(markdownInput).get('a[href$="test-pdf.pdf"]')
+        cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
         cy.get('[data-cy=saveSkillButton]').should('be.disabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File type is not supported. Supported file types are [.xlsx,.docx,.pptx,.doc,.odp,.ods,.odt,.pdf,.ppt,.xls]');
@@ -188,7 +188,7 @@ describe('Markdown Tests', () => {
         const attachmentFiles = cy.task('getFilesFromDir', { directory: 'cypress/attachments/', ignore: 'invalid' });
         attachmentFiles.each((file) => {
             cy.get('input[type=file]').selectFile(`cypress/attachments/${file}`, {force: true})
-            cy.get(markdownInput).get(`a[href$="/${file}"]`).should('exist');
+            cy.get(markdownInput).get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
             cy.get(markdownInput).type('\n\n')
         });
         cy.get('[data-cy=saveSkillButton]').should('be.enabled');
@@ -197,7 +197,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
 
         attachmentFiles.each((file) => {
-            cy.get('[data-cy="skillOverviewDescription"]').get(`a[href$="/${file}"]`).should('exist');
+            cy.get('[data-cy="skillOverviewDescription"]').get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
         });
     });
 
