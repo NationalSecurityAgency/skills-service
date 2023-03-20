@@ -157,7 +157,7 @@ jobs:
       run: |
         cd e2e-tests
         npm install
-        npm run backend:dropAllDBTables:postgres
+        npm run backend:dropAllDBTables
         npm run cyServices:start:skills-service:oauth
         npm run cyServices:start:client-display:oauth
         cd ..
