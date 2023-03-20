@@ -38,20 +38,21 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
-            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, up.points
-            FROM user_points up, skill_definition toDef
+            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, (toDef.point_increment * (up.points / fromDef.point_increment))
+            FROM user_points up, skill_definition toDef, skill_definition fromDef
             WHERE
-                  toDef.project_id = :toProjectId and 
-                  toDef.copied_from_skill_ref = up.skill_ref_id and
-                  up.skill_ref_id in (:fromSkillRefIds)
-                  and not exists (
-                    select 1 from user_points innerUP
-                    where
-                      toDef.project_id = innerUP.project_id
-                      and up.user_id = innerUP.user_id
-                      and toDef.skill_id = innerUP.skill_id
-                  )
-            ''', nativeQuery = true)
+                    toDef.project_id = :toProjectId and
+                    toDef.copied_from_skill_ref = up.skill_ref_id and
+                    toDef.copied_from_skill_ref = fromDef.id and
+                    up.skill_ref_id in (:fromSkillRefIds)
+                    and not exists(
+                        select 1
+                        from user_points innerUP
+                        where toDef.project_id = innerUP.project_id
+                          and up.user_id = innerUP.user_id
+                          and toDef.skill_id = innerUP.skill_id
+                    )
+                ''', nativeQuery = true)
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
