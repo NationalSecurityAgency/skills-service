@@ -27,13 +27,19 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.services.RuleSetDefGraphService
+import skills.services.UserAchievementsAndPointsManagement
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
+import skills.storage.model.UserAchievement
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.UserQuizAttemptRepo
 
 @Service
@@ -53,7 +59,19 @@ class QuizToSkillService {
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
+    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
+
+    @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
+    UserPointsRepo userPointsRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedRepo
 
     @Transactional
     void handleQuizToSkillRelationship(SkillDef savedSkill, SkillRequest skillRequest){
@@ -124,9 +142,35 @@ class QuizToSkillService {
     }
 
     @Transactional
-    void removeQuizToSkillAssignment(Integer skillRef) {
-        quizToSkillDefRepo.deleteBySkillRefId(skillRef)
+    void removeQuizToSkillAssignment(SkillDefWithExtra skillDef) {
+        Integer skillRefId = skillDef.id
+
+        quizToSkillDefRepo.deleteBySkillRefId(skillRefId)
         quizToSkillDefRepo.flush()
+
+        long userPerformedSkillNumRemoved = userPerformedSkillRepo.deleteBySkillRefId(skillRefId)
+        log.info("Removed [{}] UserPerformedSkill records for skill.id=[{}]", userPerformedSkillNumRemoved, skillRefId)
+        long userPointsNumRemoved = userPointsRepo.deleteBySkillRefId(skillRefId)
+        log.info("Removed [{}] UserUserPointsPerformedSkill records for skill.id=[{}]", userPointsNumRemoved, skillRefId)
+        int numAchievementsRemoved = userAchievedRepo.deleteAllBySkillRefId(skillRefId)
+        log.info("Removed [{}] UserAchievement records for skill.id=[{}]", numAchievementsRemoved, skillRefId)
+
+        if (skillDef.groupId) {
+            SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillDef.id)
+            if (group) {
+                long userAchievementNumRemoved = userAchievedRepo.deleteAllBySkillRefId(group.id)
+                log.info("Removed [{}] UserAchievement records for group.id=[{}]", userAchievementNumRemoved, group.id)
+            }
+        }
+
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillDef.id)
+        batchOperationsTransactionalAccessor.removeSubjectUserPointsForNonExistentSkillDef(subject.projectId, subject.skillId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(subject.projectId, subject.skillId)
+        userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(subject)
+
+        userPointsRepo.removeOrphanedProjectPoints(skillDef.projectId)
+        batchOperationsTransactionalAccessor.updateUserPointsForProject(skillDef.projectId)
+        userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUsersDoNotQualify(skillDef.projectId)
     }
 
     QuizToSkillDefRepo.QuizNameAndId getQuizIdForSkillRefId(Integer skillRefId) {

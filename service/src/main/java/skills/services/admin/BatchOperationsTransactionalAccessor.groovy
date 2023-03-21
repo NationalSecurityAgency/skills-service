@@ -107,9 +107,7 @@ class BatchOperationsTransactionalAccessor {
         createProjectUserPointsForTheNewUsers(projectId)
         log.info("Competed creating UserPoints for the new users for [{}] project", projectId)
 
-        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
         updateUserPointsForProject(projectId)
-        log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
 
         log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
         identifyAndAddProjectLevelAchievements(projectId, pointsBased)
@@ -208,8 +206,18 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void updateUserPointsForSubject(String projectId, String skillId) {
-        nativeQueriesRepo.updateUserPointsForSubject(projectId, skillId, false)
+    void updateUserPointsForSubject(String projectId, String subjectId) {
+        log.info("Updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+        nativeQueriesRepo.updateUserPointsForSubject(projectId, subjectId, false)
+        log.info("Completed updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+    }
+
+    @Transactional
+    @Profile
+    void removeSubjectUserPointsForNonExistentSkillDef(String projectId, String subjectId) {
+        log.info("Removing UserPoints for subject that doesn't have any child points: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subjectId)
+        log.info("Completed removing UserPoints for subject that doesn't have any child points: projectId=[{}], subjectId=[{}]", projectId, subjectId)
     }
 
     @Transactional
@@ -247,7 +255,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void updateUserPointsForProject(String projectId) {
+        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
         nativeQueriesRepo.updateUserPointsForProject(projectId)
+        log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
     }
 
     @Transactional

@@ -195,7 +195,22 @@ class UserAchievementsAndPointsManagement {
             }
         } else {
             int numDeleted = userAchievedLevelRepo.deleteAllBySkillRefId(subject.id)
-            log.info("There are no skills defined for projectId=[{}], subjectId=[{}({})]. Removed [{}] subject achievements", subject.projectId, subject.skillId, subject.id, numDeleted)
+            log.info("There are no skills defined for projectId=[{}], subjectId=[{}({})]. Removed [{}] subject achievements",
+                    subject.projectId, subject.skillId, subject.id, numDeleted)
+        }
+    }
+
+    @Transactional
+    @Profile
+    void removeProjectLevelAchievementsIfUsersDoNotQualify(String projectId) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId)
+        assert levels
+        if (levels) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.removeProjectLevelAchievementsIfUsersDoNotQualify(projectId, it.level, it.pointsFrom)
+                log.info("Remove project's level achievements for projectId=[{}], level=[{}], pointsFromExclusive=[{}]. Num rows removed = [{}]",
+                        projectId, it.level, it.pointsFrom, numUpdated)
+            }
         }
     }
 
