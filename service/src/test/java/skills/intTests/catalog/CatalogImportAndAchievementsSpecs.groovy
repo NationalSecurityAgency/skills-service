@@ -2319,6 +2319,55 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         status.numSkillsToFinalize == 1
     }
 
+    def "changes to skill in original project before finalization doesn't break and doesn't disable other imported skills"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 1)
+        skill2.pointIncrement = 150
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj, null)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def p2_subj = SkillsFactory.createSubject(2)
+        def p2_skills = (1..3).collect {createSkill(2, 1, it, 0, 5, 0, 150) }
+
+        skillsService.createProjectAndSubjectAndSkills(proj2, p2_subj, p2_skills)
+
+        skillsService.exportSkillToCatalog(proj2.projectId, p2_skills[0].skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2_skills[1].skillId)
+        skillsService.exportSkillToCatalog(proj2.projectId, p2_skills[2].skillId)
+
+        def status = skillsService.getCatalogFinalizeInfo(proj1.projectId)
+        assert status.numSkillsToFinalize == 0
+
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(proj1.projectId, subj.subjectId, [
+                [projectId: proj2.projectId, skillId: p2_skills[0].skillId],
+        ])
+
+        status = skillsService.getCatalogFinalizeInfo(proj1.projectId)
+        assert status.numSkillsToFinalize == 0
+
+        skillsService.bulkImportSkillsFromCatalog(proj1.projectId, subj.subjectId, [
+                [projectId: proj2.projectId, skillId: p2_skills[1].skillId],
+                [projectId: proj2.projectId, skillId: p2_skills[2].skillId],
+        ])
+
+        status = skillsService.getCatalogFinalizeInfo(proj1.projectId)
+        assert status.numSkillsToFinalize == 2
+
+        p2_skills[0].pointIncrement = 250
+        skillsService.updateSkill(p2_skills[0], p2_skills[0].skillId);
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        status = skillsService.getCatalogFinalizeInfo(proj1.projectId)
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, subj.subjectId)
+
+        then:
+        status.numSkillsToFinalize == 2
+        skills[0].enabled
+        skills[0].copiedFromProjectId == proj2.projectId
+    }
+
     private void printLevels(String projectId, String label, String subjectId = null) {
         println "------------\n${projectId}${subjectId ? ":${subjectId}" : ""} - ${label}:"
         levelDefinitionStorageService.getLevels(projectId, subjectId).each{

@@ -237,7 +237,7 @@ class SkillsAdminService {
 
                 def finalizeState = skillCatalogFinalizationService.getCurrentState(skillRequest.projectId)
                 if (finalizeState != SkillCatalogFinalizationService.FinalizeState.COMPLETED) {
-                    skillRequest.enabled = false
+                    skillRequest.enabled = isCurrentlyEnabled
                 }
             }
 
