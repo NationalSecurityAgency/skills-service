@@ -234,7 +234,7 @@ class SkillsAdminService {
             }
 
             if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
-                quizToSkillService.removeQuizToSkillAssignment(skillDefinition.id)
+                quizToSkillService.removeQuizToSkillAssignment(skillDefinition)
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')

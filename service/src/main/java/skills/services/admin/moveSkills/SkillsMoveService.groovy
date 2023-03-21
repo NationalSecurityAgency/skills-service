@@ -140,7 +140,7 @@ class SkillsMoveService {
 
     @Profile
     private removeSubjectUserPointsForNonExistentSkillDef(String projectId, SkillDef origSubj) {
-        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj.skillId)
+        batchOperationsTransactionalAccessor.removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj.skillId)
     }
 
     @Profile

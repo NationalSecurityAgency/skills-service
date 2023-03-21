@@ -483,15 +483,23 @@ describe('Quiz Question CRUD Tests', () => {
         cy.createQuizQuestionDef(1, 2)
         cy.createQuizMultipleChoiceQuestionDef(1, 3)
         cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="pageHeaderStat_Type"] [data-cy="statPreformatted"]').should('have.text', 'Quiz')
+        cy.get('[data-cy="editQuestionButton_1"]').should('be.visible')
+        cy.get('[data-cy="editQuestionButton_2"]').should('be.visible')
+        cy.get('[data-cy="editQuestionButton_3"]').should('be.visible')
 
         // initiate via bottom btn
         cy.get('[data-cy="editQuestionButton_2"]').click();
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').should('exist')
         cy.get('[data-cy="closeQuestionBtn"]').click()
         cy.get('[data-cy="closeQuestionBtn"]').should('not.exist')
         cy.get('[data-cy="editQuestionButton_2"]').should('have.focus')
 
         // using modal X on the top right
         cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 1')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').should('exist')
         cy.get('.modal-header [aria-label="Close"]').click()
         cy.get('.modal-header [aria-label="Close"]').should('not.exist')
         cy.get('[data-cy="editQuestionButton_1"]').should('have.focus')
