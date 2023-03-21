@@ -106,6 +106,9 @@ class SkillsAdminService {
     SkillCatalogService skillCatalogService
 
     @Autowired
+    SkillCatalogFinalizationService skillCatalogFinalizationService
+
+    @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
@@ -231,6 +234,11 @@ class SkillsAdminService {
                     pointIncrementDelta = 0
                 }
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+
+                def finalizeState = skillCatalogFinalizationService.getCurrentState(skillRequest.projectId)
+                if (finalizeState != SkillCatalogFinalizationService.FinalizeState.COMPLETED) {
+                    skillRequest.enabled = false
+                }
             }
 
             if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
