@@ -243,6 +243,11 @@ limitations under the License.
                         element.scrollIntoView({ behavior: 'smooth' });
                       });
                     }
+                    let announceMsg = `Completed ${this.quizInfo.quizType}`;
+                    if (!this.isSurveyType) {
+                      announceMsg = `${announceMsg}. ${!this.quizResult.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
+                    }
+                    this.$nextTick(() => this.$announcer.polite(announceMsg));
                   });
               });
           } else {
