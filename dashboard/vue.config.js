@@ -132,7 +132,7 @@ module.exports = {
       '^/isFeatureSupported$' : proxyConf,
       '^/resendEmailVerification$' : proxyConf,
       '^/verifyEmail$' : proxyConf,
-      '^/userEmailIsVerified$' : proxyConf,
+      '^/userEmailIsVerified/' : proxyConf,
     },
   },
   configureWebpack: {
