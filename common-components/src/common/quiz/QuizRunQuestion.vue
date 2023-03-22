@@ -35,7 +35,7 @@ limitations under the License.
               :id="`question-${num}`"
               data-cy="textInputAnswer"
               v-model="answerText"
-              :debounce="500"
+              @input="textAnswerChanged"
               :aria-label="`Please enter text to answer question number ${num}`"
               placeholder="Please enter your response here..."
               rows="2"
@@ -93,11 +93,6 @@ limitations under the License.
         this.answerText = existingAnswerText || '';
       }
       this.setupValidation();
-    },
-    watch: {
-      answerText() {
-        this.textAnswerChanged();
-      },
     },
     computed: {
       isMultipleChoice() {
