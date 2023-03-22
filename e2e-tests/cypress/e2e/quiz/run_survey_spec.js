@@ -313,6 +313,7 @@ describe('Client Display Survey Tests', () => {
             cy.visitQuizPage(env, false)
 
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').should('have.value', 'a')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible');
 
             cy.get('[data-cy="question_2"] [data-cy="answer_1"] [data-cy="selected_true"]').should('exist')
             cy.get('[data-cy="question_2"] [data-cy="answer_1"] [data-cy="selected_false"]').should('not.exist')
