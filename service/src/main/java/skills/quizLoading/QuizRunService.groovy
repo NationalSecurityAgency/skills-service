@@ -33,6 +33,7 @@ import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -98,7 +99,7 @@ class QuizRunService {
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         return new QuizInfo(
                 name: quizDefWithDesc.name,
-                description: quizDefWithDesc.description,
+                description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
                 questions: questions,
                 quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
@@ -119,7 +120,7 @@ class QuizRunService {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[it.id]
             new QuizQuestionInfo(
                     id: it.id,
-                    question: it.question,
+                    question: InputSanitizer.unsanitizeForMarkdown(it.question),
                     questionType: it.type.toString(),
                     canSelectMoreThanOne: quizAnswerDefs.count({ Boolean.valueOf(it.isCorrectAnswer) }) > 1,
                     answerOptions: quizAnswerDefs.collect {

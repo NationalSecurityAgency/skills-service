@@ -113,8 +113,14 @@ afterEach(function () {
     Cypress.env('hydraAuthenticated', false);
 
     cy.window().then((win) => {
-        expect(win.console.error).to.have.callCount(0);
-        expect(win.console.warn).to.have.callCount(0);
+        if (!Cypress.env('ignoreConsoleErrors')) {
+            expect(win.console.error).to.have.callCount(0);
+            Cypress.env('ignoreConsoleErrors', false); // reset flag
+        }
+        if (!Cypress.env('ignoreConsoleWarnings')) {
+            expect(win.console.warn).to.have.callCount(0);
+            Cypress.env('ignoreConsoleWarnings', false);  // reset flag
+        }
     });
 });
 

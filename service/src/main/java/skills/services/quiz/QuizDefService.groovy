@@ -322,7 +322,7 @@ class QuizDefService {
 
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
-                question: questionDefRequest.question,
+                question: InputSanitizer.sanitize(questionDefRequest.question),
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
         )
@@ -333,7 +333,7 @@ class QuizDefService {
     @Profile
     private QuizQuestionDef updateQuizQuestionDef(String quizId, int existingQuestionId, QuizQuestionDefRequest questionDefRequest) {
         QuizQuestionDef existing = getQuestingDef(quizId, existingQuestionId)
-        existing.question = questionDefRequest.question
+        existing.question = InputSanitizer.sanitize(questionDefRequest.question)
         existing.type = questionDefRequest.questionType
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(existing)
         return savedQuestion
@@ -489,7 +489,7 @@ class QuizDefService {
     private QuizQuestionDefResult convert(QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers) {
         new QuizQuestionDefResult(
                 id: savedQuestion.id,
-                question: savedQuestion.question,
+                question: InputSanitizer.unsanitizeForMarkdown(savedQuestion.question),
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
@@ -546,7 +546,7 @@ class QuizDefService {
                     }
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
-                            question: questionDef.question,
+                            question: InputSanitizer.unsanitizeForMarkdown(questionDef.question),
                             questionType: questionDef.type,
                             answers: answers,
                             isCorrect: isCorrect,
@@ -700,6 +700,7 @@ class QuizDefService {
 
     private QuizDefResult convert(QuizDefWithDescription updatedDef) {
         QuizDefResult result = Props.copy(updatedDef, new QuizDefResult())
+        result.description = InputSanitizer.unsanitizeForMarkdown(result.description)
         result.displayOrder = 0 // todo
         return result
     }
