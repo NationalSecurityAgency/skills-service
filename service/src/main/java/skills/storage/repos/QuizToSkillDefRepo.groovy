@@ -32,6 +32,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     }
 
     static interface ProjectIdAndSkillId {
+        Integer getSkillRefId()
         String getProjectId()
         String getSkillId()
     }
@@ -50,7 +51,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
     @Nullable
-    @Query('''select skill.skillId as skillId, skill.projectId as projectId
+    @Query('''select skill.id as skillRefId, skill.skillId as skillId, skill.projectId as projectId
             from QuizToSkillDef qToS, SkillDef skill 
             where qToS.quizRefId = ?1
                 and skill.id = qToS.skillRefId''')

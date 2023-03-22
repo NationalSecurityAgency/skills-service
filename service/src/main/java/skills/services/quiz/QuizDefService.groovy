@@ -100,6 +100,12 @@ class QuizDefService {
     @Autowired
     QuizToSkillDefRepo quizToSkillDefRepo
 
+    @Autowired
+    SkillEventAdminService skillEventAdminService
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         UserInfo userInfo = userInfoService.currentUser
@@ -431,6 +437,16 @@ class QuizDefService {
 
         userQuizAttemptRepo.delete(userQuizAttempt)
         log.info("Removed [{}]", userQuizAttempt.toString())
+        List<QuizToSkillDefRepo.ProjectIdAndSkillId> linkedSkills = quizToSkillDefRepo.getSkillsForQuiz(quizDef1.id)
+        linkedSkills.each {
+            List<UserPerformedSkill> userPerformedSkills = userPerformedSkillRepo.findAllBySkillRefIdAndUserId(it.skillRefId, userQuizAttempt.userId)
+            if (userPerformedSkills) {
+                // since this is a quiz-based skill should never be more than 1
+                userPerformedSkills.each {
+                    skillEventAdminService.removePerformedSkillEvent(it)
+                }
+            }
+        }
     }
 
     @Transactional

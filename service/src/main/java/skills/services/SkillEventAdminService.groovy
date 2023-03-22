@@ -54,6 +54,9 @@ class SkillEventAdminService {
     UserAchievedLevelRepo achievedLevelRepo
 
     @Autowired
+    RuleSetDefGraphService ruleSetDefGraphService
+
+    @Autowired
     SkillRelDefRepo skillRelDefRepo
 
     @Autowired
@@ -191,6 +194,7 @@ class SkillEventAdminService {
     }
 
     @Transactional
+    @Profile
     RequestResult deleteSkillEvent(String projectId, String skillId, String userId, Long timestamp) {
         if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
             throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
@@ -205,27 +209,6 @@ class SkillEventAdminService {
         UserPerformedSkill performedSkill = performedSkills.first()
         log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
-        SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
-        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId) ?: 0
-        // account for null
-
-        // handle catalog
-        List<SkillDefWithExtra> related = skillDefRepo.findSkillDefMinCopiedFrom(skillDefinitionMin.id)
-        if (related) {
-            log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
-            related?.each {
-                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
-            }
-        }
-
-        List<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
-        if (badgesSkillIsUsedIn) {
-            // do a delete
-            badgesSkillIsUsedIn.forEach{ it ->
-                achievedLevelRepo.deleteAllBySkillRefId(it)
-            }
-        }
-
         RequestResult res = new RequestResult()
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
@@ -236,14 +219,47 @@ class SkillEventAdminService {
             return res
         }
 
-        SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
+        SkillEventResult skillEventResult = removePerformedSkillEvent(performedSkill)
+
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation
+        return res
+    }
 
+    @Profile
+    SkillEventResult removePerformedSkillEvent(UserPerformedSkill performedSkill) {
+        log.info("Removing UserPerformedSkill {}", performedSkill)
+        String projectId = performedSkill.projectId;
+        String skillId = performedSkill.skillId
+        String userId = performedSkill.userId
+
+        SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
+        Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId) ?: 0
+        // account for null
+
+        // handle catalog
+        List<SkillDefWithExtra> related = skillDefRepo.findSkillDefMinCopiedFrom(performedSkill.skillRefId)
+        if (related) {
+            log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
+            related?.each {
+                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
+            }
+            log.info("Completed propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
+        }
+
+        List<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
+        if (badgesSkillIsUsedIn) {
+            // do a delete
+            badgesSkillIsUsedIn.forEach{ it ->
+                achievedLevelRepo.deleteAllBySkillRefId(it)
+            }
+        }
+
+        SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
         performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 
-        return res
+        return skillEventResult
     }
 
     private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Long numExistingPerformedSkills) {
@@ -256,10 +272,23 @@ class SkillEventAdminService {
             //this removes the skill achievements
             achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(skillDefinitionMin.projectId, skillDefinitionMin.skillId, userId, null)
         }
+        removeGroupAchievementIfNeeded(skillDefinitionMin)
         SkillEventResult skillEventResult = new SkillEventResult(projectId: skillDefinitionMin.projectId, skillId: skillDefinitionMin.skillId, name: skillDefinitionMin.name)
         checkParentGraph(skillEventResult, userId, skillDefinitionMin)
         deleteProjectLevelIfNecessary(skillDefinitionMin.projectId, userId, numExistingPerformedSkills.toInteger())
         return skillEventResult
+    }
+
+    @Profile
+    private void removeGroupAchievementIfNeeded(SkillDefMin skillDefinitionMin) {
+        log.info("removeGroupAchievementIfNeeded: ${skillDefinitionMin.projectId} - ${skillDefinitionMin.skillId} - ${skillDefinitionMin.groupId}")
+        if (skillDefinitionMin.groupId) {
+            SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillDefinitionMin.id)
+            if (group) {
+                long userAchievementNumRemoved = achievedLevelRepo.deleteAllBySkillRefId(group.id)
+                log.info("Removed [{}] UserAchievement records for group.id=[{}({})]", userAchievementNumRemoved, group.skillId, group.id)
+            }
+        }
     }
 
     @Profile
@@ -273,6 +302,7 @@ class SkillEventAdminService {
     }
 
 
+    @Profile
     private void deleteProjectLevelIfNecessary(String projectId, String userId, int numberOfExistingEvents) {
         List<UserAchievement> projAchievements = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, null)
         Integer userProjectPoints = userPointsRepo.getPointsByProjectIdAndUserId(projectId, userId)
@@ -299,7 +329,7 @@ class SkillEventAdminService {
     private void checkForBadgesAchieved(String userId, SkillDefMin currentSkillDef) {
         List<SkillRelDef> parentsRels = skillRelDefRepo.findAllByChildIdAndType(currentSkillDef.id, SkillRelDef.RelationshipType.BadgeRequirement)
         parentsRels.each {
-            if (it.parent.type == SkillDef.ContainerType.Badge && withinActiveTimeframe(it.parent)) {
+            if (it.parent.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(it.parent)) {
                 SkillDef badge = it.parent
                 List<SkillDef> nonAchievedChildren = achievedLevelRepo.findNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (!nonAchievedChildren) {
@@ -307,15 +337,6 @@ class SkillEventAdminService {
                 }
             }
         }
-    }
-
-    private boolean withinActiveTimeframe(SkillDef skillDef) {
-        boolean withinActiveTimeframe = true
-        if (skillDef.startDate && skillDef.endDate) {
-            Date now = new Date()
-            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
-        }
-        return withinActiveTimeframe
     }
 
     private boolean hasReachedMaxPoints(long numSkills, SkillDefMin skillDefinition) {
@@ -328,6 +349,9 @@ class SkillEventAdminService {
 
     private UserPoints doUpdateUserPoints(SkillDefMin requestedSkill, String userId, String skillId) {
         UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(requestedSkill.projectId, userId, skillId)
+        if (!userPoints) {
+            throw new SkillException("Failed to find UserPoints for projectId=[${requestedSkill.projectId}], skillId=[${skillId}], userId=[${userId}]", requestedSkill.projectId, skillId, ErrorCode.InternalError)
+        }
         userPoints.points -= requestedSkill.pointIncrement
 
         if (userPoints.points <= 0) {
