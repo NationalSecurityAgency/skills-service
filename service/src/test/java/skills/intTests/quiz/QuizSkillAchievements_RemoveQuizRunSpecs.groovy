@@ -865,7 +865,7 @@ class QuizSkillAchievements_RemoveQuizRunSpecs extends QuizSkillAchievementsBase
         supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(1).skillId])
         supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(2).skillId])
         badge1.enabled = true
-        skillsService.createGlobalBadge(badge1)
+        supervisorUser.createGlobalBadge(badge1)
 
         def badge2 = SkillsFactory.createBadge(1, 2)
         supervisorUser.createGlobalBadge(badge2)

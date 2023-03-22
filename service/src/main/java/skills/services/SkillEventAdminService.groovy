@@ -251,7 +251,7 @@ class SkillEventAdminService {
         if (badgesSkillIsUsedIn) {
             // do a delete
             badgesSkillIsUsedIn.forEach{ it ->
-                achievedLevelRepo.deleteAllBySkillRefId(it)
+                achievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
             }
         }
 
