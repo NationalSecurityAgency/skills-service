@@ -69,6 +69,35 @@ class CustomIconFacade {
         return cssGenerator.cssify(icons)
     }
 
+    @Transactional
+    def copyIcons(String fromProjectId, String toProjectId) {
+        def fromIcons = iconService.getIconsForProject(fromProjectId)
+        ProjDef project = projDefAccessor.getProjDef(toProjectId)
+        def iconsToUpdate = new HashMap<String, String>()
+        Collection<CustomIcon> newIcons = new ArrayList<CustomIcon>()
+
+        fromIcons.each{
+            CustomIcon newIcon = new CustomIcon(
+                    projectId: toProjectId,
+                    filename: it.filename,
+                    contentType: it.contentType,
+                    width: it.width,
+                    height: it.height,
+                    dataUri: it.dataUri,
+                    projRefId: project.id
+            )
+            newIcons.push(newIcon)
+            String oldClassName = IconCssNameUtil.getCssClass(fromProjectId, it.filename)
+            String newClassName = IconCssNameUtil.getCssClass(toProjectId, it.filename)
+            iconsToUpdate[oldClassName] = newClassName
+        }
+
+        iconService.saveAllIcons(newIcons)
+
+        return iconsToUpdate
+
+    }
+
     /**
      * Stores an icon and returns the css class to be used for that icon
      * @param projectId

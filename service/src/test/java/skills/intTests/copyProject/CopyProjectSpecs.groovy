@@ -15,6 +15,7 @@
  */
 package skills.intTests.copyProject
 
+import org.springframework.core.io.ClassPathResource
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
@@ -173,6 +174,28 @@ class CopyProjectSpecs extends DefaultIntSpec {
         copiedSubj.description == p1subj1.description
         copiedSubj.helpUrl == p1subj1.helpUrl
         copiedSubj.iconClass == p1subj1.iconClass
+    }
+
+    def "custom icons are properly copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+        def file = resource.getFile()
+        skillsService.uploadIcon([projectId:(p1.projectId)], file)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def originalIcons = skillsService.getIconCssForProject(p1)
+        def copiedIcons = skillsService.getIconCssForProject(projToCopy)
+
+        then:
+        originalIcons[0].filename == "dot2.png"
+        originalIcons[0].cssClassname == "TestProject1-dot2png"
+        copiedIcons[0].filename == "dot2.png"
+        copiedIcons[0].cssClassname == "TestProject2-dot2png"
     }
 
     def "subjects display order is copied"() {
