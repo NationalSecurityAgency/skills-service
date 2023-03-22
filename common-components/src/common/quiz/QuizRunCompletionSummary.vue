@@ -80,9 +80,9 @@ limitations under the License.
     </b-card-group>
 
     <div v-if="!quizResult.gradedRes.passed" class="mt-4">
-      <div class="my-2" v-if="numAttemptsLeft > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
+      <div class="my-2" v-if="unlimitedAttempts || numAttemptsLeft > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
       <b-button variant="outline-danger"  @click="close" class="text-uppercase font-weight-bold mr-2 skills-theme-btn" data-cy="closeQuizBtn"><i class="fas fa-times-circle" aria-hidden="true"></i> Close</b-button>
-      <b-button v-if="numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo" aria-hidden="true"></i> Try Again</b-button>
+      <b-button v-if="unlimitedAttempts || numAttemptsLeft > 0" variant="outline-success" @click="runAgain" class="text-uppercase font-weight-bold skills-theme-btn" data-cy="runQuizAgainBtn"><i class="fas fa-redo" aria-hidden="true"></i> Try Again</b-button>
     </div>
 
     <div v-if="quizResult.gradedRes.passed" class="mt-4">
