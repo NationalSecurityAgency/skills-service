@@ -112,6 +112,17 @@ aria-label="search for projects to pin"></b-input>
             <span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span>
             <span v-else>{{ data.item.name }}
             </span>
+            <div v-if="isEmailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
+                       :class="{
+                          'contact-button-inline': isContactButtonInline,
+                          'w-100 text-right pr-3 pt-2 contact-button-on-top': !isContactButtonInline
+                       }">
+              <b-button variant="outline-primary"
+                                            @click="showContactOwner" data-cy="contactOwnerBtn">
+                                    Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+               </b-button>
+             </div>
+             <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
           </template>
 
           <template #cell(isMyProject)="data">
@@ -189,6 +200,8 @@ aria-label="search for projects to pin"></b-input>
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
+  import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog';
   import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescriptionRow';
   import SubPageHeader from '../../utils/pages/SubPageHeader';
   import ProjectService from '../../projects/ProjectService';
@@ -208,6 +221,7 @@ aria-label="search for projects to pin"></b-input>
       SkillsSpinner,
       SubPageHeader,
       ProjectDescriptionRow,
+      ContactOwnersDialog,
     },
     props: [],
     mounted() {
@@ -216,6 +230,7 @@ aria-label="search for projects to pin"></b-input>
     data() {
       return {
         isLoading: true,
+        showContact: false,
         searchValue: '',
         projects: [],
         originalProjects: [],
@@ -268,6 +283,9 @@ aria-label="search for projects to pin"></b-input>
       hasProjects() {
         return this.originalProjects && this.originalProjects.length > 0;
       },
+      ...mapGetters([
+              'isEmailEnabled',
+            ]),
     },
     methods: {
       loadAll() {
@@ -335,6 +353,9 @@ aria-label="search for projects to pin"></b-input>
           this.$nextTick(() => this.$announcer.polite(`projects filtered by ${searchString}, there ${matchCount > 1 ? 'are' : 'is'} ${matchCount} matching project${(matchCount > 1 || matchCount === 0) ? 's' : ''}`));
         }
         this.paging.totalRows = this.projects.length;
+      },
+      showContactOwner() {
+        this.showContact = true;
       },
     },
   };
