@@ -278,4 +278,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query("SELECT p from UserPerformedSkill p where p.skillRefId=?1 and p.created > ?2 and p.created < ?3" )
     List<UserPerformedSkill> findAllBySkillRefIdWithinTimeRange(Integer skillRefId, Date start, Date end)
 
+    @Nullable
+    List<UserPerformedSkill> findAllBySkillRefIdAndUserId(Integer skillRefId, String userId)
+
 }

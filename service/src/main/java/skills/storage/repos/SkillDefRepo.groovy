@@ -495,6 +495,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.enabled as enabled,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
+        s.groupId as groupId,
         s.readOnly as readOnly
         from SkillDef s where s.copiedFrom = ?1 and s.enabled = 'true'
     ''')

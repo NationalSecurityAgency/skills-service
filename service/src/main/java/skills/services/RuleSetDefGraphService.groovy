@@ -68,6 +68,11 @@ class RuleSetDefGraphService {
     }
 
     @Transactional
+    List<SkillDef> getBadgesSkillBelongsTo(Integer skillId) {
+        return skillRelDefRepo.findParentByChildIdAndTypes(skillId, [SkillRelDef.RelationshipType.BadgeRequirement])
+    }
+
+    @Transactional
     SkillDef getMyGroupParent(Integer childId) {
         List<SkillDef> parents = skillRelDefRepo.findParentsByChildIdAndParentContainerTypeAndRelationshipTypes(childId,
                 SkillDef.ContainerType.SkillsGroup, [RelationshipType.RuleSetDefinition, RelationshipType.SkillsGroupRequirement])
