@@ -39,13 +39,6 @@ limitations under the License.
           <span class="text-uppercase ml-1 font-weight-bold" data-cy="numQuestions">{{ numQuestions }}</span>
         </b-card>
       </div>
-      <div v-if="!isSurveyType" class="col pt-2">
-        <b-card class="skills-card-theme-border" body-class="pt-2 pb-1" data-cy="quizInfoCard">
-          <i class="fas fa-business-time text-info" style="font-size: 1.3rem;" aria-hidden="true"></i>
-          <span class="text-secondary font-italic ml-1">Time Limit:</span>
-          <span class="text-uppercase ml-1 font-weight-bold">None</span>
-        </b-card>
-      </div>
       <div v-if="!isSurveyType" class="col-md pt-2">
         <b-card class="skills-card-theme-border" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;" aria-hidden="true"></i>
