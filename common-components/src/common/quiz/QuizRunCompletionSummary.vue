@@ -68,7 +68,7 @@ limitations under the License.
             <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity" aria-hidden="true"></i> Attempts</span>
             <span v-if="!unlimitedAttempts">
               <span v-if="numAttemptsLeft === 0">No</span>
-              <b-badge v-else variant="success">{{ numAttemptsLeft }}</b-badge> More Attempt{{ numAttemptsLeft > 1 ? 's' : '' }}
+              <b-badge v-else variant="success">{{ numAttemptsLeft }}</b-badge> More Attempt{{ numAttemptsLeft !== 1 ? 's' : '' }}
             </span>
           </div>
           <div class="text-secondary mt-2" data-cy="subTitle">
