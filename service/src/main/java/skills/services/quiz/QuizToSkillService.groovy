@@ -118,6 +118,7 @@ class QuizToSkillService {
         Integer skillRef = savedSkill.id
 
         batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
+        batchOperationsTransactionalAccessor.createUserEventEntriesFromPassedQuizzes(quizDef.id, skillRef)
         batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
         batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
 

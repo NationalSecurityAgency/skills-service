@@ -34,4 +34,8 @@ class WeekNumberUtil {
         return epoch.plusWeeks(weekNumber);
     }
 
+    static void main(String[] args) {
+        println WeekNumberUtil.getWeekNumber(new Date())
+    }
+
 }

@@ -19,15 +19,20 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Service
 import skills.controller.result.model.SettingsResult
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.WeekNumberUtil
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.NativeQueriesRepo
 
@@ -58,6 +63,9 @@ class BatchOperationsTransactionalAccessor {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    UserEventsRepo userEventsRepo
 
     @Transactional
     @Profile
@@ -178,6 +186,15 @@ class BatchOperationsTransactionalAccessor {
         log.info("Creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
         userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId)
         log.info("Completed creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+    }
+
+
+    @Transactional
+    @Profile
+    void createUserEventEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
+        log.info("Creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+        userEventsRepo.createUserEventEntriesFromPassedQuizzes(quizRefId, skillRefId)
+        log.info("Completed creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
     }
 
     @Transactional

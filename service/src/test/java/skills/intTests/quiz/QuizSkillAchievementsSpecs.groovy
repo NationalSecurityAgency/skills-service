@@ -19,12 +19,17 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.*
+import skills.services.StartDateUtil
+import skills.services.WeekNumberUtil
+import skills.storage.model.EventType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserEvent
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
+import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
 
@@ -1037,7 +1042,7 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
         user3OverallProgress_t4.skillsLevel == 2
     }
 
-    def "users that achieved quiz/survey should get credit when assigned to a skill - UserAchievement, UserPerformedSkill and UserPoints records are created"() {
+    def "users that achieved quiz/survey should get credit when assigned to a skill - UserAchievement, UserPerformedSkill, UserEvents and UserPoints records are created"() {
         def quiz1 = createQuiz(1)
 
         def proj = createProject(1)
@@ -1047,22 +1052,26 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
 
         List<SkillsService> userServices = getRandomUsers(1).collect { createService(it) }
         passQuiz(userServices[0], quiz1)
+        UserQuizAttempt userQuizAttempt = userQuizAttemptRepo.findAll().get(0)
 
         Integer skillRefId = skillDefRepo.findByProjectIdAndSkillId(proj.projectId, skills[0].skillId).id
         when:
         List<UserPerformedSkill> userPerformedSkills_t0 = userPerformedSkillRepo.findAll()
         List<UserPoints> userPoints_t0 = userPointsRepo.findAll()
         List<UserAchievement> achievements_t0 = userAchievedRepo.findAll()
+        List<UserEvent> userEvents_t0 = userEventsRepo.findAll()
         skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
         skills[0].quizId = quiz1.quizId
         skillsService.createSkill(skills[0])
         List<UserPerformedSkill> userPerformedSkills_t1 = userPerformedSkillRepo.findAll()
         List<UserPoints> userPoints_t1 = userPointsRepo.findAll()
         List<UserAchievement> achievements_t1 = userAchievedRepo.findAll()
+        List<UserEvent> userEvents_t1 = userEventsRepo.findAll()
         then:
         !userPerformedSkills_t0
         !userPoints_t0
         !achievements_t0
+        !userEvents_t0
 
         userPerformedSkills_t1.size() == 1
         userPerformedSkills_t1[0].userId == userServices[0].userName
@@ -1087,6 +1096,14 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
         skillAchievement.skillRefId == skillRefId
         skillAchievement.pointsWhenAchieved == skills[0].pointIncrement
         !skillAchievement.level
+
+        userEvents_t1.size() == 1
+        userEvents_t1[0].userId == userServices[0].userName
+        userEvents_t1[0].projectId == proj.projectId
+        userEvents_t1[0].skillRefId == skillRefId
+        userEvents_t1[0].eventTime.time == StartDateUtil.computeStartDate(userQuizAttempt.completed, EventType.DAILY).time
+        userEvents_t1[0].weekNumber == WeekNumberUtil.getWeekNumber(userQuizAttempt.completed)
+        userEvents_t1[0].eventType == EventType.DAILY
     }
 
     def "users that achieve quiz/survey get credit for assigned skills - UserAchievement, UserPerformedSkill and UserPoints records are created"() {

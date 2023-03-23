@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
+import skills.storage.repos.UserQuizAttemptRepo
 
 class QuizSkillAchievementsBaseIntSpec extends DefaultIntSpec{
 
@@ -30,6 +31,9 @@ class QuizSkillAchievementsBaseIntSpec extends DefaultIntSpec{
 
     @Autowired
     QuizDefRepo quizDefRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     protected def createQuiz(Integer num) {
         def quiz = QuizDefFactory.createQuiz(num)

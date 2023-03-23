@@ -325,7 +325,8 @@ class UserEventService {
             decrementEvent(event)
         } else {
             throw new SkillException("Unable to remove event for skillRefId" +
-                    " [${skillRefId}], userId [${userId}], performedOn [${performedOn}], no event exists. This should not happen")
+                    " [${skillRefId}], userId [${userId}], performedOn=[${performedOn}] checked both DAILY=[${dailyEventTime}] AND weeklyEventTime=[${weeklyEventTime}]," +
+                    " no event exists. This should not happen")
         }
     }
 
