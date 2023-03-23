@@ -911,6 +911,306 @@ class QuizSkillAchievements_RemoveQuizRunSpecs extends QuizSkillAchievementsBase
         user2Badge1_t1.badgeAchieved
         user2Badge2_t1.badgeAchieved
     }
+
+    def "removing quiz run - quiz was passed prior the skill association"() {
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+        def quiz3 = createQuiz(3)
+        List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
+
+        Integer u2Quiz1AttemptId = passQuiz(userServices[1], quiz1)
+        Integer u2Quiz2AttemptId = passQuiz(userServices[1], quiz2)
+
+        Integer u3Quiz1AttemptId = passQuiz(userServices[2], quiz1)
+        Integer u3Quiz2AttemptId = passQuiz(userServices[2], quiz2)
+        Integer u3Qui32AttemptId = passQuiz(userServices[2], quiz3)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def subj2 = createSubject(1, 2)
+        skillsService.createSubject(subj2)
+        def subj2Skills = SkillsFactory.createSkills(6, 1, 2, 100)
+        skillsService.createSkills(subj2Skills)
+
+        // to avoid premature level 5 achievement create full scheme and then only associate
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        subj2Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        subj2Skills[0].quizId = quiz2.quizId
+        subj2Skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        subj2Skills[1].quizId = quiz3.quizId
+        subj2Skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
+        subj2Skills[2].quizId = quiz1.quizId
+        skillsService.createSkills([skills[0],  subj2Skills[0],  subj2Skills[1],  subj2Skills[2]])
+
+        when:
+        def user1Progress_t0 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
+        def user2Progress_t0 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj.subjectId)
+        def user3Progress_t0 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj.subjectId)
+        def user1ProgressSubj2_t0 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj2.subjectId)
+        def user2ProgressSubj2_t0 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj2.subjectId)
+        def user3ProgressSubj2_t0 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj2.subjectId)
+        def user1OverallProgress_t0 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId)
+        def user2OverallProgress_t0 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId)
+        def user3OverallProgress_t0 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId)
+
+        skillsService.deleteQuizRun(quiz1.quizId, u1Quiz1AttemptId)
+
+        def user1Progress_t1 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
+        def user2Progress_t1 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj.subjectId)
+        def user3Progress_t1 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj.subjectId)
+        def user1ProgressSubj2_t1 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj2.subjectId)
+        def user2ProgressSubj2_t1 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj2.subjectId)
+        def user3ProgressSubj2_t1 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj2.subjectId)
+        def user1OverallProgress_t1 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId)
+        def user2OverallProgress_t1 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId)
+        def user3OverallProgress_t1 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId)
+
+        skillsService.deleteQuizRun(quiz1.quizId, u2Quiz1AttemptId)
+
+        def user1Progress_t2 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
+        def user2Progress_t2 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj.subjectId)
+        def user3Progress_t2 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj.subjectId)
+        def user1ProgressSubj2_t2 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj2.subjectId)
+        def user2ProgressSubj2_t2 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj2.subjectId)
+        def user3ProgressSubj2_t2 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj2.subjectId)
+        def user1OverallProgress_t2 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId)
+        def user2OverallProgress_t2 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId)
+        def user3OverallProgress_t2 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId)
+
+        skillsService.deleteQuizRun(quiz2.quizId, u3Quiz2AttemptId)
+
+        def user1Progress_t3 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
+        def user2Progress_t3 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj.subjectId)
+        def user3Progress_t3 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj.subjectId)
+        def user1ProgressSubj2_t3 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj2.subjectId)
+        def user2ProgressSubj2_t3 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj2.subjectId)
+        def user3ProgressSubj2_t3 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj2.subjectId)
+        def user1OverallProgress_t3 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId)
+        def user2OverallProgress_t3 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId)
+        def user3OverallProgress_t3 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId)
+
+        skillsService.deleteQuizRun(quiz2.quizId, u2Quiz2AttemptId)
+
+        def user1Progress_t4 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
+        def user2Progress_t4 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj.subjectId)
+        def user3Progress_t4 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj.subjectId)
+        def user1ProgressSubj2_t4 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj2.subjectId)
+        def user2ProgressSubj2_t4 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId, subj2.subjectId)
+        def user3ProgressSubj2_t4 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId, subj2.subjectId)
+        def user1OverallProgress_t4 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId)
+        def user2OverallProgress_t4 = skillsService.getSkillSummary(userServices[1].userName, proj.projectId)
+        def user3OverallProgress_t4 = skillsService.getSkillSummary(userServices[2].userName, proj.projectId)
+
+        then:
+        // original  -------------
+        user1Progress_t0.points == 100
+        user1Progress_t0.totalPoints == 500
+        user1Progress_t0.skillsLevel == 1
+        user1Progress_t0.skills.skillId == skills.skillId
+        user1Progress_t0.skills.points == [100, 0, 0, 0, 0]
+        user1ProgressSubj2_t0.points == 100
+        user1ProgressSubj2_t0.totalPoints == 600
+        user1ProgressSubj2_t0.skillsLevel == 1
+        user1ProgressSubj2_t0.skills.skillId == subj2Skills.skillId
+        user1ProgressSubj2_t0.skills.points == [0, 0, 100, 0, 0, 0]
+
+        user2Progress_t0.points == 100
+        user2Progress_t0.totalPoints == 500
+        user2Progress_t0.skillsLevel == 1
+        user2Progress_t0.skills.skillId == skills.skillId
+        user2Progress_t0.skills.points == [100, 0, 0, 0, 0]
+        user2ProgressSubj2_t0.points == 200
+        user2ProgressSubj2_t0.totalPoints == 600
+        user2ProgressSubj2_t0.skillsLevel == 2
+        user2ProgressSubj2_t0.skills.skillId == subj2Skills.skillId
+        user2ProgressSubj2_t0.skills.points == [100, 0, 100, 0, 0, 0]
+
+        user3Progress_t0.points == 100
+        user3Progress_t0.totalPoints == 500
+        user3Progress_t0.skillsLevel == 1
+        user3Progress_t0.skills.skillId == skills.skillId
+        user3Progress_t0.skills.points == [100, 0, 0, 0, 0]
+        user3ProgressSubj2_t0.points == 300
+        user3ProgressSubj2_t0.totalPoints == 600
+        user3ProgressSubj2_t0.skillsLevel == 3
+        user3ProgressSubj2_t0.skills.skillId == subj2Skills.skillId
+        user3ProgressSubj2_t0.skills.points == [100, 100, 100, 0, 0, 0]
+
+        user1OverallProgress_t0.points == 200
+        user2OverallProgress_t0.points == 300
+        user3OverallProgress_t0.points == 400
+        user1OverallProgress_t0.skillsLevel == 1
+        user2OverallProgress_t0.skillsLevel == 2
+        user3OverallProgress_t0.skillsLevel == 2
+
+        // after quiz 1 attempt for user 1 was removed
+        user1Progress_t1.points == 0
+        user1Progress_t1.totalPoints == 500
+        user1Progress_t1.skillsLevel == 0
+        user1Progress_t1.skills.skillId == skills.skillId
+        user1Progress_t1.skills.points == [0, 0, 0, 0, 0]
+        user1ProgressSubj2_t1.points == 0
+        user1ProgressSubj2_t1.totalPoints == 600
+        user1ProgressSubj2_t1.skillsLevel == 0
+        user1ProgressSubj2_t1.skills.skillId == subj2Skills.skillId
+        user1ProgressSubj2_t1.skills.points == [0, 0, 0, 0, 0, 0]
+
+        user2Progress_t1.points == 100
+        user2Progress_t1.totalPoints == 500
+        user2Progress_t1.skillsLevel == 1
+        user2Progress_t1.skills.skillId == skills.skillId
+        user2Progress_t1.skills.points == [100, 0, 0, 0, 0]
+        user2ProgressSubj2_t1.points == 200
+        user2ProgressSubj2_t1.totalPoints == 600
+        user2ProgressSubj2_t1.skillsLevel == 2
+        user2ProgressSubj2_t1.skills.skillId == subj2Skills.skillId
+        user2ProgressSubj2_t1.skills.points == [100, 0, 100, 0, 0, 0]
+
+        user3Progress_t1.points == 100
+        user3Progress_t1.totalPoints == 500
+        user3Progress_t1.skillsLevel == 1
+        user3Progress_t1.skills.skillId == skills.skillId
+        user3Progress_t1.skills.points == [100, 0, 0, 0, 0]
+        user3ProgressSubj2_t1.points == 300
+        user3ProgressSubj2_t1.totalPoints == 600
+        user3ProgressSubj2_t1.skillsLevel == 3
+        user3ProgressSubj2_t1.skills.skillId == subj2Skills.skillId
+        user3ProgressSubj2_t1.skills.points == [100, 100, 100, 0, 0, 0]
+
+        user1OverallProgress_t1.points == 0
+        user2OverallProgress_t1.points == 300
+        user3OverallProgress_t1.points == 400
+        user1OverallProgress_t1.skillsLevel == 0
+        user2OverallProgress_t1.skillsLevel == 2
+        user3OverallProgress_t1.skillsLevel == 2
+
+        // after quiz 1 attempt for user 2 was removed
+        user1Progress_t2.points == 0
+        user1Progress_t2.totalPoints == 500
+        user1Progress_t2.skillsLevel == 0
+        user1Progress_t2.skills.skillId == skills.skillId
+        user1Progress_t2.skills.points == [0, 0, 0, 0, 0]
+        user1ProgressSubj2_t2.points == 0
+        user1ProgressSubj2_t2.totalPoints == 600
+        user1ProgressSubj2_t2.skillsLevel == 0
+        user1ProgressSubj2_t2.skills.skillId == subj2Skills.skillId
+        user1ProgressSubj2_t2.skills.points == [0, 0, 0, 0, 0, 0]
+
+        user2Progress_t2.points == 0
+        user2Progress_t2.totalPoints == 500
+        user2Progress_t2.skillsLevel == 0
+        user2Progress_t2.skills.skillId == skills.skillId
+        user2Progress_t2.skills.points == [0, 0, 0, 0, 0]
+        user2ProgressSubj2_t2.points == 100
+        user2ProgressSubj2_t2.totalPoints == 600
+        user2ProgressSubj2_t2.skillsLevel == 1
+        user2ProgressSubj2_t2.skills.skillId == subj2Skills.skillId
+        user2ProgressSubj2_t2.skills.points == [100, 0, 0, 0, 0, 0]
+
+        user3Progress_t2.points == 100
+        user3Progress_t2.totalPoints == 500
+        user3Progress_t2.skillsLevel == 1
+        user3Progress_t2.skills.skillId == skills.skillId
+        user3Progress_t2.skills.points == [100, 0, 0, 0, 0]
+        user3ProgressSubj2_t2.points == 300
+        user3ProgressSubj2_t2.totalPoints == 600
+        user3ProgressSubj2_t2.skillsLevel == 3
+        user3ProgressSubj2_t2.skills.skillId == subj2Skills.skillId
+        user3ProgressSubj2_t2.skills.points == [100, 100, 100, 0, 0, 0]
+
+        user1OverallProgress_t2.points == 0
+        user2OverallProgress_t2.points == 100
+        user3OverallProgress_t2.points == 400
+        user1OverallProgress_t2.skillsLevel == 0
+        user2OverallProgress_t2.skillsLevel == 0
+        user3OverallProgress_t2.skillsLevel == 2
+
+        // after quiz 2 attempt remove for user3
+        user1Progress_t3.points == 0
+        user1Progress_t3.totalPoints == 500
+        user1Progress_t3.skillsLevel == 0
+        user1Progress_t3.skills.skillId == skills.skillId
+        user1Progress_t3.skills.points == [0, 0, 0, 0, 0]
+        user1ProgressSubj2_t3.points == 0
+        user1ProgressSubj2_t3.totalPoints == 600
+        user1ProgressSubj2_t3.skillsLevel == 0
+        user1ProgressSubj2_t3.skills.skillId == subj2Skills.skillId
+        user1ProgressSubj2_t3.skills.points == [0, 0, 0, 0, 0, 0]
+
+        user2Progress_t3.points == 0
+        user2Progress_t3.totalPoints == 500
+        user2Progress_t3.skillsLevel == 0
+        user2Progress_t3.skills.skillId == skills.skillId
+        user2Progress_t3.skills.points == [0, 0, 0, 0, 0]
+        user2ProgressSubj2_t3.points == 100
+        user2ProgressSubj2_t3.totalPoints == 600
+        user2ProgressSubj2_t3.skillsLevel == 1
+        user2ProgressSubj2_t3.skills.skillId == subj2Skills.skillId
+        user2ProgressSubj2_t3.skills.points == [100, 0, 0, 0, 0, 0]
+
+        user3Progress_t3.points == 100
+        user3Progress_t3.totalPoints == 500
+        user3Progress_t3.skillsLevel == 1
+        user3Progress_t3.skills.skillId == skills.skillId
+        user3Progress_t3.skills.points == [100, 0, 0, 0, 0]
+        user3ProgressSubj2_t3.points == 200
+        user3ProgressSubj2_t3.totalPoints == 600
+        user3ProgressSubj2_t3.skillsLevel == 2
+        user3ProgressSubj2_t3.skills.skillId == subj2Skills.skillId
+        user3ProgressSubj2_t3.skills.points == [0, 100, 100, 0, 0, 0]
+
+        user1OverallProgress_t3.points == 0
+        user2OverallProgress_t3.points == 100
+        user3OverallProgress_t3.points == 300
+        user1OverallProgress_t3.skillsLevel == 0
+        user2OverallProgress_t3.skillsLevel == 0
+        user3OverallProgress_t3.skillsLevel == 2
+
+        // after quiz 2 attempt remove for user2
+        user1Progress_t4.points == 0
+        user1Progress_t4.totalPoints == 500
+        user1Progress_t4.skillsLevel == 0
+        user1Progress_t4.skills.skillId == skills.skillId
+        user1Progress_t4.skills.points == [0, 0, 0, 0, 0]
+        user1ProgressSubj2_t4.points == 0
+        user1ProgressSubj2_t4.totalPoints == 600
+        user1ProgressSubj2_t4.skillsLevel == 0
+        user1ProgressSubj2_t4.skills.skillId == subj2Skills.skillId
+        user1ProgressSubj2_t4.skills.points == [0, 0, 0, 0, 0, 0]
+
+        user2Progress_t4.points == 0
+        user2Progress_t4.totalPoints == 500
+        user2Progress_t4.skillsLevel == 0
+        user2Progress_t4.skills.skillId == skills.skillId
+        user2Progress_t4.skills.points == [0, 0, 0, 0, 0]
+        user2ProgressSubj2_t4.points == 0
+        user2ProgressSubj2_t4.totalPoints == 600
+        user2ProgressSubj2_t4.skillsLevel == 0
+        user2ProgressSubj2_t4.skills.skillId == subj2Skills.skillId
+        user2ProgressSubj2_t4.skills.points == [0, 0, 0, 0, 0, 0]
+
+        user3Progress_t4.points == 100
+        user3Progress_t4.totalPoints == 500
+        user3Progress_t4.skillsLevel == 1
+        user3Progress_t4.skills.skillId == skills.skillId
+        user3Progress_t4.skills.points == [100, 0, 0, 0, 0]
+        user3ProgressSubj2_t4.points == 200
+        user3ProgressSubj2_t4.totalPoints == 600
+        user3ProgressSubj2_t4.skillsLevel == 2
+        user3ProgressSubj2_t4.skills.skillId == subj2Skills.skillId
+        user3ProgressSubj2_t4.skills.points == [0, 100, 100, 0, 0, 0]
+
+        user1OverallProgress_t4.points == 0
+        user2OverallProgress_t4.points == 0
+        user3OverallProgress_t4.points == 300
+        user1OverallProgress_t4.skillsLevel == 0
+        user2OverallProgress_t4.skillsLevel == 0
+        user3OverallProgress_t4.skillsLevel == 2
+    }
 }
 
 
