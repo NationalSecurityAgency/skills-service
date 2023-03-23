@@ -402,7 +402,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
-        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempts')
+        cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempt')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
 
         cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
