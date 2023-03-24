@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" :data-cy="`numUsersByTag-${tag.key}`">
-    <div style="max-height: 800px; overflow: auto;">
+    <div style="max-height: 800px; overflow-y: auto; overflow-x: clip;">
       <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
         <apexchart v-if="!loading" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
       </metrics-overlay>
