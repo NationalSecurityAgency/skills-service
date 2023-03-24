@@ -47,21 +47,16 @@ limitations under the License.
       </div>
     </div>
 
-    <ValidationProvider
-      rules="attachmentValidator" ref="provider" v-slot="{ errors }" name="Attachment">
       <input @change="attachFile" type="file" ref="fileInputRef"
-             :aria-invalid="errors && errors.length > 0"
              aria-label="ability to attach a file"
              aria-errormessage="attachmentError"
              :accept="allowedAttachmentFileTypes"
              hidden/>
-      <small role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{errors[0]}}</small>
-    </ValidationProvider>
+      <small v-if="attachmentError" role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{attachmentError}}</small>
   </div>
 </template>
 
 <script>
-  import { extend } from 'vee-validate';
   import '@toast-ui/editor/dist/toastui-editor.css';
   import { Editor } from '@toast-ui/vue-editor';
   import fontSize from 'tui-editor-plugin-font-size';
@@ -105,19 +100,6 @@ limitations under the License.
         hasNewAttachment: false,
         attachmentError: '',
       };
-    },
-    created() {
-      const self = this;
-      extend('attachmentValidator', {
-        message: () => this.attachmentError,
-        validate() {
-          return {
-            required: false,
-            valid: !self.attachmentError,
-          };
-        },
-        computesRequired: true,
-      });
     },
     mounted() {
       this.intervalId = setInterval(() => {
@@ -202,6 +184,7 @@ limitations under the License.
     },
     methods: {
       onEditorChange() {
+        this.attachmentError = '';
         this.$emit('input', this.markdownText);
       },
       setLabelForMoreButton() {
@@ -249,7 +232,6 @@ limitations under the License.
                 } else {
                   this.attachmentError = `Error uploading file [${file.name}] - ${err?.message}`;
                 }
-                this.$refs.provider.validate(event);
               });
             } else {
               this.attachmentError = `Unable to upload attachment - File size [${this.prettyBytes(file.size)}] exceeds maximum file size [${this.prettyBytes(this.maxAttachmentSize)}]`;
@@ -257,7 +239,6 @@ limitations under the License.
           } else {
             this.attachmentError = `Unable to upload attachment - File type is not supported. Supported file types are [${this.allowedAttachmentFileTypes}]`;
           }
-          this.$refs.provider.validate(event);
         }
       },
       prettyBytes(bytes) {

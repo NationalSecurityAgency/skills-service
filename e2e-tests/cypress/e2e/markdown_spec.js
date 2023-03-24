@@ -94,6 +94,31 @@ describe('Markdown Tests', () => {
           .should('have.attr', 'target', '_blank');
     });
 
+    it('can only upload files with supported extensions', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+            .click();
+        cy.get('[data-cy=skillName]')
+            .type('sk1');
+
+        cy.get(markdownInput).focus().selectFile('cypress/attachments/test-file.invalid', { action: 'drag-drop' })
+        cy.get('[data-cy="attachmentError"]').contains('Unable to upload attachment - File type is not supported.')
+        cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+        cy.get(markdownInput).type('k')
+        cy.get('[data-cy="attachmentError"]').should('not.exist')
+
+        cy.get(markdownInput).focus().selectFile('cypress/attachments/test-file.invalid', { action: 'drag-drop' })
+        cy.get('[data-cy="attachmentError"]').contains('Unable to upload attachment - File type is not supported.')
+        cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+        cy.get('[data-cy="saveSkillButton"]').click()
+
+        cy.get('[data-cy="editSkillButton_sk1Skill"]').click()
+        cy.get(markdownInput).contains('k')
+        cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
+    });
+
     it('drag-drop upload an attachment', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy=newSkillButton]')
@@ -132,7 +157,7 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
-        cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7.25 KB] exceeds maximum file size [5 B]');
     });
 
@@ -174,7 +199,7 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
-        cy.get('[data-cy=saveSkillButton]').should('be.disabled');
+        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File type is not supported. Supported file types are [.xlsx,.docx,.pptx,.doc,.odp,.ods,.odt,.pdf,.ppt,.xls]');
     });
 
@@ -192,7 +217,7 @@ describe('Markdown Tests', () => {
             cy.get(markdownInput).type('\n\n')
         });
         cy.get('[data-cy=saveSkillButton]').should('be.enabled');
-        cy.get('[data-cy=attachmentError]').scrollIntoView().should('not.be.visible');
+        cy.get('[data-cy=attachmentError]').should('not.exist');
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
 
