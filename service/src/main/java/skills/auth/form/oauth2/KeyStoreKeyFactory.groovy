@@ -16,12 +16,17 @@
 package skills.auth.form.oauth2
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ResourceLoaderAware
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.core.io.ResourceLoader
 import skills.auth.SecurityMode
+import skills.utils.SecretsUtil
 
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -34,7 +39,10 @@ import java.security.spec.RSAPublicKeySpec
 @Configuration
 @Conditional(SecurityMode.FormAuth)
 @Slf4j
-class KeyStoreKeyFactory {
+class KeyStoreKeyFactory implements ResourceLoaderAware {
+
+    @Value('#{"${security.oauth2.jwt.useKeystore:false}"}')
+    private Boolean useKeystore
 
     @Value('#{"${security.oauth2.jwt.keystore.resource:}"}')
     private String jwtKeystoreResource
@@ -42,15 +50,26 @@ class KeyStoreKeyFactory {
     @Value('#{"${security.oauth2.jwt.keystore.password:}"}')
     private String jwtKeystorePassword
 
-    @Value('#{"${security.oauth2.jwt.keystore.alias:}"}')
+    @Value('#{"${security.oauth2.jwt.keystore.alias:1}"}')
     private String jwtKeystoreAlias
 
-    private KeyStore store;
+    @Autowired
+    ApplicationContext applicationContext
 
-    private Object lock = new Object();
+    private KeyStore store
+
+    private ResourceLoader resourceLoader
+
+    private Object lock = new Object()
 
     KeyPair getJwtKeyPair() {
-        if (jwtKeystoreResource) {
+        if (useKeystore) {
+            if (!jwtKeystoreResource) {
+                jwtKeystoreResource = "file:${applicationContext.getEnvironment().getProperty('server.ssl.keystore')}"
+            }
+            if (!jwtKeystorePassword) {
+                jwtKeystorePassword = applicationContext.getEnvironment().getProperty('server.ssl.keystore-password')
+            }
             return getKeyPairFromKeyStore()
         } else {
             return generateRsaKey()
@@ -58,33 +77,34 @@ class KeyStoreKeyFactory {
     }
 
     private KeyPair getKeyPairFromKeyStore() {
-        InputStream inputStream = null;
-        Resource resource = new ClassPathResource(jwtKeystoreResource)
+        assert jwtKeystoreResource && jwtKeystorePassword, "useKeystore set to true for JWT, but missing keystore resource and/or password"
+        InputStream inputStream = null
+        Resource resource = resourceLoader.getResource(jwtKeystoreResource)
         char[] password = this.jwtKeystorePassword.toCharArray()
         try {
             synchronized (lock) {
                 if (store == null) {
-                    store = KeyStore.getInstance("jks");
-                    inputStream = resource.getInputStream();
-                    store.load(inputStream, password);
+                    store = KeyStore.getInstance("jks")
+                    inputStream = resource.getInputStream()
+                    store.load(inputStream, password)
                 }
             }
-            RSAPrivateCrtKey key = (RSAPrivateCrtKey) store.getKey(jwtKeystoreAlias, password);
-            RSAPublicKeySpec spec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent());
-            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec);
-            return new KeyPair(publicKey, key);
+            RSAPrivateCrtKey key = (RSAPrivateCrtKey) store.getKey(jwtKeystoreAlias, password)
+            RSAPublicKeySpec spec = new RSAPublicKeySpec(key.getModulus(), key.getPublicExponent())
+            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(spec)
+            return new KeyPair(publicKey, key)
         }
         catch (Exception e) {
-            throw new IllegalStateException("Cannot load keys from store: " + resource, e);
+            throw new IllegalStateException("Cannot load keys from store: " + resource, e)
         }
         finally {
             try {
                 if (inputStream != null) {
-                    inputStream.close();
+                    inputStream.close()
                 }
             }
             catch (IOException e) {
-                log.warn("Cannot close open stream: ", e);
+                log.warn("Cannot close open stream: ", e)
             }
         }
     }
@@ -100,5 +120,10 @@ class KeyStoreKeyFactory {
             throw new IllegalStateException(ex)
         }
         return keyPair
+    }
+
+    @Override
+    void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader
     }
 }
