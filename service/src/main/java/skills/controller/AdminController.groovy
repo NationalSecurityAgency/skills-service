@@ -262,13 +262,6 @@ class AdminController {
         return projAdminService.getProject(projectId)
     }
 
-    @RequestMapping(value = "/projects/{id}/description", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        return projAdminService.getProjectDescription(projectId)
-    }
-
     @RequestMapping(value = "/projects/{id}/projectSearch", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     List<SimpleProjectResult> searchProjects(@PathVariable("id") String projectId, @RequestParam("nameQuery") nameQuery) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
