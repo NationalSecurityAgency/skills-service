@@ -1044,6 +1044,16 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="cancelBtn"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
 
+        cy.visit('/progress-and-rankings/');
+        cy.get('[data-cy=manageMyProjsBtnInNoContent]').click();
+        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
+        cy.get('[aria-label="Close"]').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+        cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
+        cy.get('[data-cy="cancelBtn"]').click();
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
         cy.contains('Contact This is project 1').should('be.visible');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');

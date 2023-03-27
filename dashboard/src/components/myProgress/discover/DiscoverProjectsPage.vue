@@ -119,7 +119,7 @@ aria-label="search for projects to pin"></b-input>
                        }">
               <b-button variant="outline-primary"
                                             @click="showContactOwner" data-cy="contactOwnerBtn">
-                                    Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+                      Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
                </b-button>
              </div>
              <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
@@ -284,8 +284,8 @@ aria-label="search for projects to pin"></b-input>
         return this.originalProjects && this.originalProjects.length > 0;
       },
       ...mapGetters([
-              'isEmailEnabled',
-            ]),
+         'isEmailEnabled',
+      ]),
     },
     methods: {
       loadAll() {

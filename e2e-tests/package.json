@@ -110,6 +110,7 @@
     "wait-on": "5.2.1"
   },
   "dependencies": {
-    "idb-keyval": "6.2.0"
+    "idb-keyval": "6.2.0",
+    "psql": "^0.0.1"
   }
 }
