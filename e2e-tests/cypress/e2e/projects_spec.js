@@ -391,7 +391,7 @@ describe('Projects Tests', () => {
     it('project description is retained after editing', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
-        cy.intercept('GET', '/admin/projects/proj1/description').as('loadDescription');
+        cy.intercept('GET', '/app/projects/proj1/description').as('loadDescription');
         cy.intercept('POST', '/api/validation/description').as('validateDescription');
         cy.intercept('POST', '/admin/projects/proj1').as('saveProject');
 
