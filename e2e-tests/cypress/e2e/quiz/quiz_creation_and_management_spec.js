@@ -388,16 +388,13 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('exist')
 
         cy.get('[data-cy="closeQuizButton"]').click()
-        cy.wait(250);
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="editQuizButton_quiz1"]').should('have.focus')
-
 
         cy.get('[data-cy="editQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('exist')
 
         cy.get('.modal-header [aria-label="Close"]').click()
-        cy.wait(250);
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="editQuizButton_quiz1"]').should('have.focus')
     });

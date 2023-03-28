@@ -245,9 +245,9 @@ limitations under the License.
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
-      hideModal(e) {
+      hideModal() {
         this.show = false;
-        this.$emit('hidden', e);
+        this.$emit('hidden', this.quizInternal);
       },
       close(e) {
         this.clearComponentState(this.componentName);
@@ -286,8 +286,10 @@ limitations under the License.
               this.publishHidden({ update: true });
               this.quizInternal.name = InputSanitizer.sanitize(this.quizInternal.name);
               this.quizInternal.quizId = InputSanitizer.sanitize(this.quizInternal.quizId);
-              this.quizInternal.isEdit = this.isEdit;
-              this.quizInternal.originalQuizId = this.originalQuiz.quizId;
+              if (this.isEdit) {
+                this.quizInternal.isEdit = this.isEdit;
+                this.quizInternal.originalQuizId = this.originalQuiz.quizId;
+              }
               this.$emit('quiz-saved', this.quizInternal);
             }
           });
