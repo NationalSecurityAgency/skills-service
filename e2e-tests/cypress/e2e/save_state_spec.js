@@ -384,4 +384,61 @@ describe('Save State Tests', () => {
 
     cy.contains('Discard Changes').should('not.exist');
   })
+
+
+  it('Saves and discards new quiz state', () => {
+    cy.visit('/administrator/quizzes/')
+    cy.get('[data-cy="noQuizzesYet"]')
+
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+    cy.get('.modal-title').contains('New Quiz/Survey')
+
+    cy.get('[data-cy="quizName"]').type('My First Quiz')
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+
+    cy.get('[data-cy="quizDescription"]').type('Some cool Description')
+
+    cy.visit('/administrator/quizzes/')
+
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+    cy.get('.modal-title').contains('New Quiz/Survey')
+
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+    cy.get('[data-cy="quizDescription"]').contains('Some cool Description')
+
+    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+
+    cy.get('[data-cy="idInputValue"]').should('have.value', '')
+    cy.get('[data-cy="quizDescription"]').should('have.value', '')
+  })
+
+  it('Saves and discards edit quiz state', () => {
+    cy.createQuizDef(1);
+
+    cy.visit('/administrator/quizzes/')
+
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+    cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
+    cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+    cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
+
+    cy.get('[data-cy="quizName"]').type(' with edits')
+    cy.get('[data-cy="quizDescription"]').type(' with edits')
+
+    cy.visit('/administrator/quizzes/')
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1 with edits')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it! with edits')
+
+    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+  })
+
 });
