@@ -16,15 +16,8 @@
 describe('Save State Tests', () => {
 
   beforeEach(() => {
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: "proj1"
-    })
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      name: "Subject 1"
-    })
+    cy.createProject(1, { name: "proj1" })
+    cy.createSubject(1, 1, { name: "Subject 1" })
   });
 
   it('Saves and discards new badge state', () => {
@@ -167,6 +160,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
+
 
   it('Saves and discards new skill state', () => {
     cy.intercept({
@@ -313,6 +307,18 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
   })
+
+  it('new skill state should not affect copy skill state', function () {
+    cy.createQuizDef(1);
+    cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="newSkillButton"]').click()
+    cy.get('[data-cy="skillName"]').type('save')
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="copySkillButton_skill1"]').click()
+    cy.get('[data-cy="quizSelected-quiz1"]')
+  });
 
   it('Saves and discards new subject state', () => {
     cy.visit('/administrator/projects/proj1/');
