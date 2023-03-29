@@ -95,6 +95,7 @@ limitations under the License.
         const res = [
           { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
           { name: 'Results', iconClass: 'fa-users skills-color-users', page: 'QuizRunsHistoryPage' },
+          { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },
           // { name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
         ];
 
