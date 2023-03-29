@@ -113,6 +113,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
 
+    List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)
+
     @Query('''select q
               from UserQuizAttempt q, QuizToSkillDef qtoS
               where q.quizDefinitionRefId = qtoS.quizRefId

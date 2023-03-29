@@ -89,5 +89,8 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                 and skill.id = qToS.skillRefId''')
     List<Integer> getSkillRefIdsWithQuizByProjectId(String projectId)
 
+    @Nullable
+    @Query('''select qToS.quizRefId from QuizToSkillDef qToS where qToS.skillRefId = ?1''')
+    List<Integer> getQuizRefIdsBySkillRefId(Integer skillRefId)
 }
 

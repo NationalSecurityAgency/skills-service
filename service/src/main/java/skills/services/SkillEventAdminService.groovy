@@ -93,6 +93,12 @@ class SkillEventAdminService {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
     GlobalBadgesService globalBadgesService
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
@@ -220,10 +226,39 @@ class SkillEventAdminService {
         }
 
         SkillEventResult skillEventResult = removePerformedSkillEvent(performedSkill)
+        removeAssociatedQuizAttempts(performedSkill)
 
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation
         return res
+    }
+
+    @Profile
+    void removeAssociatedQuizAttempts(UserPerformedSkill performedSkill) {
+        List<Integer> quizRefIds = quizToSkillDefRepo.getQuizRefIdsBySkillRefId(performedSkill.skillRefId)
+        if (quizRefIds) {
+            quizRefIds.each {Integer quizRefId ->
+                List<UserQuizAttempt> attempts = userQuizAttemptRepo.findByUserIdAndQuizDefinitionRefIdAndStatus(performedSkill.userId, quizRefId, UserQuizAttempt.QuizAttemptStatus.PASSED)
+                if (attempts) {
+                    attempts.each { UserQuizAttempt userQuizAttempt ->
+                        userQuizAttemptRepo.delete(userQuizAttempt)
+                        log.info("Removed [{}]", userQuizAttempt.toString())
+
+                        List<QuizToSkillDefRepo.ProjectIdAndSkillId> linkedSkills = quizToSkillDefRepo.getSkillsForQuiz(quizRefId)
+                        linkedSkills.each {
+                            List<UserPerformedSkill> userPerformedSkills = performedSkillRepository.findAllBySkillRefIdAndUserId(it.skillRefId, userQuizAttempt.userId)
+                            if (userPerformedSkills) {
+                                List<UserQuizAttempt> attemptsWithInititalRecordRemoved = userPerformedSkills.findAll { it.id != performedSkill.id}
+                                // since this is a quiz-based skill should never be more than 1
+                                attemptsWithInititalRecordRemoved.each {
+                                    removePerformedSkillEvent(it)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Profile
