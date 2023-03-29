@@ -24,6 +24,7 @@ limitations under the License.
 </template>
 
 <script>
+  import numberFormatter from '@/filters/NumberFilter';
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
@@ -85,6 +86,13 @@ limitations under the License.
               text: this.tag.label,
             },
           },
+          tooltip: {
+            y: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
+            },
+          },
           dataLabels: {
             enabled: true,
             textAnchor: 'start',
@@ -96,7 +104,7 @@ limitations under the License.
               fontWeight: 'bold',
             },
             formatter(val, opt) {
-              return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${val} users`;
+              return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${numberFormatter(val)} users`;
             },
             dropShadow: {
               enabled: true,
