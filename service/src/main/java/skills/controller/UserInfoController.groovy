@@ -241,6 +241,11 @@ class UserInfoController {
         return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
     }
 
+    @RequestMapping(value = "/users/{userId}/projectsUserIsAdminFor", method = RequestMethod.GET)
+    List<String> isUserAdmin(@PathVariable("userId") String userId) {
+        return userAuthService.getProjectsUserIsAdminFor(userId)
+    }
+
     @RequestMapping(value="/userAgreement", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def getUserAgreement() {

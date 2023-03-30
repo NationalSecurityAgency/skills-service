@@ -22,6 +22,7 @@ import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
+import skills.storage.model.SubjectAwareSkillDef
 
 interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
@@ -53,10 +54,13 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
     @Nullable
-    @Query('''select skill from QuizToSkillDef quiz, SkillDef skill where
+    @Query('''select child as skill, subject.skillId as subjectId, subject.name as subjectName from QuizToSkillDef quiz, SkillDefWithExtra child
+              join SkillRelDef srd on srd.child = child and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+              where
                     quiz.quizRefId = ?1 AND
-                    skill.id = quiz.skillRefId''')
-    List<SkillDef> getSkillsForQuiz(Integer quizRefId)
+                    child.id = quiz.skillRefId''')
+    List<SubjectAwareSkillDef> getSkillsForQuiz(Integer quizRefId)
 
     @Nullable
     @Query('''select q.quizId as quizId, 

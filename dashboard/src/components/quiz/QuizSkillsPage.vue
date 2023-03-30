@@ -55,8 +55,26 @@ limitations under the License.
             <span class="text-primary"><i class="fas fa-graduation-cap skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
           </template>
 
+          <template v-slot:cell(projectId)="data">
+            <router-link v-if="userProjects.includes(data.item.skill.projectId)"
+              :to="{ name:'Subjects', params: { projectId: data.item.skill.projectId  }}"
+              class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.skill.projectId }`"
+              :aria-label="`manage project ${data.item.skill.projectId }`"
+              role="link">
+              {{ data.item.skill.projectId }}
+            </router-link>
+            <div v-else>{{ data.item.skill.projectId }}</div>
+          </template>
+
           <template v-slot:cell(name)="data">
-            {{ data.item.name }} ({{data.item.skillId}})
+            <router-link v-if="userProjects.includes(data.item.skill.projectId)"
+                         tag="a" :to="{ name:'SkillOverview',
+                         params: { projectId: data.item.skill.projectId, subjectId: data.item.subjectId, skillId: data.item.skill.skillId }}"
+                         :aria-label="`Manage skill ${data.item.skill.name}  via link`">
+              {{data.item.skill.name}}
+            </router-link>
+            <div v-else>{{data.item.skill.name}}</div>
+            <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skill.skillId}}</div>
           </template>
         </skills-b-table>
 
@@ -70,6 +88,7 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
+  import UsersService from '@/components/users/UsersService';
 
   export default {
     name: 'QuizSettings',
@@ -84,6 +103,7 @@ limitations under the License.
         filters: {
           skillName: '',
         },
+        userProjects: [],
         table: {
           options: {
             busy: true,
@@ -129,16 +149,22 @@ limitations under the License.
       loadData() {
         QuizService.getSkillsForQuiz(this.quizId).then((result) => {
           if (result) {
-            this.skills = result;
-            this.table.items = result;
-            this.table.options.busy = false;
+            UsersService.getProjectsUserIsAdminFor(this.$store.getters.userInfo.userId).then((projects) => {
+              if (projects) {
+                this.userProjects = projects;
+              }
+
+              this.skills = result;
+              this.table.items = result;
+              this.table.options.busy = false;
+            });
           }
         });
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
 
-        this.table.items = this.table.items.filter((skill) => skill.name.toLowerCase().includes(this.filters.skillName.toLowerCase()));
+        this.table.items = this.table.items.filter((skill) => skill.skill.name.toLowerCase().includes(this.filters.skillName.toLowerCase()));
         this.$nextTick(() => this.$announcer.polite(`Associated skills table has been filtered by ${this.filters.skillName}`));
       },
       reset() {
