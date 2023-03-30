@@ -33,6 +33,8 @@ import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefSkinny
 import skills.storage.model.auth.RoleName
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -79,6 +81,12 @@ class QuizController {
     @ResponseBody
     Integer countSkillsForQuiz(@PathVariable("quizId") String quizId) {
         return quizDefService.countNumSkillsQuizAssignedTo(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<SkillDef> getSkillsForQuiz(@PathVariable("quizId") String quizId) {
+        return quizDefService.getSkillsForQuiz(quizId)
     }
 
     @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")

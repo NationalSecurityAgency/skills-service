@@ -15,52 +15,138 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Skills"/>
+    <sub-page-header title="Associated Skills"/>
 
-    <skills-spinner :is-loading="isLoadingData" />
     <b-card body-class="p-0">
-      <loading-container v-bind:is-loading="isLoadingData">
-        <simple-skills-table v-if="quizSkills && quizSkills.length > 0"
-                             :skills="quizSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
+      <div v-if="table.items.length === 0" class="alert alert-info">
+        <i class="fas fa-exclamation-circle"/> There are currently no skills associated with this quiz/survey.
+        You can learn more about how to add skills to a quiz/survey in the documentation
+        <a aria-label="SkillTree documentation of associating skills to quizzes"
+           :href="docsUrl" target="_blank" style="display: inline-block">
+          here.
+        </a>
+      </div>
+      <loading-container v-bind:is-loading="table.options.busy">
 
-        <no-content2 v-else title="No Skills Yet..." icon="fas fa-award" class="mb-5"
-                     message="No skills have been associated with this quiz yet"></no-content2>
+        <div class="row px-3 pt-3">
+          <div class="col-12">
+            <b-form-group label="Skill Filter" label-class="text-muted">
+              <b-input v-model="filters.skillName" v-on:keydown.enter="applyFilters" data-cy="quiz-skillNameFilter" aria-label="Skill name filter"/>
+            </b-form-group>
+          </div>
+          <div class="col-md">
+          </div>
+        </div>
+
+        <div class="row pl-3 mb-3">
+          <div class="col">
+            <b-button variant="outline-info" @click="applyFilters" data-cy="quiz-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
+            <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="quiz-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
+          </div>
+        </div>
+
+        <skills-b-table :options="table.options" :items="table.items"
+                        tableStoredStateId="quizSkillsTable"
+                        data-cy="quizSkills">
+          <template #head(projectId)="data">
+            <span class="text-primary"><i class="fas fa-list-alt skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
+          </template>
+          <template #head(name)="data">
+            <span class="text-primary"><i class="fas fa-graduation-cap skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
+          </template>
+
+          <template v-slot:cell(name)="data">
+            {{ data.item.name }} ({{data.item.skillId}})
+          </template>
+        </skills-b-table>
+
       </loading-container>
     </b-card>
   </div>
 </template>
 
 <script>
-  // import { createNamespacedHelpers } from 'vuex';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import NoContent2 from '@/components/utils/NoContent2';
-  // import SkillsService from '@/components/skills/SkillsService';
-  // import SkillsSelector2 from '@/components/skills/SkillsSelector2';
-  import SimpleSkillsTable from '@/components/skills/SimpleSkillsTable';
+  import QuizService from '@/components/quiz/QuizService';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
-  // const { mapGetters } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizSettings',
     components: {
       SubPageHeader,
-      NoContent2,
-      SimpleSkillsTable,
+      SkillsBTable,
       LoadingContainer,
-      // SkillsSelector2,
-      SkillsSpinner,
     },
     data() {
       return {
-        isLoadingData: false,
-        quizSkills: [],
+        quizId: this.$route.params.quizId,
+        filters: {
+          skillName: '',
+        },
+        table: {
+          options: {
+            busy: true,
+            bordered: true,
+            outlined: true,
+            stacked: 'md',
+            sortBy: 'projectId',
+            sortDesc: true,
+            tableDescription: 'Skills Associated with this Quiz/Survey',
+            fields: [
+              {
+                key: 'projectId',
+                label: 'Project Id',
+                sortable: true,
+              },
+              {
+                key: 'name',
+                label: 'Skill',
+                sortable: true,
+              },
+            ],
+            pagination: {
+              server: false,
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 15, 20],
+            },
+          },
+          items: [],
+        },
       };
     },
     mounted() {
-
+      this.loadData();
+    },
+    computed: {
+      docsUrl() {
+        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/quizzes-and-surveys.html#skill-association`;
+      },
     },
     methods: {
+      loadData() {
+        QuizService.getSkillsForQuiz(this.quizId).then((result) => {
+          if (result) {
+            this.skills = result;
+            this.table.items = result;
+            this.table.options.busy = false;
+          }
+        });
+      },
+      applyFilters() {
+        this.table.options.pagination.currentPage = 1;
+
+        this.table.items = this.table.items.filter((skill) => skill.name.toLowerCase().includes(this.filters.skillName.toLowerCase()));
+        this.$nextTick(() => this.$announcer.polite(`Associated skills table has been filtered by ${this.filters.skillName}`));
+      },
+      reset() {
+        this.filters.skillName = '';
+        this.table.options.pagination.currentPage = 1;
+        this.table.items = this.skills;
+        this.$nextTick(() => this.$announcer.polite('Associated skills table filters have been removed'));
+      },
     },
   };
 </script>

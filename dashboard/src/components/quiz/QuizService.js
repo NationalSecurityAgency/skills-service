@@ -114,4 +114,8 @@ export default {
     return axios.delete(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
       .then((response) => response.data);
   },
+  getSkillsForQuiz(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/skills`)
+      .then((response) => response.data);
+  },
 };
