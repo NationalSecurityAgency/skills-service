@@ -34,7 +34,7 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 @Service
 @Slf4j
@@ -50,7 +50,7 @@ class BatchOperationsTransactionalAccessor {
     UserAchievedLevelRepo userAchievedLevelRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
@@ -225,7 +225,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void updateUserPointsForSubject(String projectId, String subjectId) {
         log.info("Updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
-        nativeQueriesRepo.updateUserPointsForSubject(projectId, subjectId, false)
+        PostgresQlNativeRepo.updateUserPointsForSubject(projectId, subjectId, false)
         log.info("Completed updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
     }
 
@@ -273,7 +273,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void updateUserPointsForProject(String projectId) {
         log.info("Updating UserPoints for the existing users for [{}] project", projectId)
-        nativeQueriesRepo.updateUserPointsForProject(projectId)
+        PostgresQlNativeRepo.updateUserPointsForProject(projectId)
         log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
     }
 

@@ -34,7 +34,7 @@ import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.*
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.tasks.TaskSchedulerService
 import skills.tasks.config.TaskConfig
 
@@ -58,7 +58,7 @@ class SkillCatalogFinalizationService {
     UserPointsRepo userPointsRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo

@@ -33,7 +33,7 @@ import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.Props
 import org.commonmark.parser.Parser
 
@@ -47,7 +47,7 @@ class ContactUsersService {
     private HtmlRenderer renderer = HtmlRenderer.builder().build()
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     EmailNotifier emailNotifier
@@ -127,13 +127,13 @@ class ContactUsersService {
     @Transactional(readOnly = true)
     Integer countMatchingUsers(QueryUsersCriteriaRequest contactUsersCriteria) {
         QueryUsersCriteria queryUsersCriteria = convert(contactUsersCriteria)
-        return nativeQueriesRepo.countUsers(queryUsersCriteria)
+        return PostgresQlNativeRepo.countUsers(queryUsersCriteria)
     }
 
     @Transactional(readOnly = true)
     Stream<String> retrieveMatchingUserIds(QueryUsersCriteriaRequest queryUsersCriteriaRequest) {
         QueryUsersCriteria queryUsersCriteria = convert(queryUsersCriteriaRequest)
-        return nativeQueriesRepo.getUserIds(queryUsersCriteria)
+        return PostgresQlNativeRepo.getUserIds(queryUsersCriteria)
     }
 
     @Transactional

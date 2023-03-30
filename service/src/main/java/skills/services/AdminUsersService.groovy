@@ -34,7 +34,7 @@ import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -68,7 +68,7 @@ class AdminUsersService {
     UserEventService userEventService
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:""}')
     String usersTableAdditionalUserTagKey
@@ -239,7 +239,7 @@ class AdminUsersService {
             return result
         }
         result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
-        Long totalProjectUsersWithSkills = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
+        Long totalProjectUsersWithSkills = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
             result.totalCount = totalProjectUsersWithSkills
@@ -248,7 +248,7 @@ class AdminUsersService {
             if (!projectUsers) {
                 result.count = 0
             } else if (query) {
-                result.count = nativeQueriesRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query)
+                result.count = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query)
             } else {
                 result.count = totalProjectUsersWithSkills
             }

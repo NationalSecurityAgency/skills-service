@@ -25,7 +25,7 @@ import skills.controller.exceptions.SkillException
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 @Slf4j
 @Service
@@ -36,7 +36,7 @@ class LockingService {
     SkillsDBLockRepo skillsDBLockRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     SkillsDBLock lockGlobalSettings() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_settings_lock")
@@ -102,7 +102,7 @@ class LockingService {
 
     SkillsDBLock lockForUserCreateOrUpdate(String userId) {
         String key = "update_" + userId
-        SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
+        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
         return lock
     }
 
@@ -120,7 +120,7 @@ class LockingService {
 
     SkillsDBLock lockForSkillReporting(String userId, String projectId) {
         String key = "reportSkill_" + userId + projectId
-        SkillsDBLock lock = nativeQueriesRepo.insertLockOrSelectExisting(key)
+        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
         return lock
     }
 
