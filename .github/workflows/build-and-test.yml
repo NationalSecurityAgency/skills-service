@@ -167,7 +167,7 @@ jobs:
         sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
         cat package.json
         npm install
-        npm run backend:dropAllDBTables:postgres
+        npm run backend:dropAllDBTables
         npm run cyServices:start
         cd ..
 
