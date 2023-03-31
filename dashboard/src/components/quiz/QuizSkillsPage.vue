@@ -47,6 +47,7 @@ limitations under the License.
 
         <skills-b-table :options="table.options" :items="table.items"
                         tableStoredStateId="quizSkillsTable"
+                        @sort-changed="sortTable"
                         data-cy="quizSkills">
           <template #head(projectId)="data">
             <span class="text-primary"><i class="fas fa-list-alt skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
@@ -172,6 +173,23 @@ limitations under the License.
         this.table.options.pagination.currentPage = 1;
         this.table.items = this.skills;
         this.$nextTick(() => this.$announcer.polite('Associated skills table filters have been removed'));
+      },
+      sortTable(sortContext) {
+        const { sortBy, sortDesc } = sortContext;
+        this.table.options.sortBy = sortBy;
+        this.table.options.sortDesc = sortDesc;
+
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.table.items = this.table.items.sort((a, b) => {
+          if (a.skill[sortBy] > b.skill[sortBy]) {
+            return sortDesc ? -1 : 1;
+          }
+          if (a.skill[sortBy] < b.skill[sortBy]) {
+            return sortDesc ? 1 : -1;
+          }
+          return 0;
+        });
       },
     },
   };
