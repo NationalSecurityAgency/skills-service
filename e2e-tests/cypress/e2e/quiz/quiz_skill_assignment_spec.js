@@ -302,7 +302,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Need to know Info Survey is completed!')
     });
 
-    it.only('view skill table for a quiz', function() {
+    it('view skill table for a quiz', function() {
         cy.createProject(1)
         cy.createSubject(1,1)
 
