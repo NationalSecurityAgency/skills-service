@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.services.quiz.QuizDefService
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
@@ -37,6 +38,9 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
     @Autowired
     QuizDefRepo quizDefRepo
+
+    @Autowired
+    QuizDefService quizDefService
 
     def "assign quiz to skill"() {
         def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
@@ -420,6 +424,43 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Cannot report skill events directly to a quiz-based skill")
         skillsClientException.message.contains("errorCode:SkillEventForQuizSkillIsNotAllowed")
+
+    }
+
+    def "can get all skills for a quiz"() {
+        def quizDef = QuizDefFactory.createQuiz(1)
+        def quiz = skillsService.createQuizDef(quizDef)
+
+        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        assert skills.size() == 0
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        assert skills.size() == 1
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [])
+
+        def skillWithQuiz2 = createSkill(2, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz2.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz2.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz2)
+
+        when:
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        then:
+        skills.size() == 2
 
     }
 }
