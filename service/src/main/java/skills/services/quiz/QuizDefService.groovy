@@ -667,7 +667,7 @@ class QuizDefService {
     @Transactional()
     List<SkillDef> getSkillsForQuiz(String quizId) {
         QuizDef quizDef = findQuizDef(quizId)
-        return quizToSkillDefRepo.getSkillsForQuiz(quizDef.id);
+        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id);
     }
 
     @Transactional(readOnly = true)

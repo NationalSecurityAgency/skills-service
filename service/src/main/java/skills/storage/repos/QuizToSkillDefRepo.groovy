@@ -60,7 +60,14 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
               where
                     quiz.quizRefId = ?1 AND
                     child.id = quiz.skillRefId''')
-    List<SubjectAwareSkillDef> getSkillsForQuiz(Integer quizRefId)
+    List<SubjectAwareSkillDef> getSkillsForQuizWithSubjects(Integer quizRefId)
+
+    @Nullable
+    @Query('''select skill.id as skillRefId, skill.skillId as skillId, skill.projectId as projectId
+            from QuizToSkillDef qToS, SkillDef skill 
+            where qToS.quizRefId = ?1
+                and skill.id = qToS.skillRefId''')
+    List<ProjectIdAndSkillId> getSkillsForQuiz(Integer quizRefId)
 
     @Nullable
     @Query('''select q.quizId as quizId, 
