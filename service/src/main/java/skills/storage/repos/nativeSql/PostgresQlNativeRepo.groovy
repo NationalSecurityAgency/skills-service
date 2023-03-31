@@ -35,7 +35,7 @@ import java.util.stream.Stream
 
 @Conditional(DBConditions.PostgresQL)
 @Service
-class PostgresQlNativeRepo implements NativeQueriesRepo {
+class PostgresQlNativeRepo {
 
     @PersistenceContext
     EntityManager entityManager;
@@ -46,7 +46,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
-    @Override
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
         String q = '''
         UPDATE user_points b set points = b.points - a.points
@@ -61,7 +60,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate();
     }
 
-    @Override
     void updateOverallScoresBySummingUpAllChildSubjects(String projectId, SkillDef.ContainerType subjectType) {
         String q = '''
         update user_points points set points = sum.sumPoints
@@ -84,7 +82,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate();
     }
 
-    @Override
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId) {
         String q = '''
             WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, childProjectId, childSkillId, childId, childName) AS (
@@ -178,8 +175,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate()
     }
 
-
-    @Override
     void updatePointTotalWhenOccurrencesAreDecreased(String projectId, String subjectId, String skillId, int pointIncrement, int newOccurrences, int previousOccurrences) {
         subjectId = subjectId ?: '';
         String q = '''
@@ -218,7 +213,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate()
     }
 
-    @Override
     void removeExtraEntriesOfUserPerformedSkillByUser(String projectId, String skillId, int numEventsToKeep) {
         String q = '''
             DELETE from user_performed_skill ups
@@ -239,7 +233,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate()
     }
 
-    @Override
     void removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(String projectId, String skillId, int numOfOccurrences) {
         String q = '''
             DELETE
@@ -265,7 +258,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate()
     }
 
-    @Override
     int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
 
         String q = '''
@@ -421,7 +413,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         return query.executeUpdate()
     }
 
-    @Override
     void createOrUpdateUserEvent(String projectId, Integer skillRefId, String userId, Date start, String type, Integer count, Integer weekNumber) {
         //start and end date should be consistently formatted for updates to work
         String sql = '''
@@ -456,7 +447,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         query.executeUpdate()
     }
 
-    @Override
     long countUsers(QueryUsersCriteria queryUsersCriteria) {
         String sql = QueryUserCriteriaHelper.generateCountSql(queryUsersCriteria)
         if (!sql) {
@@ -469,7 +459,6 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         return query.getSingleResult()
     }
 
-    @Override
     Stream<String> getUserIds(QueryUsersCriteria queryUsersCriteria) {
         String sql = QueryUserCriteriaHelper.generateSelectUserIdsSql(queryUsersCriteria)
         if (!sql) {
@@ -482,22 +471,18 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         return query.getResultStream()
     }
 
-    @Override
     void updateUserPointsForASkill(String projectId, String skillId) {
         userPointsRepo.updateUserPointsForASkill(projectId, skillId)
     }
 
-    @Override
     void updateUserPointsForSubject(String projectId, String skillId, Boolean enabledSkillsOnly) {
         userPointsRepo.updateSubjectUserPoints(projectId, skillId, false)
     }
 
-    @Override
     void updateUserPointsForProject(String projectId) {
         userPointsRepo.updateUserPointsForProject(projectId)
     }
 
-    @Override
     SkillsDBLock insertLockOrSelectExisting(String lockKey) {
         Query query = entityManager.createStoredProcedureQuery("f_select_lock_and_insert", SkillsDBLock)
                         .registerStoredProcedureParameter("_lockKey", String, ParameterMode.IN)
@@ -506,17 +491,14 @@ class PostgresQlNativeRepo implements NativeQueriesRepo {
         return dbLock
     }
 
-    @Override
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId) {
         userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId)
     }
 
-    @Override
     Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId) {
         userPointsRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
     }
 
-    @Override
     List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(String projectId, String subjectId) {
         skillRelDefRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subjectId)
     }
