@@ -17,7 +17,6 @@ package skills.tasks
 
 import com.github.kagkarlsson.scheduler.Scheduler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
-import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -26,9 +25,8 @@ import skills.services.events.SkillDate
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
-import skills.tasks.data.ProjectInviteCleanup
+import skills.tasks.data.RemoveSkillEventsForUserRequest
 
-import jakarta.annotation.PostConstruct
 import java.time.Instant
 
 @Service
@@ -49,6 +47,9 @@ class TaskSchedulerService {
 
     @Autowired
     OneTimeTask<CatalogFinalizeRequest> finalizeCatalogImportsOneTimeTask
+
+    @Autowired
+    OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser
 
     void scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
         String id = "${catalogSkillId}-${UUID.randomUUID().toString()}}"
@@ -81,4 +82,17 @@ class TaskSchedulerService {
                 projectId: projectId
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
+
+    void removeSkillEventsForAUser(String userId, String projectId, List<Integer> skillRefIds) {
+        String id = "${userId}-${projectId}${UUID.randomUUID().toString()}}"
+        log.info("removing skill events for specific skills for a single user [{}] using db-scheduler", id)
+        scheduler.schedule(removeSkillEventsForAUser.instance(id,
+                new RemoveSkillEventsForUserRequest(
+                        projectId: projectId,
+                        userId: userId,
+                        skillRefIds: skillRefIds,
+                )), Instant.now().plusSeconds(schedulingDelaySeconds))
+    }
+
+
 }

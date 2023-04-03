@@ -379,6 +379,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefId)
 
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
@@ -915,6 +916,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Modifying
     @Query(value = '''
+               WITH pointsToUpdate as (
+                    select up.user_id, sum(up.points) as newPoints
+                    from skill_definition sd,
+                    user_points up
+                    where sd.id = up.skill_ref_id
+                          and up.project_id = :projectId
+                          and up.user_id = :userId
+                          and sd.type = 'Subject'
+                    group by up.user_id
+                )
+                update user_points up set points = pointsToUpdate.newPoints
+                        from pointsToUpdate
+                where up.user_id = pointsToUpdate.user_id
+                and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
+    void updateUserPointsForProjectAndUser(@Param("projectId") String projectId, @Param("userId") String userId)
+
+    @Modifying
+    @Query(value = '''
              WITH pointsToUpdate as (
                 select up.user_id userId, sum(up.points) as newPoints
                 from skill_definition parent,
@@ -937,6 +956,32 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
     void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
+
+    @Modifying
+    @Query(value = '''
+             WITH pointsToUpdate as (
+                select up.user_id userId, sum(up.points) as newPoints
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child,
+                     user_points up
+                where parent.project_id = :projectId
+                  and parent.skill_id = :skillId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                  and child.type = 'Skill'
+                  and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
+                  and child.id = up.skill_ref_id
+                  and up.user_id = :userId
+                group by up.user_id
+            )
+            update user_points up set points = pointsToUpdate.newPoints
+            from pointsToUpdate
+            where up.user_id = pointsToUpdate.userId
+              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
+    int updateSubjectUserPointsForUser(@Param("userId") String userId, @Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+
     @Modifying
     @Query(value = '''delete from user_points up 
             where 
@@ -958,7 +1003,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                         group by up.user_id
                 )
             ''', nativeQuery = true)
-    void removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
+    int removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Modifying
     @Query('''delete from UserPoints where projectId = :projectId and points = 0''')
@@ -974,4 +1019,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                     having count(upp.id) = 1
                                                 )''')
     void removeOrphanedProjectPoints(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query('''delete from UserPoints up where up.projectId = :projectId and up.userId = :userId and
+                                                up.userId in (
+                                                    select upp.userId 
+                                                    from UserPoints upp 
+                                                    where upp.projectId = :projectId 
+                                                    and upp.userId = :userId 
+                                                    group by upp.userId 
+                                                    having count(upp.id) = 1
+                                                )''')
+    void removeOrphanedProjectPointsForUser(@Param("projectId") String projectId, @Param("userId") String userId)
+
 }

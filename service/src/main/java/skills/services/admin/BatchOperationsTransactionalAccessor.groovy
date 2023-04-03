@@ -19,20 +19,21 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Service
 import skills.controller.result.model.SettingsResult
+import skills.services.BadgeUtils
+import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
-import skills.services.WeekNumberUtil
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
@@ -44,10 +45,16 @@ class BatchOperationsTransactionalAccessor {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
     UserPointsRepo userPointsRepo
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
+
+    @Autowired
+    RuleSetDefGraphService ruleSetDefGraphService
 
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
@@ -66,6 +73,11 @@ class BatchOperationsTransactionalAccessor {
 
     @Autowired
     UserEventsRepo userEventsRepo
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+
 
     @Transactional
     @Profile
@@ -281,6 +293,72 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
         userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievements(projectId)
+    }
+
+    @Transactional
+    @Profile
+    void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
+        userPerformedSkillRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userAchievedLevelRepo.deleteAllBySkillRefIdInAndUserId(skillRefIds, userId)
+
+        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
+        updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
+        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+
+        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
+        userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
+        userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
+    }
+
+    @Profile
+    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
+        if (badgesSkillIsUsedIn) {
+            // do a delete
+            badgesSkillIsUsedIn.forEach { it ->
+                userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
+            }
+        }
+    }
+
+    @Profile
+    private void removeBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+        List<SkillDef> badges = skillRelDefRepo.findParentByChildIdInAndTypes(skillRefIds, SkillDef.ContainerType.Badge, [SkillRelDef.RelationshipType.BadgeRequirement])
+        badges.unique { it.id }.each { SkillDef badge ->
+            if (BadgeUtils.withinActiveTimeframe(badge)) {
+                userAchievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
+            }
+        }
+    }
+
+    @Profile
+    private void updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId, String projectId) {
+        List<SkillDef> subjects = skillRefIds.collect {
+            ruleSetDefGraphService.getMySubjectParent(it)
+        }.unique { it.id }
+        subjects.each { SkillDef subject ->
+            int numUpdated = userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
+            log.info("Updated [{}] Subject UserPoints For User userId=[{}], subject=[{}-{}]", numUpdated, userId, projectId, subject.skillId)
+            int numRemoved = userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subject.skillId)
+            log.info("Removed [{}] Subject UserPoints For User userId=[{}], subject=[{}-{}]", numRemoved, userId, projectId, subject.skillId)
+            userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject)
+        }
+    }
+
+    @Profile
+    private void removeGroupAchievementsForSkillsForASpecificUser(List<Integer> skillRefIds, String userId) {
+        List<SkillDef> groups = skillRefIds.collect {
+            ruleSetDefGraphService.getMyGroupParent(it)
+        }.findAll { it != null }.unique { it.id }
+        if (groups) {
+            groups.each { SkillDef group ->
+                long userAchievementNumRemoved = userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
+                log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
+            }
+        }
     }
 
 }

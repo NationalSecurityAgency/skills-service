@@ -36,11 +36,13 @@ import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.ProjectInviteCleanup
+import skills.tasks.data.RemoveSkillEventsForUserRequest
 import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
 import skills.tasks.executors.ProjectInviteCleanupTaskExecutor
+import skills.tasks.executors.RemoveSkillEventsForAUserExecutor
 import skills.tasks.executors.UnachievableLevelIdentificationTaskExecutor
 
 import java.time.Duration
@@ -146,6 +148,16 @@ class TaskConfig {
     RecurringTask<UnachievableLevelIdentification> identifyUnachievableLevels(UnachievableLevelIdentificationTaskExecutor unachievableLevelIdentificationTaskExecutor) {
         //recurring tasks are automatically picked up by the scheduler
         return Tasks.recurring("unachievable-level-identification", Schedules.parseSchedule(unachievableLevelIdentificationSchedule)).execute(unachievableLevelIdentificationTaskExecutor)
+    }
+
+    @Bean
+    OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser(RemoveSkillEventsForAUserExecutor removeSkillEventsForAUserExecutor) {
+        return Tasks.oneTime("remove-skill-events-for-user", RemoveSkillEventsForUserRequest.class)
+                .onFailure(
+                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
+                )
+                .execute(removeSkillEventsForAUserExecutor);
     }
 
 }
