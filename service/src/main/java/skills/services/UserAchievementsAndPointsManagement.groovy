@@ -200,6 +200,23 @@ class UserAchievementsAndPointsManagement {
         }
     }
 
+    @Profile
+    void removeSubjectLevelAchievementsIfThisUserDoesNotQualify(String userId, SkillDef subject) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(subject.projectId, subject.skillId)
+        boolean skillsDefined = levels[0].pointsFrom != null
+        if (skillsDefined) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject.id, it.level, it.pointsFrom)
+                log.info("Remove subject's level achievements for user=[{}], projectId=[{}], subjectId=[{}({})], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                        userId, subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
+            }
+        } else {
+            int numDeleted = userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(subject.id, userId)
+            log.info("There are no skills defined for user=[{}], projectId=[{}], subjectId=[{}({})]. Removed [{}] subject achievements",
+                    userId, subject.projectId, subject.skillId, subject.id, numDeleted)
+        }
+    }
+
     @Transactional
     @Profile
     void removeProjectLevelAchievementsIfUsersDoNotQualify(String projectId) {
@@ -210,6 +227,20 @@ class UserAchievementsAndPointsManagement {
                 int numUpdated = userAchievedLevelRepo.removeProjectLevelAchievementsIfUsersDoNotQualify(projectId, it.level, it.pointsFrom)
                 log.info("Remove project's level achievements for projectId=[{}], level=[{}], pointsFromExclusive=[{}]. Num rows removed = [{}]",
                         projectId, it.level, it.pointsFrom, numUpdated)
+            }
+        }
+    }
+
+    @Transactional
+    @Profile
+    void removeProjectLevelAchievementsIfUserDoesNotQualify(String userId, String projectId) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId)
+        assert levels
+        if (levels) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId, it.level, it.pointsFrom)
+                log.info("Remove project's level achievements for user=[{}], projectId=[{}], level=[{}], pointsFromExclusive=[{}]. Num rows removed = [{}]",
+                        userId, projectId, it.level, it.pointsFrom, numUpdated)
             }
         }
     }

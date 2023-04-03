@@ -44,6 +44,16 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     @Query('''SELECT parent 
             from SkillRelDef srd, SkillDef parent 
             where 
+                srd.child.id in (?1) 
+                and srd.type in ?3
+                and parent.type = ?2
+                and srd.parent = parent''')
+    List<SkillDef> findParentByChildIdInAndTypes(List<Integer> childId, SkillDef.ContainerType parentType, List<SkillRelDef.RelationshipType> types)
+
+    @Nullable
+    @Query('''SELECT parent 
+            from SkillRelDef srd, SkillDef parent 
+            where 
                 srd.child.id=?1
                 and parent.type = ?2 
                 and srd.type in ?3
@@ -87,6 +97,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query(value = '''select srd.parent.id from SkillRelDef srd where srd.child.id=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     List<Integer> getGlobalBadgeIdsForSkill(Integer id)
+
+    @Query(value = '''select distinct (srd.parent.id) from SkillRelDef srd where srd.child.id in (?1) and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
+    List<Integer> getGlobalBadgeIdsForSkills(List<Integer> skillRefIds)
 
     @Query(value = '''select gbld.skill_ref_id from global_badge_level_definition gbld where gbld.project_id = ?1 ''', nativeQuery = true)
     List<Integer> getGlobalBadgeLevelIdsForSkill(String projectId)

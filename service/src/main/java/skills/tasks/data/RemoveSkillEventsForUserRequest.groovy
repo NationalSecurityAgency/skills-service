@@ -15,6 +15,11 @@
  */
 package skills.tasks.data
 
-class CatalogFinalizeRequest {
+import groovy.transform.ToString
+
+@ToString(includeNames = true)
+class RemoveSkillEventsForUserRequest {
+    String userId
     String projectId
+    List<Integer> skillRefIds
 }

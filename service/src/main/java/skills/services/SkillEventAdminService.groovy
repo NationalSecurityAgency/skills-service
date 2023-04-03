@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import callStack.utils.CachedThreadPool
 import callStack.utils.ThreadPoolUtils
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -32,9 +33,9 @@ import skills.services.events.*
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.tasks.TaskSchedulerService
 import skills.utils.MetricsLogger
 
-import jakarta.annotation.PostConstruct
 import java.util.concurrent.Callable
 
 @Component
@@ -100,6 +101,9 @@ class SkillEventAdminService {
 
     @Autowired
     GlobalBadgesService globalBadgesService
+
+    @Autowired
+    TaskSchedulerService taskSchedulerService
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -196,7 +200,57 @@ class SkillEventAdminService {
         achievedLevelRepo.deleteAllById(globalBadges)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
+
+        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
+
         return RequestResult.success()
+    }
+
+    @Profile
+    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId) {
+        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = quizToSkillDefRepo.getOtherProjectsSkillRefIdsWithQuizzesInThisProject(projectId)
+        Map<String, List<Integer>> projAndSkillIds = [:]
+        Closure addToProjAndSkillIds = { String proj, List<Integer> toAdd ->
+            List<Integer> skillRefIds = projAndSkillIds[proj]
+            if (!skillRefIds) {
+                projAndSkillIds[proj] = toAdd.toList()
+            } else {
+                skillRefIds.add(toAdd)
+                skillRefIds = skillRefIds.unique()
+                projAndSkillIds[proj] = skillRefIds
+            }
+        }
+
+        // collect all of the skills that utilize the same quizzes of this project in another project(s)
+        Map<String, List<QuizToSkillDefRepo.ProjectIdAndSkillId>> byProjId = skillsToUpdateInOtherProjects.groupBy { it.getProjectId() }
+        byProjId.each {
+            List<Integer> skillRefIds = it.value.collect { it.skillRefId }
+            addToProjAndSkillIds(it.key, skillRefIds)
+
+            // follow the projects where quizzes are used to see if those skills were imported elsewhere
+            List<SkillDefRepo.ProjectIdAndSkill> importedSkillsFromQuizFollowedProjects = skillDefRepo.getAllImportedCopiesByOriginalSkillRefIds(skillRefIds)
+            if (importedSkillsFromQuizFollowedProjects) {
+                Map<String, List<SkillDefRepo.ProjectIdAndSkill>> importedByProjectId = importedSkillsFromQuizFollowedProjects.groupBy { it.projectId }
+                importedByProjectId.each {
+                    addToProjAndSkillIds(it.key, it.value.collect { it.skillRefId })
+                }
+            }
+        }
+
+        // collect catalog imported skills
+        List<SkillDefRepo.ProjectIdAndSkill> imported = skillDefRepo.getAllImportedByOriginalProject(projectId)
+        if (imported) {
+            Map<String, List<SkillDefRepo.ProjectIdAndSkill>> importedByProjectId = imported.groupBy { it.projectId }
+            importedByProjectId.each {
+                addToProjAndSkillIds(it.key, it.value.collect { it.skillRefId })
+            }
+        }
+
+        // notify other projects
+        projAndSkillIds.each {
+            taskSchedulerService.removeSkillEventsForAUser(userId, it.key, it.value)
+        }
     }
 
     @Transactional
@@ -296,6 +350,68 @@ class SkillEventAdminService {
 
         return skillEventResult
     }
+
+//    @Profile
+//    void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
+//        performedSkillRepository.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+//        userEventService.removeAllEvents(userId, skillRefIds)
+//        userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+//
+//        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
+//        updatePointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
+//        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+//        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+//
+//        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
+//        userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
+////        userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(projectId, userId)
+//    }
+
+//    @Profile
+//    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+//        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
+//        if (badgesSkillIsUsedIn) {
+//            // do a delete
+//            badgesSkillIsUsedIn.forEach { it ->
+//                achievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
+//            }
+//        }
+//    }
+//
+//    @Profile
+//    private void removeBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+//        List<SkillDef> badges = skillRelDefRepo.findParentByChildIdInAndTypes(skillRefIds, [SkillRelDef.RelationshipType.BadgeRequirement])
+//        badges.unique { it.id }.each { SkillDef badge ->
+//            if (BadgeUtils.withinActiveTimeframe(badge)) {
+//                achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
+//            }
+//        }
+//    }
+//
+//    @Profile
+//    private void updatePointsAndRemoveAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId, String projectId) {
+//        List<SkillDef> subjects = skillRefIds.collect {
+//            ruleSetDefGraphService.getMySubjectParent(it)
+//        }.unique { it.id }
+//        subjects.each { SkillDef subject ->
+//            userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
+//            userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subject.skillId)
+////            userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject)
+//        }
+//    }
+//
+//    @Profile
+//    private void removeGroupAchievementsForSkillsForASpecificUser(List<Integer> skillRefIds, String userId) {
+//        List<SkillDef> groups = skillRefIds.collect {
+//            ruleSetDefGraphService.getMyGroupParent(it)
+//        }.findAll { it != null }.unique { it.id }
+//        if (groups) {
+//            groups.each { SkillDef group ->
+//                long userAchievementNumRemoved = achievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
+//                log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
+//            }
+//        }
+//    }
 
     private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Long numExistingPerformedSkills) {
         log.info("Updating points and achievements after skill was removed for userId=[{}], projectId=[{}], skillId=[{}], numExistingPerformedSkills=[{}]",
