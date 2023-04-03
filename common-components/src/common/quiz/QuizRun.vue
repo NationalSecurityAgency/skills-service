@@ -49,12 +49,6 @@ limitations under the License.
         :quiz-result="quizResult"
         @close="doneWithThisRun"
         @run-again="tryAgain">
-      <template slot="completeAboveTitle">
-        <slot name="completeAboveTitle">
-          <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-          <span v-else>You are about to begin the quiz!</span>
-        </slot>
-      </template>
     </quiz-run-completion-summary>
 
     <b-card v-if="!splashScreen.show && !(isSurveyType && quizResult) && showQuestions" class="mb-4" data-cy="quizRunQuestions">
