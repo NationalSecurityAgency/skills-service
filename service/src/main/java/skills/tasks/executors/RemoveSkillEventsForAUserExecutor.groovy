@@ -23,7 +23,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.BatchOperationsTransactionalAccessor
-import skills.tasks.config.TaskConfig
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 
 @Component
@@ -36,7 +35,7 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
     @Override
     void execute(TaskInstance<RemoveSkillEventsForUserRequest> taskInstance, ExecutionContext executionContext) {
         RemoveSkillEventsForUserRequest data = taskInstance.getData()
-        log.debug("running async RemoveSkillEventsForAUserExecutor for [{}]", data)
+        log.debug("running async RemoveSkillEventsForAUserExecutor for userId=[{}], projId=[{}], skillRefIds={}", data.userId, data.projectId, data.skillRefIds)
 
         CProf.clear()
         String profName = "${data.projectId}-${data.userId}-RemoveSkillEventsForAUserExecutor".toString()
