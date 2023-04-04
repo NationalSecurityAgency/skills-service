@@ -52,7 +52,7 @@ limitations under the License.
       <template slot="completeAboveTitle">
         <slot name="completeAboveTitle">
           <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-          <span v-else>You are about to begin the quiz!</span>
+          <span v-else>Thank you for completing the Quiz!</span>
         </slot>
       </template>
     </quiz-run-completion-summary>
