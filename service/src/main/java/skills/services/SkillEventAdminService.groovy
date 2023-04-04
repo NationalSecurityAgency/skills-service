@@ -351,68 +351,6 @@ class SkillEventAdminService {
         return skillEventResult
     }
 
-//    @Profile
-//    void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
-//        performedSkillRepository.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
-//        userEventService.removeAllEvents(userId, skillRefIds)
-//        userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
-//
-//        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
-//        updatePointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
-//        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-//        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-//
-//        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
-//        userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
-////        userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(projectId, userId)
-//    }
-
-//    @Profile
-//    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
-//        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
-//        if (badgesSkillIsUsedIn) {
-//            // do a delete
-//            badgesSkillIsUsedIn.forEach { it ->
-//                achievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
-//            }
-//        }
-//    }
-//
-//    @Profile
-//    private void removeBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
-//        List<SkillDef> badges = skillRelDefRepo.findParentByChildIdInAndTypes(skillRefIds, [SkillRelDef.RelationshipType.BadgeRequirement])
-//        badges.unique { it.id }.each { SkillDef badge ->
-//            if (BadgeUtils.withinActiveTimeframe(badge)) {
-//                achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
-//            }
-//        }
-//    }
-//
-//    @Profile
-//    private void updatePointsAndRemoveAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId, String projectId) {
-//        List<SkillDef> subjects = skillRefIds.collect {
-//            ruleSetDefGraphService.getMySubjectParent(it)
-//        }.unique { it.id }
-//        subjects.each { SkillDef subject ->
-//            userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
-//            userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subject.skillId)
-////            userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject)
-//        }
-//    }
-//
-//    @Profile
-//    private void removeGroupAchievementsForSkillsForASpecificUser(List<Integer> skillRefIds, String userId) {
-//        List<SkillDef> groups = skillRefIds.collect {
-//            ruleSetDefGraphService.getMyGroupParent(it)
-//        }.findAll { it != null }.unique { it.id }
-//        if (groups) {
-//            groups.each { SkillDef group ->
-//                long userAchievementNumRemoved = achievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
-//                log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
-//            }
-//        }
-//    }
-
     private SkillEventResult updateUserPointsAndAchievementsWhenPerformedSkillRemoved(String userId, SkillDefMin skillDefinitionMin, Long numExistingPerformedSkills) {
         log.info("Updating points and achievements after skill was removed for userId=[{}], projectId=[{}], skillId=[{}], numExistingPerformedSkills=[{}]",
                 userId, skillDefinitionMin.projectId, skillDefinitionMin.skillId, numExistingPerformedSkills)
