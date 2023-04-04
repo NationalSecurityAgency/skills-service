@@ -250,13 +250,15 @@ class SkillEventAdminService {
         List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = quizToSkillDefRepo.getOtherProjectsSkillRefIdsWithQuizzesInThisProject(projectId)
         Map<String, List<Integer>> projAndSkillIds = [:]
         Closure addToProjAndSkillIds = { String proj, List<Integer> toAdd ->
-            List<Integer> skillRefIds = projAndSkillIds[proj]
-            if (!skillRefIds) {
-                projAndSkillIds[proj] = toAdd.toList()
-            } else {
-                skillRefIds.add(toAdd)
-                skillRefIds = skillRefIds.unique()
-                projAndSkillIds[proj] = skillRefIds
+            if (toAdd) {
+                List<Integer> skillRefIds = projAndSkillIds[proj]
+                if (!skillRefIds) {
+                    projAndSkillIds[proj] = toAdd.toList()
+                } else {
+                    skillRefIds.addAll(toAdd)
+                    skillRefIds = skillRefIds.unique()
+                    projAndSkillIds[proj] = skillRefIds
+                }
             }
         }
 
