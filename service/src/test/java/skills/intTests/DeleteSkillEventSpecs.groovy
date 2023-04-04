@@ -658,6 +658,325 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         ].collect { it.toString() }.sort ()
     }
 
+    def "delete all skill events ignores imported skills"() {
+        List<String> users = getRandomUsers(2)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def subj2 = createSubject(1, 2)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        def subj2_skills = SkillsFactory.createSkills(5, 1, 2, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(subj2_skills)
+        skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+        subj2_skills.each { skillsService.exportSkillToCatalog(proj.projectId, it.skillId) }
+
+        def proj4 = createProject(4)
+        def proj4_subj = createSubject(4, 3)
+        def proj4_subj2 = createSubject(4, 4)
+        def proj4_native_skills = [
+                SkillsFactory.createSkill(4, 3, 20, 0, 1, 100, 200),
+                SkillsFactory.createSkill(4, 3, 21, 0, 1, 100, 200),
+                SkillsFactory.createSkill(4, 3, 22, 0, 1, 100, 200),
+        ]
+        skillsService.createProjectAndSubjectAndSkills(proj4, proj4_subj, proj4_native_skills)
+        skillsService.createSubject(proj4_subj2)
+        def proj4_group = SkillsFactory.createSkillsGroup(4, 3, 30)
+        skillsService.createSkill(proj4_group)
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(proj4.projectId, proj4_subj.subjectId, proj4_group.skillId, skills[0..1].collect { [projectId: proj.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills[2..4].collect { [projectId: proj.projectId, skillId: it.skillId] })
+        skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], new Date())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], new Date())
+
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[0].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[1].skillId], users[0], new Date())
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when:
+        List<UserPerformedSkill> userPerformedSkills_t0 = userPerformedSkillRepo.findAll()
+        List<UserPoints> userPoints_t0 = userPointsRepo.findAll()
+        List<UserAchievement> userAchievements_t0 = userAchievedRepo.findAll()
+
+        skillsService.deleteAllSkillEvents([projectId: proj4.projectId, userId: users[0]])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        List<UserPerformedSkill> userPerformedSkills_t1 = userPerformedSkillRepo.findAll()
+        List<UserPoints> userPoints_t1 = userPointsRepo.findAll()
+        List<UserAchievement> userAchievements_t1 = userAchievedRepo.findAll()
+
+        then:
+        // imported skills do not get their own copies for performed skill
+        // but rather utilize the original from the exported project
+        userPerformedSkills_t0.collect { "${it.userId}-${it.projectId}-${it.skillId}".toString() }.sort() == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}",
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}",
+
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[1].skillId}",
+        ].collect { it.toString() }.sort()
+        userAchievements_t0.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-1",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-2",
+
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-1",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-2",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-3",
+
+                "${users[0]}-${proj.projectId}-1",
+                "${users[0]}-${proj.projectId}-2",
+                "${users[0]}-${proj.projectId}-3",
+
+                "${users[0]}-${proj4.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_group.skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[1].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-1",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-2",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-3",
+
+
+                "${users[0]}-${proj4.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[2].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-1",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-2",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-3",
+
+                "${users[0]}-${proj4.projectId}-1",
+                "${users[0]}-${proj4.projectId}-2",
+                "${users[0]}-${proj4.projectId}-3",
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_group.skillId}",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-1",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-2",
+
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-1",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-2",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-3",
+
+                "${users[1]}-${proj.projectId}-1",
+                "${users[1]}-${proj.projectId}-2",
+                "${users[1]}-${proj.projectId}-3",
+
+                "${users[1]}-${proj4.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj4.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_subj.subjectId}-1",
+
+                "${users[1]}-${proj4.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[2].skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-1",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-2",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-3",
+
+                "${users[1]}-${proj4.projectId}-1",
+                "${users[1]}-${proj4.projectId}-2",
+        ].collect { it.toString() }.sort ()
+
+        userPoints_t0.collect { UserPoints up -> "${up.userId}-${up.skillId ? "${up.projectId}-${up.skillId}" : up.projectId}-${up.points}".toString()}.sort() == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}-100",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-200",
+
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-300",
+                "${users[0]}-${proj.projectId}-500",
+
+                "${users[0]}-${proj4.projectId}-${skills[0].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${skills[1].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[0].skillId}-200",
+                "${users[0]}-${proj4.projectId}-${proj4_native_skills[1].skillId}-200",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-600",
+
+                "${users[0]}-${proj4.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-300",
+                "${users[0]}-${proj4.projectId}-900",
+
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}-100",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-200",
+
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-300",
+                "${users[1]}-${proj.projectId}-500",
+
+                "${users[1]}-${proj4.projectId}-${skills[0].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${skills[1].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${proj4_subj.subjectId}-200",
+
+                "${users[1]}-${proj4.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-300",
+                "${users[1]}-${proj4.projectId}-500",
+        ].collect { it.toString() }.sort ()
+
+
+
+        // t1
+        userPerformedSkills_t1.collect { "${it.userId}-${it.projectId}-${it.skillId}".toString() }.sort() == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}",
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}",
+
+        ].collect { it.toString() }.sort()
+
+        userPoints_t1.collect { UserPoints up -> "${up.userId}-${up.skillId ? "${up.projectId}-${up.skillId}" : up.projectId}-${up.points}".toString()}.sort() == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}-100",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-200",
+
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-300",
+                "${users[0]}-${proj.projectId}-500",
+
+                "${users[0]}-${proj4.projectId}-${skills[0].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${skills[1].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-200",
+
+                "${users[0]}-${proj4.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-300",
+                "${users[0]}-${proj4.projectId}-500",
+
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}-100",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-200",
+
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-300",
+                "${users[1]}-${proj.projectId}-500",
+
+                "${users[1]}-${proj4.projectId}-${skills[0].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${skills[1].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${proj4_subj.subjectId}-200",
+
+                "${users[1]}-${proj4.projectId}-${subj2_skills[0].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[1].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[2].skillId}-100",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-300",
+                "${users[1]}-${proj4.projectId}-500",
+        ].collect { it.toString() }.sort ()
+
+        userAchievements_t1.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
+                "${users[0]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-1",
+                "${users[0]}-${proj.projectId}-${subj.subjectId}-2",
+
+                "${users[0]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2_skills[2].skillId}",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-1",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-2",
+                "${users[0]}-${proj.projectId}-${subj2.subjectId}-3",
+
+                "${users[0]}-${proj.projectId}-1",
+                "${users[0]}-${proj.projectId}-2",
+                "${users[0]}-${proj.projectId}-3",
+
+                "${users[0]}-${proj4.projectId}-${skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${skills[1].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_group.skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_subj.subjectId}-1",
+
+                "${users[0]}-${proj4.projectId}-${subj2_skills[0].skillId}",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[1].skillId}",
+                "${users[0]}-${proj4.projectId}-${subj2_skills[2].skillId}",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-1",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-2",
+                "${users[0]}-${proj4.projectId}-${proj4_subj2.subjectId}-3",
+
+                "${users[0]}-${proj4.projectId}-1",
+                "${users[0]}-${proj4.projectId}-2",
+
+                "${users[1]}-${proj.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-1",
+                "${users[1]}-${proj.projectId}-${subj.subjectId}-2",
+
+                "${users[1]}-${proj.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2_skills[2].skillId}",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-1",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-2",
+                "${users[1]}-${proj.projectId}-${subj2.subjectId}-3",
+
+                "${users[1]}-${proj.projectId}-1",
+                "${users[1]}-${proj.projectId}-2",
+                "${users[1]}-${proj.projectId}-3",
+
+                "${users[1]}-${proj4.projectId}-${skills[0].skillId}",
+                "${users[1]}-${proj4.projectId}-${skills[1].skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_group.skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_subj.subjectId}-1",
+
+                "${users[1]}-${proj4.projectId}-${subj2_skills[0].skillId}",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[1].skillId}",
+                "${users[1]}-${proj4.projectId}-${subj2_skills[2].skillId}",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-1",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-2",
+                "${users[1]}-${proj4.projectId}-${proj4_subj2.subjectId}-3",
+
+                "${users[1]}-${proj4.projectId}-1",
+                "${users[1]}-${proj4.projectId}-2",
+        ].collect { it.toString() }.sort ()
+    }
+
     def "delete all skill events propagates to imported projects -- badges are removed"() {
         List<String> users = getRandomUsers(2)
 

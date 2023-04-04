@@ -56,6 +56,26 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
+            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, (toDef.point_increment * (up.points / fromDef.point_increment))
+            FROM user_points up, skill_definition toDef, skill_definition fromDef
+            WHERE
+                    toDef.project_id = :toProjectId and
+                    toDef.copied_from_skill_ref = up.skill_ref_id and
+                    toDef.copied_from_skill_ref = fromDef.id and
+                    up.skill_ref_id in (:fromSkillRefIds) and 
+                    up.user_id = :userId
+                    and not exists(
+                        select 1
+                        from user_points innerUP
+                        where toDef.project_id = innerUP.project_id
+                          and up.user_id = innerUP.user_id
+                          and toDef.skill_id = innerUP.skill_id
+                    )
+                ''', nativeQuery = true)
+    void copySingleUserSkillUserPointsToTheImportedProjects(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+
+    @Modifying
     @Query(value = '''insert into user_points (user_id, project_id, skill_ref_id, skill_id, points, created, updated)
             select q_attempt.user_id     as user_id,
                    skill.project_id      as project_id,
@@ -210,6 +230,18 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             ''', nativeQuery = true)
     void createProjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId)
 
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id)
+            SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id
+            FROM user_points up, skill_definition sd
+            WHERE
+                    up.project_id = :toProjectId and
+                    up.user_id = :userId and
+                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+            and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null)
+            group by up.user_id;
+            ''', nativeQuery = true)
+    void createProjectUserPointsForSingleNewUser(@Param('userId') String userId, @Param('toProjectId') String toProjectId)
 
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, points, project_id, skill_id, skill_ref_id)
@@ -230,6 +262,27 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         group by up.user_id;
             ''', nativeQuery = true)
     Integer createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id, skill_id, skill_ref_id)
+        SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
+        FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
+        WHERE
+          up.project_id = :toProjectId
+          and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
+          and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+          and sd.id = up.skill_ref_id
+          and up.user_id = :userId
+          and not exists (
+            select 1 from user_points innerUP
+            where
+              up.project_id = innerUP.project_id
+              and innerUP.skill_id = :toSubjectId
+              and up.user_id = innerUP.user_id
+          )
+        group by up.user_id;
+            ''', nativeQuery = true)
+    Integer createSubjectUserPointsForSingleNewUser(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
 
     @Nullable
     @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId is null''')

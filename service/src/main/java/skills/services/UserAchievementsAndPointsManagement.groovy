@@ -168,6 +168,22 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     @Profile
+    void identifyAndAddProjectLevelAchievementsForSingleUser(String userId, String projectId) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(projectId)
+        boolean skillsDefined = levels[0].pointsFrom != null
+        if (skillsDefined) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.identifyAndAddProjectLevelAchievementsForALevelAndSingleUser(userId, projectId, it.level, it.pointsFrom)
+                log.info("Calculate project's level achievements for userId=[{}], projectId=[{}], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                        userId, projectId, it.level, it.pointsFrom, numUpdated)
+            }
+        } else {
+            log.info("Project achievement calculations will not be performed aa there are no skills defined for projectId=[{}]", projectId)
+        }
+    }
+
+    @Transactional
+    @Profile
     void identifyAndAddSubjectLevelAchievements(SkillDef subject) {
         List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(subject.projectId, subject.skillId)
         boolean skillsDefined = levels[0].pointsFrom != null
@@ -176,6 +192,22 @@ class UserAchievementsAndPointsManagement {
                 int numUpdated = userAchievedLevelRepo.identifyAndAddSubjectLevelAchievementsForALevel(subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom)
                 log.info("Calculate subject's level achievements for projectId=[{}], subjectId=[{}({})], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
                         subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
+            }
+        } else {
+            log.info("Subject achievement calculations will not be performed as there are no skills defined for projectId=[{}], subjectId=[{}]", subject.projectId, subject.skillId,)
+        }
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddSubjectLevelAchievementsForSingleUser(String userId, SkillDef subject) {
+        List<LevelDefinitionRes> levels = levelDefinitionStorageService.getLevels(subject.projectId, subject.skillId)
+        boolean skillsDefined = levels[0].pointsFrom != null
+        if (skillsDefined) {
+            levels.each {
+                int numUpdated = userAchievedLevelRepo.identifyAndAddSubjectLevelAchievementsForALevelForASingleUser(userId, subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom)
+                log.info("Calculate subject's level achievements for userId=[{}], projectId=[{}], subjectId=[{}({})], level=[{}], pointsFromExclusive=[{}]. Num rows updated = [{}]",
+                        userId, subject.projectId, subject.skillId, subject.id, it.level, it.pointsFrom, numUpdated)
             }
         } else {
             log.info("Subject achievement calculations will not be performed as there are no skills defined for projectId=[{}], subjectId=[{}]", subject.projectId, subject.skillId,)
