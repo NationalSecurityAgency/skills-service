@@ -270,7 +270,7 @@ class LevelDefinitionStorageService {
         } else {
             ProjDef projDef = projDefRepo.findByProjectId(projectId)
             if(!projDef){
-                throw new skills.controller.exceptions.SkillException("Failed to find project", projectId, null)
+                throw new skills.controller.exceptions.SkillException("Failed to find project [${projectId}]", projectId, null)
             }
             res = new LevelDefRes(levels: getProjLevelDefs(projDef)?.sort({it.level}), projectId: projDef.projectId, totalPoints: projDef.totalPoints)
         }
