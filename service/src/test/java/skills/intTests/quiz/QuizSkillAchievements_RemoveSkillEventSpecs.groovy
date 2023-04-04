@@ -522,6 +522,12 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
         def proj3_subj = createSubject(3, 1)
         skillsService.createProjectAndSubjectAndSkills(proj3, proj3_subj, [])
         skillsService.bulkImportSkillsFromCatalogAndFinalize(proj3.projectId, proj3_subj.subjectId, proj2_skills[0..4].collect { [projectId: proj2.projectId, skillId: it.skillId] })
+        def proj3_subj2 = createSubject(3, 6)
+        skillsService.createSubject(proj3_subj2)
+        def proj3_subj2_skills = SkillsFactory.createSkills(1, 3, 6, 100)
+        proj3_subj2_skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        proj3_subj2_skills[0].quizId = quiz1.quizId
+        skillsService.createSkills(proj3_subj2_skills)
 
         def proj4 = createProject(4)
         def proj4_subj = createSubject(4, 1)
@@ -597,6 +603,8 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[0].userName}-${proj2.projectId}-${proj2_skills[2].skillId}", // not-quiz reported event
                 "${userServices[0].userName}-${proj2.projectId}-${proj2_skills[5].skillId}",
 
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
+
                 "${userServices[1].userName}-${proj.projectId}-${skills[0].skillId}",
                 "${userServices[1].userName}-${proj.projectId}-${skills[1].skillId}",
 
@@ -604,6 +612,8 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[1].skillId}",
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[5].skillId}",
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[2].skillId}", // not-quiz reported event
+
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
         ].collect { it.toString() }.sort()
         List<String> actualPerformed_t0  = userPerformedSkills_t0.collect { "${it.userId}-${it.projectId}-${it.skillId}".toString() }.sort()
         actualPerformed_t0 == expectedPerformed_t0
@@ -625,14 +635,16 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[0].userName}-${proj3.projectId}-${proj2_skills[1].skillId}-100",
                 "${userServices[0].userName}-${proj3.projectId}-${proj2_skills[2].skillId}-100",
                 "${userServices[0].userName}-${proj3.projectId}-${proj3_subj.subjectId}-300",
-                "${userServices[0].userName}-${proj3.projectId}-300",
+
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}-100",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-100",
+                "${userServices[0].userName}-${proj3.projectId}-400",
 
                 "${userServices[0].userName}-${proj4.projectId}-${skills[0].skillId}-100",
                 "${userServices[0].userName}-${proj4.projectId}-${skills[1].skillId}-100",
                 "${userServices[0].userName}-${proj4.projectId}-${proj4_subj.subjectId}-200",
                 "${userServices[0].userName}-${proj4.projectId}-200",
 
-                // user 1
                 "${userServices[1].userName}-${proj.projectId}-${skills[0].skillId}-100",
                 "${userServices[1].userName}-${proj.projectId}-${skills[1].skillId}-100",
                 "${userServices[1].userName}-${proj.projectId}-${subj.subjectId}-200",
@@ -649,7 +661,9 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj3.projectId}-${proj2_skills[1].skillId}-100",
                 "${userServices[1].userName}-${proj3.projectId}-${proj2_skills[2].skillId}-100",
                 "${userServices[1].userName}-${proj3.projectId}-${proj3_subj.subjectId}-300",
-                "${userServices[1].userName}-${proj3.projectId}-300",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}-100",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-100",
+                "${userServices[1].userName}-${proj3.projectId}-400",
 
                 "${userServices[1].userName}-${proj4.projectId}-${skills[0].skillId}-100",
                 "${userServices[1].userName}-${proj4.projectId}-${skills[1].skillId}-100",
@@ -687,6 +701,14 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[0].userName}-${proj3.projectId}-2",
                 "${userServices[0].userName}-${proj3.projectId}-3",
 
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-1",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-2",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-3",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-4",
+                "${userServices[0].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-5",
+
+
                 "${userServices[0].userName}-${proj4.projectId}-${skills[0].skillId}",
                 "${userServices[0].userName}-${proj4.projectId}-${skills[1].skillId}",
                 "${userServices[0].userName}-${proj4.projectId}-${proj4_subj.subjectId}-1",
@@ -722,6 +744,13 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj3.projectId}-2",
                 "${userServices[1].userName}-${proj3.projectId}-3",
 
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-1",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-2",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-3",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-4",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-5",
+
                 "${userServices[1].userName}-${proj4.projectId}-${skills[0].skillId}",
                 "${userServices[1].userName}-${proj4.projectId}-${skills[1].skillId}",
                 "${userServices[1].userName}-${proj4.projectId}-${proj4_subj.subjectId}-1",
@@ -744,7 +773,6 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[0].userName}-${proj2.projectId}-${proj2_skills[2].skillId}",
                 "${userServices[0].userName}-${proj2.projectId}-${proj2_skills[5].skillId}",
 
-
                 "${userServices[1].userName}-${proj.projectId}-${skills[0].skillId}",
                 "${userServices[1].userName}-${proj.projectId}-${skills[1].skillId}",
 
@@ -752,6 +780,8 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[1].skillId}",
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[2].skillId}",
                 "${userServices[1].userName}-${proj2.projectId}-${proj2_skills[5].skillId}",
+
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
         ].sort()
 
         userPoints_t1.collect { UserPoints up -> "${up.userId}-${up.skillId ? "${up.projectId}-${up.skillId}" : up.projectId}-${up.points}".toString()}.sort() == [
@@ -763,7 +793,6 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[0].userName}-${proj3.projectId}-${proj2_skills[2].skillId}-100",
                 "${userServices[0].userName}-${proj3.projectId}-${proj3_subj.subjectId}-100",
                 "${userServices[0].userName}-${proj3.projectId}-100",
-
 
                 "${userServices[1].userName}-${proj.projectId}-${skills[0].skillId}-100",
                 "${userServices[1].userName}-${proj.projectId}-${skills[1].skillId}-100",
@@ -781,7 +810,9 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj3.projectId}-${proj2_skills[1].skillId}-100",
                 "${userServices[1].userName}-${proj3.projectId}-${proj2_skills[2].skillId}-100",
                 "${userServices[1].userName}-${proj3.projectId}-${proj3_subj.subjectId}-300",
-                "${userServices[1].userName}-${proj3.projectId}-300",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}-100",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-100",
+                "${userServices[1].userName}-${proj3.projectId}-400",
 
                 "${userServices[1].userName}-${proj4.projectId}-${skills[0].skillId}-100",
                 "${userServices[1].userName}-${proj4.projectId}-${skills[1].skillId}-100",
@@ -826,6 +857,14 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
                 "${userServices[1].userName}-${proj3.projectId}-${proj3_subj.subjectId}-1",
                 "${userServices[1].userName}-${proj3.projectId}-${proj3_subj.subjectId}-2",
                 "${userServices[1].userName}-${proj3.projectId}-${proj3_subj.subjectId}-3",
+
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2_skills[0].skillId}",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-1",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-2",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-3",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-4",
+                "${userServices[1].userName}-${proj3.projectId}-${proj3_subj2.subjectId}-5",
+
                 "${userServices[1].userName}-${proj3.projectId}-1",
                 "${userServices[1].userName}-${proj3.projectId}-2",
                 "${userServices[1].userName}-${proj3.projectId}-3",
