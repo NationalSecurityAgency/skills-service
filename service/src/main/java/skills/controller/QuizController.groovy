@@ -83,10 +83,10 @@ class QuizController {
         return quizDefService.countNumSkillsQuizAssignedTo(quizId)
     }
 
-    @RequestMapping(value = "/{quizId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{quizId}/skills/", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<SkillDef> getSkillsForQuiz(@PathVariable("quizId") String quizId) {
-        return quizDefService.getSkillsForQuiz(quizId)
+    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId, @RequestParam String userId) {
+        return quizDefService.getSkillsForQuiz(quizId, userId)
     }
 
     @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")

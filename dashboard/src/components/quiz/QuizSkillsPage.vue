@@ -47,7 +47,6 @@ limitations under the License.
 
         <skills-b-table :options="table.options" :items="table.items"
                         tableStoredStateId="quizSkillsTable"
-                        @sort-changed="sortTable"
                         data-cy="quizSkills">
           <template #head(projectId)="data">
             <span class="text-primary"><i class="fas fa-list-alt skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
@@ -57,25 +56,25 @@ limitations under the License.
           </template>
 
           <template v-slot:cell(projectId)="data">
-            <router-link v-if="userProjects.includes(data.item.skill.projectId)"
-              :to="{ name:'Subjects', params: { projectId: data.item.skill.projectId  }}"
-              class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.skill.projectId }`"
-              :aria-label="`manage project ${data.item.skill.projectId }`"
+            <router-link v-if="data.item.isAdmin"
+              :to="{ name:'Subjects', params: { projectId: data.item.projectId  }}"
+              class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.projectId }`"
+              :aria-label="`manage project ${data.item.projectId }`"
               role="link">
-              {{ data.item.skill.projectId }}
+              {{ data.item.projectId }}
             </router-link>
-            <div v-else>{{ data.item.skill.projectId }}</div>
+            <div v-else>{{ data.item.projectId }}</div>
           </template>
 
           <template v-slot:cell(name)="data">
-            <router-link v-if="userProjects.includes(data.item.skill.projectId)"
+            <router-link v-if="data.item.isAdmin"
                          tag="a" :to="{ name:'SkillOverview',
-                         params: { projectId: data.item.skill.projectId, subjectId: data.item.subjectId, skillId: data.item.skill.skillId }}"
-                         :aria-label="`Manage skill ${data.item.skill.name}  via link`">
-              {{data.item.skill.name}}
+                         params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                         :aria-label="`Manage skill ${data.item.skillName}  via link`">
+              {{data.item.skillName}}
             </router-link>
-            <div v-else>{{data.item.skill.name}}</div>
-            <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skill.skillId}}</div>
+            <div v-else>{{data.item.skillName}}</div>
+            <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skillId}}</div>
           </template>
         </skills-b-table>
 
@@ -89,7 +88,6 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
-  import UsersService from '@/components/users/UsersService';
 
   export default {
     name: 'QuizSettings',
@@ -104,7 +102,6 @@ limitations under the License.
         filters: {
           skillName: '',
         },
-        userProjects: [],
         table: {
           options: {
             busy: true,
@@ -148,24 +145,18 @@ limitations under the License.
     },
     methods: {
       loadData() {
-        QuizService.getSkillsForQuiz(this.quizId).then((result) => {
+        QuizService.getSkillsForQuiz(this.quizId, this.$store.getters.userInfo.userId).then((result) => {
           if (result) {
-            UsersService.getProjectsUserIsAdminFor(this.$store.getters.userInfo.userId).then((projects) => {
-              if (projects) {
-                this.userProjects = projects;
-              }
-
-              this.skills = result;
-              this.table.items = result;
-              this.table.options.busy = false;
-            });
+            this.skills = result;
+            this.table.items = result;
+            this.table.options.busy = false;
           }
         });
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
 
-        this.table.items = this.table.items.filter((skill) => skill.skill.name.toLowerCase().includes(this.filters.skillName.toLowerCase()));
+        this.table.items = this.table.items.filter((skill) => skill.skillName.toLowerCase().includes(this.filters.skillName.toLowerCase()));
         this.$nextTick(() => this.$announcer.polite(`Associated skills table has been filtered by ${this.filters.skillName}`));
       },
       reset() {
@@ -173,23 +164,6 @@ limitations under the License.
         this.table.options.pagination.currentPage = 1;
         this.table.items = this.skills;
         this.$nextTick(() => this.$announcer.polite('Associated skills table filters have been removed'));
-      },
-      sortTable(sortContext) {
-        const { sortBy, sortDesc } = sortContext;
-        this.table.options.sortBy = sortBy;
-        this.table.options.sortDesc = sortDesc;
-
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.table.items = this.table.items.sort((a, b) => {
-          if (a.skill[sortBy] > b.skill[sortBy]) {
-            return sortDesc ? -1 : 1;
-          }
-          if (a.skill[sortBy] < b.skill[sortBy]) {
-            return sortDesc ? 1 : -1;
-          }
-          return 0;
-        });
       },
     },
   };

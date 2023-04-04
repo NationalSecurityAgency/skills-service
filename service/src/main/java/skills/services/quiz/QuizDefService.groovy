@@ -665,9 +665,9 @@ class QuizDefService {
     }
 
     @Transactional()
-    List<SkillDef> getSkillsForQuiz(String quizId) {
+    List<QuizSkillResult> getSkillsForQuiz(String quizId, userId) {
         QuizDef quizDef = findQuizDef(quizId)
-        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id);
+        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, userId);
     }
 
     @Transactional(readOnly = true)
