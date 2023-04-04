@@ -55,7 +55,4 @@ export default {
   getUserTags(userId) {
     return axios.get(`/app/userInfo/userTags/${userId}`).then((response) => response.data);
   },
-  getProjectsUserIsAdminFor(userId) {
-    return axios.get(`/app/users/${encodeURIComponent(userId)}/projectsUserIsAdminFor`).then((resp) => resp.data);
-  },
 };
