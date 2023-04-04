@@ -428,10 +428,11 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
     }
 
     def "can get all skills for a quiz"() {
+        def currentUser = skillsService.getCurrentUser()
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)
 
-        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
         assert skills.size() == 0
 
         def proj = createProject(1)
@@ -444,7 +445,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
         skillsService.createSkill(skillWithQuiz)
 
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
         assert skills.size() == 1
 
         def proj2 = createProject(2)
@@ -458,7 +459,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz2)
 
         when:
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId)
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
         then:
         skills.size() == 2
 
