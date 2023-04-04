@@ -25,7 +25,7 @@ import skills.controller.result.model.LevelDefinitionRes
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
 import skills.storage.repos.*
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 @Service
 @Slf4j
@@ -44,7 +44,7 @@ class UserAchievementsAndPointsManagement {
     RuleSetDefGraphService ruleSetDefGraphService
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -61,7 +61,7 @@ class UserAchievementsAndPointsManagement {
     @Transactional
     void handleSkillRemoval(SkillDef skillDef, SkillDef subject) {
         assert subject.type == SkillDef.ContainerType.Subject
-        nativeQueriesRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
+        PostgresQlNativeRepo.decrementPointsForDeletedSkill(skillDef.projectId, skillDef.skillId, subject.skillId)
         userPointsRepo.deleteByProjectIdAndSkillId(skillDef.projectId, skillDef.skillId)
         //decrement points in the step above can result in zero point entries if a user has only achieved the skill being deleted
         //cleanup those entries so as not to pollute user metrics
@@ -75,7 +75,7 @@ class UserAchievementsAndPointsManagement {
 
     @Transactional
     void handleSubjectRemoval(SkillDef subject) {
-        nativeQueriesRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
+        PostgresQlNativeRepo.updateOverallScoresBySummingUpAllChildSubjects(subject.projectId, SkillDef.ContainerType.Subject)
         userPointsRepo.removeOrphanedProjectPoints(subject.projectId)
         userAchievedLevelRepo.deleteAchievementsWithNoPoints(subject.projectId)
     }
@@ -83,14 +83,14 @@ class UserAchievementsAndPointsManagement {
     @Profile
     void adjustUserPointsAfterModification(SkillDef skill) {
         log.info("Updating all UserPoints for [{}]-[{}]", skill.projectId, skill.skillId)
-        nativeQueriesRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
+        PostgresQlNativeRepo.updateUserPointsForASkill(skill.projectId, skill.skillId)
 
         SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skill.id)
         log.info("Updating subject's UserPoints for [{}]-[{}]", subject.projectId, subject.skillId)
-        nativeQueriesRepo.updateUserPointsForSubject(subject.projectId, subject.skillId, true)
+        PostgresQlNativeRepo.updateUserPointsForSubject(subject.projectId, subject.skillId, true)
 
         log.info("Updating project's UserPoints for [{}]", skill.projectId)
-        nativeQueriesRepo.updateUserPointsForProject(skill.projectId)
+        PostgresQlNativeRepo.updateUserPointsForProject(skill.projectId)
     }
 
     @Transactional
@@ -111,7 +111,7 @@ class UserAchievementsAndPointsManagement {
         if (log.isDebugEnabled()){
             log.debug("Updating existing UserPoints. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], incrementDelta=[${incrementDelta}], ")
         }
-        nativeQueriesRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
+        PostgresQlNativeRepo.updatePointTotalsForSkill(projectId, subjectId, skillId, incrementDelta)
     }
 
     @Transactional
@@ -119,7 +119,7 @@ class UserAchievementsAndPointsManagement {
         if (log.isDebugEnabled()){
             log.debug("Update points as occurrences were decreased. projectId=[${projectId}], subjectId=[${subjectId}], skillId=[${skillId}], pointIncrement=[${pointIncrement}], newOccurrences=[$numOccurrences], previousOccurrences=[${previousOccurrences}]")
         }
-        nativeQueriesRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences, previousOccurrences)
+        PostgresQlNativeRepo.updatePointTotalWhenOccurrencesAreDecreased(projectId, subjectId, skillId, pointIncrement, newOccurrences, previousOccurrences)
     }
 
     @Profile
@@ -129,7 +129,7 @@ class UserAchievementsAndPointsManagement {
         if (log.isDebugEnabled()){
             log.debug("Remove extra entries from UserPerformedSkill. projectId=[${projectId}], numEventsToKeep=[${numEventsToKeep}], skillId=[${skillId}]")
         }
-        nativeQueriesRepo.removeExtraEntriesOfUserPerformedSkillByUser(projectId, skillId, numEventsToKeep)
+        PostgresQlNativeRepo.removeExtraEntriesOfUserPerformedSkillByUser(projectId, skillId, numEventsToKeep)
     }
 
     @Profile
@@ -231,7 +231,7 @@ class UserAchievementsAndPointsManagement {
         if (log.isDebugEnabled()){
             log.debug("Remove User achievements that do not meet number of occurences. projectId=[${projectId}], skillId=[${skillId}], numOfOccurrences=[$numOfOccurrences]")
         }
-        nativeQueriesRepo.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(projectId, skillId, numOfOccurrences)
+        PostgresQlNativeRepo.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences(projectId, skillId, numOfOccurrences)
     }
 
 }

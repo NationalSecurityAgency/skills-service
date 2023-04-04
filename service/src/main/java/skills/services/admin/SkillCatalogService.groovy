@@ -45,7 +45,7 @@ import skills.storage.repos.QuizToSkillDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -104,7 +104,7 @@ class SkillCatalogService {
     ProjDefRepo projDefRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {

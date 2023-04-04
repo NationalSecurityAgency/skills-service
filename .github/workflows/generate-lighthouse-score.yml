@@ -97,7 +97,7 @@ jobs:
         run: |
           cd e2e-tests
           npm install
-          npm run backend:dropAllDBTables:postgres
+          npm run backend:dropAllDBTables
           npm run cyServices:start
           npm run cy:run:accessibility
           cd ..
