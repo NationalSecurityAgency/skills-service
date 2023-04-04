@@ -28,6 +28,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.RequestResult
+import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
 import skills.services.events.*
 import skills.storage.accessors.ProjDefAccessor
@@ -104,6 +105,9 @@ class SkillEventAdminService {
 
     @Autowired
     TaskSchedulerService taskSchedulerService
+
+    @Autowired
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -202,9 +206,43 @@ class SkillEventAdminService {
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
 
+        handleImportedSkills(projectId, userId)
+
         propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
 
         return RequestResult.success()
+    }
+
+    @Profile
+    private void handleImportedSkills(String projectId, String userId) {
+        List<SkillDef> enabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.TRUE.toString())
+        if (enabledImportedSkills) {
+            List<Integer> skillRefIds = enabledImportedSkills.collect { it.copiedFrom }
+
+            // 1. copy skill points and achievements
+            batchOperationsTransactionalAccessor.copySingleUserSkillUserPointsToTheImportedProjects(userId, projectId, skillRefIds)
+            batchOperationsTransactionalAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, skillRefIds)
+
+            List<SkillDef> groups = enabledImportedSkills
+                    .findAll({ it.groupId != null })
+                    .collect { ruleSetDefGraphService.getParentSkill(it) }
+                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
+            log.info("Identifying group achievements for [{}] groups in project [{}] for user [{}]", groups.size(), projectId, userId)
+            batchOperationsTransactionalAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
+            log.info("Completed import of group achievements for [{}] groups in [{}] project for user [{}]", groups.size(), projectId, userId)
+
+            // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
+            List<SkillDef> subjects = enabledImportedSkills.collect { ruleSetDefGraphService.getMySubjectParent(it.id) }
+                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
+            subjects.each { SkillDef subject ->
+                batchOperationsTransactionalAccessor.createSubjectUserPointsForSingleNewUser(userId, subject.projectId, subject.skillId)
+                batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, subject.projectId, subject.skillId)
+            }
+
+            // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
+            batchOperationsTransactionalAccessor.createProjectUserPointsForSingleNewUser(userId, projectId)
+            batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(userId, projectId)
+        }
     }
 
     @Profile

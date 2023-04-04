@@ -15,9 +15,6 @@
  */
 package skills.tasks.data
 
-import groovy.transform.ToString
-
-@ToString(includeNames = true)
 class RemoveSkillEventsForUserRequest {
     String userId
     String projectId
