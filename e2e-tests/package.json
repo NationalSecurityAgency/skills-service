@@ -111,7 +111,6 @@
   },
   "dependencies": {
     "idb-keyval": "6.2.0",
-    "postgresql": "0.0.1",
-    "psql": "0.0.1"
+    "postgresql": "0.0.1"
   }
 }

@@ -112,16 +112,12 @@ aria-label="search for projects to pin"></b-input>
             <span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span>
             <span v-else>{{ data.item.name }}
             </span>
-            <div v-if="isEmailEnabled && !isLoadingSettings && isSkillsDisplayHomePage"
-                       :class="{
-                          'contact-button-inline': isContactButtonInline,
-                          'w-100 text-right pr-3 pt-2 contact-button-on-top': !isContactButtonInline
-                       }">
+            <div v-if="isEmailEnabled>
               <b-button variant="outline-primary"
-                                            @click="showContactOwner" data-cy="contactOwnerBtn">
+                                            @click="showContactOwner" :data-cy="`contactOwnerBtn_${data.item.projectId}`">
                       Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
                </b-button>
-             </div>
+            </div>
              <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
           </template>
 
