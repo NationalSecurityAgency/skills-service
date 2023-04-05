@@ -95,7 +95,7 @@ module.exports = (on, config) => {
         return launchOptions
     });
 
-    if (config.experimentalRunEvents) {
+    if (Cypress.env('enableAvgLighthouseScore')) {
         on("after:run", () => {
             generateAvgLighthouseScore();
         });
