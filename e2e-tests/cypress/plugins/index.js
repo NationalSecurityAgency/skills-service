@@ -53,6 +53,8 @@ const deleteFolderRecursive = function(path) {
 const a11yScoresDir = 'a11y_scores';
 
 const generateAvgLighthouseScore = () => {
+    console.log(`called generateAvgLighthouseScore`);
+
     if (fs.existsSync(a11yScoresDir)) {
         const files = fs.readdirSync(a11yScoresDir)
         if (files) {
@@ -95,7 +97,12 @@ module.exports = (on, config) => {
         return launchOptions
     });
 
-    if (Cypress.env('enableAvgLighthouseScore')) {
+    console.log('----------------------Environment Variables Supplied----------------------');
+    console.log(`${JSON.stringify(config.env, null, 2)}`);
+    console.log('------------------------------------------------------------');
+
+    if (config.env.enableAvgLighthouseScore && config.env.enableAvgLighthouseScore === true ) {
+        console.log('Enabled Average Lighthouse Score Generation');
         on("after:run", () => {
             generateAvgLighthouseScore();
         });
@@ -117,7 +124,9 @@ module.exports = (on, config) => {
                 const pathStr = url.pathname+url.search+url.hash;
                 const score = { score: lighthouseReport.lhr.categories.accessibility.score, url: pathStr }
                 const json = JSON.stringify(score);
-                fs.writeFileSync(`${a11yScoresDir}/${timestamp}.score`, json);
+                const filePath = `${a11yScoresDir}/${timestamp}.score`;
+                fs.writeFileSync(filePath, json);
+                console.log(`Writting score to path [${filePath}]`)
             }
 
             if (lighthouseReport && lighthouseReport.artifacts
