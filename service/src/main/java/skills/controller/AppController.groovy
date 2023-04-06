@@ -54,7 +54,7 @@ import jakarta.servlet.http.HttpServletResponse
 @RequestMapping("/app")
 @Slf4j
 @EnableCallStackProf
-class ProjectController {
+class AppController {
 
     @Autowired
     ProjAdminService projAdminService
