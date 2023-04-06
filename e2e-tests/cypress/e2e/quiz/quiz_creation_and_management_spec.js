@@ -391,7 +391,6 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="editQuizButton_quiz1"]').should('have.focus')
 
-
         cy.get('[data-cy="editQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('exist')
 
