@@ -25,10 +25,10 @@ limitations under the License.
           <stats-card title="Total # Attempts" :stat-num="metrics.numTaken" icon="fas fa-pen-square text-info"/>
         </div>
         <div class="col">
-          <stats-card title="# Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success"/>
+          <stats-card title="# Passed Attempts" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success"/>
         </div>
         <div class="col">
-          <stats-card title="# Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning"/>
+          <stats-card title="# Failed Attempts" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning"/>
         </div>
       </div>
 

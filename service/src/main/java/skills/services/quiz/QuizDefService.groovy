@@ -453,13 +453,17 @@ class QuizDefService {
 
     @Transactional
     QuizMetrics getMetrics(String quizId) {
-        List<LabeledCount> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
+        List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
+        Integer totalNumDistinctUsers = userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
 
-        int total = quizCounts ? quizCounts.collect { it.getCount() }.sum() : 0
-        LabeledCount numPassedCount = quizCounts.find{
-            UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getLabel())
+        int totalNumAttempts = quizCounts ? quizCounts.collect { it.getNumAttempts() }.sum() : 0
+        UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
+            UserQuizAttempt.QuizAttemptStatus.PASSED == it.getStatus()
         }
-        int numPassed = numPassedCount ? numPassedCount.getCount() : 0
+        int numAttemptsPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+        int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+
+        Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)
 
         QuizQuestionsResult quizQuestionsResult = getQuestionDefs(quizId)
         List<QuizQuestionDefResult> questionDefResults = quizQuestionsResult?.questions
@@ -497,9 +501,13 @@ class QuizDefService {
         }
 
         return new QuizMetrics(
-                numTaken: total,
-                numPassed: numPassed,
-                numFailed: total - numPassed,
+                numTaken: totalNumAttempts,
+                numPassed: numAttemptsPassed,
+                numFailed: totalNumAttempts - numAttemptsPassed,
+                numTakenDistinctUsers: totalNumDistinctUsers,
+                numPassedDistinctUsers: numDistinctUsersPassed,
+                numFailedDistinctUsers: totalNumDistinctUsers - numDistinctUsersPassed,
+                avgAttemptRuntimeInMs: averageRuntimeInMs,
                 questions: questions,
         )
     }

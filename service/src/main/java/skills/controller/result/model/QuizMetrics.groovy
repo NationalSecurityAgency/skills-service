@@ -20,5 +20,11 @@ class QuizMetrics {
     Integer numPassed
     Integer numFailed
 
+    Integer numTakenDistinctUsers
+    Integer numPassedDistinctUsers
+    Integer numFailedDistinctUsers
+
+    Integer avgAttemptRuntimeInMs
+
     List<QuizQuestionMetricsResult> questions
 }
