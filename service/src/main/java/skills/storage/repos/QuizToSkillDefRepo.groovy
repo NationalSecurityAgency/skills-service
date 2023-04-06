@@ -59,7 +59,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                      subject.name as subjectName, exists(
                        select ur.roleName from UserRole ur where ((ur.projectId = child.projectId and
                        ur.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')) OR ur.roleName = 'ROLE_SUPER_DUPER_USER') and ur.userId = ?2
-                   ) as isAdmin
+                   ) as canUserAccess
               from QuizToSkillDef quiz, SkillDefWithExtra child
               join SkillRelDef srd on srd.child = child and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
               join SkillDef subject on subject = srd.parent and subject.type = 'Subject'

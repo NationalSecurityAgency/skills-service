@@ -56,7 +56,7 @@ limitations under the License.
           </template>
 
           <template v-slot:cell(projectId)="data">
-            <router-link v-if="data.item.isAdmin"
+            <router-link v-if="data.item.canUserAccess"
               :to="{ name:'Subjects', params: { projectId: data.item.projectId  }}"
               class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.projectId }`"
               :aria-label="`manage project ${data.item.projectId }`"
@@ -67,7 +67,7 @@ limitations under the License.
           </template>
 
           <template v-slot:cell(name)="data">
-            <router-link v-if="data.item.isAdmin"
+            <router-link v-if="data.item.canUserAccess"
                          tag="a" :to="{ name:'SkillOverview',
                          params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                          :aria-label="`Manage skill ${data.item.skillName}  via link`">
