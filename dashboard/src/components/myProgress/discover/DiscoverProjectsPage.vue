@@ -118,7 +118,7 @@ aria-label="search for projects to pin"></b-input>
                       Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
                </b-button>
             </div>
-             <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
+             <contact-owners-dialog v-if="showContact" :project-name="`${data.item.name}`" v-model="showContact" :project-id="`$(data.item.projectId)`"/>
           </template>
 
           <template #cell(isMyProject)="data">

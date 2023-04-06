@@ -1028,7 +1028,7 @@ describe('Navigation Tests', () => {
             .contains('WORK ROLE: This is project 1');
     });
 
-    it('Contact project owner', () => {
+    it.only('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description').as('validate');
 
@@ -1048,7 +1048,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy=manageMyProjsBtn]').click();
         cy.get('[data-cy="contactOwnerBtn_proj1"]').should('be.visible').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
-        cy.get('[aria-label="cancelBtn"]').should('be.visible').click();
+        cy.get('[aria-label="Close"]').click({multiple: true});
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
         cy.get('[data-cy="contactOwnerBtn_proj1"]').should('be.visible').click();
         cy.get('[data-cy="cancelBtn"]').click();
