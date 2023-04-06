@@ -31,7 +31,7 @@ limitations under the License.
         <div class="row px-3 pt-3">
           <div class="col-12">
             <b-form-group label="Skill Filter" label-class="text-muted">
-              <b-input v-model="filters.skillName" v-on:keydown.enter="applyFilters" data-cy="quiz-skillNameFilter" aria-label="Skill name filter"/>
+              <b-input v-model="filter.skillName" v-on:keydown.enter="applyFilters" data-cy="quiz-skillNameFilter" aria-label="Skill name filter"/>
             </b-form-group>
           </div>
           <div class="col-md">
@@ -71,9 +71,11 @@ limitations under the License.
                          tag="a" :to="{ name:'SkillOverview',
                          params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
                          :aria-label="`Manage skill ${data.item.skillName}  via link`">
-              {{data.item.skillName}}
+              <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
             </router-link>
-            <div v-else>{{data.item.skillName}}</div>
+            <div v-else>
+              <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
+            </div>
             <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skillId}}</div>
           </template>
         </skills-b-table>
@@ -88,6 +90,7 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'QuizSettings',
@@ -99,7 +102,7 @@ limitations under the License.
     data() {
       return {
         quizId: this.$route.params.quizId,
-        filters: {
+        filter: {
           skillName: '',
         },
         table: {
@@ -155,12 +158,22 @@ limitations under the License.
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
-
-        this.table.items = this.table.items.filter((skill) => skill.skillName.toLowerCase().includes(this.filters.skillName.toLowerCase()));
-        this.$nextTick(() => this.$announcer.polite(`Associated skills table has been filtered by ${this.filters.skillName}`));
+        if (!this.filter.skillName || this.filter.skillName.trim() === '') {
+          this.reset();
+        } else {
+          this.table.items = this.table.items.filter((q) => q.skillName.toLowerCase()
+            .includes(this.filter.skillName.trim().toLowerCase()))?.map((item) => {
+            const nameHtml = StringHighlighter.highlight(item.skillName, this.filter.skillName);
+            return {
+              nameHtml,
+              ...item,
+            };
+          });
+        }
+        this.$nextTick(() => this.$announcer.polite(`Associated skills table has been filtered by ${this.filter.skillName}`));
       },
       reset() {
-        this.filters.skillName = '';
+        this.filter.skillName = '';
         this.table.options.pagination.currentPage = 1;
         this.table.items = this.skills;
         this.$nextTick(() => this.$announcer.polite('Associated skills table filters have been removed'));
