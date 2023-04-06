@@ -312,6 +312,7 @@ class QuizRunService {
     @Transactional
     QuizGradedResult completeQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
         QuizDef quizDef = getQuizDef(quizId)
+        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
         Optional<UserQuizAttempt> optionalUserQuizAttempt = quizAttemptRepo.findById(quizAttemptId)
         if (!optionalUserQuizAttempt.isPresent()) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
@@ -339,7 +340,7 @@ class QuizRunService {
                 throw new SkillQuizException("There is no answer provided for question with [${quizQuestionDef.id}] id", quizId, ErrorCode.BadParam)
             }
 
-            boolean isCorrect = selectedIds.containsAll(correctIds)
+            boolean isCorrect = isSurvey ?: selectedIds.containsAll(correctIds) && correctIds.containsAll(selectedIds)
 
             UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
                     userQuizAttemptRefId: quizAttemptId,

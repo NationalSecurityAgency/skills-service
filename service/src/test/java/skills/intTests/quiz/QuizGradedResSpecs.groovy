@@ -182,6 +182,46 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions[1].answers.isSelected == [false, true, true, false]
     }
 
+    def "quiz: get completed graded quiz - failed - multiple types of questions - MultipleChoice is wrong via extra selection"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createChoiceQuestion(1, 2, 2, QuizQuestionType.SingleChoice),
+                QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.MultipleChoice)
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[3].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        when:
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
+        then:
+        quizAttemptRes.userId == userAttrs.userId
+        quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
+        quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
+        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.question == questions.question
+        quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
+        quizAttemptRes.questions.isCorrect == [true, false]
+        quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
+        quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
+        quizAttemptRes.questions[0].answers.isSelected == [true, false]
+
+        quizAttemptRes.questions[1].answers.answer == questions[1].answers.answer
+        quizAttemptRes.questions[1].answers.isConfiguredCorrect == [true, false, true, false]
+        quizAttemptRes.questions[1].answers.isSelected == [true, false, true, true]
+    }
+
     def "quiz: get completed graded quiz - in progress - multiple types of questions - all questions right"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
