@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizDefService
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
@@ -462,7 +463,72 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
         then:
         skills.size() == 2
+        skills[0].skillId == 'skill1'
+        skills[0].skillName == 'Test Skill 1'
+        skills[0].subjectId == 'TestSubject1'
+        skills[0].subjectName == 'Test Subject #1'
+        skills[0].projectId == 'TestProject1'
+        skills[0].isAdmin == true
 
+        skills[1].skillId == 'skill1'
+        skills[1].skillName == 'Test Skill 1'
+        skills[1].subjectId == 'TestSubject1'
+        skills[1].subjectName == 'Test Subject #1'
+        skills[1].projectId == 'TestProject2'
+        skills[1].isAdmin == true
+    }
+
+    def "user not admin on a project can get skills"() {
+        def quizDef = QuizDefFactory.createQuiz(1)
+        def quiz = skillsService.createQuizDef(quizDef)
+
+        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
+        assert skills.size() == 0
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])
+        skillsService.addProjectAdmin(proj.projectId, "aaa@email.foo")
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz)
+
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, 'aaa@email.foo')
+        assert skills.size() == 1
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [])
+
+        def skillWithQuiz2 = createSkill(2, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz2.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz2.quizId = quiz.body.quizId
+
+        skillsService.createSkill(skillWithQuiz2)
+
+        when:
+        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
+        then:
+        skills.size() == 2
+        skills[0].skillId == 'skill1'
+        skills[0].skillName == 'Test Skill 1'
+        skills[0].subjectId == 'TestSubject1'
+        skills[0].subjectName == 'Test Subject #1'
+        skills[0].projectId == 'TestProject1'
+        skills[0].isAdmin == true
+
+        skills[1].skillId == 'skill1'
+        skills[1].skillName == 'Test Skill 1'
+        skills[1].subjectId == 'TestSubject1'
+        skills[1].subjectName == 'Test Subject #1'
+        skills[1].projectId == 'TestProject2'
+        skills[1].isAdmin == false
     }
 }
 
