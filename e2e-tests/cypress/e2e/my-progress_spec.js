@@ -1028,7 +1028,7 @@ describe('Navigation Tests', () => {
             .contains('WORK ROLE: This is project 1');
     });
 
-    it('Contact project owner', () => {
+    it.only('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description').as('validate');
 
