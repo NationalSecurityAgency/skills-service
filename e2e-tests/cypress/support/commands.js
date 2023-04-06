@@ -44,7 +44,6 @@ import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import 'cypress-wait-until';
-import LookupUtil from "./LookupUtil.js";
 var moment = require('moment-timezone');
 
 function terminalLog(violations) {
@@ -789,54 +788,29 @@ Cypress.Commands.add('get$', (selector) => {
 });
 
 Cypress.Commands.add('resetDb', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:resetDb:postgres')
-        cy.log('reset postgres db')
-    } else {
-        cy.exec('npm run backend:resetDb')
-        cy.log('reset h2 db')
-    }
+    cy.exec('npm run backend:resetDb')
+    cy.log('reset postgres db')
 });
 
 Cypress.Commands.add('clearDb', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:clearDb:postgres')
-    } else {
-        cy.exec('npm run backend:clearDb')
-    }
+    cy.exec('npm run backend:clearDb')
 });
 
 Cypress.Commands.add('createInviteOnly', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:setupInviteOnly:postgres', {failOnNonZeroExit: false}).then((res) => {
-            cy.log(res.stdout);
-            cy.log(res.stderr);
-            cy.log(res.code);
-        });
-    } else {
-        cy.exec('npm run backend:setupInviteOnly', {failOnNonZeroExit: false}).then((res) => {
-           cy.log(res.stdout);
-           cy.log(res.stderr);
-           cy.log(res.code);
-        });
-    }
+    cy.exec('npm run backend:setupInviteOnly', {failOnNonZeroExit: false}).then((res) => {
+        cy.log(res.stdout);
+        cy.log(res.stderr);
+        cy.log(res.code);
+    });
 })
 
 Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
-    const db = LookupUtil.getDb();
-
     const waitConf = {
         timeout: 60000, // waits up to 1 minutes
         interval: 500 // performs the check every 500 ms, default to 200
@@ -844,11 +818,7 @@ Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
 
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks:postgres').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
-    } else {
-        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*-->\s+(\d+)\s+\;/)[1] === '0'), waitConf);
-    }
+    cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
 });
 
 

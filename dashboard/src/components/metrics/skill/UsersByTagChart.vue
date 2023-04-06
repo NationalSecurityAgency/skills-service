@@ -35,6 +35,7 @@ limitations under the License.
 </template>
 
 <script>
+  import numberFormatter from '@/filters/NumberFilter';
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
@@ -56,6 +57,13 @@ limitations under the License.
               show: true,
               offsetX: 0,
               offsetY: -60,
+            },
+          },
+          tooltip: {
+            y: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
             },
           },
           plotOptions: {

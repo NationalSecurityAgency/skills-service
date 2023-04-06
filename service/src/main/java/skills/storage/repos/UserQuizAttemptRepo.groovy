@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
@@ -113,10 +114,27 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
 
+    List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)
+
     @Query('''select q
               from UserQuizAttempt q, QuizToSkillDef qtoS
               where q.quizDefinitionRefId = qtoS.quizRefId
                     and qtoS.skillRefId in ?1
                     and q.status = ?2''')
     List<UserQuizAttempt> findByInSkillRefIdAndByStatus(List<Integer> skillRefIds, QuizAttemptStatus status, PageRequest pageRequest)
+
+
+    @Modifying
+    @Query(value = '''delete from user_quiz_attempt
+                      where id in (select attempt.id
+                                 from skill_definition skill,
+                                      quiz_to_skill_definition q_to_s,
+                                      user_quiz_attempt attempt
+                                 where skill.project_id = ?1
+                                   and attempt.user_id = ?2
+                                   and self_reporting_type = 'Quiz'
+                                   and q_to_s.skill_ref_id = skill.id
+                                   and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
+                                   and attempt.status = 'PASSED')''' , nativeQuery = true)
+    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
 }

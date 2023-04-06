@@ -32,7 +32,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.*
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 @Service
 @Slf4j
@@ -66,7 +66,7 @@ class SkillsGroupAdminService {
     SkillsAdminService skillsAdminService
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo

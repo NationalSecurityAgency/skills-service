@@ -434,7 +434,7 @@ limitations under the License.
         return this.$store.getters.config.maxPointIncrement;
       },
       componentName() {
-        return `${this.projectId}-${this.subjectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+        return `${this.projectId}-${this.subjectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}${this.isCopy ? 'Copy' : ''}`;
       },
     },
     watch: {

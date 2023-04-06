@@ -50,7 +50,7 @@ import skills.skillLoading.model.*
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
@@ -115,7 +115,7 @@ class SkillsLoader {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     SettingsService settingsService
@@ -693,7 +693,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
-        List<GraphRelWithAchievement> graphDBRes = nativeQueriesRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
+        List<GraphRelWithAchievement> graphDBRes = PostgresQlNativeRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
 
         Map<String, Map<String,String>> subjectIdLookupByProjectIdThenBySkillId = [:]
         Map<String, List<Pair<String,String>>> byProjectIds = graphDBRes.collect { Pair.of(it.childProjectId, it.childSkillId)}.groupBy { it.first }

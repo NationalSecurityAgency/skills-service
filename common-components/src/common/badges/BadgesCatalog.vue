@@ -115,7 +115,7 @@ limitations under the License.
               {
                 icon: 'fas fa-list-alt',
                 id: 'projectBadges',
-                html: `${store.getters.projectDisplayName} Badges`,
+                html: `${(store.getters.projectDisplayName ? store.getters.projectDisplayName : 'Project')} Badges`,
                 count: 0,
                 filter: (badge) => badge.projectId,
               },

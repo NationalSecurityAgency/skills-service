@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package skills.tasks.data
 
-export default {
-    getDb () {
-        let db = Cypress.env('db');
-
-        if (db) {
-            const isValid = ['postgres'].includes(db);
-            if (!isValid) {
-                throw `Invalid db [${db}]. Valid values are 'postgres'`;
-            }
-        } else {
-            db = 'postgres';
-        }
-        cy.log(`db is [${db}]`)
-        return db;
-    },
+class RemoveSkillEventsForUserRequest {
+    String userId
+    String projectId
+    List<Integer> skillRefIds
 }

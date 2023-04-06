@@ -28,7 +28,7 @@ import skills.controller.exceptions.SkillException
 import skills.storage.model.*
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -46,7 +46,7 @@ import static skills.storage.model.SkillDef.*
 class UserEventService {
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserEventsRepo userEventsRepo
@@ -264,7 +264,7 @@ class UserEventService {
     public void recordEvent(String projectId, Integer skillRefId, String userId, Date date, Integer eventCount = 1, EventType type = EventType.DAILY) {
         Date start = StartDateUtil.computeStartDate(date, type)
         Integer weekNumber = WeekNumberUtil.getWeekNumber(start)
-        nativeQueriesRepo.createOrUpdateUserEvent(projectId, skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
+        PostgresQlNativeRepo.createOrUpdateUserEvent(projectId, skillRefId, userId, start, type.toString(), eventCount,  weekNumber)
     }
 
     /**
@@ -330,8 +330,12 @@ class UserEventService {
         }
     }
 
-    public void removeAllEvents(String projectId, String userId) {
+    void removeAllEvents(String projectId, String userId) {
         userEventsRepo.deleteAllByUserIdAndProjectId(userId, projectId);
+    }
+
+    void removeAllEvents(String userId, List<Integer> skillRefIds) {
+        userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds);
     }
 
     private void decrementEvent(UserEvent event) {

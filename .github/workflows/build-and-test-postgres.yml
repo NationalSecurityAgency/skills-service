@@ -172,9 +172,8 @@ jobs:
       run: |
         cd e2e-tests
         npm install
-        npm run backend:dropAllDBTables:postgres
-        npm run cyServices:start:skills-service:postgresql
-        npm run cyServices:start:client-display
+        npm run backend:dropAllDBTables
+        npm run cyServices:start
         cd ..
 
     - name: Run Cypress tests

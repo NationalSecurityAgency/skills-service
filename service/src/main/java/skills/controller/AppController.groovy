@@ -18,6 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
@@ -32,6 +33,7 @@ import skills.controller.request.model.QuizDefExistsRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.InviteTokenValidationResponse
+import skills.controller.result.model.ProjectDescription
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.QuizDefResult
@@ -199,4 +201,10 @@ class AppController {
         return skillsAdminService.getUniqueSkillVersionList(projectId)
     }
 
+    @RequestMapping(value = "/projects/{id}/description", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return projAdminService.getProjectDescription(projectId)
+    }
 }

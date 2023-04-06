@@ -447,6 +447,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     void deleteAllByUserIdAndProjectId(String projectId, String userId)
 
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
+
+
     @Modifying
     @Query(value='''
         update UserEvent ue

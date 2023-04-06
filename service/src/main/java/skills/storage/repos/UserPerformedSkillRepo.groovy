@@ -61,6 +61,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
 
     @Query('''select count(u.id) from UserPerformedSkill u
               where 

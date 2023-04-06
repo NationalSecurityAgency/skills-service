@@ -1563,7 +1563,7 @@ class SkillsService {
     }
 
     def getProjectDescription(String projectId) {
-        def resp = wsHelper.adminGet("/projects/${projectId}/description")
+        def resp = wsHelper.appGet("/projects/${projectId}/description")
         return resp
     }
 
