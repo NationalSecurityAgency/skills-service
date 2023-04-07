@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
@@ -79,7 +79,6 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         when:
         def q1_metrics = skillsService.getQuizMetrics(quizInfo.quizId)
         def q2_metrics = skillsService.getQuizMetrics(quizInfo2.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(q1_metrics))
         then:
         q1_metrics.numTaken == 2
         q1_metrics.avgAttemptRuntimeInMs >= 650
@@ -109,7 +108,6 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         def q1_metrics = skillsService.getQuizMetrics(quizInfo.quizId)
         def q2_metrics = skillsService.getQuizMetrics(quizInfo2.quizId)
         def q3_metrics = skillsService.getQuizMetrics(quizInfo3.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(q3_metrics))
         then:
         q1_metrics.numTaken == 7
         def q1_question = q1_metrics.questions.find { it.questionType == QuizQuestionType.SingleChoice.toString() }
@@ -169,26 +167,33 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         runSimpleQuizByProvidingAnswers(users[0], quizInfo2, [[0], [0, 2]]) // pass quiz example
 
         def quizInfo3 = createSimpleQuiz(3)
-        runSimpleQuizByProvidingAnswers(users[0], quizInfo2, [[0], [1, 3]])
+        runSimpleQuizByProvidingAnswers(users[0], quizInfo3, [[0], [1, 3]])
 
         when:
         def q1_metrics = skillsService.getQuizMetrics(quizInfo.quizId)
         def q2_metrics = skillsService.getQuizMetrics(quizInfo2.quizId)
         def q3_metrics = skillsService.getQuizMetrics(quizInfo3.quizId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(q3_metrics))
         then:
-        q1_metrics.numTaken == 7
+        q1_metrics.numTaken == 8
         def q1_question = q1_metrics.questions.find { it.questionType == QuizQuestionType.MultipleChoice.toString() }
-        q1_question.numAnsweredCorrect == 4
-        q1_question.numAnsweredWrong == 3
+        q1_question.numAnsweredCorrect == 2
+        q1_question.numAnsweredWrong == 6
         q1_question.answers[0].isCorrect == true
-        q1_question.answers[0].numAnswered == 4
-        q1_question.answers[0].numAnsweredCorrect == 4
+        q1_question.answers[0].numAnswered == 6
+        q1_question.answers[0].numAnsweredCorrect == 6
         q1_question.answers[0].numAnsweredWrong == 0
         q1_question.answers[1].isCorrect == false
         q1_question.answers[1].numAnswered == 3
         q1_question.answers[1].numAnsweredCorrect == 0
         q1_question.answers[1].numAnsweredWrong == 3
+        q1_question.answers[2].isCorrect == true
+        q1_question.answers[2].numAnswered == 3
+        q1_question.answers[2].numAnsweredCorrect == 3
+        q1_question.answers[2].numAnsweredWrong == 0
+        q1_question.answers[3].isCorrect == false
+        q1_question.answers[3].numAnswered == 4
+        q1_question.answers[3].numAnsweredCorrect == 0
+        q1_question.answers[3].numAnsweredWrong == 4
 
         q2_metrics.numTaken == 1
         def q2_question = q2_metrics.questions.find { it.questionType == QuizQuestionType.MultipleChoice.toString() }
