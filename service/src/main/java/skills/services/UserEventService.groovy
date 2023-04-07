@@ -330,8 +330,12 @@ class UserEventService {
         }
     }
 
-    public void removeAllEvents(String projectId, String userId) {
+    void removeAllEvents(String projectId, String userId) {
         userEventsRepo.deleteAllByUserIdAndProjectId(userId, projectId);
+    }
+
+    void removeAllEvents(String userId, List<Integer> skillRefIds) {
+        userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds);
     }
 
     private void decrementEvent(UserEvent event) {

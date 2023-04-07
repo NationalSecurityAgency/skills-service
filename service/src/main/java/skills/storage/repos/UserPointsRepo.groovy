@@ -56,6 +56,26 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
+            SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, (toDef.point_increment * (up.points / fromDef.point_increment))
+            FROM user_points up, skill_definition toDef, skill_definition fromDef
+            WHERE
+                    toDef.project_id = :toProjectId and
+                    toDef.copied_from_skill_ref = up.skill_ref_id and
+                    toDef.copied_from_skill_ref = fromDef.id and
+                    up.skill_ref_id in (:fromSkillRefIds) and 
+                    up.user_id = :userId
+                    and not exists(
+                        select 1
+                        from user_points innerUP
+                        where toDef.project_id = innerUP.project_id
+                          and up.user_id = innerUP.user_id
+                          and toDef.skill_id = innerUP.skill_id
+                    )
+                ''', nativeQuery = true)
+    void copySingleUserSkillUserPointsToTheImportedProjects(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+
+    @Modifying
     @Query(value = '''insert into user_points (user_id, project_id, skill_ref_id, skill_id, points, created, updated)
             select q_attempt.user_id     as user_id,
                    skill.project_id      as project_id,
@@ -210,6 +230,18 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             ''', nativeQuery = true)
     void createProjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId)
 
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id)
+            SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id
+            FROM user_points up, skill_definition sd
+            WHERE
+                    up.project_id = :toProjectId and
+                    up.user_id = :userId and
+                    sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+            and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null)
+            group by up.user_id;
+            ''', nativeQuery = true)
+    void createProjectUserPointsForSingleNewUser(@Param('userId') String userId, @Param('toProjectId') String toProjectId)
 
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, points, project_id, skill_id, skill_ref_id)
@@ -230,6 +262,27 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         group by up.user_id;
             ''', nativeQuery = true)
     Integer createSubjectUserPointsForTheNewUsers(@Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_points(user_id, points, project_id, skill_id, skill_ref_id)
+        SELECT up.user_id, sum(points) as points, max(up.project_id) as project_id, max(subject.skill_id) as skill_id, max(subject.id) as skill_ref_id
+        FROM user_points up, skill_definition subject, skill_relationship_definition srd, skill_definition sd
+        WHERE
+          up.project_id = :toProjectId
+          and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
+          and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+          and sd.id = up.skill_ref_id
+          and up.user_id = :userId
+          and not exists (
+            select 1 from user_points innerUP
+            where
+              up.project_id = innerUP.project_id
+              and innerUP.skill_id = :toSubjectId
+              and up.user_id = innerUP.user_id
+          )
+        group by up.user_id;
+            ''', nativeQuery = true)
+    Integer createSubjectUserPointsForSingleNewUser(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('toSubjectId') String toSubjectId)
 
     @Nullable
     @Query('''SELECT p.points as points from UserPoints p where p.projectId=?1 and p.userId=?2 and p.skillId is null''')
@@ -379,6 +432,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefId)
 
     @Query('''SELECT count(p) from UserPoints p where 
             p.projectId=?1 and 
@@ -915,6 +969,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Modifying
     @Query(value = '''
+               WITH pointsToUpdate as (
+                    select up.user_id, sum(up.points) as newPoints
+                    from skill_definition sd,
+                    user_points up
+                    where sd.id = up.skill_ref_id
+                          and up.project_id = :projectId
+                          and up.user_id = :userId
+                          and sd.type = 'Subject'
+                    group by up.user_id
+                )
+                update user_points up set points = pointsToUpdate.newPoints
+                        from pointsToUpdate
+                where up.user_id = pointsToUpdate.user_id
+                and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
+    void updateUserPointsForProjectAndUser(@Param("projectId") String projectId, @Param("userId") String userId)
+
+    @Modifying
+    @Query(value = '''
              WITH pointsToUpdate as (
                 select up.user_id userId, sum(up.points) as newPoints
                 from skill_definition parent,
@@ -937,6 +1009,32 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
     void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
+
+    @Modifying
+    @Query(value = '''
+             WITH pointsToUpdate as (
+                select up.user_id userId, sum(up.points) as newPoints
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child,
+                     user_points up
+                where parent.project_id = :projectId
+                  and parent.skill_id = :skillId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                  and child.type = 'Skill'
+                  and (child.enabled = 'true' or 'false' = :enabledSkillsOnly)
+                  and child.id = up.skill_ref_id
+                  and up.user_id = :userId
+                group by up.user_id
+            )
+            update user_points up set points = pointsToUpdate.newPoints
+            from pointsToUpdate
+            where up.user_id = pointsToUpdate.userId
+              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
+    int updateSubjectUserPointsForUser(@Param("userId") String userId, @Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
+
     @Modifying
     @Query(value = '''delete from user_points up 
             where 
@@ -958,7 +1056,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                         group by up.user_id
                 )
             ''', nativeQuery = true)
-    void removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
+    int removeSubjectUserPointsForNonExistentSkillDef(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Modifying
     @Query('''delete from UserPoints where projectId = :projectId and points = 0''')
@@ -974,4 +1072,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                     having count(upp.id) = 1
                                                 )''')
     void removeOrphanedProjectPoints(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query('''delete from UserPoints up where up.projectId = :projectId and up.userId = :userId and
+                                                up.userId in (
+                                                    select upp.userId 
+                                                    from UserPoints upp 
+                                                    where upp.projectId = :projectId 
+                                                    and upp.userId = :userId 
+                                                    group by upp.userId 
+                                                    having count(upp.id) = 1
+                                                )''')
+    void removeOrphanedProjectPointsForUser(@Param("projectId") String projectId, @Param("userId") String userId)
+
 }

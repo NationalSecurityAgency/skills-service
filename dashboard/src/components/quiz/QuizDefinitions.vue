@@ -270,7 +270,7 @@ limitations under the License.
           });
       },
       handleEditQuizModalClose(quizDef) {
-        const isNewQuizDef = !quizDef.originalQuizId;
+        const isNewQuizDef = !quizDef.originalQuizId && !quizDef.isEdit;
         if (isNewQuizDef) {
           this.$emit('focus-on-new-button');
         } else {

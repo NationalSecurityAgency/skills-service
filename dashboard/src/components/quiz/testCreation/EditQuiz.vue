@@ -23,6 +23,7 @@ limitations under the License.
              header-text-variant="light" no-fade>
       <skills-spinner :is-loading="loading"/>
       <b-container fluid v-if="!loading">
+        <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div class="row">
           <div class="col-12">
             <div class="form-group">
@@ -52,7 +53,7 @@ limitations under the License.
           <div class="col-12">
             <id-input type="text" label="Quiz/Survey ID" v-model="quizInternal.quizId"
                       additional-validation-rules="uniqueId"
-                      v-on:keydown.enter.native="handleSubmit(updateProject)"
+                      v-on:keydown.enter.native="handleSubmit(saveQuiz)"
                       :next-focus-el="previousFocus"
                       @shown="tooltipShowing=true"
                       @hidden="tooltipShowing=false"/>
@@ -101,7 +102,7 @@ limitations under the License.
                   data-cy="saveQuizButton">
           <span>Save</span>
         </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe"
+        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close"
                   data-cy="closeQuizButton">
           Cancel
         </b-button>
@@ -114,9 +115,12 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import InputSanitizer from '@/components/utils/InputSanitizer';
   import IdInput from '@/components/utils/inputForm/IdInput';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import SaveComponentStateLocallyMixin from '../../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../../utils/ReloadMessage';
 
   export default {
     name: 'EditQuiz',
@@ -124,7 +128,9 @@ limitations under the License.
       SkillsSpinner,
       MarkdownEditor,
       IdInput,
+      ReloadMessage,
     },
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: {
       quiz: Object,
       isEdit: {
@@ -137,16 +143,30 @@ limitations under the License.
       return {
         loading: false,
         show: this.value,
-        quizInternal: {},
+        quizInternal: {
+          quizId: this.quiz.quizId,
+          description: this.quiz.description,
+          name: this.quiz.name,
+          isEdit: this.isEdit,
+          type: this.quiz.type ? this.quiz.type : 'Quiz',
+        },
         quizTypeOptions: [
           { value: 'Quiz', text: 'Quiz' },
           { value: 'Survey', text: 'Survey' },
         ],
+        originalQuiz: {
+          quizId: this.quiz.quizId,
+          name: this.quiz.name,
+          type: this.quiz.type ? this.quiz.type : 'Quiz',
+          description: this.quiz.description,
+        },
         currentFocus: null,
         previousFocus: null,
         tooltipShowing: false,
         overallErrMsg: '',
         showDescription: false,
+        keysToWatch: ['name', 'description', 'quizId', 'type'],
+        restoredFromStorage: false,
       };
     },
     created() {
@@ -154,13 +174,62 @@ limitations under the License.
     },
     mounted() {
       document.addEventListener('focusin', this.trackFocus);
-      if (this.isEdit) {
+      this.loadComponent();
+    },
+    watch: {
+      show(newValue) {
+        this.$emit('input', newValue);
+      },
+      quizInternal: {
+        handler(newValue) {
+          this.saveComponentState(this.componentName, newValue);
+        },
+        deep: true,
+      },
+    },
+    computed: {
+      title() {
+        return this.isEdit ? 'Editing Existing Quiz/Survey' : 'New Quiz/Survey';
+      },
+      componentName() {
+        return `${this.quiz.name}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+      },
+    },
+    methods: {
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
         this.loading = true;
-        QuizService.getQuizDef(this.quiz.quizId)
-          .then((resQuizDef) => {
-            this.setInternalQuizDef(resQuizDef);
-          })
-          .finally(() => {
+        const getComponentState = this.loadComponentState(this.componentName);
+        const getQuizInfo = this.isEdit ? QuizService.getQuizDef(this.quiz.quizId) : null;
+
+        Promise.all([getQuizInfo, getComponentState]).then((values) => {
+          const quizInfo = values[0];
+          const localInfo = values[1];
+          if (localInfo) {
+            if (!this.isEdit || (this.isEdit && localInfo.quizId === this.originalQuiz.quizId)) {
+              this.quizInternal = localInfo;
+              this.restoredFromStorage = true;
+            } else if (this.isEdit && quizInfo) {
+              this.quizInternal = Object.assign(this.quizInternal, quizInfo);
+              this.originalQuiz = Object.assign(this.originalQuiz, quizInfo);
+            } else {
+              this.quizInternal = Object.assign(this.quizInternal, this.originalQuiz);
+            }
+          } else if (this.isEdit && quizInfo) {
+            this.quizInternal = Object.assign(this.quizInternal, quizInfo);
+            this.originalQuiz = Object.assign(this.originalQuiz, quizInfo);
+          } else {
+            this.quizInternal = Object.assign(this.quizInternal, this.originalQuiz);
+          }
+        }).finally(() => {
+          this.loading = false;
+          if (this.isEdit) {
             setTimeout(() => {
               this.$nextTick(() => {
                 const { observer } = this.$refs;
@@ -169,44 +238,40 @@ limitations under the License.
                 }
               });
             }, 600);
-            this.loading = false;
-          });
-      } else {
-        this.setInternalQuizDef(this.quiz);
-      }
-    },
-    watch: {
-      show(newValue) {
-        this.$emit('input', newValue);
-      },
-    },
-    computed: {
-      title() {
-        return this.isEdit ? 'Editing Existing Quiz/Survey' : 'New Quiz/Survey';
-      },
-    },
-    methods: {
-      setInternalQuizDef(quizDef) {
-        this.quizInternal = {
-          originalQuizId: quizDef.quizId,
-          isEdit: this.isEdit,
-          type: quizDef.type ? quizDef.type : 'Quiz',
-          ...quizDef,
-        };
+          }
+        });
       },
       trackFocus() {
         this.previousFocus = this.currentFocus;
         this.currentFocus = document.activeElement;
       },
-      closeMe(e) {
+      hideModal() {
         this.show = false;
-        this.publishHidden(e);
+        this.$emit('hidden', this.quizInternal);
+      },
+      close(e) {
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (!e.update && this.hasObjectChanged(this.quizInternal, this.originalQuiz) && !this.loading) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.clearComponentState(this.componentName);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', this.quizInternal);
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
         }
       },
       updateQuizId() {
@@ -218,10 +283,14 @@ limitations under the License.
         this.$refs.observer.validate()
           .then((res) => {
             if (res) {
+              this.publishHidden({ update: true });
               this.quizInternal.name = InputSanitizer.sanitize(this.quizInternal.name);
               this.quizInternal.quizId = InputSanitizer.sanitize(this.quizInternal.quizId);
+              if (this.isEdit) {
+                this.quizInternal.isEdit = this.isEdit;
+                this.quizInternal.originalQuizId = this.originalQuiz.quizId;
+              }
               this.$emit('quiz-saved', this.quizInternal);
-              this.closeMe();
             }
           });
       },

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <metrics-card :title="`Top 20 ${tag.label} Level Breakdown`" :data-cy="`numUsersByTag-${tag.key}`">
-    <div style="max-height: 800px; overflow: auto;">
+    <div style="max-height: 800px; overflow-y: auto; overflow-x: clip;">
       <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
         <apexchart v-if="!loading" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
       </metrics-overlay>
@@ -24,6 +24,7 @@ limitations under the License.
 </template>
 
 <script>
+  import numberFormatter from '@/filters/NumberFilter';
   import MetricsCard from '../utils/MetricsCard';
   import MetricsService from '../MetricsService';
   import MetricsOverlay from '../utils/MetricsOverlay';
@@ -85,6 +86,13 @@ limitations under the License.
               text: this.tag.label,
             },
           },
+          tooltip: {
+            y: {
+              formatter(val) {
+                return numberFormatter(val);
+              },
+            },
+          },
           dataLabels: {
             enabled: true,
             textAnchor: 'start',
@@ -96,7 +104,7 @@ limitations under the License.
               fontWeight: 'bold',
             },
             formatter(val, opt) {
-              return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${val} users`;
+              return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${numberFormatter(val)} users`;
             },
             dropShadow: {
               enabled: true,

@@ -15,6 +15,8 @@
  */
 package skills.tasks.data
 
-class CatalogFinalizeRequest {
+class RemoveSkillEventsForUserRequest {
+    String userId
     String projectId
+    List<Integer> skillRefIds
 }
