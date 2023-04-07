@@ -302,5 +302,93 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Need to know Info Survey is completed!')
     });
 
+    it('view skill table for a quiz', function() {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.visit('/administrator/quizzes/quiz1/skills')
+        const tableSelector = '[data-cy="quizSkills"]';
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 2ID: skill2'
+            }],
+        ], 5);
+    });
+
+    it('filter skill table for a quiz', function() {
+        cy.createProject(1)
+        cy.createSubject(1,1)
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.visit('/administrator/quizzes/quiz1/skills')
+        const tableSelector = '[data-cy="quizSkills"]';
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 2ID: skill2'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="quiz-skillNameFilter"]').type('2');
+        cy.get('[data-cy="quiz-filterBtn"]').click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 2ID: skill2'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="quiz-resetBtn"]').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 2ID: skill2'
+            }],
+        ], 5);
+    });
 });
 

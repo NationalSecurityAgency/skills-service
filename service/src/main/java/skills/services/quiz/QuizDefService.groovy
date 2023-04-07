@@ -664,6 +664,12 @@ class QuizDefService {
         return quizToSkillDefRepo.countByQuizRefId(quizDef.id);
     }
 
+    @Transactional()
+    List<QuizSkillResult> getSkillsForQuiz(String quizId, userId) {
+        QuizDef quizDef = findQuizDef(quizId)
+        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, userId);
+    }
+
     @Transactional(readOnly = true)
     boolean existsByQuizId(String quizId) {
         return quizDefRepo.existsByQuizIdIgnoreCase(quizId)

@@ -174,6 +174,10 @@ class UserAuthService {
         return updatedUserInfo
     }
 
+    List<String> getProjectsUserIsAdminFor(String userId) {
+        return userRoleRepo.getProjectIdByUserIdAndRoleName(userId, RoleName.ROLE_PROJECT_ADMIN)
+    }
+
     /**
      * Loads information for the specified user from the database but DOES NOT create a user
      * if no record already exists

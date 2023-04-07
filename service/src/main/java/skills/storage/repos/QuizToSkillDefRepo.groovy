@@ -18,8 +18,12 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
+import skills.controller.result.model.QuizSkillResult
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefSkinny
+import skills.storage.model.SubjectAwareSkillDef
 
 interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
@@ -49,6 +53,21 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                 and q.id = qToS.quizRefId
             group by q.quizId''')
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
+
+    @Nullable
+    @Query('''select child.name as skillName, child.skillId as skillId, child.projectId as projectId, subject.skillId as subjectId,
+                     subject.name as subjectName, exists(
+                       select ur.roleName from UserRole ur where ((ur.projectId = child.projectId and
+                       ur.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')) OR ur.roleName = 'ROLE_SUPER_DUPER_USER') and ur.userId = ?2
+                   ) as canUserAccess
+              from QuizToSkillDef quiz, SkillDefWithExtra child
+              join SkillRelDef srd on srd.child = child and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
+              where
+                    quiz.quizRefId = ?1 AND
+                    child.id = quiz.skillRefId
+    ''')
+    List<QuizSkillResult> getSkillsForQuizWithSubjects(Integer quizRefId, String userId)
 
     @Nullable
     @Query('''select skill.id as skillRefId, skill.skillId as skillId, skill.projectId as projectId
