@@ -453,15 +453,20 @@ class QuizDefService {
 
     @Transactional
     QuizMetrics getMetrics(String quizId) {
+        QuizDef quiz = findQuizDef(quizId)
+        boolean isSurvey = quiz.type == QuizDefParent.QuizType.Survey
         List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
-        Integer totalNumDistinctUsers = userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
 
         int totalNumAttempts = quizCounts ? quizCounts.collect { it.getNumAttempts() }.sum() : 0
         UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
             UserQuizAttempt.QuizAttemptStatus.PASSED == it.getStatus()
         }
         int numAttemptsPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+
+
+        Integer totalNumDistinctUsers = isSurvey ? totalNumAttempts : userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
         int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+
 
         Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)
 
@@ -488,13 +493,14 @@ class QuizDefService {
                         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerStatusCounts = byAnswerId[quizAnswerDefResult.id]
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerCorrectCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString() }
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerWrongCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG.toString() }
+                        int numAnswered = answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0
                         new QuizAnswerMetricsResult(
                                 id: quizAnswerDefResult.id,
                                 answer: quizAnswerDefResult.answer,
-                                isCorrect: quizAnswerDefResult.isCorrect,
-                                numAnswered: answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0,
-                                numAnsweredCorrect: answerCorrectCount?.getCount() ?: 0,
-                                numAnsweredWrong: answerWrongCount?.getCount() ?: 0,
+                                isCorrect: isSurvey ? true : quizAnswerDefResult.isCorrect,
+                                numAnswered: numAnswered,
+                                numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),
+                                numAnsweredWrong: isSurvey ? 0 : (answerWrongCount?.getCount() ?: 0),
                         )
                     }
             )
