@@ -161,4 +161,5 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                    and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
                                    and attempt.status = 'PASSED')''' , nativeQuery = true)
     int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
+
 }

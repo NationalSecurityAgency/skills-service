@@ -33,7 +33,6 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
-import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizSettings
 import skills.services.*
@@ -421,6 +420,25 @@ class QuizDefService {
         }
 
         return new TableResult(totalCount: totalCount, data: quizRuns, count: count)
+    }
+
+    @Transactional
+    TableResult getUserQuestionAnswers(String quizId, Integer answerDefId, PageRequest pageRequest) {
+        Optional<QuizAnswerDef> optionalQuizAnswerDef = quizAnswerRepo.findById(answerDefId)
+        if (!optionalQuizAnswerDef.isPresent()) {
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist", ErrorCode.BadParam)
+        }
+        QuizAnswerDef quizAnswerDef = optionalQuizAnswerDef.get()
+        if (quizAnswerDef.quizId != quizId) {
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not belonw to quiz [${quizId}]", ErrorCode.BadParam)
+        }
+
+        List<QuizRun> quizRuns = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, pageRequest)
+        int count = quizRuns.size()
+        if (pageRequest.pageNumber > 1 || count >= pageRequest.pageSize) {
+            count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
+        }
+        return new TableResult(totalCount: count, data: quizRuns, count: count)
     }
 
     @Transactional

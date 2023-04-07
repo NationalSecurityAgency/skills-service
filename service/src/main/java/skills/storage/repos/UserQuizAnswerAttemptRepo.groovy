@@ -15,10 +15,14 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
+import skills.controller.result.model.QuizRun
+import skills.controller.result.model.UserQuizAnswer
 import skills.storage.model.UserQuizAnswerAttempt
+import skills.storage.model.UserQuizAttempt
 
 interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
 
@@ -47,4 +51,24 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
 
     void deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
+    @Query('''select answerAttempt.updated as updated,
+                    answerAttempt.answer as answerTxt,
+                    answerAttempt.status as status,
+                    userAttrs.userId as userId,
+                    userAttrs.userIdForDisplay as userIdForDisplay
+        from UserQuizAnswerAttempt answerAttempt, UserAttrs userAttrs, UserQuizAttempt quizAttempt
+        where answerAttempt.userId = userAttrs.userId
+            and answerAttempt.userQuizAttemptRefId = quizAttempt.id
+            and quizAttempt.status <> 'INPROGRESS'
+            and answerAttempt.quizAnswerDefinitionRefId = ?1
+     ''')
+    List<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, PageRequest pageRequest)
+
+    @Query('''select count (answerAttempt)
+        from UserQuizAnswerAttempt answerAttempt, UserQuizAttempt quizAttempt
+        where answerAttempt.userQuizAttemptRefId = quizAttempt.id
+            and quizAttempt.status <> 'INPROGRESS'
+            and answerAttempt.quizAnswerDefinitionRefId = ?1
+     ''')
+    long countByQuizAnswerDefinitionRefId(Integer quizAnswerDefinitionRefId)
 }

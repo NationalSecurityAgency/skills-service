@@ -143,6 +143,22 @@ class QuizController {
     }
 
 
+    @RequestMapping(value = "/{quizId}/answers/{answerDefId}/attempts", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    TableResult getUserQuestionAnswerAttempts(@PathVariable("quizId") String quizId,
+                                       @PathVariable("answerDefId") Integer answerDefId,
+                                       @RequestParam int limit,
+                                       @RequestParam int page,
+                                       @RequestParam String orderBy,
+                                       @RequestParam Boolean ascending) {
+        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
+        QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
+        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
+        QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest)
+    }
+
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
