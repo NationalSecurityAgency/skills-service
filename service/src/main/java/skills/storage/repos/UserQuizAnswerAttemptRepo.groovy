@@ -55,7 +55,8 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
                     answerAttempt.answer as answerTxt,
                     answerAttempt.status as status,
                     userAttrs.userId as userId,
-                    userAttrs.userIdForDisplay as userIdForDisplay
+                    userAttrs.userIdForDisplay as userIdForDisplay,
+                    quizAttempt.id as userQuizAttemptId
         from UserQuizAnswerAttempt answerAttempt, UserAttrs userAttrs, UserQuizAttempt quizAttempt
         where answerAttempt.userId = userAttrs.userId
             and answerAttempt.userQuizAttemptRefId = quizAttempt.id

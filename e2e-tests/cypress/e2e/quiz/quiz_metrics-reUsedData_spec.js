@@ -41,6 +41,17 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.runQuizForUser(1, 11, [{selectedIndex: [0]}, {selectedIndex: [0]}]);
 
 
+        cy.createSurveyDef(2);
+        cy.createSurveyMultipleChoiceQuestionDef(2, 1);
+        cy.createTextInputQuestionDef(2, 2);
+        cy.createSurveyMultipleChoiceQuestionDef(2, 3, { questionType: 'SingleChoice' });
+
+        cy.runQuizForUser(2, 1, [{selectedIndex: [0, 1]}, {selectedIndex: [0]}, {selectedIndex: [0]}]);
+        cy.runQuizForUser(2, 2, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [2]}]);
+        cy.runQuizForUser(2, 3, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
+        cy.runQuizForUser(2, 5, [{selectedIndex: [0, 1]}, {selectedIndex: [0]}, {selectedIndex: [0]}]);
+        cy.runQuizForUser(2, 6, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
+        cy.runQuizForUser(2, 7, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
     });
 
     after(() => {

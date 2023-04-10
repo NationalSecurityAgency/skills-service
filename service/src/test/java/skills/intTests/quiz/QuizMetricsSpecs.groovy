@@ -48,6 +48,7 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         def q1_metrics = skillsService.getQuizMetrics(quizInfo.quizId)
         def q2_metrics = skillsService.getQuizMetrics(quizInfo2.quizId)
         then:
+        q1_metrics.quizType == 'Quiz'
         q1_metrics.numTaken == 8
         q1_metrics.numPassed == 5
         q1_metrics.numFailed == 3

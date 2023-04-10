@@ -24,4 +24,6 @@ interface UserQuizAnswer {
     UserQuizAnswerAttempt.QuizAnswerStatus getStatus()
     String getUserId()
     String getUserIdForDisplay()
+
+    Integer getUserQuizAttemptId()
 }

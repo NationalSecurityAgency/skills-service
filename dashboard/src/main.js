@@ -62,6 +62,7 @@ import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
 import TimeDurationFilter from '@/common-components/filter/TimeDurationFilter';
 import dayjs from '@/common-components/DayJsCustomizer';
 import '@/common-components/filter/ByteFilter';
+import '@/common-components/filter/FormatDurationFilter';
 import PageVisitService from '@/components/PageVisitService';
 import InceptionConfigurer from './InceptionConfigurer';
 import 'babel-polyfill';

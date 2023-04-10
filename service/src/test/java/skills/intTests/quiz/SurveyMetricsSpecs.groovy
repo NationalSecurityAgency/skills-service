@@ -339,15 +339,15 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         List<String> users = getRandomUsers(9, true)
 
         def surveyInfo1 = createSimpleSurvey(1)
-        reportSurvey(users[0], surveyInfo1, [[0], [0, 2]], "Cool Answer")
-        reportSurvey(users[1], surveyInfo1, [[1], [1, 2]], "Cool Answer")
-        reportSurvey(users[2], surveyInfo1, [[0], [0]], "Cool Answer")
-        reportSurvey(users[3], surveyInfo1, [[1], [0, 2]], "Cool Answer")
-        reportSurvey(users[4], surveyInfo1, [[0], [0, 1, 2]], "Cool Answer")
-        reportSurvey(users[5], surveyInfo1, [[1], [3]], "Cool Answer")
-        reportSurvey(users[6], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer")
-        reportSurvey(users[7], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer")
-        reportSurvey(users[8], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", true) // doesn't count
+        Integer attemptId0 = reportSurvey(users[0], surveyInfo1, [[0], [0, 2]], "Cool Answer")
+        Integer attemptId1 = reportSurvey(users[1], surveyInfo1, [[1], [1, 2]], "Cool Answer")
+        Integer attemptId2 = reportSurvey(users[2], surveyInfo1, [[0], [0]], "Cool Answer")
+        Integer attemptId3 = reportSurvey(users[3], surveyInfo1, [[1], [0, 2]], "Cool Answer")
+        Integer attemptId4 = reportSurvey(users[4], surveyInfo1, [[0], [0, 1, 2]], "Cool Answer")
+        Integer attemptId5 = reportSurvey(users[5], surveyInfo1, [[1], [3]], "Cool Answer")
+        Integer attemptId6 = reportSurvey(users[6], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer")
+        Integer attemptId7 = reportSurvey(users[7], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer")
+        Integer attemptId8 = reportSurvey(users[8], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", true) // doesn't count
 
         def surveyInfo2 = createSimpleSurvey(2)
         reportSurvey(users[0], surveyInfo2, [[0], [0]], "Cool Answer")
@@ -364,6 +364,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         s1_answ1.totalCount == 6
         s1_answ1.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
         s1_answ1.data.answerTxt == [null, null, null, null, null, null]
+        s1_answ1.data.userQuizAttemptId.sort() == [attemptId0, attemptId2, attemptId3, attemptId4, attemptId6, attemptId7].sort()
 
         s1_answ2.count == 4
         s1_answ2.totalCount == 4
@@ -396,7 +397,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         return quizInfo
     }
 
-    void reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, boolean inProgress = false) {
+    Integer reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, boolean inProgress = false) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quizInfo.quizId, userId).body
 
         answerOptions.eachWithIndex{ List<Integer> answers, int questionNum ->
@@ -410,6 +411,8 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         if (!inProgress) {
             skillsService.completeQuizAttemptForUserId(quizInfo.quizId, quizAttempt.id, userId).body
         }
+
+        return quizAttempt.id
     }
 
 }

@@ -20,23 +20,44 @@ limitations under the License.
     <skills-spinner :is-loading="isLoading" />
 
     <div v-if="!isLoading">
-      <div class="row">
-        <div class="col">
-          <stats-card title="Total # Attempts" :stat-num="metrics.numTaken" icon="fas fa-pen-square text-info"/>
-        </div>
-        <div class="col">
-          <stats-card title="# Passed Attempts" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success"/>
-        </div>
-        <div class="col">
-          <stats-card title="# Failed Attempts" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning"/>
-        </div>
-      </div>
-
-      <b-card class="mt-3" body-class="p-0">
-        <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-5">
-          <quiz-question-metrics :q="q" :num="index" />
-        </div>
+      <b-card v-if="!hasMetrics">
+        <no-content2 title="No Metrics Yet..." class="my-5"
+                     :message="`Metrics will be prominently displayed once at least 1 ${metrics.quizType} is completed`"/>
       </b-card>
+      <div v-if="hasMetrics">
+        <div class="row">
+          <div class="col-md-6 col-xl-3 mb-2">
+            <stats-card title="Total" icon="fas fa-pen-square text-info" :stat-num="metrics.numTaken">
+                <b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempts by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> users
+            </stats-card>
+          </div>
+          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2">
+            <stats-card title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
+              <b-badge variant="success">{{ metrics.numPassed }}</b-badge> attempts <span class="text-success text-uppercase">passed</span> by <b-badge variant="success">{{ metrics.numPassedDistinctUsers }}</b-badge> users
+            </stats-card>
+          </div>
+          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2">
+            <stats-card title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
+              <b-badge variant="danger">{{ metrics.numFailed }}</b-badge> attempts <span class="text-danger text-uppercase">failed</span> by <b-badge variant="success">{{ metrics.numFailedDistinctUsers }}</b-badge> users
+            </stats-card>
+          </div>
+          <div class="col-md-6 col-xl-3 mb-2">
+            <stats-card title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs" icon="fas fa-user-clock skills-color-points">
+              <template #card-value>
+                <span class="h4 font-weight-bold">{{ metrics.avgAttemptRuntimeInMs | formatDuration }}</span>
+              </template>
+              Average runtime for <b-badge variant="success">{{ metrics.numTaken }}</b-badge> attempts
+            </stats-card>
+          </div>
+
+        </div>
+
+        <b-card class="mt-3" body-class="p-0">
+          <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-5">
+            <quiz-question-metrics :q="q" :num="index" :is-survey="isSurvey" />
+          </div>
+        </b-card>
+      </div>
     </div>
   </div>
 </template>
@@ -47,10 +68,12 @@ limitations under the License.
   import StatsCard from '@/components/metrics/utils/StatsCard';
   import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'QuizMetrics',
     components: {
+      NoContent2,
       SkillsSpinner,
       QuizQuestionMetrics,
       StatsCard,
@@ -58,10 +81,18 @@ limitations under the License.
     },
     data() {
       return {
-        isLoading: false,
+        isLoading: true,
         quizId: this.$route.params.quizId,
         metrics: null,
       };
+    },
+    computed: {
+      isSurvey() {
+        return this.metrics.quizType === 'Survey';
+      },
+      hasMetrics() {
+        return this.metrics && this.metrics.numTaken > 0;
+      },
     },
     mounted() {
       this.isLoading = true;

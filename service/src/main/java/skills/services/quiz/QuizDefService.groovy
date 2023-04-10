@@ -435,7 +435,8 @@ class QuizDefService {
 
         List<QuizRun> quizRuns = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, pageRequest)
         int count = quizRuns.size()
-        if (pageRequest.pageNumber > 1 || count >= pageRequest.pageSize) {
+        // pages are 0 based
+        if (pageRequest.pageNumber > 0 || count >= pageRequest.pageSize) {
             count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
         }
         return new TableResult(totalCount: count, data: quizRuns, count: count)
@@ -525,6 +526,7 @@ class QuizDefService {
         }
 
         return new QuizMetrics(
+                quizType: quiz.type,
                 numTaken: totalNumAttempts,
                 numPassed: numAttemptsPassed,
                 numFailed: totalNumAttempts - numAttemptsPassed,
