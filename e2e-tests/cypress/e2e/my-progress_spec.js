@@ -1094,6 +1094,8 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="contactOwnersSubmitBtn"]').last().click();
             cy.wait(500); //wait for animations to complete
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
-            cy.getEmails();
+            cy.getEmails().then((emails) => {
+                        expect(emails[0].subject).to.equal('aaa bbb this is a message');
+                    });
     });
 });
