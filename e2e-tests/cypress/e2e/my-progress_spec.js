@@ -1096,7 +1096,7 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
             cy.loginAsRootUser();
             cy.getEmails().then((emails) => {
-                        expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
-                    });
+              expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+                });
     });
 });
