@@ -157,7 +157,26 @@ limitations under the License.
             isCorrect: false,
           }],
           question: '',
-          questionType: '',
+          questionType: {
+            options: [{
+              label: 'Multiple Choice',
+              id: QuestionType.MultipleChoice,
+              icon: 'fas fa-tasks',
+            }, {
+              label: 'Single Choice',
+              id: QuestionType.SingleChoice,
+              icon: 'far fa-check-square',
+            }, {
+              label: 'Input Text',
+              id: QuestionType.TextInput,
+              icon: 'far fa-keyboard',
+            }],
+            selectedType: {
+              label: 'Multiple Choice',
+              id: QuestionType.MultipleChoice,
+              icon: 'fas fa-tasks',
+            },
+          },
         },
         questionType: {
           options: [{
@@ -255,8 +274,11 @@ limitations under the License.
           } else {
             this.questionDefInternal = Object.assign(this.questionDefInternal, this.originalQuestion);
           }
-          const qType = this.questionDefInternal.type ? this.questionDefInternal.type : this.questionDefInternal.questionType;
-          this.questionType.selectedType = this.questionType.options.find((o) => o.id === qType);
+
+          if (this.isEdit) {
+            const qType = this.questionDefInternal.type ? this.questionDefInternal.type : this.questionDefInternal.questionType;
+            this.questionType.selectedType = this.questionType.options.find((o) => o.id === qType);
+          }
         }).finally(() => {
           if (this.isEdit || this.restoredFromStorage) {
             this.performValidation();
@@ -327,8 +349,8 @@ limitations under the License.
                 questionType,
                 answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
               };
+              this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
-              this.show = false;
             }
           });
       },
