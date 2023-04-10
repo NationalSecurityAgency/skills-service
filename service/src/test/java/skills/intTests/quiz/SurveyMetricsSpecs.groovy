@@ -365,24 +365,22 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         s1_answ1.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
         s1_answ1.data.answerTxt == [null, null, null, null, null, null]
 
-//        s1_answ2.count == 6
-//        s1_answ2.totalCount == 6
-//        s1_answ2.data.userId == [users[0], users[1], users[3], users[4], users[6], users[7]]
-//        s1_answ2.data.answerTxt == [null, null, null, null, null, null]
-//
-//        s1_answ3.count == 6
-//        s1_answ3.totalCount == 6
-//        s1_answ3.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]]
-//        s1_answ3.data.answerTxt == [null, null, null, null, null, null]
-//
-//        s1_answ4.count == 6
-//        s1_answ4.totalCount == 6
-//        s1_answ4.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]]
-//        s1_answ4.data.answerTxt == [null, null, null, null, null, null]
+        s1_answ2.count == 4
+        s1_answ2.totalCount == 4
+        s1_answ2.data.userId == [users[1], users[4], users[6], users[7]].sort()
+        s1_answ2.data.answerTxt == [null, null, null, null]
+
+        s1_answ3.count == 6
+        s1_answ3.totalCount == 6
+        s1_answ3.data.userId == [users[0], users[1], users[3], users[4], users[6], users[7]].sort()
+        s1_answ3.data.answerTxt == [null, null, null, null, null, null]
+
+        s1_answ4.count == 3
+        s1_answ4.totalCount == 3
+        s1_answ4.data.userId == [users[5], users[6], users[7]].sort()
+        s1_answ4.data.answerTxt == [null, null, null]
 
     }
-
-
 
     def createSimpleSurvey(Integer num) {
         def survey = QuizDefFactory.createQuizSurvey(num, "Fancy Description")
