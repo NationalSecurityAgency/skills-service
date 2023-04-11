@@ -35,7 +35,7 @@ limitations under the License.
     </div>
     <dashboard-footer />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
-    <scroll-to-top />
+    <scroll-to-top v-if="!isScrollToTopDisabled" />
   </div>
 </template>
 
@@ -72,6 +72,9 @@ limitations under the License.
       };
     },
     computed: {
+      isScrollToTopDisabled() {
+        return this.$store.getters.config.disableScrollToTop === 'true' || this.$store.getters.config.disableScrollToTop === true;
+      },
       isAuthenticatedUser() {
         return this.$store.getters.isAuthenticated;
       },
