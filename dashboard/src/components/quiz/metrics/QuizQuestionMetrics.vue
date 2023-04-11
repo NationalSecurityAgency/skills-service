@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <div :data-cy="`metrics-q${qNum}`">
     <div class="p-4">
-      <div class="h3">Question #{{num + 1}} <span class="h5"><b-badge variant="info">{{ questionTypeLabel }}</b-badge></span></div>
+      <div class="h3">Question #{{qNum}} <span class="h5"><b-badge variant="info" data-cy="qType">{{ questionTypeLabel }}</b-badge></span></div>
       <div>
         <markdown-text :text="q.question"/>
       </div>
@@ -41,24 +41,30 @@ limitations under the License.
         <span class="text-primary"><i class="fas fa-user-check skills-color-badges" aria-hidden="true"></i> {{ data.label }}</span>
       </template>
       <template v-slot:cell(answer)="data">
-        <check-selector v-if="!isSurvey" :value="data.item.isCorrect" :read-only="true" font-size="1.5rem"/> {{ data.value }}
+        <div :data-cy="`row${data.index}-colAnswer`">
+          <check-selector v-if="!isSurvey" :value="data.item.isCorrect" :read-only="true" font-size="1.5rem"/> {{ data.value }}
+        </div>
       </template>
       <template v-slot:cell(isCorrect)="data">
         <check-selector v-if="data.value" :value="data.value" :read-only="true"/>
       </template>
       <template v-slot:cell(numAnswered)="data">
-        <div class="row">
+        <div class="row" :data-cy="`row${data.index}-colNumAnswered`">
           <div class="col">
-            {{ data.value }} <b-badge>{{ data.item.percent }}%</b-badge>
+            <span data-cy="num">{{ data.value }}</span> <b-badge data-cy="percent">{{ data.item.percent }}%</b-badge>
           </div>
           <div class="col-auto" v-if="data.item.numAnswered && data.item.numAnswered > 0">
-            <b-button size="sm" variant="info" @click="data.toggleDetails" ><i :class="{'fa-arrow-alt-circle-up' : data.detailsShowing, 'fa-arrow-alt-circle-down' : !data.detailsShowing }" class="fas" />  Answer's History</b-button>
+            <b-button size="sm" variant="outline-primary" @click="data.toggleDetails" data-cy="answerHistoryBtn">
+              <i :class="{'fa-arrow-alt-circle-up' : data.detailsShowing, 'fa-arrow-alt-circle-down' : !data.detailsShowing }" class="fas" />  Answer's History
+            </b-button>
           </div>
         </div>
       </template>
 
       <template #row-details="row">
-        <quiz-answer-history :answer-def-id="row.item.id" class="mb-4"/>
+        <quiz-answer-history :answer-def-id="row.item.id"
+                             :data-cy="`row${row.index}-answerHistory`"
+                             class="mb-4"/>
       </template>
     </skills-b-table>
     <div v-if="!isSurvey && isMultipleChoice" class="bg-light p-2 small">
@@ -183,6 +189,9 @@ limitations under the License.
       },
       isTextInput() {
         return this.q.questionType === 'TextInput';
+      },
+      qNum() {
+        return this.num + 1;
       },
     },
   };

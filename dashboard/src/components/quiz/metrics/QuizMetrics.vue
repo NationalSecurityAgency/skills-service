@@ -26,27 +26,31 @@ limitations under the License.
       </b-card>
       <div v-if="hasMetrics">
         <div class="row">
-          <div class="col-md-6 col-xl-3 mb-2">
-            <stats-card title="Total" icon="fas fa-pen-square text-info" :stat-num="metrics.numTaken">
-                <b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempts by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> users
+          <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
+            <stats-card title="Total" icon="fas fa-pen-square skills-color-selfreport"
+                :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
+              <span v-if="!isSurvey"><b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempts by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> users</span>
+              <span v-if="isSurvey">Survey was completed <b-badge variant="info">{{ metrics.numTaken }}</b-badge> times</span>
             </stats-card>
           </div>
-          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2">
+          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardPassed">
             <stats-card title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
               <b-badge variant="success">{{ metrics.numPassed }}</b-badge> attempts <span class="text-success text-uppercase">passed</span> by <b-badge variant="success">{{ metrics.numPassedDistinctUsers }}</b-badge> users
             </stats-card>
           </div>
-          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2">
+          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardFailed">
             <stats-card title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
               <b-badge variant="danger">{{ metrics.numFailed }}</b-badge> attempts <span class="text-danger text-uppercase">failed</span> by <b-badge variant="success">{{ metrics.numFailedDistinctUsers }}</b-badge> users
             </stats-card>
           </div>
-          <div class="col-md-6 col-xl-3 mb-2">
-            <stats-card title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs" icon="fas fa-user-clock skills-color-points">
+          <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
+            <stats-card title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs"
+                        icon="fas fa-user-clock skills-color-badges"
+                        data-cy="metricsCardRuntime">
               <template #card-value>
                 <span class="h4 font-weight-bold">{{ metrics.avgAttemptRuntimeInMs | formatDuration }}</span>
               </template>
-              Average runtime for <b-badge variant="success">{{ metrics.numTaken }}</b-badge> attempts
+              Average {{ metrics.quizType }} runtime for <b-badge variant="success">{{ metrics.numTaken }}</b-badge> {{ isSurvey ? 'users' : 'attempts' }}
             </stats-card>
           </div>
 

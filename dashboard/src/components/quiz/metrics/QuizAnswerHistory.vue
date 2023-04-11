@@ -35,21 +35,42 @@ limitations under the License.
         <template #head(updated)="data">
           <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
+        <template v-slot:cell(answerTxt)="data">
+          <div :data-cy="`row${data.index}-colAnswerTxt`">
+            <pre v-if="data.item.truncated" data-cy="textTruncated">{{ data.value | truncate(answerTxtTruncate.truncateTo) }}</pre>
+            <pre v-else data-cy="text">{{ data.value }}</pre>
+            <div class="text-right">
+              <b-button v-if="data.item.truncationEnabled"
+                      size="sm"
+                      variant="outline-info"
+                      data-cy="expandCollapseTextBtn"
+                      @click="data.item.truncated = !data.item.truncated">
+                <span v-if="!data.item.truncated"><i class="fas fa-compress-arrows-alt" aria-hidden="true"></i> Collapse</span>
+                <span v-else><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Text</span>
+              </b-button>
+            </div>
+          </div>
+        </template>
         <template v-slot:cell(userIdForDisplay)="data">
-          <div class="row">
-            <div class="col">
+          <div class="row" style="min-width: 15rem;" :data-cy="`row${data.index}-colUserId`">
+            <div class="col mb-2">
               {{ data.value }}
             </div>
-            <div class="col-auto">
-              <div class="col-auto">
-                <b-button size="sm" variant="outline-info"
-                          target="_blank"  :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.userQuizAttemptId } }"><i class="fas fa-tasks"></i> View Full Run</b-button>
-              </div>
+            <div class="col-auto mb-2">
+              <b-button size="sm" variant="outline-info"
+                        target="_blank"
+                        :aria-label="`View quiz attempt for ${data.item.userQuizAttemptId} id`"
+                        :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.userQuizAttemptId } }"
+                        data-cy="viewRunBtn">
+                <i class="fas fa-eye" aria-hidden="true"></i> Run
+              </b-button>
             </div>
           </div>
         </template>
         <template v-slot:cell(updated)="data">
-          <date-cell :value="data.value"/>
+          <div style="min-width: 13rem;">
+            <date-cell :value="data.value"/>
+          </div>
         </template>
       </skills-b-table>
     </div>
@@ -76,6 +97,10 @@ limitations under the License.
         quizId: this.$route.params.quizId,
         isLoading: true,
         answerHistory: [],
+        answerTxtTruncate: {
+          truncateThreshold: 600,
+          truncateTo: 550,
+        },
         tableOptions: {
           busy: false,
           bordered: true,
@@ -134,7 +159,14 @@ limitations under the License.
         };
         return QuizService.getQuizAnswerSelectionHistory(this.quizId, this.answerDefId, params)
           .then((res) => {
-            this.answerHistory = res.data;
+            this.answerHistory = res.data.map((item) => {
+              const toTruncate = item.answerTxt && item.answerTxt.length >= this.answerTxtTruncate.truncateThreshold;
+              return ({
+                ...item,
+                truncated: toTruncate,
+                truncationEnabled: toTruncate,
+              });
+            });
             this.tableOptions.pagination.totalRows = res.count;
             this.tableOptions.pagination.hideUnnecessary = res.totalCount <= this.tableOptions.pagination.pageSize;
           })
@@ -163,5 +195,12 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
 </style>
