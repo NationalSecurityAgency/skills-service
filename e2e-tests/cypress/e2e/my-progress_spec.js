@@ -1072,7 +1072,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
-    it.only('Send email to project owner', () => {
+    it('Send email to project owner', () => {
             cy.loginAsRootUser();
             cy.createProject(4);
             cy.enableProdMode(4);
