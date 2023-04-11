@@ -18,7 +18,7 @@ limitations under the License.
     <sub-page-header title="Associated Skills"/>
 
     <b-card body-class="p-0">
-      <div v-if="table.items.length === 0" class="alert alert-info">
+      <div v-if="skills.length === 0" class="alert alert-info">
         <i class="fas fa-exclamation-circle"/> There are currently no skills associated with this quiz/survey.
         You can learn more about how to add skills to a quiz/survey in the documentation
         <a aria-label="SkillTree documentation of associating skills to quizzes"
@@ -102,6 +102,7 @@ limitations under the License.
     data() {
       return {
         quizId: this.$route.params.quizId,
+        skills: [],
         filter: {
           skillName: '',
         },
