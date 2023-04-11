@@ -73,7 +73,7 @@ limitations under the License.
     },
     computed: {
       isScrollToTopDisabled() {
-        return this.$store.getters.config.disableScrollToTop === 'true';
+        return this.$store.getters.config.disableScrollToTop === 'true' || this.$store.getters.config.disableScrollToTop === true;
       },
       isAuthenticatedUser() {
         return this.$store.getters.isAuthenticated;
