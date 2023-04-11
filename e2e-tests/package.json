@@ -26,7 +26,7 @@
     "cy:open:dev:verifyEmail": "TZ=UTC cypress open --config baseUrl=http://localhost:8082 --env verifyEmail=true",
     "cy:run": "TZ=UTC npm run licenseCheck && cypress run --browser chrome",
     "cy:run:oauth": "TZ=UTC npm run licenseCheck && cypress run --browser chrome --env oauthMode=true",
-    "cy:run:accessibility": "TZ=UTC npm run licenseCheck && cypress run --browser chrome --env enableLighthouse=true --config experimentalRunEvents=true --browser chrome --headless --spec \"cypress/e2e/accessibility/*.js\"",
+    "cy:run:accessibility": "TZ=UTC npm run licenseCheck && cypress run --browser chrome --env enableLighthouse=true,enableAvgLighthouseScore=true --browser chrome --headless --spec \"cypress/e2e/accessibility/*.js\"",
     "cy:run:dev": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:8082",
     "cy:run:dev:specificTest": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:8082 --spec \"cypress/e2e/discoverable_proj_invite_spec.js\"",
     "cy:run:dev:metrics": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:8082  --env customSnapshotsDir=./cypress/snapshots/metrics --spec \"cypress/e2e/metrics/*\"",
