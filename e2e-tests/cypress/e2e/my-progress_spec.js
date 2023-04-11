@@ -1086,7 +1086,7 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="contactOwnerBtn_proj3"]').should('be.visible').click();
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
             cy.get('[data-cy="contactOwnersMsgInput"]').last().click().fill('aaa bbb this is a message');
-            cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
+            cy.get('[data-cy="charactersRemaining"]').last().should('contain.text', '2,475 characters remaining');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').last().click();
             cy.wait('@contact');
