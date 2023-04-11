@@ -1074,8 +1074,8 @@ describe('Navigation Tests', () => {
 
     it('Send email to project owner', () => {
             cy.loginAsRootUser();
-            cy.createProject(4);
-            cy.enableProdMode(4);
+            cy.createProject(3);
+            cy.enableProdMode(3);
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.intercept('POST', '/api/validation/description').as('validate');
 
@@ -1083,7 +1083,7 @@ describe('Navigation Tests', () => {
             cy.loginAsProxyUser();
             cy.visit('/progress-and-rankings/');
             cy.get('[data-cy=manageMyProjsBtn]').click();
-            cy.get('[data-cy="contactOwnerBtn_proj4"]').should('be.visible').click();
+            cy.get('[data-cy="contactOwnerBtn_proj3"]').should('be.visible').click();
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
             cy.get('[data-cy="contactOwnersMsgInput"]').last().click().fill('aaa bbb this is a message');
             cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
@@ -1092,7 +1092,7 @@ describe('Navigation Tests', () => {
             cy.wait('@contact');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
             cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
-            cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 4 will be notified of your question via email.');
+            cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 3 will be notified of your question via email.');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').last().click();
             cy.wait(500); //wait for animations to complete
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
