@@ -66,6 +66,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
               where
                     quiz.quizRefId = ?1 AND
                     child.id = quiz.skillRefId
+              order by projectId, skillName asc
     ''')
     List<QuizSkillResult> getSkillsForQuizWithSubjects(Integer quizRefId, String userId)
 
