@@ -39,19 +39,6 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.runQuizForUser(1, 9, [{selectedIndex: [1]}, {selectedIndex: [0,2]}]);
         cy.runQuizForUser(1, 10, [{selectedIndex: [1]}, {selectedIndex: [0]}]);
         cy.runQuizForUser(1, 11, [{selectedIndex: [0]}, {selectedIndex: [0]}]);
-
-
-        cy.createSurveyDef(2);
-        cy.createSurveyMultipleChoiceQuestionDef(2, 1);
-        cy.createTextInputQuestionDef(2, 2, { question: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum' });
-        cy.createSurveyMultipleChoiceQuestionDef(2, 3, { questionType: 'SingleChoice' });
-
-        cy.runQuizForUser(2, 1, [{selectedIndex: [0, 1]}, {selectedIndex: [0]}, {selectedIndex: [0]}]);
-        cy.runQuizForUser(2, 2, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [2]}]);
-        cy.runQuizForUser(2, 3, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
-        cy.runQuizForUser(2, 5, [{selectedIndex: [0, 1]}, {selectedIndex: [0]}, {selectedIndex: [0]}]);
-        cy.runQuizForUser(2, 6, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
-        cy.runQuizForUser(2, 7, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}]);
     });
 
     after(() => {
@@ -62,11 +49,96 @@ describe('Quiz Metrics With Reused Data Tests', () => {
 
     });
 
+    it('quiz metrics summary cards', function () {
+        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '11')
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('11 attempts by 10 users')
 
-    it('quiz metrics page', function () {
-        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardValue"]').should('have.text', '5')
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardDescription"]').contains('5 attempts passed by 5 users')
 
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardValue"]').should('have.text', '6')
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('6 attempts failed by 5 users')
+
+        cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 11 attempts')
     });
 
+    it('single choice question metrics', function () {
+        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.get('[data-cy="metrics-q1"] [data-cy="qType"]').should('have.text', 'Single Choice')
 
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"]').contains("Question 1 - First Answer")
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"] [data-cy="checkbox-true"]')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"]').contains("Question 1 - Second Answer")
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"] [data-cy="checkbox-false"]')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"]').contains("Question 1 - Third Answer")
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"] [data-cy="checkbox-false"]')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="num"]').should('have.text', '6')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="percent"]').should('have.text', '54%')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="num"]').should('have.text', '5')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="percent"]').should('have.text', '45%')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="multipleChoiceQuestionWarning"]').should('not.exist')
+    });
+
+    it('multiple choice question metrics', function () {
+        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colAnswer"]').contains("First Answer")
+        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colAnswer"] [data-cy="checkbox-true"]')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colAnswer"]').contains("Second Answer")
+        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colAnswer"] [data-cy="checkbox-false"]')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colAnswer"]').contains("Third Answer")
+        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colAnswer"] [data-cy="checkbox-true"]')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colAnswer"]').contains("Fourth Answer")
+        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colAnswer"] [data-cy="checkbox-false"]')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="num"]').should('have.text', '11')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="percent"]').should('have.text', '100%')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="num"]').should('have.text', '9')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="percent"]').should('have.text', '81%')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+
+        cy.get('[data-cy="metrics-q2"] [data-cy="multipleChoiceQuestionWarning"]').should('exist')
+    });
+
+    it('single answer history', function () {
+        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
+
+        const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(headerSelector)
+            .contains('User')
+            .click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user10' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user9' }],
+        ], 10, true, 5, false);
+    });
 });

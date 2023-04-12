@@ -105,7 +105,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
         ], 5);
     });
 
-    it.only('single answer history expand to a larger page size', function () {
+    it('single answer history expand to a larger page size', function () {
         cy.visit('/administrator/quizzes/quiz2/metrics');
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
 

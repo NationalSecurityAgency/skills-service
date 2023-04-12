@@ -21,26 +21,34 @@ limitations under the License.
 
     <div v-if="!isLoading">
       <b-card v-if="!hasMetrics">
-        <no-content2 title="No Metrics Yet..." class="my-5"
-                     :message="`Metrics will be prominently displayed once at least 1 ${metrics.quizType} is completed`"/>
+        <no-content2 title="No Metrics Yet..." class="my-5" data-cy="noMetricsYet"
+                     :message="`Metrics will be available once at least 1 ${metrics.quizType} is completed`"/>
       </b-card>
       <div v-if="hasMetrics">
         <div class="row">
           <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
             <stats-card title="Total" icon="fas fa-pen-square skills-color-selfreport"
                 :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
-              <span v-if="!isSurvey"><b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempts by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> users</span>
-              <span v-if="isSurvey">Survey was completed <b-badge variant="info">{{ metrics.numTaken }}</b-badge> times</span>
+              <span v-if="!isSurvey"><b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempt{{ metrics.numTaken!=1 ? 's' : '' }} by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> user{{ metrics.numTakenDistinctUsers !=1 ? 's' : '' }}</span>
+              <span v-if="isSurvey">Survey was completed <b-badge variant="info">{{ metrics.numTaken }}</b-badge> time{{ metrics.numTaken!=1 ? 's' : '' }}</span>
             </stats-card>
           </div>
           <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardPassed">
             <stats-card title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
-              <b-badge variant="success">{{ metrics.numPassed }}</b-badge> attempts <span class="text-success text-uppercase">passed</span> by <b-badge variant="success">{{ metrics.numPassedDistinctUsers }}</b-badge> users
+              <b-badge variant="success">{{ metrics.numPassed }}</b-badge>
+              attempt{{ metrics.numPassed != 1 ? 's' : '' }} <span
+              class="text-success text-uppercase">passed</span>
+              by
+              <b-badge variant="success">{{ metrics.numPassedDistinctUsers }}</b-badge>
+              user{{ metrics.numPassedDistinctUsers != 1 ? 's' : '' }}
             </stats-card>
           </div>
           <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardFailed">
             <stats-card title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
-              <b-badge variant="danger">{{ metrics.numFailed }}</b-badge> attempts <span class="text-danger text-uppercase">failed</span> by <b-badge variant="success">{{ metrics.numFailedDistinctUsers }}</b-badge> users
+              <b-badge variant="danger">{{ metrics.numFailed }}</b-badge>
+              attempt{{ metrics.numFailed != 1 ? 's' : '' }} <span class="text-danger text-uppercase">failed</span> by
+              <b-badge variant="success">{{ metrics.numFailedDistinctUsers }}</b-badge>
+              user{{ metrics.numFailedDistinctUsers != 1 ? 's' : '' }}
             </stats-card>
           </div>
           <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
@@ -50,7 +58,9 @@ limitations under the License.
               <template #card-value>
                 <span class="h4 font-weight-bold">{{ metrics.avgAttemptRuntimeInMs | formatDuration }}</span>
               </template>
-              Average {{ metrics.quizType }} runtime for <b-badge variant="success">{{ metrics.numTaken }}</b-badge> {{ isSurvey ? 'users' : 'attempts' }}
+              Average {{ metrics.quizType }} runtime for
+              <b-badge variant="success">{{ metrics.numTaken }}</b-badge>
+              {{ isSurvey ? 'user' : 'attempt' }}{{ metrics.numTaken != 1 ? 's' : '' }}
             </stats-card>
           </div>
 

@@ -42,7 +42,7 @@ limitations under the License.
       </template>
       <template v-slot:cell(answer)="data">
         <div :data-cy="`row${data.index}-colAnswer`">
-          <check-selector v-if="!isSurvey" :value="data.item.isCorrect" :read-only="true" font-size="1.5rem"/> {{ data.value }}
+          <check-selector v-if="!isSurvey" :value="data.item.isCorrect" :read-only="true" font-size="1.5rem" :data-cy="`checkbox-${data.item.isCorrect}`"/> {{ data.value }}
         </div>
       </template>
       <template v-slot:cell(isCorrect)="data">
@@ -67,7 +67,7 @@ limitations under the License.
                              class="mb-4"/>
       </template>
     </skills-b-table>
-    <div v-if="!isSurvey && isMultipleChoice" class="bg-light p-2 small">
+    <div v-if="!isSurvey && isMultipleChoice" class="bg-light p-2 small" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span class="text-success text-uppercase">correct</span> ***
     </div>
 
