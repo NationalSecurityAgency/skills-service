@@ -28,16 +28,40 @@ import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
 interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
+    static interface QuizCounts {
+        QuizAttemptStatus getStatus()
+        Integer getNumAttempts()
+        Integer getNumDistinctUsers()
+    }
     @Nullable
     @Query('''select
-        quizAttempt.status as label, count(quizAttempt.id) as count
+        quizAttempt.status as status, count(quizAttempt.id) as numAttempts, count(distinct quizAttempt.userId) as numDistinctUsers
         from UserQuizAttempt quizAttempt, QuizDef quizDef
         where quizAttempt.quizDefinitionRefId = quizDef.id
             and quizDef.quizId = ?1
+            and quizAttempt.status <> 'INPROGRESS'
         group by quizAttempt.status
      ''')
-    List<LabeledCount> getUserQuizAttemptCounts(String quizId)
+    List<QuizCounts> getUserQuizAttemptCounts(String quizId)
 
+    @Nullable
+    @Query(value = '''select AVG((extract('epoch' from quizAttempt.completed) * 1000)- (extract('epoch' from quizAttempt.started) * 1000))
+            from user_quiz_attempt quizAttempt,
+            quiz_definition quizDef
+            where quizAttempt.quiz_definition_ref_id = quizDef.id
+                    and quizDef.quiz_id = ?1
+                    and quizAttempt.status <> 'INPROGRESS'
+     ''', nativeQuery = true)
+    Integer getAverageMsRuntimeForQuiz(String quizId)
+
+
+    @Query('''select count(distinct quizAttempt.userId)
+        from UserQuizAttempt quizAttempt, QuizDef quizDef
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizDef.quizId = ?1
+            and quizAttempt.status <> 'INPROGRESS'
+     ''')
+    Integer getDistinctNumUsersByQuizId(String quizId)
 
     @Nullable
     @Query('''select quizAttempt      
@@ -137,4 +161,5 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                    and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
                                    and attempt.status = 'PASSED')''' , nativeQuery = true)
     int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
+
 }

@@ -31,18 +31,22 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
 
     @Query('''select
         questionAttempt.quizQuestionDefinitionRefId as id, questionAttempt.status as status, count(questionAttempt.userId) as count
-        from QuizQuestionDef questionDef, UserQuizQuestionAttempt questionAttempt
+        from QuizQuestionDef questionDef, UserQuizQuestionAttempt questionAttempt, UserQuizAttempt quizAttempt
         where questionAttempt.quizQuestionDefinitionRefId = questionDef.id
             and questionDef.quizId = ?1
+            and quizAttempt.id = questionAttempt.userQuizAttemptRefId
+            and quizAttempt.status <> 'INPROGRESS'
         group by questionAttempt.quizQuestionDefinitionRefId, questionAttempt.status
      ''')
     List<IdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
 
     @Query('''select
         answerAttempt.quizAnswerDefinitionRefId as id, answerAttempt.status as status, count(answerAttempt.userId) as count
-        from QuizAnswerDef answerDef, UserQuizAnswerAttempt answerAttempt
+        from QuizAnswerDef answerDef, UserQuizAnswerAttempt answerAttempt, UserQuizAttempt quizAttempt
         where answerAttempt.quizAnswerDefinitionRefId = answerDef.id
             and answerDef.quizId = ?1
+            and quizAttempt.id = answerAttempt.userQuizAttemptRefId
+            and quizAttempt.status <> 'INPROGRESS' 
         group by answerAttempt.quizAnswerDefinitionRefId, answerAttempt.status
      ''')
     List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId)

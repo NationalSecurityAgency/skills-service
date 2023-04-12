@@ -61,6 +61,9 @@ limitations under the License.
         <template #head(started)="data">
           <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
+        <template #head(runtime)="data">
+          <span class="text-primary"><i class="fas fa-user-clock skills-color-access" aria-hidden="true"></i> {{ data.label }}</span>
+        </template>
         <template #head(controls)="">
           <span class="sr-only">Controls Heading - Not sortable</span>
         </template>

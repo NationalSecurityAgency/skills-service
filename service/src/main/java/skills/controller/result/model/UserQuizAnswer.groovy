@@ -15,19 +15,15 @@
  */
 package skills.controller.result.model
 
-import skills.storage.model.QuizDefParent
+import skills.storage.model.UserQuizAnswerAttempt
 
-class QuizMetrics {
-    QuizDefParent.QuizType quizType
-    Integer numTaken
-    Integer numPassed
-    Integer numFailed
+interface UserQuizAnswer {
+    Date getUpdated()
+    String getAnswerTxt()
 
-    Integer numTakenDistinctUsers
-    Integer numPassedDistinctUsers
-    Integer numFailedDistinctUsers
+    UserQuizAnswerAttempt.QuizAnswerStatus getStatus()
+    String getUserId()
+    String getUserIdForDisplay()
 
-    Integer avgAttemptRuntimeInMs
-
-    List<QuizQuestionMetricsResult> questions
+    Integer getUserQuizAttemptId()
 }

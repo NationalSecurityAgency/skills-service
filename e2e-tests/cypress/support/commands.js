@@ -210,7 +210,7 @@ Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => 
     }]);
 });
 
-Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true) => {
+Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');
 
@@ -223,7 +223,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
             cy.log('oauthMode, using loginBySingleSignOn')
             cy.loginBySingleSignOn()
         }
-        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete)
+        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete, userAnswerTxt)
     });
 });
 
@@ -235,7 +235,7 @@ Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo) 
         });
 });
 
-Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true) => {
+Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const quizId = `quiz${quizNum}`;
     cy.request(`/admin/quiz-definitions/${quizId}/questions`)
         .then((response) => {
@@ -251,7 +251,10 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                     return foundAnswer.id;
                 });
                 const isTextInputQuestion = qDef.questionType === 'TextInput'
-                const answerText = isTextInputQuestion ? `This is answer for question # ${questionIndex}` : null
+                let answerText = null;
+                if (isTextInputQuestion) {
+                    answerText = userAnswerTxt ? userAnswerTxt : `This is answer for question # ${questionIndex}`;
+                }
                 return { answerIds: selectedAnswerIds, isTextInputQuestion , answerText };
             }).flat();
 

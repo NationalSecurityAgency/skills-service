@@ -33,7 +33,6 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
-import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizSettings
 import skills.services.*
@@ -424,6 +423,26 @@ class QuizDefService {
     }
 
     @Transactional
+    TableResult getUserQuestionAnswers(String quizId, Integer answerDefId, PageRequest pageRequest) {
+        Optional<QuizAnswerDef> optionalQuizAnswerDef = quizAnswerRepo.findById(answerDefId)
+        if (!optionalQuizAnswerDef.isPresent()) {
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist", ErrorCode.BadParam)
+        }
+        QuizAnswerDef quizAnswerDef = optionalQuizAnswerDef.get()
+        if (quizAnswerDef.quizId != quizId) {
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not belonw to quiz [${quizId}]", ErrorCode.BadParam)
+        }
+
+        List<QuizRun> quizRuns = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, pageRequest)
+        int count = quizRuns.size()
+        // pages are 0 based
+        if (pageRequest.pageNumber > 0 || count >= pageRequest.pageSize) {
+            count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
+        }
+        return new TableResult(totalCount: count, data: quizRuns, count: count)
+    }
+
+    @Transactional
     void deleteQuizRun(String quizId, Integer attemptId) {
         Optional<UserQuizAttempt> optionalUserQuizAttempt = userQuizAttemptRepo.findById(attemptId)
         if (!optionalUserQuizAttempt.isPresent()) {
@@ -453,13 +472,22 @@ class QuizDefService {
 
     @Transactional
     QuizMetrics getMetrics(String quizId) {
-        List<LabeledCount> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
+        QuizDef quiz = findQuizDef(quizId)
+        boolean isSurvey = quiz.type == QuizDefParent.QuizType.Survey
+        List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
 
-        int total = quizCounts ? quizCounts.collect { it.getCount() }.sum() : 0
-        LabeledCount numPassedCount = quizCounts.find{
-            UserQuizAttempt.QuizAttemptStatus.PASSED.toString().equalsIgnoreCase(it.getLabel())
+        int totalNumAttempts = quizCounts ? quizCounts.collect { it.getNumAttempts() }.sum() : 0
+        UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
+            UserQuizAttempt.QuizAttemptStatus.PASSED == it.getStatus()
         }
-        int numPassed = numPassedCount ? numPassedCount.getCount() : 0
+        int numAttemptsPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+
+
+        Integer totalNumDistinctUsers = isSurvey ? totalNumAttempts : userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
+        int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
+
+
+        Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)
 
         QuizQuestionsResult quizQuestionsResult = getQuestionDefs(quizId)
         List<QuizQuestionDefResult> questionDefResults = quizQuestionsResult?.questions
@@ -484,22 +512,28 @@ class QuizDefService {
                         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerStatusCounts = byAnswerId[quizAnswerDefResult.id]
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerCorrectCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString() }
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerWrongCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG.toString() }
+                        int numAnswered = answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0
                         new QuizAnswerMetricsResult(
                                 id: quizAnswerDefResult.id,
                                 answer: quizAnswerDefResult.answer,
-                                isCorrect: quizAnswerDefResult.isCorrect,
-                                numAnswered: answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0,
-                                numAnsweredCorrect: answerCorrectCount?.getCount() ?: 0,
-                                numAnsweredWrong: answerWrongCount?.getCount() ?: 0,
+                                isCorrect: isSurvey ? true : quizAnswerDefResult.isCorrect,
+                                numAnswered: numAnswered,
+                                numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),
+                                numAnsweredWrong: isSurvey ? 0 : (answerWrongCount?.getCount() ?: 0),
                         )
                     }
             )
         }
 
         return new QuizMetrics(
-                numTaken: total,
-                numPassed: numPassed,
-                numFailed: total - numPassed,
+                quizType: quiz.type,
+                numTaken: totalNumAttempts,
+                numPassed: numAttemptsPassed,
+                numFailed: totalNumAttempts - numAttemptsPassed,
+                numTakenDistinctUsers: totalNumDistinctUsers,
+                numPassedDistinctUsers: numDistinctUsersPassed,
+                numFailedDistinctUsers: totalNumDistinctUsers - numDistinctUsersPassed,
+                avgAttemptRuntimeInMs: averageRuntimeInMs,
                 questions: questions,
         )
     }
