@@ -18,68 +18,68 @@ limitations under the License.
     <sub-page-header title="Associated Skills"/>
 
     <b-card body-class="p-0">
-      <div v-if="skills.length === 0" class="alert alert-info">
-        <i class="fas fa-exclamation-circle"/> There are currently no skills associated with this quiz/survey.
-        You can learn more about how to add skills to a quiz/survey in the documentation
-        <a aria-label="SkillTree documentation of associating skills to quizzes"
-           :href="docsUrl" target="_blank" style="display: inline-block">
-          here.
-        </a>
-      </div>
       <loading-container v-bind:is-loading="table.options.busy">
-
-        <div class="row px-3 pt-3">
-          <div class="col-12">
-            <b-form-group label="Skill Filter" label-class="text-muted">
-              <b-input v-model="filter.skillName" v-on:keydown.enter="applyFilters" data-cy="quiz-skillNameFilter" aria-label="Skill name filter"/>
-            </b-form-group>
-          </div>
-          <div class="col-md">
-          </div>
-        </div>
-
-        <div class="row pl-3 mb-3">
-          <div class="col">
-            <b-button variant="outline-info" @click="applyFilters" data-cy="quiz-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
-            <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="quiz-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
-          </div>
-        </div>
-
-        <skills-b-table :options="table.options" :items="table.items"
-                        tableStoredStateId="quizSkillsTable"
-                        data-cy="quizSkills">
-          <template #head(projectId)="data">
-            <span class="text-primary"><i class="fas fa-list-alt skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
-          </template>
-          <template #head(name)="data">
-            <span class="text-primary"><i class="fas fa-graduation-cap skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
-          </template>
-
-          <template v-slot:cell(projectId)="data">
-            <router-link v-if="data.item.canUserAccess"
-              :to="{ name:'Subjects', params: { projectId: data.item.projectId  }}"
-              class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.projectId }`"
-              :aria-label="`manage project ${data.item.projectId }`"
-              role="link">
-              {{ data.item.projectId }}
-            </router-link>
-            <div v-else>{{ data.item.projectId }}</div>
-          </template>
-
-          <template v-slot:cell(name)="data">
-            <router-link v-if="data.item.canUserAccess"
-                         tag="a" :to="{ name:'SkillOverview',
-                         params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                         :aria-label="`Manage skill ${data.item.skillName}  via link`">
-              <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
-            </router-link>
-            <div v-else>
-              <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
+        <div v-if="skills.length > 0 && !table.options.busy">
+          <div class="row px-3 pt-3">
+            <div class="col-12">
+              <b-form-group label="Skill Filter" label-class="text-muted">
+                <b-input v-model="filter.skillName" v-on:keydown.enter="applyFilters" data-cy="quiz-skillNameFilter" aria-label="Skill name filter"/>
+              </b-form-group>
             </div>
-            <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skillId}}</div>
-          </template>
-        </skills-b-table>
+            <div class="col-md">
+            </div>
+          </div>
 
+          <div class="row pl-3 mb-3">
+            <div class="col">
+              <b-button variant="outline-info" @click="applyFilters" data-cy="quiz-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
+              <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="quiz-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
+            </div>
+          </div>
+
+          <skills-b-table :options="table.options" :items="table.items"
+                          tableStoredStateId="quizSkillsTable"
+                          data-cy="quizSkills">
+            <template #head(projectId)="data">
+              <span class="text-primary"><i class="fas fa-list-alt skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
+            </template>
+            <template #head(name)="data">
+              <span class="text-primary"><i class="fas fa-graduation-cap skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
+            </template>
+
+            <template v-slot:cell(projectId)="data">
+              <router-link v-if="data.item.canUserAccess"
+                :to="{ name:'Subjects', params: { projectId: data.item.projectId  }}"
+                class="text-info mb-0 pb-0 preview-card-title" :title="`${data.item.projectId }`"
+                :aria-label="`manage project ${data.item.projectId }`"
+                role="link">
+                {{ data.item.projectId }}
+              </router-link>
+              <div v-else>{{ data.item.projectId }}</div>
+            </template>
+
+            <template v-slot:cell(name)="data">
+              <router-link v-if="data.item.canUserAccess"
+                           tag="a" :to="{ name:'SkillOverview',
+                           params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
+                           :aria-label="`Manage skill ${data.item.skillName}  via link`">
+                <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
+              </router-link>
+              <div v-else>
+                <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.skillName" />
+              </div>
+              <div class="text-secondary" style="font-size: 0.9rem;">ID: {{data.item.skillId}}</div>
+            </template>
+          </skills-b-table>
+        </div>
+        <no-content2 v-else title="No Skills Associated Yet..." icon="fas fa-award" class="my-5">
+          There are currently no skills associated with this quiz/survey.
+          You can learn more about how to add skills to a quiz/survey in the documentation
+          <a aria-label="SkillTree documentation of associating skills to quizzes"
+             :href="docsUrl" target="_blank" style="display: inline-block">
+            here.
+          </a>
+        </no-content2>
       </loading-container>
     </b-card>
   </div>
@@ -91,6 +91,7 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
     name: 'QuizSettings',
@@ -98,6 +99,7 @@ limitations under the License.
       SubPageHeader,
       SkillsBTable,
       LoadingContainer,
+      NoContent2,
     },
     data() {
       return {
