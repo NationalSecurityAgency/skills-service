@@ -42,7 +42,7 @@ describe('Client Display Skills Filtering Tests', () => {
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         });
 
-        Cypress.Commands.add('validateCounts', (withoutProgress, withPointsToday, complete, selfReported, inProgress, pendingApproval, belongsToBadge = null) => {
+        Cypress.Commands.add('validateCounts', (withoutProgress, withPointsToday, complete, selfReported, inProgress, pendingApproval, belongsToBadge = null, approval, honorSystem, quiz, survey) => {
             cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
                 .click();
             cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]')
@@ -57,6 +57,14 @@ describe('Client Display Skills Filtering Tests', () => {
                 .should('have.text', inProgress);
             cy.get('[data-cy="filter_pendingApproval"] [data-cy="filterCount"]')
                 .should('have.text', pendingApproval);
+            cy.get('[data-cy="filter_approval"] [data-cy="filterCount"]')
+                .should('have.text', approval);
+            cy.get('[data-cy="filter_honorSystem"] [data-cy="filterCount"]')
+                .should('have.text', honorSystem);
+            cy.get('[data-cy="filter_quiz"] [data-cy="filterCount"]')
+                .should('have.text', quiz);
+            cy.get('[data-cy="filter_survey"] [data-cy="filterCount"]')
+                .should('have.text', survey);
             if (belongsToBadge !== null) {
                 cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]')
                     .should('have.text', belongsToBadge);
@@ -76,46 +84,46 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0);
-        cy.validateCounts(1, 0, 0, 0, 0, 0, 0);
+        cy.validateCounts(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.refreshCounts();
-        cy.validateCounts(4, 0, 0, 0, 0, 0, 0);
+        cy.validateCounts(4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
         cy.createSkill(1, 1, 5, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 6, { selfReportingType: 'HonorSystem' });
         cy.refreshCounts();
-        cy.validateCounts(6, 0, 0, 2, 0, 0, 0);
+        cy.validateCounts(6, 0, 0, 2, 0, 0, 0, 1, 1, 0, 0);
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.refreshCounts();
-        cy.validateCounts(5, 1, 0, 2, 1, 0, 0);
+        cy.validateCounts(5, 1, 0, 2, 1, 0, 0, 1, 1, 0, 0);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.refreshCounts();
-        cy.validateCounts(4, 1, 0, 2, 2, 0, 0);
+        cy.validateCounts(4, 1, 0, 2, 2, 0, 0, 1, 1, 0, 0);
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
         cy.refreshCounts();
-        cy.validateCounts(3, 2, 1, 2, 2, 0, 0);
+        cy.validateCounts(3, 2, 1, 2, 2, 0, 0, 1, 1, 0, 0);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.refreshCounts();
-        cy.validateCounts(3, 3, 2, 2, 1, 0, 0);
+        cy.validateCounts(3, 3, 2, 2, 1, 0, 0, 1, 1, 0, 0);
 
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
         cy.refreshCounts();
-        cy.validateCounts(3, 3, 2, 2, 1, 1, 0);
+        cy.validateCounts(3, 3, 2, 2, 1, 1, 0, 1, 1, 0, 0);
 
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
         cy.assignSkillToBadge(1, 1, 2);
         cy.createBadge(1, 1, { enabled: true });
         cy.refreshCounts();
-        cy.validateCounts(3, 3, 2, 2, 1, 1, 2);
+        cy.validateCounts(3, 3, 2, 2, 1, 1, 2, 1, 1, 0, 0);
     });
 
     it('filter skills', () => {
@@ -950,7 +958,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-5"]')
             .should('not.exist');
 
-        cy.validateCounts(1, 4, 2, 1, 2, 0);
+        cy.validateCounts(1, 4, 2, 1, 2, 0, null, 1, 0, 0, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -1006,7 +1014,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"]')
             .contains('skill 4');
 
-        cy.validateCounts(0, 4, 4, 0, 0, 0);
+        cy.validateCounts(0, 4, 4, 0, 0, 0, null, 0, 0, 0, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -1080,7 +1088,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"]')
             .contains('skill 4');
 
-        cy.validateCounts(0, 4, 4, 0, 0, 0);
+        cy.validateCounts(0, 4, 4, 0, 0, 0, null, 0, 0, 0, 0);
 
         cy.get('[data-cy="filter_complete"]')
             .click();
@@ -1269,6 +1277,9 @@ describe('Client Display Skills Filtering Tests', () => {
     });
 
     it('Visual Tests: filter selected and last viewed button present', () => {
+        cy.intercept('GET', '/api/projects/proj1/subjects/subj1/summary?includeSkills=true')
+            .as('getSkills');
+
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
         cy.createBadge(1, 1);
@@ -1280,6 +1291,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.cdClickSkill(0);
         cy.get('[data-cy="skillProgressTitle"]').should('exist')
         cy.cdBack('Subject 1');
+        cy.wait('@getSkills');
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
         cy.get('[data-cy="filter_selfReported"]').click();
