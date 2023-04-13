@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import skills.auth.UserInfoService
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
 import skills.controller.result.model.RequestResult
 import skills.quizLoading.QuizRunService
@@ -27,6 +28,7 @@ import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizInfo
 import skills.quizLoading.model.QuizReportAnswerReq
+import skills.quizLoading.model.CompleteQuizAttemptReq
 
 @CrossOrigin(allowCredentials = "true", originPatterns = ["*"])
 @RestController
@@ -40,16 +42,24 @@ class UserQuizController {
     @Autowired
     QuizRunService quizRunService
 
+    @Autowired
+    UserInfoService userInfoService
+
     @RequestMapping(value = "/quizzes/{quizId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    QuizInfo getQuizInfo(@PathVariable("quizId") String quizId) {
-        return quizRunService.loadQuizInfo(quizId);
+    QuizInfo getQuizInfo(@PathVariable("quizId") String quizId,
+                         @RequestParam(name = "userId", required = false) String userIdParam,
+                         @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return quizRunService.loadQuizInfo(userId, quizId);
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
-    QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId) {
-        return quizRunService.startQuizAttempt(quizId);
+    QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
+                                            @RequestBody CompleteQuizAttemptReq startQuizAttemptReq) {
+        String userId = userInfoService.getUserName(startQuizAttemptReq.userId, true, startQuizAttemptReq.idType);
+        return quizRunService.startQuizAttempt(userId, quizId);
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
@@ -58,15 +68,18 @@ class UserQuizController {
                                    @PathVariable("attemptId") Integer attemptId,
                                    @PathVariable("answerId") Integer answerId,
                                    @RequestBody QuizReportAnswerReq quizReportAnswerReq) {
-        quizRunService.reportQuestionAnswer(quizId, attemptId, answerId, quizReportAnswerReq)
+        String userId = userInfoService.getUserName(quizReportAnswerReq.userId, true, quizReportAnswerReq.idType);
+        quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId, quizReportAnswerReq)
         return RequestResult.success()
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt/{quizAttempId}/complete", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizGradedResult completeQuizAttempt(@PathVariable("quizId") String quizId,
-                                         @PathVariable("quizAttempId") Integer quizAttemptId) {
-        return quizRunService.completeQuizAttempt(quizId, quizAttemptId);
+                                         @PathVariable("quizAttempId") Integer quizAttemptId,
+                                         @RequestBody CompleteQuizAttemptReq completeQuizAttemptReq) {
+        String userId = userInfoService.getUserName(completeQuizAttemptReq.userId, true, completeQuizAttemptReq.idType);
+        return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
     }
 
 }

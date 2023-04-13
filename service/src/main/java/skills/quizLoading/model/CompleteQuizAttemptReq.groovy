@@ -15,10 +15,7 @@
  */
 package skills.quizLoading.model
 
-class QuizReportAnswerReq {
-    Boolean isSelected = true
-    String answerText
-
+class CompleteQuizAttemptReq {
     // can only be supplied by an admin of the quiz or associated project
     String userId
     String idType

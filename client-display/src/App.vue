@@ -38,6 +38,7 @@ limitations under the License.
   import { required } from 'vee-validate/dist/rules';
   import ValidatorFactory from '@/common-components/validators/ValidatorFactory';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import store from '@/store/store';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';
@@ -150,6 +151,7 @@ limitations under the License.
 
           UserSkillsService.setVersion(parent.model.version);
           UserSkillsService.setUserId(parent.model.userId);
+          QuizRunService.setUserId(parent.model.userId);
 
           this.handleTheming(parent.model.theme);
 
