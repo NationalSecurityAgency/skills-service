@@ -367,9 +367,7 @@ aria-label="search for projects to pin"></b-input>
       chooseProject(name, id) {
         this.contactModal.projectName = name;
         this.contactModal.projectId = id;
-        console.log(this.contactModal.projectId);
         this.showContactOwner();
-        console.log(this.contactModal.show);
       },
     },
   };
