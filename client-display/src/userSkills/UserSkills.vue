@@ -30,6 +30,7 @@ limitations under the License.
   import { mapGetters } from 'vuex';
   import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';
@@ -62,6 +63,7 @@ limitations under the License.
     watch: {
       userId() {
         UserSkillsService.setUserId(this.userId);
+        QuizRunService.setUserId(this.userId);
         this.fetchData();
       },
       version() {

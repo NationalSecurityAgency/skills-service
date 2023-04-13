@@ -27,6 +27,7 @@ import java.util.regex.Pattern
 class AuthUtils {
     static final Pattern PROJECT_ID_PATTERN = Pattern.compile("/\\S+?/(myprojects|projects)/([^/]+).*\$")
     static final Pattern QUIZ_ID_PATTERN = Pattern.compile("^/admin/quiz-definitions/([^/]+).*\$")
+    static final Pattern QUIZ_ID_PATTERN1 = Pattern.compile("^/api/quizzes/([^/]+).*\$")
 
     // Example: /admin/projects/{projectId}/approvals/approve
     // Example: /admin/projects/{projectId}/approvals/reject
@@ -43,7 +44,10 @@ class AuthUtils {
     }
 
     static String getQuizIdFromRequest(HttpServletRequest servletRequest) {
-        return this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN, "quizId")
+        String quizId = this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN, "quizId")
+        if (!quizId) {
+            return this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN1, "quizId")
+        }
     }
 
     private static String getIdFromRequest(HttpServletRequest servletRequest, Pattern pattern, String label) {
