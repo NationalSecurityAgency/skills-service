@@ -11,7 +11,7 @@ fi
 
 echo "JAVA_OPTS=${JAVA_OPTS}"
 
-if [ $DEBUG_MODE == true ]
+if [ "$DEBUG_MODE" == true ]
 then
   FORMATTED=$SPRING_PROPS
 else
