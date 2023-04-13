@@ -90,6 +90,10 @@ limitations under the License.
         type: String,
         default: '',
       },
+      useHtml: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
@@ -118,9 +122,6 @@ limitations under the License.
       }
     },
     computed: {
-      markdownText() {
-        return this.$refs.toastuiEditor.invoke('getMarkdown');
-      },
       editorFeaturesUrl() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
       },
@@ -183,9 +184,19 @@ limitations under the License.
       },
     },
     methods: {
+      markdownText() {
+        return this.$refs.toastuiEditor.invoke('getMarkdown');
+      },
+      htmlText() {
+        return this.$refs.toastuiEditor.invoke('getHTML');
+      },
       onEditorChange() {
         this.attachmentError = '';
-        this.$emit('input', this.markdownText);
+        if (this.useHtml) {
+          this.$emit('input', this.htmlText());
+        } else {
+          this.$emit('input', this.markdownText());
+        }
       },
       setLabelForMoreButton() {
         this.$nextTick(() => {
