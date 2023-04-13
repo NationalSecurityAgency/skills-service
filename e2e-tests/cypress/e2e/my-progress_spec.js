@@ -443,12 +443,15 @@ describe('Navigation Tests', () => {
             .click();
         cy.get('[data-cy=filterBtn]')
             .click();
+        cy.get('[data-cy=filter_projectBadges]').contains('Project Badges');
         cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]')
             .contains('2');
         cy.get('[data-cy=filter_gems] [data-cy=filterCount]')
             .contains('2');
+        cy.get('[data-cy=filter_gems]') .contains('Gems');
         cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]')
             .contains('1');
+        cy.get('[data-cy=filter_globalBadges]').contains('Global Badges');
 
         cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]')
             .click();

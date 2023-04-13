@@ -44,7 +44,6 @@ import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import 'cypress-wait-until';
-import LookupUtil from "./LookupUtil.js";
 var moment = require('moment-timezone');
 
 function terminalLog(violations) {
@@ -211,7 +210,7 @@ Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => 
     }]);
 });
 
-Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true) => {
+Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');
 
@@ -224,7 +223,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
             cy.log('oauthMode, using loginBySingleSignOn')
             cy.loginBySingleSignOn()
         }
-        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete)
+        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete, userAnswerTxt)
     });
 });
 
@@ -236,7 +235,7 @@ Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo) 
         });
 });
 
-Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true) => {
+Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const quizId = `quiz${quizNum}`;
     cy.request(`/admin/quiz-definitions/${quizId}/questions`)
         .then((response) => {
@@ -252,7 +251,10 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                     return foundAnswer.id;
                 });
                 const isTextInputQuestion = qDef.questionType === 'TextInput'
-                const answerText = isTextInputQuestion ? `This is answer for question # ${questionIndex}` : null
+                let answerText = null;
+                if (isTextInputQuestion) {
+                    answerText = userAnswerTxt ? userAnswerTxt : `This is answer for question # ${questionIndex}`;
+                }
                 return { answerIds: selectedAnswerIds, isTextInputQuestion , answerText };
             }).flat();
 
@@ -789,54 +791,29 @@ Cypress.Commands.add('get$', (selector) => {
 });
 
 Cypress.Commands.add('resetDb', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:resetDb:postgres')
-        cy.log('reset postgres db')
-    } else {
-        cy.exec('npm run backend:resetDb')
-        cy.log('reset h2 db')
-    }
+    cy.exec('npm run backend:resetDb')
+    cy.log('reset postgres db')
 });
 
 Cypress.Commands.add('clearDb', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:clearDb:postgres')
-    } else {
-        cy.exec('npm run backend:clearDb')
-    }
+    cy.exec('npm run backend:clearDb')
 });
 
 Cypress.Commands.add('createInviteOnly', () => {
-    const db = LookupUtil.getDb();
-
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.exec('npm run backend:setupInviteOnly:postgres', {failOnNonZeroExit: false}).then((res) => {
-            cy.log(res.stdout);
-            cy.log(res.stderr);
-            cy.log(res.code);
-        });
-    } else {
-        cy.exec('npm run backend:setupInviteOnly', {failOnNonZeroExit: false}).then((res) => {
-           cy.log(res.stdout);
-           cy.log(res.stderr);
-           cy.log(res.code);
-        });
-    }
+    cy.exec('npm run backend:setupInviteOnly', {failOnNonZeroExit: false}).then((res) => {
+        cy.log(res.stdout);
+        cy.log(res.stderr);
+        cy.log(res.code);
+    });
 })
 
 Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
-    const db = LookupUtil.getDb();
-
     const waitConf = {
         timeout: 60000, // waits up to 1 minutes
         interval: 500 // performs the check every 500 ms, default to 200
@@ -844,11 +821,7 @@ Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
 
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
     cy.exec('npm version', {failOnNonZeroExit: false})
-    if (db && db === 'postgres') {
-        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks:postgres').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
-    } else {
-        cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*-->\s+(\d+)\s+\;/)[1] === '0'), waitConf);
-    }
+    cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
 });
 
 

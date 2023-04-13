@@ -76,6 +76,10 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}/metrics`)
       .then((response) => response.data);
   },
+  getQuizAnswerSelectionHistory(quizId, answerDefId, params) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/answers/${answerDefId}/attempts`, { params })
+      .then((response) => response.data);
+  },
   getQuizRunsHistory(quizId, params) {
     return axios.get(`/admin/quiz-definitions/${quizId}/runs`, { params })
       .then((response) => response.data);
@@ -112,6 +116,11 @@ export default {
   deleteQuizAdmin(quizId, userId) {
     const adminRole = 'ROLE_QUIZ_ADMIN';
     return axios.delete(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
+      .then((response) => response.data);
+  },
+  getSkillsForQuiz(quizId, userId) {
+    const params = { userId };
+    return axios.get(`/admin/quiz-definitions/${quizId}/skills/`, { params })
       .then((response) => response.data);
   },
 };

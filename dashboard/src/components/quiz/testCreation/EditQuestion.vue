@@ -23,6 +23,7 @@ limitations under the License.
              header-text-variant="light" no-fade>
       <skills-spinner :is-loading="loading"/>
       <b-container v-if="!loading" fluid data-cy="editQuestionModal">
+        <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div class="mb-2">
           <span class="font-weight-bold text-primary">Question:</span>
         </div>
@@ -109,10 +110,13 @@ limitations under the License.
   import VueSelect from 'vue-select';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import QuestionType from '@/common-components/quiz/QuestionType';
   import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers';
   import { extend } from 'vee-validate';
+  import SaveComponentStateLocallyMixin from '../../utils/SaveComponentStateLocallyMixin';
+  import ReloadMessage from '../../utils/ReloadMessage';
 
   export default {
     name: 'EditQuestion',
@@ -121,7 +125,9 @@ limitations under the License.
       MarkdownEditor,
       SkillsSpinner,
       VueSelect,
+      ReloadMessage,
     },
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
     props: {
       questionDef: Object,
       isEdit: {
@@ -135,7 +141,43 @@ limitations under the License.
         loading: true,
         show: this.value,
         showQuestion: false,
-        questionDefInternal: {},
+        questionDefInternal: {
+          question: '',
+          questionType: '',
+          answers: [],
+        },
+        originalQuestion: {
+          answers: [{
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }, {
+            id: null,
+            answer: '',
+            isCorrect: false,
+          }],
+          question: '',
+          questionType: {
+            options: [{
+              label: 'Multiple Choice',
+              id: QuestionType.MultipleChoice,
+              icon: 'fas fa-tasks',
+            }, {
+              label: 'Single Choice',
+              id: QuestionType.SingleChoice,
+              icon: 'far fa-check-square',
+            }, {
+              label: 'Input Text',
+              id: QuestionType.TextInput,
+              icon: 'far fa-keyboard',
+            }],
+            selectedType: {
+              label: 'Multiple Choice',
+              id: QuestionType.MultipleChoice,
+              icon: 'fas fa-tasks',
+            },
+          },
+        },
         questionType: {
           options: [{
             label: 'Multiple Choice',
@@ -157,30 +199,29 @@ limitations under the License.
           },
         },
         submitButtonClicked: false,
+        keysToWatch: ['question', 'questionType', 'answers'],
+        restoredFromStorage: false,
       };
     },
     mounted() {
-      if (this.isEdit) {
-        this.loading = true;
-        QuizService.getQuizQuestionDef(this.questionDef.quizId, this.questionDef.id)
-          .then((resQuizDef) => {
-            this.setInternalQuestionDef(resQuizDef);
-          })
-          .finally(() => {
-            this.performValidation();
-            this.loading = false;
-          });
-      } else {
-        this.setInternalQuestionDef(this.questionDef);
-      }
+      this.loadComponent();
       this.registerValidators();
     },
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
       },
+      questionDefInternal: {
+        handler(newValue) {
+          this.saveComponentState(this.componentName, newValue);
+        },
+        deep: true,
+      },
     },
     computed: {
+      componentName() {
+        return `${this.questionDef.quizId ? this.questionDef.quizId : this.$route.params.quizId}-${this.quizType}-${this.questionDef.id ? this.questionDef.id : 'New'}${this.isEdit ? 'Edit' : ''}`;
+      },
       isSurveyType() {
         return this.questionDef.quizType === 'Survey';
       },
@@ -201,24 +242,77 @@ limitations under the License.
       },
     },
     methods: {
-      setInternalQuestionDef(questionDef) {
-        this.questionDefInternal = {
-          isEdit: this.isEdit,
-          ...questionDef,
-        };
-        const qType = questionDef.type ? questionDef.type : questionDef.questionType;
-        this.questionType.selectedType = this.questionType.options.find((o) => o.id === qType);
-        this.loading = false;
+      discardChanges(reload = false) {
+        this.clearComponentState(this.componentName);
+        if (reload) {
+          this.restoredFromStorage = false;
+          this.loadComponent();
+        }
+      },
+      loadComponent() {
+        this.loading = true;
+        const getComponentState = this.loadComponentState(this.componentName);
+        const getQuestionInfo = this.isEdit ? QuizService.getQuizQuestionDef(this.questionDef.quizId, this.questionDef.id) : null;
+
+        Promise.all([getQuestionInfo, getComponentState]).then((values) => {
+          const questionInfo = values[0];
+          const localInfo = values[1];
+
+          if (localInfo) {
+            if (!this.isEdit || (this.isEdit && localInfo.id === questionInfo.id)) {
+              this.questionDefInternal = localInfo;
+              this.restoredFromStorage = true;
+            } else if (this.isEdit && questionInfo) {
+              this.questionDefInternal = Object.assign(this.questionDefInternal, questionInfo);
+              this.originalQuestion = Object.assign(this.originalQuestion, questionInfo);
+            } else {
+              this.questionDefInternal = Object.assign(this.questionDefInternal, this.originalQuestion);
+            }
+          } else if (this.isEdit && questionInfo) {
+            this.questionDefInternal = Object.assign(this.questionDefInternal, questionInfo);
+            this.originalQuestion = Object.assign(this.originalQuestion, questionInfo);
+          } else {
+            this.questionDefInternal = Object.assign(this.questionDefInternal, this.originalQuestion);
+          }
+
+          if (this.isEdit) {
+            const qType = this.questionDefInternal.type ? this.questionDefInternal.type : this.questionDefInternal.questionType;
+            this.questionType.selectedType = this.questionType.options.find((o) => o.id === qType);
+          }
+        }).finally(() => {
+          if (this.isEdit || this.restoredFromStorage) {
+            this.performValidation();
+          }
+          this.loading = false;
+        });
+      },
+      hideModal() {
+        this.show = false;
+        this.$emit('hidden', this.questionDefInternal);
       },
       closeMe(e) {
-        this.show = false;
-        this.publishHidden(e);
+        this.clearComponentState(this.componentName);
+        this.hideModal(e);
       },
       publishHidden(e) {
-        if (this.tooltipShowing) {
+        if (!e.update && this.hasObjectChanged(this.questionDefInternal, this.originalQuestion) && !this.loading) {
+          e.preventDefault();
+          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
+          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
+            .then((res) => {
+              if (res) {
+                this.clearComponentState(this.componentName);
+                this.hideModal(e);
+                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
+              } else {
+                this.$nextTick(() => this.$announcer.polite('Continued editing'));
+              }
+            });
+        } else if (this.tooltipShowing) {
           e.preventDefault();
         } else {
-          this.$emit('hidden', this.questionDefInternal);
+          this.clearComponentState(this.componentName);
+          this.hideModal(e);
         }
       },
       questionTypeChanged(inputItem) {
@@ -255,8 +349,8 @@ limitations under the License.
                 questionType,
                 answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
               };
+              this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
-              this.show = false;
             }
           });
       },

@@ -495,6 +495,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.enabled as enabled,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
+        s.groupId as groupId,
         s.readOnly as readOnly
         from SkillDef s where s.copiedFrom = ?1 and s.enabled = 'true'
     ''')
@@ -542,6 +543,29 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
           select s from SkillDef s where s.projectId = ?1 and s.readOnly = true  
     ''')
     List<SkillDef> findImportedSkills(String projectId, Pageable pageable)
+
+    static interface ProjectIdAndSkill {
+        Integer getSkillRefId()
+        String getProjectId()
+    }
+    @Nullable
+    @Query('''
+          select imported.id as skillRefId, imported.projectId as projectId
+          from SkillDef orig, SkillDef imported
+          where orig.projectId = ?1
+           and orig.id = imported.copiedFrom
+           and imported.enabled = 'true'  
+    ''')
+    List<ProjectIdAndSkill> getAllImportedByOriginalProject(String projectId)
+
+    @Nullable
+    @Query('''
+          select imported.id as skillRefId, imported.projectId as projectId
+          from SkillDef imported
+          where imported.copiedFrom in ?1
+           and imported.enabled = 'true'  
+    ''')
+    List<ProjectIdAndSkill> getAllImportedCopiesByOriginalSkillRefIds(List<Integer> skillRefId)
 
     @Query('''
         select count(sd.id) as numberOfSkills, 

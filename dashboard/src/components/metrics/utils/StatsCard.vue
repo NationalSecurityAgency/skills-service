@@ -19,10 +19,12 @@ limitations under the License.
       <div class="row">
         <div class="col">
           <div class="h5 text-uppercase text-muted card-title small mb-1">{{ title }}</div>
-          <span class="h4 font-weight-bold mb-0" data-cy="statCardValue">
-            <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ statNum | timeFromNow }}</span><span v-else>Never</span></span>
-            <span v-else>{{ statNum | number }}</span>
-          </span>
+          <slot name="card-value">
+            <span class="h4 font-weight-bold mb-0" data-cy="statCardValue">
+              <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ statNum | timeFromNow }}</span><span v-else>Never</span></span>
+              <span v-else>{{ statNum | number }}</span>
+            </span>
+          </slot>
         </div>
         <div class="col-auto">
           <i :class="icon" style="font-size: 2.2rem;"/>

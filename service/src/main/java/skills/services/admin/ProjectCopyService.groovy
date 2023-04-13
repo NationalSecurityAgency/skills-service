@@ -40,6 +40,8 @@ import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
+import skills.icons.CustomIconFacade
+import skills.icons.IconCssNameUtil
 import skills.services.AccessSettingsStorageService
 import skills.services.CreatedResourceLimitsValidator
 import skills.services.CustomValidationResult
@@ -134,6 +136,8 @@ class ProjectCopyService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    CustomIconFacade customIconFacade
 
     @Transactional
     @Profile
@@ -149,10 +153,10 @@ class ProjectCopyService {
         pinProjectForRootUser(toProj)
 
         List<SkillInfo> allCollectedSkills = []
-        saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills)
+        def newIcons = customIconFacade.copyIcons(originalProjectId, toProj.projectId)
+        saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
         updateProjectAndSubjectLevels(fromProject, toProj)
-
-        saveBadgesAndTheirSkills(fromProject, toProj)
+        saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
         handleQuizBasedUserPointsAndAchievements(toProj)
@@ -333,13 +337,16 @@ class ProjectCopyService {
     }
 
     @Profile
-    private void saveBadgesAndTheirSkills(ProjDef fromProject, ProjDef toProj) {
+    private void saveBadgesAndTheirSkills(ProjDef fromProject, ProjDef toProj, HashMap<String, String> newIcons) {
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Badge)
         badges.sort { it.displayOrder }.each { SkillDefWithExtra fromBadge ->
             BadgeRequest badgeRequest = new BadgeRequest()
             Props.copy(fromBadge, badgeRequest)
             badgeRequest.badgeId = fromBadge.skillId
             badgeRequest.enabled = Boolean.FALSE.toString()
+            if(newIcons[fromBadge.iconClass]) {
+                badgeRequest.iconClass = newIcons[fromBadge.iconClass];
+            }
             badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
             List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
             badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
@@ -354,7 +361,7 @@ class ProjectCopyService {
     }
 
     @Profile
-    private void saveSubjectsAndSkills(ProjectRequest projectRequest, ProjDef fromProject, ProjDef toProj, List<SkillInfo> allCollectedSkills) {
+    private void saveSubjectsAndSkills(ProjectRequest projectRequest, ProjDef fromProject, ProjDef toProj, List<SkillInfo> allCollectedSkills, HashMap<String, String> newIcons) {
         List<SkillDefWithExtra> fromSubjects = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Subject)
         fromSubjects?.findAll { it.enabled }
                 .sort { it.displayOrder }
@@ -362,6 +369,9 @@ class ProjectCopyService {
                     SubjectRequest toSubj = new SubjectRequest()
                     Props.copy(fromSubj, toSubj)
                     toSubj.subjectId = fromSubj.skillId
+                    if(newIcons[fromSubj.iconClass]) {
+                        toSubj.iconClass = newIcons[fromSubj.iconClass]
+                    }
                     subjAdminService.saveSubject(projectRequest.projectId, fromSubj.skillId, toSubj)
                     log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
                     createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills)

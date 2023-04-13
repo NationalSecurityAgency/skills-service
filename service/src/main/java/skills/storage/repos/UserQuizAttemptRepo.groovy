@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
@@ -27,16 +28,40 @@ import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
 interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
+    static interface QuizCounts {
+        QuizAttemptStatus getStatus()
+        Integer getNumAttempts()
+        Integer getNumDistinctUsers()
+    }
     @Nullable
     @Query('''select
-        quizAttempt.status as label, count(quizAttempt.id) as count
+        quizAttempt.status as status, count(quizAttempt.id) as numAttempts, count(distinct quizAttempt.userId) as numDistinctUsers
         from UserQuizAttempt quizAttempt, QuizDef quizDef
         where quizAttempt.quizDefinitionRefId = quizDef.id
             and quizDef.quizId = ?1
+            and quizAttempt.status <> 'INPROGRESS'
         group by quizAttempt.status
      ''')
-    List<LabeledCount> getUserQuizAttemptCounts(String quizId)
+    List<QuizCounts> getUserQuizAttemptCounts(String quizId)
 
+    @Nullable
+    @Query(value = '''select AVG((extract('epoch' from quizAttempt.completed) * 1000)- (extract('epoch' from quizAttempt.started) * 1000))
+            from user_quiz_attempt quizAttempt,
+            quiz_definition quizDef
+            where quizAttempt.quiz_definition_ref_id = quizDef.id
+                    and quizDef.quiz_id = ?1
+                    and quizAttempt.status <> 'INPROGRESS'
+     ''', nativeQuery = true)
+    Integer getAverageMsRuntimeForQuiz(String quizId)
+
+
+    @Query('''select count(distinct quizAttempt.userId)
+        from UserQuizAttempt quizAttempt, QuizDef quizDef
+        where quizAttempt.quizDefinitionRefId = quizDef.id
+            and quizDef.quizId = ?1
+            and quizAttempt.status <> 'INPROGRESS'
+     ''')
+    Integer getDistinctNumUsersByQuizId(String quizId)
 
     @Nullable
     @Query('''select quizAttempt      
@@ -113,10 +138,28 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
 
+    List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)
+
     @Query('''select q
               from UserQuizAttempt q, QuizToSkillDef qtoS
               where q.quizDefinitionRefId = qtoS.quizRefId
                     and qtoS.skillRefId in ?1
                     and q.status = ?2''')
     List<UserQuizAttempt> findByInSkillRefIdAndByStatus(List<Integer> skillRefIds, QuizAttemptStatus status, PageRequest pageRequest)
+
+
+    @Modifying
+    @Query(value = '''delete from user_quiz_attempt
+                      where id in (select attempt.id
+                                 from skill_definition skill,
+                                      quiz_to_skill_definition q_to_s,
+                                      user_quiz_attempt attempt
+                                 where skill.project_id = ?1
+                                   and attempt.user_id = ?2
+                                   and self_reporting_type = 'Quiz'
+                                   and q_to_s.skill_ref_id = skill.id
+                                   and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
+                                   and attempt.status = 'PASSED')''' , nativeQuery = true)
+    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
+
 }

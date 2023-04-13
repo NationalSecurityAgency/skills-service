@@ -21,15 +21,21 @@ import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.controller.result.model.SettingsResult
+import skills.services.BadgeUtils
+import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserEventsRepo
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 @Service
 @Slf4j
@@ -39,13 +45,19 @@ class BatchOperationsTransactionalAccessor {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
     UserPointsRepo userPointsRepo
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    RuleSetDefGraphService ruleSetDefGraphService
+
+    @Autowired
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
@@ -58,6 +70,14 @@ class BatchOperationsTransactionalAccessor {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    UserEventsRepo userEventsRepo
+
+    @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+
 
     @Transactional
     @Profile
@@ -79,16 +99,13 @@ class BatchOperationsTransactionalAccessor {
         String projectId = subject.projectId
         String subjectId = subject.skillId
 
-        log.info("Creating UserPoints for the new users for [{}-{}] subject", projectId, subjectId)
-        Integer numRows = createSubjectUserPointsForTheNewUsers(projectId, subjectId)
-        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, projectId, subjectId)
+        createSubjectUserPointsForTheNewUsers(projectId, subjectId)
 
         log.info("Updating UserPoints for the existing users for [{}-{}] subject", projectId, subjectId)
         updateUserPointsForSubject(projectId, subjectId)
 
-        log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subjectId)
+
         identifyAndAddSubjectLevelAchievements(subject.projectId, subjectId)
-        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subjectId)
     }
 
     /**
@@ -103,17 +120,9 @@ class BatchOperationsTransactionalAccessor {
         SettingsResult settingsResult = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         boolean pointsBased = settingsResult ? settingsResult.isEnabled() : false
 
-        log.info("Creating UserPoints for the new users for [{}] project", projectId)
         createProjectUserPointsForTheNewUsers(projectId)
-        log.info("Competed creating UserPoints for the new users for [{}] project", projectId)
-
-        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
         updateUserPointsForProject(projectId)
-        log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
-
-        log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
         identifyAndAddProjectLevelAchievements(projectId, pointsBased)
-        log.info("Completed identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBased)
     }
 
     @Transactional
@@ -145,6 +154,14 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
+    void copySingleUserSkillUserPointsToTheImportedProjects(String userId, String toProjectId, List<Integer> fromSkillRefIds) {
+        log.info("Copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+        userPointsRepo.copySingleUserSkillUserPointsToTheImportedProjects(userId, toProjectId, fromSkillRefIds)
+        log.info("Done copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+    }
+
+    @Transactional
+    @Profile
     void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
         userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds)
@@ -153,8 +170,31 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
+    void copyForSingleUserSkillAchievementsToTheImportedProjects(String userId, String projectId, List<Integer> fromSkillRefIds) {
+        log.info("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+        userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, fromSkillRefIds)
+        log.info("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+    }
+
+    @Transactional
+    @Profile
     Integer createSubjectUserPointsForTheNewUsers(String toProjectId, String toSubjectId) {
-        userPointsRepo.createSubjectUserPointsForTheNewUsers(toProjectId, toSubjectId)
+        log.info("Creating UserPoints for the new users for [{}-{}] subject", toProjectId, toSubjectId)
+        int numRows = userPointsRepo.createSubjectUserPointsForTheNewUsers(toProjectId, toSubjectId)
+        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, toProjectId, toSubjectId)
+
+        return numRows
+    }
+
+
+    @Transactional
+    @Profile
+    Integer createSubjectUserPointsForSingleNewUser(String userId, String toProjectId, String toSubjectId) {
+        log.info("Creating UserPoints for the new users for [{}-{}] subject", toProjectId, toSubjectId)
+        int numRows = userPointsRepo.createSubjectUserPointsForSingleNewUser(userId, toProjectId, toSubjectId)
+        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, toProjectId, toSubjectId)
+
+        return numRows
     }
 
     @Transactional
@@ -180,6 +220,15 @@ class BatchOperationsTransactionalAccessor {
         log.info("Creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
         userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId)
         log.info("Completed creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+    }
+
+
+    @Transactional
+    @Profile
+    void createUserEventEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
+        log.info("Creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
+        userEventsRepo.createUserEventEntriesFromPassedQuizzes(quizRefId, skillRefId)
+        log.info("Completed creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
     }
 
     @Transactional
@@ -208,8 +257,18 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void updateUserPointsForSubject(String projectId, String skillId) {
-        nativeQueriesRepo.updateUserPointsForSubject(projectId, skillId, false)
+    void updateUserPointsForSubject(String projectId, String subjectId) {
+        log.info("Updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+        PostgresQlNativeRepo.updateUserPointsForSubject(projectId, subjectId, false)
+        log.info("Completed updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+    }
+
+    @Transactional
+    @Profile
+    void removeSubjectUserPointsForNonExistentSkillDef(String projectId, String subjectId) {
+        log.info("Removing UserPoints for subject that doesn't have any child points: projectId=[{}], subjectId=[{}]", projectId, subjectId)
+        userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subjectId)
+        log.info("Completed removing UserPoints for subject that doesn't have any child points: projectId=[{}], subjectId=[{}]", projectId, subjectId)
     }
 
     @Transactional
@@ -233,27 +292,146 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
+    void identifyAndAddGroupAchievementsForSingleUser(String userId, List<SkillDef> groups) {
+        groups.each { SkillDef skillsGroupSkillDef ->
+            int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            log.info("Identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+                    userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
+            userAchievedLevelRepo.identifyAndAddGroupAchievementsForSingleUser(
+                    userId,
+                    skillsGroupSkillDef.projectId,
+                    skillsGroupSkillDef.skillId,
+                    skillsGroupSkillDef.id,
+                    numSkillsRequired,
+                    Boolean.FALSE.toString(),
+            )
+            log.info("Finished identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+                    userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
+        }
+    }
+
+    @Transactional
+    @Profile
     void identifyAndAddSubjectLevelAchievements(String projectId, String subjectId) {
+        log.info("Identifying subject level achievements for [{}-{}] subject", projectId, subjectId)
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
         userAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievements(subject)
+        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}]", projectId, subjectId)
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddSubjectLevelAchievementsForSingleUser(String userId, String projectId, String subjectId) {
+        log.info("Identifying subject level achievements for [{}-{}] subject for user=[{}]", projectId, subjectId, userId, )
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        userAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, subject)
+        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}] for user=[{}]", projectId, subjectId, userId)
     }
 
     @Transactional
     @Profile
     void createProjectUserPointsForTheNewUsers(String toProjectId) {
+        log.info("Creating UserPoints for the new users for [{}] project", toProjectId)
         userPointsRepo.createProjectUserPointsForTheNewUsers(toProjectId)
+        log.info("Competed creating UserPoints for the new users for [{}] project", toProjectId)
+    }
+
+    @Transactional
+    @Profile
+    void createProjectUserPointsForSingleNewUser(String userId, String toProjectId) {
+        log.info("Creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
+        userPointsRepo.createProjectUserPointsForSingleNewUser(userId, toProjectId)
+        log.info("Competed creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
     }
 
     @Transactional
     @Profile
     void updateUserPointsForProject(String projectId) {
-        nativeQueriesRepo.updateUserPointsForProject(projectId)
+        log.info("Updating UserPoints for the existing users for [{}] project", projectId)
+        PostgresQlNativeRepo.updateUserPointsForProject(projectId)
+        log.info("Completed updating UserPoints for the existing users for [{}] project", projectId)
     }
 
     @Transactional
     @Profile
     void identifyAndAddProjectLevelAchievements(String projectId, boolean pointsBasedLevels){
+        log.info("Identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBasedLevels)
         userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievements(projectId)
+        log.info("Completed identifying and adding project level achievements for [{}] project, pointsBased=[{}]", projectId, pointsBasedLevels)
+    }
+
+    @Transactional
+    @Profile
+    void identifyAndAddProjectLevelAchievements(String userId, String projectId){
+        log.info("Identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+        userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievementsForSingleUser(userId, projectId)
+        log.info("Completed identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+    }
+
+    @Transactional
+    @Profile
+    void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
+        userPerformedSkillRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
+        userAchievedLevelRepo.deleteAllBySkillRefIdInAndUserId(skillRefIds, userId)
+
+        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
+        updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
+        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+
+        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
+        userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
+        userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
+    }
+
+    @Profile
+    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
+        if (badgesSkillIsUsedIn) {
+            // do a delete
+            badgesSkillIsUsedIn.forEach { it ->
+                userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
+            }
+        }
+    }
+
+    @Profile
+    private void removeBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
+        List<SkillDef> badges = skillRelDefRepo.findParentByChildIdInAndTypes(skillRefIds, SkillDef.ContainerType.Badge, [SkillRelDef.RelationshipType.BadgeRequirement])
+        badges.unique { it.id }.each { SkillDef badge ->
+            if (BadgeUtils.withinActiveTimeframe(badge)) {
+                userAchievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
+            }
+        }
+    }
+
+    @Profile
+    private void updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId, String projectId) {
+        List<SkillDef> subjects = skillRefIds.collect {
+            ruleSetDefGraphService.getMySubjectParent(it)
+        }.unique { it.id }
+        subjects.each { SkillDef subject ->
+            int numUpdated = userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
+            log.info("Updated [{}] Subject UserPoints For User userId=[{}], subject=[{}-{}]", numUpdated, userId, projectId, subject.skillId)
+            int numRemoved = userPointsRepo.removeSubjectUserPointsForNonExistentSkillDef(projectId, subject.skillId)
+            log.info("Removed [{}] Subject UserPoints For User userId=[{}], subject=[{}-{}]", numRemoved, userId, projectId, subject.skillId)
+            userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject)
+        }
+    }
+
+    @Profile
+    private void removeGroupAchievementsForSkillsForASpecificUser(List<Integer> skillRefIds, String userId) {
+        List<SkillDef> groups = skillRefIds.collect {
+            ruleSetDefGraphService.getMyGroupParent(it)
+        }.findAll { it != null }.unique { it.id }
+        if (groups) {
+            groups.each { SkillDef group ->
+                long userAchievementNumRemoved = userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
+                log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
+            }
+        }
     }
 
 }

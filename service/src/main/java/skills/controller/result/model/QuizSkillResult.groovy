@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package skills.controller.result.model
 
-export default {
-    getDb() {
-        let db = Cypress.env('db');
-
-        if (db) {
-            const isValid = ['postgres'].includes(db);
-            if (!isValid) {
-                throw `Invalid db [${db}]. Valid values are 'postgres'`;
-            }
-        } else {
-            db = 'postgres';
-        }
-        cy.log(`db is [${db}]`);
-        return cy.wrap(db);
-    },
-};
+interface QuizSkillResult {
+    String getSkillName()
+    String getSkillId()
+    String getSubjectId()
+    String getSubjectName()
+    String getProjectId()
+    Boolean getCanUserAccess()
+}

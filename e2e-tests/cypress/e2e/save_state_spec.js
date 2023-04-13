@@ -16,15 +16,8 @@
 describe('Save State Tests', () => {
 
   beforeEach(() => {
-    cy.request('POST', '/app/projects/proj1', {
-      projectId: 'proj1',
-      name: "proj1"
-    })
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      name: "Subject 1"
-    })
+    cy.createProject(1, { name: "proj1" })
+    cy.createSubject(1, 1, { name: "Subject 1" })
   });
 
   it('Saves and discards new badge state', () => {
@@ -167,6 +160,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
+
 
   it('Saves and discards new skill state', () => {
     cy.intercept({
@@ -314,6 +308,18 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
   })
 
+  it('new skill state should not affect copy skill state', function () {
+    cy.createQuizDef(1);
+    cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="newSkillButton"]').click()
+    cy.get('[data-cy="skillName"]').type('save')
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="copySkillButton_skill1"]').click()
+    cy.get('[data-cy="quizSelected-quiz1"]')
+  });
+
   it('Saves and discards new subject state', () => {
     cy.visit('/administrator/projects/proj1/');
 
@@ -383,5 +389,151 @@ describe('Save State Tests', () => {
     cy.visit('/error');
 
     cy.contains('Discard Changes').should('not.exist');
+  })
+
+
+  it('Saves and discards new quiz state', () => {
+    cy.visit('/administrator/quizzes/')
+    cy.get('[data-cy="noQuizzesYet"]')
+
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+    cy.get('.modal-title').contains('New Quiz/Survey')
+
+    cy.get('[data-cy="quizName"]').type('My First Quiz')
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+
+    cy.get('[data-cy="quizDescription"]').type('Some cool Description')
+
+    cy.visit('/administrator/quizzes/')
+
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+    cy.get('.modal-title').contains('New Quiz/Survey')
+
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+    cy.get('[data-cy="quizDescription"]').contains('Some cool Description')
+
+    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+
+    cy.get('[data-cy="idInputValue"]').should('have.value', '')
+    cy.get('[data-cy="quizDescription"]').should('have.value', '')
+  })
+
+  it('Saves and discards edit quiz state', () => {
+    cy.createQuizDef(1);
+
+    cy.visit('/administrator/quizzes/')
+
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
+    cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+    cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
+    cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+    cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
+
+    cy.get('[data-cy="quizName"]').type(' with edits')
+    cy.get('[data-cy="quizDescription"]').type(' with edits')
+
+    cy.visit('/administrator/quizzes/')
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1 with edits')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it! with edits')
+
+    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="editQuizButton_quiz1"]').click()
+
+    cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
+    cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+  })
+
+  it('Saves and discards new question state', () => {
+    cy.createQuizDef(1);
+    cy.visit('/administrator/quizzes/quiz1/')
+
+    cy.get('[data-cy="btn_Questions"]').click()
+    cy.get('.modal-title').contains('New Question')
+
+    cy.get('[data-cy="questionText"]').type('My new quiz question')
+    cy.get('[data-cy="answer-0"]').type('Answer One')
+    cy.get('[data-cy="answer-1"]').type('Answer Two')
+
+    cy.get('[data-cy="addNewAnswer"]').last().click();
+    cy.get('[data-cy="answer-2"]').type('Answer Three')
+    cy.get('[data-cy="addNewAnswer"]').last().click();
+
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click();
+
+    cy.visit('/administrator/quizzes/quiz1/')
+
+    cy.get('[data-cy="btn_Questions"]').click()
+    cy.get('.modal-title').contains('New Question')
+
+    cy.get('[data-cy="questionText"]').contains('My new quiz question')
+    cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Answer One')
+    cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Answer Two')
+    cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Answer Three')
+    cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('have.value', '')
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+
+    cy.get('[data-cy="closeQuestionBtn"]').click()
+    cy.get('[data-cy="btn_Questions"]').click()
+
+    cy.get('[data-cy="questionText"]').should('have.value', '')
+    cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', '')
+    cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', '')
+    cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('not.exist')
+    cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('not.exist')
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('not.exist');
+
+  })
+
+  it('Saves and discards edit question state', () => {
+    cy.createQuizDef(1);
+    cy.visit('/administrator/quizzes/quiz1/')
+
+    cy.get('[data-cy="btn_Questions"]').click()
+    cy.get('.modal-title').contains('New Question')
+
+    cy.get('[data-cy="questionText"]').type('My new quiz question')
+    cy.get('[data-cy="answer-0"]').type('Answer One')
+    cy.get('[data-cy="answer-1"]').type('Answer Two')
+
+    cy.get('[data-cy="addNewAnswer"]').last().click();
+    cy.get('[data-cy="answer-2"]').type('Answer Three')
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click();
+    cy.get('[data-cy="saveQuestionBtn"]').click();
+
+    cy.visit('/administrator/quizzes/quiz1/')
+
+    cy.get('[data-cy="editQuestionButton_1"]').click()
+    cy.get('.modal-title').contains('Editing Existing Question')
+
+    cy.get('[data-cy="questionText"]').type(' with edit')
+    cy.get('[data-cy="answer-0"]').type(' with edit')
+    cy.get('[data-cy="answer-2"]').type(' with edit')
+    cy.get('[data-cy="addNewAnswer"]').last().click();
+    cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click();
+
+    cy.visit('/administrator/quizzes/quiz1/')
+
+    cy.get('[data-cy="editQuestionButton_1"]').click()
+    cy.get('[data-cy="questionText"]').contains('My new quiz question with edit')
+    cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Answer One with edit')
+    cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Answer Two')
+    cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Answer Three with edit')
+    cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('have.value', '')
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+    cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+
+    cy.get('[data-cy="closeQuestionBtn"]').click()
+    cy.get('[data-cy="editQuestionButton_1"]').click()
+
+    cy.get('[data-cy="questionText"]').contains('My new quiz question')
+    cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Answer One')
+    cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Answer Two')
+    cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Answer Three')
+    cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('not.exist')
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
   })
 });

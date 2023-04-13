@@ -1563,7 +1563,7 @@ class SkillsService {
     }
 
     def getProjectDescription(String projectId) {
-        def resp = wsHelper.adminGet("/projects/${projectId}/description")
+        def resp = wsHelper.appGet("/projects/${projectId}/description")
         return resp
     }
 
@@ -1702,6 +1702,11 @@ class SkillsService {
     def getQuizRuns(String quizId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "") {
         String url = "${getQuizDefUrl(quizId)}/runs"
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
+    }
+
+    def getUserQuizAnswers(String quizId, Integer answerDefId, int limit = 10, int page = 1, String orderBy = 'userIdForDisplay', boolean ascending = true) {
+        String url = "${getQuizDefUrl(quizId)}/answers/${answerDefId}/attempts"
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}".toString())
     }
 
     def deleteQuizRun(String quizId, Integer quizAttemptId) {

@@ -101,7 +101,7 @@ limitations under the License.
         return res;
       },
       ariaLabel() {
-        let res = `Answer number ${this.answerNum} of the question number ${this.qNum}. Currently ${!this.selected ? 'not ' : ''}selected.`;
+        let res = `Answer number ${this.answerNum} of the question number ${this.qNum}. The answer is ${this.a.answerOption}. Currently ${!this.selected ? 'not ' : ''}selected.`;
         if (this.a.isGraded) {
           if (this.a.isCorrect && this.selected) {
             res = `${res} Answer was correctly selected.`;
@@ -128,7 +128,10 @@ limitations under the License.
             id: this.a.id,
             selected: this.selected,
           });
-          this.$nextTick(() => this.$announcer.polite(`Selected answer number ${this.answerNum} as the correct answer for the question number ${this.qNum}`));
+          const announceMsg = this.selected
+            ? `Selected answer number ${this.answerNum} as the correct answer for the question number ${this.qNum}`
+            : `Removed selection from the answer number ${this.answerNum}`;
+          this.$nextTick(() => this.$announcer.polite(announceMsg));
         }
       },
     },

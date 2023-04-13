@@ -15,8 +15,6 @@
  */
 package skills.tasks.data
 
-import skills.services.events.SkillDate
-
 class CatalogFinalizeRequest {
     String projectId
 }

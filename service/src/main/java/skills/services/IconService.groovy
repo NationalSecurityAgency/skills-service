@@ -54,6 +54,10 @@ class IconService {
         iconRepo.save(icon)
     }
 
+    void saveAllIcons(Collection<CustomIcon> icons) {
+        iconRepo.saveAll(icons)
+    }
+
     CustomIcon loadIcon(String filename, String projectId){
         return iconRepo.findByProjectIdAndFilename(projectId, filename)
     }

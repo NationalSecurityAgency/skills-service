@@ -59,7 +59,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey, Pageable pageable)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
+    long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
 
     @Query('''select count(u.id) from UserPerformedSkill u
               where 
@@ -276,5 +278,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query("SELECT p from UserPerformedSkill p where p.skillRefId=?1 and p.created > ?2 and p.created < ?3" )
     List<UserPerformedSkill> findAllBySkillRefIdWithinTimeRange(Integer skillRefId, Date start, Date end)
+
+    @Nullable
+    List<UserPerformedSkill> findAllBySkillRefIdAndUserId(Integer skillRefId, String userId)
 
 }

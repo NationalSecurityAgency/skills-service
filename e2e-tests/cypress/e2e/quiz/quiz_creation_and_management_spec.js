@@ -391,7 +391,6 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="editQuizButton_quiz1"]').should('have.focus')
 
-
         cy.get('[data-cy="editQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('exist')
 
@@ -463,6 +462,30 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('.modal-header [aria-label="Close"]').click()
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
+    });
+
+    it('edit quiz description with block quotes on the quiz page', function () {
+        // ignore warning 'TextSelection endpoint not pointing into a node with inline content (blockQuote)'
+        Cypress.env('ignoreConsoleWarnings', true);
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuizButton"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
+        cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
+
+        cy.get('button.quote').click({force: true})
+        cy.get('[data-cy="saveQuizButton"]').click()
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuizButton"]').click()
+        cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+        cy.get('[data-cy="quizDescription"] div.ProseMirror.toastui-editor-contents blockquote p').should('contain', 'What a cool quiz #1! Thank you for taking it!')
+        cy.get('[data-cy="quizDescription"] div.ProseMirror.toastui-editor-contents blockquote p').should('not.contain', '> What a cool quiz #1! Thank you for taking it!')
     });
 });
 

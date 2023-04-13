@@ -37,6 +37,31 @@ import java.util.stream.Stream
 @CompileStatic
 interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
+    @Modifying
+    @Query(value = '''insert into user_events (user_id, project_id, skill_ref_id, event_time, event_type, count, week_number)
+            select q_attempt.user_id     as user_id,
+                   skill.project_id      as project_id,
+                   skill.id              as skill_ref_id,
+                   DATE_TRUNC('day', q_attempt.completed)   as event_time,
+                   'DAILY'               as event_type,
+                   1                     as count,
+                   trunc((extract(epoch from date_trunc('week',q_attempt.completed)))/604800) as weeks
+            from user_quiz_attempt q_attempt,
+                 quiz_to_skill_definition q_to_s,
+                 skill_definition skill
+            where q_attempt.status = 'PASSED'
+              and q_attempt.quiz_definition_ref_id = :quizRefId
+              and skill.id = :skillRefId
+              and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
+              and q_to_s.skill_ref_id = skill.id
+              and not exists(
+                    select 1
+                    from user_events innerUP
+                    where skill.id = innerUP.skill_ref_id
+                      and q_attempt.user_id = innerUP.user_id
+                );''', nativeQuery = true)
+    void createUserEventEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+
     @Nullable
     @Query(value="""SELECT min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count FROM
         (
@@ -421,6 +446,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     void deleteByEventTypeAndEventTimeLessThan(EventType type, Date start)
 
     void deleteAllByUserIdAndProjectId(String projectId, String userId)
+
+    void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
+
 
     @Modifying
     @Query(value='''

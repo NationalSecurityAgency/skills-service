@@ -134,6 +134,6 @@ export default {
     return axios.post('/root/users/previewEmail', email).then((response) => response.data);
   },
   loadDescription(projectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/description`).then((response) => response.data);
+    return axios.get(`/app/projects/${encodeURIComponent(projectId)}/description`).then((response) => response.data);
   },
 };

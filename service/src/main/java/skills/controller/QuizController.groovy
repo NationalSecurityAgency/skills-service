@@ -33,6 +33,8 @@ import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefSkinny
 import skills.storage.model.auth.RoleName
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -79,6 +81,12 @@ class QuizController {
     @ResponseBody
     Integer countSkillsForQuiz(@PathVariable("quizId") String quizId) {
         return quizDefService.countNumSkillsQuizAssignedTo(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/skills/", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId, @RequestParam String userId) {
+        return quizDefService.getSkillsForQuiz(quizId, userId)
     }
 
     @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")
@@ -134,6 +142,22 @@ class QuizController {
         return quizDefService.getQuestionDef(quizId, questionId)
     }
 
+
+    @RequestMapping(value = "/{quizId}/answers/{answerDefId}/attempts", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    TableResult getUserQuestionAnswerAttempts(@PathVariable("quizId") String quizId,
+                                       @PathVariable("answerDefId") Integer answerDefId,
+                                       @RequestParam int limit,
+                                       @RequestParam int page,
+                                       @RequestParam String orderBy,
+                                       @RequestParam Boolean ascending) {
+        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
+        QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
+        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
+        QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest)
+    }
 
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody

@@ -360,6 +360,32 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                                          @Param('numSkillsRequired') int numSkillsRequired,
                                          @Param('notified') String notified)
 
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
+            SELECT achievementsByUserId.user_id, :projectId, :groupSkillId, :groupSkillRefId, -1, :notified
+            FROM (
+                SELECT user_id, count(id) achievementCount
+                FROM user_achievement
+                WHERE
+                      skill_id IN (select sd.skill_id
+                                    from skill_relationship_definition srd, skill_definition sd
+                                    where srd.parent_ref_id = :groupSkillRefId and sd.id = srd.child_ref_id and srd.type='SkillsGroupRequirement') and
+                      user_id = :userId and
+                      project_id = :projectId
+                GROUP BY user_id
+                ) achievementsByUserId
+            WHERE
+                  achievementsByUserId.achievementCount >= :numSkillsRequired and
+                NOT EXISTS (
+                        SELECT id FROM user_achievement WHERE project_id = :projectId and skill_id = :groupSkillId and user_id = achievementsByUserId.user_id
+                    )''', nativeQuery = true)
+    @Modifying
+    void identifyAndAddGroupAchievementsForSingleUser(@Param('userId') String userId,
+                                         @Param('projectId') String projectId,
+                                         @Param('groupSkillId') String groupSkillId,
+                                         @Param('groupSkillRefId') Integer groupSkillRefId,
+                                         @Param('numSkillsRequired') int numSkillsRequired,
+                                         @Param('notified') String notified)
+
     @Modifying
     @Query(value = '''
         WITH skills as (
@@ -383,6 +409,34 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         where t.runningSum >= :fromPoints
         group by user_id''', nativeQuery = true)
     int identifyAndAddProjectLevelAchievementsForALevel(
+            @Param('projectId') String projectId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
+    @Modifying
+    @Query(value = '''
+        WITH skills as (
+            select case when s.copied_from_skill_ref is not null then s.copied_from_skill_ref else s.id end as id,
+                s.point_increment as point_increment
+            from skill_definition s
+            where s.project_id = :projectId
+                and s.type = 'Skill'
+        )
+        INSERT INTO user_achievement (user_id, level, achieved_on, points_when_achieved, project_id, notified)
+        SELECT user_id, :level, min(performed_on), min(runningSum) points_when_achieved, :projectId, 'false'
+        FROM (
+                 SELECT ups.user_id,
+                        ups.performed_on,
+                        ups.created,
+                        SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
+                 FROM user_performed_skill ups, skills
+                 WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                   and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id is null and ua.level = :level)
+             ) as t
+        where t.runningSum >= :fromPoints
+        group by user_id''', nativeQuery = true)
+    int identifyAndAddProjectLevelAchievementsForALevelAndSingleUser(
+            @Param('userId') String userId,
             @Param('projectId') String projectId,
             @Param('level') Integer level,
             @Param('fromPoints') Integer fromPointsExclusive)
@@ -420,6 +474,39 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param('level') Integer level,
             @Param('fromPoints') Integer fromPointsExclusive)
 
+    @Modifying
+    @Query(value = '''
+        WITH skills as (
+          select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                 child.point_increment as point_increment
+                    from skill_relationship_definition rel,
+                         skill_definition child
+                    where rel.parent_ref_id = :subjectRefId
+                      and rel.child_ref_id = child.id
+                      and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                      and child.type = 'Skill'
+        )
+        INSERT INTO user_achievement (user_id, level, achieved_on, points_when_achieved, project_id, skill_id, skill_ref_id, notified)
+        SELECT user_id, :level, min(performed_on), min(runningSum) points_when_achieved, :projectId, :subjectId, :subjectRefId, 'false'
+        FROM (
+                 SELECT ups.user_id,
+                        ups.performed_on,
+                        ups.created,
+                        SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
+                 FROM user_performed_skill ups, skills
+                 WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                   and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id = :subjectRefId and ua.level = :level)
+             ) as t
+        where t.runningSum >= :fromPoints
+        group by user_id''', nativeQuery = true)
+    int identifyAndAddSubjectLevelAchievementsForALevelForASingleUser(
+            @Param('userId') String userId,
+            @Param('projectId') String projectId,
+            @Param('subjectId') String subjectId,
+            @Param('subjectRefId') Integer subjectRefId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
 
     @Modifying
     @Query(value = '''delete
@@ -438,7 +525,74 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param('fromPoints') Integer fromPointsExclusive)
 
     @Modifying
+    @Query(value = '''delete
+                from user_achievement uaOuter
+                where uaOuter.id = ANY (select ua.id
+                        from user_achievement ua
+                                 left join user_points up
+                                           on (ua.skill_ref_id = up.skill_ref_id and ua.user_id = up.user_id)
+                        where ua.skill_ref_id = :subjectRefId
+                          and ua.user_id = :userId
+                          and ua.level = :level
+                          and (up.points < :fromPoints or up.points is null)
+                        )''', nativeQuery = true)
+    int removeSubjectLevelAchievementsIfThisUserDoesNotQualify(
+            @Param('userId') String userId,
+            @Param('subjectRefId') Integer subjectRefId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
+    @Modifying
+    @Query(value = '''delete
+                from user_achievement uaOuter
+                where uaOuter.id = ANY (select ua.id
+                        from user_achievement ua
+                                 left join user_points up
+                                           on (ua.project_id = up.project_id 
+                                                   and ua.skill_ref_id is null 
+                                                   and up.skill_ref_id is null
+                                                   and ua.user_id = up.user_id)
+                        where ua.project_id = :projectId 
+                          and ua.skill_ref_id is null
+                          and ua.level = :level
+                          and (up.points < :fromPoints or up.points is null)
+                        )''', nativeQuery = true)
+    int removeProjectLevelAchievementsIfUsersDoNotQualify(
+            @Param('projectId') String projectId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
+    @Modifying
+    @Query(value = '''delete
+                from user_achievement uaOuter
+                where uaOuter.id = ANY (select ua.id
+                        from user_achievement ua
+                                 left join user_points up
+                                           on (ua.project_id = up.project_id 
+                                                   and ua.skill_ref_id is null 
+                                                   and up.skill_ref_id is null
+                                                   and ua.user_id = :userId
+                                                   and ua.user_id = up.user_id)
+                        where ua.project_id = :projectId 
+                          and ua.user_id = :userId
+                          and ua.skill_ref_id is null
+                          and ua.level = :level
+                          and (up.points < :fromPoints or up.points is null)
+                        )''', nativeQuery = true)
+    int removeProjectLevelAchievementsIfUserDoesNotQualify(
+            @Param('userId') String userId,
+            @Param('projectId') String projectId,
+            @Param('level') Integer level,
+            @Param('fromPoints') Integer fromPointsExclusive)
+
+    @Modifying
     int deleteAllBySkillRefId(Integer skillRefId)
+
+    @Modifying
+    int deleteAllBySkillRefIdAndUserId(Integer skillRefId, String userId)
+
+    @Modifying
+    int deleteAllBySkillRefIdInAndUserId(List<Integer> skillRefId, String userId)
 
     static interface AchievementItem {
         Date getAchievedOn()
@@ -703,6 +857,24 @@ where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagK
                 )
             ''', nativeQuery = true)
     void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+
+    @Modifying
+    @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)
+            SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
+            FROM user_achievement ua,
+                 skill_definition toDef
+            WHERE toDef.copied_from_skill_ref = ua.skill_ref_id
+              and ua.skill_ref_id in (:fromSkillRefIds)
+              and ua.user_id = :userId
+              and not exists(
+                    select 1
+                    from user_achievement innerTable
+                    where toDef.project_id = innerTable.project_id
+                      and ua.user_id = innerTable.user_id
+                      and toDef.skill_id = innerTable.skill_id
+                )
+            ''', nativeQuery = true)
+    void copyForSingleUserSkillAchievementsToTheImportedProjects(@Param('userId') userId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
     @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')

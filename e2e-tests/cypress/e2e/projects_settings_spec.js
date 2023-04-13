@@ -444,7 +444,7 @@ describe('Project Settings Tests', () => {
             .as('p2SaveSettings');
 
         cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
-        cy.intercept('GET', '/admin/projects/proj1/description').as('loadProj1Description');
+        cy.intercept('GET', '/app/projects/proj1/description').as('loadProj1Description');
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@p1GetSettings');
@@ -466,6 +466,13 @@ describe('Project Settings Tests', () => {
 
 
         //validate that the project description expander is only present for proj1 as proj2 has no description defined, proj3 should not have an expander as while it does
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.request('POST', '/logout');
+              cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+              cy.loginAsProxyUser();
+          });
+        cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/manage-my-projects');
         cy.wait('@loadMyProjects');
         cy.get('[data-cy="expandDetailsBtn_proj1"]').should('be.visible');

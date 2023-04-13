@@ -52,7 +52,7 @@ limitations under the License.
       <template slot="completeAboveTitle">
         <slot name="completeAboveTitle">
           <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-          <span v-else>You are about to begin the quiz!</span>
+          <span v-else>Thank you for completing the Quiz!</span>
         </slot>
       </template>
     </quiz-run-completion-summary>
@@ -243,6 +243,11 @@ limitations under the License.
                         element.scrollIntoView({ behavior: 'smooth' });
                       });
                     }
+                    let announceMsg = `Completed ${this.quizInfo.quizType}`;
+                    if (!this.isSurveyType) {
+                      announceMsg = `${announceMsg}. ${!this.quizResult.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
+                    }
+                    this.$nextTick(() => this.$announcer.polite(announceMsg));
                   });
               });
           } else {

@@ -30,7 +30,7 @@ import skills.services.*
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
-import skills.storage.repos.nativeSql.NativeQueriesRepo
+import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -66,7 +66,7 @@ class BadgeAdminService {
     SkillsAdminService skillsAdminService
 
     @Autowired
-    NativeQueriesRepo nativeQueriesRepo
+    PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
@@ -174,7 +174,7 @@ class BadgeAdminService {
     @Transactional
     public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge) {
         if(!badge.projectId) {
-            nativeQueriesRepo.addGlobalBadgeAchievementForEligibleUsers(badge.skillId,
+            PostgresQlNativeRepo.addGlobalBadgeAchievementForEligibleUsers(badge.skillId,
                     badge.id,
                     Boolean.FALSE,
                     countNumberOfRequiredSkills(badge.skillId),
@@ -182,7 +182,7 @@ class BadgeAdminService {
                     badge.startDate,
                     badge.endDate)
         } else {
-            nativeQueriesRepo.addBadgeAchievementForEligibleUsers(badge.projectId,
+            PostgresQlNativeRepo.addBadgeAchievementForEligibleUsers(badge.projectId,
                     badge.skillId,
                     badge.id,
                     Boolean.FALSE,

@@ -170,7 +170,8 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
         if (grantedAuthority.getRole().roleName == RoleName.ROLE_PRIVATE_PROJECT_USER && grantedAuthority.getRole().projectId == projectId) {
             return true
         }
-        if (grantedAuthority.getRole().roleName == RoleName.ROLE_PROJECT_ADMIN && grantedAuthority.getRole().projectId == projectId) {
+        if ((grantedAuthority.getRole().roleName == RoleName.ROLE_PROJECT_ADMIN ||
+                grantedAuthority.getRole().roleName == RoleName.ROLE_PROJECT_APPROVER) && grantedAuthority.getRole().projectId == projectId) {
             return true
         }
         return false

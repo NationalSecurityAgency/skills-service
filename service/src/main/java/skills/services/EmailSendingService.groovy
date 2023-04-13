@@ -66,7 +66,7 @@ class EmailSendingService {
 
         MimeMessage message = mailSender.createMimeMessage()
         MimeMessageHelper helper = plainTextBody ?
-                new MimeMessageHelper(message, true) :
+                new MimeMessageHelper(message, true, "UTF-8") :
                 new MimeMessageHelper(message, "UTF-8")
         helper.setSubject(subject)
         String[] toArr = to.toArray()
@@ -80,6 +80,7 @@ class EmailSendingService {
             helper.setSentDate(sentDate)
         }
         if (plainTextBody) {
+
             helper.setText(plainTextBody, htmlBody)
         } else {
             helper.setText(htmlBody, true)

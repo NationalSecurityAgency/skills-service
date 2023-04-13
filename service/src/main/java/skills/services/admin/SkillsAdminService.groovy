@@ -106,6 +106,9 @@ class SkillsAdminService {
     SkillCatalogService skillCatalogService
 
     @Autowired
+    SkillCatalogFinalizationService skillCatalogFinalizationService
+
+    @Autowired
     SkillsGroupAdminService skillsGroupAdminService
 
     @Autowired
@@ -231,10 +234,15 @@ class SkillsAdminService {
                     pointIncrementDelta = 0
                 }
                 totalPointsRequested = skillRequest.pointIncrement * skillRequest.numPerformToCompletion
+
+                def finalizeState = skillCatalogFinalizationService.getCurrentState(skillRequest.projectId)
+                if (finalizeState != SkillCatalogFinalizationService.FinalizeState.COMPLETED) {
+                    skillRequest.enabled = isCurrentlyEnabled
+                }
             }
 
             if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
-                quizToSkillService.removeQuizToSkillAssignment(skillDefinition.id)
+                quizToSkillService.removeQuizToSkillAssignment(skillDefinition)
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')

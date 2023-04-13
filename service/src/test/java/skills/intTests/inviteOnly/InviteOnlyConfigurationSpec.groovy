@@ -15,12 +15,13 @@
  */
 package skills.intTests.inviteOnly
 
+import org.springframework.core.io.ClassPathResource
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.auth.RoleName
 
 class InviteOnlyConfigurationSpec extends DefaultIntSpec {
-
 
     def "project cannot be configured as invite only if discoverable"() {
         def proj = SkillsFactory.createProject(99)
@@ -62,9 +63,12 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         err.message.contains("explanation:production.mode.enabled can only be enabled if invite_only is false")
     }
 
-    def "invite only project can access appropriate API functions"() {
+    def "invite only project can access appropriate API functions as project admin"() {
         def proj = SkillsFactory.createProject(1)
         skillsService.createProject(proj)
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+        def file = resource.getFile()
+        skillsService.uploadIcon([projectId:(proj.projectId)], file)
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
 
         def subj = SkillsFactory.createSubject(1, 1)
@@ -82,6 +86,7 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         def usersPerLevel = skillsService.getUsersPerLevel(proj.projectId)
         def summary = skillsService.getSkillSummary(skillsService.userName, proj.projectId)
         def otherSummary = skillsService.getSkillSummary(skillsService.userName, proj.projectId, subj.subjectId)
+        def customIconCss = skillsService.getCustomClientDisplayCss(proj.projectId)
 
         then:
         projectName
@@ -91,5 +96,44 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         usersPerLevel
         summary
         otherSummary
+        customIconCss
+    }
+
+    def "invite only project can access appropriate API functions as a project approver"() {
+        def user1Service = createService(getRandomUsers(1, true)[0])
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+        def file = resource.getFile()
+        skillsService.uploadIcon([projectId:(proj.projectId)], file)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        when:
+        def projectName = user1Service.lookupMyProjectName(proj.projectId)
+        def subjectDescriptions = user1Service.getSubjectDescriptions(proj.projectId, subj.subjectId)
+        def userLevels = user1Service.getUserLevel(proj.projectId)
+        def myProgress = user1Service.getMyProgressSummary()
+        def usersPerLevel = user1Service.getUsersPerLevel(proj.projectId)
+        def summary = user1Service.getSkillSummary(user1Service.userName, proj.projectId)
+        def otherSummary = user1Service.getSkillSummary(user1Service.userName, proj.projectId, subj.subjectId)
+        def customIconCss = user1Service.getCustomClientDisplayCss(proj.projectId)
+
+        then:
+        projectName
+        subjectDescriptions
+        userLevels == 0
+        myProgress
+        usersPerLevel
+        summary
+        otherSummary
+        customIconCss
     }
 }
