@@ -1072,7 +1072,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
-    it.only('Send email to project owner', () => {
+    it('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.intercept('POST', '/api/validation/description').as('validate');
             cy.loginAsAdminUser();
