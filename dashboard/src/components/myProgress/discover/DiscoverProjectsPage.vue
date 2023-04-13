@@ -116,13 +116,12 @@ aria-label="search for projects to pin"></b-input>
               </span>
               </div>
               <div class="col-auto">
-                <b-button v-if="isEmailEnabled" variant="outline-primary" style="float:right" :aria-label="`Contact ${data.item.name} project owner`"
-                                 @click="showContactOwner" :data-cy="`contactOwnerBtn_${ data.item.projectId }`">
+                <b-button v-if="isEmailEnabled" variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`" size="sm"
+                                 @click="chooseProject(data.item.name, data.item.projectId)" :data-cy="`contactOwnerBtn_${ data.item.projectId }`">
                         Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
                  </b-button>
               </div>
-                <contact-owners-dialog v-if="showContact" :project-name="`${data.item.name}`" v-model="showContact" :project-id="data.item.projectId"/>
-             </div>
+              </div>
           </template>
 
           <template #cell(isMyProject)="data">
@@ -171,6 +170,9 @@ aria-label="search for projects to pin"></b-input>
             </div>
           </template>
         </b-table>
+        <div>
+          <contact-owners-dialog v-if="contactModal.show && isEmailEnabled"  :projectName="contactModal.projectName"
+                                     v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
           <b-row align-h="center" class="mt-3">
           <b-col>
 
@@ -239,6 +241,11 @@ aria-label="search for projects to pin"></b-input>
           all: 0,
           myProjects: 0,
           discoverProjects: 0,
+        },
+        contactModal: {
+          show: false,
+          projectId: null,
+          projectName: null,
         },
         fields: [
           {
@@ -355,7 +362,14 @@ aria-label="search for projects to pin"></b-input>
         this.paging.totalRows = this.projects.length;
       },
       showContactOwner() {
-        this.showContact = true;
+        this.contactModal.show = true;
+      },
+      chooseProject(name, id) {
+        this.contactModal.projectName = name;
+        this.contactModal.projectId = id;
+        console.log(this.contactModal.projectId);
+        this.showContactOwner();
+        console.log(this.contactModal.show);
       },
     },
   };

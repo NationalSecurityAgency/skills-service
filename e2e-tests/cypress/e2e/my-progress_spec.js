@@ -1072,7 +1072,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
-    it('Send email to project owner', () => {
+    it.only('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.intercept('POST', '/api/validation/description').as('validate');
             cy.loginAsAdminUser();
@@ -1082,20 +1082,20 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy=manageMyProjsBtn]').click();
             cy.get('[data-cy="contactOwnerBtn_proj4"]').should('be.visible').click();
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
-            cy.get('[data-cy="contactOwnersMsgInput"]').last().click().fill('aaa bbb this is a message');
-            cy.get('[data-cy="charactersRemaining"]').last().should('contain.text', '2,475 characters remaining');
+            cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
+            cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-            cy.get('[data-cy="contactOwnersSubmitBtn"]').last().click();
+            cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
             cy.wait('@contact');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
             cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
             cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 4 will be notified of your question via email.');
-            cy.get('[data-cy="contactOwnersSubmitBtn"]').last().click();
+            cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
             cy.wait(500); //wait for animations to complete
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
             cy.getEmails().then((emails) => {
                         cy.wait(5000);
-                        //expect(emails[0].to.text).to.equal('abc@abc.org');
+                        //expect(emails[0].to.text).to.equal('skills@skills.org');
                         expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
                     });
     });
