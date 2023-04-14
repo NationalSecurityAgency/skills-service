@@ -10,7 +10,22 @@ then
 fi
 
 echo "JAVA_OPTS=${JAVA_OPTS}"
-echo -e "SPRING_PROPS=${SPRING_PROPS}"
+
+if [ "$DEBUG_MODE" == true ]
+then
+  FORMATTED=$SPRING_PROPS
+else
+  PROPS=(${SPRING_PROPS//,/ })
+
+  for PROP in "${!PROPS[@]}"; do
+    PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+  done
+
+  FORMATTED=$(printf ",%s" "${PROPS[@]}")
+  FORMATTED=${FORMATTED:1}
+fi
+
+echo -e "SPRING_PROPS=${FORMATTED}"
 
 # support both \n and , as a prop separator
 echo -e $SPRING_PROPS | sed -r 's$([^\])[,]\s?$\1\n$g; s$\\,$,$g' >> application.properties
