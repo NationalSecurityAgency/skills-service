@@ -124,6 +124,26 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.createBadge(1, 1, { enabled: true });
         cy.refreshCounts();
         cy.validateCounts(3, 3, 2, 2, 1, 1, 2, 1, 1, 0, 0);
+
+        cy.createQuizDef(1);
+        cy.createSkill(1, 1, 7, {
+            name: 'g some quiz skill',
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            numPerformToCompletion: 1
+        });
+        cy.refreshCounts();
+        cy.validateCounts(4, 3, 2, 3, 1, 1, 2, 1, 1, 1, 0);
+
+        cy.createSurveyDef(2, { name: 'Test survey' });
+        cy.createSkill(1, 1, 8, {
+            name: 'h some survey skill',
+            selfReportingType: 'Quiz',
+            quizId: 'quiz2',
+            numPerformToCompletion: 1
+        });
+        cy.refreshCounts();
+        cy.validateCounts(5, 3, 2, 4, 1, 1, 2, 1, 1, 1, 1);
     });
 
     it('filter skills', () => {
