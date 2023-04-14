@@ -65,6 +65,7 @@ public class SpringBootApp {
             HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
         }
 
+
         SpringApplication.run(SpringBootApp.class, args);
     }
 
