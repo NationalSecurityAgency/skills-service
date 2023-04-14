@@ -99,7 +99,6 @@ limitations under the License.
         maxIntervalAttempts: 8,
         hasNewAttachment: false,
         attachmentError: '',
-        useHtml: false,
       };
     },
     mounted() {
@@ -121,9 +120,6 @@ limitations under the License.
     computed: {
       markdownText() {
         return this.$refs.toastuiEditor.invoke('getMarkdown');
-      },
-      htmlText() {
-        return this.$refs.toastuiEditor.invoke('getHtml');
       },
       editorFeaturesUrl() {
         return `${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`;
@@ -189,11 +185,7 @@ limitations under the License.
     methods: {
       onEditorChange() {
         this.attachmentError = '';
-        if (this.useHtml) {
-          this.$emit('input', this.htmlText);
-        } else {
           this.$emit('input', this.markdownText);
-        }
       },
       setLabelForMoreButton() {
         this.$nextTick(() => {
