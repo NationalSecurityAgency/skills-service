@@ -103,18 +103,27 @@ class AuthorizationAspect {
         validateJoinPoint(joinPoint);
         CodeSignature codeSignature = (CodeSignature) joinPoint.getSignature();
         String[] parameterNames = codeSignature.getParameterNames();
+
+        Object[] args = joinPoint.getArgs();
         paramLoop:
         for (int i = 0; i < parameterNames.length; i++) {
             String paramName = parameterNames[i];
             if (USER_ID_PARAM.equalsIgnoreCase(paramName)) {
-                Object[] args = joinPoint.getArgs();
                 userId = (String) args[i];
                 break paramLoop;
             } else if (SKILL_EVENT_REQUEST_PARAM.equalsIgnoreCase(paramName)) {
-                Object[] args = joinPoint.getArgs();
                 if (args != null && args.length > i && args[i] != null) {
                     SkillEventRequest request = (SkillEventRequest) args[i];
                     userId = request.getUserId();
+                }
+            }
+        }
+        if (StringUtils.isBlank(userId)) {
+            for (Object arg : args) {
+                if (arg != null && arg instanceof UserIdIsSupplied) {
+                    UserIdIsSupplied userIdIsSupplied = (UserIdIsSupplied)arg;
+                    userId = userIdIsSupplied.getUserId();
+                    break;
                 }
             }
         }

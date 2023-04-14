@@ -22,6 +22,7 @@ import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.collections4.CollectionUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -231,12 +232,16 @@ class UserAuthService {
         UserRole role
         HttpServletRequest request = getServletRequest()
         String quizId = AuthUtils.getQuizIdFromRequest(request)
+        String quizIdUnderApiEndpoint = AuthUtils.getQuizIdFromApiRequest(request)
         String method = request?.method
-        boolean isGetMethod =  method && method == HttpMethod.GET.toString()
-        if (isGetMethod && quizId) {
+
+        // this role is allowed to execute get methods for /admin/* path and get/post/put under /api/* path
+        // unfortunately ROLE_QUIZ_READ_ONLY doesn't quite accurately represent its function
+        boolean shouldCheckForRole = (method && method == HttpMethod.GET.toString()) || StringUtils.isNotBlank(quizIdUnderApiEndpoint)
+        if (shouldCheckForRole && quizId) {
             boolean isNotQuizAdmin = !addedRoles?.find { it.roleName == RoleName.ROLE_QUIZ_ADMIN }
             if (isNotQuizAdmin) {
-                List<UserRole> projectAdminRoles = roles.findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN }
+                List<UserRole> projectAdminRoles = roles.findAll { it.roleName == RoleName.ROLE_PROJECT_ADMIN || it.roleName == RoleName.ROLE_PROJECT_APPROVER }
                 if (projectAdminRoles) {
                     List<String> projectIds = projectAdminRoles.collect { it.projectId }
                     if (quizToSkillDefRepo.existQuizIdToOneOfTheProjectIdsAssociation(quizId, projectIds)) {
