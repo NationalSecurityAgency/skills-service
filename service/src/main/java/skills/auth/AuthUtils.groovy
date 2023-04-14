@@ -46,8 +46,10 @@ class AuthUtils {
     static String getQuizIdFromRequest(HttpServletRequest servletRequest) {
         String quizId = this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN, "quizId")
         if (!quizId) {
-            return this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN1, "quizId")
+            quizId = this.getIdFromRequest(servletRequest, QUIZ_ID_PATTERN1, "quizId")
         }
+
+        return quizId
     }
 
     private static String getIdFromRequest(HttpServletRequest servletRequest, Pattern pattern, String label) {
