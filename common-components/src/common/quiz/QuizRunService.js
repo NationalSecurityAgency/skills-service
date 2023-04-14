@@ -16,24 +16,45 @@
 import axios from 'axios';
 
 export default {
+
+  userId: new URLSearchParams(window.location.search).get('userId'),
+
+  getUserIdParams() {
+    if (!this.userId) {
+      return {};
+    }
+
+    if (typeof this.userId === 'string') {
+      return { userId: this.userId };
+    }
+    return {
+      userId: this.userId.id,
+      idType: this.userId.idType,
+    };
+  },
+
   getQuizInfo(quizId) {
-    return axios.get(`/api/quizzes/${quizId}`)
+    return axios.get(`/api/quizzes/${quizId}`, { params: this.getUserIdParams() })
       .then((response) => response.data);
   },
   startQuizAttempt(quizId) {
-    return axios.post(`/api/quizzes/${quizId}/attempt`)
+    return axios.post(`/api/quizzes/${quizId}/attempt`, { ...this.getUserIdParams() })
         .then((response) => response.data);
   },
   reportAnswer(quizId, attemptId, answerId, isSelected, answerText = null) {
-    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { isSelected, answerText })
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { ...this.getUserIdParams(), isSelected, answerText })
         .then((response) => response.data);
   },
   completeQuizAttempt(quizId, attemptId) {
-    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/complete`)
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/complete`, { ...this.getUserIdParams() })
         .then((response) => response.data);
   },
   validateDescription(description) {
     return axios.post('/api/validation/description', { value: description })
         .then((response) => response.data);
+  },
+
+  setUserId(userId) {
+    this.userId = userId;
   },
 };

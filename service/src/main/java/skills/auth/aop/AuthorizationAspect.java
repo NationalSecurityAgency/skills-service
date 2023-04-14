@@ -30,6 +30,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.stereotype.Component;
+import skills.auth.AuthUtils;
 import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
 import skills.auth.UserSkillsGrantedAuthority;
@@ -67,19 +68,29 @@ class AuthorizationAspect {
     @Profile
     private void checkAccess(UserInfo userInfo) {
         Collection<GrantedAuthority> authorities = !userInfo.isProxied() ? userInfo.getAuthorities() : userAuthService.loadAuthorities(userInfo.getUsername());
-        boolean foundAdmin = false;
+        boolean foundRole = false;
+
         if (authorities != null) {
             for (GrantedAuthority grantedAuthority : authorities) {
                 UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
                 RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
-                if (roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_PROJECT_APPROVER) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER)) {
-                    foundAdmin = true;
+                String projectId = AuthUtils.getProjectIdFromRequest(userAuthService.getServletRequest());
+                boolean projectBasedRole = roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_PROJECT_APPROVER) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER);
+                if (StringUtils.isNotBlank(projectId) && projectBasedRole) {
+                    foundRole = true;
+                    break;
+                }
+
+                String quizId = AuthUtils.getQuizIdFromRequest(userAuthService.getServletRequest());
+                boolean quizBasedRole = roleName.equals(RoleName.ROLE_QUIZ_ADMIN) || roleName.equals(RoleName.ROLE_QUIZ_READ_ONLY) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER);
+                if (StringUtils.isNotBlank(quizId) && quizBasedRole) {
+                    foundRole = true;
                     break;
                 }
             }
         }
 
-        if (!foundAdmin) {
+        if (!foundRole) {
             log.trace("Access is denied for userName=[{}]", userInfo.getUsername());
             throw new AccessDeniedException(messages.getMessage(
                     "AbstractAccessDecisionManager.accessDenied", "Access is denied"));
@@ -92,18 +103,27 @@ class AuthorizationAspect {
         validateJoinPoint(joinPoint);
         CodeSignature codeSignature = (CodeSignature) joinPoint.getSignature();
         String[] parameterNames = codeSignature.getParameterNames();
+
+        Object[] args = joinPoint.getArgs();
         paramLoop:
         for (int i = 0; i < parameterNames.length; i++) {
             String paramName = parameterNames[i];
             if (USER_ID_PARAM.equalsIgnoreCase(paramName)) {
-                Object[] args = joinPoint.getArgs();
                 userId = (String) args[i];
                 break paramLoop;
             } else if (SKILL_EVENT_REQUEST_PARAM.equalsIgnoreCase(paramName)) {
-                Object[] args = joinPoint.getArgs();
                 if (args != null && args.length > i && args[i] != null) {
                     SkillEventRequest request = (SkillEventRequest) args[i];
                     userId = request.getUserId();
+                }
+            }
+        }
+        if (StringUtils.isBlank(userId)) {
+            for (Object arg : args) {
+                if (arg != null && arg instanceof UserIdIsSupplied) {
+                    UserIdIsSupplied userIdIsSupplied = (UserIdIsSupplied)arg;
+                    userId = userIdIsSupplied.getUserId();
+                    break;
                 }
             }
         }

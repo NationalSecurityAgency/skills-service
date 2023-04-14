@@ -93,14 +93,17 @@ class UserInfoService {
 
     @Profile
     protected String doGetUserName(String userIdParam, boolean retry, String idType) {
+        log.debug("doGetUserName: userIdParam=[{}], retry=[{}], idType=[{}]", userIdParam, retry, idType)
         String userNameRes = userIdParam
         if (!userIdParam) {
             UserInfo userInfo = getCurrentUser()
             userNameRes =  userInfo.username
+            log.debug("called getCurrentUser: userNameRes=[{}]", userNameRes)
         } else if (authMode == AuthMode.PKI) {
             if (ID_IDTYPE != idType?.toUpperCase()) {
                 UserInfo userInfo
                 try {
+                    log.debug("called lookupUserDn: userIdParam=[{}]", userIdParam)
                     userInfo = pkiUserLookup.lookupUserDn(userIdParam)
                 } catch (Throwable e) {
                     String msg = ""
@@ -146,7 +149,9 @@ class UserInfoService {
             userAttrsService.saveUserAttrs(userNameRes, new UserInfo(username: userNameRes))
         }
 
-        return userNameRes?.toLowerCase()
+        String res = userNameRes?.toLowerCase()
+        log.debug("doGetUserName result =[{}]", res)
+        return res
     }
 
     /**

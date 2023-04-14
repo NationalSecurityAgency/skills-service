@@ -240,7 +240,7 @@ class WSHelper {
         return result
     }
 
-    def apiPost(String endpoint, def params) {
+    def apiPost(String endpoint, def params = null) {
         return post(endpoint, "api", params)
     }
 

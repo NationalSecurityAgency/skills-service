@@ -76,12 +76,6 @@ class QuizRunService {
     UserInfoService userInfoService
 
     @Transactional
-    QuizInfo loadQuizInfo(String quizId) {
-        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
-        return this.loadQuizInfo(currentUserAttrs.userId, quizId)
-    }
-
-    @Transactional
     QuizInfo loadQuizInfo(String userId, String quizId) {
         QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         if (!quizDefWithDesc) {
@@ -132,12 +126,6 @@ class QuizRunService {
             )
         }
         return questions
-    }
-
-    @Transactional
-    QuizAttemptStartResult startQuizAttempt(String quizId) {
-        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
-        return this.startQuizAttempt(currentUserAttrs.userId, quizId)
     }
 
     @Transactional
@@ -218,12 +206,6 @@ class QuizRunService {
     }
 
     @Transactional
-    void reportQuestionAnswer(String quizId, Integer attemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
-        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
-        this.reportQuestionAnswer(currentUserAttrs.userId, quizId, attemptId, answerDefId, quizReportAnswerReq)
-    }
-
-    @Transactional
     void reportQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         if (!quizAttemptRepo.existsByUserIdAndIdAndQuizId(userId, quizAttemptId, quizId)) {
             throw new SkillQuizException("Provided attempt id [${quizAttemptId}] does not exist for [${userId}] user and [${quizId}] quiz", ErrorCode.BadParam)
@@ -301,12 +283,6 @@ class QuizRunService {
                 }
             }
         }
-    }
-
-    @Transactional
-    QuizGradedResult completeQuizAttempt(String quizId, Integer quizAttemptId) {
-        UserAttrs currentUserAttrs = userInfoService.getCurrentUserAttrs()
-        return this.completeQuizAttempt(currentUserAttrs.userId, quizId, quizAttemptId)
     }
 
     @Transactional

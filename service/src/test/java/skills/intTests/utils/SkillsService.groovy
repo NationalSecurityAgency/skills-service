@@ -1689,9 +1689,9 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
-    def getQuizInfo(String quizId) {
+    def getQuizInfo(String quizId, String userId = null) {
         String url = "/quizzes/${quizId}"
-        return wsHelper.apiGet(url)
+        return wsHelper.apiGet(url, userId ? [userId: userId] : null)
     }
 
     def getQuizAttemptResult(String quizId, Integer attemptId) {
@@ -1720,17 +1720,17 @@ class SkillsService {
         return wsHelper.apiPost(url, quizAttemptReq)
     }
 
-    def startQuizAttempt(String quizId) {
+    def startQuizAttempt(String quizId, String userId = null) {
         String url = "/quizzes/${quizId}/attempt"
-        return wsHelper.apiPost(url, [])
+        return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
     def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId, Map params = [isSelected:true]) {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}"
         return wsHelper.apiPost(url, params)
     }
-    def completeQuizAttempt(String quizId, Integer attemptId) {
+    def completeQuizAttempt(String quizId, Integer attemptId, String userId = null) {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/complete"
-        return wsHelper.apiPost(url, [])
+        return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
 
     def startQuizAttemptForUserId(String quizId, String userId) {

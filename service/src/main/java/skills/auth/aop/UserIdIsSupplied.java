@@ -13,15 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+package skills.auth.aop;
 
-import skills.auth.aop.UserIdIsSupplied
+public interface UserIdIsSupplied {
 
-class QuizReportAnswerReq  implements UserIdIsSupplied {
-    Boolean isSelected = true
-    String answerText
-
-    // can only be supplied by an admin of the quiz or associated project
-    String userId
-    String idType
+    String getUserId();
 }
