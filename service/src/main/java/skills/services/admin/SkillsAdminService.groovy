@@ -604,6 +604,9 @@ class SkillsAdminService {
     @Transactional(readOnly = true)
     SkillDefSkinnyRes getSkinnySkill(String projectId, String skillId) {
         SkillDefSkinny data = loadSkinnySkill(projectId, skillId)
+        if (!data) {
+            throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
+        }
         SkillDefSkinnyRes res = convertToSkillDefSkinnyRes(data)
         return res
     }

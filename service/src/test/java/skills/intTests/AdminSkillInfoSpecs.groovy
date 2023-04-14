@@ -15,7 +15,9 @@
  */
 package skills.intTests
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 class AdminSkillInfoSpecs extends DefaultIntSpec {
@@ -225,5 +227,33 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         then:
         skill.enabled == true
         skills[0].enabled == true
+    }
+
+    def "get skill info returns 404 for nonexistent skill"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+        skillsService.getSkill([projectId: proj1.projectId, skillId: 'Fake'])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Skill [Fake] doesn't exist.")
+        e.httpStatus == HttpStatus.NOT_FOUND
+    }
+
+    def "get skill returns 404 for nonexistent skill"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+
+        when:
+        skillsService.getSkill([projectId: proj1.projectId, subjectId: proj1_subj.subjectId, skillId: 'Fake'])
+        skillsService.createSubject(proj1_subj)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Skill [Fake] doesn't exist.")
+        e.httpStatus == HttpStatus.NOT_FOUND
     }
 }
