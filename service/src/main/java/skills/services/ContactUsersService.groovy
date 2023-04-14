@@ -16,7 +16,6 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -43,9 +42,6 @@ import java.util.stream.Stream
 @Service
 class ContactUsersService {
 
-    private Parser parser = Parser.builder().build()
-    private HtmlRenderer renderer = HtmlRenderer.builder().build()
-
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
@@ -71,18 +67,13 @@ class ContactUsersService {
 
     @Transactional
     contactAllProjectAdmins(String emailSubject, String emailBody) {
-        Parser parser = Parser.builder().build()
-        HtmlRenderer renderer = HtmlRenderer.builder().build()
-        def markdown = parser.parse(emailBody)
-        String parsedBody = renderer.render(markdown)
-
         List<String> batch = []
         Closure sendNotifications = { List<String> userIds ->
             Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                     userIds: new ArrayList(batch),
                     type: Notification.Type.ContactUsers,
                     keyValParams: [
-                            htmlBody    : parsedBody,
+                            htmlBody    : emailBody,
                             emailSubject: emailSubject,
                             rawBody     : emailBody,
                     ]
@@ -142,16 +133,13 @@ class ContactUsersService {
         String sender = currentUser.getEmail()
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
-            def markdown = parser.parse(contactUsersRequest.emailBody)
-            String parsedBody = renderer.render(markdown)
-
             Closure sendNotification = { List<String> batch ->
                 Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                         userIds: batch,
                         type: Notification.Type.ContactUsers,
                         keyValParams: [
                                 projectId   : contactUsersRequest.queryCriteria.projectId,
-                                htmlBody    : parsedBody,
+                                htmlBody    : contactUsersRequest.emailBody,
                                 emailSubject: contactUsersRequest.emailSubject,
                                 rawBody     : contactUsersRequest.emailBody,
                                 replyTo     : sender,
