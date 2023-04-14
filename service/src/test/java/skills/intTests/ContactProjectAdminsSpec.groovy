@@ -73,7 +73,7 @@ class ContactProjectAdminsSpec extends DefaultIntSpec {
 
         when:
         def count = rootServiceOne.countAllProjectAdminsWithEmail()
-        rootServiceOne.contactAllProjectAdmins("test subject", "# test email body")
+        rootServiceOne.contactAllProjectAdmins("test subject", "<h1>test email body</h1>")
 
         WaitFor.wait { greenMail.getReceivedMessages().size() >= 7 }
 
@@ -116,7 +116,6 @@ limitations under the License.
 <body class="overall-container">
 
 <h1>test email body</h1>
-
 
 </body>
 </html>'''
