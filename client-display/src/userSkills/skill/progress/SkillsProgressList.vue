@@ -198,6 +198,10 @@ limitations under the License.
           belongsToBadge: 0,
           pendingApproval: 0,
           hasTag: 0,
+          approval: 0,
+          honorSystem: 0,
+          quiz: 0,
+          survey: 0,
         },
         loading: false,
         showDescriptionsInternal: false,
@@ -242,6 +246,36 @@ limitations under the License.
             groupId: 'attributeGroups',
             groupLabel: `${store.getters.skillDisplayName} Attribute Filter`,
             filterItems: this.createAttributeFilterItems(),
+          },
+          {
+            groupId: 'selfReportGroups',
+            groupLabel: `${store.getters.skillDisplayName} Self Reporting Filter`,
+            filterItems: [
+              {
+                icon: 'fas fa-user-check',
+                id: 'approval',
+                html: 'Approval',
+                count: 0,
+              },
+              {
+                icon: 'fas fa-person-booth',
+                id: 'honorSystem',
+                html: 'Honor System',
+                count: 0,
+              },
+              {
+                icon: 'fas fa-spell-check',
+                id: 'quiz',
+                html: 'Quiz',
+                count: 0,
+              },
+              {
+                icon: 'fas fa-file-contract',
+                id: 'survey',
+                html: 'Survey',
+                count: 0,
+              },
+            ],
           },
         ],
       };
@@ -355,6 +389,18 @@ limitations under the License.
         }
         if (meta.hasTag) {
           this.metaCounts.hasTag += 1;
+        }
+        if (meta.approval) {
+          this.metaCounts.approval += 1;
+        }
+        if (meta.honorSystem) {
+          this.metaCounts.honorSystem += 1;
+        }
+        if (meta.quiz) {
+          this.metaCounts.quiz += 1;
+        }
+        if (meta.survey) {
+          this.metaCounts.survey += 1;
         }
       },
       onDetailsToggle() {

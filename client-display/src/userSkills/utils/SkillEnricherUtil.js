@@ -72,6 +72,10 @@ export default {
             pendingApproval: skill.selfReporting && skill.selfReporting.requestedOn && !skill.selfReporting.rejectedOn,
             belongsToBadge: skill.badges && skill.badges.length > 0,
             hasTag: skill.tags && skill.tags.length > 0,
+            approval: skill.selfReporting && skill.selfReporting.type === 'Approval',
+            honorSystem: skill.selfReporting && skill.selfReporting.type === 'HonorSystem',
+            quiz: skill.selfReporting && skill.selfReporting.type === 'Quiz',
+            survey: skill.selfReporting && skill.selfReporting.type === 'Survey',
         };
         return copy;
     },
