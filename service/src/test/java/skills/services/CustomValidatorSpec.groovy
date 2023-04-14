@@ -595,6 +595,10 @@ A new sentence after a few new lines
         validator.validateDescription("""### <strong><em>A</em></strong> this is a heading""").valid
         validator.validateDescription("""### <strong>A</strong> this is a heading""").valid
         validator.validateDescription("""### <em><strong>A</strong></em> this is a heading""").valid
+
+        validator.validateDescription("""<span style="font-size: 14px;">A line with </span>[<span style="font-size: 14px;">a link</span>](http://link.com)<span style="font-size: 14px;"> in the middle</span>
+
+<span style="font-size: 14px;">A line with a new line above</span>""").valid
     }
 }
 
