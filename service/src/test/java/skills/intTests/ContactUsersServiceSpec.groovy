@@ -456,10 +456,12 @@ class ContactUsersServiceSpec extends DefaultIntSpec {
 
 
         String emailSubject = "The Subject"
-        String emailBody = """# The Body
-* one item
-* two items
-        """
+        String emailBody = """<h1>The Body</h1>
+<ul>
+<li>one item</li>
+<li>two items</li>
+</ul>
+"""
 
         when:
         user9SkillsService.contactProjectUsers(proj.projectId, emailSubject, emailBody, false, [skill6.skillId])
@@ -617,10 +619,12 @@ limitations under the License.
 
 
         String emailSubject = "The Subject"
-        String emailBody = """# The Body
-* one item
-* two items
-        """
+        String emailBody = """<h1>The Body</h1>
+<ul>
+<li>one item</li>
+<li>two items</li>
+</ul>
+"""
 
         String user2Email = userAttrsService.findByUserId(users[2].toLowerCase())?.email
         String user3Email = userAttrsService.findByUserId(users[3].toLowerCase())?.email
