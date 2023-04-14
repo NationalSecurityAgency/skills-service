@@ -17,10 +17,7 @@ package skills.quizLoading.model
 
 import skills.auth.aop.UserIdIsSupplied
 
-class QuizReportAnswerReq  implements UserIdIsSupplied {
-    Boolean isSelected = true
-    String answerText
-
+class StartQuizAttemptReq implements UserIdIsSupplied {
     // can only be supplied by an admin of the quiz or associated project
     String userId
     String idType

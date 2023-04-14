@@ -29,6 +29,7 @@ import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizInfo
 import skills.quizLoading.model.QuizReportAnswerReq
 import skills.quizLoading.model.CompleteQuizAttemptReq
+import skills.quizLoading.model.StartQuizAttemptReq
 
 @CrossOrigin(allowCredentials = "true", originPatterns = ["*"])
 @RestController
@@ -57,8 +58,8 @@ class UserQuizController {
     @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
-                                            @RequestBody CompleteQuizAttemptReq startQuizAttemptReq) {
-        String userId = userInfoService.getUserName(startQuizAttemptReq.userId, true, startQuizAttemptReq.idType);
+                                            @RequestBody(required = false) StartQuizAttemptReq startQuizAttemptReq) {
+        String userId = userInfoService.getUserName(startQuizAttemptReq?.userId, true, startQuizAttemptReq?.idType);
         return quizRunService.startQuizAttempt(userId, quizId);
     }
 
@@ -68,7 +69,7 @@ class UserQuizController {
                                    @PathVariable("attemptId") Integer attemptId,
                                    @PathVariable("answerId") Integer answerId,
                                    @RequestBody QuizReportAnswerReq quizReportAnswerReq) {
-        String userId = userInfoService.getUserName(quizReportAnswerReq.userId, true, quizReportAnswerReq.idType);
+        String userId = userInfoService.getUserName(quizReportAnswerReq?.userId, true, quizReportAnswerReq?.idType);
         quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId, quizReportAnswerReq)
         return RequestResult.success()
     }
@@ -77,8 +78,8 @@ class UserQuizController {
     @ResponseBody
     QuizGradedResult completeQuizAttempt(@PathVariable("quizId") String quizId,
                                          @PathVariable("quizAttempId") Integer quizAttemptId,
-                                         @RequestBody CompleteQuizAttemptReq completeQuizAttemptReq) {
-        String userId = userInfoService.getUserName(completeQuizAttemptReq.userId, true, completeQuizAttemptReq.idType);
+                                         @RequestBody(required = false) CompleteQuizAttemptReq completeQuizAttemptReq) {
+        String userId = userInfoService.getUserName(completeQuizAttemptReq?.userId, true, completeQuizAttemptReq?.idType);
         return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
     }
 

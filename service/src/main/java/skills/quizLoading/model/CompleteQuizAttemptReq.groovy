@@ -15,7 +15,9 @@
  */
 package skills.quizLoading.model
 
-class CompleteQuizAttemptReq {
+import skills.auth.aop.UserIdIsSupplied
+
+class CompleteQuizAttemptReq implements UserIdIsSupplied {
     // can only be supplied by an admin of the quiz or associated project
     String userId
     String idType

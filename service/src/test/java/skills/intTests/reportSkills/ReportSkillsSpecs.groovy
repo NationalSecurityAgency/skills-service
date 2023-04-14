@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.*
 import skills.storage.model.UserAchievement
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
 
@@ -1079,5 +1080,49 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown()
         ex.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
     }
+
+    def "only project admins are allowed to report skills on behalf of another user"() {
+        SkillsService projAdmin = createService("projAdminUser")
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        projAdmin.createProject(proj)
+        projAdmin.createSubject(subj)
+        projAdmin.createSkills(skills)
+
+        SkillsService otherUser = createService("otherUser")
+
+        when:
+        otherUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
+    }
+
+    def "project approves are not allowed to report skills on behalf of another user"() {
+        SkillsService projAdmin = createService("projAdminUser")
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        projAdmin.createProject(proj)
+        projAdmin.createSubject(subj)
+        projAdmin.createSkills(skills)
+
+        SkillsService approverUser = createService("approver")
+        projAdmin.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        approverUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
+    }
+
 
 }
