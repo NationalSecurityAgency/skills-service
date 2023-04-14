@@ -185,7 +185,7 @@ limitations under the License.
     methods: {
       onEditorChange() {
         this.attachmentError = '';
-          this.$emit('input', this.markdownText);
+        this.$emit('input', this.markdownText);
       },
       setLabelForMoreButton() {
         this.$nextTick(() => {
