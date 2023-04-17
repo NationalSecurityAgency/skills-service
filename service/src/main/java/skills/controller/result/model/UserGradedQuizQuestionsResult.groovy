@@ -28,4 +28,5 @@ class UserGradedQuizQuestionsResult {
     Integer numQuestionsToPass
     Date started
     Date completed
+    String userTag
 }

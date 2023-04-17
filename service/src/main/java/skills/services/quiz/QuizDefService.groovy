@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -47,6 +48,9 @@ import skills.utils.Props
 @Service
 @Slf4j
 class QuizDefService {
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey:""}')
+    String usersTableAdditionalUserTagKey
 
     @Autowired
     UserInfoService userInfoService
@@ -95,6 +99,9 @@ class QuizDefService {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     @Autowired
     QuizToSkillDefRepo quizToSkillDefRepo
@@ -413,7 +420,7 @@ class QuizDefService {
         }
 
         query = query ?: ''
-        List<QuizRun> quizRuns = userQuizAttemptRepo.findQuizRuns(quizId, query, pageRequest)
+        List<QuizRun> quizRuns = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, pageRequest)
         int count = totalCount > pageRequest.pageSize ? totalCount : quizRuns.size()
         if (totalCount > pageRequest.pageSize && query) {
             count = userQuizAttemptRepo.countQuizRuns(quizId, query)
@@ -433,13 +440,13 @@ class QuizDefService {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not belonw to quiz [${quizId}]", ErrorCode.BadParam)
         }
 
-        List<QuizRun> quizRuns = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, pageRequest)
-        int count = quizRuns.size()
+        List<UserQuizAnswer> answerAttempts = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
+        int count = answerAttempts.size()
         // pages are 0 based
         if (pageRequest.pageNumber > 0 || count >= pageRequest.pageSize) {
             count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
         }
-        return new TableResult(totalCount: count, data: quizRuns, count: count)
+        return new TableResult(totalCount: count, data: answerAttempts, count: count)
     }
 
     @Transactional
@@ -613,6 +620,12 @@ class QuizDefService {
             }
         }
 
+        String userTag
+        if (StringUtils.isNotBlank(usersTableAdditionalUserTagKey)) {
+            List<UserTag> userTags = userTagRepo.findAllByUserIdAndKeyIn(userAttrs.userId, [usersTableAdditionalUserTagKey.toLowerCase()].toSet())
+            userTag = userTags ? userTags.first()?.value : null
+        }
+
         return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
@@ -621,6 +634,7 @@ class QuizDefService {
                 numQuestionsToPass: numQuestionsToPass,
                 started: userQuizAttempt.started,
                 completed: userQuizAttempt.completed,
+                userTag: userTag,
         )
     }
 

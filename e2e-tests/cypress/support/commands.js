@@ -1145,6 +1145,38 @@ Cypress.Commands.add('moveSkillIntoAnotherSubject', (projNum, skillNum, toSubjNu
     });
 });
 
+Cypress.Commands.add('addUserTag', (userTags) => {
+    cy.fixture('vars.json')
+        .then((vars) => {
+
+            const userIdsWithAssociatedTags = []
+            userTags.forEach((element, index) => {
+                const userId =  `user${index + 1}`;
+                cy.register(userId, 'password');
+                cy.log(`Registered [${userId}] user`);
+                userIdsWithAssociatedTags.push({
+                    userId,
+                    tagKey: element.tagKey,
+                    tags: element.tags
+                })
+            });
+
+
+            cy.logout();
+            cy.register(vars.rootUser, vars.defaultPass, true);
+            cy.login(vars.rootUser, vars.defaultPass);
+
+            userIdsWithAssociatedTags.forEach((tagInfo) => {
+                cy.log(`Create tags user=[${tagInfo.userId}], tagKey=[${tagInfo.tagKey}], tags=[${tagInfo.tags}]`);
+                const url = `/root/users/${tagInfo.userId}/tags/${tagInfo.tagKey}`;
+                cy.request('POST', url, { tags: tagInfo.tags });
+            });
+
+            cy.logout();
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+});
+
 Cypress.Commands.add('moveSkillIntoAnotherGroup', (projNum, skillNum, toSubjNum, groupNum) => {
     cy.log(groupNum);
     const groupId = `group${groupNum}${toSubjNum > 1 ? `Subj${toSubjNum}` : ''}`;

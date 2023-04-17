@@ -51,19 +51,26 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
 
     void deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
-    @Query('''select answerAttempt.updated as updated,
-                    answerAttempt.answer as answerTxt,
-                    answerAttempt.status as status,
-                    userAttrs.userId as userId,
-                    userAttrs.userIdForDisplay as userIdForDisplay,
-                    quizAttempt.id as userQuizAttemptId
-        from UserQuizAnswerAttempt answerAttempt, UserAttrs userAttrs, UserQuizAttempt quizAttempt
-        where answerAttempt.userId = userAttrs.userId
-            and answerAttempt.userQuizAttemptRefId = quizAttempt.id
-            and quizAttempt.status <> 'INPROGRESS'
-            and answerAttempt.quizAnswerDefinitionRefId = ?1
-     ''')
-    List<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, PageRequest pageRequest)
+    @Query(value = '''select answerAttempt.updated         as updated,
+                   answerAttempt.answer          as answerTxt,
+                   answerAttempt.status          as status,
+                   userAttrs.user_id             as userId,
+                   userAttrs.user_id_for_display as userIdForDisplay,
+                   quizAttempt.id                as userQuizAttemptId,
+                   ut.value                      as userTag
+            from user_quiz_answer_attempt answerAttempt,
+                 user_quiz_attempt quizAttempt,
+                 user_attrs userAttrs
+                     left join (SELECT ut.user_id, max(ut.value) AS value
+                                FROM user_tags ut
+                                WHERE lower(ut.key) = lower(?2)
+                                group by ut.user_id) ut ON ut.user_id = userAttrs.user_id
+            where answerAttempt.user_id = userAttrs.user_id
+              and answerAttempt.user_quiz_attempt_ref_id = quizAttempt.id
+              and quizAttempt.status <> 'INPROGRESS'
+              and answerAttempt.quiz_answer_definition_ref_id = ?1
+     ''', nativeQuery = true)
+    List<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, String usersTableAdditionalUserTagKey, PageRequest pageRequest)
 
     @Query('''select count (answerAttempt)
         from UserQuizAnswerAttempt answerAttempt, UserQuizAttempt quizAttempt

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header title="Results"/>
+  <sub-page-header title="Runs"/>
 
   <b-card body-class="p-0">
     <div>
@@ -83,6 +83,10 @@ limitations under the License.
           </div>
         </template>
 
+        <template v-slot:cell(userTag)="data">
+          <span :data-cy="`row${data.index}-userTag`">{{ data.value }}</span>
+        </template>
+
         <template v-slot:cell(status)="data">
           <quiz-run-status :quiz-type="quizType" :status="data.value" />
         </template>
@@ -131,11 +135,13 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
+  import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizRunsHistoryPage',
+    mixins: [UserTagsConfigMixin],
     components: {
       QuizRunStatus,
       DateCell,
@@ -203,6 +209,13 @@ limitations under the License.
       };
     },
     mounted() {
+      if (this.showUserTagColumn) {
+        this.table.options.fields.splice(1, 0, {
+          key: 'userTag',
+          label: this.userTagLabel,
+          sortable: true,
+        });
+      }
       this.loadData();
     },
     methods: {
