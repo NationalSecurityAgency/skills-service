@@ -554,17 +554,13 @@ describe('Client Display Skills Groups Tests', () => {
     });
 
     it('filter should not show empty groups', () => {
-        Cypress.Commands.add('validateFilterCounts', (withoutProgress, withPointsToday, complete, selfReported, inProgress) => {
+        Cypress.Commands.add('validateFilterCounts', (withoutProgress, complete, inProgress) => {
             cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
                 .click();
             cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]')
                 .contains(withoutProgress);
-            cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]')
-                .contains(withPointsToday);
             cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]')
                 .contains(complete);
-            cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]')
-                .contains(selfReported);
             cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]')
                 .contains(inProgress);
         });
@@ -601,7 +597,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
-        cy.validateFilterCounts(5, 2, 1, 2, 1);
+        cy.validateFilterCounts(5, 1, 1);
         cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]')
             .click();
 
@@ -626,13 +622,11 @@ describe('Client Display Skills Groups Tests', () => {
         // 2 skills under the same group
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
-        cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]')
+        cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]')
             .click();
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
             .contains('gRouP1 GrOuP2');
-        cy.get('[data-cy="group-group3_skillProgress-skill6"] [data-cy="skillProgressTitle"]')
-            .contains('For skill1 SkIll2 skill3 skill4 skill5 skill6 skill7 Searching');
         cy.get('[data-cy="group-group3_skillProgress-skill7"] [data-cy="skillProgressTitle"]')
             .contains('For skill1 SkIll2 skill3 skill4 skill5 skill6 skill7 skill8 Searching');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]')
@@ -648,7 +642,7 @@ describe('Client Display Skills Groups Tests', () => {
         // multiple skills across more than 1 group
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
-        cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]')
+        cy.get('[data-cy="filter_honorSystem"] [data-cy="filterCount"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
@@ -707,7 +701,7 @@ describe('Client Display Skills Groups Tests', () => {
         // multiple skills across more than 1 group
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
-        cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]')
+        cy.get('[data-cy="filter_honorSystem"] [data-cy="filterCount"]')
             .click();
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
