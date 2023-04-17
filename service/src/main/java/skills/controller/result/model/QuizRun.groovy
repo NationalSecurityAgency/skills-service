@@ -24,4 +24,5 @@ interface QuizRun {
     Date getStarted()
     Date getCompleted()
     UserQuizAttempt.QuizAttemptStatus getStatus()
+    String getUserTag()
 }
