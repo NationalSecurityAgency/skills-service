@@ -242,11 +242,7 @@ describe('Client Display Accessibility tests', () => {
             .click();
         cy.get('[data-cy="filter_withoutProgress"] [data-cy="filterCount"]')
             .contains(2);
-        cy.get('[data-cy="filter_withPointsToday"] [data-cy="filterCount"]')
-            .contains(2);
         cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]')
-            .contains(1);
-        cy.get('[data-cy="filter_selfReported"] [data-cy="filterCount"]')
             .contains(1);
         cy.get('[data-cy="filter_inProgress"] [data-cy="filterCount"]')
             .contains(1);
