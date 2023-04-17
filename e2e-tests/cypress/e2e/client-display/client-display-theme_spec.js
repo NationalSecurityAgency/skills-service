@@ -509,9 +509,7 @@ describe('Client Display Tests', () => {
         cy.enableBadge(1, 1);
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
@@ -523,19 +521,19 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
-        cy.get('[data-cy="filter_withPointsToday"]')
+        cy.get('[data-cy="filter_inProgress"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
-            .contains('With Points Earned Today');
+            .contains('In Progress');
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
         cy.get('[data-cy="skillProgress_index-0"]')
-            .contains('200 / 200');
+            .contains('100 / 200');
         cy.get('[data-cy="skillProgress_index-1"]')
             .contains('skill 3');
         cy.get('[data-cy="skillProgress_index-1"]')
-            .contains('200 / 200');
+            .contains('100 / 200');
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
 
