@@ -191,8 +191,6 @@ limitations under the License.
         lastViewedButtonDisabled: false,
         metaCounts: {
           complete: 0,
-          selfReported: 0,
-          withPointsToday: 0,
           withoutProgress: 0,
           inProgress: 0,
           belongsToBadge: 0,
@@ -220,12 +218,6 @@ limitations under the License.
                 icon: 'fas fa-battery-empty',
                 id: 'withoutProgress',
                 html: '<b>Without</b> Progress',
-                count: 0,
-              },
-              {
-                icon: 'far fa-calendar-check',
-                id: 'withPointsToday',
-                html: 'With Points Earned <b>Today</b>',
                 count: 0,
               },
               {
@@ -328,12 +320,6 @@ limitations under the License.
       createAttributeFilterItems() {
         const res = [
           {
-            icon: 'fas fa-laptop',
-            id: 'selfReported',
-            html: '<b>Self</b> Reported',
-            count: 0,
-          },
-          {
             icon: 'fas fa-check',
             id: 'pendingApproval',
             html: 'Pending Approval',
@@ -368,12 +354,6 @@ limitations under the License.
       updateMetaCounts(meta) {
         if (meta.complete) {
           this.metaCounts.complete += 1;
-        }
-        if (meta.selfReported) {
-          this.metaCounts.selfReported += 1;
-        }
-        if (meta.withPointsToday) {
-          this.metaCounts.withPointsToday += 1;
         }
         if (meta.withoutProgress) {
           this.metaCounts.withoutProgress += 1;
