@@ -106,4 +106,60 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
 
     });
 
+    it('display user tag quiz chart', function () {
+        cy.addUserTag([{
+            tagKey: 'dutyOrganization',
+            tags: ['ABC']
+        }, {
+            tagKey: 'dutyOrganization',
+            tags: ['ABC']
+        }, {
+            tagKey: 'dutyOrganization',
+            tags: ['ABC1']
+        }]);
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="quizUserTagsChart"]').contains('ABC: 2')
+        cy.get('[data-cy="quizUserTagsChart"]').contains('ABC1: 1')
+    });
+
+    it('display user tag quiz chart - empty', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="quizUserTagsChart"]').contains('No data yet...')
+    });
+
+    it('do not show user tag quiz chart when not configured', function () {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                delete conf.usersTableAdditionalUserTagKey
+                delete conf.usersTableAdditionalUserTagLabel
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="quizUserTagsChart"]').should('not.exist')
+    });
+
+
+
 });
