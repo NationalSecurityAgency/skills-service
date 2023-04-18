@@ -178,6 +178,5 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-answerHistory"] [data-cy="row0-colUserId"]').contains('user1')
-        cy.get('[data-cy="metrics-q3"] [data-cy="row0-answerHistory"] [data-cy="skillsBTableTotalRows"]').should('not.exist')
     });
 });

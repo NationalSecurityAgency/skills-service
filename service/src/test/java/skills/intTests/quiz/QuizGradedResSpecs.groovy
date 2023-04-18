@@ -477,7 +477,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
     }
 
     def "quiz: get completed graded quiz where user tag"() {
-        SkillsService rootSkillsService = createRootSkillService("rootey")
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true)[0])
         rootSkillsService.saveUserTag(skillsService.userName, usersTableAdditionalUserTagKey, ["ABC"])
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")

@@ -81,9 +81,10 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.runQuizForUser(2, 3, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}], true, 'A3: This is a short one');
 
         cy.visit('/administrator/quizzes/quiz2/results');
-
         // text input question
-        const q2TableSelector = '[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"]'
+        const q2TableSelector = '[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"]';
+        cy.get(`${q2TableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3');
+        cy.get(q2TableSelector).contains('ABC1');
         const q2HeaderSelector = `${q2TableSelector} thead tr th`;
         cy.get(q2HeaderSelector)
             .contains('User')

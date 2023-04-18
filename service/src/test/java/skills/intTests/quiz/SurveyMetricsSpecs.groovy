@@ -301,7 +301,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def surveyInfo1 = createSimpleSurvey(1)
         List<AnswerRequestInfo> answerRequestsSorted = users[0..7].collect {
             new AnswerRequestInfo(userId: it, answerOptions:  [[0], [0, 2]], textAnswer: "answer-by-${it}", userTag: usersToTagLookup[it])
-        }.sort({ userAttrsRepo.findByUserId(it.userId).userIdForDisplay })
+        }.sort({ it.userId })
         answerRequestsSorted.each {
             reportSurvey(it.userId, surveyInfo1, it.answerOptions, it.textAnswer)
         }
