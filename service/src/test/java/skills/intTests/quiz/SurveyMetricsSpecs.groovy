@@ -291,7 +291,8 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
 
     def "get text answers"() {
         List<String> users = getRandomUsers(9, true)
-        SkillsService rootSkillsService = createRootSkillService("rootey")
+        List<String> exclude = [[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME],users].flatten()
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true, exclude)[0])
         Map<String, String> usersToTagLookup = [:]
         usersToTagLookup[users[0]] = "ABC"
         usersToTagLookup[users[2]] = "ABC1"
@@ -300,7 +301,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def surveyInfo1 = createSimpleSurvey(1)
         List<AnswerRequestInfo> answerRequestsSorted = users[0..7].collect {
             new AnswerRequestInfo(userId: it, answerOptions:  [[0], [0, 2]], textAnswer: "answer-by-${it}", userTag: usersToTagLookup[it])
-        }.sort({ it.userId })
+        }.sort({ userAttrsRepo.findByUserId(it.userId).userIdForDisplay })
         answerRequestsSorted.each {
             reportSurvey(it.userId, surveyInfo1, it.answerOptions, it.textAnswer)
         }
