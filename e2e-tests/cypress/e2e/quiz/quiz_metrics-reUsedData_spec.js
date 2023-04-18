@@ -50,7 +50,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
     });
 
     it('quiz metrics summary cards', function () {
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '11')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('11 attempts by 10 users')
 
@@ -64,7 +64,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
     });
 
     it('single choice question metrics', function () {
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="qType"]').should('have.text', 'Single Choice')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"]').contains("Question 1 - First Answer")
@@ -92,7 +92,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
     });
 
     it('multiple choice question metrics', function () {
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metrics-q2"] [data-cy="row0-colAnswer"]').contains("First Answer")
         cy.get('[data-cy="metrics-q2"] [data-cy="row0-colAnswer"] [data-cy="checkbox-true"]')
 
@@ -125,7 +125,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
     });
 
     it('single answer history', function () {
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
