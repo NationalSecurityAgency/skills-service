@@ -941,7 +941,7 @@ const router = new Router({
         },
       }, {
         name: 'QuizMetrics',
-        path: 'metrics',
+        path: 'results',
         component: QuizMetrics,
         meta: {
           requiresAuth: true,
@@ -961,22 +961,22 @@ const router = new Router({
         },
       }, {
         name: 'QuizRunsHistoryPage',
-        path: 'results',
+        path: 'runs',
         component: QuizRunsHistoryPage,
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Quiz Results History',
+            message: 'Quiz Runs',
           },
         },
       }, {
         name: 'QuizSingleRunPage',
-        path: 'results/:runId',
+        path: 'runs/:runId',
         component: QuizSingleRunPage,
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Quiz Single Result',
+            message: 'Quiz Single Run',
           },
         },
       }, {

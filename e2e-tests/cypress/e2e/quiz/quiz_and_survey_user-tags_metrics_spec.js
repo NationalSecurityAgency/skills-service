@@ -40,7 +40,7 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         const tableSelector = '[data-cy="quizRunsHistoryTable"]'
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
         const headerSelector = `${tableSelector} thead tr th`;
@@ -80,7 +80,7 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.runQuizForUser(2, 2, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [2]}], true, 'A2: Second answer');
         cy.runQuizForUser(2, 3, [{selectedIndex: [2]}, {selectedIndex: [0]}, {selectedIndex: [1]}], true, 'A3: This is a short one');
 
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
 
         // text input question
         const q2TableSelector = '[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"]'
@@ -125,7 +125,7 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get('[data-cy="quizUserTagsChart"]').contains('ABC: 2')
         cy.get('[data-cy="quizUserTagsChart"]').contains('ABC1: 1')
     });
@@ -136,7 +136,7 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
         cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get('[data-cy="quizUserTagsChart"]').contains('No data yet...')
     });
 
@@ -154,7 +154,7 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
         cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.wait('@loadConfig')
         cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
         cy.get('[data-cy="quizUserTagsChart"]').should('not.exist')

@@ -58,7 +58,7 @@ limitations under the License.
                         :aria-label="`View quiz attempt for ${data.item.userQuizAttemptId} id`"
                         :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.userQuizAttemptId } }"
                         data-cy="viewRunBtn">
-                <i class="fas fa-eye" aria-hidden="true"></i> Run
+                <i class="fas fa-eye" aria-hidden="true"></i> View Run
               </b-button>
             </div>
           </div>
