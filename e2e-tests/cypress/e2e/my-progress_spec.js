@@ -1078,7 +1078,7 @@ describe('Navigation Tests', () => {
     it('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.intercept('POST', '/api/validation/description').as('validate');
-            cy.loginAsAdminUser();
+            cy.loginAsRootUser();
             cy.createProject(4);
             cy.enableProdMode(4);
             cy.visit('/progress-and-rankings/');
@@ -1097,7 +1097,7 @@ describe('Navigation Tests', () => {
             cy.wait(500); //wait for animations to complete
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
             cy.getEmails().then((emails) => {
-                        expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
-                    });
+                    expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+            });
     });
 });
