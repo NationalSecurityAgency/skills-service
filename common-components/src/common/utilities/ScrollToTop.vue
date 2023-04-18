@@ -49,6 +49,7 @@ limitations under the License.
     right: 15px;
     border-radius: 50px;
     opacity: 0.6;
+    z-index: 10;
   }
 
   #returnToTopButton:hover {
