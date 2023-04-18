@@ -45,6 +45,8 @@ import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
+import static org.springframework.data.domain.Sort.Direction.DESC
+
 @Service
 @Slf4j
 class QuizDefService {
@@ -695,6 +697,47 @@ class QuizDefService {
 
     }
 
+    @Transactional(readOnly = true)
+    List<LabelCountItem> getUserTagCounts(String quizId, String userTag) {
+        PageRequest pageRequest = PageRequest.of(0, 20, DESC, "tagCount")
+        List<UserQuizAttemptRepo.TagValueCount> tagValueCounts = userQuizAttemptRepo.getUserTagCounts(quizId, userTag, pageRequest)
+        return tagValueCounts?.collect { new LabelCountItem(value: it.tagValue, count: it.tagCount)}
+    }
+
+    @Transactional(readOnly = true)
+    List<TimestampCountItem> getUsageOverTime(String quizId) {
+        List<UserQuizAttemptRepo.DateCount> usageOverTime = userQuizAttemptRepo.getUsageOverTime(quizId)
+        if (!usageOverTime) {
+            return []
+        }
+
+        Date previousDate
+        List<TimestampCountItem> res = usageOverTime.collect {
+            List<TimestampCountItem> res = []
+            Date currentDate = new Date(it.dateVal.getTime())
+            if (previousDate) {
+                List<DayCountItem> items = ZeroFillDayCountItemUtil.zeroFillDailyGaps(currentDate, previousDate, false)
+                if (items) {
+                    List<TimestampCountItem> timestampCountItems = items.collect {
+                        new TimestampCountItem(value: it.day.time, count: it.count)
+                    }.sort { it.value }
+                    res.addAll(timestampCountItems)
+                }
+            }
+
+            res.add(new TimestampCountItem(value: currentDate.getTime(), count: it.count))
+            previousDate = currentDate
+            return res
+        }.flatten()
+
+        Date now = StartDateUtil.computeStartDate(new Date(), EventType.DAILY)
+        List<DayCountItem> items = ZeroFillDayCountItemUtil.zeroFillDailyGaps(now, previousDate, true)
+        if (items) {
+            res.addAll(items.collect {new TimestampCountItem( value: it.day.time, count: it.count)}.sort { it.value})
+        }
+
+        return res
+    }
 
     @Transactional()
     void deleteQuiz(String quizId) {

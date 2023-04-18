@@ -33,9 +33,11 @@ import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.storage.model.LabeledCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserQuizAttemptRepo
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -266,6 +268,22 @@ class QuizController {
 
         quizRoleService.deleteQuizRole(userKey, quizId, roleName)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/{quizId}/userTagCounts", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    List<LabelCountItem> getUserTagCounts(@PathVariable("quizId") String quizId, @RequestParam String userTagKey) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotBlank(userTagKey, "User Tag Key")
+        return quizDefService.getUserTagCounts(quizId, userTagKey)
+    }
+
+    @RequestMapping(value = "/{quizId}/usageOverTime", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    List<TimestampCountItem> getUsageOverTime(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        List<TimestampCountItem> res = quizDefService.getUsageOverTime(quizId)
+        return res
     }
 
 }

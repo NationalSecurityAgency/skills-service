@@ -22,7 +22,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.QuizRun
-import skills.storage.model.LabeledCount
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
@@ -169,4 +168,35 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                    and attempt.status = 'PASSED')''' , nativeQuery = true)
     int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
 
+    static interface TagValueCount {
+        String getTagValue()
+        Integer getTagCount()
+    }
+    @Nullable
+    @Query(value = '''select tags.value as tagValue, count(attempt.id) as tagCount
+                    from user_quiz_attempt attempt,
+                         quiz_definition quizDef,
+                         user_tags tags
+                    where attempt.user_id = tags.user_id
+                        and attempt.quiz_definition_ref_id = quizDef.id
+                      and quizDef.quiz_id = ?1
+                      and tags.key = ?2
+                    group by tags.value''', nativeQuery = true)
+    List<TagValueCount> getUserTagCounts(String quizId, String userTag, PageRequest pageRequest)
+
+
+    static interface DateCount {
+        Date getDateVal()
+        Integer getCount()
+    }
+
+    @Nullable
+    @Query(value = '''select DATE_TRUNC ('day', attempt.started) as dateVal, count(attempt.id) as count
+                from user_quiz_attempt attempt,
+                quiz_definition quizDef
+                where attempt.quiz_definition_ref_id = quizDef.id
+                        and quizDef.quiz_id = ?
+                group by DATE_TRUNC ('day', attempt.started)
+                order by dateVal''', nativeQuery = true)
+    List<DateCount> getUsageOverTime(String quizId)
 }
