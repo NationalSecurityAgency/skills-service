@@ -195,8 +195,8 @@ aria-label="search for projects to pin"></b-input>
         <no-projects-in-prod-message />
       </div>
     </div>
-              <contact-owners-dialog v-if="contactModal.show && isEmailEnabled"  :projectName="contactModal.projectName"
-                                         v-model="contactModal.show" :projectId="contactModal.projectId" />
+      <contact-owners-dialog v-if="contactModal.show && isEmailEnabled"  :projectName="contactModal.projectName"
+                                 v-model="contactModal.show" :projectId="contactModal.projectId" />
   </div>
 </template>
 
