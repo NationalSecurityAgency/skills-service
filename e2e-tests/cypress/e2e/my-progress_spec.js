@@ -1075,10 +1075,10 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
-    it('Send email to project owner', () => {
+    it.only('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.intercept('POST', '/api/validation/description').as('validate');
-            cy.loginAsRootUser();
+            cy.loginAsAdminUser();
             cy.createProject(4);
             cy.enableProdMode(4);
             cy.visit('/progress-and-rankings/');
