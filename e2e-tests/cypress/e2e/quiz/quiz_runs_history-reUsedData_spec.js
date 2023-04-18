@@ -50,103 +50,103 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     const tableSelector = '[data-cy="quizRunsHistoryTable"]'
 
     it('quiz run history table paging', function () {
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user9' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user8' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user7' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user6' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user5' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user4' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 10);
     });
 
     it('sort by user', function () {
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector)
             .contains('User')
             .click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
             [{ colIndex: 0, value: 'user3' }],
             [{ colIndex: 0, value: 'user3' }],
-            [{ colIndex: 0, value: 'user4' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user5' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user6' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user7' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user8' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user9' }, { colIndex: 1, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
         ], 10);
     });
 
     it('sort by status', function () {
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector)
             .contains('Status')
             .click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
-            [{ colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 2, value: 'Passed' }],
         ], 10);
     });
 
     it('quiz run history page size', function () {
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`).select('20');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user9' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user8' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user7' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user6' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user5' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user4' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 20, true);
     });
 
     it('filter by user name', function () {
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '12')
         cy.get('[data-cy="userNameFilter"]').type(' SeR1{enter}')
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user11' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 10);
 
         cy.get('[data-cy="userNameFilter"]').type('0 ')
         cy.get('[data-cy="userFilterBtn"]').click()
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 1, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
         ], 10);
 
         cy.get('[data-cy="userResetBtn"]').click()

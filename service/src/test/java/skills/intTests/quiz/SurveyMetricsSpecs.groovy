@@ -15,12 +15,17 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
+import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
 
 class SurveyMetricsSpecs extends DefaultIntSpec {
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey}')
+    String usersTableAdditionalUserTagKey
 
     def "survey metrics counts"() {
         List<String> users = getRandomUsers(9, true)
@@ -281,14 +286,21 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         String userId
         List<List<Integer>> answerOptions
         String textAnswer
+        String userTag
     }
 
     def "get text answers"() {
         List<String> users = getRandomUsers(9, true)
-        def surveyInfo1 = createSimpleSurvey(1)
+        List<String> exclude = [[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME],users].flatten()
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true, exclude)[0])
+        Map<String, String> usersToTagLookup = [:]
+        usersToTagLookup[users[0]] = "ABC"
+        usersToTagLookup[users[2]] = "ABC1"
+        usersToTagLookup.each { rootSkillsService.saveUserTag(it.key, usersTableAdditionalUserTagKey, [it.value]) }
 
+        def surveyInfo1 = createSimpleSurvey(1)
         List<AnswerRequestInfo> answerRequestsSorted = users[0..7].collect {
-            new AnswerRequestInfo(userId: it, answerOptions:  [[0], [0, 2]], textAnswer: "answer-by-${it}")
+            new AnswerRequestInfo(userId: it, answerOptions:  [[0], [0, 2]], textAnswer: "answer-by-${it}", userTag: usersToTagLookup[it])
         }.sort({ it.userId })
         answerRequestsSorted.each {
             reportSurvey(it.userId, surveyInfo1, it.answerOptions, it.textAnswer)
@@ -307,27 +319,30 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
 
         def answers2 = skillsService.getUserQuizAnswers(surveyInfo2.quizId, surveyInfo2.questions[2].answerOptions[0].id)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(answers1.data))
         then:
         answers1.count == 8
         answers1.totalCount == 8
         answers1.data.userId == answerRequestsSorted.userId
         answers1.data.answerTxt == answerRequestsSorted.textAnswer
+        answers1.data.userTag == answerRequestsSorted.userTag
 
         answers1_pg1.count == 8
         answers1_pg1.totalCount == 8
         answers1_pg1.data.userId == answerRequestsSorted[0..2].userId
         answers1_pg1.data.answerTxt == answerRequestsSorted[0..2].textAnswer
+        answers1_pg1.data.userTag == answerRequestsSorted[0..2].userTag
 
         answers1_pg2.count == 8
         answers1_pg2.totalCount == 8
         answers1_pg2.data.userId == answerRequestsSorted[3..5].userId
         answers1_pg2.data.answerTxt == answerRequestsSorted[3..5].textAnswer
+        answers1_pg2.data.userTag == answerRequestsSorted[3..5].userTag
 
         answers1_pg3.count == 8
         answers1_pg3.totalCount == 8
         answers1_pg3.data.userId == answerRequestsSorted[6..7].userId
         answers1_pg3.data.answerTxt == answerRequestsSorted[6..7].textAnswer
+        answers1_pg3.data.userTag == answerRequestsSorted[6..7].userTag
 
         answers2.count == 1
         answers2.totalCount == 1
@@ -358,7 +373,6 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def s1_answ3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[2].id)
         def s1_answ4 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[3].id)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(s1_answ1.data))
         then:
         s1_answ1.count == 6
         s1_answ1.totalCount == 6

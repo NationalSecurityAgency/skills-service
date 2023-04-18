@@ -17,9 +17,11 @@ package skills.intTests.quiz
 
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.UserQuizAnswerAttemptRepo
 import skills.storage.repos.UserQuizAttemptRepo
@@ -36,6 +38,9 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
     @Autowired
     UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey}')
+    String usersTableAdditionalUserTagKey
 
     def "get quiz runs page"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
@@ -56,7 +61,6 @@ class QuizRunsSpecs extends DefaultIntSpec {
         def quizRuns_pg2 = skillsService.getQuizRuns(quiz.quizId, 3, 2, 'started', true, '')
         def quizRuns_pg3 = skillsService.getQuizRuns(quiz.quizId, 3, 3, 'started', true, '')
         def quizRuns_pg4 = skillsService.getQuizRuns(quiz.quizId, 3, 4, 'started', true, '')
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizRuns))
         then:
         quizRuns.totalCount == users.size()
         quizRuns.count == users.size()
@@ -232,6 +236,44 @@ class QuizRunsSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Provided attempt id [${quizRuns.data[0].attemptId}] does not belong to quiz [${quiz1.quizId}]")
+    }
+
+    def "get quiz runs page with user tags"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(10, true)
+
+        List<String> exclude = [[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME],users].flatten()
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true, exclude)[0])
+        rootSkillsService.saveUserTag(users[0], usersTableAdditionalUserTagKey, ["ABC"])
+        rootSkillsService.saveUserTag(users[1], usersTableAdditionalUserTagKey, ["ABC1"])
+
+        users.eachWithIndex { it, index ->
+            runQuiz(it, quiz, quizInfo, index % 2 == 0)
+        }
+
+        when:
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        then:
+        quizRuns.totalCount == users.size()
+        quizRuns.count == users.size()
+        quizRuns.data.userId == users
+        quizRuns.data.userTag == ["ABC",
+                                  "ABC1",
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+                                  null,
+        ]
     }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {

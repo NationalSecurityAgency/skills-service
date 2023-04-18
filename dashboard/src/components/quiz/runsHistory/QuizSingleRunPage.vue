@@ -15,10 +15,11 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header title="Result">
+  <sub-page-header title="User Run">
     <b-button :to="{ name: 'QuizRunsHistoryPage' }"
               :aria-label="`Return back to all the ${runInfo.quizType} results`"
-              variant="outline-primary" size="sm">
+              variant="outline-primary" size="sm"
+              data-cy="quizRunBackBtn">
       <i class="fas fa-arrow-alt-circle-left" aria-hidden="true"/> Back
     </b-button>
   </sub-page-header>
@@ -28,9 +29,10 @@ limitations under the License.
     <div v-if="!loading">
       <div class="row h-100">
         <div class="col-md-6 col-xl mb-2">
-          <b-card class="h-100">
+          <b-card class="h-100" data-cy="userInfoCard">
             <div class="text-uppercase text-secondary">User</div>
             <div class="text-primary font-weight-bold">{{ runInfo.userIdForDisplay }}</div>
+            <div v-if="showUserTagColumn && runInfo.userTag"><span class="text-info font-italic">{{ userTagLabel }}</span>: {{ runInfo.userTag }}</div>
           </b-card>
         </div>
         <div class="col-md-6 col-xl mb-2" data-cy="quizRunStatus">
@@ -74,9 +76,11 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import QuizRunQuestionCard from '@/components/quiz/runsHistory/QuizRunQuestionCard';
   import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
+  import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
 
   export default {
     name: 'QuizRunsHistoryPage',
+    mixins: [UserTagsConfigMixin],
     components: {
       QuizRunQuestionCard,
       SkillsSpinner,

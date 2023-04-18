@@ -15,13 +15,17 @@ limitations under the License.
 */
 <template>
 <div>
-  <sub-page-header title="Results"/>
+  <sub-page-header title="Runs"/>
+
+    <quiz-attempts-time-chart class="my-3"/>
+    <quiz-user-tags-chart v-if="showUserTagColumn" class="mb-3"/>
 
   <b-card body-class="p-0">
     <div>
-      <div class="row px-3 py-3">
+      <div class="row px-3 py-3 pt-4">
         <div class="col-12">
           <b-input v-model="filters.userId" v-on:keyup.enter="applyFilters"
+                   placeholder="User filter"
                    data-cy="userNameFilter" aria-label="User Name Filter"/>
         </div>
       </div>
@@ -83,6 +87,10 @@ limitations under the License.
           </div>
         </template>
 
+        <template v-slot:cell(userTag)="data">
+          <span :data-cy="`row${data.index}-userTag`">{{ data.value }}</span>
+        </template>
+
         <template v-slot:cell(status)="data">
           <quiz-run-status :quiz-type="quizType" :status="data.value" />
         </template>
@@ -131,17 +139,23 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
   import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus';
+  import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
+  import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart';
+  import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizRunsHistoryPage',
+    mixins: [UserTagsConfigMixin],
     components: {
       QuizRunStatus,
       DateCell,
       SkillsBTable,
       SubPageHeader,
       RemovalValidation,
+      QuizAttemptsTimeChart,
+      QuizUserTagsChart,
     },
     data() {
       return {
@@ -203,6 +217,13 @@ limitations under the License.
       };
     },
     mounted() {
+      if (this.showUserTagColumn) {
+        this.table.options.fields.splice(1, 0, {
+          key: 'userTag',
+          label: this.userTagLabel,
+          sortable: true,
+        });
+      }
       this.loadData();
     },
     methods: {

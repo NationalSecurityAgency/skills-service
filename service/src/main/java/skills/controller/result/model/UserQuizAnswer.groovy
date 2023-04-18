@@ -26,4 +26,6 @@ interface UserQuizAnswer {
     String getUserIdForDisplay()
 
     Integer getUserQuizAttemptId()
+
+    String getUserTag()
 }

@@ -1704,7 +1704,17 @@ class SkillsService {
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
     }
 
-    def getUserQuizAnswers(String quizId, Integer answerDefId, int limit = 10, int page = 1, String orderBy = 'userIdForDisplay', boolean ascending = true) {
+    def getUserTagCounts(String quizId, String userTagKey) {
+        String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}"
+        return wsHelper.adminGet(url.toString())
+    }
+
+    def getUsageOverTime(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/usageOverTime"
+        return wsHelper.adminGet(url.toString())
+    }
+
+    def getUserQuizAnswers(String quizId, Integer answerDefId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
         String url = "${getQuizDefUrl(quizId)}/answers/${answerDefId}/attempts"
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}".toString())
     }

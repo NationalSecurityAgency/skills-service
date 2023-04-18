@@ -15,9 +15,11 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+
+import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
@@ -25,6 +27,9 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
 
 class QuizGradedResSpecs extends DefaultIntSpec {
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey}')
+    String usersTableAdditionalUserTagKey
 
     def "quiz: get completed graded quiz - passed"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
@@ -41,8 +46,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -50,6 +53,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
         quizAttemptRes.started
         quizAttemptRes.completed
+        !quizAttemptRes.userTag
         quizAttemptRes.questions.id == quizInfo.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == questions.questionType
@@ -83,8 +87,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -123,8 +125,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -162,8 +162,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -202,8 +200,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -240,8 +236,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -277,8 +271,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -313,8 +305,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -354,8 +344,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -398,8 +386,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -439,8 +425,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.userId == userAttrs.userId
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
@@ -487,11 +471,37 @@ class QuizGradedResSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '2'],
         ])
         def quizAttemptRes1 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes))
         then:
         quizAttemptRes.numQuestionsToPass == 2
         quizAttemptRes1.numQuestionsToPass == 1
+    }
+
+    def "quiz: get completed graded quiz where user tag"() {
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true)[0])
+        rootSkillsService.saveUserTag(skillsService.userName, usersTableAdditionalUserTagKey, ["ABC"])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        when:
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        quizAttemptRes.userId == userAttrs.userId
+        quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
+        quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes.started
+        quizAttemptRes.completed
+        quizAttemptRes.userTag == "ABC"
     }
 }
 

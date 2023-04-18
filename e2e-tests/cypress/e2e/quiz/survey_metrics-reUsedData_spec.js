@@ -50,7 +50,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('survey metrics summary cards', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '8')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('Survey was completed 8 times')
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Survey runtime for 8 users')
@@ -60,14 +60,14 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('question type is displayed next to each question', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="qType"]').should('have.text', 'Multiple Choice')
         cy.get('[data-cy="metrics-q2"] [data-cy="qType"]').should('have.text', 'Text Input')
         cy.get('[data-cy="metrics-q3"] [data-cy="qType"]').should('have.text', 'Single Choice')
     });
 
     it('multiple choice question metrics', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"]').contains("Question 1 - First Answer")
         cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"]').contains("Question 1 - Second Answer")
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"]').contains("Question 1 - Third Answer")
@@ -86,7 +86,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('single answer history with paging', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="quizAnswerHistoryTable"]';
@@ -106,7 +106,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('single answer history expand to a larger page size', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row2-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
@@ -127,7 +127,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('text input question', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         const tableSelector = '[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector)
@@ -159,7 +159,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
     });
 
     it('single choice question metrics', function () {
-        cy.visit('/administrator/quizzes/quiz2/metrics');
+        cy.visit('/administrator/quizzes/quiz2/results');
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-colAnswer"]').contains("Question 3 - First Answer")
         cy.get('[data-cy="metrics-q3"] [data-cy="row1-colAnswer"]').contains("Question 3 - Second Answer")
         cy.get('[data-cy="metrics-q3"] [data-cy="row2-colAnswer"]').contains("Question 3 - Third Answer")
@@ -178,6 +178,5 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-answerHistory"] [data-cy="row0-colUserId"]').contains('user1')
-        cy.get('[data-cy="metrics-q3"] [data-cy="row0-answerHistory"] [data-cy="skillsBTableTotalRows"]').should('not.exist')
     });
 });

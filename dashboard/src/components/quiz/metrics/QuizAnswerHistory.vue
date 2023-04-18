@@ -15,11 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <div class="text-center">
-      <b-spinner v-if="isLoading" label="Loading..." style="width: 2rem; height: 2rem;" variant="info"/>
-    </div>
-    <div v-if="!isLoading">
-      <skills-b-table :options="tableOptions"
+    <skills-b-table :options="tableOptions"
                       :items="answerHistory"
                       @page-size-changed="pageSizeChanged"
                       @page-changed="pageChanged"
@@ -62,10 +58,13 @@ limitations under the License.
                         :aria-label="`View quiz attempt for ${data.item.userQuizAttemptId} id`"
                         :to="{ name: 'QuizSingleRunPage', params: { runId: data.item.userQuizAttemptId } }"
                         data-cy="viewRunBtn">
-                <i class="fas fa-eye" aria-hidden="true"></i> Run
+                <i class="fas fa-eye" aria-hidden="true"></i> View Run
               </b-button>
             </div>
           </div>
+        </template>
+        <template v-slot:cell(userTag)="data">
+          <span :data-cy="`row${data.index}-userTag`">{{ data.value }}</span>
         </template>
         <template v-slot:cell(updated)="data">
           <div style="min-width: 13rem;">
@@ -73,7 +72,6 @@ limitations under the License.
           </div>
         </template>
       </skills-b-table>
-    </div>
   </div>
 </template>
 
@@ -81,9 +79,11 @@ limitations under the License.
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
+  import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
 
   export default {
     name: 'QuizAnswerHistory',
+    mixins: [UserTagsConfigMixin],
     components: { DateCell, SkillsBTable },
     props: {
       answerDefId: Number,
@@ -95,7 +95,6 @@ limitations under the License.
     data() {
       return {
         quizId: this.$route.params.quizId,
-        isLoading: true,
         answerHistory: [],
         answerTxtTruncate: {
           truncateThreshold: 600,
@@ -138,15 +137,20 @@ limitations under the License.
         label: 'User',
         sortable: true,
       });
+      if (this.showUserTagColumn) {
+        fields.push({
+          key: 'userTag',
+          label: this.userTagLabel,
+          sortable: true,
+        });
+      }
       fields.push({
         key: 'updated',
         label: 'Date',
         sortable: true,
       });
       this.tableOptions.fields = fields;
-      this.loadData().then(() => {
-        this.isLoading = false;
-      });
+      this.loadData();
     },
     methods: {
       loadData() {

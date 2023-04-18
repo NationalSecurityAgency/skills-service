@@ -26,11 +26,11 @@ describe('Quiz and Survey Metrics', () => {
         cy.createSurveyDef(2);
         cy.createSurveyMultipleChoiceQuestionDef(2, 1);
 
-        cy.visit('/administrator/quizzes/quiz1/metrics');
-        cy.get('[data-cy="noMetricsYet"]').contains('Metrics will be available once at least 1 Quiz is completed')
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="noMetricsYet"]').contains('Results will be available once at least 1 Quiz is completed')
 
-        cy.visit('/administrator/quizzes/quiz2/metrics');
-        cy.get('[data-cy="noMetricsYet"]').contains('Metrics will be available once at least 1 Survey is completed')
+        cy.visit('/administrator/quizzes/quiz2/results');
+        cy.get('[data-cy="noMetricsYet"]').contains('Results will be available once at least 1 Survey is completed')
     });
 
 
@@ -40,7 +40,7 @@ describe('Quiz and Survey Metrics', () => {
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
         cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '1')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('1 attempt by 1 user')
 
@@ -54,7 +54,7 @@ describe('Quiz and Survey Metrics', () => {
         cy.get('[data-cy="noMetricsYet"]').should('not.exist')
 
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [1,2]}]);
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '2')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('2 attempts by 2 users')
 
@@ -69,7 +69,7 @@ describe('Quiz and Survey Metrics', () => {
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [1,2]}]);
 
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '4')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('4 attempts by 3 users')
 
@@ -88,7 +88,7 @@ describe('Quiz and Survey Metrics', () => {
 
         cy.runQuizForUser(1, 1, [{selectedIndex: [0, 2]}], true);
 
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '1')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('Survey was completed 1 time')
 
@@ -98,7 +98,7 @@ describe('Quiz and Survey Metrics', () => {
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Survey runtime for 1 user')
 
         cy.runQuizForUser(1, 2, [{selectedIndex: [0, 2]}], true);
-        cy.visit('/administrator/quizzes/quiz1/metrics');
+        cy.visit('/administrator/quizzes/quiz1/results');
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '2')
         cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('Survey was completed 2 times')
 

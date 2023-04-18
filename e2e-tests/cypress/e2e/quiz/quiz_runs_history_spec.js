@@ -54,11 +54,11 @@ describe('Quiz Runs History Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}], false);
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Completed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Completed' }],
         ], 10);
     });
 
@@ -111,7 +111,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.wait('@quizRuns')
         cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`).select('50');
 
@@ -156,7 +156,7 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [1]}]);
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
         cy.get('[data-cy="row0-userCell"]').contains('user3')
         cy.get('[data-cy="row1-userCell"]').contains('user2')
         cy.get('[data-cy="row2-userCell"]').contains('user1')
@@ -178,7 +178,7 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [1]}]);
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row1-deleteBtn"]').click()
         cy.get('[data-cy="closeRemovalSafetyCheck"]').click()
@@ -196,7 +196,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createTextInputQuestionDef(1, 3);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]}])
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('Completed')
@@ -247,7 +247,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createTextInputQuestionDef(1, 3);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}], false)
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('In Progress')
@@ -279,7 +279,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createTextInputQuestionDef(1, 3);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [1]}, {selectedIndex: [0]}], false)
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('In Progress')
@@ -310,7 +310,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
         cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}])
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('Passed')
@@ -357,7 +357,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createQuizMultipleChoiceQuestionDef(1, 2);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}])
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('Failed')
@@ -392,7 +392,7 @@ describe('Quiz Runs History Tests', () => {
         cy.createQuizQuestionDef(1, 4);
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}], false)
 
-        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.get('[data-cy="row0-viewRun"]').click()
         cy.get('[data-cy="quizRunStatus"]').contains('In Progress')

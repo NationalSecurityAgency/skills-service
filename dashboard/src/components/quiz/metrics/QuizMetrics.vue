@@ -21,8 +21,8 @@ limitations under the License.
 
     <div v-if="!isLoading">
       <b-card v-if="!hasMetrics">
-        <no-content2 title="No Metrics Yet..." class="my-5" data-cy="noMetricsYet"
-                     :message="`Metrics will be available once at least 1 ${metrics.quizType} is completed`"/>
+        <no-content2 title="No Results Yet..." class="my-5" data-cy="noMetricsYet"
+                     :message="`Results will be available once at least 1 ${metrics.quizType} is completed`"/>
       </b-card>
       <div v-if="hasMetrics">
         <div class="row">

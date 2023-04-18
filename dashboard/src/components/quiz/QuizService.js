@@ -123,4 +123,12 @@ export default {
     return axios.get(`/admin/quiz-definitions/${quizId}/skills/`, { params })
       .then((response) => response.data);
   },
+  getUserTagCounts(quizId, userTagKey) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/userTagCounts?userTagKey=${userTagKey}`)
+      .then((response) => response.data);
+  },
+  getUsageOverTime(quizId) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/usageOverTime`)
+      .then((response) => response.data);
+  },
 };

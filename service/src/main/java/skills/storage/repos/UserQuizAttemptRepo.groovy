@@ -22,7 +22,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.QuizRun
-import skills.storage.model.LabeledCount
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
@@ -121,19 +120,26 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''')
     Integer countQuizRuns(String quizId, String userQuery)
 
-    @Query('''select quizAttempt.id as attemptId,
-                    quizAttempt.started as started,
-                    quizAttempt.completed as completed,
-                    quizAttempt.status as status,
-                    userAttrs.userId as userId,
-                    userAttrs.userIdForDisplay as userIdForDisplay
-        from UserQuizAttempt quizAttempt, QuizDef quizDef, UserAttrs userAttrs
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizAttempt.userId = userAttrs.userId
-            and lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%'))
-            and quizDef.quizId = ?1
-     ''')
-    List<QuizRun> findQuizRuns(String quizId, String userQuery, PageRequest pageRequest)
+    @Query(value = '''select quizAttempt.id                as attemptId,
+                           quizAttempt.started           as started,
+                           quizAttempt.completed         as completed,
+                           quizAttempt.status            as status,
+                           userAttrs.user_id             as userId,
+                           userAttrs.user_id_for_display as userIdForDisplay,
+                           ut.value                      as userTag 
+                    from user_quiz_attempt quizAttempt,
+                         quiz_definition quizDef,
+                         user_attrs userAttrs
+                             left join (SELECT ut.user_id, max(ut.value) AS value
+                                        FROM user_tags ut
+                                        WHERE lower(ut.key) = lower(?3)
+                                        group by ut.user_id) ut ON ut.user_id = userAttrs.user_id
+                    where quizAttempt.quiz_definition_ref_id = quizDef.id
+                      and quizAttempt.user_id = userAttrs.user_id
+                      and lower(userAttrs.user_id_for_display) like lower(CONCAT('%', ?2, '%'))
+                      and quizDef.quiz_id = ?1
+     ''', nativeQuery = true)
+    List<QuizRun> findQuizRuns(String quizId, String userQuery, String usersTableAdditionalUserTagKey, PageRequest pageRequest)
 
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
@@ -162,4 +168,35 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                    and attempt.status = 'PASSED')''' , nativeQuery = true)
     int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
 
+    static interface TagValueCount {
+        String getTagValue()
+        Integer getTagCount()
+    }
+    @Nullable
+    @Query(value = '''select tags.value as tagValue, count(attempt.id) as tagCount
+                    from user_quiz_attempt attempt,
+                         quiz_definition quizDef,
+                         user_tags tags
+                    where attempt.user_id = tags.user_id
+                        and attempt.quiz_definition_ref_id = quizDef.id
+                      and quizDef.quiz_id = ?1
+                      and tags.key = ?2
+                    group by tags.value''', nativeQuery = true)
+    List<TagValueCount> getUserTagCounts(String quizId, String userTag, PageRequest pageRequest)
+
+
+    static interface DateCount {
+        Date getDateVal()
+        Integer getCount()
+    }
+
+    @Nullable
+    @Query(value = '''select DATE_TRUNC ('day', attempt.started) as dateVal, count(attempt.id) as count
+                from user_quiz_attempt attempt,
+                quiz_definition quizDef
+                where attempt.quiz_definition_ref_id = quizDef.id
+                        and quizDef.quiz_id = ?
+                group by DATE_TRUNC ('day', attempt.started)
+                order by dateVal''', nativeQuery = true)
+    List<DateCount> getUsageOverTime(String quizId)
 }
