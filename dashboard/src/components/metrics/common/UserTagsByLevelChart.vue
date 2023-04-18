@@ -54,7 +54,7 @@ limitations under the License.
             toolbar: {
               show: true,
               offsetX: 0,
-              offsetY: -60,
+              offsetY: 0,
             },
           },
           plotOptions: {
