@@ -57,8 +57,8 @@ describe('Quiz Runs History Tests', () => {
         cy.visit('/administrator/quizzes/quiz1/runs');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'In Progress' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Completed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Completed' }],
         ], 10);
     });
 

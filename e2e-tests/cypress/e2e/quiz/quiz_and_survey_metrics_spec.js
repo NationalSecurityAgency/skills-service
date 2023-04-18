@@ -27,10 +27,10 @@ describe('Quiz and Survey Metrics', () => {
         cy.createSurveyMultipleChoiceQuestionDef(2, 1);
 
         cy.visit('/administrator/quizzes/quiz1/results');
-        cy.get('[data-cy="noMetricsYet"]').contains('Metrics will be available once at least 1 Quiz is completed')
+        cy.get('[data-cy="noMetricsYet"]').contains('Results will be available once at least 1 Quiz is completed')
 
         cy.visit('/administrator/quizzes/quiz2/results');
-        cy.get('[data-cy="noMetricsYet"]').contains('Metrics will be available once at least 1 Survey is completed')
+        cy.get('[data-cy="noMetricsYet"]').contains('Results will be available once at least 1 Survey is completed')
     });
 
 

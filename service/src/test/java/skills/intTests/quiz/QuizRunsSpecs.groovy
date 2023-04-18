@@ -248,7 +248,8 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(10, true)
 
-        SkillsService rootSkillsService = createRootSkillService("rootey")
+        List<String> exclude = [[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME],users].flatten()
+        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true, exclude)[0])
         rootSkillsService.saveUserTag(users[0], usersTableAdditionalUserTagKey, ["ABC"])
         rootSkillsService.saveUserTag(users[1], usersTableAdditionalUserTagKey, ["ABC1"])
 
