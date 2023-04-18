@@ -170,9 +170,6 @@ aria-label="search for projects to pin"></b-input>
             </div>
           </template>
         </b-table>
-        <div>
-          <contact-owners-dialog v-if="contactModal.show && isEmailEnabled"  :projectName="contactModal.projectName"
-                                     v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
           <b-row align-h="center" class="mt-3">
           <b-col>
 
@@ -198,6 +195,8 @@ aria-label="search for projects to pin"></b-input>
         <no-projects-in-prod-message />
       </div>
     </div>
+              <contact-owners-dialog v-if="contactModal.show && isEmailEnabled"  :projectName="contactModal.projectName"
+                                         v-model="contactModal.show" :projectId="contactModal.projectId" />
   </div>
 </template>
 
@@ -232,7 +231,6 @@ aria-label="search for projects to pin"></b-input>
     data() {
       return {
         isLoading: true,
-        showContact: false,
         searchValue: '',
         projects: [],
         originalProjects: [],
