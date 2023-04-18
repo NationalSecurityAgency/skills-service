@@ -56,7 +56,7 @@ limitations under the License.
             toolbar: {
               show: true,
               offsetX: 0,
-              offsetY: -60,
+              offsetY: 0,
             },
           },
           tooltip: {
@@ -121,8 +121,13 @@ limitations under the License.
               achievedData.push({ x: label, y: dataFromServer[label].numberAchieved });
             });
 
-            this.inProgressSeries = [{ data: inProgressData, name: 'In Progress' }];
-            this.achievedSeries = [{ data: achievedData, name: 'Achieved' }];
+            if (inProgressData.length > 0) {
+              this.inProgressSeries = [{ data: inProgressData, name: 'In Progress' }];
+            }
+
+            if (achievedData.length > 0) {
+              this.achievedSeries = [{ data: achievedData, name: 'Achieved' }];
+            }
             this.loading = false;
           });
       },
