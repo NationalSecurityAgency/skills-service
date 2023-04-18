@@ -889,6 +889,83 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
     });
+
+    it.only('contact project owner for exported skill', () => {
+            cy.intercept('POST', '/api/projects/*/contact').as('contact');
+            cy.createSkill(1, 1, 1);
+            cy.createSkill(1, 1, 2);
+            cy.createSkill(1, 1, 3);
+            cy.exportSkillToCatalog(1, 1, 1);
+            cy.exportSkillToCatalog(1, 1, 2);
+            cy.exportSkillToCatalog(1, 1, 3);
+
+            cy.createProject(2);
+            cy.createSubject(2, 1);
+            cy.importSkillFromCatalog(2, 1, 1, 1);
+            cy.finalizeCatalogImport(2);
+
+            cy.createProject(3);
+            cy.createSubject(3, 1);
+            cy.importSkillFromCatalog(3, 1, 1, 3);
+
+            cy.visit('/administrator/projects/proj1');
+            cy.get('[data-cy="nav-Skill Catalog"]')
+                .click();
+            cy.validateTable('[data-cy="exportedSkillsTable"]', [
+                [{
+                    colIndex: 0,
+                    value: 'Very Great Skill 3'
+                }, {
+                    colIndex: 2,
+                    value: '1'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'Very Great Skill 2'
+                }, {
+                    colIndex: 2,
+                    value: '0'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'Very Great Skill 1'
+                }, {
+                    colIndex: 2,
+                    value: '1'
+                }],
+            ], 5);
+            cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]')
+                .click();
+            cy.get('[data-cy="importSkillInfo-proj1_skill2"')
+                .contains('This skill has not been imported by any other projects yet...');
+
+            cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
+                .click();
+            cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
+                .should('exist');
+            cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
+                [{
+                    colIndex: 0,
+                    value: 'This is project 2'
+                }],
+            ], 5, true, null, false);
+           cy.get('[data-cy="contactOwnerBtn_proj1"]').should('be.visible').click();
+           cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
+           cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
+           cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
+           cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
+           cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+           cy.wait('@contact');
+           cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+           cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
+           cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 2 will be notified of your question via email.');
+           cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+           cy.wait(500); //wait for animations to complete
+           cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
+           cy.getEmails().then((emails) => {
+                     expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+                 });
+        });
 });
 
 

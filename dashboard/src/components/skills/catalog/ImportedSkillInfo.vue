@@ -31,14 +31,27 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(importingProjectName)="data">
-          <span class="ml-2">{{ data.value }}</span>
-          <span v-if="data.item.enabled !== 'true'" class="text-uppercase ml-2"><b-badge variant="warning">Disabled</b-badge></span>
+        <div class="row">
+          <div class="col">
+            <span class="ml-2">{{ data.value }}</span>
+            <span v-if="data.item.enabled !== 'true'" class="text-uppercase ml-2"><b-badge variant="warning">Disabled</b-badge></span>
+          </div>
+          <div class="col-auto">
+            <b-button variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`"
+                             @click="chooseProject(data.value, skill.projectId)" :data-cy="`contactOwnerBtn_${ skill.projectId }`">
+                    Contact <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+             </b-button>
+          </div>
+          </div>
         </template>
 
         <template v-slot:cell(importedOn)="data">
           <date-cell :value="data.value" />
         </template>
       </skills-b-table>
+        <div>
+          <contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
+                                   v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
     </div>
     <div v-else>
       <div class="h6">This skill has not been imported by any other projects yet...</div>
@@ -47,15 +60,18 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import DateCell from '@/components/utils/table/DateCell';
+  import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog';
 
   export default {
     name: 'ImportedSkillInfo',
     components: {
       SkillsBTable,
       DateCell,
+      ContactOwnersDialog,
     },
     props: {
       skill: Object,
@@ -63,6 +79,11 @@ limitations under the License.
     data() {
       return {
         importedProjects: [],
+        contactModal: {
+          show: false,
+          projectId: null,
+          projectName: null,
+        },
         table: {
           options: {
             sortBy: 'exportedOn',
@@ -95,6 +116,11 @@ limitations under the License.
     mounted() {
       this.loadImportedProjectDetails(this.skill);
     },
+    computed: {
+      ...mapGetters([
+         'isEmailEnabled',
+      ]),
+    },
     methods: {
       loadImportedProjectDetails(skill) {
         if (skill.importedProjectCount > 0) {
@@ -106,6 +132,14 @@ limitations under the License.
               this.table.options.busy = false;
             });
         }
+      },
+      showContactOwner() {
+        this.contactModal.show = true;
+      },
+      chooseProject(name, id) {
+        this.contactModal.projectName = name;
+        this.contactModal.projectId = id;
+        this.showContactOwner();
       },
     },
   };
