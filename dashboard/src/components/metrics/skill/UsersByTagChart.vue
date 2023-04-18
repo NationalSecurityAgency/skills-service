@@ -56,7 +56,7 @@ limitations under the License.
             toolbar: {
               show: true,
               offsetX: 0,
-              offsetY: 0,
+              offsetY: -60,
             },
           },
           tooltip: {
@@ -69,6 +69,11 @@ limitations under the License.
           plotOptions: {
             bar: {
               horizontal: true,
+              barHeight: '30%',
+              dataLabels: {
+                position: 'bottom',
+              },
+              distributed: true,
             },
           },
           stroke: {
@@ -121,11 +126,14 @@ limitations under the License.
               achievedData.push({ x: label, y: dataFromServer[label].numberAchieved });
             });
 
-            if (inProgressData.length > 0) {
+            const totalInProgressData = inProgressData.map((value) => value.y).filter((value) => value > 0);
+            const totalAchievedData = achievedData.map((value) => value.y).filter((value) => value > 0);
+
+            if (inProgressData.length > 0 && totalInProgressData.length > 0) {
               this.inProgressSeries = [{ data: inProgressData, name: 'In Progress' }];
             }
 
-            if (achievedData.length > 0) {
+            if (achievedData.length > 0 && totalAchievedData.length > 0) {
               this.achievedSeries = [{ data: achievedData, name: 'Achieved' }];
             }
             this.loading = false;
