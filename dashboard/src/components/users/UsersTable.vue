@@ -16,9 +16,25 @@ limitations under the License.
 <template>
     <div>
       <div class="row px-3 pt-3">
-        <div class="col-12">
+        <div class="col-6">
           <b-form-group label="User Id Filter" label-class="text-muted">
             <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user id filter"/>
+          </b-form-group>
+        </div>
+        <div class="col-6">
+          <b-form-group label="Minimum User Progress" label-class="text-muted">
+            <div class="row px-3">
+              <div class="col-10">
+                <div style="float: left;">0%</div>
+                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
+                         data-cy="users-skillIdFilter" aria-label="user id filter" style="width: 88%; margin-left: 4px;"/>
+                <div style="float: right;">100%</div>
+              </div>
+              <div class="col-2">
+                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
+                         data-cy="users-skillIdFilter" aria-label="user id filter"/>
+              </div>
+            </div>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -125,6 +141,8 @@ limitations under the License.
         data: [],
         filters: {
           userId: '',
+          progress: 0,
+          minimumPoints: 0,
         },
         totalPoints: 0,
         table: {
@@ -211,12 +229,15 @@ limitations under the License.
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
+        this.filters.minimumPoints = this.totalPoints * (this.filters.progress / 100);
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite(`Users table has been filtered by ${this.filters.userId}`));
         });
       },
       reset() {
         this.filters.userId = '';
+        this.filters.minimumPoints = 0;
+        this.filters.progress = 0;
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Users table filters have been removed'));
@@ -232,6 +253,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           byColumn: 0,
           orderBy: this.table.options.sortBy,
+          minimumPoints: this.filters.minimumPoints,
         }).then((res) => {
           this.table.items = res.data;
           this.table.options.pagination.totalRows = res.count;
