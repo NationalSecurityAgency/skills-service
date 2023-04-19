@@ -637,16 +637,21 @@ Cypress.Commands.add("getLinkFromEmail", () => {
     });
 });
 
-Cypress.Commands.add("getEmails", () => {
-    cy.request({
-        "method":"GET",
-        "url": "http://localhost:1081/api/emails"
-    }).then((response) => {
-        if (response.body) {
-            return cy.wrap(response.body);
-        }
-        return '';
+Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
+    const emailUrl = 'http://localhost:1081/api/emails';
+    cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
+        errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
+        timeout: 120000, // waits up to 2 minutes
+        interval: 1000 // performs the check every 1 second, default to 200ms
     });
+
+    cy.request(emailUrl)
+        .then((response) => {
+            if (response.body) {
+                return cy.wrap(response.body);
+            }
+            return '';
+        });
 });
 
 Cypress.Commands.add('customLighthouse', () => {
