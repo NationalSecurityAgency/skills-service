@@ -156,7 +156,8 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
         skills[0].quizId = quiz.quizId
         otherUser.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        SkillsService approverUser = super.createService("approverUser")
+        String approverUserName = getRandomUsers(1).first()
+        SkillsService approverUser = super.createService(approverUserName)
         otherUser.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
         when:

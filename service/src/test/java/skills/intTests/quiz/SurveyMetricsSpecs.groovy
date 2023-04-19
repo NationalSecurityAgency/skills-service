@@ -301,7 +301,10 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def surveyInfo1 = createSimpleSurvey(1)
         List<AnswerRequestInfo> answerRequestsSorted = users[0..7].collect {
             new AnswerRequestInfo(userId: it, answerOptions:  [[0], [0, 2]], textAnswer: "answer-by-${it}", userTag: usersToTagLookup[it])
-        }.sort({ it.userId })
+        }.sort({
+            // "-" char is sorted different in postgres vs groovy
+            return it.userId.replace("-", "Z")
+        })
         answerRequestsSorted.each {
             reportSurvey(it.userId, surveyInfo1, it.answerOptions, it.textAnswer)
         }
@@ -373,26 +376,29 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def s1_answ3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[2].id)
         def s1_answ4 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[3].id)
 
+        // "-" char is sorted different in postgres vs groovy
+        Closure sort = { String s -> s.replace("-", "Z")}
         then:
         s1_answ1.count == 6
         s1_answ1.totalCount == 6
-        s1_answ1.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
+
+        s1_answ1.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]].sort(sort)
         s1_answ1.data.answerTxt == [null, null, null, null, null, null]
         s1_answ1.data.userQuizAttemptId.sort() == [attemptId0, attemptId2, attemptId3, attemptId4, attemptId6, attemptId7].sort()
 
         s1_answ2.count == 4
         s1_answ2.totalCount == 4
-        s1_answ2.data.userId == [users[1], users[4], users[6], users[7]].sort()
+        s1_answ2.data.userId == [users[1], users[4], users[6], users[7]].sort(sort)
         s1_answ2.data.answerTxt == [null, null, null, null]
 
         s1_answ3.count == 6
         s1_answ3.totalCount == 6
-        s1_answ3.data.userId == [users[0], users[1], users[3], users[4], users[6], users[7]].sort()
+        s1_answ3.data.userId == [users[0], users[1], users[3], users[4], users[6], users[7]].sort(sort)
         s1_answ3.data.answerTxt == [null, null, null, null, null, null]
 
         s1_answ4.count == 3
         s1_answ4.totalCount == 3
-        s1_answ4.data.userId == [users[5], users[6], users[7]].sort()
+        s1_answ4.data.userId == [users[5], users[6], users[7]].sort(sort)
         s1_answ4.data.answerTxt == [null, null, null]
 
     }
