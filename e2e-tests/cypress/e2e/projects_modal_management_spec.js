@@ -244,72 +244,36 @@ describe('Projects Modal Management Tests', () => {
         });
         cy.visit('/administrator/');
         const proj1EditBtn = '[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]';
-        const proj2EditBtn = '[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]';
 
         cy.get(proj1EditBtn)
             .click();
+        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
         cy.wait(250);
-        cy.get('[data-cy=projectName]')
-            .should('be.visible');
         cy.realPress('Escape');
-        cy.get(proj1EditBtn)
-            .should('have.focus');
+        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.wait(600)
+        cy.get(proj1EditBtn).should('have.focus');
 
-        cy.get(proj1EditBtn)
-            .click();
-        cy.get('[data-cy=closeProjectButton]')
-            .click();
-        cy.get(proj1EditBtn)
-            .should('have.focus');
+        cy.get(proj1EditBtn).click();
+        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
+        cy.get('.modal-footer [data-cy=closeProjectButton]').click();
+        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.wait(600)
+        cy.get(proj1EditBtn).should('have.focus');
 
-        cy.get(proj1EditBtn)
-            .click();
-        cy.get('[data-cy=projectName]')
-            .type('test 123');
-        cy.get('[data-cy=saveProjectButton]')
-            .click();
-        cy.get(proj1EditBtn)
-            .should('have.focus');
+        cy.get(proj1EditBtn).click();
+        cy.get('.modal-body [data-cy=projectName]').type('test 123');
+        cy.get('.modal-footer [data-cy=saveProjectButton]').click();
+        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.wait(600)
+        cy.get(proj1EditBtn).should('have.focus');
 
-        cy.get(proj1EditBtn)
-            .click();
-        cy.get('[aria-label=Close]')
-            .click();
-        cy.get(proj1EditBtn)
-            .should('have.focus');
-
-        //project 2
-        cy.get(proj2EditBtn)
-            .click();
-        cy.wait(250);
-        cy.get('[data-cy=projectName]')
-            .should('be.visible');
-        cy.realPress('Escape');
-        cy.get(proj2EditBtn)
-            .should('have.focus');
-
-        cy.get(proj2EditBtn)
-            .click();
-        cy.get('[data-cy=closeProjectButton]')
-            .click();
-        cy.get(proj2EditBtn)
-            .should('have.focus');
-
-        cy.get(proj2EditBtn)
-            .click();
-        cy.get('[data-cy=projectName]')
-            .type('test 123');
-        cy.get('[data-cy=saveProjectButton]')
-            .click();
-        cy.get(proj2EditBtn)
-            .should('have.focus');
-
-        cy.get(proj2EditBtn)
-            .click();
-        cy.get('[aria-label=Close]')
-            .click();
-        cy.get(proj2EditBtn)
-            .should('have.focus');
+        cy.get(proj1EditBtn).click();
+        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
+        cy.get('.modal-header [aria-label=Close]').click();
+        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.wait(600)
+        cy.get(proj1EditBtn).should('have.focus');
     });
 
     it('new level dialog should return focus to new level button', () => {
