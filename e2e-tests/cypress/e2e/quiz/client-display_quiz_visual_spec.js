@@ -196,6 +196,9 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
 
+        // must wait so "Completed In: <N> SECONDS" card renders consistently, otherwise
+        // it will sometimes execute in 1 second and the singular form will fail the comparison
+        cy.wait(2000)
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points')
 
