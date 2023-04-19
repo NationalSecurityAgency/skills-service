@@ -899,16 +899,13 @@ describe('Skills Exported to Catalog Tests', () => {
             cy.exportSkillToCatalog(1, 1, 1);
             cy.exportSkillToCatalog(1, 1, 2);
             cy.exportSkillToCatalog(1, 1, 3);
-
             cy.createProject(2);
             cy.createSubject(2, 1);
             cy.importSkillFromCatalog(2, 1, 1, 1);
             cy.finalizeCatalogImport(2);
-
             cy.createProject(3);
             cy.createSubject(3, 1);
             cy.importSkillFromCatalog(3, 1, 1, 3);
-
             cy.visit('/administrator/projects/proj1');
             cy.get('[data-cy="nav-Skill Catalog"]')
                 .click();
