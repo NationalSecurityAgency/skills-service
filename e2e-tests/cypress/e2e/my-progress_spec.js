@@ -1094,7 +1094,6 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
             cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 3 will be notified of your question via email.');
             cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
-            cy.wait(500); //wait for animations to complete
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
             cy.getEmails().then((emails) => {
                     expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
