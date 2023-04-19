@@ -132,7 +132,7 @@ limitations under the License.
     methods: {
       loadData() {
         this.loading = true;
-        QuizService.getUserTagCounts(this.quizId, 'dutyOrganization')
+        QuizService.getUserTagCounts(this.quizId, this.userTagKey)
           .then((res) => {
             const seriesData = res.map((item) => ({ x: item.value, y: item.count }));
             this.series = [{ data: seriesData, name: '# of Runs' }];
