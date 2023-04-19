@@ -229,7 +229,7 @@ limitations under the License.
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
-        this.filters.minimumPoints = this.totalPoints * (this.filters.progress / 100);
+        this.filters.minimumPoints = Math.floor(this.totalPoints * (this.filters.progress / 100));
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite(`Users table has been filtered by ${this.filters.userId}`));
         });
