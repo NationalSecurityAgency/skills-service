@@ -476,22 +476,25 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes1.numQuestionsToPass == 1
     }
 
-    def "quiz: get completed graded quiz where user tag"() {
-        SkillsService rootSkillsService = createRootSkillService(getRandomUsers(1, true)[0])
-        rootSkillsService.saveUserTag(skillsService.userName, usersTableAdditionalUserTagKey, ["ABC"])
+    def "quiz: get completed graded quiz with user tag"() {
+        List<String> users = getRandomUsers(2, true)
+        SkillsService rootSkillsService = createRootSkillService(users[0])
+        SkillsService regularUser = createService(users[1])
+
+        rootSkillsService.saveUserTag(regularUser.userName, usersTableAdditionalUserTagKey, ["ABC"])
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizInfo = regularUser.getQuizInfo(quiz.quizId)
+        def quizAttempt =  regularUser.startQuizAttempt(quiz.quizId).body
+        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        regularUser.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(regularUser.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
