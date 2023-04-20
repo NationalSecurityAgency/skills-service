@@ -100,27 +100,26 @@ aria-label="search for projects to pin"></b-input>
           </template>
 
           <template #cell(name)="data">
-            <span v-if="data.item.hasDescription">
-                <b-button size="sm" @click="data.toggleDetails" variant="outline-info"
-                          class="mr-2 py-0 px-1"
-                          :aria-label="`Show description for ${data.item.name}`"
-                          :data-cy="`expandDetailsBtn_${data.item.projectId}`">
-                  <i v-if="data.detailsShowing" class="fas fa-caret-up"/>
-                  <i v-else class="fas fa-caret-down"/>
-                </b-button>
-              </span>
             <div class="row">
-            <div class="col">
-              <span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span>
-              <span v-else>{{ data.item.name }}
-              </span>
-              </div>
-              <div class="col-auto">
-                <b-button v-if="isEmailEnabled" variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`" size="sm"
-                                 @click="chooseProject(data.item.name, data.item.projectId)" :data-cy="`contactOwnerBtn_${ data.item.projectId }`">
-                        Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
-                 </b-button>
-              </div>
+              <div class="col">
+                <span v-if="data.item.hasDescription">
+                  <b-button size="sm" @click="data.toggleDetails" variant="outline-info"
+                            class="mr-2 py-0 px-1"
+                            :aria-label="`Show description for ${data.item.name}`"
+                            :data-cy="`expandDetailsBtn_${data.item.projectId}`">
+                    <i v-if="data.detailsShowing" class="fas fa-caret-up"/>
+                    <i v-else class="fas fa-caret-down"/>
+                  </b-button>
+                </span>
+                <span v-if="data.item.nameHtml" v-html="data.item.nameHtml"></span>
+                <span v-else>{{ data.item.name }}</span>
+                </div>
+                <div class="col-auto">
+                  <b-button v-if="isEmailEnabled" variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`" size="sm"
+                                   @click="chooseProject(data.item.name, data.item.projectId)" :data-cy="`contactOwnerBtn_${ data.item.projectId }`">
+                          Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+                  </b-button>
+                </div>
               </div>
           </template>
 
