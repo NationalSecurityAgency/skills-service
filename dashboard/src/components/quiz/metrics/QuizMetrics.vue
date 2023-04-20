@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Metrics" aria-label="metrics"/>
+    <sub-page-header title="Results" aria-label="results"/>
 
     <skills-spinner :is-loading="isLoading" />
 
