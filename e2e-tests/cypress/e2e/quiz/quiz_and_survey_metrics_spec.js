@@ -77,7 +77,7 @@ describe('Quiz and Survey Metrics', () => {
         cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardDescription"]').contains('2 attempts passed by 2 users')
 
         cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardValue"]').should('have.text', '2')
-        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('2 attempts failed by 1 user')
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('2 attempts failed by 2 users')
 
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 4 attempts')
     });
