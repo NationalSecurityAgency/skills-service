@@ -489,12 +489,15 @@ class QuizDefService {
         UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
             UserQuizAttempt.QuizAttemptStatus.PASSED == it.getStatus()
         }
+        UserQuizAttemptRepo.QuizCounts failedQuizCounts = quizCounts.find {
+            UserQuizAttempt.QuizAttemptStatus.FAILED == it.getStatus()
+        }
         int numAttemptsPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
-
+        int numAttemptsFailed = failedQuizCounts ? failedQuizCounts.getNumAttempts() : 0
 
         Integer totalNumDistinctUsers = isSurvey ? totalNumAttempts : userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
-        int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
-
+        int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumDistinctUsers() : 0
+        int numDistinctUsersFailed = failedQuizCounts ? failedQuizCounts.getNumDistinctUsers() : 0
 
         Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)
 
@@ -538,10 +541,10 @@ class QuizDefService {
                 quizType: quiz.type,
                 numTaken: totalNumAttempts,
                 numPassed: numAttemptsPassed,
-                numFailed: totalNumAttempts - numAttemptsPassed,
+                numFailed: numAttemptsFailed,
                 numTakenDistinctUsers: totalNumDistinctUsers,
                 numPassedDistinctUsers: numDistinctUsersPassed,
-                numFailedDistinctUsers: totalNumDistinctUsers - numDistinctUsersPassed,
+                numFailedDistinctUsers: numDistinctUsersFailed,
                 avgAttemptRuntimeInMs: averageRuntimeInMs,
                 questions: questions,
         )
