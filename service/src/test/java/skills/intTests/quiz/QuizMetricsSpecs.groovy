@@ -55,7 +55,7 @@ class QuizMetricsSpecs extends DefaultIntSpec {
 
         q1_metrics.numTakenDistinctUsers == 5
         q1_metrics.numPassedDistinctUsers == 5
-        q1_metrics.numFailedDistinctUsers == 0
+        q1_metrics.numFailedDistinctUsers == 2
 
         q2_metrics.numTaken == 5
         q2_metrics.numPassed == 2
@@ -148,6 +148,26 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         q3_question.answers[1].numAnswered == 1
         q3_question.answers[1].numAnsweredCorrect == 0
         q3_question.answers[1].numAnsweredWrong == 1
+    }
+
+    def "quiz metrics - passed and failed are calculated correctly"() {
+        List<String> users = getRandomUsers(5, true)
+
+        def quizInfo = createSimpleQuiz(1)
+        runSimpleQuizByProvidingAnswers(users[0], quizInfo, [[1], [1]])
+        runSimpleQuizByProvidingAnswers(users[0], quizInfo, [[1], [1]])
+        runSimpleQuizByProvidingAnswers(users[0], quizInfo, [[0], [0, 2]]) // pass quiz example
+
+        when:
+        def q1_metrics = skillsService.getQuizMetrics(quizInfo.quizId)
+
+        then:
+        q1_metrics.numTaken == 3
+        q1_metrics.numPassed == 1
+        q1_metrics.numFailed == 2
+        q1_metrics.numPassedDistinctUsers == 1
+        q1_metrics.numFailedDistinctUsers == 1
+        q1_metrics.numTakenDistinctUsers == 1
     }
 
     def "quiz metrics - answers: multiple choice question"() {

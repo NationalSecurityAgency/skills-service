@@ -58,7 +58,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardDescription"]').contains('5 attempts passed by 5 users')
 
         cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardValue"]').should('have.text', '6')
-        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('6 attempts failed by 5 users')
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('6 attempts failed by 6 users')
 
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 11 attempts')
     });
