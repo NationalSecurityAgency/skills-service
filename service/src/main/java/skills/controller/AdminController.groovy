@@ -961,7 +961,8 @@ class AdminController {
                               @RequestParam int limit,
                               @RequestParam int page,
                               @RequestParam String orderBy,
-                              @RequestParam Boolean ascending) {
+                              @RequestParam Boolean ascending,
+                              @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
 
@@ -971,7 +972,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints)
     }
 
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
