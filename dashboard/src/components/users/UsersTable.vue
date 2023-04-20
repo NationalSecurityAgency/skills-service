@@ -27,12 +27,12 @@ limitations under the License.
               <div class="col-10">
                 <div style="float: left;">0%</div>
                 <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
-                         data-cy="users-skillIdFilter" aria-label="user id filter" style="width: 88%; margin-left: 4px;"/>
+                         data-cy="users-progress-range" aria-label="user progress range filter" style="width: 88%; margin-left: 4px;"/>
                 <div style="float: right;">100%</div>
               </div>
               <div class="col-2">
                 <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
-                         data-cy="users-skillIdFilter" aria-label="user id filter"/>
+                         data-cy="users-progress-input" aria-label="user progress input filter"/>
               </div>
             </div>
           </b-form-group>
