@@ -218,7 +218,7 @@ limitations under the License.
           this.reset();
         } else {
           this.quizzes = this.quizzesPreFilter.filter((q) => q.name.toLowerCase()
-            .indexOf(this.filter.name.trim().toLowerCase()) > 0)?.map((item) => {
+            .includes(this.filter.name.trim().toLowerCase()))?.map((item) => {
             const nameHtml = StringHighlighter.highlight(item.name, this.filter.name);
             return {
               nameHtml,
