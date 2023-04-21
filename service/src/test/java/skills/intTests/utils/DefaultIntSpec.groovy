@@ -171,6 +171,7 @@ class DefaultIntSpec extends Specification {
         return rootSkillsService
     }
 
+    static String defaultFromEmail = "resetspec@skilltreetests"
     def startEmailServer() {
         greenMail = new GreenMail(ServerSetupTest.SMTP)
         greenMail.start()
@@ -183,7 +184,7 @@ class DefaultIntSpec extends Specification {
                 "authEnabled": false,
                 "tlsEnabled" : false,
                 "publicUrl"  : "http://localhost:${localPort}/".toString(),
-                "fromEmail"  : "resetspec@skilltreetests"
+                "fromEmail"  : defaultFromEmail
         ])
     }
 
@@ -244,7 +245,7 @@ class DefaultIntSpec extends Specification {
      * of test p12 certificates available if in pki mode
      * @return
      */
-    List<String> getRandomUsers(int numUsers, boolean createEmail = true, List<String> exclude=[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME]) {
+    List<String>  getRandomUsers(int numUsers, boolean createEmail = true, List<String> exclude=[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME]) {
         //create email addresses for the users automatically?
         List<String> userIds =  userUtil.getUsers(numUsers+exclude.size())
         exclude.each { userToExclude ->
