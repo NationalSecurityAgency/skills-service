@@ -815,6 +815,71 @@ describe('Users Tests', () => {
         cy.contains("Client Display");
         cy.get('.h5').should('not.have.text', "Org: tagA");
     });
+
+    it('filter project users by completion', () => {
+        for (let i = 0; i < 6; i += 1) {
+            for (let j = 0; j <= i+2; j += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}@skills.org`, timestamp: m.clone().add(j, 'day').format('x')})
+            }
+        }
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+
+        // default sort order is 'Points Last Earned' desc
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(2, 'day')) }],
+        ], 5);
+
+        cy.get('[data-cy=users-progress-input]').type('{selectall}50')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        // users-progress-input
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 0,  value: 'user2@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(4, 'day')) }],
+        ], 5);
+
+        cy.get('[data-cy=users-progress-input]').type('{selectall}60')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        // users-progress-input
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0,  value: 'user3@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(5, 'day')) }],
+        ], 5);
+
+        cy.get('[data-cy=users-progress-input]').type('{selectall}70')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        // users-progress-input
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(6, 'day')) }],
+        ], 5);
+
+        cy.get('[data-cy=users-progress-input]').type('{selectall}80')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        // users-progress-input
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
+        ], 5);
+
+        cy.get('[data-cy=users-progress-input]').type('{selectall}90')
+        cy.get('[data-cy="users-filterBtn"]').click();
+        // users-progress-input
+
+        cy.get(tableSelector).contains('There are no records to show');
+    });
 })
 
 

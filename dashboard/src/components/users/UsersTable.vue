@@ -23,17 +23,15 @@ limitations under the License.
         </div>
         <div class="col-6">
           <b-form-group label="Minimum User Progress" label-class="text-muted">
-            <div class="row px-3">
-              <div class="col-10">
-                <div style="float: left;">0%</div>
+            <div class="row">
+                <span>0%</span>
                 <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
-                         data-cy="users-progress-range" aria-label="user progress range filter" style="width: 88%; margin-left: 4px;"/>
-                <div style="float: right;">100%</div>
-              </div>
-              <div class="col-2">
-                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
-                         data-cy="users-progress-input" aria-label="user progress input filter"/>
-              </div>
+                         data-cy="users-progress-range" aria-label="user progress range filter" style="margin-left: 5px; margin-right: 5px; max-width: 88%;"/>
+                <span>100%</span>
+            </div>
+            <div class="row justify-content-center">
+              <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
+                       data-cy="users-progress-input" aria-label="user progress input filter" style="width: 80px;"/>
             </div>
           </b-form-group>
         </div>
