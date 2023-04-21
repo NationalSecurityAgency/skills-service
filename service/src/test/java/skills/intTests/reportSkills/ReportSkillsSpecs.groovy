@@ -1092,10 +1092,11 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        SkillsService otherUser = createService("otherUser")
+        List<String> users = getRandomUsers(2)
+        SkillsService otherUser = createService(users[0])
 
         when:
-        otherUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+        otherUser.addSkill([projectId: projId, skillId: skills[0].skillId], users[1], new Date())
 
         then:
         SkillsClientException ex = thrown()
@@ -1113,11 +1114,12 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        SkillsService approverUser = createService("approver")
+        List<String> users = getRandomUsers(2)
+        SkillsService approverUser = createService(users[0])
         projAdmin.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
         when:
-        approverUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+        approverUser.addSkill([projectId: projId, skillId: skills[0].skillId], users[1], new Date())
 
         then:
         SkillsClientException ex = thrown()

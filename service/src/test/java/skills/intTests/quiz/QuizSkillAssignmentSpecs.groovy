@@ -28,6 +28,7 @@ import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
+import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -478,6 +479,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills[1].canUserAccess == true
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "user that is not admin on a project does not get canUserAccess status on skill"() {
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)
@@ -531,6 +533,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills[1].canUserAccess == false
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "user that is approver on a project can access skill"() {
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)

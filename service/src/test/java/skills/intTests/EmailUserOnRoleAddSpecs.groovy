@@ -69,8 +69,10 @@ class EmailUserOnRoleAddSpecs extends DefaultIntSpec {
         proj1Serv.createSkills(skills)
 
         createService(users[1])
-        String reportUserEmail = "report@email.com"
-        SkillsService reportSkillUser = createService(new SkillsService.UseParams(username: users[2], email: reportUserEmail))
+
+        SkillsService reportSkillUser = createService(new SkillsService.UseParams(username: users[2], email: "report@email.com"))
+        String reportUserEmail = userAttrsRepo.findByUserId(users[2].toLowerCase()).email
+        assert reportUserEmail.contains("@")
 
         // report back to back to get in the same notification batch
         reportSkillUser.addSkill([projectId: proj.projectId, skillId: skills[0].skillId])
