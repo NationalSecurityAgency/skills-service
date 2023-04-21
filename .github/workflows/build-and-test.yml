@@ -45,20 +45,8 @@ jobs:
           github_token: ${{ github.token }}
           paths_ignore: '["**/README.md"]'
 
-  test-out-container:
-    runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-18.14.1-chrome-110.0.5481.96-1-ff-109.0-edge-110.0.1587.41-1
-    steps:
-      - name: install things
-        run: |
-          apt-get update
-          apt-get install -y postgresql-client
-          psql --version
-          apt-get install fonts-noto-color-emoji
-
   build-skills-service-for-ui-tests:
-    needs: [pre_job, test-out-container]
+    needs: [pre_job]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
 
@@ -204,7 +192,7 @@ jobs:
         npm run verifyThatNewSnapshotsAreNotCreated
 
   service-against-postgresql:
-    needs: [pre_job, test-out-container]
+    needs: [pre_job]
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
     strategy:
