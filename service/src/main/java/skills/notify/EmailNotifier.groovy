@@ -164,18 +164,13 @@ class EmailNotifier implements Notifier {
 
         streamCreator.call().withCloseable { Stream<Notification> notifications ->
 
-            JavaMailSender senderForBatch = null
-            String fromEmail = null
-            Formatting formatting = null
+            SettingsInit init = getEmailConfig()
+            JavaMailSender senderForBatch = init.mailSender
+            Formatting formatting = init.formatting
             JsonSlurper slurper = new JsonSlurper()
 
             notifications.forEach({ Notification notification ->
-                if (!senderForBatch) {
-                    SettingsInit init = getEmailConfig()
-                    senderForBatch = init.mailSender
-                    fromEmail = init.fromEmail
-                    formatting = init.formatting
-                }
+                String fromEmail =  init.fromEmail
 
                 def userIds = null
                 try {
