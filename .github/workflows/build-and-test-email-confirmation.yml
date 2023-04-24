@@ -75,6 +75,8 @@ jobs:
           ${{ runner.os }}-maven-
 
     - name: Build skills-service
+      env:
+        MAVEN_OPTS: -Xmx2048m
       run: mvn --batch-mode install -DskipTests
 
     - name: Start services for Cypress tests
