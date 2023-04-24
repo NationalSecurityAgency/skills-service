@@ -24,14 +24,14 @@ limitations under the License.
         <div class="col-6">
           <b-form-group label="Minimum User Progress" label-class="text-muted">
             <div class="row">
-                <span>0%</span>
-                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
-                         data-cy="users-progress-range" aria-label="user progress range filter" style="margin-left: 5px; margin-right: 5px; max-width: 88%;"/>
-                <span>100%</span>
-            </div>
-            <div class="row justify-content-center">
-              <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
-                       data-cy="users-progress-input" aria-label="user progress input filter" style="width: 80px;"/>
+                <span style="padding-top: 6px;">0%</span>
+                <div class="col" style="padding-top: 6px;">
+                  <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
+                           data-cy="users-progress-range" aria-label="user progress range filter"/>
+                </div>
+                <span style="margin-right:8px; padding-top: 6px;">100%</span>
+                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
+                         data-cy="users-progress-input" aria-label="user progress input filter" style="width: 80px; margin-right: 6px;"/>
             </div>
           </b-form-group>
         </div>
