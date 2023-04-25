@@ -1082,7 +1082,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
     def "only project admins are allowed to report skills on behalf of another user"() {
-        SkillsService projAdmin = createService("projAdminUser")
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1092,7 +1093,7 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        List<String> users = getRandomUsers(2)
+
         SkillsService otherUser = createService(users[0])
 
         when:
@@ -1104,7 +1105,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
     def "project approves are not allowed to report skills on behalf of another user"() {
-        SkillsService projAdmin = createService("projAdminUser")
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1114,7 +1116,6 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        List<String> users = getRandomUsers(2)
         SkillsService approverUser = createService(users[0])
         projAdmin.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
