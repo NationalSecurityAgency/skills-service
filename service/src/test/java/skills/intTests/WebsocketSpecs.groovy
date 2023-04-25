@@ -47,6 +47,7 @@ import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserRepo
+import skills.utils.WaitFor
 
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
@@ -357,7 +358,14 @@ class WebsocketSpecs extends DefaultIntSpec {
         if (certificateRegistry) {
             protocol += "s"
         }
-        stompSession = stompClient.connectAsync("${protocol}://localhost:${localPort}/skills-websocket", headers, connectHeaders, sessionHandler).get()
+        String url = "${protocol}://localhost:${localPort}/skills-websocket".toString()
+        log.debug("connecting to [{}]", url)
+        java.util.concurrent.CompletableFuture<StompSession> future = stompClient.connectAsync(url, headers, connectHeaders, sessionHandler)
+        WaitFor.wait { future.isDone() }
+        if (!future.isDone()) {
+            throw new IllegalStateException("Failed to create websocket connection to [${url}]. Please see the test's logs")
+        }
+        stompSession = future.get()
         return messagesReceived
     }
 
