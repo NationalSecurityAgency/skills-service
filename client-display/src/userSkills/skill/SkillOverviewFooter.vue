@@ -100,8 +100,8 @@ limitations under the License.
         <div class="row">
           <div class="col">
             <i class="fas fa-heart-broken font-size-2" aria-hidden=""></i>
-            Unfortunately your request from <b>{{ skillInternal.selfReporting.requestedOn | formatDate('MM/DD/YYYY') }}</b> was rejected <span class="text-info">{{ skillInternal.selfReporting.rejectedOn | relativeTime}}</span>. The reason is:
-            <b>"{{ skillInternal.selfReporting.rejectionMsg }}"</b>
+            Unfortunately your request from <b>{{ skillInternal.selfReporting.requestedOn | formatDate('MM/DD/YYYY') }}</b> was rejected <span class="text-info">{{ skillInternal.selfReporting.rejectedOn | relativeTime}}</span>.
+            <span v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg }}"</b></span>
           </div>
           <div class="col-auto text-right">
             <button class="btn btn-info" data-cy="clearRejectionMsgBtn" @click="removeRejection">
