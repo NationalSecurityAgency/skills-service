@@ -123,12 +123,12 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         } else {
             log.info("POST/PUT/DELETE request to [{}] is not allowed, user [{}], database upgrade is currently in progress", uri, userInfo?.username)
             DbUpgradeErrBody basicErrBody = new DbUpgradeErrBody(explanation: "A database upgrade is currently in progress, no training profile modifications are allowed at this time.")
-            response.setStatus(503)
-            response.setHeader(HttpHeaders.RETRY_AFTER, TimeUnit.MINUTES.toSeconds(30).toString())
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE)
             boolean success = writeResponse(response, serverHttpRequest, DbUpgradeErrBody.class, basicErrBody)
             if (!success) {
                 log.error("unable to write response to client request for [{}] with accept headers of [{}]", uri, serverHttpRequest.getHeaders().getAccept())
             }
+            return;
         }
     }
 
