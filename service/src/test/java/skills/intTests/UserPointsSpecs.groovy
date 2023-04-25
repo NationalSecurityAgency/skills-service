@@ -19,7 +19,10 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
@@ -374,6 +377,15 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2
         results2.count == 0
         results2.totalCount == 1
+    }
+
+    def 'can not get skills with negative points'() {
+        when:
+        skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", -100)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getResBody().contains("Minimum Points is less than 0")
     }
 
     def 'get badge users when project exists'() {
