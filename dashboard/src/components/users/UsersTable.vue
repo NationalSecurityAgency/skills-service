@@ -16,12 +16,12 @@ limitations under the License.
 <template>
     <div>
       <div class="row px-3 pt-3">
-        <div class="col-6">
+        <div class="col-md-6">
           <b-form-group label="User Id Filter" label-class="text-muted">
             <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user id filter"/>
           </b-form-group>
         </div>
-        <div class="col-6">
+        <div class="col-md-6">
           <b-form-group label="Minimum User Progress" label-class="text-muted">
             <div class="row">
                 <span style="padding-top: 6px;">0%</span>
@@ -235,7 +235,14 @@ limitations under the License.
         }
         this.filters.minimumPoints = Math.floor(this.totalPoints * (this.filters.progress / 100));
         this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite(`Users table has been filtered by ${this.filters.userId}`));
+          let filterMessage = 'Users table has been filtered by';
+          if (this.filters.userId) {
+            filterMessage += ` ${this.filters.userId}`;
+          }
+          if (this.filters.minimumPoints > 0) {
+            filterMessage += `${this.filters.userId ? ' and' : ''} users with at least ${this.filters.minimumPoints} points`;
+          }
+          this.$nextTick(() => this.$announcer.polite(filterMessage));
         });
       },
       reset() {

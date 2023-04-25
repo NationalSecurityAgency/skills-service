@@ -589,15 +589,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Long countDistinctUserIdByProjectId(String projectId)
 
     @Query(value = '''SELECT COUNT(*)
-        FROM (SELECT DISTINCT usattr.user_id AS userId, SUM(usr.points) as totalPoints
+        FROM (SELECT DISTINCT usattr.user_id 
                 FROM user_points usr, user_attrs usattr 
                 where usr.user_id = usattr.user_id and 
                     usr.project_id = ?1 and 
                     usr.skill_id is null and 
+                    usr.points >= ?3 and
                     (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
-                     lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))
-                GROUP BY usattr.user_id
-                ) AS temp WHERE temp.totalPoints >= ?3''',
+                     lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))) 
+                AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserIdLike(String projectId, String userId, int minimumPoints)
 
@@ -625,7 +625,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId)
 
-    @Query(value = '''SELECT * FROM (SELECT 
+    @Query(value = '''SELECT 
                 up.user_id as userId, 
                 max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
@@ -661,8 +661,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
                 ) and 
-                up.skill_id is null
-            GROUP BY up.user_id) AS projectUser WHERE projectUser.totalPoints >= ?4''', nativeQuery = true)
+                up.skill_id is null and
+                up.points >= ?4
+            GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
@@ -686,16 +687,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         )
         SELECT COUNT(*)
         FROM (
-            SELECT DISTINCT up.user_id AS userId, sum(up.points) AS totalPoints
+            SELECT DISTINCT up.user_id 
             from user_points up, user_attrs usattr 
             where 
                 up.user_id = usattr.user_id and
                 up.skill_ref_id in (select id from subj_skills) and 
+                up.points >= :minimumPoints and
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
-                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
-                 )
-            GROUP BY up.user_id
-        ) AS temp WHERE temp.totalPoints >= :minimumPoints
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%')))
+        ) AS temp
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints)
 
@@ -718,23 +718,20 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Long countDistinctUsersByProjectIdAndSubjectId(@Param("projectId") String projectId, @Param("subjectId") String subjectId)
 
     @Query(value='''SELECT COUNT(*)
-        FROM (SELECT DISTINCT up.user_id AS userId, SUM(up.points) AS totalPoints
+        FROM (SELECT DISTINCT up.user_id 
             from user_points up, user_attrs usattr 
             where 
                 up.user_id = usattr.user_id and
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
+                up.points >= ?4 and
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%')) OR
-                 lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
-            GROUP BY up.user_id
-            ) 
-            AS temp WHERE temp.totalPoints >= ?4''',
+                 lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%')))) 
+            AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String query, int minimumPoints)
 
-    @Query(value = '''
-        SELECT * FROM (
-            SELECT 
+    @Query(value = '''SELECT 
                 up.user_id as userId, 
                 max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
@@ -758,11 +755,12 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                up.skill_id in (?3) and 
+                up.skill_id in (?3) and
+                up.points >= ?5 and
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
                 ) 
-            GROUP BY up.user_id) as projectUser WHERE projectUser.totalPoints >= ?5''', nativeQuery = true)
+            GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, Pageable pageable)
 
     @Query(value = '''SELECT 
