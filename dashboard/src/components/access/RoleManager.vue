@@ -76,7 +76,7 @@ limitations under the License.
       </template>
       <template v-slot:cell(controls)="data">
 
-        <div class="float-right" :data-cy="`controlsCell_${data.item.userId}`">
+        <div class="float-right mr-1" :data-cy="`controlsCell_${data.item.userId}`">
           <i v-if="!notCurrentUser(data.item.userId)"
              data-cy="cannotRemoveWarning"
              v-b-tooltip.hover="'Can not remove or edit myself. Sorry!!'"

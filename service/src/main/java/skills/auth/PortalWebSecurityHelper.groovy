@@ -19,13 +19,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.DependsOn
 import org.springframework.http.HttpMethod
+import org.springframework.security.authorization.AuthorityAuthorizationManager
+import org.springframework.security.authorization.AuthorizationManager
+import org.springframework.security.authorization.AuthorizationManagers
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.stereotype.Component
 import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
+import skills.auth.userCommunity.UserCommunityAuthorizationManager
 import skills.storage.model.auth.RoleName
 
 @Component
-@DependsOn('inviteOnlyProjectAuthorizationManager')
+@DependsOn(['inviteOnlyProjectAuthorizationManager', 'userCommunityAuthorizationManager'])
 class PortalWebSecurityHelper {
 
     @Value('#{"${server.port:8080}"}')
@@ -42,6 +47,9 @@ class PortalWebSecurityHelper {
 
     @Autowired
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
+
+    @Autowired
+    UserCommunityAuthorizationManager userCommunityAuthorizationManager
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
@@ -66,16 +74,22 @@ class PortalWebSecurityHelper {
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset",
                     "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
-                .requestMatchers('/admin/quiz-definitions/**').hasAnyAuthority(RoleName.ROLE_QUIZ_ADMIN.name(), RoleName.ROLE_QUIZ_READ_ONLY.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
-                .requestMatchers('/admin/**').hasAnyAuthority(RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name())
-                .requestMatchers('/supervisor/**').hasAnyAuthority(RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
-                .requestMatchers('/root/**').hasRole('SUPER_DUPER_USER')
-                .requestMatchers("/${managementPath}/**").hasRole('SUPER_DUPER_USER')
-                .anyRequest().access(inviteOnlyProjectAuthorizationManager)
+                .requestMatchers('/root/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPER_DUPER_USER.name()))
+                .requestMatchers('/supervisor/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
+                .requestMatchers('/admin/quiz-definitions/**').hasAnyAuthority(RoleName.ROLE_QUIZ_ADMIN.name(), RoleName.ROLE_QUIZ_READ_ONLY.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
+                .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name()))
+                .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
+                .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
+                .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
+                .anyRequest().authenticated()
         )
         http.headers().frameOptions().disable()
 
         return http
+    }
+
+    AuthorizationManager<RequestAuthorizationContext> hasAnyAuthorityPlus(List<AuthorizationManager<RequestAuthorizationContext>> managers, String... authorities) {
+        return AuthorizationManagers.allOf(([AuthorityAuthorizationManager.hasAnyAuthority(authorities)] + managers) as AuthorizationManager[])
     }
 }

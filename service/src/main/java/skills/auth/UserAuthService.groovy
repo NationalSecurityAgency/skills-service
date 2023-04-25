@@ -273,6 +273,13 @@ class UserAuthService {
                 shouldAddRole = true
             }
         }
+        if (userRole.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
+            shouldAddRole = false
+            String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
+            if (projectId && userRole.projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
+                shouldAddRole = true
+            }
+        }
         return shouldAddRole
     }
 

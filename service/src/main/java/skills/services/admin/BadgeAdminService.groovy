@@ -79,7 +79,7 @@ class BadgeAdminService {
 
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
-        CustomValidationResult customValidationResult = customValidator.validate(badgeRequest)
+        CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
         if(performCustomValidation && !customValidationResult.valid){
             String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[badge], badgeId=[${badgeRequest.badgeId}], badgeName=[${badgeRequest.name}], description=[${badgeRequest.description}]"
             throw new SkillException(msg)

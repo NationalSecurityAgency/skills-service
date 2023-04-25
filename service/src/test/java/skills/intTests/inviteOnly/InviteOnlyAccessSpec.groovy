@@ -572,4 +572,25 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         contactEmail.fromEmail == [EmailUtils.generateEmaillAddressFor(user)]
     }
 
+    def "cannot suggest users for a project that has been configured for invite only without accepting invite"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        def user = getRandomUsers(1, true)[0]
+        def newService = createService(user)
+
+        newService.suggestClientUsersForProject(proj.projectId, "")
+
+        then:
+        def err = thrown(SkillsClientException)
+        err.httpStatus == HttpStatus.FORBIDDEN
+    }
 }

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import store from '../../store/store';
 
 export default {
   validateDescription(description) {
     const body = {
       value: description,
     };
-    return axios.post('/api/validation/description', body).then((result) => result.data);
+    return axios.post(`/api/validation/description?projectId=${store.state.projectId}`, body).then((result) => result.data);
   },
 };

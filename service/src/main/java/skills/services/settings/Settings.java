@@ -28,7 +28,8 @@ public enum Settings {
     INVITE_ONLY_PROJECT("invite_only"),
     GROUP_DESCRIPTIONS("group-descriptions"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
-    USER_PROJECT_ROLE("user_project_role");
+    USER_PROJECT_ROLE("user_project_role"),
+    USER_COMMUNITY_ONLY_PROJECT("user_community");
 
     private String settingName;
 

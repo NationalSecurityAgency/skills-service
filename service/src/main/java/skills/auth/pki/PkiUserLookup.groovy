@@ -20,7 +20,11 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.CacheStats
 import com.google.common.cache.LoadingCache
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.ParameterizedTypeReference
@@ -28,12 +32,13 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -71,7 +76,8 @@ class PkiUserLookup {
         userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
             @Override
             UserInfo load(String dn) throws Exception {
-                UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn)
+                String issuerDn = getIssuerDn()
+                UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn, issuerDn)
                 validate(userInfo, dn)
                 return userInfo
             }
@@ -91,8 +97,8 @@ class PkiUserLookup {
     @PreDestroy
     void destroy(){
         if (timer != null) {
-            timer.cancel();
-            timer.purge();
+            timer.cancel()
+            timer.purge()
         }
     }
 
@@ -154,6 +160,31 @@ class PkiUserLookup {
             e.doNotRetry = true
             throw e
         }
+    }
+
+    private String getIssuerDn() {
+        return extractClientCertificate(getServletRequest())?.getIssuerX500Principal()?.getName()
+    }
+
+    private HttpServletRequest getServletRequest() {
+        HttpServletRequest httpServletRequest
+        try {
+            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
+            httpServletRequest = currentRequestAttributes?.getRequest()
+        } catch (Exception e) {
+            log.warn("Unable to access current HttpServletRequest. Error Recieved [$e]", e)
+        }
+        return httpServletRequest
+    }
+
+    private X509Certificate extractClientCertificate(HttpServletRequest request) {
+        X509Certificate[] certs = (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate")
+        if (certs != null && certs.length > 0) {
+            log.debug("X.509 client authentication certificate:${certs[0]}")
+            return certs[0]
+        }
+        log.error("No client certificate found in request.")
+        return null
     }
 
     static class Status {

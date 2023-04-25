@@ -145,10 +145,23 @@ class UserAttrsService {
     @Profile
     private void replaceUserTags(String userId, UserInfo userInfo) {
         userTagsRepository.deleteByUserId(userId)
-        List<UserTag> userTags = userInfo.userTags.collect { new UserTag(userId: userId, key: it.key, value: it.value) }
+        List<UserTag> userTags = userInfo.userTags.collect {
+            if (isCollectionOrArray(it.value)) {
+                it.value.collect { value ->
+                    return new UserTag(userId: userId, key: it.key, value: value)
+                }
+            } else {
+                return new UserTag(userId: userId, key: it.key, value: it.value)
+            }
+        }.flatten()
+
         if (userTags) {
             userTagsRepository.saveAll(userTags)
         }
+    }
+
+    private isCollectionOrArray(Object value) {
+        [Collection, Object[]].any { it.isAssignableFrom(value?.class) }
     }
 
     @Profile

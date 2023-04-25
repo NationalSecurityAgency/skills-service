@@ -124,6 +124,8 @@ skills:
       #it may be necessary to use the (?s) modifier for paragraph validation regexes, depending on the regex specified
       paragraphValidationRegex:
       paragraphValidationMessage:
+      userCommunityParagraphValidationRegex:
+      userCommunityParagraphValidationMessage:
       nameValidationRegex:
       nameValidationMessage:
       maxFirstNameLength: 30

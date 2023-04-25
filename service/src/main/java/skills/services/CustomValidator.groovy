@@ -17,18 +17,15 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.QuizDefRequest
-import skills.controller.request.model.SkillRequest
-import skills.controller.request.model.SubjectRequest
+import skills.controller.request.model.*
+import skills.services.admin.UserCommunityService
 import skills.utils.InputSanitizer
 
-import jakarta.annotation.PostConstruct
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Slf4j
@@ -38,8 +35,14 @@ class CustomValidator {
     @Value('#{"${skills.config.ui.paragraphValidationRegex}"}')
     String paragraphValidationRegex
 
+    @Value('#{"${skills.config.ui.userCommunityParagraphValidationRegex}"}')
+    String userCommunityParagraphValidationRegex
+
     @Value('#{"${skills.config.ui.paragraphValidationMessage}"}')
     String paragraphValidationMessage
+
+    @Value('#{"${skills.config.ui.userCommunityParagraphValidationMessage}"}')
+    String userCommunityParagraphValidationMessage
 
     @Value('#{"${skills.config.ui.nameValidationRegex}"}')
     String nameValidationRegex
@@ -47,8 +50,13 @@ class CustomValidator {
     @Value('#{"${skills.config.ui.nameValidationMessage}"}')
     String nameValidationMessage
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     private String paragraphValidationMsg
+    private String userCommunityParagraphValidationMsg
     private Pattern paragraphPattern
+    private Pattern userCommunityParagraphPattern
 
     private String nameValidationMsg
     private Pattern nameRegex
@@ -71,6 +79,12 @@ class CustomValidator {
             paragraphPattern = Pattern.compile(paragraphValidationRegex)
         }
 
+        userCommunityParagraphValidationMsg = userCommunityParagraphValidationMessage ?: "Description failed validation"
+        if ( StringUtils.isNotBlank(userCommunityParagraphValidationRegex)){
+            log.info("Configuring user community paragraph validator. regex=[{}], message=[{}]", userCommunityParagraphValidationRegex, userCommunityParagraphValidationMessage)
+            userCommunityParagraphPattern = Pattern.compile(userCommunityParagraphValidationRegex)
+        }
+
         nameValidationMsg = nameValidationMessage ?: "Name failed validation"
         if ( StringUtils.isNotBlank(nameValidationRegex)) {
             log.info("Configuring name validator. regex=[{}], message=[{}]", nameValidationRegex, nameValidationMsg)
@@ -81,11 +95,11 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(ProjectRequest projectRequest) {
-        return validateDescriptionAndName(projectRequest.description, projectRequest.name)
+        return validateDescriptionAndName(projectRequest.description, projectRequest.name, projectRequest.projectId)
     }
 
-    CustomValidationResult validate(SubjectRequest subjectRequest) {
-        return validateDescriptionAndName(subjectRequest.description, subjectRequest.name)
+    CustomValidationResult validate(SubjectRequest subjectRequest, String projectId) {
+        return validateDescriptionAndName(subjectRequest.description, subjectRequest.name, projectId)
     }
 
     CustomValidationResult validate(QuizDefRequest quizDefRequest) {
@@ -94,15 +108,15 @@ class CustomValidator {
 
     @Profile
     CustomValidationResult validate(SkillRequest skillRequest) {
-        return validateDescriptionAndName(skillRequest.description, skillRequest.name)
+        return validateDescriptionAndName(skillRequest.description, skillRequest.name, SkillRequest.projectId)
     }
 
-    CustomValidationResult validate(BadgeRequest badgeRequest) {
-        return validateDescriptionAndName(badgeRequest.description, badgeRequest.name)
+    CustomValidationResult validate(BadgeRequest badgeRequest, String projectId) {
+        return validateDescriptionAndName(badgeRequest.description, badgeRequest.name, projectId)
     }
 
-    private CustomValidationResult validateDescriptionAndName(String description, String name) {
-        CustomValidationResult validationResult = validateDescription(description)
+    private CustomValidationResult validateDescriptionAndName(String description, String name, String projectId=null) {
+        CustomValidationResult validationResult = validateDescription(description, projectId)
         if (!validationResult.valid) {
             return validationResult
         }
@@ -111,7 +125,15 @@ class CustomValidator {
         return validationResult
     }
 
-    CustomValidationResult validateDescription(String description) {
+    CustomValidationResult validateDescription(String description, String projectId=null) {
+        Pattern paragraphPattern = this.paragraphPattern
+        String paragraphValidationMsg = this.paragraphValidationMsg
+        if (projectId && this.userCommunityParagraphPattern) {
+            if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
+                paragraphPattern = this.userCommunityParagraphPattern
+                paragraphValidationMsg = this.userCommunityParagraphValidationMsg ?: paragraphValidationMsg
+            }
+        }
         if (!paragraphPattern || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }

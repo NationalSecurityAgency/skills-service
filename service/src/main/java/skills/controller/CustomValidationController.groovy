@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import skills.controller.result.model.ValidationResult
@@ -43,8 +44,8 @@ class CustomValidationController {
     @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    ValidationResult validateDescription(@RequestBody Map<String,String> body){
-        CustomValidationResult vr = customValidator.validateDescription(body.value)
+    ValidationResult validateDescription(@RequestBody Map<String,String> body, @RequestParam(required = false) String projectId){
+        CustomValidationResult vr = customValidator.validateDescription(body.value, projectId)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
         return validationResult
     }

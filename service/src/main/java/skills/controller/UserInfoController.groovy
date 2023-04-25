@@ -38,6 +38,7 @@ import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
 import skills.services.UserAgreementResult
 import skills.services.UserAgreementService
+import skills.services.admin.UserCommunityService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.UserTag
@@ -87,6 +88,9 @@ class UserInfoController {
     @Autowired
     UserAgreementService userAgreementService
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     @Value('#{"${skills.config.ui.rankingAndProgressViewsEnabled}"}')
     Boolean rankingAndProgressViewsEnabled
 
@@ -112,6 +116,9 @@ class UserInfoController {
             if (uar.userAgreement && uar.lastViewedVersion != uar.currentVersion) {
                 headers.set(DISPLAY_UA_HEADER, "true")
                 headers.set("Access-Control-Expose-Headers", DISPLAY_UA_HEADER)
+            }
+            if (userCommunityService.isUserCommunityMember(currentUser.username)) {
+                res.userCommunity = userCommunityService.userCommunityUserTagValue
             }
         }
         return new ResponseEntity<>(res, headers, HttpStatus.OK)

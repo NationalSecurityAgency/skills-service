@@ -18,13 +18,20 @@ import store from '../../store/store';
 import DescriptionValidatorService from './DescriptionValidatorService';
 
 const validator = {
-  message: (field) => `${field} - ${store.getters.config.paragraphValidationMessage}.`,
   validate(value) {
     if (!store.getters.config.paragraphValidationRegex) {
       return true;
     }
 
-    return DescriptionValidatorService.validateDescription(value).then((result) => result.valid);
+    return DescriptionValidatorService.validateDescription(value).then((result) => {
+      if (result.valid) {
+        return true;
+      }
+      if (result.msg) {
+        return `{_field_} - ${result.msg}`;
+      }
+      return '{_field_} is invalid';
+    });
   },
 };
 

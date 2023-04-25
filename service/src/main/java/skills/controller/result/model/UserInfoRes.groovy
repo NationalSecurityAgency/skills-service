@@ -30,6 +30,7 @@ class UserInfoRes {
     String nickname
     String dn
     String landingPage
+    String userCommunity
 
     UserInfoRes() {}
 
