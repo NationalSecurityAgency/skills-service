@@ -893,6 +893,7 @@ class AdminController {
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotNull(minimumPoints, "Minimum Points")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
@@ -931,6 +932,7 @@ class AdminController {
                                 @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isNotNull(minimumPoints, "Minimum Points")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest, minimumPoints)
@@ -948,6 +950,7 @@ class AdminController {
                               @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isNotNull(minimumPoints, "Minimum Points")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest, minimumPoints)
@@ -965,6 +968,7 @@ class AdminController {
                               @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotNull(minimumPoints, "Minimum Points")
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
