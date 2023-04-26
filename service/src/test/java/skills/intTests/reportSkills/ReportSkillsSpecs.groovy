@@ -1082,7 +1082,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
     def "only project admins are allowed to report skills on behalf of another user"() {
-        SkillsService projAdmin = createService("projAdminUser")
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1092,10 +1093,11 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        SkillsService otherUser = createService("otherUser")
+
+        SkillsService otherUser = createService(users[0])
 
         when:
-        otherUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+        otherUser.addSkill([projectId: projId, skillId: skills[0].skillId], users[1], new Date())
 
         then:
         SkillsClientException ex = thrown()
@@ -1103,7 +1105,8 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
     def "project approves are not allowed to report skills on behalf of another user"() {
-        SkillsService projAdmin = createService("projAdminUser")
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
 
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1113,11 +1116,11 @@ class ReportSkillsSpecs extends DefaultIntSpec {
         projAdmin.createSubject(subj)
         projAdmin.createSkills(skills)
 
-        SkillsService approverUser = createService("approver")
+        SkillsService approverUser = createService(users[0])
         projAdmin.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
         when:
-        approverUser.addSkill([projectId: projId, skillId: skills[0].skillId], "u123", new Date())
+        approverUser.addSkill([projectId: projId, skillId: skills[0].skillId], users[1], new Date())
 
         then:
         SkillsClientException ex = thrown()

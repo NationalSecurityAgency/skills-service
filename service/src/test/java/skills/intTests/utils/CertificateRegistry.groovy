@@ -65,6 +65,10 @@ class CertificateRegistry {
         return idsOnly.get(random.nextInt(idsOnly.size()))
     }
 
+    List<String> getAllUserIds() {
+        return new ArrayList<>(idsOnly)
+    }
+
     public List<String> getRandomUsers(int num) {
         List<String> copy = new ArrayList<>(idsOnly)
         List<String> res = []

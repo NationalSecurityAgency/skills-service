@@ -22,6 +22,7 @@ import org.joda.time.format.DateTimeFormatter
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -353,6 +354,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
+   @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
    def "filter users by name"(){
 
         SkillsService createAcctService = createService()
@@ -386,6 +388,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         result3.data.find{it.userId.contains('jdoe@email.foo')}
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "sort users" () {
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
@@ -432,6 +435,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         fooUsersSortByLastName.data[2].lastName == 'Doe'
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "user paging" () {
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])

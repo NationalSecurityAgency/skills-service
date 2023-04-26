@@ -64,9 +64,11 @@ class PkiSecurityConfiguration {
                 .x509()
                 .subjectPrincipalRegex(/(.*)/)
                 .and()
+                .securityContext().securityContextRepository(securityContextRepository)
+                .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .securityContext().securityContextRepository(securityContextRepository)
+                .sessionManagement().sessionFixation().none()
         http.build()
     }
 
@@ -75,7 +77,7 @@ class PkiSecurityConfiguration {
     @Lazy
     AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
         // provides the default AuthenticationManager as a Bean
-        return http.getSharedObject(AuthenticationManager.class);
+        return http.getSharedObject(AuthenticationManager.class)
     }
 
     @Bean
