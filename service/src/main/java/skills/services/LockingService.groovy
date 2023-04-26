@@ -124,6 +124,12 @@ class LockingService {
         return lock
     }
 
+    SkillsDBLock lockUserQuizAttempt(Integer quizAttemptId) {
+        String key = "quizAttempt_" + quizAttemptId
+        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
+        return lock
+    }
+
     @Transactional
     void deleteLocksOlderThan(Date date) {
         skillsDBLockRepo.deleteByCreatedBeforeAndExpires(date)

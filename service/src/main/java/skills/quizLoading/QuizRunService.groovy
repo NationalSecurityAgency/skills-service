@@ -28,6 +28,7 @@ import skills.controller.exceptions.SkillQuizException
 import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
+import skills.services.LockingService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
@@ -53,6 +54,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
+    LockingService lockingService
 
     @Autowired
     CustomValidator validator
@@ -207,6 +211,8 @@ class QuizRunService {
 
     @Transactional
     void reportQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
+        lockingService.lockUserQuizAttempt(quizAttemptId)
+
         if (!quizAttemptRepo.existsByUserIdAndIdAndQuizId(userId, quizAttemptId, quizId)) {
             throw new SkillQuizException("Provided attempt id [${quizAttemptId}] does not exist for [${userId}] user and [${quizId}] quiz", ErrorCode.BadParam)
         }
