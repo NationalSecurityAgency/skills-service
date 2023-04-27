@@ -108,7 +108,7 @@ class CustomValidator {
 
     @Profile
     CustomValidationResult validate(SkillRequest skillRequest) {
-        return validateDescriptionAndName(skillRequest.description, skillRequest.name, SkillRequest.projectId)
+        return validateDescriptionAndName(skillRequest.description, skillRequest.name, skillRequest.projectId)
     }
 
     CustomValidationResult validate(BadgeRequest badgeRequest, String projectId) {
