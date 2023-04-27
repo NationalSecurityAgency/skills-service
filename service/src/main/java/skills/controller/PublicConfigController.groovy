@@ -182,12 +182,9 @@ class PublicConfigController {
 
     private configureUserCommunityProps(Map<String,String> res) {
         Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
-        if (belongsToUserCommunity) {
-            if (uiConfigProperties.ui.userCommunityHeaderDescriptor) {
-                res['headerDescriptor'] = uiConfigProperties.ui.userCommunityHeaderDescriptor
-            }
-        }
-
+        res['currentUsersCommunityDescriptor'] = belongsToUserCommunity ?
+                uiConfigProperties.ui.userCommunityRestrictedDescriptor :
+                uiConfigProperties.ui.defaultCommunityDescriptor
         if (!belongsToUserCommunity) {
             // remove all userCommunity keys
             Set<String> userCommunityKeys = res.keySet().findAll { StringUtils.startsWith(it, 'userCommunity') }

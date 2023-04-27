@@ -33,9 +33,6 @@ limitations under the License.
       isProjConfigInviteOnly() {
         return this.$store.getters.projConfig && this.$store.getters.projConfig.invite_only === 'true';
       },
-      isProjConfigUserCommunityOnly() {
-        return this.$store.getters.projConfig && this.$store.getters.projConfig.user_community === 'true';
-      },
       isProjConfigDiscoverable() {
         return this.$store.getters.projConfig && this.$store.getters.projConfig['production.mode.enabled'] === 'true';
       },

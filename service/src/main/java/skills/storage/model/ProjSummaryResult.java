@@ -49,4 +49,6 @@ public interface ProjSummaryResult {
     public abstract Integer getTotalPointsReused();
 
     String getUserRole();
+
+    Boolean getProtectedCommunityEnabled();
 }

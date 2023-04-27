@@ -16,6 +16,7 @@ limitations under the License.
 <script>
   const releaseVersion = /\{\{\s?release.version\s?\}\}/gi;
   const buildDate = /\{\{\s?build.date\s?\}\}/gi;
+  const communityDescriptor = /\{\{\s?community.descriptor\s?\}\}/gi;
   export default {
     name: 'DynamicVariableReplacementMixin',
     methods: {
@@ -30,6 +31,10 @@ limitations under the License.
           if (timestamp) {
             const dateString = window.dayjs(timestamp).format('ll');
             result = result.replace(buildDate, dateString);
+          }
+          const communityHeaderDescriptor = this.$store.getters.config.currentUsersCommunityDescriptor;
+          if (communityHeaderDescriptor) {
+            result = result.replace(communityDescriptor, communityHeaderDescriptor);
           }
         }
         return result;

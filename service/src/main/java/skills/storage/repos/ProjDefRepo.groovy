@@ -191,6 +191,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     reusedSkills.skillCount AS numSkillsReused,
                     reusedSkills.totalPoints AS totalPointsReused, 
                     ur.role_name as userRole,
+                    COALESCE(CAST(userCommunity.protectedCommunityEnabled AS BOOLEAN), false) as protectedCommunityEnabled,
                     pd.created
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
@@ -201,6 +202,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, value AS protectedCommunityEnabled FROM settings WHERE setting = 'user_community' and value = 'true') userCommunity ON userCommunity.project_id = pd.project_id
                 JOIN user_roles ur on (ur.project_id = pd.project_id AND ur.role_name in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'))
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)

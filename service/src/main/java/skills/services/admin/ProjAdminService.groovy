@@ -98,6 +98,9 @@ class ProjAdminService {
     ProjectSortingService sortingService
 
     @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
     SettingsService settingsService
 
     @Autowired
@@ -372,16 +375,24 @@ class ProjAdminService {
         String userId = userInfo.username
         Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
 
+        boolean isNotCommunityMember = !userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
         List<ProjectResult> finalRes
         if (isRoot) {
             finalRes = loadProjectsForRoot(projectIdSortOrder, userId)
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
             List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)
+            if (isNotCommunityMember) {
+                projects = projects.findAll { !it.protectedCommunityEnabled}
+            }
             finalRes = projects?.unique({ it.projectId })?.collect({
                 ProjectResult res = convert(it, projectIdSortOrder)
                 return res
             })
+        }
+
+        if (isNotCommunityMember) {
+            finalRes.each { it.userCommunity = null }
         }
 
         finalRes.sort() { it.displayOrder }
@@ -399,6 +410,8 @@ class ProjAdminService {
         ProjSummaryResult projectDefinition = projDefAccessor.getProjSummaryResult(projectId)
         Integer order = sortingService.getProjectSortOrder(projectId)
         ProjectResult res = convert(projectDefinition, [(projectId): order])
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
+        res.userCommunity = isCommunityMember ? userCommunityService.getProjectUserCommunity(projectId) : null
         return res
     }
 
@@ -547,6 +560,7 @@ class ProjAdminService {
                 numSkillsReused: definition.getNumSkillsReused() ?: 0,
                 totalPointsReused: definition.getTotalPointsReused() ?: 0,
                 userRole: definition.getUserRole(),
+                userCommunity: userCommunityService.getCommunityNameBasedProjConfStatus(definition.getProtectedCommunityEnabled())
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

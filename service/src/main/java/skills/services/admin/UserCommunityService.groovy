@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
@@ -43,11 +44,15 @@ class UserCommunityService {
 
     String userCommunityUserTagKey
     String userCommunityUserTagValue
+    String defaultUserCommunityName
+    String restrictedUserCommunityName
 
     @PostConstruct
     void init() {
         this.userCommunityUserTagKey = uiConfigProperties.ui.userCommunityUserTagKey
         this.userCommunityUserTagValue = uiConfigProperties.ui.userCommunityUserTagValue
+        this.defaultUserCommunityName = uiConfigProperties.ui.defaultCommunityDescriptor;
+        this.restrictedUserCommunityName = uiConfigProperties.ui.userCommunityRestrictedDescriptor;
     }
 
     Boolean isUserCommunityConfigured() {
@@ -73,6 +78,19 @@ class UserCommunityService {
     boolean isUserCommunityOnlyProject(String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         return settingsDataAccessor.getProjectSetting(projectId, Settings.USER_COMMUNITY_ONLY_PROJECT.settingName)?.isEnabled()
+    }
+
+    @Transactional(readOnly = true)
+    String getProjectUserCommunity(String projectId) {
+       return getCommunityNameBasedProjConfStatus(isUserCommunityOnlyProject(projectId))
+    }
+
+
+    String getCommunityNameBasedProjConfStatus(Boolean isUserCommunityOnlyProject) {
+        if (!restrictedUserCommunityName || isUserCommunityOnlyProject == null) {
+            return null
+        }
+        return isUserCommunityOnlyProject ? restrictedUserCommunityName : defaultUserCommunityName;
     }
 
 }

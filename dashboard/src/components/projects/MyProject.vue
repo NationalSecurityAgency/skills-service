@@ -30,7 +30,13 @@ limitations under the License.
               </b-avatar>
               {{ projectInternal.name }}
             </router-link>
-            <div class="text-secondary preview-card-subTitle mt-1 ml-1" data-cy="projectId">ID: {{ projectInternal.projectId }}</div>
+            <div v-if="projectInternal.userCommunity" class="my-2" data-cy="userCommunity">
+              <span class="border p-1 border-danger rounded"><i
+                class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
+              class="text-secondary font-italic ml-1">{{ beforeCommunityLabel }}</span> <span
+              class="font-weight-bold text-primary">{{ projectInternal.userCommunity }}</span> <span
+              class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
+            </div>
           </div>
           <div class="col-md-auto mt-3 mt-md-0">
             <project-card-controls
@@ -141,6 +147,7 @@ limitations under the License.
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SettingsService from '@/components/settings/SettingsService';
   import UserRolesUtil from '@/components/utils/UserRolesUtil';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
 
   export default {
     name: 'MyProject',
@@ -151,7 +158,7 @@ limitations under the License.
       RemovalValidation,
     },
     props: ['project', 'disableSortControl'],
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, CommunityLabelsMixin],
     data() {
       return {
         isLoading: false,
