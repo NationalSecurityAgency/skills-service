@@ -491,8 +491,8 @@ class PostgresQlNativeRepo {
         return dbLock
     }
 
-    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId) {
-        userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId)
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId, int minimumPoints) {
+        userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId, minimumPoints)
     }
 
     Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId) {

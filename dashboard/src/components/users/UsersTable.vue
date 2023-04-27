@@ -16,9 +16,23 @@ limitations under the License.
 <template>
     <div>
       <div class="row px-3 pt-3">
-        <div class="col-12">
+        <div class="col-md-6">
           <b-form-group label="User Id Filter" label-class="text-muted">
             <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user id filter"/>
+          </b-form-group>
+        </div>
+        <div class="col-md-6">
+          <b-form-group label="Minimum User Progress" label-class="text-muted">
+            <div class="row">
+                <span style="padding-top: 6px;">0%</span>
+                <div class="col" style="padding-top: 6px;">
+                  <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="range" min="0" max="100"
+                           data-cy="users-progress-range" aria-label="user progress range filter"/>
+                </div>
+                <span style="margin-right:8px; padding-top: 6px;">100%</span>
+                <b-input v-model="filters.progress" v-on:keydown.enter="applyFilters" type="number" min="0" max="100"
+                         data-cy="users-progress-input" aria-label="user progress input filter" style="width: 80px; margin-right: 6px;"/>
+            </div>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -125,6 +139,8 @@ limitations under the License.
         data: [],
         filters: {
           userId: '',
+          progress: 0,
+          minimumPoints: 0,
         },
         totalPoints: 0,
         table: {
@@ -211,12 +227,28 @@ limitations under the License.
       },
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
+        if (this.filters.progress > 100) {
+          this.filters.progress = 100;
+        }
+        if (this.filters.progress < 0) {
+          this.filters.progress = 0;
+        }
+        this.filters.minimumPoints = Math.floor(this.totalPoints * (this.filters.progress / 100));
         this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite(`Users table has been filtered by ${this.filters.userId}`));
+          let filterMessage = 'Users table has been filtered by';
+          if (this.filters.userId) {
+            filterMessage += ` ${this.filters.userId}`;
+          }
+          if (this.filters.minimumPoints > 0) {
+            filterMessage += `${this.filters.userId ? ' and' : ''} users with at least ${this.filters.minimumPoints} points`;
+          }
+          this.$nextTick(() => this.$announcer.polite(filterMessage));
         });
       },
       reset() {
         this.filters.userId = '';
+        this.filters.minimumPoints = 0;
+        this.filters.progress = 0;
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Users table filters have been removed'));
@@ -232,6 +264,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           byColumn: 0,
           orderBy: this.table.options.sortBy,
+          minimumPoints: this.filters.minimumPoints,
         }).then((res) => {
           this.table.items = res.data;
           this.table.options.pagination.totalRows = res.count;

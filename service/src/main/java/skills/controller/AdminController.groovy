@@ -890,11 +890,13 @@ class AdminController {
                                 @RequestParam int limit,
                                 @RequestParam int page,
                                 @RequestParam String orderBy,
-                                @RequestParam Boolean ascending) {
+                                @RequestParam Boolean ascending,
+                                @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest)
+        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')
@@ -926,12 +928,14 @@ class AdminController {
                                 @RequestParam int limit,
                                 @RequestParam int page,
                                 @RequestParam String orderBy,
-                                @RequestParam Boolean ascending) {
+                                @RequestParam Boolean ascending,
+                                @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest)
+        return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest, minimumPoints)
     }
 
     @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -942,12 +946,14 @@ class AdminController {
                               @RequestParam int limit,
                               @RequestParam int page,
                               @RequestParam String orderBy,
-                              @RequestParam Boolean ascending) {
+                              @RequestParam Boolean ascending,
+                              @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest, minimumPoints)
     }
 
     @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -958,9 +964,11 @@ class AdminController {
                               @RequestParam int limit,
                               @RequestParam int page,
                               @RequestParam String orderBy,
-                              @RequestParam Boolean ascending) {
+                              @RequestParam Boolean ascending,
+                              @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
@@ -968,7 +976,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints)
     }
 
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)

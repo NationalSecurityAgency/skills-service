@@ -19,7 +19,10 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
@@ -227,6 +230,28 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
     }
 
+    def 'get project users with paging and minimum points'() {
+        when:
+        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 40)
+
+        then:
+        results1
+        results1.count == 2 // result count
+        results1.totalCount == 2  // total user count
+        results1.data.size() == 2
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 70
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+        results2
+        results2.count == 1
+        results2.totalCount == 2
+        results2.data.size() == 1
+        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).totalPoints == 70
+    }
+
     def 'get subject users when project exists'() {
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(0))
@@ -256,6 +281,27 @@ class UserPointsSpecs extends DefaultIntSpec {
         results3.count == 0
         results3.totalCount == 0
         !results3.data
+    }
+
+    def 'get subject users with minimum points'() {
+        when:
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 40)
+
+        then:
+        results1
+        results1.count == 2
+        results1.totalCount == 2
+        results1.data.size() == 2
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+
+        results2
+        results2.count == 0
+        results2.totalCount == 2
+        results2.data.size() == 0
     }
 
     def 'get skill users when project exists'() {
@@ -314,6 +360,33 @@ class UserPointsSpecs extends DefaultIntSpec {
         results3.count == 0
         results3.totalCount == 0
         !results3.data
+    }
+
+    def 'get skill users with minimum points'() {
+        when:
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0)
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 45)
+
+        then:
+        results1
+        results1.count == 1
+        results1.totalCount == 1
+        results1.data.size() == 1
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+
+        results2
+        results2.count == 0
+        results2.totalCount == 1
+    }
+
+    def 'can not get skills with negative points'() {
+        when:
+        skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", -100)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getResBody().contains("Minimum Points is less than 0")
     }
 
     def 'get badge users when project exists'() {
