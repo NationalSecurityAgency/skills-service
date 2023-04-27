@@ -591,14 +591,21 @@ A new sentence after a few new lines
 <em>A <del>cool</del>, not cool</em>""").valid
 
         validator.validateDescription("""### A this is a heading""").valid
-        validator.validateDescription("""### <em>A</em> this is a heading""").valid
+        validator.validateDescription("""### <em class="some-class" unknown>A</em> this is a heading""").valid
         validator.validateDescription("""### <strong><em>A</em></strong> this is a heading""").valid
-        validator.validateDescription("""### <strong>A</strong> this is a heading""").valid
+        validator.validateDescription("""### <strong blah href="something" class="xyz" dah>A</strong> this is a heading""").valid
         validator.validateDescription("""### <em><strong>A</strong></em> this is a heading""").valid
+        validator.validateDescription("""### <EM><strong>A</strong></em> this is a heading""").valid
+        validator.validateDescription("""### <EM><unknown>A</unkNoWn></em> this is a heading""").valid
 
         validator.validateDescription("""<span style="font-size: 14px;">A line with </span>[<span style="font-size: 14px;">a link</span>](http://link.com)<span style="font-size: 14px;"> in the middle</span>
 
 <span style="font-size: 14px;">A line with a new line above</span>""").valid
+        validator.validateDescription('''### A [How to copy text from an HTML element (div, p, span ... - Arclab](https://www.arclab.com/en/kb/htmlcss/how-to-copy-text-from-html-element-to-clipboard.html)
+
+<span class="VuuXrf" style="color: rgb(32, 33, 36); font-size: 14px; max-width: 200px; display: block; line-height: 20px; white-space: nowrap;">A arclab.com</span>
+A [https://www.arclab.com<span class="dyjrff ob9lvb" role="text" style="color: rgb(77, 81, 86);"> › htmlcss › how-to-copy-text-...</span>](https://www.arclab.com/en/kb/htmlcss/how-to-copy-text-from-html-element-to-clipboard.html)
+<span>A The function copies the visible text of the element to the </span><em><span>clipboard</span></em><span>. This works as if you had selected the text and </span>*<span>copied</span>*<span> it with ctrl+c. Use the parameter " ...</span>''').valid
     }
 }
 
