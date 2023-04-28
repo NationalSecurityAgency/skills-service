@@ -851,7 +851,7 @@ describe('Skills Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('loadSkill1');
     cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('saveSkill1');
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/entirelyNewId').as('afterIdEdit');
-    cy.intercept('POST', '/api/validation/description').as('validateDescription');
+    cy.intercept('POST', '/api/validation/description*').as('validateDescription');
     cy.intercept('POST', '/api/validation/url').as('validateUrl');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
@@ -1357,7 +1357,7 @@ describe('Skills Tests', () => {
   });
 
   it('edit skill - run validation on load in case validation improved and existing values fail to validate', () => {
-    cy.intercept('POST', '/api/validation/description', {
+    cy.intercept('POST', '/api/validation/description*', {
       valid: false,
       msg: 'Mocked up validation failure'
     }).as('validateDesc');
@@ -1370,7 +1370,7 @@ describe('Skills Tests', () => {
   });
 
   it('copy skill - run validation on load in case validation improved and existing values fail to validate', () => {
-    cy.intercept('POST', '/api/validation/description', {
+    cy.intercept('POST', '/api/validation/description*', {
       valid: false,
       msg: 'Mocked up validation failure'
     }).as('validateDesc');

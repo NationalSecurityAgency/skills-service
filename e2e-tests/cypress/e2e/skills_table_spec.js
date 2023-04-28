@@ -74,7 +74,7 @@ describe('Skills Table Tests', () => {
 
     it('copy existing skill', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/copy_of_skill2').as('saveSkill');
-        cy.intercept('POST', '/api/validation/description').as('validateDescription');
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
 
         const numSkills = 3;
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {

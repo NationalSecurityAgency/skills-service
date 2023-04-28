@@ -1033,7 +1033,7 @@ describe('Navigation Tests', () => {
 
     it('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
-        cy.intercept('POST', '/api/validation/description').as('validate');
+        cy.intercept('POST', '/api/validation/description*').as('validate');
 
         const invalidMsg = new Array(3000).fill('a').join('');
         cy.loginAsProxyUser();
@@ -1077,7 +1077,7 @@ describe('Navigation Tests', () => {
 
         it('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
-            cy.intercept('POST', '/api/validation/description').as('validate');
+            cy.intercept('POST', '/api/validation/description*').as('validate');
             cy.loginAsAdminUser();
             cy.createProject(3);
             cy.enableProdMode(3);

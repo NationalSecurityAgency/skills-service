@@ -28,9 +28,9 @@ const validator = {
         return true;
       }
       if (result.msg) {
-        return `{_field_} - ${result.msg}`;
+        return `{_field_} - ${result.msg}.`;
       }
-      return '{_field_} is invalid';
+      return '{_field_} is invalid.';
     });
   },
 };

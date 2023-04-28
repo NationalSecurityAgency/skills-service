@@ -1102,7 +1102,7 @@ describe('Subjects Tests', () => {
     });
 
     it('edit subject - run validation on load in case validation improved and existing values fail to validate', () => {
-        cy.intercept('POST', '/api/validation/description', {
+        cy.intercept('POST', '/api/validation/description*', {
             valid: false,
             msg: 'Mocked up validation failure'
         }).as('validateDesc');
