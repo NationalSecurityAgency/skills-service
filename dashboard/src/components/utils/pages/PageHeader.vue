@@ -46,7 +46,7 @@ limitations under the License.
                           <i :class="stat.icon" style="font-size: 2.2rem;"></i>
                         </div>
                       </div>
-                      <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted" v-html="stat.secondaryPreformatted"></div>
+                      <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted" v-html="stat.secondaryPreformatted" :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
                       <div v-if="stat.secondaryStats">
                         <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
                           <div v-if="secCount.count > 0" style="font-size: 0.9rem"

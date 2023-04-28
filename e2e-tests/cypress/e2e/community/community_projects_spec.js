@@ -105,8 +105,31 @@ describe('Community Projects Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="userCommunity"]').should('not.exist')
     });
 
-    it('show community indicator on the project page', () => {
+    it('show community indicator on the project page - via direct page loading', () => {
         cy.visit('/administrator/projects/proj1')
-        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('Divine Dragon')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStatSecondaryLabel_For"]').contains('Nation')
+
+        cy.visit('/administrator/projects/proj2')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('All Dragons')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStatSecondaryLabel_For"]').contains('Nation')
+    });
+
+    it('show community indicator on the project page - via navigation', () => {
+        cy.visit('/administrator')
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('Divine Dragon')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStatSecondaryLabel_For"]').contains('Nation')
+
+        cy.get('[data-cy="breadcrumb-Projects"]').click()
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+
+        cy.get('[data-cy="projCard_proj2_manageBtn"]').click()
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('All Dragons')
+        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStatSecondaryLabel_For"]').contains('Nation')
     });
 });
