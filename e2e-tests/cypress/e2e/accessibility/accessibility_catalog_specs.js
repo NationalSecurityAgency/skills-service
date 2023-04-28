@@ -284,7 +284,7 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="dupSkill-diffId"]')
             .contains('Name Conflict');
         cy.get('[data-cy="dupSkill-skill5"]')
-            .contains('Has Dependencies');
+            .contains('Has Prerequisites');
 
         cy.customLighthouse();
         cy.customA11y();

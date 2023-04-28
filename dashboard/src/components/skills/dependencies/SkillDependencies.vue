@@ -30,7 +30,7 @@ limitations under the License.
                      class="mt-5 pt-5"
                      icon="fas fa-recycle"
                      title="Skill was Reused"
-                     message="Once a Skill has been reused, Dependencies may not be added."></no-content2>
+                     message="Once a Skill has been reused, Prerequisites may not be added."></no-content2>
 
         <div class="p-3" v-if="!skill.sharedToCatalog && !skill.thisSkillWasReusedElsewhere">
           <skills-selector2 v-if="!isReadOnlyProj" :options="allSkills" :selected="skills" v-on:added="skillAdded"
