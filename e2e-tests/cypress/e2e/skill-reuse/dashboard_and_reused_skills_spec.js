@@ -96,13 +96,13 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('skill1');
     });
 
-    it('reused skills must NOT be available for dependencies', () => {
+    it('reused skills must NOT be available for prerequisites', () => {
         cy.createSkill(1, 1, 10);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill10/dependencies');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill10/prerequisites');
         cy.get('[data-cy="skillsSelector"]')
             .click();
         cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
@@ -316,13 +316,13 @@ describe('Skill Reuse and Dashboard Tests', () => {
 
     });
 
-    it('cannot add dependencies to a reused skill', () => {
+    it('cannot add prerequisites to a reused skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
-        const expectedMsg = 'Once a Skill has been reused, Dependencies may not be added.';
+        const expectedMsg = 'Once a Skill has been reused, Prerequisites may not be added.';
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
         cy.get('[data-cy="noContent"]')
             .contains(expectedMsg);
 
@@ -330,7 +330,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy="manageSkillBtn_skill1"]')
             .click();
-        cy.clickNav('Dependencies');
+        cy.clickNav('Prerequisites');
         cy.get('[data-cy="noContent"]')
             .contains(expectedMsg);
     });

@@ -360,7 +360,7 @@ describe('Approver Role Tests', () => {
     it('/prerequisites page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
-            cy.visit(`/administrator/projects/proj${projNum}/prerequisites`);
+            cy.visit(`/administrator/projects/proj${projNum}/learning-path`);
             cy.wait(`@getSettingsProj${projNum}`);
             cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)

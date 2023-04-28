@@ -17,7 +17,7 @@ import moment from 'moment-timezone';
 
 const dateFormatter = value => moment.utc(value)
     .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
-describe('Client Display Dependencies Tests', () => {
+describe('Client Display Prerequisites Tests', () => {
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
         failureThreshold: 0.03, // threshold for entire image
@@ -32,7 +32,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.createSubject(1, 1);
 
         Cypress.Commands.add('clickOnNode', (x, y) => {
-            cy.contains('Dependencies');
+            cy.contains('Prerequisites');
             cy.contains('Node Legend');
             cy.wait(2000); // wait for chart
             // have to click twice to it to work...
@@ -180,8 +180,8 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.get('#dependent-skills-network canvas')
             .should('be.visible')
@@ -190,7 +190,7 @@ describe('Client Display Dependencies Tests', () => {
         // should still be on the same page and no errors should have occurred (no errors are checked in afterEach)
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
     });
 
     it('Deps Chart - partially completed deps - 1 out 4', () => {
@@ -211,7 +211,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
         cy.contains('Node Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
@@ -242,7 +242,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
         cy.contains('Node Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
@@ -274,7 +274,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
         cy.contains('Node Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
@@ -308,7 +308,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.reportSkill(2, 1, Cypress.env('proxyUser'), 'now');
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
         cy.contains('Node Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('3');
@@ -357,14 +357,14 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.wait(4000);
         cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`, snapshotOptions);
     });
 
-    it('parent and child dependencies are properly displayed', () => {
+    it('parent and child Prerequisites are properly displayed', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -387,7 +387,7 @@ describe('Client Display Dependencies Tests', () => {
         // cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        // should render dependencies section
+        // should render Prerequisites section
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
         cy.wait(4000);
         cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
@@ -409,8 +409,8 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 1');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
         cy.wait(4000);
         cy.matchSnapshotImage(`CrossProject Dep with the same skillId`, snapshotOptions);
 
@@ -428,8 +428,8 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.get('#dependent-skills-network canvas')
             .should('be.visible')
@@ -438,7 +438,7 @@ describe('Client Display Dependencies Tests', () => {
         // should still be on the same page and no errors should have occurred (no errors are checked in afterEach)
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        cy.contains('Dependencies');
+        cy.contains('Prerequisites');
     });
 
     it('deps are added to partially achieved skill', () => {
@@ -461,10 +461,10 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        const expectedMsg = 'You were able to earn partial points before the dependencies were added';
+        const expectedMsg = 'You were able to earn partial points before the prerequisites were added';
         cy.contains(expectedMsg);
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.wait(4000);
         cy.matchSnapshotImage(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
@@ -507,7 +507,7 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        const msg = 'Congrats! You completed this skill before the dependencies were added';
+        const msg = 'Congrats! You completed this skill before the prerequisites were added';
         cy.contains(msg);
 
         cy.wait(4000);

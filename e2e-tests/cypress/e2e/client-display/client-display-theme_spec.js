@@ -323,7 +323,7 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=myRank]')
                 .contains('1');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Skill has 1 direct dependent(s).');
+            cy.contains('Skill has 1 prerequisite(s).');
             cy.contains('Earn up to 1,400 points');
             cy.contains('Description');
 
@@ -408,7 +408,7 @@ describe('Client Display Tests', () => {
             cy.contains('Skill Overview');
             cy.contains('This is 4');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Achieved Dependencies');
+            cy.contains('Achieved Prerequisites');
             cy.wait(4000);
             cy.matchSnapshotImage(snapshotOptions);
         });
