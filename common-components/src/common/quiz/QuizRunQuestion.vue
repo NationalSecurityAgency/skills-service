@@ -35,7 +35,7 @@ limitations under the License.
               :id="`question-${num}`"
               data-cy="textInputAnswer"
               v-model="answerText"
-              @input="textAnswerChanged"
+              :debounce="320"
               :aria-label="`Please enter text to answer question number ${num}`"
               placeholder="Please enter your response here..."
               rows="2"
@@ -83,16 +83,24 @@ limitations under the License.
     data() {
       return {
         answerOptions: [],
-        answerText: '',
+        // since b-form-textarea uses :debounce attribute it cannot utilize @input event but
+        // rather has to watch answerText value that bound to  b-form-text-area's v-model
+        // it's better to set the value in-line so the watcher is not invoked
+        answerText: (this.q.questionType === QuestionType.TextInput) ? (this.q.answerOptions[0].answerText || '') : '',
       };
     },
     mounted() {
       this.answerOptions = this.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
-      if (this.isTextInput) {
-        const existingAnswerText = this.q.answerOptions[0].answerText;
-        this.answerText = existingAnswerText || '';
-      }
       this.setupValidation();
+    },
+    watch: {
+      /**
+       *  since b-form-textarea uses :debounce attribute it cannot utilize @input event but
+       *  rather has to watch answerText value that bound to  b-form-text-area's v-model
+       */
+      answerText() {
+        this.textAnswerChanged();
+      },
     },
     computed: {
       isMultipleChoice() {

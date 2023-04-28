@@ -419,9 +419,11 @@ describe('Client Display Survey Tests', () => {
             cy.wait(500)
             // type last char and then click on the button to try to force validation at completion
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').type('y')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]')
+                .should('be.visible').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
             cy.get('[data-cy="completeQuizBtn"]').click()
-            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
-            cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
+            cy.get('[data-cy="questionErrors"]')
+                .should('be.visible').contains('Answer to question #1 - paragraphs may not contain jabberwocky.')
         });
 
         it(`all questions must be answered validation in [${env}]`, () => {
