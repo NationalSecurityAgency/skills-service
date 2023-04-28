@@ -513,7 +513,7 @@ const router = new Router({
           requiresAuth: true,
           reportSkillId: 'VisitProjectDependencies',
           announcer: {
-            message: 'All Project Dependencies',
+            message: 'Project Learning Path',
           },
         },
       }, {
@@ -769,7 +769,7 @@ const router = new Router({
           requiresAuth: true,
           reportSkillId: 'VisitSkillDependencies',
           announcer: {
-            message: 'Skill Dependencies',
+            message: 'Learning Path',
           },
         },
       }, {

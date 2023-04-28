@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card id="shared-skills-with-others-panel" title="Can be added as dependencies in other Projects"
+  <metrics-card id="shared-skills-with-others-panel" title="Share skills from this project with other projects"
                 :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
       <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">
         <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"

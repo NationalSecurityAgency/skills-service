@@ -160,7 +160,7 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills`)
       .then((res) => res.data);
   },
-  getSkillsFroDependency(projectId) {
+  getSkillsForDependency(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/availableSkills`)
       .then((res) => res.data);
   },

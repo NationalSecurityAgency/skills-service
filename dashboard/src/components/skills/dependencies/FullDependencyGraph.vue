@@ -15,13 +15,13 @@ limitations under the License.
 */
 <template>
   <div id="full-dependent-skills-graph">
-    <sub-page-header title="Skill Dependencies"/>
+    <sub-page-header title="Learning Path"/>
 
     <simple-card data-cy="fullDepsSkillsGraph">
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
-            <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
-                         message="Here you can visualize skill's dependencies for the entire project. However, please navigate to a single skill to add dependencies."></no-content2>
+            <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
+                         message="Here you can visualize skill prerequisites and dependencies for the entire project. However, please navigate to a single skill to add prerequisites."></no-content2>
         </div>
         <div v-else class="row">
           <div class="col-12 col-sm">
@@ -38,6 +38,10 @@ limitations under the License.
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4"/>
 
     <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="my-4"/>
+
+    <dependency-modification-modal v-if="displayEditModal" v-model="displayEditModal"
+                :node="selectedNode"
+                @hidden="handleHidden"></dependency-modification-modal>
   </div>
 </template>
 
@@ -57,6 +61,7 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SimpleCard from '@/components/utils/cards/SimpleCard';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import DependencyModificationModal from './DependencyModificationModal';
 
   export default {
     name: 'FullDependencyGraph',
@@ -70,18 +75,21 @@ limitations under the License.
       NoContent2,
       GraphNodeSortMethodSelector,
       LoadingContainer,
+      DependencyModificationModal,
     },
     data() {
       return {
         isLoading: true,
         showGraph: true,
+        displayEditModal: false,
+        selectedNode: null,
         graph: {},
         network: null,
         nodes: {},
         edges: {},
         legendItems: [
-          { label: 'Skill Dependencies', color: 'lightgreen' },
-          { label: 'Cross Project Skill Dependencies', color: '#ffb87f' },
+          { label: 'Skill', color: 'lightgreen' },
+          { label: 'Cross Project Skill', color: '#ffb87f' },
         ],
         displayOptions: {
           layout: {
@@ -95,6 +103,7 @@ limitations under the License.
           interaction: {
             selectConnectedEdges: false,
             navigationButtons: true,
+            selectable: true,
           },
           physics: {
             enabled: false,
@@ -122,6 +131,22 @@ limitations under the License.
       }
     },
     methods: {
+      handleHidden() {
+        this.displayEditModal = false;
+        this.selectedNode = null;
+
+        this.network.unselectAll();
+
+        SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
+          .then((response) => {
+            this.graph = response;
+            this.isLoading = false;
+            this.createGraph();
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+      },
       loadGraphDataAndCreateGraph() {
         SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
           .then((response) => {
@@ -150,6 +175,13 @@ limitations under the License.
         if (this.hasGraphData) {
           const container = document.getElementById('dependency-graph');
           this.network = new Network(container, data, this.displayOptions);
+
+          this.network.on('selectNode', (params) => {
+            const selectedNode = params.nodes[0];
+            const nodeData = data.nodes.find((node) => node.id === selectedNode);
+            this.selectedNode = nodeData;
+            this.displayEditModal = true;
+          });
         } else {
           this.showGraph = false;
         }
@@ -164,6 +196,7 @@ limitations under the License.
             margin: 10,
             shape: 'box',
             chosen: false,
+            details: node,
             title: GraphUtils.getTitle(node, isCrossProject),
           };
           if (isCrossProject) {
@@ -177,8 +210,8 @@ limitations under the License.
         const sortedEdges = this.graph.edges.sort((a, b) => a.toId - b.toId);
         sortedEdges.forEach((edge) => {
           this.edges.push({
-            from: edge.fromId,
-            to: edge.toId,
+            from: edge.toId,
+            to: edge.fromId,
             arrows: 'to',
           });
         });

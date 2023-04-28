@@ -17,8 +17,8 @@ limitations under the License.
   <simple-card id="dependent-skills-graph" data-cy="dependenciesGraph">
     <div v-if="!hasGraphData">
       <div class="column is-half has-text-centered">
-        <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
-                     message="You can manage and visualize skill's dependencies on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
+        <no-content2 icon="fa fa-project-diagram" title="No Prerequisites Yet..."
+                     message="You can manage and visualize skill's prerequisites on this page. Please use the dropdown above to start adding dependent skills."></no-content2>
       </div>
 
     </div>
@@ -27,9 +27,9 @@ limitations under the License.
         <div class="col-12 col-sm">
           <graph-legend :items="[
             {label: 'This Skill', color: 'lightgreen'},
-            {label: 'My Dependencies', color: 'lightblue'},
-            {label: 'Cross Project Skill Dependencies', color: '#ffb87f'},
-            {label: 'Transitive Dependencies', color: 'lightgray'}
+            {label: 'Prerequisites', color: 'lightblue'},
+            {label: 'Cross Project Skill Prerequisites', color: '#ffb87f'},
+            {label: 'Transitive Prerequisites', color: 'lightgray'}
             ]"></graph-legend>
         </div>
         <div class="col text-left text-sm-right mt-2">
@@ -166,8 +166,8 @@ limitations under the License.
         });
         this.graph.edges.forEach((edge) => {
           this.edges.push({
-            from: edge.fromId,
-            to: edge.toId,
+            from: edge.toId,
+            to: edge.fromId,
             arrows: 'to',
           });
         });

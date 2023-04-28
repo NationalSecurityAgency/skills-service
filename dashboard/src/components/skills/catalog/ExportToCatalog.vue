@@ -54,8 +54,8 @@ limitations under the License.
                 <b-badge variant="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">Name Conflict</b-badge>
                 <b-badge variant="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID Conflict</b-badge>
                 <b-badge variant="warning" v-if="dupSkill.hasDependencies" class="ml-1"
-                         aria-label="Skills that have dependencies cannot be exported to the catalog."
-                         v-b-tooltip.hover="'Skills that have dependencies cannot be exported to the catalog.'">Has Dependencies</b-badge>
+                         aria-label="Skills that have prerequisites cannot be exported to the catalog."
+                         v-b-tooltip.hover="'Skills that have prerequisites cannot be exported to the catalog.'">Has Dependencies</b-badge>
               </li>
               <li v-if="notExportableSkills.length > notExportableSkillsToShow.length" data-cy="cantExportTruncatedMsg">
                 <span class="text-primary font-weight-bold">{{ notExportableSkills.length - notExportableSkillsToShow.length }}</span> <span class="font-italic">more items...</span>

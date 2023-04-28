@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <metrics-card id="shared-skills-from-others-panel"
-    title="Can be added as dependencies to your Skills" :no-padding="true"
+    title="Available skills from other projects for use as prerequisites" :no-padding="true"
                 data-cy="skillsSharedWithMeCard">
       <loading-container :is-loading="loading">
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">

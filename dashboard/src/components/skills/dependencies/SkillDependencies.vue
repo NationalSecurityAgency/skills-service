@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Dependencies"/>
+    <sub-page-header title="Prerequisites"/>
 
     <b-card body-class="p-0" class="dependencies-container">
       <loading-container :is-loading="isLoading">
@@ -24,7 +24,7 @@ limitations under the License.
                      class="mt-5 pt-5"
                      icon="fas fa-book"
                      title="Exported to the Catalog"
-                     message="Once a Skill has been exported to the catalog, Dependencies may not be added."></no-content2>
+                     message="Once a Skill has been exported to the catalog, Prerequisites may not be added."></no-content2>
 
         <no-content2 v-if="skill.thisSkillWasReusedElsewhere"
                      class="mt-5 pt-5"
@@ -91,7 +91,7 @@ limitations under the License.
               <i v-else class="fas fa-w-16 fa-list-alt text-hc mr-1"></i>
               {{ row.props.name }}
                <div v-if="row.props.isFromAnotherProject" class="">
-                Cross Project Dependency from project [{{row.props.projectId}}]
+                Cross Project Prerequisite from project [{{row.props.projectId}}]
               </div>
             </span>
         </simple-skills-table>
@@ -255,7 +255,7 @@ limitations under the License.
       },
       loadAllSkills() {
         this.loading.finishedAllSkills = false;
-        SkillsService.getSkillsFroDependency(this.$route.params.projectId)
+        SkillsService.getSkillsForDependency(this.$route.params.projectId)
           .then((skills) => {
             this.allSkills = skills.filter((item) => (item.skillId !== this.$route.params.skillId || item.otherProjectId));
             this.loading.finishedAllSkills = true;

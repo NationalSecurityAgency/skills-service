@@ -134,9 +134,9 @@ limitations under the License.
       </div>
       <div v-if="skill.type === 'Skill'">
         <div v-if="locked" class="text-center text-muted locked-text">
-            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-            <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
-            <span v-else>Please see its dependencies below.</span>
+            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> prerequisite(s).
+            <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
+            <span v-else>Please see its prerequisites below.</span>
           ***
         </div>
 

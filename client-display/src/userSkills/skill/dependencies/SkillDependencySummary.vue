@@ -21,7 +21,7 @@ limitations under the License.
         <div class="card-body">
             <div class="row">
                 <div class="col-8 text-left">
-                    <strong data-cy="numDeps">{{ numDependencies }}</strong> Dependencies
+                    <strong data-cy="numDeps">{{ numDependencies }}</strong> Prerequisites
                 </div>
                 <div class="col-4">
                     <span class="text-muted" data-cy="depsPercentComplete">{{ percentComplete }}%</span>

@@ -16,7 +16,7 @@ limitations under the License.
 <template>
     <div class="card">
         <div class="card-header">
-            <h5 class="h6 card-title mb-0 float-left">Dependencies</h5>
+            <h5 class="h6 card-title mb-0 float-left">Prerequisites</h5>
         </div>
         <div class="card-body">
             <div class="row legend-row">
@@ -62,8 +62,8 @@ limitations under the License.
         network: null,
         legendItems: [
           { label: 'This Skill', color: 'lightblue' },
-          { label: 'Dependencies', color: 'lightgray' },
-          { label: 'Achieved Dependencies', color: 'lightgreen' },
+          { label: 'Prerequisites', color: 'lightgray' },
+          { label: 'Achieved Prerequisites', color: 'lightgreen' },
         ],
         displayOptions: {
           layout: {
@@ -225,8 +225,8 @@ limitations under the License.
           } : {};
           this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
           edges.push({
-            from: this.getNodeId(item.skill),
-            to: this.getNodeId(item.dependsOn),
+            from: this.getNodeId(item.dependsOn),
+            to: this.getNodeId(item.skill),
             arrows: 'to',
           });
         });
