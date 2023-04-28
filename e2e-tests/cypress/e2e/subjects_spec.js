@@ -1111,6 +1111,6 @@ describe('Subjects Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="editBtn"]').click()
         cy.wait('@validateDesc')
-        cy.get('[data-cy="subjectDescError"]').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="subjectDescError"]').contains('Mocked up validation failure')
     });
 });

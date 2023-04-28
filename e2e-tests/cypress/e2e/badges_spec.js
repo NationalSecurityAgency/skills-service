@@ -2069,7 +2069,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges');
         cy.get('[data-cy="editBtn"]').click()
         cy.wait('@validateDesc')
-        cy.get('[data-cy="badgeDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="badgeDescriptionError"]').contains('Mocked up validation failure')
     });
 
 

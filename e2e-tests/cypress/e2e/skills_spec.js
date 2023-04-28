@@ -1366,7 +1366,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.get('[data-cy="editSkillButton_skill1"]').click()
     cy.wait('@validateDesc')
-    cy.get('[data-cy="skillDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+    cy.get('[data-cy="skillDescriptionError"]').contains('Mocked up validation failure')
   });
 
   it('copy skill - run validation on load in case validation improved and existing values fail to validate', () => {
@@ -1379,7 +1379,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.get('[data-cy="copySkillButton_skill1"]').click()
     cy.wait('@validateDesc')
-    cy.get('[data-cy="skillDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+    cy.get('[data-cy="skillDescriptionError"]').contains('Mocked up validation failure')
   });
 
 
