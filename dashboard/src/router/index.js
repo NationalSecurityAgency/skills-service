@@ -507,7 +507,7 @@ const router = new Router({
         },
       }, {
         name: 'FullDependencyGraph',
-        path: 'dependencies',
+        path: 'learning-path',
         component: FullDependencyGraph,
         meta: {
           requiresAuth: true,
@@ -763,7 +763,7 @@ const router = new Router({
         },
       }, {
         name: 'SkillDependencies',
-        path: 'dependencies',
+        path: 'prerequisites',
         component: SkillDependencies,
         meta: {
           requiresAuth: true,

@@ -62,7 +62,7 @@ describe('Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.wait('@loadSkill')
 
-        cy.get('div#menu-collapse-control li').contains('Dependencies').click();
+        cy.get('div#menu-collapse-control li').contains('Prerequisites').click();
 
         cy.get('[data-cy="depsSelector"]').click();
         cy.get('[data-cy="depsSelector"] .vs__dropdown-option').eq(0).click();
@@ -92,8 +92,8 @@ describe('Skills Tests', () => {
 
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill2')
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
-        cy.contains('No Dependencies Yet');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/prerequisites');
+        cy.contains('No Prerequisites Yet');
 
         cy.get('[data-cy="depsSelector"]').click().type('Skill 1{enter}')
 
@@ -113,8 +113,8 @@ describe('Skills Tests', () => {
             });
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
-        cy.contains('No Dependencies Yet');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
+        cy.contains('No Prerequisites Yet');
 
         cy.get('[data-cy="depsSelector"]').click().type('Skill 2{enter}');
 
@@ -138,7 +138,7 @@ describe('Skills Tests', () => {
 
         cy.get('[data-cy="deleteSkill_skill3"]').click();
         cy.contains('Yes, Please').click();
-        cy.contains('No Dependencies Yet');
+        cy.contains('No Prerequisites Yet');
     });
 
 
@@ -161,7 +161,7 @@ describe('Skills Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
         cy.get(`${tableSelector} th`).contains('Skill ID').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'skill2' }],
@@ -189,7 +189,7 @@ describe('Skills Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3Subj2');
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4Subj2');
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
         cy.get('[data-cy="manage_skill3Subj2"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
@@ -266,7 +266,7 @@ describe('Skills Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill3')
         cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/skill4')
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
         cy.wait('@getGraph');
         cy.contains('eafeafeafeafeSkill%2Ddlajleajljelajelkaj... >> more');
     });
