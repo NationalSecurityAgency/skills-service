@@ -268,9 +268,9 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.clickNav('Dependencies');
-        cy.contains('No Dependencies Yet');
-        cy.contains('You can manage and visualize skill\'s dependencies on this page');
+        cy.clickNav('Prerequisites');
+        cy.contains('No Prerequisites Yet');
+        cy.contains('You can manage and visualize skill\'s prerequisites on this page');
         cy.customLighthouse();
         cy.customA11y();
 

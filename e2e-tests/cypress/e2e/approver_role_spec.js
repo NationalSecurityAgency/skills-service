@@ -273,10 +273,10 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'not.')
     });
 
-    it('/subj/skill/dependencies page - approver role has no mutation controls', function () {
+    it('/subj/skill/prerequisites page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
-            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill3/dependencies`);
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill3/prerequisites`);
             cy.wait(`@getSettingsProj${projNum}`);
 
             cy.get('[data-cy="editSkillButton_skill3"]').should(`${chainerPrepend}exist`)
@@ -357,10 +357,10 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it('/dependencies page - approver role has no mutation controls', function () {
+    it('/prerequisites page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
-            cy.visit(`/administrator/projects/proj${projNum}/dependencies`);
+            cy.visit(`/administrator/projects/proj${projNum}/prerequisites`);
             cy.wait(`@getSettingsProj${projNum}`);
             cy.get('[data-cy="projectPreview"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="shareProjBtn"]').should(`${chainerPrepend}exist`)

@@ -1221,7 +1221,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('7 more items');
     });
 
-    it('do not allow to export skills with dependencies', () => {
+    it('do not allow to export skills with prerequisites', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -1263,10 +1263,10 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="dupSkill-diffId"]')
             .contains('Name Conflict');
         cy.get('[data-cy="dupSkill-skill5"]')
-            .contains('Has Dependencies');
+            .contains('Has Prerequisites');
     });
 
-    it('do not allow to export skills with global dependencies', () => {
+    it('do not allow to export skills with global prerequisites', () => {
         cy.createSkill(1, 1, 1);
 
         cy.createProject(2);
@@ -1284,7 +1284,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.contains('Cannot export 1 skill(s)');
         cy.get('[data-cy="dupSkill-skill1"]')
-            .contains('Has Dependencies');
+            .contains('Has Prerequisites');
     });
 
     it('exported skill cannot depend on the completion of other skills', () => {
@@ -1297,12 +1297,12 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.exportSkillToCatalog(1, 1, 3);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="nav-Dependencies"]')
+        cy.get('[data-cy="nav-Prerequisites"]')
             .click();
-        cy.contains('Once a Skill has been exported to the catalog, Dependencies may not be added.');
+        cy.contains('Once a Skill has been exported to the catalog, Prerequisites may not be added.');
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
-        cy.contains('Once a Skill has been exported to the catalog, Dependencies may not be added.');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
+        cy.contains('Once a Skill has been exported to the catalog, Prerequisites may not be added.');
     });
 
     it('do not include imported skills in Actions count when selecting all skills in a subject', () => {

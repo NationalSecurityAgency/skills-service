@@ -123,7 +123,7 @@ describe('Accessibility Tests', () => {
     });
 
     it('project - Deps page', () => {
-        cy.visit('/administrator/projects/proj1/dependencies');
+        cy.visit('/administrator/projects/proj1/learning-path');
         cy.contains('Color Legend');
 
         cy.customLighthouse();

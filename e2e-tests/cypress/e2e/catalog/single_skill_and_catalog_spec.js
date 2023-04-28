@@ -22,7 +22,7 @@ describe('Single Skill and Catalog Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    const navDepsSelector = '[data-cy="nav-Dependencies"]';
+    const navDepsSelector = '[data-cy="nav-Prerequisites"]';
     const navAddEventSelector = '[data-cy="nav-Add Event"]';
 
     it('verify subject cards are aligned properly when one subject has disabled skills and another does not', () => {
