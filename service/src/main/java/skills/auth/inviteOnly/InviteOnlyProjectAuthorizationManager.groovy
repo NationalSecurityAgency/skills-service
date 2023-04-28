@@ -66,6 +66,9 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
 
     private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
     private static final Pattern JOIN_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/join\/.*/
+    private static final Pattern VALIDATE_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/validateInvite\/.*/
+
+    private static final List<Pattern> EXCEPTIONS = [CONTACT_EXCEPTION, JOIN_EXCEPTION, VALIDATE_EXCEPTION]
 
     @Value('#{"${skills.config.privateProject.cache-expiration-time:PT5M}"}')
     String privateProjectsCacheExpirationTime = "PT5M"
@@ -108,7 +111,7 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
             log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
             String projectId = extractProjectId(request)
             Boolean isInviteOnly = cacheLoader.load(projectId)
-            if (isInviteOnly && !(isContactUrl(request) || isJoinUrl(request))) {
+            if (isInviteOnly && !isExceptionUrl(request)) {
                 log.debug("project id [{}] requires invite only access", projectId)
                 Collection<? extends GrantedAuthority> authorities = getAuthorities(authentication.get())
                 vote = new AuthorizationDecision(false) //ACCESS_DENIED;
@@ -133,6 +136,17 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
             return pid.group(1)
         }
         return StringUtils.EMPTY
+    }
+
+    private boolean isExceptionUrl(HttpServletRequest request) {
+        String url = getRequestUrl(request)
+        log.debug("checking to see if url [{}] matches exception paths [{}]", url, EXCEPTIONS)
+        for (Pattern exception : EXCEPTIONS) {
+            if (exception.matcher(url)) {
+                return true
+            }
+        }
+        return false
     }
 
     private boolean isContactUrl(HttpServletRequest request) {
