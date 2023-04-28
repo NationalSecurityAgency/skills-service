@@ -107,7 +107,6 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
         }
         AuthorizationDecision vote = null //ACCESS_ABSTAIN
         if (projectsApiRequestMatcher.matches(request)) {
-
             log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
             String projectId = extractProjectId(request)
             Boolean isInviteOnly = cacheLoader.load(projectId)
@@ -145,26 +144,6 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
             if (exception.matcher(url)) {
                 return true
             }
-        }
-        return false
-    }
-
-    private boolean isContactUrl(HttpServletRequest request) {
-        String url = getRequestUrl(request)
-        log.debug("checking to see if url [{}] matches path [{}]", url, CONTACT_EXCEPTION.toString())
-        Matcher contact = CONTACT_EXCEPTION.matcher(url)
-        if (contact) {
-            return true
-        }
-        return false
-    }
-
-    private boolean isJoinUrl(HttpServletRequest request) {
-        String url = getRequestUrl(request)
-        log.debug("checking to see if url [{}] matches path [{}]", url, JOIN_EXCEPTION.toString())
-        Matcher contact = JOIN_EXCEPTION.matcher(url)
-        if (contact) {
-            return true
         }
         return false
     }
