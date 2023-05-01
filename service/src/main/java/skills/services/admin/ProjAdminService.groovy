@@ -214,7 +214,7 @@ class ProjAdminService {
                 if (allRoles) {
                     List<String> userIds = allRoles.collect { it.userId }.unique()
                     userIds.each { String projAdminUserId ->
-                        if (!userCommunityService.isUserCommunityMember(userId)) {
+                        if (!userCommunityService.isUserCommunityMember(projAdminUserId)) {
                             throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${projId}] has user [${projAdminUserId}] with administrative role that doesn't belong to the project's community", projId, null, ErrorCode.AccessDenied)
                         }
                     }

@@ -60,7 +60,7 @@ limitations under the License.
           </div>
         </div>
         <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">
-          <div v-if="isEdit && internalProject.enableProtectedUserCommunity">
+          <div v-if="isEdit && initialValueForEnableProtectedUserCommunity">
             <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
           </div>
           <div v-else>
@@ -136,6 +136,7 @@ limitations under the License.
           description: '',
           ...this.project,
         },
+        initialValueForEnableProtectedUserCommunity: null,
         originalProject: {
           name: '',
           description: '',
@@ -158,6 +159,7 @@ limitations under the License.
     },
     mounted() {
       this.internalProject.enableProtectedUserCommunity = this.project.userCommunity ? this.project.userCommunity === this.userCommunityRestrictedDescriptor : false;
+      this.initialValueForEnableProtectedUserCommunity = this.internalProject.enableProtectedUserCommunity;
       this.loadComponent();
 
       document.addEventListener('focusin', this.trackFocus);
