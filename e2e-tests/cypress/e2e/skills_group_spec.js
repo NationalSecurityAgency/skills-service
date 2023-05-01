@@ -814,8 +814,8 @@ describe('Skills Group Tests', () => {
         cy.addSkillToGroup(1, 1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 2);
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/dependencies');
-        cy.contains('No Dependencies Yet');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/prerequisites');
+        cy.contains('No Prerequisites Yet');
         cy.get('[data-cy="depsSelector"]').click();
         cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 1).as('skillIds');
         cy.get('@skillIds').eq(0).contains('skill1');

@@ -729,8 +729,8 @@ describe('Client Display Tests', () => {
             cy.intercept('/api/projects/proj1/token')
                 .as('getToken');
         }
-        cy.intercept('GET', '/api/projects/proj1/skills/skill4/prerequisites')
-            .as('getPrerequisites');
+        cy.intercept('GET', '/api/projects/proj1/skills/skill4/dependencies')
+            .as('getDependencies');
         cy.cdVisit('/subjects/subj1/skills/skill4');
         cy.wait('@getToken')
           .its('response.body')
@@ -738,7 +738,7 @@ describe('Client Display Tests', () => {
         cy.get('@getToken')
           .its('response.body')
           .should('have.property', 'token_type', 'Bearer');
-        cy.wait('@getPrerequisites')
+        cy.wait('@getDependencies')
             .its('request.headers')
             .should('have.property', 'authorization');
     });
@@ -747,8 +747,8 @@ describe('Client Display Tests', () => {
         it('verify that loginAsUser is used when retrieving token in DevMode', () => {
             cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user7', })
                 .as('getToken');
-            cy.intercept('GET', '/api/projects/proj1/skills/skill4/prerequisites')
-                .as('getPrerequisites');
+            cy.intercept('GET', '/api/projects/proj1/skills/skill4/dependencies')
+                .as('getDependencies');
             cy.cdVisit('/subjects/subj1/skills/skill4?loginAsUser=user7');
             cy.wait('@getToken')
                 .its('response.body')
@@ -756,7 +756,7 @@ describe('Client Display Tests', () => {
             cy.get('@getToken')
                 .its('response.body')
                 .should('have.property', 'token_type', 'Bearer')
-            cy.wait('@getPrerequisites')
+            cy.wait('@getDependencies')
                 .its('request.headers')
                 .should('have.property', 'authorization');
         });
