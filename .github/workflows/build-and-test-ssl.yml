@@ -76,7 +76,6 @@ jobs:
 
       - name: Run skills-service pki tests
         env:
-          MAVEN_OPTS: -Xmx2048m
           SPRING_PROFILES_ACTIVE: pki
           MAVEN_OPTS: -Xmx2048m
         run: |
