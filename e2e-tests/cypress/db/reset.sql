@@ -25,3 +25,4 @@ delete from user_points where project_id = 'Inception';
 delete from user_achievement where project_id = 'Inception';
 delete from user_performed_skill where project_id = 'Inception';
 delete from user_events where project_id = 'Inception';
+delete from user_tags;

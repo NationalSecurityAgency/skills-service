@@ -16,6 +16,7 @@
 package skills.intTests.community
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
@@ -24,7 +25,7 @@ import static skills.intTests.utils.SkillsFactory.createProject
 
 class GetProjectsCommunitySpecs extends DefaultIntSpec {
 
-    def "protected community project is only returned for users in that community, even if that user happened to assigned an admin"() {
+    def "cannot enable protected community for a project that has admin that does not belong to that community"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService allDragonsUser = createService(users[0])
@@ -41,17 +42,39 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         allDragonsUser.addUserRole(pristineDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
         allDragonsUser.addUserRole(pristineDragonsUser.userName, p2.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
 
-        pristineDragonsUser.changeSettings(p1.projectId, [
-                [projectId: p1.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: "true"],
-        ])
+        p1.enableProtectedUserCommunity = true
+
         when:
-        def pristineDragonUserProjects = pristineDragonsUser.getProjects()
-        def allDragonsUserProjects = allDragonsUser.getProjects()
+        pristineDragonsUser.updateProject(p1, p1.projectId)
         then:
-        pristineDragonUserProjects.projectId == [p1.projectId, p2.projectId]
-        pristineDragonUserProjects.userCommunity == ['Divine Dragon', 'All Dragons']
-        allDragonsUserProjects.projectId == [p2.projectId]
-        allDragonsUserProjects.userCommunity == [null]
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
+    }
+
+    def "cannot enable protected community for a project that has approver that does not belong to that community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        pristineDragonsUser.createProject(p1)
+
+        def p2 = createProject(2)
+        pristineDragonsUser.createProject(p2)
+
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        p1.enableProtectedUserCommunity = true
+
+        when:
+        pristineDragonsUser.updateProject(p1, p1.projectId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
     }
 
     def "get single project - community info is only returned for community members"() {
@@ -62,18 +85,14 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        def p1 = createProject(1)
-        allDragonsUser.createProject(p1)
+        def p1 = createProject(1, true)
+        pristineDragonsUser.createProject(p1)
 
         def p2 = createProject(2)
         allDragonsUser.createProject(p2)
 
-        allDragonsUser.addUserRole(pristineDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
         allDragonsUser.addUserRole(pristineDragonsUser.userName, p2.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
 
-        pristineDragonsUser.changeSettings(p1.projectId, [
-                [projectId: p1.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: "true"],
-        ])
         when:
         def pristineDragonUserP1 = pristineDragonsUser.getProject(p1.projectId)
         def pristineDragonUserP2 = pristineDragonsUser.getProject(p2.projectId)

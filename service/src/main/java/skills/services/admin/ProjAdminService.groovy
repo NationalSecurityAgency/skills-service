@@ -29,6 +29,7 @@ import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.CustomIconResult
 import skills.controller.result.model.LatestEvent
@@ -45,12 +46,14 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.CustomIconRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.ProjDefWithDescriptionRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserRoleRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -119,6 +122,9 @@ class ProjAdminService {
     UserRepo userRepo
 
     @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
@@ -134,6 +140,7 @@ class ProjAdminService {
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
+        validateUserCommunityProps(projectRequest, originalProjectId)
 
         lockingService.lockProjects()
 
@@ -149,6 +156,7 @@ class ProjAdminService {
         if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
             serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
         }
+        ProjDefParent savedProjDef
         if (projectDefinition) {
             Props.copy(projectRequest, projectDefinition)
             log.debug("Updating [{}]", projectDefinition)
@@ -157,6 +165,7 @@ class ProjAdminService {
                 projectDefinition = projDefWithDescriptionRepo.save(projectDefinition)
             }
             log.debug("Saved [{}]", projectDefinition)
+            savedProjDef = projectDefinition
         } else {
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
@@ -181,6 +190,38 @@ class ProjAdminService {
             String userId = userIdParam ?: userInfoService.getCurrentUserId()
             accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.debug("Added user role [{}] to [{}]", RoleName.ROLE_PROJECT_ADMIN, userId)
+
+            savedProjDef = projDef
+        }
+
+        if (projectRequest.enableProtectedUserCommunity) {
+            settingsService.saveSetting(new ProjectSettingsRequest(projectId: savedProjDef.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
+        }
+    }
+
+    @Profile
+    private void validateUserCommunityProps(ProjectRequest projectRequest, String originalProjectId) {
+        String projId = originalProjectId ?: projectRequest.projectId
+        if (projectRequest.enableProtectedUserCommunity != null) {
+            if (projectRequest.enableProtectedUserCommunity) {
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", projId, null, ErrorCode.AccessDenied)
+                }
+
+                // check existing admins/approvers
+                List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
+                if (allRoles) {
+                    List<String> userIds = allRoles.collect { it.userId }.unique()
+                    userIds.each { String projAdminUserId ->
+                        if (!userCommunityService.isUserCommunityMember(userId)) {
+                            throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${projId}] has user [${projAdminUserId}] with administrative role that doesn't belong to the project's community", projId, null, ErrorCode.AccessDenied)
+                        }
+                    }
+                }
+            } else {
+                SkillsValidator.isTrue(!userCommunityService.isUserCommunityOnlyProject(projId), "Once project [enableProtectedUserCommunity=true] it cannot be flipped to false", projId)
+            }
         }
     }
 

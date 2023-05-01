@@ -42,6 +42,9 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     @Nullable
     List<UserRole> findAllByUserId(String userId)
 
+    @Nullable
+    List<UserRole> findAllByProjectIdIgnoreCase(String projectId)
+
     @Query('''SELECT count(ur.id)
         from UserRole ur, UserAttrs ua 
         where

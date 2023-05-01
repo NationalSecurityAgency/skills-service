@@ -45,6 +45,7 @@ import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
+import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
 

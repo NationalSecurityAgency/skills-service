@@ -22,4 +22,6 @@ class ProjectRequest {
     String projectId
     String name
     String description
+
+    Boolean enableProtectedUserCommunity = false
 }

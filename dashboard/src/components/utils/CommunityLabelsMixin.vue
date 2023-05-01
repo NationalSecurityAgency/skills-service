@@ -23,6 +23,15 @@ limitations under the License.
       afterCommunityLabel() {
         return (this.$store.getters.config && this.$store.getters.config.userCommunityAfterLabel) || 'Community';
       },
+      currentUserCommunity() {
+        return this.$store.getters.userInfo?.userCommunity;
+      },
+      showManageUserCommunity() {
+        return Boolean(this.currentUserCommunity);
+      },
+      userCommunityRestrictedDescriptor() {
+        return this.$store.getters.config.userCommunityRestrictedDescriptor;
+      },
     },
   };
 </script>

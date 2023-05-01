@@ -17,6 +17,7 @@ package skills.services.settings
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SettingsRequest
@@ -53,5 +54,9 @@ class ProjectSettingsValidator {
             }
         }
 
+        ProjectSettingsRequest communitySetting = settings.find { it.setting == Settings.USER_COMMUNITY_ONLY_PROJECT.settingName }
+        if (communitySetting) {
+            throw new SkillException("Not allowed to save [${Settings.USER_COMMUNITY_ONLY_PROJECT.settingName}] setting using this endpoint", ErrorCode.BadParam)
+        }
     }
 }

@@ -59,6 +59,23 @@ limitations under the License.
                       @hidden="tooltipShowing=false"/>
           </div>
         </div>
+        <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">
+          <div v-if="isEdit && internalProject.enableProtectedUserCommunity">
+            <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
+          </div>
+          <div v-else>
+            <div class="row">
+              <div class="col">
+                <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity" name="check-button" inline switch data-cy="restrictCommunity">
+                  Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
+                </b-form-checkbox>
+              </div>
+            </div>
+            <div v-if="internalProject.enableProtectedUserCommunity" class="alert-warning alert mb-0 mt-1">
+              <i class="fas fa-exclamation-triangle text-danger" aria-hidden="true" /> Please note that once the restriction is enabled it <b>cannot</b> be lifted/disabled.
+            </div>
+          </div>
+        </div>
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
@@ -89,6 +106,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
@@ -106,7 +124,7 @@ limitations under the License.
       SkillsSpinner,
       ReloadMessage,
     },
-    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin, CommunityLabelsMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
@@ -122,6 +140,7 @@ limitations under the License.
           name: '',
           description: '',
           projectId: '',
+          enableProtectedUserCommunity: false,
         },
         canEditProjectId: false,
         overallErrMsg: '',
@@ -138,6 +157,7 @@ limitations under the License.
       this.registerValidation();
     },
     mounted() {
+      this.internalProject.enableProtectedUserCommunity = this.project.userCommunity ? this.project.userCommunity === this.userCommunityRestrictedDescriptor : false;
       this.loadComponent();
 
       document.addEventListener('focusin', this.trackFocus);

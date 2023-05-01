@@ -24,7 +24,7 @@ import skills.storage.model.Setting
 interface SettingRepo extends CrudRepository<Setting, Integer> {
 
     @Nullable
-    Setting findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
+    Setting findByTypeAndUserRefIdAndProjectIdIgnoreCaseAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
 
     @Nullable
     List<Setting> findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSettingIn(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, List<String> settings)

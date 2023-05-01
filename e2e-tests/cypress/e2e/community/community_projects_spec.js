@@ -39,16 +39,9 @@ describe('Community Projects Tests', () => {
             cy.logout();
 
             cy.login(vars.defaultUser, vars.defaultPass);
-            cy.createProject(1)
+            cy.createProject(1, {enableProtectedUserCommunity: true})
             cy.createProject(2)
 
-            cy.request('POST', '/admin/projects/proj1/settings', [
-                {
-                    value: true,
-                    setting: 'user_community',
-                    projectId: 'proj1',
-                },
-            ]);
             cy.request('POST', `/admin/projects/proj1/users/${allDragonsUser}/roles/ROLE_PROJECT_ADMIN`);
             cy.request('POST', `/admin/projects/proj2/users/${allDragonsUser}/roles/ROLE_PROJECT_ADMIN`);
         });
@@ -62,6 +55,7 @@ describe('Community Projects Tests', () => {
         cy.visit('/administrator')
         cy.get('.community-desc-header').should('have.text', 'Divine Dragon')
         cy.get('.community-desc-footer').should('have.text', 'Divine Dragon')
+        cy.get('[data-cy="inception-button"]').contains('Level 0')
 
         cy.fixture('vars.json').then((vars) => {
             cy.logout();
