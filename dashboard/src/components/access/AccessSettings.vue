@@ -21,27 +21,6 @@ limitations under the License.
                     :add-role-confirmation="addUserConfirmationConfig"/>
     </metrics-card>
 
-    <metrics-card v-if="showManageUserCommunity" title="User Community Management" data-cy="userCommunityManagement" :no-padding="true" class="my-4">
-      <b-card>
-            <div class="row" data-cy="projectVisibility">
-              <div class="d-inline-block pt-2 col" id="userCommunityLabel">
-                <span class="text-secondary">{{ userCommunityLabel }}: <inline-help target-id="userCommunityHelp"
-                  :msg="`Restrict Access to users with ${currentUserCommunity} access`" />
-                </span>
-                <span class="ml-2">{{userCommunitySwitchLabel}}</span>
-              </div>
-              <div class="col-auto">
-                <b-button variant="outline-info" @click="userCommunityChanged" data-cy="userCommunityBtn"> {{userCommunityButtonLabel}}</b-button>
-              </div>
-            </div>
-        <div v-if="errMsg" class="row">
-          <div class="col">
-            <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
-          </div>
-        </div>
-      </b-card>
-    </metrics-card>
-
     <metrics-card v-if="privateProject" title="Project User: Invite" data-cy="inviteUser" :no-padding="true" class="my-4">
       <b-overlay :show="!isEmailEnabled">
         <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">
@@ -78,7 +57,6 @@ limitations under the License.
   import InviteUsersToProject from '@/components/access/InviteUsersToProject';
   import InviteStatuses from '@/components/access/InviteStatuses';
   import RevokeUserAccess from '@/components/access/RevokeUserAccess';
-  import InlineHelp from '@/components/utils/InlineHelp';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
@@ -99,7 +77,6 @@ limitations under the License.
       InviteUsersToProject,
       RevokeUserAccess,
       InviteStatuses,
-      InlineHelp,
     },
     data() {
       return {
@@ -123,30 +100,6 @@ limitations under the License.
       },
       addUserConfirmationConfig() {
         return this.privateProject;
-      },
-      showManageUserCommunity() {
-        return Boolean(this.currentUserCommunity);
-      },
-      userCommunityLabel() {
-        return this.$store.getters.config.userCommunityLabel;
-      },
-      userCommunityRestrictedValue() {
-        return this.userCommunityRestrictedSetting.value;
-      },
-      userCommunitySwitchLabel() {
-        if (this.userCommunityRestrictedValue) {
-          return 'Enabled';
-        }
-        return 'Disabled';
-      },
-      userCommunityButtonLabel() {
-        if (this.userCommunityRestrictedValue) {
-          return 'Disable';
-        }
-        return 'Enable';
-      },
-      currentUserCommunity() {
-        return this.$store.getters.userInfo?.userCommunity;
       },
     },
     beforeRouteLeave(to, from, next) {
@@ -175,51 +128,6 @@ limitations under the License.
     methods: {
       handleInviteSent() {
         this.$refs.inviteStatuses.loadData();
-      },
-      userCommunityChanged() {
-        if (!this.userCommunityRestrictedValue) {
-          this.msgConfirm(`Warning: User's that do not belong to the ${this.currentUserCommunity} community will no longer have access to this project. Are you sure you want to continue?`, 'Please Confirm!', 'YES, Restrict Access!')
-            .then((res) => {
-              if (res) {
-                this.doToggleUserCommunitySetting();
-              }
-            });
-        } else {
-          this.msgConfirm(`Warning: This will remove the ${this.currentUserCommunity} community restriction from this project, allowing any user to access this project. `
-            + `You are responsible for ensuring that all data is releasable and does not require restricting access to the ${this.currentUserCommunity} community! `
-            + 'Are you sure you want to continue?', 'Please Confirm!', `YES, Remove ${this.currentUserCommunity} Access Restriction!`)
-            .then((res) => {
-              if (res) {
-                this.doToggleUserCommunitySetting();
-              }
-            });
-        }
-      },
-      doToggleUserCommunitySetting() {
-        const updatedUserCommunitySetting = {
-          value: !this.userCommunityRestrictedSetting.value,
-          setting: 'user_community',
-          projectId: this.$route.params.projectId,
-        };
-
-        this.isLoading = true;
-        SettingsService.checkSettingsValidity(this.$route.params.projectId, [updatedUserCommunitySetting])
-          .then((res) => {
-            if (res.valid) {
-              SettingsService.saveSettings(this.$route.params.projectId, [updatedUserCommunitySetting])
-                .then(() => {
-                  this.$announcer.polite('User Community Settings have been successfully saved');
-                  this.userCommunityRestrictedSetting = updatedUserCommunitySetting;
-                  this.$store.dispatch('loadProjConfigState', { projectId: this.$route.params.projectId, updateLoadingVar: false });
-                })
-                .finally(() => {
-                  this.isLoading = false;
-                });
-            } else {
-              this.errMsg = res.explanation;
-              this.isLoading = false;
-            }
-          });
       },
     },
   };
