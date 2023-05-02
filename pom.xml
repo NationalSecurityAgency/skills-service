@@ -8,7 +8,6 @@
     <artifactId>skills-service-parent</artifactId>
     <packaging>pom</packaging>
     <version>2.6.0-SNAPSHOT</version>
-
     <modules>
         <module>dashboard</module>
         <module>client-display</module>
