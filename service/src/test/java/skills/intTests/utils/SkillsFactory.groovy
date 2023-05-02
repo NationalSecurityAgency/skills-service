@@ -80,11 +80,8 @@ class SkillsFactory {
         return skillVersions.collect { createSkill(projNumber, subjNumber, num++, it) }
     }
 
-    static createProject(int projNumber = 1, Boolean enableProtectedUserCommunity = null) {
+    static createProject(int projNumber = 1) {
         Map res = [projectId: getDefaultProjId(projNumber), name: getDefaultProjName(projNumber)]
-        if (enableProtectedUserCommunity != null) {
-            res.enableProtectedUserCommunity = enableProtectedUserCommunity
-        }
         return res
     }
 

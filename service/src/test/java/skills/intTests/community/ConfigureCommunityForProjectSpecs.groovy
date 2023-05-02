@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.services.settings.Settings
+import skills.storage.model.auth.RoleName
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
@@ -52,10 +53,11 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        def p1 = createProject(1, true)
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
         pristineDragonsUser.createProject(p1)
 
-        def p2 = createProject(2, false)
+        def p2 = createProject(2)
         pristineDragonsUser.createProject(p2)
 
         when:
@@ -70,7 +72,8 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
 
         SkillsService allDragonsUser = createService(users[0])
 
-        def p1 = createProject(1, true)
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
         when:
         allDragonsUser.createProject(p1)
         then:
@@ -86,10 +89,10 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        def p1 = createProject(1, false)
+        def p1 = createProject(1)
         pristineDragonsUser.createProject(p1)
 
-        def p2 = createProject(2, false)
+        def p2 = createProject(2)
         pristineDragonsUser.createProject(p2)
 
         when:
@@ -113,7 +116,8 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        def p1 = createProject(1, true)
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
         pristineDragonsUser.createProject(p1)
         when:
         p1.enableProtectedUserCommunity = false
@@ -122,6 +126,102 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Once project [enableProtectedUserCommunity=true] it cannot be flipped to false")
         e.getMessage().contains("projectId:TestProject1")
-
     }
+
+    def "cannot enable protected community for a project that has admin that does not belong to that community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        allDragonsUser.createProject(p1)
+
+        def p2 = createProject(2)
+        allDragonsUser.createProject(p2)
+
+        allDragonsUser.addUserRole(pristineDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        allDragonsUser.addUserRole(pristineDragonsUser.userName, p2.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        p1.enableProtectedUserCommunity = true
+
+        when:
+        pristineDragonsUser.updateProject(p1, p1.projectId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
+    }
+
+    def "cannot enable protected community for a project that has approver that does not belong to that community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        pristineDragonsUser.createProject(p1)
+
+        def p2 = createProject(2)
+        pristineDragonsUser.createProject(p2)
+
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        p1.enableProtectedUserCommunity = true
+
+        when:
+        pristineDragonsUser.updateProject(p1, p1.projectId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
+    }
+
+    def "run community specific paragraph validation for project's description - project creation with community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        String notAllowedProtectedDesc = "has divinedragon"
+        String notAllowedForNonProtectedDesc = "has jabberwocky"
+        when:
+        def protectedWithNotAllowedDesc  = createProject(1)
+        protectedWithNotAllowedDesc.enableProtectedUserCommunity = true
+        protectedWithNotAllowedDesc.description = notAllowedProtectedDesc
+
+        def protectedWithAllowedDesc  = createProject(2)
+        protectedWithAllowedDesc.enableProtectedUserCommunity = true
+        protectedWithAllowedDesc.description = notAllowedForNonProtectedDesc
+
+        def notProtectedWithNotAllowedDesc  = createProject(3)
+        notProtectedWithNotAllowedDesc.description = notAllowedForNonProtectedDesc
+
+        def notProtectedWithAllowedDesc  = createProject(4)
+        notProtectedWithAllowedDesc.description = notAllowedProtectedDesc
+
+        pristineDragonsUser.createProject(protectedWithAllowedDesc)
+        pristineDragonsUser.createProject(notProtectedWithAllowedDesc)
+
+        then:
+        expectErrWithMsg ({pristineDragonsUser.createProject(protectedWithNotAllowedDesc) }, "May not contain divinedragon word")
+        expectErrWithMsg ({pristineDragonsUser.createProject(notProtectedWithNotAllowedDesc) }, "paragraphs may not contain jabberwocky")
+    }
+
+    def expectErrWithMsg(Closure c, String msg) {
+        boolean res = false
+        try {
+            c.call()
+            res = false // should not get here
+        } catch (SkillsClientException e) {
+            res = e.message.contains(msg)
+        }
+
+        return res
+    }
+
 }

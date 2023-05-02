@@ -22,6 +22,9 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.services.admin.UserCommunityService
 import skills.utils.InputSanitizer
@@ -52,6 +55,9 @@ class CustomValidator {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    UserInfoService userInfoService
 
     private String paragraphValidationMsg
     private String userCommunityParagraphValidationMsg
@@ -95,7 +101,13 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(ProjectRequest projectRequest) {
-        return validateDescriptionAndName(projectRequest.description, projectRequest.name, projectRequest.projectId)
+        CustomValidationResult validationResult = validateDescription(projectRequest.description, projectRequest.projectId)
+        if (!validationResult.valid) {
+            return validationResult
+        }
+
+        validationResult = validateName(projectRequest.name)
+        return validationResult
     }
 
     CustomValidationResult validate(SubjectRequest subjectRequest, String projectId) {
@@ -125,19 +137,25 @@ class CustomValidator {
         return validationResult
     }
 
-    CustomValidationResult validateDescription(String description, String projectId=null) {
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false) {
         Pattern paragraphPattern = this.paragraphPattern
         String paragraphValidationMsg = this.paragraphValidationMsg
-        if (projectId && this.userCommunityParagraphPattern) {
-            if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
+        if ((utilizeUserCommunityParagraphPatternByDefault || projectId) && this.userCommunityParagraphPattern) {
+            boolean shouldUseCommunityValidation = projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
+            if (shouldUseCommunityValidation) {
                 paragraphPattern = this.userCommunityParagraphPattern
                 paragraphValidationMsg = this.userCommunityParagraphValidationMsg ?: paragraphValidationMsg
+
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillException("User [${userId}] is not allowed to validate using user community validation", projectId, null, ErrorCode.AccessDenied)
+                }
             }
         }
         if (!paragraphPattern || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
-        log.debug("Validating description:\n[${description}]")
+        log.debug("Validating description:\n[{}]", description)
 
         description = InputSanitizer.unsanitizeForMarkdown(description)
 

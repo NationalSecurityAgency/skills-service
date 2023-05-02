@@ -66,7 +66,9 @@ limitations under the License.
           <div v-else>
             <div class="row">
               <div class="col">
-                <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity" name="check-button" inline switch data-cy="restrictCommunity">
+                <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"
+                                 @change="userCommunityChanged"
+                                 name="check-button" inline switch data-cy="restrictCommunity">
                   Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
                 </b-form-checkbox>
               </div>
@@ -79,7 +81,7 @@ limitations under the License.
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
-              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
+              <ValidationProvider rules="maxDescriptionLength|customProjectDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
                 <markdown-editor v-if="!isEdit || descriptionLoaded" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
@@ -106,6 +108,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService';
   import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
@@ -306,6 +309,16 @@ limitations under the License.
       updateDescription(event) {
         this.internalProject.description = event;
       },
+      userCommunityChanged() {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const { observer } = this.$refs;
+            if (observer) {
+              observer.validate({ silent: false });
+            }
+          });
+        }, 250);
+      },
       registerValidation() {
         const self = this;
         extend('uniqueName', {
@@ -327,6 +340,24 @@ limitations under the License.
             }
             return ProjectService.checkIfProjectIdExist(value)
               .then((remoteRes) => !remoteRes);
+          },
+        });
+
+        extend('customProjectDescriptionValidator', {
+          validate(value) {
+            if (!self.$store.getters.config.paragraphValidationRegex) {
+              return true;
+            }
+
+            return DescriptionValidatorService.validateDescription(value, false, self.internalProject.enableProtectedUserCommunity).then((result) => {
+              if (result.valid) {
+                return true;
+              }
+              if (result.msg) {
+                return `{_field_} - ${result.msg}.`;
+              }
+              return '{_field_} is invalid.';
+            });
           },
         });
       },

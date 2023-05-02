@@ -1214,8 +1214,8 @@ class SkillsService {
         return wsHelper.adminPost("${getProjectUrl(project)}/settings/checkValidity".toString(), settings)
     }
 
-    def checkCustomDescriptionValidation(String description){
-        return wsHelper.apiPost("/validation/description", [value: description])
+    def checkCustomDescriptionValidation(String description, String projectId = null, Boolean useProtectedCommunityValidator = null){
+        return wsHelper.apiPost("/validation/description", [value: description, projectId: projectId, useProtectedCommunityValidator: useProtectedCommunityValidator])
     }
 
     def checkCustomNameValidation(String description){

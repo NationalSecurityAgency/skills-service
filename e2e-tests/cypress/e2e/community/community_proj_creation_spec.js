@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe('Community Projects Tests', () => {
+describe('Community Project Creation Tests', () => {
 
     const allDragonsUser = 'allDragons@email.org'
 
@@ -117,4 +117,147 @@ describe('Community Projects Tests', () => {
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access is restricted to Divine Dragon users only and cannot be lifted/disabled');
         cy.get('[data-cy="restrictCommunity"]').should('not.exist')
     });
+
+    it('community validator should be selected based on the community - projection creation', () => {
+        cy.visit('/administrator')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]').type('one')
+        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').clear().type('divinedragon')
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
+    it('community validator should be selected based on the community - edit existing project', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: false, description: 'some text'})
+        cy.visit('/administrator')
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').clear().type('divinedragon')
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
+    it('community validator should be selected based on the community - edit existing project from project page', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: false, description: 'some text'})
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="btn_edit-project"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - paragraphs may not contain jabberwocky.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').clear().type('divinedragon')
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
+    it('edit existing community project should use community validator', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'some text '})
+        cy.visit('/administrator/')
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
+    it('edit existing community project should use community validator - project page', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'some text '})
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="btn_edit-project"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
+        cy.wait(1000)
+        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
 });

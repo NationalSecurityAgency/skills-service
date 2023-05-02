@@ -17,13 +17,7 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import skills.controller.result.model.ValidationResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.profile.EnableCallStackProf
@@ -44,8 +38,9 @@ class CustomValidationController {
     @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    ValidationResult validateDescription(@RequestBody Map<String,String> body, @RequestParam(required = false) String projectId){
-        CustomValidationResult vr = customValidator.validateDescription(body.value, projectId)
+    ValidationResult validateDescription(@RequestBody Map<String,String> body){
+        Boolean useProtectedCommunityValidator = body.useProtectedCommunityValidator ? Boolean.valueOf(body.useProtectedCommunityValidator) : false
+        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, useProtectedCommunityValidator)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
         return validationResult
     }

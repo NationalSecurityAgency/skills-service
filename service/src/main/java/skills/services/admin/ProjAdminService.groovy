@@ -144,11 +144,6 @@ class ProjAdminService {
 
         lockingService.lockProjects()
 
-        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
-        if (!customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
-        }
-
         ProjDefWithDescription projectDefinition = originalProjectId ? projDefWithDescriptionRepo.findByProjectIdIgnoreCase(originalProjectId) : null
         if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
             serviceValidatorHelper.validateProjectIdDoesNotExist(projectRequest.projectId)
@@ -196,6 +191,11 @@ class ProjAdminService {
 
         if (projectRequest.enableProtectedUserCommunity) {
             settingsService.saveSetting(new ProjectSettingsRequest(projectId: savedProjDef.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
+        }
+
+        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg)
         }
     }
 
