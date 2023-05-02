@@ -601,11 +601,11 @@ A new sentence after a few new lines
         validator.validateDescription("""<span style="font-size: 14px;">A line with </span>[<span style="font-size: 14px;">a link</span>](http://link.com)<span style="font-size: 14px;"> in the middle</span>
 
 <span style="font-size: 14px;">A line with a new line above</span>""").valid
-        validator.validateDescription('''### A [How to copy text from an HTML element (div, p, span ... - Arclab](https://www.arclab.com/en/kb/htmlcss/how-to-copy-text-from-html-element-to-clipboard.html)
+        validator.validateDescription('''### A [Lorem ipsum dolor sit amet, consectetur adipiscing elit (div, p, span ... - BlahBlah](https://www.blahblah.com/en/kb/htmlcss/how-to-do-stuff-link.html)
 
-<span class="VuuXrf" style="color: rgb(32, 33, 36); font-size: 14px; max-width: 200px; display: block; line-height: 20px; white-space: nowrap;">A arclab.com</span>
-A [https://www.arclab.com<span class="dyjrff ob9lvb" role="text" style="color: rgb(77, 81, 86);"> › htmlcss › how-to-copy-text-...</span>](https://www.arclab.com/en/kb/htmlcss/how-to-copy-text-from-html-element-to-clipboard.html)
-<span>A The function copies the visible text of the element to the </span><em><span>clipboard</span></em><span>. This works as if you had selected the text and </span>*<span>copied</span>*<span> it with ctrl+c. Use the parameter " ...</span>''').valid
+<span class="dsfgfdsgsdg" style="color: rgb(00, 11, 22); font-size: 14px; max-width: 200px; display: block; line-height: 20px; white-space: nowrap;">A arclab.com</span>
+A [https://www.blahblah.com<span class="dgfdsgdsd dfgdsfg" role="text" style="color: rgb(33, 44, 55);"> › htmlcss › how-to-do-stuff-...</span>](https://www.blahblah.com/en/kb/htmlcss/how-to-do-stuff-link.html)
+<span>quis nostrud exercitation ullamco laboris nisi ut aliquip ex </span><em><span>ea commodo consequat</span></em><span>. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur " ...</span>''').valid
     }
 }
 
