@@ -735,11 +735,13 @@ class SkillsService {
 
     def getSkillSummary(String userId, String projId, String subjId=null, int version = -1, boolean includeSkills=true) {
         userId = getUserId(userId)
-        String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?userId=${userId}"
+        String url = "/projects/${projId}/${subjId ? "subjects/${subjId}/" : ''}summary?includeSkills=${includeSkills}"
+        if (userId) {
+            url += "&userId=${userId}"
+        }
         if (version >= 0) {
             url += "&version=${version}"
         }
-        url += "&includeSkills=${includeSkills}"
         wsHelper.apiGet(url)
     }
 
@@ -845,18 +847,21 @@ class SkillsService {
 
     def getBadgesSummary(String userId, String projId){
         userId = getUserId(userId)
-        String url = "/projects/${projId}/badges/summary?userId=${userId}"
+        String url = "/projects/${projId}/badges/summary"
+        if (userId) {
+            url += "?userId=${userId}"
+        }
         wsHelper.apiGet(url)
     }
 
     def getBadgeSummary(String userId, String projId, String badgeId, int version = -1, boolean global = false){
         userId = getUserId(userId)
-        String url = "/projects/${projId}/badges/${badgeId}/summary?userId=${userId}"
+        String url = "/projects/${projId}/badges/${badgeId}/summary?global=${global}"
         if (version >= 0) {
             url += "&version=${version}"
         }
-        if (global) {
-            url += "&global=${global}"
+        if (userId) {
+            url += "&userId=${userId}"
         }
         wsHelper.apiGet(url)
     }
@@ -945,30 +950,44 @@ class SkillsService {
     def getRank(String userId, String projectId, String subjectId = null){
         userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rank" : "/projects/${projectId}/rank"
-        endpoint = "${endpoint}?userId=${userId}"
+        endpoint = "${endpoint}"
+        if (userId) {
+            endpoint += "?userId=${userId}"
+        }
         return wsHelper.apiGet(endpoint)
     }
 
     def getLeaderboard(String userId, String projectId, String subjectId = null, String type="topTen"){
         userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/leaderboard" : "/projects/${projectId}/leaderboard"
-        endpoint = "${endpoint}?type=${type}&userId=${userId}"
+        endpoint = "${endpoint}?type=${type}"
+        if (userId) {
+            endpoint += "&userId=${userId}"
+        }
         return wsHelper.apiGet(endpoint)
     }
 
     def getRankDistribution(String userId, String projectId, String subjectId = null){
         userId = getUserId(userId)
         String endpoint = subjectId ? "/projects/${projectId}/subjects/${subjectId}/rankDistribution" : "/projects/${projectId}/rankDistribution"
-        endpoint = "${endpoint}?userId=${userId}"
+        endpoint = "${endpoint}"
+        if (userId) {
+            endpoint += "?userId=${userId}"
+        }
         return wsHelper.apiGet(endpoint)
     }
 
     def getPointHistory(String userId, String projectId, String subjectId=null, Integer version = -1){
         userId = getUserId(userId)
         String endpointStart = subjectId ? getSubjectUrl(projectId, subjectId) : getProjectUrl(projectId)
-        String url = "${endpointStart}/pointHistory?userId=${userId}"
+        String url = "${endpointStart}/pointHistory"
+        Boolean paramAdded = false;
+        if (userId) {
+            url += "?userId=${userId}"
+            paramAdded = true
+        }
         if (version >= 0) {
-            url += "&version=${version}"
+            url += "${paramAdded ? "&" : "?"}version=${version}"
         }
         return wsHelper.apiGet(url.toString())
     }
