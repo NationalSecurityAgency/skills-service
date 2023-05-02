@@ -40,6 +40,7 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
+import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
@@ -150,6 +151,9 @@ class SkillsLoader {
     @Autowired
     SkillTagService skillTagService
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
     @Transactional(readOnly = true)
@@ -172,7 +176,7 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     List<AvailableProjectResult> getAvailableForMyProjects(String userId) {
 
-        List<ProjDefRepo.AvailableProjectSummary> projectSummaries = projDefRepo.getAvailableProjectSummariesInProduction(userId)
+        List<ProjDefRepo.AvailableProjectSummary> projectSummaries = getAvailableProjectSummaries(userId)
         List<AvailableProjectResult> res = projectSummaries.collect { ProjDefRepo.AvailableProjectSummary summary ->
             String myProjectId = summary.getMyProjectId();
             new AvailableProjectResult(
@@ -189,6 +193,14 @@ class SkillsLoader {
         }
 
         return res;
+    }
+
+    private List<ProjDefRepo.AvailableProjectSummary> getAvailableProjectSummaries(String userId) {
+        if (userCommunityService.isUserCommunityConfigured()) {
+            return projDefRepo.getAvailableProjectSummariesInProduction(userId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
+        } else {
+            return projDefRepo.getAvailableProjectSummariesInProduction(userId)
+        }
     }
 
     @Profile
