@@ -18,8 +18,7 @@ describe('Community Project Creation Tests', () => {
 
     const allDragonsUser = 'allDragons@email.org'
 
-    before(() => {
-        cy.beforeTestSuiteThatReusesData()
+    beforeEach(() => {
         cy.fixture('vars.json').then((vars) => {
             cy.logout();
             cy.login(vars.rootUser, vars.defaultPass, true);
@@ -29,11 +28,9 @@ describe('Community Project Creation Tests', () => {
 
             cy.register(allDragonsUser, vars.defaultPass);
             cy.logout();
-        });
-    });
 
-    after(() => {
-        cy.afterTestSuiteThatReusesData()
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
     });
 
     it('create restricted community project', () => {

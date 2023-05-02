@@ -64,7 +64,8 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
         List projs = (1..3).collect { int numProj ->
-            def proj = SkillsFactory.createProject(numProj, numProj == 3)  // 3rd project has user community protection enabled
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
             pristineDragonsUser.createProject(proj)
 
             (1..numProj).each {
@@ -106,7 +107,8 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
         rootUser.saveUserTag(otherPristineDragonsUser.userName, 'dragons', ['DivineDragon'])
         List projs = (1..3).collect { int numProj ->
-            def proj = SkillsFactory.createProject(numProj, numProj == 3)  // 3rd project has user community protection enabled
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
             pristineDragonsUser.createProject(proj)
 
             (1..numProj).each {
