@@ -31,6 +31,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(importingProjectName)="data">
+<<<<<<< HEAD
         <div class="row">
           <div class="col">
             <span class="ml-2">{{ data.value }}</span>
@@ -43,15 +44,35 @@ limitations under the License.
              </b-button>
           </div>
           </div>
+=======
+          <div class="row">
+            <div class="col">
+              <span class="ml-2">{{ data.value }}</span>
+              <span v-if="data.item.enabled !== 'true'" class="text-uppercase ml-2"><b-badge variant="warning">Disabled</b-badge></span>
+            </div>
+            <div class="col-auto">
+              <b-button variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`"
+                               @click="chooseProject(data.value, skill.projectId)" :data-cy="`contactOwnerBtn_${ skill.projectId }`">
+                      Contact <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
+               </b-button>
+            </div>
+            </div>
+>>>>>>> 3621a3a2f (fixing original commit)
         </template>
 
         <template v-slot:cell(importedOn)="data">
           <date-cell :value="data.value" />
         </template>
       </skills-b-table>
+<<<<<<< HEAD
         <div>
           <contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
                                    v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
+=======
+      <div>
+         <contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
+               v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
+>>>>>>> 3621a3a2f (fixing original commit)
     </div>
     <div v-else>
       <div class="h6">This skill has not been imported by any other projects yet...</div>
