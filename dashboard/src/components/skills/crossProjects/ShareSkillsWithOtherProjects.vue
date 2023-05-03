@@ -16,42 +16,49 @@ limitations under the License.
 <template>
   <metrics-card id="shared-skills-with-others-panel" title="Can be added as dependencies in other Projects"
                 :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
-      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills">
-        <div class="row px-3 py-1">
-          <div class="col-lg mt-2">
-            <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                              :selected="selectedSkills" :onlySingleSelectedValue="true"
-                              data-cy="skillSelector"></skills-selector2>
+      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">
+        <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
+                     class="my-5" data-cy="restrictedUserCommunityWarning">
+          This project's access is
+          restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users
+          only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
+        </no-content2>
+        <div v-if="!restrictedUserCommunity">
+          <div class="row px-3 py-1">
+            <div class="col-lg mt-2">
+              <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
+                                :selected="selectedSkills" :onlySingleSelectedValue="true"
+                                data-cy="skillSelector"></skills-selector2>
+            </div>
+            <div class="col-lg mt-2">
+              <project-selector :project-id="projectId" :selected="selectedProject"
+                                v-on:selected="onSelectedProject"
+                                v-on:unselected="onUnSelectedProject"
+                                :only-single-selected-value="true"
+                                :disabled="shareWithAllProjects">
+
+              </project-selector>
+              <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2"
+                               data-cy="shareWithAllProjectsCheckbox">
+                <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
+              </b-form-checkbox>
+            </div>
           </div>
-          <div class="col-lg mt-2">
-            <project-selector :project-id="projectId" :selected="selectedProject"
-                              v-on:selected="onSelectedProject"
-                              v-on:unselected="onUnSelectedProject"
-                              :only-single-selected-value="true"
-                              :disabled="shareWithAllProjects">
 
-            </project-selector>
-            <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2"
-                             data-cy="shareWithAllProjectsCheckbox">
-              <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
-            </b-form-checkbox>
+          <div class="row px-3">
+            <div class="col text-center text-sm-left">
+              <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
+                      :disabled="!shareButtonEnabled" data-cy="shareButton">
+                <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="row px-3">
-          <div class="col text-center text-sm-left">
-            <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
-                    :disabled="!shareButtonEnabled" data-cy="shareButton">
-              <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
-            </button>
-          </div>
-        </div>
+          <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
+            <i class="fa fa-exclamation-circle"></i> <span v-html="errorMessage"></span>
+          </b-alert>
 
-        <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
-          <i class="fa fa-exclamation-circle"></i> <span v-html="errorMessage"></span>
-        </b-alert>
-
-        <loading-container :is-loading="loading.sharedSkills">
+          <loading-container :is-loading="loading.sharedSkills">
           <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
             <shared-skills-table :shared-skills="sharedSkills"
                                  v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
@@ -61,12 +68,13 @@ limitations under the License.
                          message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with."/>
           </div>
         </loading-container>
-
+        </div>
       </loading-container>
   </metrics-card>
 </template>
 
 <script>
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import SkillsSelector2 from '../SkillsSelector2';
   import LoadingContainer from '../../utils/LoadingContainer';
   import SkillsService from '../SkillsService';
@@ -76,9 +84,11 @@ limitations under the License.
   import NoContent2 from '../../utils/NoContent2';
   import InlineHelp from '../../utils/InlineHelp';
   import MetricsCard from '../../metrics/utils/MetricsCard';
+  import ProjectService from '../../projects/ProjectService';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
+    mixins: [CommunityLabelsMixin],
     props: ['projectId'],
     components: {
       MetricsCard,
@@ -95,7 +105,9 @@ limitations under the License.
           allSkills: true,
           sharedSkillsInit: true,
           sharedSkills: false,
+          projInfo: true,
         },
+        restrictedUserCommunity: false,
         isLoading: true,
         allSkills: [],
         selectedSkills: [],
@@ -107,6 +119,7 @@ limitations under the License.
       };
     },
     mounted() {
+      this.loadProjectInfo();
       this.loadAllSkills();
       this.loadSharedSkills();
     },
@@ -116,6 +129,15 @@ limitations under the License.
       },
     },
     methods: {
+      loadProjectInfo() {
+        this.loading.projInfo = true;
+        ProjectService.getProject(this.projectId)
+          .then((projRes) => {
+            this.restrictedUserCommunity = this.isRestrictedUserCommunity(projRes.userCommunity);
+          }).finally(() => {
+            this.loading.projInfo = false;
+          });
+      },
       loadAllSkills() {
         this.loading.allSkills = true;
         SkillsService.getProjectSkillsWithoutImportedSkills(this.projectId)

@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
@@ -1014,6 +1015,10 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
         SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
+
+        if (projAdminService.isUserCommunityRestrictedProject(projectId)) {
+            throw new SkillException("Projects with the community protection are not allowed to externally share skills", projectId, skillId, ErrorCode.AccessDenied)
+        }
 
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }

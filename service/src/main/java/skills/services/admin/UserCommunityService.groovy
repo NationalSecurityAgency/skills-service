@@ -35,6 +35,7 @@ import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillShareDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
 import skills.storage.repos.UserTagRepo
@@ -63,6 +64,9 @@ class UserCommunityService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    SkillShareDefRepo skillShareDefRepo
 
     String userCommunityUserTagKey
     String userCommunityUserTagValue
@@ -112,6 +116,11 @@ class UserCommunityService {
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
                 res.unmetRequirements.add("Has skill(s) that have been exported to the Skills Catalog")
+            }
+
+            if (skillShareDefRepo.countNumSkillsSharedByProjectId(projDef.projectId) > 0) {
+                res.isAllowed = false
+                res.unmetRequirements.add("Has skill(s) that have been shared for cross-project dependencies")
             }
         }
         return res;

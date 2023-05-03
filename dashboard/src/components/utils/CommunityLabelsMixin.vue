@@ -33,6 +33,11 @@ limitations under the License.
         return this.$store.getters.config.userCommunityRestrictedDescriptor;
       },
     },
+    methods: {
+      isRestrictedUserCommunity(communityName) {
+        return communityName ? communityName === this.userCommunityRestrictedDescriptor : false;
+      },
+    },
   };
 </script>
 

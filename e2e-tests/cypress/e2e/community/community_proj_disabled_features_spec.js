@@ -51,4 +51,12 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
     });
 
+    it('community projected project cannot share skills for cross-project dependencies', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/projects/proj1/dependencies')
+        cy.get('[data-cy="restrictedUserCommunityWarning"]').contains('is restricted to Divine Dragon')
+        cy.get('[data-cy="shareButton"]').should('not.exist')
+    });
+
 });

@@ -176,7 +176,7 @@ limitations under the License.
       this.registerValidation();
     },
     mounted() {
-      this.internalProject.enableProtectedUserCommunity = this.project.userCommunity ? this.project.userCommunity === this.userCommunityRestrictedDescriptor : false;
+      this.internalProject.enableProtectedUserCommunity = this.isRestrictedUserCommunity(this.project.userCommunity);
       this.initialValueForEnableProtectedUserCommunity = this.internalProject.enableProtectedUserCommunity;
       this.loadComponent();
 
@@ -360,7 +360,7 @@ limitations under the License.
 
         extend('customProjectDescriptionValidator', {
           validate(value) {
-            if (!self.internalProject.enableProtectedUserCommunity) {
+            if (!self.$store.getters.config.paragraphValidationRegex) {
               return true;
             }
 
@@ -378,7 +378,7 @@ limitations under the License.
 
         extend('projectCommunityRequirements', {
           validate(value) {
-            if (!value) {
+            if (!value || !this.isEdit) {
               return true;
             }
 
