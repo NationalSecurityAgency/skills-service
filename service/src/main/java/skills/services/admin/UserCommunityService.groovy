@@ -23,10 +23,20 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.result.model.EnableProjValidationRes
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
+import skills.storage.model.ProjDef
+import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
+import skills.storage.model.auth.UserRole
+import skills.storage.repos.ExportedSkillRepo
+import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserRoleRepo
 import skills.storage.repos.UserTagRepo
 
 @Service
@@ -41,6 +51,18 @@ class UserCommunityService {
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
+
+    @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    ExportedSkillRepo exportedSkillRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
 
     String userCommunityUserTagKey
     String userCommunityUserTagValue
@@ -66,6 +88,33 @@ class UserCommunityService {
             belongsToUserCommunity = userTags?.find { it?.value == userCommunityUserTagValue }
         }
         return belongsToUserCommunity
+    }
+
+    EnableProjValidationRes validateProjectForCommunity(String projId) {
+        EnableProjValidationRes res = new EnableProjValidationRes(isAllowed: true, unmetRequirements: [])
+
+        // only applicable if project already exist; also normalizes project ids case
+        ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
+        if (projDef) {
+            List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projDef.projectId)
+            if (allRoles) {
+                List<UserRole> unique = allRoles.unique { it.userId }
+                unique.each { UserRole userWithRole ->
+                    if (!isUserCommunityMember(userWithRole.userId)) {
+                        String userIdForDisplay = userAttrsRepo.findByUserId(userWithRole.userId).userIdForDisplay
+
+                        res.isAllowed = false
+                        res.unmetRequirements.add("Has an existing user [${userIdForDisplay}] that is not authorized".toString())
+                    }
+                }
+            }
+
+            if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
+                res.isAllowed = false
+                res.unmetRequirements.add("Has Skills Catalog exported skills")
+            }
+        }
+        return res;
     }
 
 

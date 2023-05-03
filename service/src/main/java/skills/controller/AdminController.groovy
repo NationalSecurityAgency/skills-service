@@ -1496,6 +1496,12 @@ class AdminController {
         return projAdminService.getLastReportedSkillEvent(projectId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
+    EnableProjValidationRes validateProjectForEnablingCommunity(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return projAdminService.validateProjectForEnablingCommunity(projectId)
+    }
+
     @RequestMapping(value="/projects/{projectId}/requestAccess", method = RequestMethod.POST, produces = "application/json")
     RequestResult requestAccess(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, projectId)

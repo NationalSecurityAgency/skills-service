@@ -31,12 +31,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
-import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.LatestEvent
-import skills.controller.result.model.ProjectDescription
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.SimpleProjectResult
+import skills.controller.result.model.*
 import skills.icons.IconCssNameUtil
 import skills.services.*
 import skills.services.inception.InceptionProjectService
@@ -46,14 +41,7 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
-import skills.storage.model.auth.UserRole
-import skills.storage.repos.CustomIconRepo
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.ProjDefWithDescriptionRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserEventsRepo
-import skills.storage.repos.UserRepo
-import skills.storage.repos.UserRoleRepo
+import skills.storage.repos.*
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -209,15 +197,10 @@ class ProjAdminService {
                     throw new SkillException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", projId, null, ErrorCode.AccessDenied)
                 }
 
-                // check existing admins/approvers
-                List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
-                if (allRoles) {
-                    List<String> userIds = allRoles.collect { it.userId }.unique()
-                    userIds.each { String projAdminUserId ->
-                        if (!userCommunityService.isUserCommunityMember(projAdminUserId)) {
-                            throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${projId}] has user [${projAdminUserId}] with administrative role that doesn't belong to the project's community", projId, null, ErrorCode.AccessDenied)
-                        }
-                    }
+                EnableProjValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
+                if (!enableProjValidationRes.isAllowed) {
+                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+                    throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", projId, null, ErrorCode.AccessDenied)
                 }
             } else {
                 SkillsValidator.isTrue(!userCommunityService.isUserCommunityOnlyProject(projId), "Once project [enableProtectedUserCommunity=true] it cannot be flipped to false", projId)
@@ -629,5 +612,10 @@ class ProjAdminService {
     LatestEvent getLastReportedSkillEvent(String projectId) {
         Date date = eventsRepo.getLatestEventDateForProject(projectId)
         new LatestEvent(lastReportedSkillDate: date)
+    }
+
+    @Transactional(readOnly = true)
+    EnableProjValidationRes validateProjectForEnablingCommunity(String projectId) {
+        return userCommunityService.validateProjectForCommunity(projectId)
     }
 }

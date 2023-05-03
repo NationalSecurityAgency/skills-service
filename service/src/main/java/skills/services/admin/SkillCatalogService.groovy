@@ -106,6 +106,9 @@ class SkillCatalogService {
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
         pageable = convertForCatalogSkills(pageable)
@@ -200,6 +203,10 @@ class SkillCatalogService {
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
         insufficientPointsValidator.validateProjectPoints(projDef.totalPoints, projDef.projectId, null, ", export to catalog is disallowed")
 
+        if (userCommunityService.isUserCommunityOnlyProject(projDef.projectId)) {
+            throw new SkillException("Projects with the community protection are not allowed to export skills to the catalog", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, skillId)
         if (!skillDef) {
             throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, skillId, ErrorCode.SkillNotFound)
@@ -223,6 +230,7 @@ class SkillCatalogService {
         ExportedSkill exportedSkill = new ExportedSkill(projectId: skillDef.projectId, skill: skillDef)
         exportedSkillRepo.save(exportedSkill)
     }
+
 
     private Long countDependencies(String projectId, String skillId) {
         Long dependencies = relationshipService.countChildrenSkills(projectId, skillId, [SkillRelDef.RelationshipType.Dependence])

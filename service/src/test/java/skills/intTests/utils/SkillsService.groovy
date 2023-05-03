@@ -119,6 +119,10 @@ class SkillsService {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
 
+    def validateProjectForEnablingCommunity(String projectId) {
+        wsHelper.adminGet(getProjectUrl(projectId) + "/validateEnablingCommunity")
+    }
+
     @Profile
     def copyProject(String fromProjId, Map toProjProps) {
         wsHelper.adminPost("/projects/${fromProjId}/copy".toString(), toProjProps)

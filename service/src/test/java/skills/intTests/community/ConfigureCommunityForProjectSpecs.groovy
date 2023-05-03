@@ -151,7 +151,8 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         pristineDragonsUser.updateProject(p1, p1.projectId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
+        e.message.contains("Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay}] that is not authorized")
     }
 
     def "cannot enable protected community for a project that has approver that does not belong to that community"() {
@@ -177,7 +178,8 @@ class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
         pristineDragonsUser.updateProject(p1, p1.projectId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true. Project [${p1.projectId}] has user [${allDragonsUser.userName}] with administrative role that doesn't belong to the project's community")
+        e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
+        e.message.contains("Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay}] that is not authorized")
     }
 
     def "run community specific paragraph validation for project's description - project creation with community"() {

@@ -42,7 +42,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         String userCommunityUserId =  skillsService.userName
         rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
 
-        def proj = createProject(1, true)
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
@@ -87,7 +88,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         String userCommunityUserId =  skillsService.userName
         rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
 
-        def proj = createProject(1, true)
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
