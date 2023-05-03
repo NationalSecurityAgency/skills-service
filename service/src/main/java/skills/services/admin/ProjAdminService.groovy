@@ -618,4 +618,9 @@ class ProjAdminService {
     EnableProjValidationRes validateProjectForEnablingCommunity(String projectId) {
         return userCommunityService.validateProjectForCommunity(projectId)
     }
+
+    @Transactional(readOnly = true)
+    boolean isUserCommunityRestrictedProject(String projectId) {
+        return userCommunityService.isUserCommunityOnlyProject(projectId)
+    }
 }

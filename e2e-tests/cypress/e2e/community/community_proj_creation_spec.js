@@ -239,6 +239,7 @@ describe('Community Project Creation Tests', () => {
 
     it('edit existing community project should use community validator - project page', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true, description: 'some text '})
+
         cy.visit('/administrator/projects/proj1')
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
@@ -255,6 +256,28 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
         cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+    });
+
+    it('do not allow to enable if project does not meet community requirements', () => {
+        cy.createProject(1, { enableProtectedUserCommunity: false })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.request('POST', `/admin/projects/proj1/users/${allDragonsUser}/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.visit('/administrator/')
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+        cy.get('[data-cy="communityValidationErrors"]').should('not.exist')
+
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="communityValidationErrors"]').contains('Unable to restrict access to Divine Dragon users only')
+        cy.get('[data-cy="communityValidationErrors"]').contains(`Has existing ${allDragonsUser} user that is not authorized`)
+        cy.get('[data-cy="communityValidationErrors"]').contains('Has skill(s) that have been exported to the Skills Catalog')
+        cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
+        cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     });
 
 });

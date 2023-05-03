@@ -104,14 +104,14 @@ class UserCommunityService {
                         String userIdForDisplay = userAttrsRepo.findByUserId(userWithRole.userId).userIdForDisplay
 
                         res.isAllowed = false
-                        res.unmetRequirements.add("Has an existing user [${userIdForDisplay}] that is not authorized".toString())
+                        res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
                     }
                 }
             }
 
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
-                res.unmetRequirements.add("Has Skills Catalog exported skills")
+                res.unmetRequirements.add("Has skill(s) that have been exported to the Skills Catalog")
             }
         }
         return res;

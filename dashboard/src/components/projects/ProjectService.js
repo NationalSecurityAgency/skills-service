@@ -136,4 +136,7 @@ export default {
   loadDescription(projectId) {
     return axios.get(`/app/projects/${encodeURIComponent(projectId)}/description`).then((response) => response.data);
   },
+  validateProjectForEnablingCommunity(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/validateEnablingCommunity`).then((response) => response.data);
+  },
 };

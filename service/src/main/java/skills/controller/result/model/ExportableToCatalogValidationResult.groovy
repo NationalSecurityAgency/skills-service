@@ -18,4 +18,5 @@ package skills.controller.result.model
 class ExportableToCatalogValidationResult {
     Boolean hasSufficientSubjectPoints = true
     Map<String, ExportableToCatalogSkillValidationResult> skillsValidationRes
+    Boolean isUserCommunityRestricted = false
 }

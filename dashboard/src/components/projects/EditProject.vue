@@ -64,18 +64,33 @@ limitations under the License.
             <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
           </div>
           <div v-else>
-            <div class="row">
-              <div class="col">
-                <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"
-                                 @change="userCommunityChanged"
-                                 name="check-button" inline switch data-cy="restrictCommunity">
-                  Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
-                </b-form-checkbox>
+            <ValidationObserver v-slot="{ pending, invalid }">
+              <div class="row">
+                <div class="col">
+                  <ValidationProvider rules="projectCommunityRequirements"
+                                      name="Failed Minimum Requirement" v-slot="{ errors }">
+                    <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"
+                                     @change="userCommunityChanged"
+                                     name="check-button" inline switch data-cy="restrictCommunity">
+                      Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
+                    </b-form-checkbox>
+
+                    <div v-if="invalid" class="alert alert-danger mb-3 mt-1" data-cy="communityValidationErrors" role="alert">
+                      <div>
+                        <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true" />
+                        <span>Unable to restrict access to {{ userCommunityRestrictedDescriptor }} users only:</span>
+                      </div>
+                      <span v-html="errors[0]"/>
+                    </div>
+                  </ValidationProvider>
+                </div>
               </div>
-            </div>
-            <div v-if="internalProject.enableProtectedUserCommunity" class="alert-warning alert mb-0 mt-1">
-              <i class="fas fa-exclamation-triangle text-danger" aria-hidden="true" /> Please note that once the restriction is enabled it <b>cannot</b> be lifted/disabled.
-            </div>
+              <div v-if="!pending">
+                <div v-if="internalProject.enableProtectedUserCommunity && !invalid" class="alert-warning alert mb-0 mt-1" data-cy="communityRestrictionWarning">
+                  <i class="fas fa-exclamation-triangle text-danger" aria-hidden="true" /> Please note that once the restriction is enabled it <b>cannot</b> be lifted/disabled.
+                </div>
+              </div>
+            </ValidationObserver>
           </div>
         </div>
         <div class="row">
@@ -113,7 +128,7 @@ limitations under the License.
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
-  import ProjectService from './ProjectService';
+  import ProjectService from '@/components/projects/ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
   import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
@@ -345,7 +360,7 @@ limitations under the License.
 
         extend('customProjectDescriptionValidator', {
           validate(value) {
-            if (!self.$store.getters.config.paragraphValidationRegex) {
+            if (!self.internalProject.enableProtectedUserCommunity) {
               return true;
             }
 
@@ -355,6 +370,24 @@ limitations under the License.
               }
               if (result.msg) {
                 return `{_field_} - ${result.msg}.`;
+              }
+              return '{_field_} is invalid.';
+            });
+          },
+        });
+
+        extend('projectCommunityRequirements', {
+          validate(value) {
+            if (!value) {
+              return true;
+            }
+
+            return ProjectService.validateProjectForEnablingCommunity(self.internalProject.originalProjectId).then((result) => {
+              if (result.isAllowed) {
+                return true;
+              }
+              if (result.unmetRequirements) {
+                return `<ul><li>${result.unmetRequirements.join('</li><li>')}</li></ul>`;
               }
               return '{_field_} is invalid.';
             });

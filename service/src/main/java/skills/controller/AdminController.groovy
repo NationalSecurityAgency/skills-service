@@ -1271,6 +1271,10 @@ class AdminController {
             return new ExportableToCatalogValidationResult(hasSufficientSubjectPoints: hasSufficientSubjectPoints)
         }
 
+        if (projAdminService.isUserCommunityRestrictedProject(projectId)) {
+            return new ExportableToCatalogValidationResult(isUserCommunityRestricted: true)
+        }
+
         List<ExportableToCatalogSkillValidationResult> validationResults = skillCatalogService.canSkillIdsBeExported(projectId, skillIds)
         Map<String, ExportableToCatalogSkillValidationResult> skillsValidationRes = validationResults.collectEntries() { [it.skillId, it]}
         return new ExportableToCatalogValidationResult(skillsValidationRes: skillsValidationRes)

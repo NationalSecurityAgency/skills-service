@@ -24,8 +24,12 @@ limitations under the License.
       <div class="h5 text-center text-primary mt-1">Checking Catalog...</div>
     </div>
     <div v-if="!loadingData">
-      <div v-if="insufficientSubjectPoints" class="alert alert-warning"><i class="fas fa-exclamation-circle" /> Export of skills is not allowed until the <b>subject</b> has sufficient points. Must have at least <b-badge>{{  this.$store.getters.config.minimumSubjectPoints }}</b-badge> points!</div>
-      <div v-else>
+      <div v-if="isUserCommunityRestricted" class="alert alert-warning" data-cy="userCommunityRestrictedWarning">
+        <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> This project's access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and its skills <b class="text-primary">cannot</b> be exported to the Skills Catalog.
+      </div>
+      <div v-if="!isUserCommunityRestricted">
+        <div v-if="insufficientSubjectPoints" class="alert alert-warning"><i class="fas fa-exclamation-circle" /> Export of skills is not allowed until the <b>subject</b> has sufficient points. Must have at least <b-badge>{{  this.$store.getters.config.minimumSubjectPoints }}</b-badge> points!</div>
+        <div v-else>
         <div v-if="allSkillsExportedAlready">
           All selected <b-badge variant="info">{{ skills.length }}</b-badge> skill(s) are already in the Skill Catalog.
         </div>
@@ -82,15 +86,16 @@ limitations under the License.
             Skills were</span>  <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
         </p>
       </div>
+      </div>
     </div>
 
-    <div v-if="allSkillsExportedAlready || state.exported || allSkillsAreDups || insufficientSubjectPoints" slot="modal-footer" class="w-100">
+    <div v-if="!isExportable" slot="modal-footer" class="w-100">
       <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="okButton">
         OK
       </b-button>
     </div>
 
-    <div v-if="!allSkillsExportedAlready && !state.exported && !allSkillsAreDups && !insufficientSubjectPoints" slot="modal-footer" class="w-100">
+    <div v-if="isExportable" slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right"
                 @click="handleExport"
                 data-cy="exportToCatalogButton">
@@ -106,10 +111,12 @@ limitations under the License.
 <script>
   import { SkillsReporter } from '@skilltree/skills-client-vue';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import CatalogService from './CatalogService';
+  import CatalogService from '@/components/skills/catalog/CatalogService';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
 
   export default {
     name: 'ExportToCatalog',
+    mixins: [CommunityLabelsMixin],
     components: { SkillsSpinner },
     props: {
       skills: {
@@ -133,6 +140,7 @@ limitations under the License.
         visibilityToAllProjects: true,
         selectedProject: null,
         insufficientSubjectPoints: false,
+        isUserCommunityRestricted: false,
         skillsFiltered: [],
         notExportableSkills: [],
         notExportableSkillsToShow: [],
@@ -154,6 +162,11 @@ limitations under the License.
     watch: {
       show(newValue) {
         this.$emit('input', newValue);
+      },
+    },
+    computed: {
+      isExportable() {
+        return !this.allSkillsExportedAlready && !this.state.exported && !this.allSkillsAreDups && !this.insufficientSubjectPoints && !this.isUserCommunityRestricted;
       },
     },
     methods: {
@@ -188,7 +201,8 @@ limitations under the License.
         CatalogService.areSkillsExportable(this.$route.params.projectId, skillIds)
           .then((res) => {
             this.insufficientSubjectPoints = !res.hasSufficientSubjectPoints;
-            if (!this.insufficientSubjectPoints) {
+            this.isUserCommunityRestricted = res.isUserCommunityRestricted;
+            if (!this.insufficientSubjectPoints && !this.isUserCommunityRestricted) {
               let enrichedSkills = this.skills.map((skillToUpdate) => {
                 const enhanceWith = res.skillsValidationRes[skillToUpdate.skillId];
                 return ({

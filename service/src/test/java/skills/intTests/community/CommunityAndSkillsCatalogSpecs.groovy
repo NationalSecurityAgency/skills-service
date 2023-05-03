@@ -66,8 +66,32 @@ class CommunityAndSkillsCatalogSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
-        e.message.contains("Has Skills Catalog exported skills")
+        e.message.contains("Has skill(s) that have been exported to the Skills Catalog")
     }
 
+    def "areSkillIdsExportable endpoint - projects with a protected community are not allowed to export skills"() {
+        List<String> users = getRandomUsers(2)
 
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(3, 2, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        when:
+        def res = pristineDragonsUser.areSkillIdsExportable(p1.projectId, [p1Skills[0].skillId])
+        def res1 = pristineDragonsUser.areSkillIdsExportable(p2.projectId, [p2Skills[0].skillId])
+        then:
+        res.isUserCommunityRestricted == true
+        res1.isUserCommunityRestricted == false
+    }
 }

@@ -60,7 +60,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has Skills Catalog exported skills"]
+        res.unmetRequirements == ["Has skill(s) that have been exported to the Skills Catalog"]
     }
 
     def "validation endpoint - cannot enable community if project has admin that doesn't belong to the community"() {
@@ -84,7 +84,8 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay}] that is not authorized"]
+        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+
     }
 
     def "validation endpoint - cannot enable community if project has approver that doesn't belong to the community"() {
@@ -108,7 +109,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay}] that is not authorized"]
+        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
     }
 
     def "validation endpoint - cannot enable community because number of requirements are not met"() {
@@ -134,9 +135,9 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         then:
         res.isAllowed == false
         res.unmetRequirements.sort() == [
-                "Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay}] that is not authorized",
-                "Has an existing user [${userAttrsRepo.findByUserId(allDragonsUser1.userName).userIdForDisplay}] that is not authorized",
-                "Has Skills Catalog exported skills"
+                "Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized",
+                "Has existing ${userAttrsRepo.findByUserId(allDragonsUser1.userName).userIdForDisplay} user that is not authorized",
+                "Has skill(s) that have been exported to the Skills Catalog"
         ].sort()
     }
 }
