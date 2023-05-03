@@ -378,7 +378,7 @@ limitations under the License.
 
         extend('projectCommunityRequirements', {
           validate(value) {
-            if (!value || !this.isEdit) {
+            if (!value || !self.isEdit) {
               return true;
             }
 
