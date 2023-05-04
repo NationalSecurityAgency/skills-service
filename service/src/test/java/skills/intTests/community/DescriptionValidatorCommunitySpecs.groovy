@@ -15,12 +15,10 @@
  */
 package skills.intTests.community
 
-
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import skills.services.settings.Settings
-import skills.storage.model.auth.RoleName
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
@@ -131,6 +129,196 @@ class DescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         communityValidP2.body.valid
         !communityInvalidValidP2.body.valid
         communityInvalidValidP2.body.msg == "paragraphs may not contain jabberwocky"
+    }
+
+    def "project paragraph custom validation on create"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        proj.description = notValidProtectedCommunity
+
+        when:
+        pristineDragonsUser.createProject(proj)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "project paragraph custom validation on update"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        proj.description = notValidDefault
+
+        when:
+        def communityValid = pristineDragonsUser.createProject(proj)
+
+        proj.description = notValidProtectedCommunity
+        pristineDragonsUser.updateProject(proj)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+
+        communityValid.body.success
+    }
+
+    def "subject paragraph custom validation on create"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        when:
+        def subj = SkillsFactory.createSubject()
+        subj.description = notValidProtectedCommunity
+        def communityValid = pristineDragonsUser.createSubject(subj)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "subject paragraph custom validation on update"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        when:
+        def subj = SkillsFactory.createSubject()
+        subj.description = notValidDefault
+        def communityValid = pristineDragonsUser.createSubject(subj)
+
+        subj.description = notValidProtectedCommunity
+        pristineDragonsUser.updateSubject(subj)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+
+        communityValid.body.success
+    }
+
+    def "skill paragraph custom validation on create"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        def subj = SkillsFactory.createSubject()
+        pristineDragonsUser.createSubject(subj)
+
+        when:
+        def skill = SkillsFactory.createSkill()
+        skill.description = notValidProtectedCommunity
+        def communityValid = pristineDragonsUser.createSkill(skill)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "skill paragraph custom validation on update"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        def subj = SkillsFactory.createSubject()
+        pristineDragonsUser.createSubject(subj)
+
+        when:
+        def skill = SkillsFactory.createSkill()
+        skill.description = notValidDefault
+        def communityValid = pristineDragonsUser.createSkill(skill)
+
+        skill.description = notValidProtectedCommunity
+        pristineDragonsUser.updateSkill(skill)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+
+        communityValid.body.success
+    }
+
+    def "badge paragraph custom validation create"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        when:
+        def badge = SkillsFactory.createBadge()
+        badge.description = notValidProtectedCommunity
+        def communityValid = pristineDragonsUser.createBadge(badge)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "badge paragraph custom validation update"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        when:
+        def badge = SkillsFactory.createBadge()
+        badge.description = notValidDefault
+        def communityValid = pristineDragonsUser.createBadge(badge)
+
+        badge.description = notValidProtectedCommunity
+        pristineDragonsUser.updateBadge(badge)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+
+        communityValid.body.success
     }
 
     def "only community member can call description validator for community with useProtectedCommunityValidator"() {

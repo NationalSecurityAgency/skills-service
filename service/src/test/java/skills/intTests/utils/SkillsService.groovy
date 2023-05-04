@@ -304,8 +304,8 @@ class SkillsService {
     }
 
     @Profile
-    def updateSubject(Map props, String oritinalSubjectId) {
-        wsHelper.adminPost(getSubjectUrl(props.projectId, oritinalSubjectId), props)
+    def updateSubject(Map props, String originalSubjectId = null) {
+        wsHelper.adminPost(getSubjectUrl(props.projectId, originalSubjectId ?: props.subjectId), props)
     }
 
     def getSubjects(String projectId) {
@@ -386,7 +386,7 @@ class SkillsService {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, props.skillId), props, throwExceptionOnFailure)
     }
 
-    def updateSkill(Map props, String originalSkillId) {
+    def updateSkill(Map props, String originalSkillId = null) {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
     }
 
@@ -402,7 +402,7 @@ class SkillsService {
         wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
-    def updateBadge(Map props, String originalBadgeId) {
+    def updateBadge(Map props, String originalBadgeId = null) {
         wsHelper.adminPut(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
 
