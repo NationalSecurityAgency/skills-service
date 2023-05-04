@@ -774,6 +774,24 @@ class AdminController {
         return res
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skillsAndBadges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SkillDefSkinnyRes> getAllSkillsAndBadgesForProject(
+            @PathVariable("projectId") String projectId,
+            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
+            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+
+        boolean excludeImportedSkillsBol = excludeImportedSkills
+        boolean includeDisabledBool = includeDisabled
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkillsAndBadges(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        if (excludeReusedSkills) {
+            res = res.findAll { !it.isReused }
+        }
+        return res
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     SkillDefSkinnyRes getSkillInfo(
             @PathVariable("projectId") String projectId,

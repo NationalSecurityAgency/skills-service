@@ -602,6 +602,21 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
+    List<SkillDefSkinnyRes> getSkinnySkillsAndBadges(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+        List<SkillDefSkinny> data = loadSkinnySkillsAndBadges(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
+        List<SkillDefSkinnyRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
+
+        // do not hit on the reuse tag
+        if (StringUtils.isNoneBlank(skillNameQuery)) {
+            Boolean hasReusedSkills = res.find { it.isReused }
+            if (hasReusedSkills) {
+                res = res.findAll { it.name.toUpperCase().contains(skillNameQuery.toUpperCase()) }
+            }
+        }
+        return res
+    }
+
+    @Transactional(readOnly = true)
     SkillDefSkinnyRes getSkinnySkill(String projectId, String skillId) {
         SkillDefSkinny data = loadSkinnySkill(projectId, skillId)
         if (!data) {
@@ -828,6 +843,11 @@ class SkillsAdminService {
     @Profile
     private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
         skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
+    }
+
+    @Profile
+    private List<SkillDefSkinny> loadSkinnySkillsAndBadges(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
+        skillDefRepo.findAllSkinnySkillsAndBadgesSelectByProjectId(projectId, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
     }
 
     @Profile

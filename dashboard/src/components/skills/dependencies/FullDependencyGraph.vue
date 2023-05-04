@@ -17,6 +17,8 @@ limitations under the License.
   <div id="full-dependent-skills-graph">
     <sub-page-header title="Learning Path"/>
 
+    <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" />
+
     <simple-card data-cy="fullDepsSkillsGraph">
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
@@ -62,6 +64,7 @@ limitations under the License.
   import SimpleCard from '@/components/utils/cards/SimpleCard';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import DependencyModificationModal from './DependencyModificationModal';
+  import PrerequisiteSelector from './PrerequisiteSelector';
 
   export default {
     name: 'FullDependencyGraph',
@@ -76,6 +79,7 @@ limitations under the License.
       GraphNodeSortMethodSelector,
       LoadingContainer,
       DependencyModificationModal,
+      PrerequisiteSelector,
     },
     data() {
       return {
@@ -131,11 +135,29 @@ limitations under the License.
       }
     },
     methods: {
+      handleUpdate() {
+        this.isLoading = true;
+        this.showGraph = false;
+        SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
+          .then((response) => {
+            this.graph = response;
+            // const mySkill = this.graph.nodes.find((entry) => entry.skillId === this.skillId && entry.projectId === this.projectId);
+            // const myEdges = this.graph.edges.filter((entry) => entry.fromId === mySkill.skillId);
+            // const myChildren = this.graph.nodes.filter((item) => myEdges.find((item1) => item1.toId === item.id));
+            this.createGraph();
+          })
+          .finally(() => {
+            this.isLoading = false;
+          });
+      },
       handleHidden() {
         this.displayEditModal = false;
         this.selectedNode = null;
+        this.isLoading = true;
 
-        this.network.unselectAll();
+        if (this.network) {
+          this.network.unselectAll();
+        }
 
         SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
           .then((response) => {
@@ -180,7 +202,9 @@ limitations under the License.
             const selectedNode = params.nodes[0];
             const nodeData = data.nodes.find((node) => node.id === selectedNode);
             this.selectedNode = nodeData;
-            this.displayEditModal = true;
+            if (nodeData.details.type !== 'Badge') {
+              this.displayEditModal = true;
+            }
           });
         } else {
           this.showGraph = false;
@@ -194,7 +218,14 @@ limitations under the License.
             id: node.id,
             label: GraphUtils.getLabel(node, isCrossProject),
             margin: 10,
-            shape: 'box',
+            shape: 'icon',
+            icon: {
+              face: '"Font Awesome 5 Free"',
+              code: '\uf19d',
+              weight: '900',
+              size: 50,
+              color: 'lightgreen',
+            },
             chosen: false,
             details: node,
             title: GraphUtils.getTitle(node, isCrossProject),
@@ -204,6 +235,11 @@ limitations under the License.
               border: 'orange',
               background: '#ffb87f',
             };
+          }
+          if (node.type === 'Badge') {
+            newNode.shape = 'icon';
+            newNode.icon.code = '\uf559';
+            newNode.icon.color = '#88a9fc';
           }
           this.nodes.push(newNode);
         });

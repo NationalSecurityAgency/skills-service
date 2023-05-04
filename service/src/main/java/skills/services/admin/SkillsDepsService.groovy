@@ -88,8 +88,8 @@ class SkillsDepsService {
 
     @Transactional()
     void assignSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependendencyProjectId = null) {
-        SkillDef dependent = skillDefAccessor.getSkillDef(projectId, dependentSkillId)
-        SkillDef dependency = skillDefAccessor.getSkillDef(dependendencyProjectId ?: projectId, dependencySkillId)
+        SkillDef dependent = skillDefAccessor.getSkillAndBadgeDef(projectId, dependentSkillId)
+        SkillDef dependency = skillDefAccessor.getSkillAndBadgeDef(dependendencyProjectId ?: projectId, dependencySkillId)
 
         if (skillCatalogService.isAvailableInCatalog(dependent)) {
             throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
@@ -235,7 +235,9 @@ class SkillsDepsService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.name = InputSanitizer.unsanitizeName(res.name)
-        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        if(skillDef.type != SkillDef.ContainerType.Badge) {
+            res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        }
         return res
     }
 
@@ -259,22 +261,22 @@ class SkillsDepsService {
                     id: it[0],
                     name: it[1],
                     skillId: it[2],
-                    subjectId: it[3],
-                    projectId: it[4],
-                    pointIncrement: it[5],
-                    totalPoints: it[6],
-                    type: it[7],
+//                    subjectId: it[3],
+                    projectId: it[3],
+                    pointIncrement: it[4],
+                    totalPoints: it[5],
+                    type: it[6],
             )
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[8],
-                    name: it[9],
-                    skillId: it[10],
-                    subjectId: it[11],
-                    projectId: it[12],
-                    pointIncrement: it[13],
-                    totalPoints: it[14],
-                    type: it[15],
+                    id: it[7],
+                    name: it[8],
+                    skillId: it[9],
+//                    subjectId: it[11],
+                    projectId: it[10],
+                    pointIncrement: it[11],
+                    totalPoints: it[12],
+                    type: it[13],
             )
 
             new GraphSkillDefEdge(from: from, to: to)

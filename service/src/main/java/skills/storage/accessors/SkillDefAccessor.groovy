@@ -35,6 +35,13 @@ class SkillDefAccessor {
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
+    SkillDef getSkillAndBadgeDef(String projectId, String skillId, List<SkillDef.ContainerType> containerTypes = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge]) {
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
+        if (!skillDef) {
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with types [${containerTypes}]", projectId, skillId)
+        }
+        return skillDef
+    }
 
     SkillDef getSkillDef(String projectId, String skillId, List<SkillDef.ContainerType> containerTypes = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup]) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)

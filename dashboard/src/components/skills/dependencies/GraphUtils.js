@@ -34,6 +34,7 @@ export default {
   getLabel(skillItem, isCrossProject) {
     let res = isCrossProject ? `${this.truncate(skillItem.projectId, 10)} : ${skillItem.name} ` : skillItem.name;
     res = this.truncate(res);
+
     return res;
   },
   truncate(strValue, truncateTo = 35) {

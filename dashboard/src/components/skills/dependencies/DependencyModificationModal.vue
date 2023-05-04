@@ -151,7 +151,7 @@ limitations under the License.
         this.$emit('hidden', e);
       },
       loadAllSkills() {
-        SkillsService.getSkillsForDependency(this.projectId)
+        SkillsService.getProjectSkillsAndBadgesWithoutImportedSkills(this.projectId)
           .then((skills) => {
             this.allSkills = skills.filter((item) => (item.skillId !== this.skillId || item.otherProjectId));
           });

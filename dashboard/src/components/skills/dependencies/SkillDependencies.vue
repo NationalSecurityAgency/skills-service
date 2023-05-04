@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Prerequisites"/>
+    <sub-page-header title="Prerequisitesz"/>
 
     <b-card body-class="p-0" class="dependencies-container">
       <loading-container :is-loading="isLoading">

@@ -55,6 +55,24 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints,
+        s.groupId as groupId
+        from SkillDef s
+         where 
+            s.projectId = ?1 and (s.type = 'Skill' or s.type = 'Badge') and
+            (s.copiedFromProjectId is null or 'true' = ?3) and
+            (s.enabled = 'true' or 'true' = ?4) and
+            lower(s.name) like lower(CONCAT('%', ?2, '%'))''')
+    List<SkillDefSkinny> findAllSkinnySkillsAndBadgesSelectByProjectId(String id, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
+
     @Nullable
     @Query('''SELECT
         s.id as id,

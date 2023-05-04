@@ -107,9 +107,6 @@ limitations under the License.
         }
         const items = [];
         items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
-        if (!this.isImported) {
-          items.push({ name: 'Prerequisites', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'SkillDependencies' });
-        }
         items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
         const isReadOnlyNonSr = (this.skill.readOnly === true && !this.skill.selfReportType);
         const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
