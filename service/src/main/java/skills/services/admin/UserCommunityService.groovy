@@ -35,6 +35,7 @@ import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
@@ -67,6 +68,9 @@ class UserCommunityService {
 
     @Autowired
     SkillShareDefRepo skillShareDefRepo
+
+    @Autowired
+    SkillRelDefRepo skillRelDefRepo
 
     String userCommunityUserTagKey
     String userCommunityUserTagValue
@@ -121,6 +125,11 @@ class UserCommunityService {
             if (skillShareDefRepo.countNumSkillsSharedByProjectId(projDef.projectId) > 0) {
                 res.isAllowed = false
                 res.unmetRequirements.add("Has skill(s) that have been shared for cross-project dependencies")
+            }
+
+            if (skillRelDefRepo.belongsToGlobalBadge(projDef.projectId)) {
+                res.isAllowed = false
+                res.unmetRequirements.add("This project is part of one or more Global Badges")
             }
         }
         return res;

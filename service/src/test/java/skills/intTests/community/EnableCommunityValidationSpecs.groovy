@@ -16,7 +16,7 @@
 package skills.intTests.community
 
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 
@@ -165,5 +165,41 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         then:
         res.isAllowed == false
         res.unmetRequirements == ["Has skill(s) that have been shared for cross-project dependencies"]
+    }
+
+    def "validation endpoint - projects with a protected community are not allowed to be part of the global badge"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(3, 2, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        def badge1 = SkillsFactory.createBadge(1)
+        def badge2 = SkillsFactory.createBadge(2)
+        rootUser.createGlobalBadge(badge1)
+        rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
+
+        rootUser.createGlobalBadge(badge2)
+        rootUser.assignProjectLevelToGlobalBadge(projectId: p2.projectId, badgeId: badge2.badgeId, level: "1")
+
+        when:
+        def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
+        def res1 = pristineDragonsUser.validateProjectForEnablingCommunity(p2.projectId)
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ["This project is part of one or more Global Badges"]
+
+        res1.isAllowed == false
+        res1.unmetRequirements == ["This project is part of one or more Global Badges"]
     }
 }

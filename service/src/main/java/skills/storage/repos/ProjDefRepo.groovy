@@ -67,14 +67,20 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     List<ProjDef> findAllByNameLike(@Param("query") query)
 
     @Nullable
-    @Query("select p from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    @Query('''select p from ProjDef p
+            where lower(p.name) like lower(CONCAT('%', :query, '%'))
+            and p.projectId not in (:projectIds)
+            and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
+    ''')
     List<ProjDef> findAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds, Pageable pageable)
 
-    @Query("select count(p.projectId) from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    @Query('''select count(p.projectId)
+        from ProjDef p
+        where lower(p.name) like lower(CONCAT('%', :query, '%'))
+            and p.projectId not in (:projectIds)
+            and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
+    ''')
     Integer countAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds)
-
-    @Nullable
-    List<ProjDef> findAllByProjectIdIn(List<String> projectIds)
 
     @Query(value="""
                 SELECT 
