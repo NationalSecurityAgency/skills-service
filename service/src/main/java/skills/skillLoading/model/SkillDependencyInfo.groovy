@@ -25,6 +25,7 @@ class SkillDependencyInfo {
         String skillId
         String skillName
         String subjectId
+        String type
     }
 
     static class SkillRelationship {

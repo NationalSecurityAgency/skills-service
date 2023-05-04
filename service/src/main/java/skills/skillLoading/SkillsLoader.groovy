@@ -731,8 +731,8 @@ class SkillsLoader {
             Map<String,String> subjectIdLookup = subjectIdLookupByProjectIdThenBySkillId[it.childProjectId]
             String childSubjectId = subjectIdLookup[it.childSkillId]
             new SkillDependencyInfo.SkillRelationship(
-                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName)),
-                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName)),
+                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName), type: it.parentType),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName), type: it.childType),
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )

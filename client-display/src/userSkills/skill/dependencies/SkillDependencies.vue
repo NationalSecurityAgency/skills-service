@@ -151,7 +151,7 @@ limitations under the License.
                   dependentSkillId: skillItem.skillId,
                 },
               });
-            } else {
+            } else if (skillItem.type !== 'Badge') {
               this.handlePush({
                 name: 'skillDetails',
                 params: {
@@ -159,6 +159,8 @@ limitations under the License.
                   skillId: skillItem.skillId,
                 },
               });
+            } else {
+              this.handlePush(`/badges/${skillItem.skillId}/`);
             }
           }
         });
@@ -241,10 +243,23 @@ limitations under the License.
             id: skill.id,
             label: this.getLabel(skill, isCrossProject),
             margin: 10,
-            shape: 'box',
+            shape: 'icon',
+            icon: {
+              face: '"Font Awesome 5 Free"',
+              code: '\uf19d',
+              weight: '900',
+              size: 50,
+              color: 'lightgreen',
+            },
             chosen: !skill.isThisSkill,
             font: { multi: 'html', size: 20 },
           };
+
+          if (skill.type === 'Badge') {
+            node.shape = 'icon';
+            node.icon.code = '\uf559';
+            node.icon.color = '#88a9fc';
+          }
           const res = Object.assign(node, extraProps);
           nodes.push(res);
         }

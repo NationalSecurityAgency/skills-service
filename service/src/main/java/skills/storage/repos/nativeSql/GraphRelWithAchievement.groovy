@@ -21,12 +21,14 @@ class GraphRelWithAchievement {
     Integer parentId
     String parentSkillId
     String parentName
+    String parentType
 
     String childProjectId
     String childProjectName
     Integer childId
     String childSkillId
     String childName
+    String childType
 
     Integer achievementId
 }
