@@ -889,7 +889,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
     });
-    it.only('contact project owner for exported skill', () => {
+    it('contact project owner for exported skill', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.loginAsAdminUser();
             cy.createSkill(1, 1, 1);
