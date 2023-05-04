@@ -37,8 +37,9 @@ limitations under the License.
               <span v-if="data.item.enabled !== 'true'" class="text-uppercase ml-2"><b-badge variant="warning">Disabled</b-badge></span>
             </div>
             <div class="col-auto">
-              <b-button variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`"
-                               @click="chooseProject(data.value, skill.projectId)" :data-cy="`contactOwnerBtn_${ skill.projectId }`">
+              <b-button v-if="isEmailEnabled" variant="outline-primary" :aria-label="`Contact ${data.item.name} project owner`"
+                               @click="chooseProject(data.value, data.item.importingProjectId)" :data-cy="`contactOwnerBtn_${ data.item.importingProjectId
+ }`">
                       Contact <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
                </b-button>
             </div>
@@ -49,9 +50,8 @@ limitations under the License.
           <date-cell :value="data.value" />
         </template>
       </skills-b-table>
-        <div>
-         <contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
-               v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
+       <div><contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
+             v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
     </div>
     <div v-else>
       <div class="h6">This skill has not been imported by any other projects yet...</div>
@@ -79,6 +79,7 @@ limitations under the License.
     data() {
       return {
         importedProjects: [],
+        importedProjectId: null,
         contactModal: {
           show: false,
           projectId: null,

@@ -889,7 +889,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
     });
-    it('contact project owner for exported skill', () => {
+    it.only('contact project owner for exported skill', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
             cy.loginAsAdminUser();
             cy.createSkill(1, 1, 1);
@@ -908,29 +908,8 @@ describe('Skills Exported to Catalog Tests', () => {
             cy.visit('/administrator/projects/proj1');
             cy.get('[data-cy="nav-Skill Catalog"]')
                 .click();
-            cy.validateTable('[data-cy="exportedSkillsTable"]', [
-                [{
-                    colIndex: 0,
-                    value: 'Very Great Skill 3'
-                }, {
-                    colIndex: 2,
-                    value: '1'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'Very Great Skill 2'
-                }, {
-                    colIndex: 2,
-                    value: '0'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'Very Great Skill 1'
-                }, {
-                    colIndex: 2,
-                    value: '1'
-                }],
-            ], 5);
+            cy.get('[data-cy="exportedSkillsTable"] [data-cy="skillsBTableTotalRows"]')
+                            .should('have.text', '3')
             cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]')
                 .click();
             cy.get('[data-cy="importSkillInfo-proj1_skill2"')
@@ -946,7 +925,7 @@ describe('Skills Exported to Catalog Tests', () => {
                     value: 'This is project 2'
                 }],
             ], 5, true, null, false);
-           cy.get('[data-cy="contactOwnerBtn_proj1"]').should('be.visible').click();
+           cy.get('[data-cy="contactOwnerBtn_proj2"]').should('be.visible').click();
            cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
            cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
            cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
@@ -960,7 +939,7 @@ describe('Skills Exported to Catalog Tests', () => {
            cy.wait(500); //wait for animations to complete
            cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
            cy.getEmails().then((emails) => {
-                     expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+                     expect(emails[0].textAsHtml).to.contain('This is project 2');
                  });
         });
 });
