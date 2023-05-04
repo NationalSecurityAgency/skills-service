@@ -283,6 +283,7 @@ limitations under the License.
         this.showEditProjectModal = true;
       },
       copyProject() {
+        this.copyProjectInfo.newProject = { userCommunity: this.project.userCommunity };
         this.copyProjectInfo.showModal = true;
       },
       projectCopied(project) {

@@ -60,10 +60,13 @@ limitations under the License.
           </div>
         </div>
         <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">
-          <div v-if="isEdit && initialValueForEnableProtectedUserCommunity">
+          <div v-if="isCopyAndCommunityProtected">
+            <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Copying project whose access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
+          </div>
+          <div v-if="isEditAndCommunityProtected">
             <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
           </div>
-          <div v-else>
+          <div v-if="!isEditAndCommunityProtected && !isCopyAndCommunityProtected">
             <ValidationObserver v-slot="{ pending, invalid }">
               <div class="row">
                 <div class="col">
@@ -178,11 +181,20 @@ limitations under the License.
     mounted() {
       this.internalProject.enableProtectedUserCommunity = this.isRestrictedUserCommunity(this.project.userCommunity);
       this.initialValueForEnableProtectedUserCommunity = this.internalProject.enableProtectedUserCommunity;
+      if (this.isCopy && this.initialValueForEnableProtectedUserCommunity) {
+        this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
+      }
       this.loadComponent();
 
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
+      isEditAndCommunityProtected() {
+        return this.isEdit && this.initialValueForEnableProtectedUserCommunity;
+      },
+      isCopyAndCommunityProtected() {
+        return this.isCopy && this.initialValueForEnableProtectedUserCommunity;
+      },
       title() {
         if (this.isCopy) {
           return 'Copy Project';

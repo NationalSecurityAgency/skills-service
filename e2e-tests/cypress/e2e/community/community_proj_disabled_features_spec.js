@@ -59,4 +59,35 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="shareButton"]').should('not.exist')
     });
 
+    it('protected projects cannot be disabled during copy', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/')
+        cy.get('[data-cy="copyProjBtn"]').click()
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Copying project whose access is restricted to Divine Dragon')
+        cy.get('[data-cy="projectName"]').type('copy')
+        cy.get('[data-cy="saveProjectButton"]').click()
+        cy.get('[data-cy="allDoneBten"]').click()
+        cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+    });
+
+    it('copy non-protected projects and make it protected during copy', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: false})
+
+        cy.visit('/administrator/')
+        cy.get('[data-cy="copyProjBtn"]').click()
+        cy.get('[data-cy="projectName"]').type('copy')
+
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
+
+        cy.get('[data-cy="saveProjectButton"]').click()
+        cy.get('[data-cy="allDoneBtn"]').click()
+        cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+    });
+
+
 });
