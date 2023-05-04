@@ -16,10 +16,13 @@
 package skills.intTests.community
 
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
+import skills.utils.WaitFor
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSubject
@@ -36,7 +39,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         }
     }
 
-    def "cannot access a project with user community protection enabled when the user does not belong to the user community"() {
+    def "cannot access project endpoints with UC protection enabled if the user does not belong to the user community"() {
 
         when:
         String userCommunityUserId =  skillsService.userName
@@ -83,7 +86,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.getPointHistory(null, proj.projectId, subj.subjectId)}
     }
 
-    def "can access a project with user community protection enabled when the user does belong to the user community"() {
+    def "can access project endpoints with UC protection enabled when the user does belong to the user community"() {
         when:
         String userCommunityUserId =  skillsService.userName
         rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
@@ -128,6 +131,82 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         !validateForbidden { otherUserCommunityUser.getRankDistribution(null, proj.projectId, subj.subjectId)}
         !validateForbidden { otherUserCommunityUser.getPointHistory(null, proj.projectId)}
         !validateForbidden { otherUserCommunityUser.getPointHistory(null, proj.projectId, subj.subjectId)}
+    }
+
+    def "cannot add a project admin role to a community protected project if the user is not a member of that community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(p1)
+
+        when:
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to be assigned [ROLE_PROJECT_ADMIN] user role")
+    }
+
+    def "cannot add project approver role to a UC protected project if the user is not a member of that community"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(p1)
+
+        when:
+        pristineDragonsUser.addUserRole(allDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to be assigned [ROLE_PROJECT_APPROVER] user role")
+    }
+
+    def "cannot accept invite to an invite only project for a UC protected project if the user is not a member of that community"() {
+        startEmailServer()
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        pristineDragonsUser.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        when:
+
+        pristineDragonsUser.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = greenMail.getReceivedMessages()[0]
+        def invite = extractInviteFromEmail(email.content)
+
+        allDragonsUser.joinProject(proj.projectId, invite)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    String extractInviteFromEmail(String emailBody) {
+        def regex = /join-project\/([^\/]+)\/([^?]+)/
+        def matcher = emailBody =~ regex
+        return matcher[0][2]
     }
 
     private boolean validateForbidden(Closure c) {
