@@ -50,8 +50,8 @@ limitations under the License.
           <date-cell :value="data.value" />
         </template>
       </skills-b-table>
-       <div><contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
-             v-model="contactModal.show" :projectId="contactModal.projectId" /></div>
+       <contact-owners-dialog v-if="contactModal.show"  :projectName="contactModal.projectName"
+             v-model="contactModal.show" :projectId="contactModal.projectId" />
     </div>
     <div v-else>
       <div class="h6">This skill has not been imported by any other projects yet...</div>
