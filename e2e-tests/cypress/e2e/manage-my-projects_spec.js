@@ -101,7 +101,7 @@ describe('Manage My Projects Tests', () => {
         }
 
         cy.visit('/progress-and-rankings');
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.contains('No Discoverable Projects');
         cy.contains('Projects can be created and managed from the "Project Admin" view');
@@ -114,7 +114,7 @@ describe('Manage My Projects Tests', () => {
         }
 
         cy.visit('/progress-and-rankings');
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
 
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')

@@ -14,31 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <loading-container :is-loading="loading" class="container-fluid">
+  <loading-container :is-loading="loading">
 
-    <sub-page-header title="My Projects" class="pt-4">
-        <b-button id="manageMyProjectsBtn" :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
+    <div class="container-fluid mb-0">
+    <sub-page-header v-if="hasProjects" title="My Projects" class="pt-4" :margin-bottom="0">
+        <b-button id="manageMyProjectsBtn" :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-tasks" aria-hidden="true"/> Projects Catalog</b-button>
       <b-tooltip v-if="!hasProjects" target="manageMyProjectsBtn" placement="bottom" variant="primary">
-        <i class="fas fa-info-circle"></i> Click here to add to
+        <i class="fas fa-tasks"></i> Click here to add to
         <div class="text-uppercase"><b>My Projects</b></div>
       </b-tooltip>
     </sub-page-header>
+    </div>
+    <progress-and-ranking-splash v-if="!hasProjects"/>
 
-      <no-content2 v-if="!hasProjects" class="mt-5 pb-4"
-                   title="START CUSTOMIZING TODAY!"
-                   icon="fas fa-user-cog" icon-color="text-info" icon-size="fa-4x">
-        <b-card class="mb-5 mt-2 px-5">
-          <div>Please click</div>
-          <div class="my-2">
-          <b-button :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtnInNoContent" class="animate__bounceIn"><i class="fas fa-cog" aria-hidden="true"/> Manage My Projects</b-button>
-          </div>
-          <div>
-          on the <b>top-right</b> to start adding projects to <b class="text-uppercase">My Projects</b> view.
-          </div>
-        </b-card>
-      </no-content2>
-
-    <div v-if="!loading && hasProjects">
+    <div v-if="!loading && hasProjects" class="container-fluid">
       <b-row class="my-4">
         <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
           <info-snapshot-card :projects="myProjects"
@@ -99,7 +88,6 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import Sortable from 'sortablejs';
-  import NoContent2 from '@/components/utils/NoContent2';
   import ProjectLinkCard from './ProjectLinkCard';
   import InfoSnapshotCard from './InfoSnapshotCard';
   import NumSkills from './NumSkills';
@@ -108,14 +96,15 @@ limitations under the License.
   import LoadingContainer from '../utils/LoadingContainer';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import ProjectService from '../projects/ProjectService';
+  import ProgressAndRankingSplash from './ProgressAndRankingSplash';
 
   const { mapActions, mapGetters } = createNamespacedHelpers('myProgress');
 
   export default {
     name: 'MyProgressPage',
     components: {
+      ProgressAndRankingSplash,
       SubPageHeader,
-      NoContent2,
       LastEarnedCard,
       BadgesNumCard,
       NumSkills,

@@ -836,14 +836,12 @@ describe('Navigation Tests', () => {
         cy.removeFromMyProjects(2);
         cy.visit('/progress-and-rankings');
 
-        cy.contains('START CUSTOMIZING TODAY!');
-
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
 
         cy.visit('/progress-and-rankings');
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
     });
