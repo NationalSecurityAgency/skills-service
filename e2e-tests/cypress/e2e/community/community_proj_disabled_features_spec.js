@@ -67,7 +67,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunityControls"]').contains('Copying project whose access is restricted to Divine Dragon')
         cy.get('[data-cy="projectName"]').type('copy')
         cy.get('[data-cy="saveProjectButton"]').click()
-        cy.get('[data-cy="allDoneBten"]').click()
+        cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
 

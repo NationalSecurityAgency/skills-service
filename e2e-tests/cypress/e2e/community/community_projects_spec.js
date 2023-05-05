@@ -42,7 +42,6 @@ describe('Community Projects Tests', () => {
             cy.createProject(1, {enableProtectedUserCommunity: true})
             cy.createProject(2)
 
-            cy.request('POST', `/admin/projects/proj1/users/${allDragonsUser}/roles/ROLE_PROJECT_ADMIN`);
             cy.request('POST', `/admin/projects/proj2/users/${allDragonsUser}/roles/ROLE_PROJECT_ADMIN`);
         });
     });

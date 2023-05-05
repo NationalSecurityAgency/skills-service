@@ -132,7 +132,7 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         def originalProject = pristineDragonsUser.getProject(p1.projectId)
         then:
         copiedProject.projectId == newProj.projectId
-        copiedProject.userCommunity == 'All Dragon'
+        copiedProject.userCommunity == 'All Dragons'
 
         originalProject.userCommunity == 'All Dragons'
     }
