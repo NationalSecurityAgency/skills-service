@@ -59,6 +59,10 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.id as id,
         s.name as name,
         s.skillId as skillId,
+        CASE WHEN s.type != 'Badge' THEN (SELECT subjectDef.skillId as subjectSkillId FROM SkillDef subjectDef, SkillRelDef srd WHERE (subjectDef = srd.parent and s = srd.child and 
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject')) END as subjectSkillId,
+        CASE WHEN s.type != 'Badge' THEN (SELECT subjectDef.name as subjectName FROM SkillDef subjectDef, SkillRelDef srd WHERE (subjectDef = srd.parent and s = srd.child and 
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject')) END as subjectName,            
         s.projectId as projectId,
         s.displayOrder as displayOrder,
         s.created as created,

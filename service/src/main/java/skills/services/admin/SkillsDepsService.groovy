@@ -261,22 +261,22 @@ class SkillsDepsService {
                     id: it[0],
                     name: it[1],
                     skillId: it[2],
-//                    subjectId: it[3],
-                    projectId: it[3],
-                    pointIncrement: it[4],
-                    totalPoints: it[5],
-                    type: it[6],
+                    subjectId: it[3],
+                    projectId: it[4],
+                    pointIncrement: it[5],
+                    totalPoints: it[6],
+                    type: it[7],
             )
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[7],
-                    name: it[8],
-                    skillId: it[9],
-//                    subjectId: it[11],
-                    projectId: it[10],
-                    pointIncrement: it[11],
-                    totalPoints: it[12],
-                    type: it[13],
+                    id: it[8],
+                    name: it[9],
+                    skillId: it[10],
+                    subjectId: it[11],
+                    projectId: it[12],
+                    pointIncrement: it[13],
+                    totalPoints: it[14],
+                    type: it[15],
             )
 
             new GraphSkillDefEdge(from: from, to: to)
