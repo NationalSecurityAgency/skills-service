@@ -92,8 +92,9 @@ limitations under the License.
         nodes: {},
         edges: {},
         legendItems: [
-          { label: 'Skill', color: 'lightgreen' },
-          { label: 'Cross Project Skill', color: '#ffb87f' },
+          { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
+          { label: 'Cross Project Skill', color: '#ffb87f', iconClass: '' },
+          { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
         ],
         displayOptions: {
           layout: {

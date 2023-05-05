@@ -137,7 +137,7 @@ class RuleSetDefGraphService {
                                  String relationshipProjectId, String relationshipSkillId, RelationshipType relationshipType,
                                  boolean failOnMissingRel=true){
         SkillDef skill1 = skillDefAccessor.getSkillDef(projectId, skillId, [skillType])
-        SkillDef skill2 = skillDefAccessor.getSkillDef(relationshipProjectId, relationshipSkillId)
+        SkillDef skill2 = skillDefAccessor.getSkillAndBadgeDef(relationshipProjectId, relationshipSkillId)
         SkillRelDef relDef = skillRelDefRepo.findByChildAndParentAndType(skill2, skill1, relationshipType)
         if (relDef) {
             skillRelDefRepo.delete(relDef)

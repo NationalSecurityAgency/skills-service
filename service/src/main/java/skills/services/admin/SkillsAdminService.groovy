@@ -763,6 +763,7 @@ class SkillsAdminService {
                 isReused: SkillReuseIdUtil.isTagged(skinny.skillId),
                 groupName: groupName,
                 groupId: skinny.groupId,
+                type: skinny.type
         )
         return res;
     }

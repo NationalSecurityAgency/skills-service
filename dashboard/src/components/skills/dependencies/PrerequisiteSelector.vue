@@ -62,7 +62,7 @@ limitations under the License.
     methods: {
       loadAllSkills() {
         // this.loading.allSkills = true;
-        SkillsService.getProjectSkillsAndBadgesWithoutImportedSkills(this.projectId)
+        SkillsService.getProjectSkillsWithoutImportedSkills(this.projectId)
           .then((skills) => {
             this.allSkills = skills;
             this.updatePotentialSkills();
@@ -70,14 +70,17 @@ limitations under the License.
           });
       },
       updatePotentialSkills() {
-        if (this.skillId) {
-          this.allPotentialSkills = this.allSkills.filter((skill) => skill.skillId !== this.skillId);
-        }
-        if (this.selectedPrerequisites.length > 0) {
-          this.selectedPrerequisites.forEach((skill) => {
-            this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => potentialSkill.skillId !== skill.skillId);
+        SkillsService.getProjectSkillsAndBadgesWithoutImportedSkills(this.projectId)
+          .then((skills) => {
+            if (this.skillId) {
+              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.skillId);
+            }
+            if (this.selectedPrerequisites.length > 0) {
+              this.selectedPrerequisites.forEach((skill) => {
+                this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => potentialSkill.skillId !== skill.skillId);
+              });
+            }
           });
-        }
       },
       onSelectedSkill(item) {
         this.selectedSkills = [item];

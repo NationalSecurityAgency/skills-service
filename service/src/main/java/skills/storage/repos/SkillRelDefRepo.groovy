@@ -354,7 +354,6 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             and sd2 = srd.child
             and srd.type=?2 
             and sd1.projectId=?1
-            and sd2.projectId=?1
         ''')
     List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
 

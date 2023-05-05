@@ -310,7 +310,11 @@ class SkillsDepsService {
             throw new IllegalStateException("Number of [$maxIter] iterations exceeded when checking for circular dependency for [${originalParent.skillId}]")
         }
 
+        // alternative path - if the parent is a badge, check the badge's skills
         List<SkillRelDef> relationships = skillRelDefRepo.findAllByParentAndType(parent, type)
+        if (parent.type == SkillDef.ContainerType.Badge) {
+          log.info('Type is a badge');
+        }
         if (relationships) {
             if (relationships.find { it.child.skillId == originalParent.skillId }) {
                 return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${getDependencyCheckId(originalParent)}]".toString())

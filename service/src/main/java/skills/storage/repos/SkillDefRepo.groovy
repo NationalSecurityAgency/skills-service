@@ -64,7 +64,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.created as created,
         s.version as version,
         s.totalPoints as totalPoints,
-        s.groupId as groupId
+        s.groupId as groupId,
+        s.type as type
         from SkillDef s
          where 
             s.projectId = ?1 and (s.type = 'Skill' or s.type = 'Badge') and

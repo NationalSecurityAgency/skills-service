@@ -50,7 +50,9 @@ limitations under the License.
                   }}</span></span>
               </span>
               <span class="mx-2">|</span>
-              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span
+              <span v-if="option.type !== 'Badge'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span>
+              <span v-else class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Badge</span>
+              <span v-if="option.type !== 'Badge'"
               class="font-weight-bold skills-option-subject-name"
               data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
               <span v-if="option.groupName">

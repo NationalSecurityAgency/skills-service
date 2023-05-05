@@ -15,11 +15,12 @@ limitations under the License.
 */
 <template>
   <simple-card class="legend" style="max-width: 18rem; min-width: 17rem;">
-    <div class='legend-title'>Color Legend</div>
+    <div class='legend-title'>Legend</div>
     <div class='legend-scale'>
       <ul class='legend-labels'>
         <li v-for="item in items" v-bind:key="item.label">
-          <span v-bind:style=' {background: item.color }'></span>{{ item.label }}
+          <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
+          <span v-else v-bind:style=' {background: item.color }'></span>{{ item.label }}
         </li>
       </ul>
     </div>
