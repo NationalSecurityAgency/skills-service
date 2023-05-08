@@ -568,8 +568,8 @@ limitations under the License.
             + '<b>Add to the Project Catalog</b> projects can be accessed directly and can be found in the Project Catalog. <br/><br/>'
             + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite. ';
         }
-        return 'Public Not Discoverable (default) projects can be accessed directly by any user. '
-          + 'Private Invite Only projects may ONLY be accessed by users who have been issued a specific project invite. ';
+        return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+          + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite.';
       },
     },
     watch: {
