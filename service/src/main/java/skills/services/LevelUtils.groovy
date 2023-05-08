@@ -83,6 +83,11 @@ class LevelUtils {
             }
             lastEntry = entry
         }
+
+        levelDefs.each {
+            it.pointsFrom = null
+            it.pointsTo = null
+        }
     }
 
     /**
