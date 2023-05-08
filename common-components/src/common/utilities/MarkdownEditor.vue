@@ -42,7 +42,7 @@ limitations under the License.
       </div>
       <div v-if="attachmentWarningMessage && hasNewAttachment" class="row">
         <div class="col">
-          <span data-cy="attachmentWarningMessage" class="text-danger" style="font-size: .9rem">{{ attachmentWarningMessage }}</span>
+          <span data-cy="attachmentWarningMessage" class="text-danger font-weight-bold" style="font-size: .9rem"><i class="fas fa-exclamation-triangle animate__bounceIn" aria-hidden="true"/> {{ attachmentWarningMessage }}</span>
         </div>
       </div>
     </div>
