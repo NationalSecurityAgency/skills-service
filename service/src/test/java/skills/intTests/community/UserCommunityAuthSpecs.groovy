@@ -145,7 +145,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to be assigned [ROLE_PROJECT_ADMIN] user role")
+        e.getMessage().contains("User [${allDragonsUser.userName} for display] is not allowed to be assigned [Admin] user role")
     }
 
     def "cannot add project approver role to a UC protected project if the user is not a member of that community"() {
@@ -164,7 +164,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to be assigned [ROLE_PROJECT_APPROVER] user role")
+        e.getMessage().contains("User [${allDragonsUser.userName} for display] is not allowed to be assigned [Approver] user role")
     }
 
     def "cannot accept invite to an invite only project for a UC protected project if the user is not a member of that community"() {

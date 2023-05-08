@@ -282,7 +282,8 @@ class AccessSettingsStorageService {
         }
 
         if (projectId && !userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyProject(projectId)) {
-            throw new SkillException("User [${userId}] is not allowed to be assigned [${roleName}] user role", projectId, null, ErrorCode.AccessDenied)
+            String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay
+            throw new SkillException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role", projectId, null, ErrorCode.AccessDenied)
         }
 
         // remove mutually exclusive roles

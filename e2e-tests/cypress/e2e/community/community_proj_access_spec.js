@@ -58,7 +58,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdminAttempt').its('response.statusCode').should('eq', 400);
         cy.get('[data-cy=error-msg]')
-          .contains('Error! Request could not be completed! User [alldragons@email.org] is not allowed to be assigned [ROLE_PROJECT_ADMIN] user role');
+          .contains('Error! Request could not be completed! User [allDragons@email.org] is not allowed to be assigned [Admin] user role');
     });
 
     it('community protected project cannot assign non community member approver access', () => {
@@ -86,7 +86,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApproverAttempt').its('response.statusCode').should('eq', 400);
         cy.get('[data-cy=error-msg]')
-          .contains('Error! Request could not be completed! User [alldragons@email.org] is not allowed to be assigned [ROLE_PROJECT_APPROVER] user role');
+          .contains('Error! Request could not be completed! User [allDragons@email.org] is not allowed to be assigned [Approver] user role');
     });
 
     it('cannot join invite only community protected project if user non community member', () => {

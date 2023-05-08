@@ -16,12 +16,18 @@
 package skills.storage.model.auth
 
 enum RoleName {
-    ROLE_APP_USER,
-    ROLE_PRIVATE_PROJECT_USER,
-    ROLE_PROJECT_ADMIN,
-    ROLE_SUPERVISOR,
-    ROLE_SUPER_DUPER_USER,
-    ROLE_PROJECT_APPROVER,
-    ROLE_QUIZ_ADMIN,
-    ROLE_QUIZ_READ_ONLY,
+    ROLE_APP_USER('Application'),
+    ROLE_PRIVATE_PROJECT_USER('Private'),
+    ROLE_PROJECT_ADMIN('Admin'),
+    ROLE_SUPERVISOR('Supervisor'),
+    ROLE_SUPER_DUPER_USER('Root'),
+    ROLE_PROJECT_APPROVER('Approver'),
+    ROLE_QUIZ_ADMIN('Admin'),
+    ROLE_QUIZ_READ_ONLY('Read Only');
+
+    String displayName;
+
+    RoleName(String displayName) {
+        this.displayName = displayName;
+    }
 }
