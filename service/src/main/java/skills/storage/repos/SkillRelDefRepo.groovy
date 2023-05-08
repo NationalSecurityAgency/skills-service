@@ -345,7 +345,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             sd2.id as id2,
             sd2.name as name2,
             sd2.skillId as skillId2,
-            CASE WHEN sd2.type != 'Badge' THEN (SELECT subj2.skillId FROM  SkillDef subj2, SkillRelDef subj2Rel WHERE subj2 = subj2Rel.parent and subj2Rel.child = sd1 and subj2Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')) END as subjectId2,
+            CASE WHEN sd2.type != 'Badge' THEN (SELECT subj2.skillId FROM  SkillDef subj2, SkillRelDef subj2Rel WHERE subj2 = subj2Rel.parent and subj2Rel.child = sd2 and subj2Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')) END as subjectId2,
             sd2.projectId as projectId2,
             sd2.pointIncrement as pointIncrement2,
             sd2.totalPoints as totalPoints2,
