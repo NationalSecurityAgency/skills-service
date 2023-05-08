@@ -657,7 +657,7 @@ limitations under the License.
             this.settings.productionModeEnabled.value = 'false';
             this.msgOk('Changing this Project to Invite Only '
               + 'will restrict access to the training profile and '
-              + 'skill reporting to only invited users.', 'Changing to Invite Only', 'OK', { size: 'mg' });
+              + 'skill reporting to only invited users.', 'Changing to Invite Only', 'Ok', { size: 'mg' });
           } else if (value === discoverableProgressAndRanking) {
             this.settings.inviteOnlyProject.value = 'false';
             this.settings.productionModeEnabled.value = 'true';

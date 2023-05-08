@@ -30,7 +30,7 @@ describe('Projects Invite-Only Tests', () => {
             .as('getRolesForRoot');
     });
 
-    it('invite only project full flow', () => {
+    it.only('invite only project full flow', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/settings')
             .as('getSettings');

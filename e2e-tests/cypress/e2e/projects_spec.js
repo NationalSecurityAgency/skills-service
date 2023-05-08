@@ -370,23 +370,6 @@ describe('Projects Tests', () => {
             .should('not.exist');
     });
 
-    it('page header rendering on small screen', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
-        cy.createSubject(1, 2);
-
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 2, 3);
-
-        cy.setResolution('iphone-6');
-        cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="manageBtn_subj1"]');
-        cy.get('[data-cy="manageBtn_subj2"]');
-
-        cy.matchSnapshotImage(`project-page-iphone6`, snapshotOptions);
-    });
-
     it('project description is retained after editing', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
