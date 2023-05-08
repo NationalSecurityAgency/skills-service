@@ -29,14 +29,10 @@ import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
 class UserCommunityAuthSpecs extends DefaultIntSpec {
-    String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
 
     def setup() {
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
+        rootSkillsService = createRootSkillService()
     }
 
     def "cannot access project endpoints with UC protection enabled if the user does not belong to the user community"() {
