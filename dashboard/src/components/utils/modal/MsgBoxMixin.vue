@@ -30,7 +30,7 @@ limitations under the License.
           centered: true,
         });
       },
-      msgOk(msg, overallTitle = 'Message!', okButtonTitle = 'Ok') {
+      msgOk(msg, overallTitle = 'Message!', okButtonTitle = 'Ok', overrideOpts = {}) {
         return this.$bvModal.msgBoxOk(msg, {
           title: overallTitle,
           size: 'sm',
@@ -39,6 +39,7 @@ limitations under the License.
           footerClass: 'p-2',
           hideHeaderClose: false,
           centered: true,
+          ...overrideOpts,
         });
       },
     },

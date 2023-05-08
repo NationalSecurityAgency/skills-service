@@ -156,15 +156,19 @@ limitations under the License.
         if (!this.project || !this.projConfig) {
           return {};
         }
-        let visibilityIcon = 'fas fa-lock-open';
-        let visibilityDescription = 'Not Discoverable';
-        let visibilityType = 'PUBLIC';
+        let visibilityLabel = 'Project Catalog';
+        let visibilityIcon = 'fas fa-eye-slash text-warning';
+        let visibilityDescription = '';
+        let visibilityType = 'Hidden';
         if (this.isProjConfigInviteOnly) {
+          visibilityLabel = 'Protection';
           visibilityDescription = 'Invite Only';
-          visibilityIcon = 'fas fa-lock';
+          visibilityIcon = 'fas fa-user-lock text-danger';
           visibilityType = 'PRIVATE';
         } else if (this.isProjConfigDiscoverable) {
-          visibilityDescription = 'Discoverable';
+          visibilityType = 'Discoverable';
+          visibilityIcon = 'fas fa-search-plus text-success';
+          visibilityDescription = '';
         }
 
         const stats = [];
@@ -177,7 +181,7 @@ limitations under the License.
           });
         }
         stats.push({
-          label: 'Visibility',
+          label: visibilityLabel,
           preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
           secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
           icon: `${visibilityIcon} skills-color-visibility`,

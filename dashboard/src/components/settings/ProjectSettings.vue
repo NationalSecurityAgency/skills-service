@@ -21,7 +21,7 @@ limitations under the License.
       <loading-container :is-loading="isLoading">
         <div class="row" data-cy="projectVisibility">
           <div class="col col-md-3 text-secondary" id="projectVisibilityLabel">
-            Project Visibility: <inline-help target-id="projectVisibilityHelp" :msg="projectVisibilityHelpMsg" />
+            Project Discoverability: <inline-help target-id="projectVisibilityHelp" :html-msg="projectVisibilityHelpMsg" />
           </div>
           <div class="col">
             <b-form-select v-model="settings.projectVisibility.value"
@@ -554,19 +554,19 @@ limitations under the License.
       },
       projectVisibilityOptions() {
         const opts = [
-          { value: publicNotDiscoverable, text: 'Public Not Discoverable' },
-          { value: privateInviteOnly, text: 'Private Invite Only' },
+          { value: publicNotDiscoverable, text: 'Not in the Project Catalog' },
         ];
         if (this.isProgressAndRankingEnabled) {
-          opts.push({ value: discoverableProgressAndRanking, text: 'Discoverable on Progress And Ranking' });
+          opts.push({ value: discoverableProgressAndRanking, text: 'Add to the Project Catalog' });
         }
+        opts.push({ value: privateInviteOnly, text: 'Private Invite Only' });
         return opts;
       },
       projectVisibilityHelpMsg() {
         if (this.isProgressAndRankingEnabled) {
-          return 'Public Not Discoverable (default) projects can be accessed directly but are not discoverable on the Progress and Ranking page. '
-            + 'Discoverable on Progress and Ranking projects can be accessed directly and are selectable on the Progress and Ranking page. '
-            + 'Private Invite Only projects may ONLY be accessed by users who have been issued a specific project invite. ';
+          return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+            + '<b>Add to the Project Catalog</b> projects can be accessed directly and can be found in the Project Catalog. <br/><br/>'
+            + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite. ';
         }
         return 'Public Not Discoverable (default) projects can be accessed directly by any user. '
           + 'Private Invite Only projects may ONLY be accessed by users who have been issued a specific project invite. ';
@@ -657,7 +657,7 @@ limitations under the License.
             this.settings.productionModeEnabled.value = 'false';
             this.msgOk('Changing this Project to Invite Only '
               + 'will restrict access to the training profile and '
-              + 'skill reporting to only invited users.', 'Changing to Invite Only');
+              + 'skill reporting to only invited users.', 'Changing to Invite Only', 'OK', { size: 'mg' });
           } else if (value === discoverableProgressAndRanking) {
             this.settings.inviteOnlyProject.value = 'false';
             this.settings.productionModeEnabled.value = 'true';

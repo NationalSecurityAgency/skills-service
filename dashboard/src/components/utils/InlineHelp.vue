@@ -27,7 +27,12 @@ limitations under the License.
        role="alert"
        @keydown.esc="handleEscape"/>
 
-    <b-tooltip :target="targetId"
+    <b-tooltip v-if="htmlMsg" :target="targetId"
+               @shown="tooltipShown"
+               @hidden="tooltipHidden">
+      <span v-html="htmlMsg" />
+    </b-tooltip>
+    <b-tooltip v-else :target="targetId"
                :title="msg"
                @shown="tooltipShown"
                @hidden="tooltipHidden"/>
@@ -39,6 +44,7 @@ limitations under the License.
     name: 'InlineHelp',
     props: {
       msg: String,
+      htmlMsg: String,
       targetId: {
         type: String,
         default: 'helpMsg',
