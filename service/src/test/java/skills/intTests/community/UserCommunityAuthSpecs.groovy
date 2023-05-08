@@ -138,8 +138,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
-        SkillsService rootUser = createRootSkillService()
-        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
         def p1 = createProject(1)
         p1.enableProtectedUserCommunity = true
@@ -158,8 +157,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
-        SkillsService rootUser = createRootSkillService()
-        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
         def p1 = createProject(1)
         p1.enableProtectedUserCommunity = true
@@ -179,8 +177,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
-        SkillsService rootUser = createRootSkillService()
-        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
         def proj = createProject(1)
         proj.enableProtectedUserCommunity = true
