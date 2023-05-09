@@ -14,23 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <metrics-card id="prerequisite-selector-panel" title="Add a new skill to the learning path"
-                :no-padding="true" data-cy="addPrerequisiteToLearningPath">
+  <metrics-card id="prerequisite-selector-panel" title="Add a new item to the learning path"
+                :no-padding="true" data-cy="addPrerequisiteToLearningPath" style="margin-bottom:10px;">
     <div class="row px-3 py-2">
-      <div class="col">
-        Skill to add to learning path:
-        <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                          :selected="selectedSkills" :onlySingleSelectedValue="true"
+      <div class="col-6">
+        From:
+        <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
+                          :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
+                          data-cy="skillSelectorPrerequisites"></skills-selector2>
+      </div>
+      <div class="col-5">
+        To:
+        <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
+                          :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
                           data-cy="skillSelector"></skills-selector2>
       </div>
-    </div>
-
-    <div v-if="selectedSkills.length > 0" class="row px-3 py-3">
-      <div class="col">
-        Skills to add as prerequisite(s):
-        <skills-selector2 :options="allPotentialSkills" v-on:added="onPrerequisiteSelected" v-on:removed="onPrerequisiteDeselected"
-                          :selected="selectedPrerequisites" :onlySingleSelectedValue="false"
-                          data-cy="skillSelectorPrerequisites"></skills-selector2>
+      <div class="col-1" style="margin-top: 24px;">
+        <button type="button" class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath" :disabled="!this.fromSkillId || !this.toSkillId">Add</button>
       </div>
     </div>
   </metrics-card>
@@ -50,10 +50,14 @@ limitations under the License.
     },
     data() {
       return {
-        selectedSkills: [],
+        selectedFromSkills: [],
         allSkills: [],
         allPotentialSkills: [],
-        selectedPrerequisites: [],
+        selectedToSkills: [],
+        fromSkillId: null,
+        fromProjectId: null,
+        toSkillId: null,
+        toProjectId: null,
       };
     },
     mounted() {
@@ -61,63 +65,59 @@ limitations under the License.
     },
     methods: {
       loadAllSkills() {
-        // this.loading.allSkills = true;
-        SkillsService.getProjectSkillsWithoutImportedSkills(this.projectId)
+        SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
             this.allSkills = skills;
-            this.updatePotentialSkills();
-            // this.loading.allSkills = false;
           });
       },
       updatePotentialSkills() {
-        SkillsService.getProjectSkillsAndBadgesWithoutImportedSkills(this.projectId)
+        SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
-            if (this.skillId) {
-              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.skillId);
+            if (this.fromSkillId) {
+              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.fromSkillId);
             }
-            if (this.selectedPrerequisites.length > 0) {
-              this.selectedPrerequisites.forEach((skill) => {
+            if (this.selectedToSkills.length > 0) {
+              this.selectedToSkills.forEach((skill) => {
                 this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => potentialSkill.skillId !== skill.skillId);
               });
             }
           });
       },
-      onSelectedSkill(item) {
-        this.selectedSkills = [item];
-        this.skillId = item.skillId;
-        this.loadDataForSkill();
+      onToSelected(item) {
+        this.toSkillId = item.skillId;
+        this.toProjectId = item.projectId;
       },
-      onDeselectedSkill() {
-        this.selectedSkills = [];
+      onToDeselected() {
+        this.selectedToSkills = [];
         this.updatePotentialSkills();
       },
-      onPrerequisiteSelected(item) {
-        SkillsService.assignDependency(this.projectId, this.skillId, item.skillId, item.projectId).then(() => {
-          this.loadDataForSkill();
+      onFromSelected(item) {
+        this.clearToData();
+        this.selectedFromSkills = [item];
+        this.fromSkillId = item.skillId;
+        this.fromProjectId = item.projectId;
+        this.updatePotentialSkills();
+      },
+      onFromDeselected() {
+        console.log('Deselected');
+      },
+      onAddPath() {
+        SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.fromSkillId, this.fromProjectId).then(() => {
+          this.clearData();
           this.$emit('update');
         });
       },
-      onPrerequisiteDeselected(item) {
-        SkillsService.removeDependency(this.projectId, this.skillId, item.skillId, item.projectId).then(() => {
-          this.loadDataForSkill();
-          this.$emit('update');
-        });
+      clearData() {
+        this.selectedFromSkills = [];
+        this.fromSkillId = null;
+        this.fromProjectId = null;
+        this.clearToData();
       },
-      loadDataForSkill() {
-        SkillsService.getDependentSkillsGraphForSkill(this.projectId, this.skillId).then((data) => {
-          const mySkill = data.nodes.find((entry) => entry.skillId === this.skillId && entry.projectId === this.projectId);
-          const myEdges = data.edges.filter((entry) => entry.fromId === mySkill.id);
-          const myChildren = data.nodes.filter((item) => myEdges.find((item1) => item1.toId === item.id));
-
-          this.selectedPrerequisites = myChildren.map((entry) => {
-            const externalProject = entry.projectId !== this.projectId;
-            return Object.assign(entry, {
-              entryId: `${entry.projectId}_${entry.skillId}`,
-              isFromAnotherProject: externalProject,
-            });
-          });
-          this.updatePotentialSkills();
-        });
+      clearToData() {
+        this.allPotentialSkills = [];
+        this.selectedToSkills = [];
+        this.toSkillId = null;
+        this.toProjectId = null;
       },
     },
   };

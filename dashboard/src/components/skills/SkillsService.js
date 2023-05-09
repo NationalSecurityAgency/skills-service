@@ -81,6 +81,10 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=true`)
       .then((response) => response.data);
   },
+  getProjectSkillsAndBadgesWithImportedSkills(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=false`)
+      .then((response) => response.data);
+  },
   getGroupSkills(projectId, groupId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/skills`)
       .then((response) => response.data.map((item) => ({ ...item, groupId })));
@@ -170,7 +174,7 @@ export default {
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
     if (dependentProjectId) {
-      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/projects/${encodeURIComponent(dependentProjectId)}/skills/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
+      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
         .then((createdRuleResult) => createdRuleResult.data);
     }
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })

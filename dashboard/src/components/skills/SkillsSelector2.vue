@@ -67,7 +67,7 @@ limitations under the License.
       </template>
       <template #selected-option-container="{ option }">
         <div style="display: flex; align-items: baseline">
-          <span class="selected-tag ml-2 mt-2 border rounded p-1">
+          <span v-if="multipleSelection" class="selected-tag ml-2 mt-2 border rounded p-1">
             <span>{{ option.name }}</span>
             <span class="border rounded ml-1 remove-x"
                   :aria-label="`remove ${option.name} skill option button`"
@@ -76,6 +76,7 @@ limitations under the License.
                   v-on:click.stop="considerRemoval(option)">❌
             </span>
           </span>
+          <span v-else class="ml-2 mt-2">{{ option.name }}</span>
         </div>
       </template>
       <template v-if="afterListSlotText" #list-footer>
