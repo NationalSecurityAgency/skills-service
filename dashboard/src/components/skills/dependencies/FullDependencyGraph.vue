@@ -37,11 +37,7 @@ limitations under the License.
       <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
     </simple-card>
 
-    <simple-card>
-      <loading-container :is-loading="isLoading">
-        <div>Table</div>
-      </loading-container>
-    </simple-card>
+    <dependency-table :is-loading="isLoading" :graph="graph" @update="handleUpdate" />
 
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4"/>
 
@@ -68,6 +64,7 @@ limitations under the License.
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import PrerequisiteSelector from './PrerequisiteSelector';
+  import DependencyTable from './DependencyTable';
 
   export default {
     name: 'FullDependencyGraph',
@@ -82,6 +79,7 @@ limitations under the License.
       GraphNodeSortMethodSelector,
       LoadingContainer,
       PrerequisiteSelector,
+      DependencyTable,
     },
     data() {
       return {
