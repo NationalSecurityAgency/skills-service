@@ -44,7 +44,7 @@ class ContactOwnersController {
     public RequestResult contactOwners(@PathVariable("projectId") String projectId, @RequestBody ContactOwnerRequest msg) {
         SkillsValidator.isNotBlank(msg?.message, "message", projectId)
         //TODO: some form of RateLimiting should be applied to each user since this end point exposes all projects to contact emails
-        CustomValidationResult result = customValidator.validateDescription(msg.message)
+        CustomValidationResult result = customValidator.validateDescription(msg.message, projectId)
 
         if (!result.valid) {
             throw new SkillException("Message is invalid: ${result.msg}", projectId)

@@ -262,7 +262,6 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(projectsSelector)
                     .should('have.length', 5)
                     .as('projects');
-                cy.contains('ID: Inception');
                 cy.contains('one');
                 cy.contains('two');
                 cy.contains('three');
@@ -644,15 +643,15 @@ describe('Root Pin and Unpin Tests', () => {
 
         const tableSelector = '[data-cy=projectsTable]'
         cy.validateTable(tableSelector, [
-          [{ colIndex: 0,  value: 'proj9' }],
-          [{ colIndex: 0,  value: 'proj8' }],
-          [{ colIndex: 0,  value: 'proj7' }],
-          [{ colIndex: 0,  value: 'proj6' }],
-          [{ colIndex: 0,  value: 'proj5' }],
-          [{ colIndex: 0,  value: 'proj4' }],
-          [{ colIndex: 0,  value: 'proj3' }],
-          [{ colIndex: 0,  value: 'proj2' }],
-          [{ colIndex: 0,  value: 'proj1' }],
+          [{ colIndex: 0,  value: 'project 9' }],
+          [{ colIndex: 0,  value: 'project 8' }],
+          [{ colIndex: 0,  value: 'project 7' }],
+          [{ colIndex: 0,  value: 'project 6' }],
+          [{ colIndex: 0,  value: 'project 5' }],
+          [{ colIndex: 0,  value: 'project 4' }],
+          [{ colIndex: 0,  value: 'project 3' }],
+          [{ colIndex: 0,  value: 'project 2' }],
+          [{ colIndex: 0,  value: 'project 1' }],
           [{ colIndex: 0,  value: 'Inception' }],
         ], 10);
 
@@ -660,22 +659,22 @@ describe('Root Pin and Unpin Tests', () => {
         cy.get('[data-cy="projectsTable-projectFilter"]').type('proj1');
         cy.get('[data-cy="projectsTable-filterBtn"]').click();
         cy.validateTable(tableSelector, [
-          [{ colIndex: 0,  value: 'proj1' }],
+          [{ colIndex: 0,  value: 'project 1' }],
         ], 10);
         cy.get('[data-cy=unpin]').click();
 
         // < 10 projects pinned now, so back to project cards
         cy.get(projectsSelector).should('have.length', 9).as('projects');
         cy.contains('Inception');
-        cy.contains('proj9');
-        cy.contains('proj8');
-        cy.contains('proj7');
-        cy.contains('proj6');
-        cy.contains('proj5');
-        cy.contains('proj4');
-        cy.contains('proj3');
-        cy.contains('proj2');
-        cy.contains('proj1').should('not.exist');
+        cy.contains('project 9');
+        cy.contains('project 8');
+        cy.contains('project 7');
+        cy.contains('project 6');
+        cy.contains('project 5');
+        cy.contains('project 4');
+        cy.contains('project 3');
+        cy.contains('project 2');
+        cy.contains('project 1').should('not.exist');
       });
     });
 

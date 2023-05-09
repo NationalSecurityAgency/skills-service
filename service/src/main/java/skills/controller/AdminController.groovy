@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
@@ -1015,6 +1016,10 @@ class AdminController {
         SkillsValidator.isNotBlank(sharedProjectId, "Shared Project Id", projectId)
         SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
 
+        if (projAdminService.isUserCommunityRestrictedProject(projectId)) {
+            throw new SkillException("Projects with the community protection are not allowed to externally share skills", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
 
@@ -1271,6 +1276,10 @@ class AdminController {
             return new ExportableToCatalogValidationResult(hasSufficientSubjectPoints: hasSufficientSubjectPoints)
         }
 
+        if (projAdminService.isUserCommunityRestrictedProject(projectId)) {
+            return new ExportableToCatalogValidationResult(isUserCommunityRestricted: true)
+        }
+
         List<ExportableToCatalogSkillValidationResult> validationResults = skillCatalogService.canSkillIdsBeExported(projectId, skillIds)
         Map<String, ExportableToCatalogSkillValidationResult> skillsValidationRes = validationResults.collectEntries() { [it.skillId, it]}
         return new ExportableToCatalogValidationResult(skillsValidationRes: skillsValidationRes)
@@ -1494,6 +1503,12 @@ class AdminController {
     LatestEvent getLatestEventForProject(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         return projAdminService.getLastReportedSkillEvent(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
+    EnableProjValidationRes validateProjectForEnablingCommunity(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return projAdminService.validateProjectForEnablingCommunity(projectId)
     }
 
     @RequestMapping(value="/projects/{projectId}/requestAccess", method = RequestMethod.POST, produces = "application/json")

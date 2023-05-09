@@ -59,7 +59,6 @@ describe('Projects Tests', () => {
         cy.wait('@postNewProject');
 
         cy.contains('My New & test Project');
-        cy.contains('ID: MyNewtestProject');
     });
 
     it('Provide clear instructions how to create a new project - root user', function () {
@@ -371,28 +370,11 @@ describe('Projects Tests', () => {
             .should('not.exist');
     });
 
-    it('page header rendering on small screen', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
-        cy.createSubject(1, 2);
-
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 2, 3);
-
-        cy.setResolution('iphone-6');
-        cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="manageBtn_subj1"]');
-        cy.get('[data-cy="manageBtn_subj2"]');
-
-        cy.matchSnapshotImage(`project-page-iphone6`, snapshotOptions);
-    });
-
     it('project description is retained after editing', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
         cy.intercept('GET', '/app/projects/proj1/description').as('loadDescription');
-        cy.intercept('POST', '/api/validation/description').as('validateDescription');
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
         cy.intercept('POST', '/admin/projects/proj1').as('saveProject');
 
         // validate that edit on both /projects and /project/projId view retain edits to description

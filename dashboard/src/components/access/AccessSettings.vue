@@ -57,6 +57,7 @@ limitations under the License.
   import InviteUsersToProject from '@/components/access/InviteUsersToProject';
   import InviteStatuses from '@/components/access/InviteStatuses';
   import RevokeUserAccess from '@/components/access/RevokeUserAccess';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import MetricsCard from '../metrics/utils/MetricsCard';
   import RoleManager from './RoleManager';
   import TrustedClientProps from './TrustedClientProps';
@@ -66,6 +67,7 @@ limitations under the License.
 
   export default {
     name: 'AccessSettings',
+    mixins: [MsgBoxMixin],
     components: {
       MetricsCard,
       LoadingContainer,
@@ -81,6 +83,12 @@ limitations under the License.
         isLoading: true,
         privateProject: false,
         projectId: this.$route.params.projectId,
+        userCommunityRestrictedSetting: {
+          value: false,
+          setting: 'user_community',
+          projectId: this.$route.params.projectId,
+        },
+        errMsg: null,
       };
     },
     computed: {
@@ -108,9 +116,10 @@ limitations under the License.
       }
     },
     mounted() {
-      SettingsService.getProjectSetting(this.$route.params.projectId, 'invite_only')
-        .then((setting) => {
-          this.privateProject = setting?.enabled;
+      SettingsService.getSettingsForProject(this.$route.params.projectId)
+        .then((settingsResponse) => {
+          this.privateProject = settingsResponse.find((setting) => setting.setting === 'invite_only')?.enabled;
+          this.userCommunityRestrictedSetting.value = Boolean(settingsResponse.find((setting) => setting.setting === 'user_community')?.enabled);
         })
         .finally(() => {
           this.isLoading = false;

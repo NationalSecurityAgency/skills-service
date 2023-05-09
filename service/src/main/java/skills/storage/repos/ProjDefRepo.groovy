@@ -67,14 +67,20 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     List<ProjDef> findAllByNameLike(@Param("query") query)
 
     @Nullable
-    @Query("select p from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    @Query('''select p from ProjDef p
+            where lower(p.name) like lower(CONCAT('%', :query, '%'))
+            and p.projectId not in (:projectIds)
+            and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
+    ''')
     List<ProjDef> findAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds, Pageable pageable)
 
-    @Query("select count(p.projectId) from ProjDef p where lower(p.name) like lower(CONCAT('%', :query, '%')) and p.projectId not in (:projectIds)")
+    @Query('''select count(p.projectId)
+        from ProjDef p
+        where lower(p.name) like lower(CONCAT('%', :query, '%'))
+            and p.projectId not in (:projectIds)
+            and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
+    ''')
     Integer countAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds)
-
-    @Nullable
-    List<ProjDef> findAllByProjectIdIn(List<String> projectIds)
 
     @Query(value="""
                 SELECT 
@@ -191,6 +197,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     reusedSkills.skillCount AS numSkillsReused,
                     reusedSkills.totalPoints AS totalPointsReused, 
                     ur.role_name as userRole,
+                    COALESCE(CAST(userCommunity.protectedCommunityEnabled AS BOOLEAN), false) as protectedCommunityEnabled,
                     pd.created
                 FROM project_definition pd
                 LEFT JOIN (SELECT project_id, COUNT(id) AS errorCount FROM project_error GROUP BY project_id) errors ON errors.project_id = pd.project_id
@@ -201,6 +208,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, value AS protectedCommunityEnabled FROM settings WHERE setting = 'user_community' and value = 'true') userCommunity ON userCommunity.project_id = pd.project_id
                 JOIN user_roles ur on (ur.project_id = pd.project_id AND ur.role_name in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'))
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)
@@ -351,6 +359,45 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             """, nativeQuery = true)
     @Nullable
     List<AvailableProjectSummary> getAvailableProjectSummariesInProduction(String userId)
+
+    @Query(value="""
+                SELECT
+                    pd.project_id AS projectId,
+                    pd.name AS name,
+                    pd.total_points AS totalPoints,
+                    COALESCE(skills.skillCount, 0) AS numSkills,
+                    COALESCE(badges.badgeCount, 0) AS numBadges,
+                    COALESCE(subjects.subjectCount, 0) AS numSubjects,
+                    COALESCE(groups.groupCount, 0) AS numGroups,
+                    pd.created, 
+                    theSettings.myProjectId AS myProjectId,
+                    case when (pd.description is not null and pd.description != '') then true else false end as hasDescription
+                FROM settings s, project_definition pd
+                LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
+                LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
+                WHERE pd.project_id = s.project_id and 
+                      (
+                          (s.setting = 'production.mode.enabled' and s.value = 'true') or
+                          (s.setting = 'invite_only' and s.value = 'true' and exists 
+                              (
+                                select 1 from user_roles ur where ur.user_id = ?1 and ur.project_id = s.project_id and ur.role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              )
+                          )
+                      ) and
+                      (
+                          (not exists (select 1 from settings s2 where pd.project_id = s2.project_id and s2.setting = 'user_community' and s2.value = 'true')) or 
+                          (exists (select 1 from settings s2 where pd.project_id = s2.project_id and s2.setting = 'user_community' and s2.value = 'true') and 
+                           exists (select 1 from user_tags ut where ut.user_id = ?1 and ut.key = ?2 and ut.value = ?3)
+                          ) 
+                      )
+                ORDER BY projectId
+            """, nativeQuery = true)
+    @Nullable
+    List<AvailableProjectSummary> getAvailableProjectSummariesInProduction(String userId, String userCommunityUserTagKey, String userCommunityUserTagValue)
 
     @Query(value="""
             SELECT pd.project_id as projectId,

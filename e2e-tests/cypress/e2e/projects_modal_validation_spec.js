@@ -215,7 +215,6 @@ describe('Projects Modal Validation Tests', () => {
         cy.clickSave();
         cy.wait('@postNewProject');
 
-        cy.contains(`ID: ${projId}`);
         cy.contains(longValid);
     });
 
@@ -297,7 +296,7 @@ describe('Projects Modal Validation Tests', () => {
     });
 
     it('run validation on load in case validation improved and existing values fail to validate', () => {
-        cy.intercept('POST', '/api/validation/description', {
+        cy.intercept('POST', '/api/validation/description*', {
             valid: false,
             msg: 'Mocked up validation failure'
         }).as('validateDesc');
@@ -306,7 +305,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy="editProjBtn"]').click()
         cy.wait('@validateDesc')
-        cy.get('[data-cy="projectDescriptionError"]').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="projectDescriptionError"]').contains('Mocked up validation failure')
     });
 
 });

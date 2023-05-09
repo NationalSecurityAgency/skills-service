@@ -126,7 +126,7 @@ class AccessSettingsController {
     RequestResult deleteUserRole(
             @PathVariable("projectId") String projectId,
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
-        String currentUser = userInfoService.getCurrentUser()
+        String currentUser = userInfoService.getCurrentUserId()
         String userIdLower = userId?.toLowerCase()
         if (currentUser?.toLowerCase() == userIdLower) {
             throw new SkillException("Cannot delete roles for myself. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)

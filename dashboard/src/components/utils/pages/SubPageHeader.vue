@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="row bg-white border-bottom py-2 mb-3 text-center" data-cy="subPageHeader">
+  <div class="row bg-white border-bottom py-2 text-center" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
     <div class="col-sm-6 col-md-7 text-sm-left">
       <h1 class="h4 text-uppercase">{{ title }}</h1>
     </div>
@@ -69,6 +69,11 @@ limitations under the License.
         type: Boolean,
         required: false,
         default: false,
+      },
+      marginBottom: {
+        type: Number,
+        required: false,
+        default: 3,
       },
     },
     data() {

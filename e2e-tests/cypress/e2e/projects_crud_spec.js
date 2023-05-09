@@ -51,7 +51,6 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@postNewProject');
 
         cy.contains('My New test Project');
-        cy.contains('ID: MyNewtestProject');
     });
 
     it('Edit in place', () => {
@@ -160,7 +159,6 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@postNewProject');
 
         cy.contains('My New test Project');
-        cy.contains('ID: MyNewtestProject');
     });
 
     it('delete project', () => {

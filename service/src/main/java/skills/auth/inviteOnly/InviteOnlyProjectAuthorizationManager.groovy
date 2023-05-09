@@ -58,13 +58,17 @@ import java.util.regex.Pattern
 @Order(99)
 class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-    private static final Pattern PROJECT_ID = ~/(?i)\/api\/(?:my)?projects\/([^\/]+).*/
+    private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
 
     private RequestMatcher projectsApiRequestMatcher
 
     private LoadingCache<String, Boolean> privateProjects
 
     private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
+    private static final Pattern JOIN_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/join\/.*/
+    private static final Pattern VALIDATE_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/validateInvite\/.*/
+
+    private static final List<Pattern> EXCEPTIONS = [CONTACT_EXCEPTION, JOIN_EXCEPTION, VALIDATE_EXCEPTION]
 
     @Value('#{"${skills.config.privateProject.cache-expiration-time:PT5M}"}')
     String privateProjectsCacheExpirationTime = "PT5M"
@@ -84,7 +88,7 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsApiRequestMatcher = new AntPathRequestMatcher("/api/*projects/**")
+        projectsApiRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
         privateProjects = Caffeine.newBuilder()
                 .expireAfterWrite(Duration.parse(privateProjectsCacheExpirationTime))
                 .refreshAfterWrite(Duration.parse(privateProjectCacheRefreshTime))
@@ -101,14 +105,12 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
             log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
             return authenticatedDecision
         }
+        AuthorizationDecision vote = null //ACCESS_ABSTAIN
         if (projectsApiRequestMatcher.matches(request)) {
-
-            AuthorizationDecision vote = null //ACCESS_ABSTAIN
-
             log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
             String projectId = extractProjectId(request)
-            Boolean isInviteOnly = privateProjects.get(projectId)
-            if (isInviteOnly && !isContactUrl(request)) {
+            Boolean isInviteOnly = cacheLoader.load(projectId)
+            if (isInviteOnly && !isExceptionUrl(request)) {
                 log.debug("project id [{}] requires invite only access", projectId)
                 Collection<? extends GrantedAuthority> authorities = getAuthorities(authentication.get())
                 vote = new AuthorizationDecision(false) //ACCESS_DENIED;
@@ -121,9 +123,9 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
                 log.debug("user [{}] is not permitted to access project [{}]", authentication.get().getPrincipal(), projectId)
                 throw new InviteOnlyAccessDeniedException("Access is denied", projectId)
             }
-
             return vote
         }
+        return vote
     }
 
     private String extractProjectId(HttpServletRequest request) {
@@ -135,12 +137,13 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
         return StringUtils.EMPTY
     }
 
-    private boolean isContactUrl(HttpServletRequest request) {
+    private boolean isExceptionUrl(HttpServletRequest request) {
         String url = getRequestUrl(request)
-        log.debug("checking to see if url [{}] matches path [{}]", url, CONTACT_EXCEPTION.toString())
-        Matcher contact = CONTACT_EXCEPTION.matcher(url)
-        if (contact) {
-            return true
+        log.debug("checking to see if url [{}] matches exception paths [{}]", url, EXCEPTIONS)
+        for (Pattern exception : EXCEPTIONS) {
+            if (exception.matcher(url)) {
+                return true
+            }
         }
         return false
     }
@@ -164,14 +167,7 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     }
 
     private static boolean isPermitted(String projectId, UserSkillsGrantedAuthority grantedAuthority) {
-        if (grantedAuthority.getRole().roleName == RoleName.ROLE_SUPER_DUPER_USER) {
-            return true
-        }
-        if (grantedAuthority.getRole().roleName == RoleName.ROLE_PRIVATE_PROJECT_USER && grantedAuthority.getRole().projectId == projectId) {
-            return true
-        }
-        if ((grantedAuthority.getRole().roleName == RoleName.ROLE_PROJECT_ADMIN ||
-                grantedAuthority.getRole().roleName == RoleName.ROLE_PROJECT_APPROVER) && grantedAuthority.getRole().projectId == projectId) {
+        if (grantedAuthority.getRole().roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_SUPER_DUPER_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]) {
             return true
         }
         return false

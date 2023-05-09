@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
@@ -36,6 +37,7 @@ import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.SkillsDepsService
+import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
@@ -111,6 +113,9 @@ class GlobalBadgesService {
     @Autowired
     SkillDefAccessor skillDefAccessor
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
@@ -131,6 +136,10 @@ class GlobalBadgesService {
         SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
         SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
 
+        if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
+            throw new SkillException("Projects with the community protection are not allowed to be added to a Global Badge", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
         assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
     }
 
@@ -144,6 +153,10 @@ class GlobalBadgesService {
         if (!projDef) {
             throw new SkillException("Failed to find project [${projectId}]", projectId)
         }
+        if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
+            throw new SkillException("Projects with the community protection are not allowed to be added to a Global Badge", projectId, null, ErrorCode.AccessDenied)
+        }
+
         List<LevelDef> projectLevels = levelDefinitionRepository.findAllByProjectRefId(projDef.id)
         projectLevels.sort({it.level})
 
@@ -282,16 +295,6 @@ class GlobalBadgesService {
         return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
     }
 
-    @Transactional(readOnly = true)
-    List<ProjectResult> getAllProjectsForBadge(String badgeId) {
-        List<String> projectIdsAlreadyInBadge = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
-        return projDefRepo.findAll().findAll { !(it.projectId in projectIdsAlreadyInBadge) && it.projectId != InceptionProjectService.inceptionProjectId }.collect { ProjDef definition ->
-            new ProjectResult(
-                    projectId: definition.projectId, name: InputSanitizer.unsanitizeName(definition.name), totalPoints: definition.totalPoints,
-                    displayOrder: 0,
-            )
-        }
-    }
 
     @Transactional(readOnly = true)
     AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {

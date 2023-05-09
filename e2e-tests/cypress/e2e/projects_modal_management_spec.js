@@ -101,7 +101,6 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@postNewProject');
 
         cy.contains('test');
-        cy.contains('ID: test');
 
         cy.get('[data-cy=editProjBtn]')
             .focus();
@@ -114,7 +113,6 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=closeProjectButton]')
             .click();
         cy.contains('test');
-        cy.contains('ID: test');
     });
 
     it('Close new project dialog', () => {
@@ -162,8 +160,6 @@ describe('Projects Modal Management Tests', () => {
 
         cy.clickSave();
         cy.wait('@postNewProject');
-
-        cy.contains(`ID: ${expectedId}`);
     });
 
     it('Once project id is enabled name-to-id autofill should be turned off', () => {

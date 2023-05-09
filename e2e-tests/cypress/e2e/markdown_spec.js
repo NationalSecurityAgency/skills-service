@@ -86,7 +86,7 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
-        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();
@@ -130,7 +130,7 @@ describe('Markdown Tests', () => {
 
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
-        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
           .click();

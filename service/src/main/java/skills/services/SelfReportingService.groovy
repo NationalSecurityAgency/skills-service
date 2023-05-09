@@ -105,7 +105,7 @@ class SelfReportingService {
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
-            CustomValidationResult customValidationResult = customValidator.validateDescription(requestMsg)
+            CustomValidationResult customValidationResult = customValidator.validateDescription(requestMsg, skillDefinition.projectId)
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[selfReportApprovalMsg], requestMsg=[${requestMsg}], userId=${userId}, performedOn=[${performedOn}]]"
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)

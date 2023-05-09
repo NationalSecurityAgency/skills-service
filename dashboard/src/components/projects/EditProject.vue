@@ -59,10 +59,47 @@ limitations under the License.
                       @hidden="tooltipShowing=false"/>
           </div>
         </div>
+        <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">
+          <div v-if="isCopyAndCommunityProtected">
+            <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Copying project whose access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
+          </div>
+          <div v-if="isEditAndCommunityProtected">
+            <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
+          </div>
+          <div v-if="!isEditAndCommunityProtected && !isCopyAndCommunityProtected">
+            <ValidationObserver v-slot="{ pending, invalid }">
+              <div class="row">
+                <div class="col">
+                  <ValidationProvider rules="projectCommunityRequirements"
+                                      name="Failed Minimum Requirement" v-slot="{ errors }">
+                    <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"
+                                     @change="userCommunityChanged"
+                                     name="check-button" inline switch data-cy="restrictCommunity">
+                      Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
+                    </b-form-checkbox>
+
+                    <div v-if="invalid" class="alert alert-danger mb-3 mt-1" data-cy="communityValidationErrors" role="alert">
+                      <div>
+                        <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true" />
+                        <span>Unable to restrict access to {{ userCommunityRestrictedDescriptor }} users only:</span>
+                      </div>
+                      <span v-html="errors[0]"/>
+                    </div>
+                  </ValidationProvider>
+                </div>
+              </div>
+              <div v-if="!pending">
+                <div v-if="internalProject.enableProtectedUserCommunity && !invalid" class="alert-warning alert mb-0 mt-1" data-cy="communityRestrictionWarning">
+                  <i class="fas fa-exclamation-triangle text-danger" aria-hidden="true" /> Please note that once the restriction is enabled it <b>cannot</b> be lifted/disabled.
+                </div>
+              </div>
+            </ValidationObserver>
+          </div>
+        </div>
         <div class="row">
           <div class="mt-2 col-12">
             <label>Description</label>
-              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
+              <ValidationProvider rules="maxDescriptionLength|customProjectDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
                 <markdown-editor v-if="!isEdit || descriptionLoaded" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
@@ -89,10 +126,12 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
-  import ProjectService from './ProjectService';
+  import ProjectService from '@/components/projects/ProjectService';
   import IdInput from '../utils/inputForm/IdInput';
   import InputSanitizer from '../utils/InputSanitizer';
   import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
@@ -106,7 +145,7 @@ limitations under the License.
       SkillsSpinner,
       ReloadMessage,
     },
-    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
+    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin, CommunityLabelsMixin],
     props: ['project', 'isEdit', 'value', 'isCopy'],
     data() {
       return {
@@ -118,10 +157,12 @@ limitations under the License.
           description: '',
           ...this.project,
         },
+        initialValueForEnableProtectedUserCommunity: null,
         originalProject: {
           name: '',
           description: '',
           projectId: '',
+          enableProtectedUserCommunity: false,
         },
         canEditProjectId: false,
         overallErrMsg: '',
@@ -138,11 +179,22 @@ limitations under the License.
       this.registerValidation();
     },
     mounted() {
+      this.internalProject.enableProtectedUserCommunity = this.isRestrictedUserCommunity(this.project.userCommunity);
+      this.initialValueForEnableProtectedUserCommunity = this.internalProject.enableProtectedUserCommunity;
+      if (this.isCopy && this.initialValueForEnableProtectedUserCommunity) {
+        this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
+      }
       this.loadComponent();
 
       document.addEventListener('focusin', this.trackFocus);
     },
     computed: {
+      isEditAndCommunityProtected() {
+        return this.isEdit && this.initialValueForEnableProtectedUserCommunity;
+      },
+      isCopyAndCommunityProtected() {
+        return this.isCopy && this.initialValueForEnableProtectedUserCommunity;
+      },
       title() {
         if (this.isCopy) {
           return 'Copy Project';
@@ -284,6 +336,16 @@ limitations under the License.
       updateDescription(event) {
         this.internalProject.description = event;
       },
+      userCommunityChanged() {
+        setTimeout(() => {
+          this.$nextTick(() => {
+            const { observer } = this.$refs;
+            if (observer) {
+              observer.validate({ silent: false });
+            }
+          });
+        }, 250);
+      },
       registerValidation() {
         const self = this;
         extend('uniqueName', {
@@ -305,6 +367,42 @@ limitations under the License.
             }
             return ProjectService.checkIfProjectIdExist(value)
               .then((remoteRes) => !remoteRes);
+          },
+        });
+
+        extend('customProjectDescriptionValidator', {
+          validate(value) {
+            if (!self.$store.getters.config.paragraphValidationRegex) {
+              return true;
+            }
+
+            return DescriptionValidatorService.validateDescription(value, false, self.internalProject.enableProtectedUserCommunity).then((result) => {
+              if (result.valid) {
+                return true;
+              }
+              if (result.msg) {
+                return `{_field_} - ${result.msg}.`;
+              }
+              return '{_field_} is invalid.';
+            });
+          },
+        });
+
+        extend('projectCommunityRequirements', {
+          validate(value) {
+            if (!value || !self.isEdit) {
+              return true;
+            }
+
+            return ProjectService.validateProjectForEnablingCommunity(self.internalProject.originalProjectId).then((result) => {
+              if (result.isAllowed) {
+                return true;
+              }
+              if (result.unmetRequirements) {
+                return `<ul><li>${result.unmetRequirements.join('</li><li>')}</li></ul>`;
+              }
+              return '{_field_} is invalid.';
+            });
           },
         });
       },

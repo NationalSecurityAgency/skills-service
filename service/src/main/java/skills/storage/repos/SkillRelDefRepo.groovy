@@ -403,4 +403,20 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.type='Tag' and srd.parent.type = 'Tag' and srd.parent.skillId=?1''')
     Integer getSkillWithTagCount(String tagId)
+
+    @Query(value = '''select skillReq.hasGlobalBadge OR levelReq.hasGlobalBadge
+                from
+                (select count(badge) > 0 as hasGlobalBadge
+                from skill_relationship_definition rel,
+                     skill_definition badge,
+                     skill_definition skill
+                where rel.parent_ref_id = badge.id
+                  and rel.child_ref_id = skill.id
+                  and rel.type = 'BadgeRequirement'
+                  and badge.type = 'GlobalBadge'
+                  and skill.project_id = ?1) skillReq,
+                (select COUNT(*) > 0 as hasGlobalBadge
+                 from global_badge_level_definition
+                 where project_id = ?1) levelReq''', nativeQuery = true)
+    boolean belongsToGlobalBadge(String projectId)
 }

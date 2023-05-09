@@ -57,7 +57,7 @@ describe('Client Display Survey Tests', () => {
             cy.completedCheck(env)
             if (isDashboard) {
                 cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
-                cy.get('[data-cy="manageMyProjsBtn"]')
+                cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             } else {
                 cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
                 cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
@@ -137,7 +137,7 @@ describe('Client Display Survey Tests', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
 
         cy.get('[data-cy="cancelQuizAttempt"]').click()
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
     it('answers are preserved after save-and-close in client-display', () => {
@@ -397,7 +397,7 @@ describe('Client Display Survey Tests', () => {
 
         it(`input text validation - custom validation happens when completing the test in [${env}]`, () => {
             // make validate call very slow that way as-you-type validation will not be performed by the time Done button is pressed
-            cy.intercept('/api/validation/description', (req) => {
+            cy.intercept('/api/validation/description*', (req) => {
                 req.reply((res) => {
                     res.send({ delay: 3000 });
                 });

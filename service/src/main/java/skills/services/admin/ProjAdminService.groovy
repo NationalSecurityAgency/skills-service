@@ -29,13 +29,9 @@ import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
-import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.LatestEvent
-import skills.controller.result.model.ProjectDescription
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.SimpleProjectResult
+import skills.controller.result.model.*
 import skills.icons.IconCssNameUtil
 import skills.services.*
 import skills.services.inception.InceptionProjectService
@@ -45,12 +41,7 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
-import skills.storage.repos.CustomIconRepo
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.ProjDefWithDescriptionRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserEventsRepo
-import skills.storage.repos.UserRepo
+import skills.storage.repos.*
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -98,6 +89,9 @@ class ProjAdminService {
     ProjectSortingService sortingService
 
     @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
     SettingsService settingsService
 
     @Autowired
@@ -116,6 +110,9 @@ class ProjAdminService {
     UserRepo userRepo
 
     @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
@@ -131,13 +128,9 @@ class ProjAdminService {
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
         assert projectRequest?.name
+        validateUserCommunityProps(projectRequest, originalProjectId)
 
         lockingService.lockProjects()
-
-        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
-        if (!customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
-        }
 
         ProjDefWithDescription projectDefinition = originalProjectId ? projDefWithDescriptionRepo.findByProjectIdIgnoreCase(originalProjectId) : null
         if (!projectDefinition || !projectRequest.projectId.equalsIgnoreCase(originalProjectId)) {
@@ -146,6 +139,7 @@ class ProjAdminService {
         if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
             serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
         }
+        ProjDefParent savedProjDef
         if (projectDefinition) {
             Props.copy(projectRequest, projectDefinition)
             log.debug("Updating [{}]", projectDefinition)
@@ -154,6 +148,7 @@ class ProjAdminService {
                 projectDefinition = projDefWithDescriptionRepo.save(projectDefinition)
             }
             log.debug("Saved [{}]", projectDefinition)
+            savedProjDef = projectDefinition
         } else {
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
@@ -178,6 +173,38 @@ class ProjAdminService {
             String userId = userIdParam ?: userInfoService.getCurrentUserId()
             accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.debug("Added user role [{}] to [{}]", RoleName.ROLE_PROJECT_ADMIN, userId)
+
+            savedProjDef = projDef
+        }
+
+        if (projectRequest.enableProtectedUserCommunity) {
+            settingsService.saveSetting(new ProjectSettingsRequest(projectId: savedProjDef.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
+        }
+
+        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg)
+        }
+    }
+
+    @Profile
+    private void validateUserCommunityProps(ProjectRequest projectRequest, String originalProjectId) {
+        String projId = originalProjectId ?: projectRequest.projectId
+        if (projectRequest.enableProtectedUserCommunity != null) {
+            if (projectRequest.enableProtectedUserCommunity) {
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", projId, null, ErrorCode.AccessDenied)
+                }
+
+                EnableProjValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
+                if (!enableProjValidationRes.isAllowed) {
+                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+                    throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", projId, null, ErrorCode.AccessDenied)
+                }
+            } else {
+                SkillsValidator.isTrue(!userCommunityService.isUserCommunityOnlyProject(projId), "Once project [enableProtectedUserCommunity=true] it cannot be flipped to false", projId)
+            }
         }
     }
 
@@ -372,16 +399,24 @@ class ProjAdminService {
         String userId = userInfo.username
         Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)
 
+        boolean isNotCommunityMember = !userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
         List<ProjectResult> finalRes
         if (isRoot) {
             finalRes = loadProjectsForRoot(projectIdSortOrder, userId)
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
             List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)
+            if (isNotCommunityMember) {
+                projects = projects.findAll { !it.protectedCommunityEnabled}
+            }
             finalRes = projects?.unique({ it.projectId })?.collect({
                 ProjectResult res = convert(it, projectIdSortOrder)
                 return res
             })
+        }
+
+        if (isNotCommunityMember) {
+            finalRes.each { it.userCommunity = null }
         }
 
         finalRes.sort() { it.displayOrder }
@@ -399,6 +434,8 @@ class ProjAdminService {
         ProjSummaryResult projectDefinition = projDefAccessor.getProjSummaryResult(projectId)
         Integer order = sortingService.getProjectSortOrder(projectId)
         ProjectResult res = convert(projectDefinition, [(projectId): order])
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
+        res.userCommunity = isCommunityMember ? userCommunityService.getProjectUserCommunity(projectId) : null
         return res
     }
 
@@ -547,6 +584,7 @@ class ProjAdminService {
                 numSkillsReused: definition.getNumSkillsReused() ?: 0,
                 totalPointsReused: definition.getTotalPointsReused() ?: 0,
                 userRole: definition.getUserRole(),
+                userCommunity: userCommunityService.getCommunityNameBasedProjConfStatus(definition.getProtectedCommunityEnabled())
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills
@@ -574,5 +612,15 @@ class ProjAdminService {
     LatestEvent getLastReportedSkillEvent(String projectId) {
         Date date = eventsRepo.getLatestEventDateForProject(projectId)
         new LatestEvent(lastReportedSkillDate: date)
+    }
+
+    @Transactional(readOnly = true)
+    EnableProjValidationRes validateProjectForEnablingCommunity(String projectId) {
+        return userCommunityService.validateProjectForCommunity(projectId)
+    }
+
+    @Transactional(readOnly = true)
+    boolean isUserCommunityRestrictedProject(String projectId) {
+        return userCommunityService.isUserCommunityOnlyProject(projectId)
     }
 }

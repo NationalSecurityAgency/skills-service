@@ -42,4 +42,6 @@ class ProjectResult extends SimpleProjectResult{
 
     String description
     String userRole
+
+    String userCommunity
 }

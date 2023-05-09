@@ -16,6 +16,7 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -23,11 +24,13 @@ import org.springframework.web.bind.annotation.*
 import skills.HealthChecker
 import skills.UIConfigProperties
 import skills.auth.AuthMode
+import skills.auth.UserInfoService
 import skills.controller.result.model.SettingsResult
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.FeatureService
 import skills.services.SystemSettingsService
+import skills.services.admin.UserCommunityService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 
@@ -68,12 +71,19 @@ class PublicConfigController {
     FeatureService featureService
 
     @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
         Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
+        configureUserCommunityProps(res)
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
         res["oAuthOnly"] = authMode == AuthMode.FORM && oAuthOnly
@@ -101,6 +111,7 @@ class PublicConfigController {
     Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId){
         String docsHost = uiConfigProperties.ui.docsHost
         Map<String,String> res = new HashMap<>()
+        configureUserCommunityProps(res)
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
         res["allowedAttachmentFileTypes"] = uiConfigProperties.ui.allowedAttachmentFileTypes
@@ -167,6 +178,18 @@ class PublicConfigController {
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting
         return res
+    }
+
+    private configureUserCommunityProps(Map<String,String> res) {
+        Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
+        res['currentUsersCommunityDescriptor'] = belongsToUserCommunity ?
+                uiConfigProperties.ui.userCommunityRestrictedDescriptor :
+                uiConfigProperties.ui.defaultCommunityDescriptor
+        if (!belongsToUserCommunity) {
+            // remove all userCommunity keys
+            Set<String> userCommunityKeys = res.keySet().findAll { StringUtils.startsWith(it, 'userCommunity') }
+            userCommunityKeys.each { res.remove(it)}
+        }
     }
 
     final private static Map statusRes = [

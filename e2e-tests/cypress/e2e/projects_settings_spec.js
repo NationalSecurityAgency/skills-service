@@ -360,10 +360,10 @@ describe('Project Settings Tests', () => {
         cy.wait('@getSettings');
         cy.get('[data-cy="pageHeaderStat"]')
             .eq(0)
-            .should('include.text', 'PUBLIC');
+            .should('include.text', 'Project Catalog');
         cy.get('[data-cy="pageHeaderStat"]')
             .eq(0)
-            .should('include.text', 'Not Discoverable');
+            .should('include.text', 'Hidden');
 
         cy.get('[data-cy="projectVisibilitySelector"]')
             .select('dpr');
@@ -373,13 +373,13 @@ describe('Project Settings Tests', () => {
         cy.wait('@getSettings');
         cy.get('[data-cy="pageHeaderStat"]')
             .eq(0)
-            .should('include.text', 'PUBLIC');
+            .should('include.text', 'Project Catalog');
         cy.get('[data-cy="pageHeaderStat"]')
             .eq(0)
             .should('include.text', 'Discoverable');
         cy.get('[data-cy="pageHeaderStat"]')
             .eq(0)
-            .should('not.include.text', 'Not Discoverable');
+            .should('not.include.text', 'Hidden');
 
         cy.get('[data-cy="projectVisibilitySelector"]')
             .select('pio');

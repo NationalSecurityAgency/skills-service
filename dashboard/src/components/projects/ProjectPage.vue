@@ -93,12 +93,13 @@ limitations under the License.
   import ProjectService from '@/components/projects/ProjectService';
   import ProjectShareModal from '@/components/projects/ProjectShareModal';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
 
   const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
   export default {
     name: 'ProjectPage',
-    mixins: [ProjConfigMixin],
+    mixins: [ProjConfigMixin, CommunityLabelsMixin],
     components: {
       ProjectShareModal,
       ImportFinalizeAlert,
@@ -155,23 +156,37 @@ limitations under the License.
         if (!this.project || !this.projConfig) {
           return {};
         }
-        let visibilityIcon = 'fas fa-lock-open';
-        let visibilityDescription = 'Not Discoverable';
-        let visibilityType = 'PUBLIC';
+        let visibilityLabel = 'Project Catalog';
+        let visibilityIcon = 'fas fa-eye-slash text-warning';
+        let visibilityDescription = '';
+        let visibilityType = 'Hidden';
         if (this.isProjConfigInviteOnly) {
+          visibilityLabel = 'Protection';
           visibilityDescription = 'Invite Only';
-          visibilityIcon = 'fas fa-lock';
+          visibilityIcon = 'fas fa-user-lock text-danger';
           visibilityType = 'PRIVATE';
         } else if (this.isProjConfigDiscoverable) {
-          visibilityDescription = 'Discoverable';
+          visibilityType = 'Discoverable';
+          visibilityIcon = 'fas fa-search-plus text-success';
+          visibilityDescription = '';
         }
 
-        const stats = [{
-          label: 'Visibility',
+        const stats = [];
+        if (this.project.userCommunity) {
+          stats.push({
+            label: this.beforeCommunityLabel,
+            preformatted: `<div class="h5 font-weight-bold mb-0">${this.project.userCommunity}</div>`,
+            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${this.afterCommunityLabel}</div>`,
+            icon: 'fas fa-shield-alt text-danger',
+          });
+        }
+        stats.push({
+          label: visibilityLabel,
           preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
           secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
           icon: `${visibilityIcon} skills-color-visibility`,
-        }, {
+        });
+        stats.push({
           label: 'Skills',
           count: this.project.numSkills,
           secondaryStats: [{
@@ -184,7 +199,8 @@ limitations under the License.
             badgeVariant: 'warning',
           }],
           icon: 'fas fa-graduation-cap skills-color-skills',
-        }, {
+        });
+        stats.push({
           label: 'Points',
           count: this.project.totalPoints,
           warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
@@ -194,11 +210,12 @@ limitations under the License.
             count: this.project.totalPointsReused,
             badgeVariant: 'info',
           }],
-        }, {
+        });
+        stats.push({
           label: 'Badges',
           count: this.project.numBadges,
           icon: 'fas fa-award skills-color-badges',
-        }];
+        });
 
         if (!this.isReadOnlyProj) {
           stats.push({

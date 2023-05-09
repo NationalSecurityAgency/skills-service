@@ -81,7 +81,8 @@ class SkillsFactory {
     }
 
     static createProject(int projNumber = 1) {
-        return [projectId: getDefaultProjId(projNumber), name: getDefaultProjName(projNumber)]
+        Map res = [projectId: getDefaultProjId(projNumber), name: getDefaultProjName(projNumber)]
+        return res
     }
 
     static createSubject(int projNumber = 1, int subjNumber = 1) {

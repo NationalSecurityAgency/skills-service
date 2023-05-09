@@ -87,7 +87,7 @@ class SubjAdminService {
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
         lockingService.lockProject(projectId)
 
-        CustomValidationResult customValidationResult = customValidator.validate(subjectRequest)
+        CustomValidationResult customValidationResult = customValidator.validate(subjectRequest, projectId)
         if (performCustomValidation && !customValidationResult.valid) {
             String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[subject], subjectId=[${subjectRequest.subjectId}], name=[${subjectRequest.name}], description=[${subjectRequest.description}]"
             throw new SkillException(msg)

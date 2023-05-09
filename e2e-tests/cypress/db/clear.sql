@@ -19,3 +19,4 @@ delete from user_roles;
 delete from global_badge_level_definition;
 delete from skill_definition;
 delete from settings;
+delete from user_tags;

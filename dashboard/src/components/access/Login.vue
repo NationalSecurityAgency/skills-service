@@ -172,6 +172,9 @@ limitations under the License.
               const errorMessage = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : undefined;
               this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
             }
+          })
+          .finally(() => {
+            this.$store.dispatch('loadConfigState');
           });
       },
       oAuth2Login(registrationId) {

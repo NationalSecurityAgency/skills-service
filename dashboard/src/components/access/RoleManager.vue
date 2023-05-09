@@ -76,7 +76,7 @@ limitations under the License.
       </template>
       <template v-slot:cell(controls)="data">
 
-        <div class="float-right" :data-cy="`controlsCell_${data.item.userId}`">
+        <div class="float-right mr-1" :data-cy="`controlsCell_${data.item.userId}`">
           <i v-if="!notCurrentUser(data.item.userId)"
              data-cy="cannotRemoveWarning"
              v-b-tooltip.hover="'Can not remove or edit myself. Sorry!!'"
@@ -375,12 +375,13 @@ limitations under the License.
           })
           .finally(() => {
             this.isSaving = false;
+            this.table.options.busy = false;
             this.selectedUser = null;
             this.userRole.selected = null;
           });
       },
       handleError(e) {
-        if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'UserNotFound') {
+        if (e.response.data && e.response.data.errorCode && (e.response.data.errorCode === 'UserNotFound' || e.response.data.errorCode === 'AccessDenied')) {
           this.errNotification.msg = e.response.data.explanation;
           this.errNotification.enable = true;
         } else {

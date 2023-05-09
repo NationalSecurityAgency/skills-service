@@ -35,6 +35,7 @@ import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
+import skills.services.admin.UserCommunityService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
 import skills.storage.model.UserAttrs
@@ -82,6 +83,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserAttrsService userAttrsService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
@@ -275,6 +279,11 @@ class AccessSettingsStorageService {
             assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName] already exists"
         } else {
             throw new SkillException("User [$userIdLower]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
+        }
+
+        if (projectId && !userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyProject(projectId)) {
+            String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay
+            throw new SkillException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role", projectId, null, ErrorCode.AccessDenied)
         }
 
         // remove mutually exclusive roles

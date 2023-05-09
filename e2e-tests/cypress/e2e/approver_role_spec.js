@@ -505,9 +505,9 @@ describe('Approver Role Tests', () => {
     it('navigate from project where you are an approver to Progress & Ranking page - "Manage My Project" button should be available', function () {
         cy.visit(`/administrator/projects/proj1/self-report`);
         cy.get('[data-cy="skillTreeLogo"]').click()
-        cy.get('[data-cy="manageMyProjsBtn"]').click()
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]').click()
         cy.get('[data-cy="backToProgressAndRankingBtn"]').click()
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
     it('navigate into the project and back to projects view - Add Project button should still be present', function () {

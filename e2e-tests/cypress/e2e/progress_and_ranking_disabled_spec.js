@@ -68,8 +68,10 @@ describe('Project and Ranking Views are disabled Tests', () => {
     it('Project level enable prod-mode setting must NOT be shown', () => {
         cy.createProject(1);
 
+        const addToCatalogLabel = 'Add to the Project Catalog'
+
         cy.visit('/administrator/projects/proj1/settings');
-        cy.contains('[data-cy=projectVisibilitySelector]', 'Discoverable on Progress And Ranking')
+        cy.contains('[data-cy=projectVisibilitySelector]', addToCatalogLabel)
             .should('exist');
         // cy.get('[ data-cy="productionModeSetting"]').should('exist');
         cy.intercept('GET', '/public/config', (req) => {
@@ -83,10 +85,9 @@ describe('Project and Ranking Views are disabled Tests', () => {
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getConfig');
-        cy.contains('[data-cy=projectVisibilitySelector]', 'Discoverable on Progress And Ranking')
+        cy.contains('[data-cy=projectVisibilitySelector]', addToCatalogLabel)
             .should('not.exist');
 
-        // cy.get('[ data-cy="productionModeSetting"]').should('not.exist');
     });
 
     it('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {

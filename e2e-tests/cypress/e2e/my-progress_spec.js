@@ -836,14 +836,12 @@ describe('Navigation Tests', () => {
         cy.removeFromMyProjects(2);
         cy.visit('/progress-and-rankings');
 
-        cy.contains('START CUSTOMIZING TODAY!');
-
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
 
         cy.visit('/progress-and-rankings');
-        cy.get('[data-cy="manageMyProjsBtn"]')
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
     });
@@ -865,7 +863,7 @@ describe('Navigation Tests', () => {
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/');
 
-        cy.contains('START CUSTOMIZING TODAY!');
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
     it('change sort order using keyboard', function () {
@@ -1033,7 +1031,7 @@ describe('Navigation Tests', () => {
 
     it('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
-        cy.intercept('POST', '/api/validation/description').as('validate');
+        cy.intercept('POST', '/api/validation/description*').as('validate');
 
         const invalidMsg = new Array(3000).fill('a').join('');
         cy.loginAsProxyUser();
@@ -1077,12 +1075,12 @@ describe('Navigation Tests', () => {
 
         it('Send email to project owner', () => {
             cy.intercept('POST', '/api/projects/*/contact').as('contact');
-            cy.intercept('POST', '/api/validation/description').as('validate');
+            cy.intercept('POST', '/api/validation/description*').as('validate');
             cy.loginAsAdminUser();
             cy.createProject(3);
             cy.enableProdMode(3);
             cy.visit('/progress-and-rankings/');
-            cy.get('[data-cy=manageMyProjsBtn]').click();
+            cy.get('[data-cy="manageMyProjsBtnInNoContent"]').click();
             cy.get('[data-cy="contactOwnerBtn_proj3"]').should('be.visible').click();
             cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
             cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');

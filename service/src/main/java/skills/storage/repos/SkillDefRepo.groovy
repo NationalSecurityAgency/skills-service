@@ -125,6 +125,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         subjectDef = srd.parent and s = srd.child and 
         srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
         s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%')) and
+        not exists (select 1 from Setting s2 where s.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true') and
         s.readOnly != true''')
     List<SkillDefPartial> findAllByTypeAndNameLikeNoImportedSkills(SkillDef.ContainerType type, String name)
 
