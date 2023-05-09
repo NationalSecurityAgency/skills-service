@@ -87,29 +87,35 @@ class SkillsDepsService {
     }
 
     @Transactional()
-    void assignSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependendencyProjectId = null) {
-        SkillDef dependent = skillDefAccessor.getSkillAndBadgeDef(projectId, dependentSkillId)
-        SkillDef dependency = skillDefAccessor.getSkillAndBadgeDef(dependendencyProjectId ?: projectId, dependencySkillId)
+    void addLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
+        SkillDef skillDef = skillDefAccessor.getSkillAndBadgeDef(projectId, id)
+        SkillDef prereqSkillDef = skillDefAccessor.getSkillAndBadgeDef(prereqFromProjectId ?: projectId, prereqFromId)
 
-        if (skillCatalogService.isAvailableInCatalog(dependent)) {
-            throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
+        if (skillCatalogService.isAvailableInCatalog(skillDef)) {
+            throw new SkillException("Skill [${skillDef.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, id, ErrorCode.DependenciesNotAllowed)
         }
-        if (skillDefRepo.wasThisSkillReusedElsewhere(dependent.id)) {
-            throw new SkillException("Skill [${dependent.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
+        if (skillDefRepo.wasThisSkillReusedElsewhere(skillDef.id)) {
+            throw new SkillException("Skill [${skillDef.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, id, ErrorCode.DependenciesNotAllowed)
+        }
+        if ("false" == skillDef.enabled) {
+            throw new SkillException("Disabled nodes cannot be added. [${skillDef.projectId}-${skillDef.skillId}] is disabled", projectId, null, ErrorCode.BadParam)
+        }
+        if ("false" == prereqSkillDef.enabled) {
+            throw new SkillException("Disabled nodes cannot be added. [${prereqSkillDef.projectId}-${prereqSkillDef.skillId}] is disabled", projectId, null, ErrorCode.BadParam)
         }
 
-        if (dependendencyProjectId) {
-            dependencyValidator.validateDependencyEligibility(projectId, dependency)
+        if (prereqFromProjectId && projectId != prereqFromProjectId) {
+            dependencyValidator.validateDependencyEligibility(projectId, prereqSkillDef)
         }
 
-        validateDependencyVersions(dependent, dependency)
-        checkForCircularGraphAndThrowException(dependent, dependency, SkillRelDef.RelationshipType.Dependence)
+        validateDependencyVersions(skillDef, prereqSkillDef)
+        checkForCircularGraphAndThrowException(skillDef, prereqSkillDef, SkillRelDef.RelationshipType.Dependence)
         try {
-            skillRelDefRepo.save(new SkillRelDef(parent: dependent, child: dependency, type: SkillRelDef.RelationshipType.Dependence))
+            skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
         } catch (DataIntegrityViolationException e) {
-            String msg = "Skill dependency [${dependent.projectId}:${dependent.skillId}]=>[${dependency.projectId}:${dependency.skillId}] already exist.".toString()
+            String msg = "Skill dependency [${skillDef.projectId}:${skillDef.skillId}]=>[${prereqSkillDef.projectId}:${prereqSkillDef.skillId}] already exist.".toString()
             log.error(msg, e)
-            throw new SkillException(msg, dependent.projectId, dependent.skillId, ErrorCode.FailedToAssignDependency)
+            throw new SkillException(msg, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 

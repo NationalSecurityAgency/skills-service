@@ -18,7 +18,6 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -34,14 +33,12 @@ import skills.controller.request.model.NextLevelRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.SkillProjectCopyRequest
-import skills.controller.request.model.SkillRequest
 import skills.controller.request.model.SkillsActionRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
 import skills.icons.CustomIconFacade
-import skills.icons.IconCssNameUtil
 import skills.services.AccessSettingsStorageService
 import skills.services.CreatedResourceLimitsValidator
 import skills.services.CustomValidationResult
@@ -50,11 +47,8 @@ import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.settings.Settings
-import skills.services.settings.SettingsDataAccessor
 import skills.services.settings.SettingsService
 import skills.storage.model.ProjDef
-import skills.storage.model.QuizDef
-import skills.storage.model.Setting
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
@@ -66,7 +60,6 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserQuizAttemptRepo
-import skills.utils.ClientSecretGenerator
 import skills.utils.Props
 
 @Service
@@ -332,7 +325,7 @@ class ProjectCopyService {
             graphSkillDefEdge.to.projectId == fromProject.projectId && graphSkillDefEdge.from.projectId == fromProject.projectId
         }
         localOnlyEdges.each {
-            skillsDepsService.assignSkillDependency(toProj.projectId, it.from.skillId, it.to.skillId)
+            skillsDepsService.addLearningPathItem(toProj.projectId, it.from.skillId, it.to.skillId)
         }
     }
 

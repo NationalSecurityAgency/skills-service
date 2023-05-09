@@ -628,7 +628,7 @@ class AdminController {
         SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
         SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
-        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
+        skillsDepsService.addLearningPathItem(projectId, dependentSkillId, dependencySkillId)
         return new RequestResult(success: true)
     }
 
@@ -643,6 +643,25 @@ class AdminController {
     }
 
 
+
+    @RequestMapping(value = "/projects/{projectId}/{id}/prerequisite/{prereqProjectId}/{prereqId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult addLearningPathItem(@PathVariable("projectId") String projectId,
+                                      @PathVariable("id") String id,
+                                      @PathVariable("prereqProjectId") String prereqProjectId,
+                                      @PathVariable("prereqId") String prereqId) {
+        SkillsValidator.isNotBlank(projectId, "To Project Id", projectId)
+        SkillsValidator.isNotBlank(id, "To Id", id)
+        SkillsValidator.isNotBlank(prereqProjectId, "From Project Id")
+        SkillsValidator.isNotBlank(prereqId, "From Id", prereqId)
+
+        SkillsValidator.isTrue(!id.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "To ID must not contain reuse tag", projectId, id)
+        SkillsValidator.isTrue(!prereqId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "From ID must not contain reuse tag", projectId, prereqId)
+
+        skillsDepsService.addLearningPathItem(projectId, id, prereqId, prereqProjectId)
+        return new RequestResult(success: true)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
@@ -656,7 +675,7 @@ class AdminController {
         SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
         SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
-        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
+        skillsDepsService.addLearningPathItem(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
         return new RequestResult(success: true)
     }
 

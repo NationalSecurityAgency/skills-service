@@ -415,6 +415,11 @@ class SkillsService {
         wsHelper.adminPost(url, props, throwExceptionOnFailure)
     }
 
+    def addLearningPathPrerequisite(String projectId, String id, String prereqProjectId, String prereqId, boolean throwExceptionOnFailure = true) {
+        String url = "/projects/${projectId}/${id}/prerequisite/${prereqProjectId}/${prereqId}".toString()
+        wsHelper.adminPost(url, [:], throwExceptionOnFailure)
+    }
+
     def checkIfSkillsHaveDependencies(String projectId, List<String> skillIds) {
         String url = "/projects/${projectId}/hasDependency"
         return wsHelper.adminPost(url, [skillIds: skillIds]).body
