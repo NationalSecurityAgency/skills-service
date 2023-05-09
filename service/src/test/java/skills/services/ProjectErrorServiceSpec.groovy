@@ -16,8 +16,10 @@
 package skills.services
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
+import skills.controller.result.model.TableResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.ProjectError
@@ -105,6 +107,30 @@ class ProjectErrorServiceSpec extends DefaultIntSpec {
         allErrs[1].count == 1
         allErrs[1].errorType == ProjectError.ErrorType.UnachievableSubjectLevel
         allErrs[1].error == "Level 5 in SubjectName cannot be achieved based on the points available in the subject"
+    }
+
+    def "unachievable levels are not generated for percent based project"() {
+        def proj = SkillsFactory.createProject(5)
+        def subject = SkillsFactory.createSubject(5, 1)
+        def skill = SkillsFactory.createSkill(5, 1, 1)
+        skill.pointIncrement = 1000
+        skillsService.createProjectAndSubjectAndSkills(proj, subject, [skill])
+
+        skillsService.changeSetting(proj.projectId, projectPointsSetting, [projectId: proj.projectId, setting: projectPointsSetting, value: "true"])
+        skill.pointIncrement = 100
+        skillsService.createSkill(skill)
+
+        skillsService.changeSetting(proj.projectId, projectPointsSetting, [projectId: proj.projectId, setting: projectPointsSetting, value: "false"])
+
+        when:
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        transactionTemplate.execute() {
+            projectErrorService.generateIssuesForUnachievableLevels()
+        }
+        then:
+        TableResult tableResult = projectErrorService.getAllErrorsForProject(proj.projectId, PageRequest.of(0, 10))
+        tableResult.count == 0
+        !tableResult.data
     }
 
     def "existing unachievable level issues are updated as opposed to being recreated"() {

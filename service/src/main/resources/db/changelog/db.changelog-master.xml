@@ -2383,4 +2383,42 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="39" author="skills team">
+        <sql>
+            UPDATE level_definition l
+            SET points_from=null,
+                points_to=null
+                from project_definition p,
+             settings settings
+                    where p.id = l.project_ref_id
+                      and l.skill_ref_id is null
+                      and p.project_id != 'Inception'
+          and p.project_id = settings.project_id
+          and settings.setting = 'level.points.enabled'
+          and settings.value = 'false';
+
+        UPDATE level_definition l
+        SET points_from=null,
+            points_to=null
+            from skill_definition s,
+             settings settings
+                where s.id = l.skill_ref_id
+                  and s.project_id != 'Inception'
+          and s.project_id = settings.project_id
+          and settings.setting = 'level.points.enabled'
+          and settings.value = 'false';
+
+        delete
+        from project_error
+        where id in (
+            select error.id
+            from project_error error, settings settings
+            where error.error_type in ('UnachievableProjectLevel', 'UnachievableSubjectLevel')
+              and error.project_id = settings.project_id
+              and settings.setting = 'level.points.enabled'
+              and settings.value = 'false'
+        );
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
