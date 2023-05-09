@@ -124,7 +124,7 @@ describe('Accessibility Tests', () => {
 
     it('project - Deps page', () => {
         cy.visit('/administrator/projects/proj1/learning-path');
-        cy.contains('Color Legend');
+        cy.contains('Legend');
 
         cy.customLighthouse();
         cy.injectAxe();
