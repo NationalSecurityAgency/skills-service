@@ -34,7 +34,8 @@ limitations under the License.
           </div>
         </div>
       </loading-container>
-      <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
+
+      <div id="dependency-graph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden', 'height': '500px'}"></div>
     </simple-card>
 
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" />
@@ -171,6 +172,7 @@ limitations under the License.
 
         this.data = this.buildData();
         if (this.hasGraphData) {
+          this.showGraph = true;
           const container = document.getElementById('dependency-graph');
           this.network = new Network(container, this.data, this.displayOptions);
 
