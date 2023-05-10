@@ -15,7 +15,7 @@
  */
 package skills.services.admin
 
-import skills.controller.exceptions.ErrorCode
+import callStack.profiler.Profile
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.DependencyCheckResult
 import skills.controller.result.model.SkillDefGraphRes
@@ -31,7 +31,10 @@ class CircularLearningPathChecker {
 
     //private
     List<BadgeAndSkills> badgeAndSkills = []
+    Map<String, BadgeAndSkills> badgeAndSkillsByBadgeId = [:]
+    Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup
 
+    // methods
     CircularLearningPathChecker addBadgeAndSkills(BadgeAndSkills b) {
         badgeAndSkills.add(b)
         return this
@@ -53,9 +56,14 @@ class CircularLearningPathChecker {
         List<DependencyCheckResult.SkillInfo> skills
     }
 
+    @Profile
     DependencyCheckResult check() {
         if (isEmpty()) {
             return new DependencyCheckResult()
+        }
+
+        badgeAndSkills.each {
+            badgeAndSkillsByBadgeId[it.badgeGraphNode.skillId] = it
         }
 
         List<SkillDefGraphResPair> edgePairs = existingGraph.edges.collect { SkillsGraphRes.Edge edge ->
@@ -66,7 +74,7 @@ class CircularLearningPathChecker {
         }
         // only project local skills dependencies can cause a circular path
         edgePairs = edgePairs?.findAll({ it.prerequisite.projectId == skillDef.projectId })
-        Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup = [:]
+        byNodeLookup = [:]
         edgePairs.groupBy { it.node.skillId }.each {
             byNodeLookup[it.key] = it.value.collect { new DependencyCheckResult.SkillInfo(skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
         }
@@ -75,7 +83,7 @@ class CircularLearningPathChecker {
         DependencyCheckResult.SkillInfo prereqSkillInfo = new DependencyCheckResult.SkillInfo(skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
         List<DependencyCheckResult.SkillInfo> path = [skillInfo, prereqSkillInfo]
         try {
-            return recursiveCircularPrerequisiteCheck(prereqSkillInfo, skillInfo, path, byNodeLookup, badgeAndSkills, 1)
+            return recursiveCircularPrerequisiteCheck(prereqSkillInfo, skillInfo, path, 1)
         } catch (Throwable t) {
             throw new SkillException(t.message, t, skillDef.projectId, skillDef.skillId)
         }
@@ -84,40 +92,36 @@ class CircularLearningPathChecker {
     private DependencyCheckResult recursiveCircularPrerequisiteCheck(DependencyCheckResult.SkillInfo current,
                                                                      DependencyCheckResult.SkillInfo start,
                                                                      List<DependencyCheckResult.SkillInfo> path,
-                                                                     Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup,
-                                                                     List<BadgeAndSkills> badgeAndSkills,
                                                                      int currentIter = 0) {
         if (currentIter > 1000) {
             throw new IllegalStateException("Number of [1000] iterations exceeded when checking for circular dependency for [${start.skillId}]")
         }
 
         if (current.type == SkillDef.ContainerType.Badge) {
-            BadgeAndSkills badge = badgeAndSkills.find { it.badgeGraphNode.skillId == current.skillId }
+            BadgeAndSkills badge = badgeAndSkillsByBadgeId[current.skillId]
 
             // step back through the path and see if any of skills are present in the badges on this path
             List<DependencyCheckResult.SkillInfo> badgesOnPath = path.findAll { it.type == SkillDef.ContainerType.Badge && it.skillId != badge.badgeGraphNode.skillId }
             for (DependencyCheckResult.SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
-                BadgeAndSkills badgeOnPath = badgeAndSkills.find { it.badgeGraphNode.skillId == badgeOnPathSkillInfo.skillId }
+                BadgeAndSkills badgeOnPath = badgeAndSkillsByBadgeId[badgeOnPathSkillInfo.skillId]
                 DependencyCheckResult.SkillInfo found = badgeOnPath.skills.find { DependencyCheckResult.SkillInfo searchFor -> badge.skills.find { searchFor.skillId == it.skillId } }
                 if (found) {
                     return new DependencyCheckResult(possible: false, reason: "Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [${badgeOnPath.badgeGraphNode.name}] on this learning path that has the same skill as [${current.name}] badge. The skill in conflict is [${found.name}].")
                 }
             }
 
-            DependencyCheckResult res = handlePrerequisiteNodes(badge.skills, start, path, byNodeLookup, badgeAndSkills, currentIter)
+            DependencyCheckResult res = handlePrerequisiteNodes(badge.skills, start, path, currentIter)
             if (!res.possible) {
                 return res
             }
         }
         List<DependencyCheckResult.SkillInfo> prereqNodes = byNodeLookup.get(current.skillId)
-        return handlePrerequisiteNodes(prereqNodes, start, path, byNodeLookup, badgeAndSkills, currentIter)
+        return handlePrerequisiteNodes(prereqNodes, start, path, currentIter)
     }
 
     private DependencyCheckResult handlePrerequisiteNodes(List<DependencyCheckResult.SkillInfo> prereqNodes,
                                                           DependencyCheckResult.SkillInfo start,
                                                           List<DependencyCheckResult.SkillInfo> path,
-                                                          Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup,
-                                                          List<BadgeAndSkills> badgeAndSkills,
                                                           int currentIter) {
         if (prereqNodes) {
             DependencyCheckResult.SkillInfo sameNodeFound = prereqNodes.find { it.skillId == start.skillId }
@@ -129,7 +133,7 @@ class CircularLearningPathChecker {
             for ( DependencyCheckResult.SkillInfo pNode : prereqNodes ) {
                 List<DependencyCheckResult.SkillInfo> pathCopy = new ArrayList<>(path)
                 pathCopy.add(pNode)
-                DependencyCheckResult res = recursiveCircularPrerequisiteCheck(pNode, start, pathCopy, byNodeLookup, badgeAndSkills, currentIter+1)
+                DependencyCheckResult res = recursiveCircularPrerequisiteCheck(pNode, start, pathCopy, currentIter+1)
                 if (!res.possible) {
                     return res
                 }
