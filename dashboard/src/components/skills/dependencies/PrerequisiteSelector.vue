@@ -99,7 +99,6 @@ limitations under the License.
         this.updatePotentialSkills();
       },
       onFromDeselected() {
-        console.log('Deselected');
       },
       onAddPath() {
         SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.fromSkillId, this.fromProjectId).then(() => {
