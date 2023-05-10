@@ -24,20 +24,15 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillDefForDependencyRes
-import skills.controller.result.model.DependencyCheckResult
-import skills.controller.result.model.SharedSkillResult
-import skills.controller.result.model.SkillDefGraphRes
-import skills.controller.result.model.SkillDefRes
-import skills.controller.result.model.SkillDepResult
-import skills.controller.result.model.SkillsGraphRes
+import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.storage.accessors.ProjDefAccessor
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
-import skills.storage.accessors.ProjDefAccessor
-import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
@@ -86,10 +81,15 @@ class SkillsDepsService {
         }?.sort { it.skillId }
     }
 
+    @Profile
+    private SkillDef loadSkillDefForLearningPath(String projectId, String id) {
+        return skillDefAccessor.getSkillDef(projectId, id, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
+    }
+
     @Transactional()
     void addLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
-        SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, id, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
-        SkillDef prereqSkillDef = skillDefAccessor.getSkillDef(prereqFromProjectId ?: projectId, prereqFromId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
+        SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
+        SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
         if (skillCatalogService.isAvailableInCatalog(skillDef)) {
             throw new SkillException("Skill [${skillDef.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, id, ErrorCode.DependenciesNotAllowed)
@@ -298,6 +298,15 @@ class SkillsDepsService {
         }
     }
 
+    @Transactional(readOnly = true)
+    DependencyCheckResult validatePossibleLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
+        SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
+        SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
+
+        DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skillDef, prereqSkillDef)
+        return dependencyCheckResult
+    }
+
     @Profile
     private DependencyCheckResult checkForCircularGraph(SkillDef skillDef, SkillDef prereqSkillDef) {
         assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
@@ -326,9 +335,9 @@ class SkillsDepsService {
     @Profile
     private CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
         List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
-        List<DependencyCheckResult.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new DependencyCheckResult.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true) }
+        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true) }
         return new CircularLearningPathChecker.BadgeAndSkills(
-                badgeGraphNode: new DependencyCheckResult.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
+                badgeGraphNode: new CircularLearningPathChecker.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
                 skills: badgeSkillInfos
         )
     }

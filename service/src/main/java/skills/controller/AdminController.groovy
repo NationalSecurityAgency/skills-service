@@ -662,6 +662,23 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/{id}/prerequisiteValidate/{prereqProjectId}/{prereqId}", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    DependencyCheckResult validateLearningPathItem(@PathVariable("projectId") String projectId,
+                                      @PathVariable("id") String id,
+                                      @PathVariable("prereqProjectId") String prereqProjectId,
+                                      @PathVariable("prereqId") String prereqId) {
+        SkillsValidator.isNotBlank(projectId, "To Project Id", projectId)
+        SkillsValidator.isNotBlank(id, "To Id", id)
+        SkillsValidator.isNotBlank(prereqProjectId, "From Project Id")
+        SkillsValidator.isNotBlank(prereqId, "From Id", prereqId)
+
+        SkillsValidator.isTrue(!id.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "To ID must not contain reuse tag", projectId, id)
+        SkillsValidator.isTrue(!prereqId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "From ID must not contain reuse tag", projectId, prereqId)
+
+        return skillsDepsService.validatePossibleLearningPathItem(projectId, id, prereqId, prereqProjectId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,

@@ -15,16 +15,20 @@
  */
 package skills.controller.result.model
 
-import skills.storage.model.SkillDef
-
 class DependencyCheckResult {
-    static class SkillInfo {
-        String skillId
-        String name
-        SkillDef.ContainerType type
-        Boolean belongsToBadge = false
+    static enum FailureType {
+        CircularLearningPath, BadgeOverlappingSkills
     }
     boolean possible = true
 
+    FailureType failureType
     String reason
+
+    // if violating skill was found inside of a badge, applies to CircularLearningPath and BadgeOverlappingSkills types
+    String violatingSkillInBadgeId
+    String violatingSkillInBadgeName
+
+    // applies to BadgeOverlappingSkills types
+    String violatingSkillId
+    String violatingSkillName
 }
