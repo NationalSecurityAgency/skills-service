@@ -46,7 +46,7 @@ limitations under the License.
   export default {
     name: 'DependencyTable',
     mixins: [MsgBoxMixin],
-    props: ['isLoading', 'graph'],
+    props: ['isLoading', 'data'],
     components: {
       MetricsCard,
       NoContent2,
@@ -88,20 +88,21 @@ limitations under the License.
       };
     },
     mounted() {
-      if (this.graph && this.graph.edges && this.graph.edges.length > 0) {
-        const { nodes, edges } = this.graph;
+      if (this.data && this.data.edges && this.data.edges.length > 0) {
+        const { nodes, edges } = this.data;
 
         if (edges && edges.length > 0) {
           edges.forEach((edge) => {
-            const fromNode = nodes.find((node) => node.id === edge.toId);
-            const toNode = nodes.find((node) => node.id === edge.fromId);
+            const fromNode = nodes.find((node) => node.id === edge.from);
+            const toNode = nodes.find((node) => node.id === edge.to);
+
             this.learningPaths.push({
-              fromItem: fromNode.name,
-              fromProjectId: fromNode.projectId,
-              fromSkillId: fromNode.skillId,
-              toItem: toNode.name,
-              toProjectId: toNode.projectId,
-              toSkillId: toNode.skillId,
+              fromItem: fromNode.details.name,
+              fromProjectId: fromNode.details.projectId,
+              fromSkillId: fromNode.details.skillId,
+              toItem: toNode.details.name,
+              toProjectId: toNode.details.projectId,
+              toSkillId: toNode.details.skillId,
             });
           });
         }

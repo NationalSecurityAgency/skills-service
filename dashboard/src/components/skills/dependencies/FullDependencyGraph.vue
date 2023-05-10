@@ -19,7 +19,7 @@ limitations under the License.
 
     <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" />
 
-    <simple-card data-cy="fullDepsSkillsGraph">
+    <simple-card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
             <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
@@ -37,7 +37,7 @@ limitations under the License.
       <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
     </simple-card>
 
-    <dependency-table :is-loading="isLoading" :graph="graph" @update="handleUpdate" />
+    <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" />
 
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4"/>
 
@@ -86,6 +86,7 @@ limitations under the License.
         isLoading: true,
         showGraph: true,
         selectedNode: null,
+        data: [],
         graph: {},
         network: null,
         nodes: {},
@@ -168,10 +169,10 @@ limitations under the License.
           this.edges = [];
         }
 
-        const data = this.buildData();
+        this.data = this.buildData();
         if (this.hasGraphData) {
           const container = document.getElementById('dependency-graph');
-          this.network = new Network(container, data, this.displayOptions);
+          this.network = new Network(container, this.data, this.displayOptions);
 
           this.network.on('selectEdge', (params) => {
             const allNodes = this.graph.nodes;
