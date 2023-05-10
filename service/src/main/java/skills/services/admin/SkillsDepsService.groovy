@@ -88,8 +88,8 @@ class SkillsDepsService {
 
     @Transactional()
     void addLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
-        SkillDef skillDef = skillDefAccessor.getSkillAndBadgeDef(projectId, id)
-        SkillDef prereqSkillDef = skillDefAccessor.getSkillAndBadgeDef(prereqFromProjectId ?: projectId, prereqFromId)
+        SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, id, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
+        SkillDef prereqSkillDef = skillDefAccessor.getSkillDef(prereqFromProjectId ?: projectId, prereqFromId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
 
         if (skillCatalogService.isAvailableInCatalog(skillDef)) {
             throw new SkillException("Skill [${skillDef.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, id, ErrorCode.DependenciesNotAllowed)
@@ -129,7 +129,7 @@ class SkillsDepsService {
 
     @Transactional()
     void removeSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependencyProjectId = null) {
-        ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, SkillDef.ContainerType.Skill,
+        ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, null,
                 dependencyProjectId ?: projectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
