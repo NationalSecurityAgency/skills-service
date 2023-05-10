@@ -15,11 +15,19 @@
  */
 package skills.controller.result.model
 
-class DependencyCheckResult {
-    String skillId
-    String dependentSkillId
+import skills.storage.model.SkillDef
 
+class DependencyCheckResult {
+    static class SkillInfo {
+        String skillId
+        String name
+        SkillDef.ContainerType type
+        Boolean belongsToBadge = false
+    }
     boolean possible = true
+
+    // only set if circular path was discovered
+    List<SkillInfo> circularPath
 
     String reason
 }
