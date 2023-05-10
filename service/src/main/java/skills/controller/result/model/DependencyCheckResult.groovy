@@ -26,8 +26,5 @@ class DependencyCheckResult {
     }
     boolean possible = true
 
-    // only set if circular path was discovered
-    List<SkillInfo> circularPath
-
     String reason
 }

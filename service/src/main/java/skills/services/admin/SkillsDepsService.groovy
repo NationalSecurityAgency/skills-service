@@ -167,6 +167,7 @@ class SkillsDepsService {
         SkillDefGraphRes to
     }
 
+    @Profile
     @Transactional(readOnly = true)
     SkillsGraphRes getDependentSkillsGraph(String projectId) {
         List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
@@ -293,145 +294,42 @@ class SkillsDepsService {
     private void checkForCircularGraphAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
         DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skillDef, prereqSkillDef)
         if (!dependencyCheckResult.possible) {
-            String reason = dependencyCheckResult.reason
-            if (dependencyCheckResult.circularPath) {
-                StringBuilder builder = new StringBuilder()
-                dependencyCheckResult.circularPath.eachWithIndex { DependencyCheckResult.SkillInfo item, int index ->
-                    String itemStr = "${item.type}:${item.skillId}".toString()
-                    if (item.belongsToBadge) {
-                        builder.append("(${itemStr})".toString())
-                    } else {
-                        if (index > 0) {
-                            builder.append(" -> ")
-                        }
-                        builder.append(itemStr)
-                    }
-                }
-                reason = "Discovered circular prerequisite [${builder.toString()}]".toString()
-            }
-            throw new SkillException(reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
+            throw new SkillException(dependencyCheckResult.reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
-    private BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
-        List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
-        List<DependencyCheckResult.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new DependencyCheckResult.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true) }
-        return new BadgeAndSkills(
-                badgeGraphNode: new DependencyCheckResult.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
-                skills: badgeSkillInfos
-        )
-    }
-
+    @Profile
     private DependencyCheckResult checkForCircularGraph(SkillDef skillDef, SkillDef prereqSkillDef) {
         assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
 
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
-        List<BadgeAndSkills> badgeAndSkills = []
+        CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(skillDef: skillDef, prereqSkillDef: prereqSkillDef, existingGraph: existingGraph)
         if (prereqSkillDef.type == SkillDef.ContainerType.Badge) {
-            badgeAndSkills.add(loadBadgeSkills(prereqSkillDef.id, prereqSkillDef.skillId, prereqSkillDef.name))
+            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(prereqSkillDef.id, prereqSkillDef.skillId, prereqSkillDef.name))
         }
         if (skillDef.type == SkillDef.ContainerType.Badge) {
-            badgeAndSkills.add(loadBadgeSkills(skillDef.id, skillDef.skillId, skillDef.name))
+            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(skillDef.id, skillDef.skillId, skillDef.name))
         }
-        if (!existingGraph.nodes && !badgeAndSkills) {
-            return new DependencyCheckResult()
-        }
-        List<SkillDefGraphResPair> edgePairs = existingGraph.edges.collect { SkillsGraphRes.Edge edge ->
-            new SkillDefGraphResPair(
-                    node: existingGraph.nodes.find { it.id == edge.fromId },
-                    prerequisite: existingGraph.nodes.find { it.id == edge.toId },
-            )
-        }
-        // only project local skills dependencies can cause a circular path
-        edgePairs = edgePairs?.findAll({ it.prerequisite.projectId == skillDef.projectId })
-        Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup = [:]
-        edgePairs.groupBy { it.node.skillId }.each {
-            byNodeLookup[it.key] = it.value.collect { new DependencyCheckResult.SkillInfo(skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
-        }
-
-        List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge})
-        badgeAndSkills.addAll(badgeNodes.collect {
-            Integer badgeId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
-            return loadBadgeSkills(badgeId, it.skillId, it.name)
-        })
-
-        DependencyCheckResult.SkillInfo skillInfo = new DependencyCheckResult.SkillInfo(skillId: skillDef.skillId, name: skillDef.name, type: skillDef.type)
-        DependencyCheckResult.SkillInfo prereqSkillInfo = new DependencyCheckResult.SkillInfo(skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
-        List<DependencyCheckResult.SkillInfo> path = [skillInfo, prereqSkillInfo]
-        try {
-            return recursiveCircularPrerequisiteCheck(prereqSkillInfo, skillInfo, path, byNodeLookup, badgeAndSkills, 1)
-        } catch (Throwable t) {
-            throw new SkillException(t.message, t, skillDef.projectId, skillDef.skillId)
-        }
-    }
-
-    private String getProjectId(SkillDef skill, SkillDef original) {
-        return skill.projectId != original.projectId ? "${skill.projectId}:".toString() : ""
-    }
-
-    private static class SkillDefGraphResPair {
-        SkillDefGraphRes node
-        SkillDefGraphRes prerequisite
-    }
-    private static class BadgeAndSkills {
-        DependencyCheckResult.SkillInfo badgeGraphNode
-        List<DependencyCheckResult.SkillInfo> skills
-    }
-    private DependencyCheckResult recursiveCircularPrerequisiteCheck(DependencyCheckResult.SkillInfo current,
-                                                                     DependencyCheckResult.SkillInfo start,
-                                                                     List<DependencyCheckResult.SkillInfo> path,
-                                                                     Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup,
-                                                                     List<BadgeAndSkills> badgeAndSkills,
-                                                                     int currentIter = 0) {
-        if (currentIter > 1000) {
-            throw new IllegalStateException("Number of [1000] iterations exceeded when checking for circular dependency for [${start.skillId}]")
-        }
-
-        if (current.type == SkillDef.ContainerType.Badge) {
-            BadgeAndSkills badge = badgeAndSkills.find { it.badgeGraphNode.skillId == current.skillId }
-
-            // step back through the path and see if any of skills are present in the badges on this path
-            List<DependencyCheckResult.SkillInfo> badgesOnPath = path.findAll { it.type == SkillDef.ContainerType.Badge && it.skillId != badge.badgeGraphNode.skillId }
-            for (DependencyCheckResult.SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
-                BadgeAndSkills badgeOnPath = badgeAndSkills.find { it.badgeGraphNode.skillId == badgeOnPathSkillInfo.skillId }
-                DependencyCheckResult.SkillInfo found = badgeOnPath.skills.find { DependencyCheckResult.SkillInfo searchFor -> badge.skills.find { searchFor.skillId == it.skillId } }
-                if (found) {
-                    return new DependencyCheckResult(possible: false, reason: "Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [${badgeOnPath.badgeGraphNode.name}] on this learning path that has the same skill as [${current.name}] badge. The skill in conflict is [${found.name}].")
-                }
-            }
-
-            DependencyCheckResult res = handlePrerequisiteNodes(badge.skills, start, path, byNodeLookup, badgeAndSkills, currentIter)
-            if (!res.possible) {
-                return res
+        if (existingGraph.nodes) {
+            List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge })
+            if (badgeNodes) {
+                circularLearningPathChecker.addAllBadgeAndSkills(badgeNodes.collect {
+                    Integer badgeId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
+                    return loadBadgeSkills(badgeId, it.skillId, it.name)
+                })
             }
         }
-        List<DependencyCheckResult.SkillInfo> prereqNodes = byNodeLookup.get(current.skillId)
-        return handlePrerequisiteNodes(prereqNodes, start, path, byNodeLookup, badgeAndSkills, currentIter)
+
+        return circularLearningPathChecker.check()
     }
 
-    private DependencyCheckResult handlePrerequisiteNodes(List<DependencyCheckResult.SkillInfo> prereqNodes,
-                                                          DependencyCheckResult.SkillInfo start,
-                                                          List<DependencyCheckResult.SkillInfo> path,
-                                                          Map<String, List<DependencyCheckResult.SkillInfo>> byNodeLookup,
-                                                          List<BadgeAndSkills> badgeAndSkills,
-                                                          int currentIter) {
-        if (prereqNodes) {
-            DependencyCheckResult.SkillInfo sameNodeFound = prereqNodes.find { it.skillId == start.skillId }
-            if (sameNodeFound) {
-                List<String> pathCopy = new ArrayList<>(path)
-                pathCopy.add(sameNodeFound)
-                return new DependencyCheckResult(possible: false, circularPath: pathCopy)
-            }
-            for ( DependencyCheckResult.SkillInfo pNode : prereqNodes ) {
-                List<DependencyCheckResult.SkillInfo> pathCopy = new ArrayList<>(path)
-                pathCopy.add(pNode)
-                DependencyCheckResult res = recursiveCircularPrerequisiteCheck(pNode, start, pathCopy, byNodeLookup, badgeAndSkills, currentIter+1)
-                if (!res.possible) {
-                    return res
-                }
-            }
-        }
-        return new DependencyCheckResult()
+    @Profile
+    private CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
+        List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
+        List<DependencyCheckResult.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new DependencyCheckResult.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true) }
+        return new CircularLearningPathChecker.BadgeAndSkills(
+                badgeGraphNode: new DependencyCheckResult.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
+                skills: badgeSkillInfos
+        )
     }
-
 }
