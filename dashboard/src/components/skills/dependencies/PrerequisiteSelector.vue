@@ -17,28 +17,30 @@ limitations under the License.
   <metrics-card id="prerequisite-selector-panel" title="Add a new item to the learning path"
                 :no-padding="true" data-cy="addPrerequisiteToLearningPath" style="margin-bottom:10px;">
     <ValidationObserver v-slot="{ invalid }">
-    <div class="row ml-1 mr-3 my-2 no-gutters">
-      <div class="col-lg ml-2 mt-1">
-        From:
-        <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
-                          @selection-removed="onFromSelectionRemoved"
-                          :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                          data-cy="learningPathFromSkillSelector"></skills-selector2>
+    <b-overlay :show="isLoading" rounded="sm" opacity="0.2">
+      <div class="row ml-1 mr-3 my-2 no-gutters">
+        <div class="col-lg ml-2 mt-1">
+          From:
+          <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
+                            @selection-removed="onFromSelectionRemoved"
+                            :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
+                            data-cy="learningPathFromSkillSelector"></skills-selector2>
+        </div>
+        <div class="col-lg mt-1 ml-2">
+          To:
+          <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
+                            @selection-removed="onToSelectionRemoved" :disabled="selectedFromSkills.length === 0"
+                            :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
+                            data-cy="learningPathToSkillSelector"></skills-selector2>
+        </div>
+        <div class="col-lg-auto text-right mt-1 ml-2 align-self-end">
+          <button type="button"
+                  class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath"
+                  data-cy="addLearningPathItemBtn"
+                  :disabled="selectedFromSkills.length === 0 || !toSkillId || invalid">Add <i class="fas fa-plus-circle" aria-hidden="true"/></button>
+        </div>
       </div>
-      <div class="col-lg mt-1 ml-2">
-        To:
-        <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
-                          @selection-removed="onToSelectionRemoved"
-                          :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                          data-cy="learningPathToSkillSelector"></skills-selector2>
-      </div>
-      <div class="col-lg-auto text-right mt-1 ml-2 align-self-end">
-        <button type="button"
-                class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath"
-                data-cy="addLearningPathItemBtn"
-                :disabled="!fromSkillId || !toSkillId || invalid">Add <i class="fas fa-plus-circle" aria-hidden="true"/></button>
-      </div>
-    </div>
+    </b-overlay>
 
       <ValidationProvider ref="learningPathValidator" :immediate="true"
                           rules="validLearningPath" v-slot="{errors, valid}" name="Skill Name">
@@ -58,7 +60,7 @@ limitations under the License.
 
   export default {
     name: 'PrerequisiteSelector',
-    props: ['projectId'],
+    props: ['projectId', 'selectedFromSkills'],
     components: {
       MetricsCard,
       SkillsSelector2,
@@ -66,39 +68,52 @@ limitations under the License.
     data() {
       return {
         tempText: '',
-        selectedFromSkills: [],
         allSkills: [],
         allPotentialSkills: [],
         selectedToSkills: [],
-        fromSkillId: null,
-        fromProjectId: null,
         toSkillId: null,
         toSkillName: null,
         toProjectId: null,
+        loadingPotentialSkills: false,
+        loadingAllSkills: false,
       };
+    },
+    watch: {
+      selectedFromSkills: function skillWatch() {
+        this.updatePotentialSkills();
+      },
     },
     mounted() {
       this.loadAllSkills();
       this.registerValidation();
     },
+    computed: {
+      isLoading() {
+        return this.loadingPotentialSkills || this.loadingAllSkills;
+      },
+    },
     methods: {
       loadAllSkills() {
+        this.loadingAllSkills = true;
         SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
             this.allSkills = skills;
+            this.loadingAllSkills = false;
           });
       },
       updatePotentialSkills() {
+        this.loadingPotentialSkills = true;
         SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
-            if (this.fromSkillId) {
-              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.fromSkillId);
+            if (this.selectedFromSkills.length > 0 && this.selectedFromSkills[0].skillId) {
+              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.selectedFromSkills[0].skillId);
             }
             if (this.selectedToSkills.length > 0) {
               this.selectedToSkills.forEach((skill) => {
                 this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => potentialSkill.skillId !== skill.skillId);
               });
             }
+            this.loadingPotentialSkills = false;
           });
       },
       onToSelected(item) {
@@ -125,23 +140,18 @@ limitations under the License.
       },
       onFromSelected(item) {
         this.clearToData();
-        this.selectedFromSkills = [item];
-        this.fromSkillId = item.skillId;
-        this.fromProjectId = item.projectId;
-        this.updatePotentialSkills();
+        this.$emit('updateSelectedFromSkills', item);
       },
       onFromDeselected() {
       },
       onAddPath() {
-        SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.fromSkillId, this.fromProjectId).then(() => {
+        SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.selectedFromSkills[0].skillId, this.selectedFromSkills[0].projectId).then(() => {
           this.clearData();
           this.$emit('update');
         });
       },
       clearData() {
-        this.selectedFromSkills = [];
-        this.fromSkillId = null;
-        this.fromProjectId = null;
+        this.$emit('clearSelectedFromSkills');
         this.clearToData();
       },
       clearToData() {
@@ -155,10 +165,10 @@ limitations under the License.
         const self = this;
         extend('validLearningPath', {
           validate() {
-            if (!self || !self.toProjectId || !self.toSkillId || !self.fromSkillId || !self.fromProjectId) {
+            if (!self || !self.toProjectId || !self.toSkillId || !self.selectedFromSkills[0].skillId || !self.selectedFromSkills[0].projectId) {
               return true;
             }
-            return SkillsService.validateDependency(self.toProjectId, self.toSkillId, self.fromSkillId, self.fromProjectId)
+            return SkillsService.validateDependency(self.toProjectId, self.toSkillId, self.selectedFromSkills[0].skillId, self.selectedFromSkills[0].projectId)
               .then((res) => {
                 if (res.possible) {
                   return true;

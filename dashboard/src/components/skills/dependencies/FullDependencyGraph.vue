@@ -17,7 +17,8 @@ limitations under the License.
   <div id="full-dependent-skills-graph">
     <sub-page-header title="Learning Path"/>
 
-    <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" />
+    <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+        @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills"/>
 
     <simple-card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <loading-container :is-loading="isLoading">
@@ -86,7 +87,7 @@ limitations under the License.
       return {
         isLoading: true,
         showGraph: true,
-        selectedNode: null,
+        selectedFromSkills: [],
         data: [],
         graph: {},
         network: null,
@@ -137,8 +138,14 @@ limitations under the License.
       }
     },
     methods: {
+      updateSelectedFromSkills(item) {
+        this.selectedFromSkills = [item];
+      },
+      clearSelectedFromSkills() {
+        this.selectedFromSkills = [];
+      },
       handleUpdate() {
-        this.selectedNode = null;
+        this.selectedFromSkills = [];
         this.graph = [];
         this.network = null;
         this.nodes = [];
@@ -175,6 +182,12 @@ limitations under the License.
           this.showGraph = true;
           const container = document.getElementById('dependency-graph');
           this.network = new Network(container, this.data, this.displayOptions);
+
+          this.network.on('selectNode', (params) => {
+            const selectedNode = params.nodes[0];
+            const nodeValue = this.nodes.find((node) => node.id === selectedNode);
+            this.selectedFromSkills = [nodeValue.details];
+          });
 
           this.network.on('selectEdge', (params) => {
             const allNodes = this.graph.nodes;

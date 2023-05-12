@@ -532,26 +532,6 @@ Cypress.Commands.add("addLearningPathItem", (projNum, fromSkillNum, toSkillNum, 
     cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${projectId}/${prerequisiteSkill}`);
 });
 
-Cypress.Commands.add("assignDep", (projNum, skillNum1, skillNum2, subj2Num=null) => {
-    let skill2Id = `skill${skillNum2}`
-    if (subj2Num) {
-        skill2Id = `${skill2Id}Subj2`;
-    }
-    cy.request('POST', `/admin/projects/proj${projNum}/skills/skill${skillNum1}/dependency/${skill2Id}`);
-});
-
-Cypress.Commands.add("assignCrossProjectDep", (proj1Num, skillNum1, proj2Num, skillNum2, share=true, subj2Num=null) => {
-    let skill2Id = `skill${skillNum2}`
-    if (subj2Num) {
-        skill2Id = `${skill2Id}Subj2`;
-    }
-    if (share) {
-        cy.request('PUT', `/admin/projects/proj${proj2Num}/skills/${skill2Id}/shared/projects/proj${proj1Num}`);
-    }
-    cy.request('POST', `/admin/projects/proj${proj1Num}/skills/skill${skillNum1}/dependency/projects/proj${proj2Num}/skills/${skill2Id}`);
-});
-
-
 Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
     let timestamp = null
     if (Number.isInteger(date)) {
