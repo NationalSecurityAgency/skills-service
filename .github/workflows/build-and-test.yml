@@ -32,16 +32,6 @@ on:
       - '.gitlab-ci.yml'
 
 jobs:
-  pre_job:
-    runs-on: ubuntu-latest
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          github_token: ${{ github.token }}
-          paths_ignore: '["**/README.md"]'
-
-
   build-skills-service-for-ui-tests:
     runs-on: ubuntu-latest
 
