@@ -15,7 +15,7 @@
  */
 package skills.intTests.dependentSkills
 
-
+import skills.controller.result.model.DependencyCheckResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -221,5 +221,71 @@ class AdminLearningPathCircularDependencySpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [Test Badge 1] on this learning path that has the same skill as [Test Badge 2] badge. The skill in conflict is [Test Skill 2].")
     }
+
+
+    def "skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2: Cannot add a badge that already has one of its skills on the learning path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[4].skillId]) // this skill already on the path
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        // skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1.projectId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1.projectId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1.projectId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1.projectId, p1Skills[5].skillId)
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[6].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Provided badge [${badge2.name}] has skill [${p1Skills[4].name}] which already exists on the learning path.")
+    }
+
+    def "skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2: Cannot add a learning path item that already exist"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[4].skillId]) // this skill already on the path
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        // skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1.projectId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1.projectId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1.projectId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1.projectId, p1Skills[5].skillId)
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1.projectId, badge1.badgeId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Learning path from [${badge1.name}] to [${p1Skills[5].name}] already exists.")
+    }
+
 
 }

@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <metrics-card id="prerequisite-selector-panel" title="Add a new item to the learning path"
                 :no-padding="true" data-cy="addPrerequisiteToLearningPath" style="margin-bottom:10px;">
-    <ValidationObserver v-slot="{ invalid }">
+    <ValidationObserver ref="validationObserver" v-slot="{ invalid }">
     <b-overlay :show="isLoading" rounded="sm" opacity="0.2">
       <div class="row ml-1 mr-3 my-2 no-gutters">
         <div class="col-lg ml-2 mt-1">
@@ -145,10 +145,17 @@ limitations under the License.
       onFromDeselected() {
       },
       onAddPath() {
-        SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.selectedFromSkills[0].skillId, this.selectedFromSkills[0].projectId).then(() => {
-          this.clearData();
-          this.$emit('update');
-        });
+        this.$refs.validationObserver.validate()
+          .then((res) => {
+            console.log(res);
+            if (res) {
+              SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.selectedFromSkills[0].skillId, this.selectedFromSkills[0].projectId)
+                .then(() => {
+                  this.clearData();
+                  this.$emit('update');
+                });
+            }
+          });
       },
       clearData() {
         this.$emit('clearSelectedFromSkills');
@@ -178,10 +185,15 @@ limitations under the License.
                   const additionalBadgeMsg = res.violatingSkillInBadgeName ? `under the badge <b>${res.violatingSkillInBadgeName}</b> ` : '';
                   return `<b>${self.toSkillName}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
                 }
-
                 if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
                   return 'Multiple badges on the same Learning path cannot have overlapping skills. '
                     + `There is already a badge <b>${res.violatingSkillInBadgeName}</b> on this learning path that has the same skill as <b>${self.toSkillName}</b> badge. The skill in conflict is <b>${res.violatingSkillName}</b>.`;
+                }
+                if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
+                  return `Provided badge <b>${self.toSkillName}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
+                }
+                if (res.failureType && res.failureType === 'AlreadyExist') {
+                  return `Learning path from <b>${res.violatingSkillName}</b> to <b>${self.toSkillName}</b> already exists.`;
                 }
 
                 return `${res.reason}`;

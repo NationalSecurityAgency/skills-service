@@ -54,6 +54,17 @@ class CircularLearningPathChecker {
     protected static class BadgeAndSkills {
         SkillInfo badgeGraphNode
         List<SkillInfo> skills
+        private Set<String> cachedSkillIds
+
+        private Set<String> getSkillIds() {
+            if (!cachedSkillIds) {
+                cachedSkillIds = new HashSet<>(skills.collect { it.skillId })
+            }
+            return cachedSkillIds
+        }
+        boolean badgeHasSkillId(String skillId) {
+            return skillIds.contains(skillId)
+        }
     }
     protected static class SkillInfo {
         String skillId
@@ -76,6 +87,18 @@ class CircularLearningPathChecker {
                     node: existingGraph.nodes.find { it.id == edge.fromId },
                     prerequisite: existingGraph.nodes.find { it.id == edge.toId },
             )
+        }
+        for (SkillDefGraphResPair edgePair : edgePairs) {
+            if (edgePair.prerequisite.skillId == prereqSkillDef.skillId
+                    && edgePair.prerequisite.projectId == prereqSkillDef.projectId
+                    && edgePair.node.skillId == skillDef.skillId
+                    && edgePair.node.projectId == skillDef.projectId) {
+                return new DependencyCheckResult(possible: false,
+                        failureType: DependencyCheckResult.FailureType.AlreadyExist,
+                        violatingSkillId: prereqSkillDef.skillId,
+                        violatingSkillName: prereqSkillDef.name,
+                        reason: "Learning path from [${prereqSkillDef.name}] to [${skillDef.name}] already exists.")
+            }
         }
         // only project local skills dependencies can cause a circular path
         edgePairs = edgePairs?.findAll({ it.prerequisite.projectId == skillDef.projectId })
@@ -126,6 +149,18 @@ class CircularLearningPathChecker {
                 return res
             }
         }
+        if (current.type == SkillDef.ContainerType.Skill && start.type == SkillDef.ContainerType.Badge) {
+            BadgeAndSkills badge = badgeAndSkillsByBadgeId[start.skillId]
+            if (badge.badgeHasSkillId(current.skillId)) {
+                return new DependencyCheckResult(possible: false,
+                        failureType: DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath,
+                        violatingSkillId: current.skillId,
+                        violatingSkillName: current.name,
+                        reason: "Provided badge [${start.name}] has skill [${current.name}] which already exists on the learning path.")
+            }
+        }
+
+
         List<SkillInfo> prereqNodes = byNodeLookup.get(current.skillId)
         return handlePrerequisiteNodes(prereqNodes, start, path, currentIter)
     }

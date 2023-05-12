@@ -202,7 +202,22 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-skill9"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-badge3"]').click();
-        cy.get('[data-cy="learningPathError"]').contains('Skill Already is on the path - messaged to be improved')
+        cy.get('[data-cy="learningPathError"]').contains('Provided badge Badge 3 has skill Very Great Skill 2 which already exists on the learning path')
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
     });
+
+    it('Cannot add path item which is already present on the path', () => {
+        cy.createSkill(1, 1, 4)
+        cy.addLearningPathItem(1, 1, 2)
+        cy.addLearningPathItem(1, 2, 3)
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]').click();
+        cy.get('[data-cy="learningPathError"]').contains('Learning path from Very Great Skill 1 to Very Great Skill 2 already exists')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+
+    })
 });
