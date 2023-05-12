@@ -50,6 +50,7 @@ jobs:
       - name: Print Versions
         run: |
           java -version
+          mvn --version
 
       - name: Cache local Maven repository
         uses: actions/cache@v3
@@ -124,7 +125,6 @@ jobs:
 
     - name: Print Versions
       run: |
-        mvn --version
         java -version
 
     - uses: actions/download-artifact@v3
