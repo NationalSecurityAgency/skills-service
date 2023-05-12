@@ -49,8 +49,8 @@ jobs:
 
       - name: Print Versions
         run: |
-          mvn --version
           java -version
+          mvn --version
 
       - name: Cache local Maven repository
         uses: actions/cache@v3
@@ -122,11 +122,9 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: '19' # The JDK version to make available on the path.
-        cache: 'maven'
 
     - name: Print Versions
       run: |
-        mvn --version
         java -version
 
     - uses: actions/download-artifact@v3
