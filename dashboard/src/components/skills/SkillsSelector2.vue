@@ -32,7 +32,7 @@ limitations under the License.
       <template #option="option">
         <slot name="dropdown-item" :option="option">
           <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
-            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName">{{ option.name }}
+            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName"><span v-if="showType">{{ option.type }}:</span> {{ option.name }}
               <b-badge v-if="option.isReused" variant="success" size="sm" class="text-uppercase"
                        data-cy="reusedBadge"
                        style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
@@ -50,9 +50,8 @@ limitations under the License.
                     removeReuseTag(option.skillId)
                   }}</span></span>
               </span>
-              <span class="mx-2">|</span>
+              <span class="mx-2" v-if="option.type !== 'Badge'">|</span>
               <span v-if="option.type !== 'Badge'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span>
-              <span v-else class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Badge</span>
               <span v-if="option.type !== 'Badge'"
               class="font-weight-bold skills-option-subject-name"
               data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
@@ -151,6 +150,10 @@ limitations under the License.
         default: true,
       },
       disabled: {
+        type: Boolean,
+        default: false,
+      },
+      showType: {
         type: Boolean,
         default: false,
       },

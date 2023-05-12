@@ -24,14 +24,14 @@ limitations under the License.
           <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
                             @selection-removed="onFromSelectionRemoved"
                             :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                            data-cy="learningPathFromSkillSelector"></skills-selector2>
+                            :showType=true data-cy="learningPathFromSkillSelector"></skills-selector2>
         </div>
         <div class="col-lg mt-1 ml-2">
           To:
           <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
                             @selection-removed="onToSelectionRemoved" :disabled="selectedFromSkills.length === 0"
                             :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                            data-cy="learningPathToSkillSelector"></skills-selector2>
+                            :showType=true data-cy="learningPathToSkillSelector"></skills-selector2>
         </div>
         <div class="col-lg-auto text-right mt-1 ml-2 align-self-end">
           <button type="button"
