@@ -91,40 +91,8 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        if (skillCatalogService.isAvailableInCatalog(skillDef)) {
-            throw new SkillException("Skill [${skillDef.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, id, ErrorCode.DependenciesNotAllowed)
-        }
-        if (skillDefRepo.wasThisSkillReusedElsewhere(skillDef.id)) {
-            throw new SkillException("Skill [${skillDef.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, id, ErrorCode.DependenciesNotAllowed)
-        }
-        if ("false" == skillDef.enabled) {
-            throw new SkillException("Disabled nodes cannot be added. [${skillDef.projectId}-${skillDef.skillId}] is disabled", projectId, null, ErrorCode.BadParam)
-        }
-        if ("false" == prereqSkillDef.enabled) {
-            throw new SkillException("Disabled nodes cannot be added. [${prereqSkillDef.projectId}-${prereqSkillDef.skillId}] is disabled", projectId, null, ErrorCode.BadParam)
-        }
-
-        if (prereqFromProjectId && projectId != prereqFromProjectId) {
-            dependencyValidator.validateDependencyEligibility(projectId, prereqSkillDef)
-        }
-
-        validateDependencyVersions(skillDef, prereqSkillDef)
-        checkForCircularGraphAndThrowException(skillDef, prereqSkillDef)
-        try {
-            skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
-        } catch (DataIntegrityViolationException e) {
-            String msg = "Skill dependency [${skillDef.projectId}:${skillDef.skillId}]=>[${prereqSkillDef.projectId}:${prereqSkillDef.skillId}] already exist.".toString()
-            log.error(msg, e)
-            throw new SkillException(msg, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
-        }
-    }
-
-    private void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
-        if (skill.version < dependOnSkill.version) {
-            throw new SkillException("Not allowed to depend on skill with a later version. " +
-                    "Skill [ID:${skill.skillId}, version ${skill.version}] can not depend on [ID:${dependOnSkill.skillId}, version ${dependOnSkill.version}]",
-                    skill.projectId, skill.skillId, ErrorCode.FailedToAssignDependency)
-        }
+        validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
+        skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
     }
 
     @Transactional()
@@ -291,8 +259,8 @@ class SkillsDepsService {
         })
     }
 
-    private void checkForCircularGraphAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
-        DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skillDef, prereqSkillDef)
+    private void validateLearningPathItemAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
         if (!dependencyCheckResult.possible) {
             throw new SkillException(dependencyCheckResult.reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
@@ -303,13 +271,51 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skillDef, prereqSkillDef)
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
         return dependencyCheckResult
     }
 
     @Profile
-    private DependencyCheckResult checkForCircularGraph(SkillDef skillDef, SkillDef prereqSkillDef) {
+    private DependencyCheckResult validateLearningPathItem(SkillDef skillDef, SkillDef prereqSkillDef) {
         assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
+
+        if ("false" == skillDef.enabled) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.NotEligible,
+                    reason: "Disabled nodes cannot be added. [${skillDef.projectId}-${skillDef.skillId}] is disabled")
+        }
+        if ("false" == prereqSkillDef.enabled) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.NotEligible,
+                    reason: "Disabled nodes cannot be added. [${prereqSkillDef.projectId}-${prereqSkillDef.skillId}] is disabled")
+        }
+
+        if (skillDef.projectId != prereqSkillDef.projectId) {
+            try {
+                dependencyValidator.validateDependencyEligibility(skillDef.projectId, prereqSkillDef)
+            } catch (SkillException e) {
+                return new DependencyCheckResult(possible: false,
+                        failureType: DependencyCheckResult.FailureType.NotEligible,
+                        reason: e.message)
+            }
+        }
+
+        if (skillCatalogService.isAvailableInCatalog(skillDef)) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.SkillInCatalog,
+                    reason: "Skill [${skillDef.skillId}] was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.")
+        }
+
+        if (skillDefRepo.wasThisSkillReusedElsewhere(skillDef.id)) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.ReusedSkill,
+                    reason: "Skill [${skillDef.skillId}] was reused in another subject or group and cannot have prerequisites in the learning path.")
+        }
+        if (skillDef.version < prereqSkillDef.version) {
+            String msg = "Not allowed to depend on skill with a later version. " +
+                    "Skill [ID:${skillDef.skillId}, version ${skillDef.version}] can not depend on [ID:${prereqSkillDef.skillId}, version ${prereqSkillDef.version}]".toString()
+            return new DependencyCheckResult(possible: false, failureType: DependencyCheckResult.FailureType.SkillVersion, reason: msg)
+        }
 
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
         CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(skillDef: skillDef, prereqSkillDef: prereqSkillDef, existingGraph: existingGraph)

@@ -195,6 +195,12 @@ limitations under the License.
                 if (res.failureType && res.failureType === 'AlreadyExist') {
                   return `Learning path from <b>${res.violatingSkillName}</b> to <b>${self.toSkillName}</b> already exists.`;
                 }
+                if (res.failureType && res.failureType === 'SkillInCatalog') {
+                  return `Skill <b>${self.toSkillName}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
+                }
+                if (res.failureType && res.failureType === 'ReusedSkill') {
+                  return `Skill <b>${self.toSkillName}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
+                }
 
                 return `${res.reason}`;
               });

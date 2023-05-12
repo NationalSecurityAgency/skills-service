@@ -17,7 +17,7 @@ package skills.controller.result.model
 
 class DependencyCheckResult {
     static enum FailureType {
-        CircularLearningPath, BadgeOverlappingSkills, BadgeSkillIsAlreadyOnPath, AlreadyExist
+        CircularLearningPath, BadgeOverlappingSkills, BadgeSkillIsAlreadyOnPath, AlreadyExist, SkillInCatalog, ReusedSkill, SkillVersion, NotEligible
     }
     boolean possible = true
 

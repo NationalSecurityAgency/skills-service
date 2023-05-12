@@ -218,6 +218,32 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]').click();
         cy.get('[data-cy="learningPathError"]').contains('Learning path from Very Great Skill 1 to Very Great Skill 2 already exists')
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
-
     })
+
+    it('exported skills cannot be added learning path', () => {
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
+        cy.get('[data-cy="learningPathError"]').contains('Skill Very Great Skill 1 was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+    })
+
+    it('reused skills cannot be added learning path', () => {
+        cy.createSubject(1,2)
+        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
+        cy.get('[data-cy="learningPathError"]').contains('Skill Very Great Skill 1 was reused in another subject or group and cannot have prerequisites in the learning path')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+    })
+
+
 });

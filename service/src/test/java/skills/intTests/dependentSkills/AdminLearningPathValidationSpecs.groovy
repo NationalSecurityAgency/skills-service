@@ -22,7 +22,7 @@ import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class AdminLearningPathCircularDependencySpecs extends DefaultIntSpec {
+class AdminLearningPathValidationSpecs extends DefaultIntSpec {
 
     def "skill1 -> skill2 -> skill1 circular dep"() {
         def p1 = createProject(1)
@@ -287,5 +287,70 @@ class AdminLearningPathCircularDependencySpecs extends DefaultIntSpec {
         e.message.contains("Learning path from [${badge1.name}] to [${p1Skills[5].name}] already exists.")
     }
 
+    def "skills exported to the catalog cannot have a prerequisite"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
+        skillsService.exportSkillToCatalog(p1.projectId, p1Skills[0].skillId)
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[1].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [${p1Skills[0].skillId}] was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.")
+    }
+
+    def "re-used skills cannot have a prerequisite"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkillInAnotherSubject(p1.projectId, p1Skills[0].skillId, p1subj2.subjectId)
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[1].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [${p1Skills[0].skillId}] was reused in another subject or group and cannot have prerequisites in the learning path.")
+    }
+
+    def "assigning dependent skills validates versions of the skills (dependency version must be less than or equal to the skill version)"() {
+        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkill(skills.get(0))
+        skillsService.createSkill(skills.get(1))
+        skillsService.createSkill(skills.get(2))
+
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, SkillsFactory.defaultProjId, skills.get(0).skillId)
+        when:
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, SkillsFactory.defaultProjId, skills.get(2).skillId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Not allowed to depend on skill with a later version. Skill [ID:skill2, version 0] can not depend on [ID:skill3, version 1]")
+    }
+
+    def "attempt to depend on skill that was not shared"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, proj1_skills)
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, proj2_skills)
+
+        when:
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill [TestProject1:skill1] is not shared (or does not exist) to [TestProject2] project")
+    }
 }
