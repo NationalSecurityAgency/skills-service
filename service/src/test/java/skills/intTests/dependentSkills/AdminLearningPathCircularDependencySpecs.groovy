@@ -15,14 +15,14 @@
  */
 package skills.intTests.dependentSkills
 
-import skills.controller.result.model.DependencyCheckResult
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
+class AdminLearningPathCircularDependencySpecs extends DefaultIntSpec {
 
     def "skill1 -> skill2 -> skill1 circular dep"() {
         def p1 = createProject(1)
@@ -32,12 +32,10 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
 
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[2].skillId)
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1.projectId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1.projectId, p1Skills[0].skillId)
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
-        !result.violatingSkillInBadgeId
-        !result.violatingSkillInBadgeName
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Discovered circular prerequisite [Skill:${p1Skills[2].skillId} -> Skill:${p1Skills[0].skillId} -> Skill:${p1Skills[2].skillId}]")
     }
 
     def "skill1 -> skill2 -> skill3 -> skill1 circular dep"() {
@@ -49,12 +47,10 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1.projectId, p1Skills[2].skillId)
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[1].skillId)
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1.projectId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1.projectId, p1Skills[0].skillId)
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
-        !result.violatingSkillInBadgeId
-        !result.violatingSkillInBadgeName
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Discovered circular prerequisite [Skill:${p1Skills[2].skillId} -> Skill:${p1Skills[0].skillId} -> Skill:${p1Skills[1].skillId} -> Skill:${p1Skills[2].skillId}]")
     }
 
     def "badge(skill1) -> skill1 learning path: badge cannot contain the skill"() {
@@ -71,12 +67,10 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
 
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, badge.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, badge.badgeId)
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
-        result.violatingSkillInBadgeId == badge.badgeId
-        result.violatingSkillInBadgeName == badge.name
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Discovered circular prerequisite [Skill:${p1Skills[0].skillId} -> Badge:${badge.badgeId}(Skill:${p1Skills[0].skillId})]")
     }
 
     def "skill1 -> badge(skill2) -> skill1 learning path: badge cannot contain the skill"() {
@@ -115,12 +109,11 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
 
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1.projectId, badge.badgeId)
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge.badgeId, p1.projectId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge.badgeId, p1.projectId, p1Skills[2].skillId)
+
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
-        !result.violatingSkillInBadgeId
-        !result.violatingSkillInBadgeName
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Discovered circular prerequisite [Badge:${badge.badgeId} -> Skill:${p1Skills[2].skillId} -> Badge:${badge.badgeId}]")
     }
 
     def "[badge1, badge2] -> [badge3, badge4] -> skill1 -> badge2) learning path: badge cannot contain the skill"() {
@@ -159,14 +152,14 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, badge4.badgeId, p1.projectId, badge2.badgeId)
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1.projectId, badge3.badgeId)
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1.projectId, badge4.badgeId)
-
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[4].skillId)
+
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
-        !result.violatingSkillInBadgeId
-        !result.violatingSkillInBadgeName
+        SkillsClientException e = thrown(SkillsClientException)
+        (e.getMessage().contains("Discovered circular prerequisite [Badge:${badge2.badgeId} -> Skill:${p1Skills[4].skillId} -> Badge:${badge4.badgeId} -> Badge:${badge2.badgeId}]")
+                ||
+                e.getMessage().contains("Discovered circular prerequisite [Badge:${badge2.badgeId} -> Skill:${p1Skills[4].skillId} -> Badge:${badge3.badgeId} -> Badge:${badge2.badgeId}]"))
     }
 
     def "badge1 -> badge2: two badges cannot contain the same skill in the same learning path"() {
@@ -190,14 +183,10 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge2)
 
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, badge1.badgeId)
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.BadgeOverlappingSkills.toString()
-        result.violatingSkillInBadgeId == badge1.badgeId
-        result.violatingSkillInBadgeName == badge1.name
-        result.violatingSkillId == p1Skills[1].skillId
-        result.violatingSkillName == p1Skills[1].name
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [Test Badge 1] on this learning path that has the same skill as [Test Badge 2] badge. The skill in conflict is [Test Skill 2].")
     }
 
     def "skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2: two badges cannot contain the same skill in the same learning path"() {
@@ -226,14 +215,11 @@ class AdminValidateAdditionOfLearningPathItemSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1.projectId, badge1.badgeId)
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1.projectId, p1Skills[5].skillId)
         when:
-        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[6].skillId)
+
         then:
-        result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.BadgeOverlappingSkills.toString()
-        result.violatingSkillInBadgeId == badge1.badgeId
-        result.violatingSkillInBadgeName == badge1.name
-        result.violatingSkillId == p1Skills[1].skillId
-        result.violatingSkillName == p1Skills[1].name
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [Test Badge 1] on this learning path that has the same skill as [Test Badge 2] badge. The skill in conflict is [Test Skill 2].")
     }
 
 }

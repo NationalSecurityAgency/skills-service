@@ -16,27 +16,42 @@ limitations under the License.
 <template>
   <metrics-card id="prerequisite-selector-panel" title="Add a new item to the learning path"
                 :no-padding="true" data-cy="addPrerequisiteToLearningPath" style="margin-bottom:10px;">
-    <div class="row px-3 py-2">
-      <div class="col-6">
+    <ValidationObserver v-slot="{ invalid }">
+    <div class="row ml-1 mr-3 my-2 no-gutters">
+      <div class="col-lg ml-2 mt-1">
         From:
         <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
+                          @selection-removed="onFromSelectionRemoved"
                           :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                          data-cy="skillSelectorPrerequisites"></skills-selector2>
+                          data-cy="learningPathFromSkillSelector"></skills-selector2>
       </div>
-      <div class="col-5">
+      <div class="col-lg mt-1 ml-2">
         To:
         <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
+                          @selection-removed="onToSelectionRemoved"
                           :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
-                          data-cy="skillSelector"></skills-selector2>
+                          data-cy="learningPathToSkillSelector"></skills-selector2>
       </div>
-      <div class="col-1" style="margin-top: 24px;">
-        <button type="button" class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath" :disabled="!this.fromSkillId || !this.toSkillId">Add</button>
+      <div class="col-lg-auto text-right mt-1 ml-2 align-self-end">
+        <button type="button"
+                class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath"
+                data-cy="addLearningPathItemBtn"
+                :disabled="!fromSkillId || !toSkillId || invalid">Add <i class="fas fa-plus-circle" aria-hidden="true"/></button>
       </div>
     </div>
+
+      <ValidationProvider ref="learningPathValidator" :immediate="true"
+                          rules="validLearningPath" v-slot="{errors, valid}" name="Skill Name">
+        <input v-model="toSkillId" class="d-none"/>
+        <div v-if="!valid" class="mx-3 alert alert-danger" data-cy="learningPathError"><i class="fas fa-exclamation-triangle" aria-hidden="true"/><span v-html="errors[0]" class="px-3"/></div>
+      </ValidationProvider>
+
+    </ValidationObserver>
   </metrics-card>
 </template>
 
 <script>
+  import { extend } from 'vee-validate';
   import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSelector2 from '@/components/skills/SkillsSelector2';
@@ -50,6 +65,7 @@ limitations under the License.
     },
     data() {
       return {
+        tempText: '',
         selectedFromSkills: [],
         allSkills: [],
         allPotentialSkills: [],
@@ -57,11 +73,13 @@ limitations under the License.
         fromSkillId: null,
         fromProjectId: null,
         toSkillId: null,
+        toSkillName: null,
         toProjectId: null,
       };
     },
     mounted() {
       this.loadAllSkills();
+      this.registerValidation();
     },
     methods: {
       loadAllSkills() {
@@ -85,11 +103,25 @@ limitations under the License.
       },
       onToSelected(item) {
         this.toSkillId = item.skillId;
+        this.toSkillName = item.name;
         this.toProjectId = item.projectId;
       },
       onToDeselected() {
         this.selectedToSkills = [];
         this.updatePotentialSkills();
+      },
+      onFromSelectionRemoved() {
+        if (this.$refs && this.$refs.learningPathValidator) {
+          this.clearData();
+          this.$refs.learningPathValidator.reset();
+        }
+      },
+      onToSelectionRemoved() {
+        if (this.$refs && this.$refs.learningPathValidator) {
+          this.clearToData();
+          this.$refs.learningPathValidator.reset();
+          this.updatePotentialSkills();
+        }
       },
       onFromSelected(item) {
         this.clearToData();
@@ -116,7 +148,36 @@ limitations under the License.
         this.allPotentialSkills = [];
         this.selectedToSkills = [];
         this.toSkillId = null;
+        this.toSkillName = null;
         this.toProjectId = null;
+      },
+      registerValidation() {
+        const self = this;
+        extend('validLearningPath', {
+          validate() {
+            if (!self || !self.toProjectId || !self.toSkillId || !self.fromSkillId || !self.fromProjectId) {
+              return true;
+            }
+            return SkillsService.validateDependency(self.toProjectId, self.toSkillId, self.fromSkillId, self.fromProjectId)
+              .then((res) => {
+                if (res.possible) {
+                  return true;
+                }
+
+                if (res.failureType && res.failureType === 'CircularLearningPath') {
+                  const additionalBadgeMsg = res.violatingSkillInBadgeName ? `under the badge <b>${res.violatingSkillInBadgeName}</b> ` : '';
+                  return `<b>${self.toSkillName}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
+                }
+
+                if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
+                  return 'Multiple badges on the same Learning path cannot have overlapping skills. '
+                    + `There is already a badge <b>${res.violatingSkillInBadgeName}</b> on this learning path that has the same skill as <b>${self.toSkillName}</b> badge. The skill in conflict is <b>${res.violatingSkillName}</b>.`;
+                }
+
+                return `${res.reason}`;
+              });
+          },
+        });
       },
     },
   };

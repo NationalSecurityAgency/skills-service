@@ -22,6 +22,7 @@ limitations under the License.
               :filterable="internalSearch"
               label="name"
               v-on:search="searchChanged"
+              v-on:input="valChanged"
               v-on:option:selected="added"
               v-on:option:deselecting="considerRemoval"
               :loading="isLoading"
@@ -160,6 +161,7 @@ limitations under the License.
         optionsInternal: [],
         multipleSelection: true,
         currentSearch: '',
+        isMounted: false,
       };
     },
     mounted() {
@@ -168,6 +170,7 @@ limitations under the License.
       if (this.onlySingleSelectedValue) {
         this.multipleSelection = false;
       }
+      this.isMounted = true;
     },
     watch: {
       selected: function watchUpdatesToSelected() {
@@ -221,6 +224,11 @@ limitations under the License.
       searchChanged(query, loadingFunction) {
         this.currentSearch = query;
         this.$emit('search-change', query, loadingFunction);
+      },
+      valChanged(val) {
+        if (this.isMounted && val === null) {
+          this.$emit('selection-removed');
+        }
       },
     },
   };

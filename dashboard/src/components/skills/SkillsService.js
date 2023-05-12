@@ -173,11 +173,11 @@ export default {
       .then((res) => res.data);
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
-    if (dependentProjectId) {
-      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
+      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
         .then((createdRuleResult) => createdRuleResult.data);
-    }
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
+  },
+  validateDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisiteValidate/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
       .then((createdRuleResult) => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {

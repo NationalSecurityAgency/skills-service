@@ -113,11 +113,11 @@ class CircularLearningPathChecker {
                 if (found) {
                     return new DependencyCheckResult(possible: false,
                             failureType: DependencyCheckResult.FailureType.BadgeOverlappingSkills,
-                            violatingSkillInBadgeId: badgeOnPath.badgeGraphNode.skillId,
-                            violatingSkillInBadgeName: badgeOnPath.badgeGraphNode.name,
+                            violatingSkillInBadgeId: current.skillId,
+                            violatingSkillInBadgeName: current.name,
                             violatingSkillId: found.skillId,
                             violatingSkillName: found.name,
-                            reason: "Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [${badgeOnPath.badgeGraphNode.name}] on this learning path that has the same skill as [${current.name}] badge. The skill in conflict is [${found.name}].")
+                            reason: "Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [${current.name}] on this learning path that has the same skill as [${badgeOnPath.badgeGraphNode.name}] badge. The skill in conflict is [${found.name}].")
                 }
             }
 

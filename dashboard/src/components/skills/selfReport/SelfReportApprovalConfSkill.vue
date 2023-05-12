@@ -22,7 +22,7 @@ limitations under the License.
     </template>
     <div v-if="!(this.loadingMeta.skills || this.loadingMeta.subjects)" class="row no-gutters mx-1">
       <div class="col-md mx-1 mt-1 align-self-end">
-          <div class="mb-1">Add a Single Skills</div>
+          <div class="mb-1">Add a Single Skill</div>
           <skills-selector2
               :disabled="selectedSubject !== null || loading"
               :options="availableSkills"

@@ -525,6 +525,13 @@ Cypress.Commands.add("assignProjectToGlobalBadge", (badgeNum = 1, projNum = 1, l
 });
 
 
+Cypress.Commands.add("addLearningPathItem", (projNum, fromSkillNum, toSkillNum, isFromBadge = false, isToBadge = false) => {
+    const skill = isToBadge ? `badge${toSkillNum}` : `skill${toSkillNum}`
+    const prerequisiteSkill = isFromBadge? `badge${fromSkillNum}`: `skill${fromSkillNum}`
+    const projectId = `proj${projNum}`
+    cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${projectId}/${prerequisiteSkill}`);
+});
+
 Cypress.Commands.add("assignDep", (projNum, skillNum1, skillNum2, subj2Num=null) => {
     let skill2Id = `skill${skillNum2}`
     if (subj2Num) {
