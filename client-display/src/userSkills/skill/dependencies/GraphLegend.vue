@@ -16,12 +16,13 @@ limitations under the License.
 <template>
   <div class='graph-legend card skills-card-theme-border' style="min-width: 13rem;">
     <div class="card-header">
-      <h6 class="card-title mb-0 float-left">Node Legend</h6>
+      <h6 class="card-title mb-0 float-left">Legend</h6>
     </div>
     <div class='card-body'>
       <ul class='text-left p-0 mb-0' data-cy="nodeLegend">
         <li v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0">
-          <span v-bind:style=' {background: item.color }' class="mr-2 mb-0 border border-secondary rounded"></span>{{ item.label }}
+          <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
+          <span v-else v-bind:style=' {background: item.color }' class="mr-2 mb-0 border border-secondary rounded"></span>{{ item.label }}
         </li>
       </ul>
     </div>

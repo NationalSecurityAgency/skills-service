@@ -61,9 +61,10 @@ limitations under the License.
         dependenciesInternal: [],
         network: null,
         legendItems: [
-          { label: 'This Skill', color: 'lightblue' },
-          { label: 'Prerequisites', color: 'lightgray' },
-          { label: 'Achieved Prerequisites', color: 'lightgreen' },
+          { label: 'This Skill', color: 'lightblue', iconClass: 'fa-graduation-cap' },
+          { label: 'Prerequisites', color: 'lightgray', iconClass: 'fa-graduation-cap' },
+          { label: 'Achieved Prerequisites', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
+          { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
         ],
         displayOptions: {
           layout: {
@@ -239,6 +240,11 @@ limitations under the License.
       buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
         if (!createdSkillIds.includes(skill.id)) {
           createdSkillIds.push(skill.id);
+          const found = this.dependenciesInternal.find((item) => item.skill.id === skill.id);
+          let skillColor = skill.isThisSkill ? 'lightblue' : 'lightgray';
+          if (found && found.achieved) {
+            skillColor = 'lightgreen';
+          }
           const node = {
             id: skill.id,
             label: this.getLabel(skill, isCrossProject),
@@ -249,7 +255,7 @@ limitations under the License.
               code: '\uf19d',
               weight: '900',
               size: 50,
-              color: 'lightgreen',
+              color: skillColor,
             },
             chosen: !skill.isThisSkill,
             font: { multi: 'html', size: 20 },
