@@ -46,8 +46,8 @@ class UserAttrsService {
     @Autowired
     LockingService lockingService
 
-    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalDays:7}"}')
-    private int attrsAndUserTagsUpdateIntervalDays
+    @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalHours:7}"}')
+    private int attrsAndUserTagsUpdateIntervalHours
 
     @Transactional
     @Profile
@@ -77,7 +77,7 @@ class UserAttrsService {
                             userInfo.userDn, userAttrs.dn,
                             userInfo.nickname, userAttrs.nickname,
                             userInfo.usernameForDisplay, userAttrs.userIdForDisplay,
-                            userAttrs.userTagsLastUpdated, attrsAndUserTagsUpdateIntervalDays.days.ago
+                            userAttrs.userTagsLastUpdated, attrsAndUserTagsUpdateIntervalHours.hours.ago
                     )
                     log.trace('Should Update [{}] UserAttrs [{}], UserTags [{}]', userId, updateUserAttrs, updateUserTags)
                 }
@@ -178,7 +178,7 @@ class UserAttrsService {
     @Profile
     private boolean shouldUpdateUserTags(UserAttrs userAttrs) {
         use(TimeCategory) {
-            return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalDays.days.ago)
+            return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalHours.hours.ago)
         }
     }
 
