@@ -261,7 +261,6 @@ limitations under the License.
     },
     computed: {
       locked() {
-        console.log(this.badgeIsLocked);
         return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked;
       },
       isSkillComplete() {

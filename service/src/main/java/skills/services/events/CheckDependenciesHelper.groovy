@@ -36,7 +36,7 @@ class CheckDependenciesHelper {
 
     @Profile
     DependencyCheckRes check(String userId, String projectId, String skillId) {
-        List<UserAchievedLevelRepo.ChildWithAchievementsInfo> dependentsAndAchievements = achievedLevelRepo.findChildrenAndTheirAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence)
+        List<UserAchievedLevelRepo.ChildWithAchievementsInfo> dependentsAndAchievements = achievedLevelRepo.findChildrenAndTheirAchievements(userId, projectId, skillId, SkillRelDef.RelationshipType.Dependence.toString())
         List<UserAchievedLevelRepo.ChildWithAchievementsInfo> notAchievedDependents = dependentsAndAchievements.findAll({
             !it.childAchievedSkillId
         })

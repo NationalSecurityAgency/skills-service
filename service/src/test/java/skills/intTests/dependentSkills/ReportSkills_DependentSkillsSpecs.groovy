@@ -19,9 +19,11 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
-class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkills
+import static skills.intTests.utils.SkillsFactory.createSubject
 
-    String projId = SkillsFactory.defaultProjId
+class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     List<String> sampleUserIds // loaded from system props
 
@@ -30,29 +32,7 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         sampleUserIds = System.getProperty("sampleUserIds", "tom|||dick|||harry")?.split("\\|\\|\\|").sort()
     }
 
-    def "do not allow to create circular dependencies"(){
-        // don't allow circular dependency of skill3 -> skill2 -> skill1 -> skill3
-        List<Map> skills = SkillsFactory.createSkills(3)
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(SkillsFactory.createSubject())
-        skillsService.createSkill(skills.get(0))
-        skillsService.createSkill(skills.get(1))
-        skillsService.createSkill(skills.get(2))
-
-        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(0).skillId)
-        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(2).skillId, skills.get(1).skillId)
-
-        when:
-        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
-
-        then:
-        SkillsClientException e = thrown()
-        e.message.contains("Discovered circular prerequisite [Skill:skill1 -> Skill:skill3 -> Skill:skill2 -> Skill:skill1]")
-    }
-
-    def "do not give credit if dependency was not fulfilled"(){
-
+    def "do not give credit if dependency was not fulfilled: learning path of skill -> skill"(){
         List<Map> skills = SkillsFactory.createSkills(2)
 
         when:
@@ -69,7 +49,7 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:skill1]."
     }
 
-    def "do not give credit if only some dependencies were fulfilled"(){
+    def "do not give credit if only some dependencies were fulfilled  [skill0, skill1, skill2] -> skill3 "(){
         List<Map> skills = SkillsFactory.createSkills(4)
         skills.each{
             it.pointIncrement = 25
@@ -93,6 +73,579 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
         !resSkill4.body.skillApplied
         resSkill4.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 3. Waiting on completion of [TestProject1:skill2]."
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of skill -> badge"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        // skill2 -> skill3 -> badge1 -> skill4
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, badge1.badgeId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:${p1Skills[3].skillId}]."
+    }
+
+    def "do not give credit if dependency was only partially fulfilled: learning path of [skill2, skill3, skill4] -> badge"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[4].skillId)
+
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[3].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        then:
+        res1.body.skillApplied
+        !res2.body.skillApplied
+        res2.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 2 out of 3. Waiting on completion of [TestProject1:${p1Skills[2].skillId}, TestProject1:${p1Skills[4].skillId}]."
+    }
+
+    def "give credit if dependency are fulfilled: learning path of [skill2, skill3, skill4] -> badge"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[4].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[2].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[3].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of badge -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        // skill2 -> skill3 -> badge1 -> skill4
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, badge1.badgeId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:${badge1.badgeId}]."
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of [badge1, badge2] -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[2].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, badge2.badgeId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 2 out of 2. Waiting on completion of [TestProject1:${badge1.badgeId}, TestProject1:${badge2.badgeId}]."
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of [badge1, badge2, skill] -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[5].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1Skills[7].skillId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 3 out of 3. Waiting on completion of [TestProject1:${badge1.badgeId}, TestProject1:${badge2.badgeId}, TestProject1:${p1Skills[7].skillId}]."
+    }
+
+    def "do not give credit if dependency was only partially fulfilled: learning path of [badge1-done, badge2, skill] -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[5].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1Skills[7].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[5].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+        def res5 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 2 out of 3. Waiting on completion of [TestProject1:${badge2.badgeId}, TestProject1:${p1Skills[7].skillId}]."
+    }
+
+    def "do not give credit if dependency was only partially fulfilled: learning path of [badge1-done, badge2, skill-done] -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[5].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1Skills[7].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[5].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+        def res5 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[7].skillId])
+        def res6 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.skillApplied
+        !res6.body.skillApplied
+        res6.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 3. Waiting on completion of [TestProject1:${badge2.badgeId}]."
+    }
+
+    def "give credit if dependency was fulfilled: learning path of [badge1-done, badge2-done, skill-done] -> skill"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[5].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1Skills[7].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[5].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+        def res5 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[7].skillId])
+        def res6 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[2].skillId])
+        def res7 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[3].skillId])
+
+        def res8 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.skillApplied
+        res6.body.skillApplied
+        res7.body.skillApplied
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of badge -> badge"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        // skill4 -> skill5 -> badge1 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[4].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[5].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, badge1.badgeId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[3].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:${badge1.badgeId}]."
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of [badge1, badge2] -> badge3"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[4].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[5].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        // skill4 -> skill5 -> badge1 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[7].skillId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[7].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge2.badgeId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 2 out of 2. Waiting on completion of [TestProject1:${badge1.badgeId}, TestProject1:${badge2.badgeId}]."
+    }
+
+    def "do not give credit if dependency was not fulfilled: learning path of [badge1, badge2, skill] -> badge3"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[4].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[5].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        // skill4 -> skill5 -> badge1 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[7].skillId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[7].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, p1Skills[9].skillId)
+
+        when:
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        !res.body.skillApplied
+        res.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 3 out of 3. Waiting on completion of [TestProject1:${badge1.badgeId}, TestProject1:${badge2.badgeId}, TestProject1:${p1Skills[9].skillId}]."
+    }
+
+    def "do not give credit if dependency was partially fulfilled: learning path of [badge1-done, badge2, skill] -> badge3"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[4].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[5].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        // skill4 -> skill5 -> badge1 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[7].skillId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[7].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, p1Skills[9].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[7].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+
+        def resLast = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+
+        !resLast.body.skillApplied
+        resLast.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 2 out of 3. Waiting on completion of [TestProject1:${badge2.badgeId}, TestProject1:${p1Skills[9].skillId}]."
+    }
+
+    def "do not give credit if dependency was partially fulfilled: learning path of [badge1-done, badge2, skill-done] -> badge3"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[4].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[5].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        // skill4 -> skill5 -> badge1 -> badge2
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[7].skillId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[7].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, p1Skills[9].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[7].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+        def res5 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[9].skillId])
+
+        def resLast = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.skillApplied
+
+        !resLast.body.skillApplied
+        resLast.body.explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 3. Waiting on completion of [TestProject1:${badge2.badgeId}]."
+    }
+
+    def "credit if dependency was fulfilled: learning path of [badge1, badge2, skill] -> badge3"(){
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 3)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[4].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: p1Skills[5].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[7].skillId, p1Skills[6].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[7].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, p1Skills[9].skillId)
+
+        when:
+        def res1 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[6].skillId])
+        def res2 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[7].skillId])
+        def res3 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId])
+        def res4 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId])
+        def res5 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[9].skillId])
+        def res6 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[2].skillId])
+        def res7 = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[3].skillId])
+
+
+        def resLast = skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[4].skillId])
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.skillApplied
+        res6.body.skillApplied
+        res7.body.skillApplied
+
+        resLast.body.skillApplied
     }
 
     def "give credit if dependency was fulfilled"(){
@@ -146,7 +699,6 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         res2.body.explanation == "Skill event was applied"
     }
 
-
     def "give credit if all dependencies were fulfilled"(){
         List<Map> skills = SkillsFactory.createSkills(4)
         skills.each{
@@ -171,27 +723,5 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         resSkill3.body.skillApplied
         resSkill2.body.skillApplied
         resSkill4.body.skillApplied
-    }
-
-    @Override
-    void setMetaClass(MetaClass metaClass) {
-        super.setMetaClass(metaClass)
-    }
-
-    def 'retrieve skills available for dependencies'() {
-        setup:
-        def project = skillsService.createProject(SkillsFactory.createProject(1)).body
-        skillsService.createSubject(SkillsFactory.createSubject(1, 1))
-        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 1, 0))
-        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 4, 1))
-        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 2, 2))
-        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 3, 0))
-
-        when:
-        def v0Result = skillsService.getSkillsAvailableForDependency(SkillsFactory.getDefaultProjId(1))
-
-        then:
-        // verify all 4 skills are returned regardless of version #
-        v0Result.size() == 4
     }
 }

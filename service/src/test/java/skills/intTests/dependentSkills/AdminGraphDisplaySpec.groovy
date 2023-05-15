@@ -295,4 +295,21 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         node2.totalPoints ==  skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
         node2.type ==  "Skill"
     }
+
+    def 'retrieve skills available for dependencies'() {
+        setup:
+        def project = skillsService.createProject(SkillsFactory.createProject(1)).body
+        skillsService.createSubject(SkillsFactory.createSubject(1, 1))
+        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 1, 0))
+        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 4, 1))
+        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 2, 2))
+        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 3, 0))
+
+        when:
+        def v0Result = skillsService.getSkillsAvailableForDependency(SkillsFactory.getDefaultProjId(1))
+
+        then:
+        // verify all 4 skills are returned regardless of version #
+        v0Result.size() == 4
+    }
 }
