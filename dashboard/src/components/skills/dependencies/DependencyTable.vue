@@ -19,6 +19,12 @@ limitations under the License.
     <loading-container :is-loading="isLoading">
         <div v-if="!isLoading && !isProcessing && learningPaths.length > 0" class="my-4">
           <skills-b-table v-if="!isProcessing" :options="table.options" :items="learningPaths" data-cy="learningPathTable" tableStoredStateId="learningPathTable">
+            <template v-slot:cell(fromItem)="data">
+              <a :href="getUrl(data.item.fromNode)">{{ data.item.fromItem }}</a>
+            </template>
+            <template v-slot:cell(toItem)="data">
+              <a :href="getUrl(data.item.toNode)">{{ data.item.toItem }}</a>
+            </template>
             <template v-slot:cell(edit)="data">
               <b-button @click="removeLearningPath(data)"
                         variant="outline-info" size="sm" class="text-info"
@@ -81,7 +87,11 @@ limitations under the License.
               },
             ],
             pagination: {
-              remove: true,
+              server: false,
+              currentPage: 1,
+              totalRows: 1,
+              pageSize: 5,
+              possiblePageSizes: [5, 10, 15, 20],
             },
           },
         },
@@ -98,11 +108,9 @@ limitations under the License.
 
             this.learningPaths.push({
               fromItem: fromNode.details.name,
-              fromProjectId: fromNode.details.projectId,
-              fromSkillId: fromNode.details.skillId,
+              fromNode: fromNode.details,
               toItem: toNode.details.name,
-              toProjectId: toNode.details.projectId,
-              toSkillId: toNode.details.skillId,
+              toNode: toNode.details,
             });
           });
         }
@@ -115,11 +123,21 @@ limitations under the License.
         this.msgConfirm(message, 'Remove Learning Path?', 'Remove')
           .then((ok) => {
             if (ok) {
-              SkillsService.removeDependency(data.item.toProjectId, data.item.toSkillId, data.item.fromSkillId, data.item.fromProjectId).then(() => {
+              SkillsService.removeDependency(data.item.toNode.projectId, data.item.toNode.skillId, data.item.fromNode.skillId, data.item.fromNode.projectId).then(() => {
                 this.$emit('update');
               });
             }
           });
+      },
+      getUrl(item) {
+        let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`;
+        if (item.type === 'Skill') {
+          url += `/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
+        } else if (item.type === 'Badge') {
+          url += `/badges/${encodeURIComponent(item.skillId)}/`;
+        }
+
+        return url;
       },
     },
   };
