@@ -147,7 +147,6 @@ limitations under the License.
       onAddPath() {
         this.$refs.validationObserver.validate()
           .then((res) => {
-            console.log(res);
             if (res) {
               SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.selectedFromSkills[0].skillId, this.selectedFromSkills[0].projectId)
                 .then(() => {

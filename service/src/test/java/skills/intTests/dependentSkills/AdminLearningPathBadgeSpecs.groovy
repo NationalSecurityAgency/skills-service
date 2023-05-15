@@ -226,6 +226,166 @@ class AdminLearningPathBadgeSpecs extends DefaultIntSpec {
         e.getMessage().contains("Disabled nodes cannot be added")
     }
 
+    def "remove skill->skill learning path item - no data left"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        when:
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.deleteLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph_before) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+        ].sort()
+        !graph.nodes
+        !graph.edges
+    }
+
+    def "remove skill->skill learning path item"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[1].skillId)
+        when:
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.deleteLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[1].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph_before) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[3].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+        edges(graph) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+    }
+
+    def "remove skill->skill learning path item - splits graph into 2 "() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(8, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[1].skillId)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[5].skillId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[6].skillId, p1Skills[5].skillId)
+        when:
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.deleteLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[1].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph_before) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[3].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+                "[Skill:${p1Skills[3].skillId}] prerequisite for [Skill:${p1Skills[5].skillId}]",
+                "[Skill:${p1Skills[5].skillId}] prerequisite for [Skill:${p1Skills[6].skillId}]",
+        ].sort()
+        edges(graph) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+                "[Skill:${p1Skills[3].skillId}] prerequisite for [Skill:${p1Skills[5].skillId}]",
+                "[Skill:${p1Skills[5].skillId}] prerequisite for [Skill:${p1Skills[6].skillId}]",
+        ].sort()
+    }
+
+    def "remove skill->badge learning path item"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[9].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[8].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[1].skillId)
+
+
+        when:
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.deleteLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1Skills[1].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph_before) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Badge:${badge1.badgeId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+        edges(graph) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+    }
+
+    def "remove badge->skill learning path item"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[9].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[8].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[1].skillId)
+
+
+        when:
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.deleteLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, badge1.badgeId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph_before) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Badge:${badge1.badgeId}] prerequisite for [Skill:${p1Skills[3].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+        edges(graph) == [
+                "[Skill:${p1Skills[0].skillId}] prerequisite for [Skill:${p1Skills[1].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[2].skillId}]",
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[4].skillId}]",
+        ].sort()
+    }
+
     private List<String> edges(def graph) {
         def idToSkillIdMap = graph.nodes.collectEntries {[it.id, it]}
         return graph.edges.collect {

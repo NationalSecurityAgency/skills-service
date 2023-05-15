@@ -487,7 +487,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         def p1subj2 = createSubject(1, 2)
         skillsService.createSubject(p1subj2)
 
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(1).skillId)
 
         when:
         def res = skillsService.checkIfSkillsHaveDependencies(p1.projectId, p1Skills.collect { it.skillId })

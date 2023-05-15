@@ -76,8 +76,8 @@ class CopyProjectSpecs extends DefaultIntSpec {
         skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[1].skillId)
         skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1SkillsSubj2[1].skillId)
 
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(2).skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(2).skillId, dependentSkillId: p1SkillsSubj2.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(2).skillId, p1SkillsSubj2.get(2).skillId)
 
         skillsService.reuseSkills(p1.projectId, [p1Skills[1].skillId], p1subj2.subjectId)
         skillsService.reuseSkills(p1.projectId, [p1Skills[7].skillId], p1subj2.subjectId, group3.skillId)
@@ -486,10 +486,10 @@ class CopyProjectSpecs extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(group3.skillId, it)
         }
 
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(2).skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(2).skillId, dependentSkillId: p1Skills.get(5).skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(3).skillId, dependentSkillId: p1SkillsSubj2.get(0).skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(3).skillId, dependentSkillId: p1SkillsSubj2.get(4).skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(2).skillId, p1Skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(3).skillId, p1SkillsSubj2.get(0).skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(3).skillId, p1SkillsSubj2.get(4).skillId)
 
         when:
         def projToCopy = createProject(2)
@@ -528,8 +528,7 @@ class CopyProjectSpecs extends DefaultIntSpec {
         skillsService.createSkills(proj2_skills)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         when:
         // proj2 copy

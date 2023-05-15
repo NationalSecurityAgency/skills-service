@@ -111,8 +111,8 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         String userId = "user1"
         when:
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(0).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(0).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(2).skillId)
         def summary = skillsService.getSingleSkillSummary(userId, proj1.projectId, proj1_skills.get(1).skillId)
 
         then:
@@ -136,8 +136,8 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         String userId = "user1"
         when:
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(0).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(0).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(2).skillId)
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(2).skillId], userId, new Date())
 
@@ -1277,8 +1277,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.createSkills(proj2_skills)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
 
         when:
         def res = skillsService.getCrossProjectSkillSummaryWithSubject("user1", proj2.projectId, proj1.projectId, proj2_subj.subjectId, proj1_skills.get(1).skillId)

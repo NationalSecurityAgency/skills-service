@@ -340,6 +340,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(@Nullable String id, String name, SkillDef.ContainerType type)
     boolean existsByProjectIdAndNameAndTypeInAllIgnoreCase(@Nullable String id, String name, List<SkillDef.ContainerType> types)
 
+    @Nullable
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
 

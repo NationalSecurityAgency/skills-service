@@ -194,10 +194,10 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
         when:
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(1).skillId, dependentSkillId: SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0), throwExceptionOnFailure: true])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(1).skillId, SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0))
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill ID must not contain reuse tag")
+        ex.message.contains("From ID must not contain reuse tag")
     }
 
     def "reused skill cannot be assigned as a cross-project dependency"() {
@@ -205,8 +205,7 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.createProject(p1)
         when:
         skillsService.shareSkill(p1.projectId, SkillReuseIdUtil.addTag("valu", 1), "other")
-        skillsService.assignDependency([projectId         : p1.projectId, skillId: SkillReuseIdUtil.addTag("first", 2),
-                                        dependentProjectId: "other", dependentSkillId: "second",])
+        skillsService.addLearningPathPrerequisite(p1.projectId, SkillReuseIdUtil.addTag("first", 2),"other", "second")
         then:
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill ID must not contain reuse tag")
@@ -217,8 +216,7 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.createProject(p1)
         when:
         skillsService.shareSkill(p1.projectId, SkillReuseIdUtil.addTag("valu", 1), "other")
-        skillsService.assignDependency([projectId         : p1.projectId, skillId: "blah",
-                                        dependentProjectId: "other", dependentSkillId: SkillReuseIdUtil.addTag("first", 2),])
+        skillsService.addLearningPathPrerequisite(p1.projectId, "blah", "other", SkillReuseIdUtil.addTag("first", 2))
         then:
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill ID must not contain reuse tag")
@@ -246,10 +244,10 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
         when:
-        skillsService.assignDependency([projectId: p1.projectId, skillId: SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0), dependentSkillId: p1Skills.get(1).skillId, throwExceptionOnFailure: true])
+        skillsService.addLearningPathPrerequisite(p1.projectId, SkillReuseIdUtil.addTag(p1Skills.get(0).skillId, 0), p1Skills.get(1).skillId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill ID must not contain reuse tag")
+        ex.message.contains("To ID must not contain reuse tag")
     }
 
     def "cannot reuse if a finalization is running"() {
@@ -328,7 +326,7 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         def p1subj2 = createSubject(1, 2)
         skillsService.createSubject(p1subj2)
 
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(1).skillId)
 
         when:
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
@@ -348,10 +346,11 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
         when:
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills.get(0).skillId, dependentSkillId: p1Skills.get(1).skillId, throwExceptionOnFailure: true])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(1).skillId)
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Skill [skill1] was reused in another subject or group. Dependencies cannot be added to a skill that was reused")
+        ex.message.contains("Skill [skill1] was reused in another subject or group and cannot have prerequisites in the learning path")
     }
+
 }

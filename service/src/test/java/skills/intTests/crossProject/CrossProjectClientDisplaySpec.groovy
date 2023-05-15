@@ -52,11 +52,10 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
         when:
         // cross project dependency
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         // this project dependencies
-        skillsService.assignDependency([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId, dependentSkillId: proj2_skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj2_skills.get(1).skillId)
 
         def clientDisplay1 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
         addedSkills << skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(1).skillId], user, new Date())
@@ -118,17 +117,16 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
         when:
 
         // other project deps
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId, dependentSkillId: proj1_skills.get(1).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId, dependentSkillId: proj1_skills.get(2).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId, dependentSkillId: proj1_skills.get(3).skillId])
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(0).skillId, proj1_skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(0).skillId, proj1_skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(0).skillId, proj1_skills.get(3).skillId)
 
         // cross project dependency
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         // this project dependencies
-        skillsService.assignDependency([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId, dependentSkillId: proj2_skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj2_skills.get(1).skillId)
 
         def clientDisplay1 = skillsService.getSkillDependencyInfo(user, proj2.projectId, proj2_skills.get(0).skillId)
         addedSkills << skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(1).skillId], user, new Date())
@@ -188,8 +186,7 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
         def summary = skillsService.getCrossProjectSkillSummary("user1", proj2.projectId, proj1.projectId, proj1_skills.get(1).skillId)
 
         then:
@@ -225,8 +222,7 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, 'ALL_SKILLS_PROJECTS')
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
         def summary = skillsService.getCrossProjectSkillSummary("user1", proj2.projectId, proj1.projectId, proj1_skills.get(1).skillId)
 
         then:
@@ -266,8 +262,7 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
         Date yesterday = use(TimeCategory) { return 1.day.ago }
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, yesterday)
 
@@ -310,8 +305,7 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
         Date yesterday = use(TimeCategory) { return 1.day.ago }
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, 'ALL_SKILLS_PROJECTS')
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId], userId, yesterday)
 
@@ -354,8 +348,7 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
         Date yesterday = use(TimeCategory) { return 1.day.ago }
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
 
         skillsService.getCrossProjectSkillSummary(userId, proj2.projectId, proj1.projectId, proj1_skills.get(0).skillId)
 
@@ -382,10 +375,8 @@ class CrossProjectClientDisplaySpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
-        skillsService.assignDependency([projectId         : proj1.projectId, skillId: proj1_skills.get(1).skillId,
-                                        dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(0).skillId)
         def summary = skillsService.getCrossProjectSkillSummary("user1", proj2.projectId, proj1.projectId, proj1_skills.get(1).skillId)
 
         then:

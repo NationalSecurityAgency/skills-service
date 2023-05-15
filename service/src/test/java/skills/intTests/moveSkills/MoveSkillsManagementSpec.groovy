@@ -509,8 +509,8 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSkill(p1subj2g1)
 
         // add moved skill in the middle of a graph chain
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[1].skillId, dependentSkillId: p1Skills[0].skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[0].skillId, dependentSkillId: p1Skills[2].skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1Skills[2].skillId)
 
         def skill0Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
         def skill1Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
@@ -550,8 +550,8 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSubject(p1subj2)
 
         // add moved skill in the middle of a graph chain
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[1].skillId, dependentSkillId: p1Skills[0].skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[0].skillId, dependentSkillId: p1Skills[2].skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1Skills[2].skillId)
 
         def skill0Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
         def skill1Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
@@ -673,8 +673,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSubject(proj2_subj2)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         String user = getRandomUsers(1)[0]
         when:
@@ -722,8 +721,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSkill(proj2_subj2_group2)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         String user = getRandomUsers(1)[0]
         when:

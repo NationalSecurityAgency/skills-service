@@ -96,9 +96,9 @@ class SkillsDepsService {
     }
 
     @Transactional()
-    void removeSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependencyProjectId = null) {
+    void removeLearningPathItem(String projectId, String dependentSkillId, String dependencyProjectId, String dependencySkillId) {
         ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, null,
-                dependencyProjectId ?: projectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
+                dependencyProjectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
     @Transactional(readOnly = true)

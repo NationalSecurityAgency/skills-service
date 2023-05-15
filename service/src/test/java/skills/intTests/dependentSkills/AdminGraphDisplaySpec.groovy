@@ -44,7 +44,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -70,7 +70,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createSkills(skills_subj2)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(0).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -102,7 +102,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(group2.skillId, it)
         }
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(0).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -122,12 +122,12 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(4).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(4).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -155,7 +155,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -200,7 +200,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -220,12 +220,12 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(4).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(4).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
 
         when:
         def graphSkill0 = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -274,7 +274,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)

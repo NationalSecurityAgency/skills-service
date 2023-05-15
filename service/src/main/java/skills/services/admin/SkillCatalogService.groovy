@@ -314,7 +314,7 @@ class SkillCatalogService {
         copy.copiedFromProjectId = projectIdFrom
         copy.copiedFrom = original.id
         copy.subjectId = subjectTo.skillId
-        copy.version = skillsAdminService.findLatestSkillVersion(projectIdTo)
+        copy.version = skillsAdminService.findMaxVersionByProjectId(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
         copy.selfReportingType = original.selfReportingType?.toString()
         if (original.selfReportingType && original.selfReportingType == SkillDef.SelfReportingType.Quiz) {

@@ -30,7 +30,6 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SkillImportRequest
-import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefRes
@@ -529,7 +528,7 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    Integer findLatestSkillVersion(String projectId) {
+    Integer findMaxVersionByProjectId(String projectId) {
         return skillDefRepo.findMaxVersionByProjectId(projectId)
     }
 
@@ -863,7 +862,7 @@ class SkillsAdminService {
 
     @Profile
     private void validateSkillVersion(SkillRequest skillRequest) {
-        int latestSkillVersion = findLatestSkillVersion(skillRequest.projectId)
+        Integer latestSkillVersion = findMaxVersionByProjectId(skillRequest.projectId) ?: 0
         if (skillRequest.version > (latestSkillVersion + 1)) {
             throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)
         }

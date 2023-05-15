@@ -50,7 +50,7 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def skillSummary = skillsService.getSkillSummary(userId, SkillsFactory.defaultProjId, subject.subjectId)
@@ -77,7 +77,7 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
 
         when:
@@ -105,8 +105,8 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
 
         when:
@@ -137,8 +137,8 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId], userId, new Date())
 
@@ -170,8 +170,8 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(2).skillId)
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId], userId, new Date())
 
         when:
@@ -214,7 +214,7 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def dependencyInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -233,8 +233,8 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
 
         when:
         def dependencyInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -262,8 +262,8 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         List<Map> skills_subj2 = SkillsFactory.createSkills(4, 1, 2)
         skillsService.createSkills(skills_subj2)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(1).skillId)
 
         when:
         def dependencyInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -288,17 +288,17 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(4).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(4).skillId, dependentSkillId: skills.get(9).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(4).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(4).skillId, skills.get(9).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(7).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(7).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(8).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(8).skillId)
 
         when:
         def dependencyInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
@@ -330,16 +330,16 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(4).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(4).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(7).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(7).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(8).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(8).skillId)
 
         skills.reverse().each {
             skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: it.skillId], userId, new Date())
@@ -373,16 +373,16 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(4).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(4).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(7).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(7).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(8).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(8).skillId)
 
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId], userId, new Date())
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(4).skillId], userId, new Date())
@@ -425,16 +425,16 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(4).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(4).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(7).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(7).skillId)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(8).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(8).skillId)
 
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId], userId, new Date())
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(4).skillId], userId, new Date())

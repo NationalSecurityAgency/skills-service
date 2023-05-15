@@ -29,8 +29,8 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills.get(0).skillId, skills.get(2).skillId)
 
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
@@ -59,8 +59,8 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: proj.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills.get(0).skillId, skills.get(2).skillId)
 
         badge.enabled = false
         skillsService.createBadge(badge)

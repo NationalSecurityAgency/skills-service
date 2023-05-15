@@ -189,8 +189,7 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj3SharedSkills = skillsService.getSharedSkills(proj3.projectId)
         def proj3SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj3.projectId)
 
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         def sharedSkillInfo = skillsService.getSkillDependencyInfo("user1", proj2.projectId, proj2_skills.get(0).skillId)
 
@@ -397,8 +396,7 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
 
         def sharedSkillInfo = skillsService.getSkillDependencyInfo("user1", proj2.projectId, proj2_skills.get(0).skillId)
 
@@ -433,8 +431,7 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, 'ALL_SKILLS_PROJECTS')
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
 
         def sharedSkillInfo = skillsService.getSkillDependencyInfo("user1", proj2.projectId, proj2_skills.get(0).skillId)
 
@@ -470,14 +467,13 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
         when:
         // project 1 internal dependencies
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId, dependentSkillId: proj1_skills.get(1).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(1).skillId, dependentSkillId: proj1_skills.get(2).skillId])
-        skillsService.assignDependency([projectId: proj1.projectId, skillId: proj1_skills.get(2).skillId, dependentSkillId: proj1_skills.get(3).skillId])
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(0).skillId, proj1_skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(1).skillId, proj1_skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(proj1.projectId, proj1_skills.get(2).skillId, proj1_skills.get(3).skillId)
 
         // cross project dependency
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
 
         def crossProjectSharedInfo = skillsService.getSkillDependencyInfo("user1", proj2.projectId, proj2_skills.get(0).skillId)
@@ -545,8 +541,7 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
         when:
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(1).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(1).skillId)
 
         def sharedSkillInfo = skillsService.getSkillDependencyInfo("user1", proj2.projectId, proj2_skills.get(0).skillId)
 
@@ -586,8 +581,7 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
 
         when:
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
         def res1 = skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId])
         def res2 = skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], "phil", new Date())
         def res3 = skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(0).skillId])
@@ -621,17 +615,13 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
 
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
         when:
-        def res = skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
-        def res1 = skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                                  dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         then:
-        res.success
-        !res1.success
-        res1.body.explanation == "Skill dependency [TestProject2:skill1subj2]=>[TestProject1:skill1] already exist."
-        res1.body.errorCode == "FailedToAssignDependency"
+        SkillsClientException e = thrown()
+        e.message.contains("Learning path from [Test Skill 1] to [Test Skill 1 Subject2] already exists")
     }
 
 

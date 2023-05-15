@@ -406,18 +406,22 @@ class SkillsService {
         wsHelper.adminPut(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
 
-    def assignDependency(Map props) {
-        String url = getSkillDependencyUrl(props)
-        boolean throwExceptionOnFailure = false
-        if (props.get("throwExceptionOnFailure") != null) {
-            throwExceptionOnFailure = props.throwExceptionOnFailure instanceof Boolean ? props.throwExceptionOnFailure : Boolean.valueOf(props.throwExceptionOnFailure)
-        }
-        wsHelper.adminPost(url, props, throwExceptionOnFailure)
+    def addLearningPathPrerequisite(String projectId, String id, String prereqId) {
+        this.addLearningPathPrerequisite(projectId, id, projectId, prereqId)
     }
 
-    def addLearningPathPrerequisite(String projectId, String id, String prereqProjectId, String prereqId, boolean throwExceptionOnFailure = true) {
+    def addLearningPathPrerequisite(String projectId, String id, String prereqProjectId, String prereqId) {
         String url = "/projects/${projectId}/${id}/prerequisite/${prereqProjectId}/${prereqId}".toString()
-        wsHelper.adminPost(url, [:], throwExceptionOnFailure)
+        wsHelper.adminPost(url, [:])
+    }
+
+    def deleteLearningPathPrerequisite(String projectId, String id, String prereqId) {
+        this.deleteLearningPathPrerequisite(projectId, id, projectId, prereqId)
+    }
+
+    def deleteLearningPathPrerequisite(String projectId, String id, String prereqProjectId, String prereqId) {
+        String url = "/projects/${projectId}/${id}/prerequisite/${prereqProjectId}/${prereqId}".toString()
+        wsHelper.adminDelete(url, [:])
     }
 
     def vadlidateLearningPathPrerequisite(String projectId, String id, String prereqProjectId, String prereqId, boolean throwExceptionOnFailure = true) {
@@ -428,32 +432,6 @@ class SkillsService {
     def checkIfSkillsHaveDependencies(String projectId, List<String> skillIds) {
         String url = "/projects/${projectId}/hasDependency"
         return wsHelper.adminPost(url, [skillIds: skillIds]).body
-    }
-
-    def removeDependency(Map props) {
-        String url = getSkillDependencyUrl(props)
-        wsHelper.adminDelete(url, props)
-    }
-
-    String getSkillDependencyUrl(Map props) {
-        String url
-        def newProps = props.clone()
-        // variables on backend where changed to more accurately reflect the relationships
-        // adding this translation layer in place to avoid breaking pre-existing specs using the previous variable naming structure
-        if(newProps.dependentSkillId && newProps.skillId) {
-            newProps.dependencySkillId = newProps.dependentSkillId
-            newProps.dependentSkillId = newProps.skillId
-        }
-        if (newProps.dependentProjectId) {
-            newProps.dependendencyProjectId = newProps.dependentProjectId
-        }
-
-        if(newProps.dependendencyProjectId){
-            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/projects/${newProps.dependendencyProjectId}/skills/${newProps.dependencySkillId}"
-        } else {
-            url = "/projects/${newProps.projectId}/skills/${newProps.dependentSkillId}/dependency/${newProps.dependencySkillId}"
-        }
-        return url
     }
 
     def deleteSkill(Map props) {
