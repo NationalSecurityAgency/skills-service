@@ -38,4 +38,6 @@ class SkillBadgeSummary {
 
     String projectId
     String projectName
+
+    SkillDependencySummary dependencyInfo
 }

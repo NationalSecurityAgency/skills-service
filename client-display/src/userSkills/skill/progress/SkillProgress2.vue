@@ -104,6 +104,7 @@ limitations under the License.
     <div class="row">
       <div class="col">
         <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"
+                      :badge-is-locked="badgeIsLocked"
                       :bar-size="skill.groupId ? 12 : 22"
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
@@ -133,7 +134,7 @@ limitations under the License.
         </p>
       </div>
       <div v-if="skill.type === 'Skill'">
-        <div v-if="locked" class="text-center text-muted locked-text">
+        <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
             *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> prerequisite(s).
             <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
             <span v-else>Please see its prerequisites below.</span>
@@ -243,6 +244,11 @@ limitations under the License.
         type: String,
         default: '',
       },
+      badgeIsLocked: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
     },
     data() {
       return {
@@ -255,7 +261,8 @@ limitations under the License.
     },
     computed: {
       locked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+        console.log(this.badgeIsLocked);
+        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked;
       },
       isSkillComplete() {
         return this.skill && this.skill.meta && this.skill.meta.complete;

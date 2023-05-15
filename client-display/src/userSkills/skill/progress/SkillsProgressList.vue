@@ -96,6 +96,7 @@ limitations under the License.
                   :show-description="showDescriptionsInternal"
                   :show-group-descriptions="showGroupDescriptions"
                   :data-cy="`skillProgress_index-${index}`"
+                  :badge-is-locked="badgeIsLocked"
                   @points-earned="onPointsEarned"
                   @add-tag-filter="addTagFilter"
                   :child-skill-highlight-string="searchString"
@@ -181,6 +182,11 @@ limitations under the License.
       showNoDataMsg: {
         type: Boolean,
         default: true,
+        required: false,
+      },
+      badgeIsLocked: {
+        type: Boolean,
+        default: false,
         required: false,
       },
     },

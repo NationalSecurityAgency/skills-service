@@ -43,6 +43,11 @@ limitations under the License.
         type: Number,
         default: 22,
       },
+      badgeIsLocked: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
     },
     computed: {
       progress() {
@@ -73,7 +78,7 @@ limitations under the License.
         this.$emit('progressbar-clicked', skill);
       },
       isLocked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked;
       },
       getTotalPoints() {
         let totalPts;

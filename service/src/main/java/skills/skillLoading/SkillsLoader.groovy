@@ -879,6 +879,8 @@ class SkillsLoader {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
+        def badgeDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projDef.projectId, badgeDefinition.skillId)
+
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
@@ -893,7 +895,8 @@ class SkillsLoader {
                 iconClass: badgeDefinition.iconClass,
                 helpUrl: helpUrl,
                 projectId: badgeDefinition.projectId,
-                projectName: InputSanitizer.unsanitizeName(projectName)
+                projectName: InputSanitizer.unsanitizeName(projectName),
+                dependencyInfo: badgeDependencySummary
         )
     }
 
