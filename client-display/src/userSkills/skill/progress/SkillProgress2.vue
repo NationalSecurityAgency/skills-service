@@ -135,9 +135,14 @@ limitations under the License.
       </div>
       <div v-if="skill.type === 'Skill'">
         <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
-            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> prerequisite(s).
+            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct prerequisite(s).
             <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
             <span v-else>Please see its prerequisites below.</span>
+          ***
+        </div>
+        <div v-if="locked && skill.badgeDependencyInfo" class="text-center text-muted locked-text">
+          *** Skill is part of <b>{{ skill.badgeDependencyInfo.length}}</b> badge(s) with prerequisite(s).
+          <span>Please go to the badge(s) to see its prerequisites.</span>
           ***
         </div>
 
@@ -261,7 +266,13 @@ limitations under the License.
     },
     computed: {
       locked() {
-        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked;
+        let hasBadgeDependency = false;
+        if (this.skill.badgeDependencyInfo && this.skill.badgeDependencyInfo.length > 0) {
+          if (this.skill.badgeDependencyInfo.find((item) => !item.achieved)) {
+            hasBadgeDependency = true;
+          }
+        }
+        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked || hasBadgeDependency;
       },
       isSkillComplete() {
         return this.skill && this.skill.meta && this.skill.meta.complete;

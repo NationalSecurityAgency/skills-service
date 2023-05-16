@@ -527,8 +527,15 @@ class SkillsLoader {
         }
 
         SkillDependencySummary skillDependencySummary
+        def badgeDependencySummary = []
         if (!crossProjectId) {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
+            badges.each(it -> {
+                SkillDependencySummary badgeSummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, it.badgeId)
+                if (badgeSummary) {
+                    badgeDependencySummary.push(badgeSummary);
+                }
+            })
         }
 
         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz ?
@@ -558,6 +565,7 @@ class SkillsLoader {
                         description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
+                badgeDependencyInfo: badgeDependencySummary,
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef, quizNameAndId),
@@ -1065,6 +1073,16 @@ class SkillsLoader {
 
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
 
+                def badgeDependencySummary = []
+                if(skillDefAndUserPoints.badges) {
+                    skillDefAndUserPoints.badges.each(it -> {
+                        SkillDependencySummary badgeSummary = dependencySummaryLoader.loadDependencySummary(userId, skillDef.projectId, it.badgeId)
+                        if (badgeSummary) {
+                            badgeDependencySummary.push(badgeSummary);
+                        }
+                    })
+                }
+
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1077,6 +1095,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                        badgeDependencyInfo: badgeDependencySummary,
                         selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
                         subjectName: subjectName,
                         subjectId: subjectId,

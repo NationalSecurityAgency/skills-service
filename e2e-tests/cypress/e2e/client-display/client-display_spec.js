@@ -190,7 +190,7 @@ describe('Client Display Tests', () => {
             .click();
         cy.contains('Lorem ipsum dolor sit amet');
         // 1 skill is locked
-        cy.contains('Skill has 1 prerequisite(s).');
+        cy.contains('Skill has 1 direct prerequisite(s).');
         cy.customA11y();
     });
 

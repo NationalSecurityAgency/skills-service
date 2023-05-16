@@ -323,7 +323,7 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=myRank]')
                 .contains('1');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Skill has 1 prerequisite(s).');
+            cy.contains('Skill has 1 direct prerequisite(s).');
             cy.contains('Earn up to 1,400 points');
             cy.contains('Description');
 

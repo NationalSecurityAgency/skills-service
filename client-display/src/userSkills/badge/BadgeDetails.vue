@@ -25,7 +25,7 @@ limitations under the License.
                     <badge-details-overview :badge="badgeOverview"></badge-details-overview>
 
                     <div v-if="locked" class="text-center text-muted locked-text">
-                      *** Badge has <b>{{ badge.dependencyInfo.numDirectDependents}}</b> prerequisite(s).
+                      *** Badge has <b>{{ badge.dependencyInfo.numDirectDependents}}</b> direct prerequisite(s).
                       <span>Please see its prerequisites below.</span>
                       ***
                     </div>

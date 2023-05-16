@@ -27,6 +27,7 @@ class SkillSummary extends SkillSummaryParent {
     SkillDescription description
 
     SkillDependencySummary dependencyInfo
+    List<SkillDependencySummary> badgeDependencyInfo
 
     // null if the skill is NOT achieved
     Date achievedOn
