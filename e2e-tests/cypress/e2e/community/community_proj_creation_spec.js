@@ -128,7 +128,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
@@ -141,7 +141,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
     });
 
@@ -164,7 +164,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
@@ -177,7 +177,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
     });
 
@@ -200,7 +200,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
@@ -213,7 +213,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
     });
 
@@ -233,7 +233,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
     });
 
@@ -254,7 +254,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('divinedragon')
-        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divindedragon word.')
+        cy.get('[data-cy="projectDescriptionError"]').should('have.text', 'Project Description - May not contain divinedragon word.')
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled')
     });
 
