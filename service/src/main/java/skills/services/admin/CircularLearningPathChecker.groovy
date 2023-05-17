@@ -28,11 +28,15 @@ class CircularLearningPathChecker {
     SkillDef skillDef
     SkillDef prereqSkillDef
     SkillsGraphRes existingGraph
+    boolean performAlreadyExistCheck = true
 
     //private
     List<BadgeAndSkills> badgeAndSkills = []
     Map<String, BadgeAndSkills> badgeAndSkillsByBadgeId = [:]
-    Map<String, List<SkillInfo>> byNodeLookup
+    Map<String, List<SkillInfo>> prerequisiteNodeLookup
+    Map<String, List<SkillInfo>> prerequisiteParentNodeLookup
+    // contains all of the badges by following start node in the opposite direction of prerequisite path
+    List<SkillInfo> startNodeBadgesOnParentPath
 
     // methods
     CircularLearningPathChecker addBadgeAndSkills(BadgeAndSkills b) {
@@ -71,6 +75,8 @@ class CircularLearningPathChecker {
         String name
         SkillDef.ContainerType type
         Boolean belongsToBadge = false
+        // only set if belongsToBadge = true
+        String belongsToBadgeId
     }
     @Profile
     DependencyCheckResult check() {
@@ -88,28 +94,36 @@ class CircularLearningPathChecker {
                     prerequisite: existingGraph.nodes.find { it.id == edge.toId },
             )
         }
-        for (SkillDefGraphResPair edgePair : edgePairs) {
-            if (edgePair.prerequisite.skillId == prereqSkillDef.skillId
-                    && edgePair.prerequisite.projectId == prereqSkillDef.projectId
-                    && edgePair.node.skillId == skillDef.skillId
-                    && edgePair.node.projectId == skillDef.projectId) {
-                return new DependencyCheckResult(possible: false,
-                        failureType: DependencyCheckResult.FailureType.AlreadyExist,
-                        violatingSkillId: prereqSkillDef.skillId,
-                        violatingSkillName: prereqSkillDef.name,
-                        reason: "Learning path from [${prereqSkillDef.name}] to [${skillDef.name}] already exists.")
+        if (performAlreadyExistCheck) {
+            for (SkillDefGraphResPair edgePair : edgePairs) {
+                if (edgePair.prerequisite.skillId == prereqSkillDef.skillId
+                        && edgePair.prerequisite.projectId == prereqSkillDef.projectId
+                        && edgePair.node.skillId == skillDef.skillId
+                        && edgePair.node.projectId == skillDef.projectId) {
+                    return new DependencyCheckResult(possible: false,
+                            failureType: DependencyCheckResult.FailureType.AlreadyExist,
+                            violatingSkillId: prereqSkillDef.skillId,
+                            violatingSkillName: prereqSkillDef.name,
+                            reason: "Learning path from [${prereqSkillDef.name}] to [${skillDef.name}] already exists.")
+                }
             }
         }
         // only project local skills dependencies can cause a circular path
         edgePairs = edgePairs?.findAll({ it.prerequisite.projectId == skillDef.projectId })
-        byNodeLookup = [:]
+        prerequisiteNodeLookup = [:]
         edgePairs.groupBy { it.node.skillId }.each {
-            byNodeLookup[it.key] = it.value.collect { new SkillInfo(skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
+            prerequisiteNodeLookup[it.key] = it.value.collect { new SkillInfo(skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
         }
-
+        prerequisiteParentNodeLookup = [:]
+        edgePairs.groupBy { it.prerequisite.skillId }.each {
+            prerequisiteParentNodeLookup[it.key] = it.value.collect { new SkillInfo(skillId: it.node.skillId, name: it.node.name, type: it.node.type) }
+        }
         SkillInfo skillInfo = new SkillInfo(skillId: skillDef.skillId, name: skillDef.name, type: skillDef.type)
         SkillInfo prereqSkillInfo = new SkillInfo(skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
         List<SkillInfo> path = [skillInfo, prereqSkillInfo]
+
+        startNodeBadgesOnParentPath = []
+        collectParentBadges(skillInfo, startNodeBadgesOnParentPath, 0)
         try {
             return recursiveCircularPrerequisiteCheck(prereqSkillInfo, skillInfo, path, 1)
         } catch (Throwable t) {
@@ -129,7 +143,9 @@ class CircularLearningPathChecker {
             BadgeAndSkills badge = badgeAndSkillsByBadgeId[current.skillId]
 
             // step back through the path and see if any of skills are present in the badges on this path
-            List<SkillInfo> badgesOnPath = path.findAll { it.type == SkillDef.ContainerType.Badge && it.skillId != badge.badgeGraphNode.skillId }
+            List<SkillInfo> badgesOnPath = new ArrayList<>(path)
+            badgesOnPath.addAll(startNodeBadgesOnParentPath)
+            badgesOnPath = badgesOnPath.findAll { it.type == SkillDef.ContainerType.Badge && it.skillId != badge.badgeGraphNode.skillId }
             for (SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
                 BadgeAndSkills badgeOnPath = badgeAndSkillsByBadgeId[badgeOnPathSkillInfo.skillId]
                 SkillInfo found = badgeOnPath.skills.find { SkillInfo searchFor -> badge.skills.find { searchFor.skillId == it.skillId } }
@@ -140,7 +156,7 @@ class CircularLearningPathChecker {
                             violatingSkillInBadgeName: current.name,
                             violatingSkillId: found.skillId,
                             violatingSkillName: found.name,
-                            reason: "Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [${current.name}] on this learning path that has the same skill as [${badgeOnPath.badgeGraphNode.name}] badge. The skill in conflict is [${found.name}].")
+                            reason: "Multiple badges on the same Learning path cannot have overlapping skills. Both badge [${current.name}] and [${badgeOnPath.badgeGraphNode.name}] badge have [${found.name}] skill.")
                 }
             }
 
@@ -149,20 +165,39 @@ class CircularLearningPathChecker {
                 return res
             }
         }
-        if (current.type == SkillDef.ContainerType.Skill && start.type == SkillDef.ContainerType.Badge) {
-            BadgeAndSkills badge = badgeAndSkillsByBadgeId[start.skillId]
-            if (badge.badgeHasSkillId(current.skillId)) {
-                return new DependencyCheckResult(possible: false,
-                        failureType: DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath,
-                        violatingSkillId: current.skillId,
-                        violatingSkillName: current.name,
-                        reason: "Provided badge [${start.name}] has skill [${current.name}] which already exists on the learning path.")
+        if (current.type == SkillDef.ContainerType.Skill) {
+            List<SkillInfo> badgesOnPath = new ArrayList<>(path)
+            badgesOnPath.addAll(startNodeBadgesOnParentPath)
+            badgesOnPath = badgesOnPath.findAll { it.type == SkillDef.ContainerType.Badge && it.skillId != current.belongsToBadgeId }
+            for (SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
+                BadgeAndSkills badge = badgeAndSkillsByBadgeId[badgeOnPathSkillInfo.skillId]
+                if (badge.badgeHasSkillId(current.skillId)) {
+                    return new DependencyCheckResult(possible: false,
+                            failureType: DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath,
+                            violatingSkillId: current.skillId,
+                            violatingSkillName: current.name,
+                            reason: "Badge [${badge.badgeGraphNode.name}] has skill [${current.name}] which already exists on the Learning Path.")
+                }
             }
         }
 
 
-        List<SkillInfo> prereqNodes = byNodeLookup.get(current.skillId)
+        List<SkillInfo> prereqNodes = prerequisiteNodeLookup.get(current.skillId)
         return handlePrerequisiteNodes(prereqNodes, start, path, currentIter)
+    }
+
+    private void collectParentBadges(SkillInfo start, List<SkillInfo> badges, int currentIteration) {
+        if (currentIteration > 1000) {
+            throw new IllegalStateException("Number of [1000] iterations exceeded when checking for circular dependency for [${start.skillId}]")
+        }
+
+        List<SkillInfo> skillInfos = prerequisiteParentNodeLookup[start.skillId]
+        for (SkillInfo skillInfo : skillInfos) {
+            if (skillInfo.type == SkillDef.ContainerType.Badge) {
+                badges.add(skillInfo)
+            }
+            collectParentBadges(skillInfo, badges, currentIteration + 1)
+        }
     }
 
     private DependencyCheckResult handlePrerequisiteNodes(List<SkillInfo> prereqNodes,

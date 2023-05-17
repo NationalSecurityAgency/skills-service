@@ -157,7 +157,7 @@ export default {
       .then((res) => res.data);
   },
   assignSkillToBadge(projectId, badgeId, skillId) {
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`)
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`, null, { handleError: false })
       .then((res) => res.data);
   },
   removeSkillFromBadge(projectId, badgeId, skillId) {

@@ -55,4 +55,5 @@ enum ErrorCode {
     UserQuizAttemptsExhausted,
     SurveyCanOnlyBeTakenOnce,
     SkillEventForQuizSkillIsNotAllowed,
+    LearningPathViolation,
 }

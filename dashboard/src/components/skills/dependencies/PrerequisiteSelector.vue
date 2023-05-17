@@ -186,7 +186,7 @@ limitations under the License.
                 }
                 if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
                   return 'Multiple badges on the same Learning path cannot have overlapping skills. '
-                    + `There is already a badge <b>${res.violatingSkillInBadgeName}</b> on this learning path that has the same skill as <b>${self.toSkillName}</b> badge. The skill in conflict is <b>${res.violatingSkillName}</b>.`;
+                    + `Both <b>${res.violatingSkillInBadgeName}</b> badge and <b>${self.toSkillName}</b> badge have <b>${res.violatingSkillName}</b> skill.`;
                 }
                 if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
                   return `Provided badge <b>${self.toSkillName}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;

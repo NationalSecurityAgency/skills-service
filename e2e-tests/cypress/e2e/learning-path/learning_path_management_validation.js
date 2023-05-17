@@ -153,7 +153,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-skill9"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-badge3"]').click();
-        cy.get('[data-cy="learningPathError"]').contains('Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge Badge 1 on this learning path that has the same skill as Badge 3 badge. The skill in conflict is Very Great Skill 12.')
+        cy.get('[data-cy="learningPathError"]').contains('Multiple badges on the same Learning path cannot have overlapping skills. Both Badge 1 badge and Badge 3 badge have Very Great Skill 12 skill')
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
     });
 
@@ -244,6 +244,21 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathError"]').contains('Skill Very Great Skill 1 was reused in another subject or group and cannot have prerequisites in the learning path')
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
     })
+
+    it('adding a skill to a badge violates Learning Path', () => {
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.addLearningPathItem(1, 3, 1, false, true)
+        cy.visit('/administrator/projects/proj1/badges/badge1/')
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill3"]').click()
+        cy.get('[data-cy="learningPathErrMsg"]').contains(' Failed to add Very Great Skill 3 skill to the badge. Adding this skill would result in a circular/infinite learning path')
+        cy.get('[data-cy="learningPathErrMsg"] [data-cy="learningPathLink"]').click()
+        cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+    });
 
 
 });

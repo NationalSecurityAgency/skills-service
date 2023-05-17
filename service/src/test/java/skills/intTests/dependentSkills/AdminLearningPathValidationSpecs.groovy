@@ -186,7 +186,7 @@ class AdminLearningPathValidationSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, badge1.badgeId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [Test Badge 1] on this learning path that has the same skill as [Test Badge 2] badge. The skill in conflict is [Test Skill 2].")
+        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. Both badge [Test Badge 1] and [Test Badge 2] badge have [Test Skill 2] skill")
     }
 
     def "skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2: two badges cannot contain the same skill in the same learning path"() {
@@ -219,7 +219,7 @@ class AdminLearningPathValidationSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. There is already a badge [Test Badge 1] on this learning path that has the same skill as [Test Badge 2] badge. The skill in conflict is [Test Skill 2].")
+        e.message.contains("Multiple badges on the same Learning path cannot have overlapping skills. Both badge [Test Badge 1] and [Test Badge 2] badge have [Test Skill 2] skill")
     }
 
 
@@ -252,7 +252,7 @@ class AdminLearningPathValidationSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, p1Skills[6].skillId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Provided badge [${badge2.name}] has skill [${p1Skills[4].name}] which already exists on the learning path.")
+        e.message.contains("Badge [${badge2.name}] has skill [${p1Skills[4].name}] which already exists on the Learning Path")
     }
 
     def "skill3 -> skill4 -> badge1 -> skill5 -> skill6 -> badge2: Cannot add a learning path item that already exist"() {

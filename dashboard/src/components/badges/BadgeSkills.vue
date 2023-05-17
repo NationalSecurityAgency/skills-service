@@ -19,11 +19,17 @@ limitations under the License.
 
     <b-card body-class="p-0">
       <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
-        <skills-selector2 v-if="!isReadOnlyProj" :options="availableSkills" class="mb-4 m-3"
+        <skills-selector2 v-if="!isReadOnlyProj" :options="availableSkills" class="mb-2 m-3"
                           v-on:added="skillAdded"
                           :onlySingleSelectedValue="true"></skills-selector2>
+        <div v-if="learningPathViolationErr.show" class="alert alert-danger mx-3" data-cy="learningPathErrMsg">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true" />
+          Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
+          Adding this skill would result in a <b>circular/infinite learning path</b>.
+          Please visit project's <b-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</b-link> page to review.
+        </div>
 
-        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0"
+        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" class="mt-2"
                              :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>
 
         <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"
@@ -46,6 +52,7 @@ limitations under the License.
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import BadgesService from '@/components/badges/BadgesService';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
 
   const { mapActions } = createNamespacedHelpers('badges');
 
@@ -58,7 +65,7 @@ limitations under the License.
       LoadingContainer,
       SkillsSelector2,
     },
-    mixins: [MsgBoxMixin, ProjConfigMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin, NavigationErrorMixin],
     data() {
       return {
         loading: {
@@ -73,6 +80,10 @@ limitations under the License.
         badgeId: null,
         badge: null,
         self: null,
+        learningPathViolationErr: {
+          show: false,
+          skillName: '',
+        },
       };
     },
     mounted() {
@@ -154,7 +165,19 @@ limitations under the License.
             this.loading.skillOp = false;
             this.$emit('skills-changed', newItem);
             SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
-          });
+          }).catch((e) => {
+            if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
+              this.loading.skillOp = false;
+              this.learningPathViolationErr.show = true;
+              this.learningPathViolationErr.skillName = newItem.name;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
+              this.handlePush({
+                name: 'ErrorPage',
+                query: { errorMessage },
+              });
+            }
+        });
       },
     },
   };

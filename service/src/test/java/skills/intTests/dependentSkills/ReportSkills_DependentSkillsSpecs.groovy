@@ -196,8 +196,8 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
         def badge2 = SkillsFactory.createBadge(1, 2)
         skillsService.createBadge(badge2)
-        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[2].skillId])
-        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[8].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[9].skillId])
         badge2.enabled = true
         skillsService.createBadge(badge2)
 

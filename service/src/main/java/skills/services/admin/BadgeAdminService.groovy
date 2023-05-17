@@ -26,8 +26,12 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.BadgeResult
+import skills.controller.result.model.DependencyCheckResult
+import skills.controller.result.model.SkillDefGraphRes
+import skills.controller.result.model.SkillsGraphRes
 import skills.services.*
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
@@ -55,6 +59,12 @@ class BadgeAdminService {
 
     @Autowired
     ProjDefAccessor projDefAccessor
+
+    @Autowired
+    SkillDefAccessor skillDefAccessor
+
+    @Autowired
+    SkillsDepsService skillsDepsService
 
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
@@ -238,8 +248,48 @@ class BadgeAdminService {
     }
 
     @Transactional()
+    @Profile
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
         ruleSetDefGraphService.assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeRequirement, true)
+
+        validateAgainstLearningPath(projectId, badgeId, skillid)
+    }
+
+    @Profile
+    private void validateAgainstLearningPath(String projectId, String badgeId, String skillid) {
+        SkillDef badge = skillDefAccessor.getSkillDef(projectId, badgeId, [SkillDef.ContainerType.Badge])
+        SkillsGraphRes existingGraph = skillsDepsService.getDependentSkillsGraph(projectId)
+
+        if (existingGraph.nodes) {
+            List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll { it.skillId == badge.skillId }
+            if (badgeNodes) {
+                for (SkillDefGraphRes badgeNode : badgeNodes) {
+                    List<SkillsGraphRes.Edge> edgesToCheck = existingGraph.edges.findAll { it.fromId == badgeNode.id || it.toId == badgeNode.id }
+                    for (SkillsGraphRes.Edge edge : edgesToCheck) {
+                        SkillDefGraphRes skillDefItem = existingGraph.nodes.find { it.id == edge.fromId }
+                        SkillDefGraphRes prereqDefItem = existingGraph.nodes.find { it.id == edge.toId }
+                        SkillDef skillDef = skillDefItem.skillId == badge.skillId ? badge : skillDefAccessor.getSkillDef(projectId, skillDefItem.skillId, [skillDefItem.type])
+                        SkillDef prreqDef = prereqDefItem.skillId == badge.skillId ? badge : skillDefAccessor.getSkillDef(projectId, prereqDefItem.skillId, [prereqDefItem.type])
+                        CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(
+                                skillDef: skillDef, prereqSkillDef: prreqDef, existingGraph: existingGraph, performAlreadyExistCheck: false)
+
+                        List<SkillDefGraphRes> badgeNodesOnly = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge })
+                        if (badgeNodesOnly) {
+                            circularLearningPathChecker.addAllBadgeAndSkills(badgeNodesOnly.collect {
+                                Integer badgeIdInGraph = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
+                                return skillsDepsService.loadBadgeSkills(badgeIdInGraph, it.skillId, it.name)
+                            })
+                        }
+
+                        DependencyCheckResult dependencyCheckResult = circularLearningPathChecker.check()
+                        if (!dependencyCheckResult.possible) {
+                            String msg = "Adding skill [${skillid}] to badge [${badge.skillId}] violates the Learning Path. Reason: ${dependencyCheckResult.reason}"
+                            throw new SkillException(msg, projectId, null, ErrorCode.LearningPathViolation)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Transactional()
