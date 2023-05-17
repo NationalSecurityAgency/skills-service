@@ -101,35 +101,6 @@ class SkillsDepsService {
                 dependencyProjectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
-    @Transactional(readOnly = true)
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
-        List<SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
-        // remove reused skills
-        res = res.findAll { !SkillReuseIdUtil.isTagged(it.skillId) }
-        List<SkillDefForDependencyRes> finalRes = res.collect {
-            new SkillDefForDependencyRes(
-                    skillId: it.skillId,
-                    name: InputSanitizer.unsanitizeName(it.name),
-                    projectId: it.projectId,
-                    version: it.version
-            )
-        }
-        List<SharedSkillResult> sharedSkills = shareSkillsService.getSharedSkillsFromOtherProjects(projectId)
-        sharedSkills.each {
-            finalRes.add(
-                new SkillDefForDependencyRes(
-                    skillId: it.skillId,
-                    name: InputSanitizer.unsanitizeName(it.skillName),
-                    projectId: projectId,
-                    otherProjectId: it.projectId,
-                    otherProjectName: InputSanitizer.unsanitizeName(it.projectName)
-                )
-            )
-        }
-
-        return finalRes
-    }
-
     static class GraphSkillDefEdge {
         SkillDefGraphRes from
         SkillDefGraphRes to
@@ -142,20 +113,6 @@ class SkillsDepsService {
         return convertToSkillsGraphRes(edges)
     }
 
-
-    @Transactional(readOnly = true)
-    SkillsGraphRes getDependentSkillsGraph(String projectId, String skillId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
-
-        // must only keep the provide skill id and its descendants
-        List<GraphSkillDefEdge> collectedRes = []
-        List<GraphSkillDefEdge> startEdges = edges.findAll { it.from.skillId == skillId }
-        if(startEdges){
-            collectDescendants(edges, startEdges, collectedRes)
-        }
-
-        return convertToSkillsGraphRes(collectedRes)
-    }
 
     private static Comparator<SkillDefGraphRes> skillDefComparator = new Comparator<SkillDefGraphRes>() {
         @Override

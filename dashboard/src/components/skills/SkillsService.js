@@ -148,10 +148,6 @@ export default {
     })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
-  getDependentSkillsGraphForSkill(projectId, skillId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/graph`)
-      .then((res) => res.data);
-  },
   getDependentSkillsGraphForProject(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/graph`)
       .then((res) => res.data);
@@ -166,10 +162,6 @@ export default {
   },
   getBadgeSkills(projectId, badgeId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills`)
-      .then((res) => res.data);
-  },
-  getSkillsForDependency(projectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/availableSkills`)
       .then((res) => res.data);
   },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {

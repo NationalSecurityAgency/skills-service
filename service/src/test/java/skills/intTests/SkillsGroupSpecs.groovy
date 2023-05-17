@@ -1063,31 +1063,6 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
     }
 
-    void "skills under SkillsGroup are available to be used as dependencies" () {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(4) // first one is group
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
-        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
-        // regular skill
-        skillsService.createSkill(allSkills[3])
-
-        when:
-        def res = skillsService.getSkillsAvailableForDependency(proj.projectId)
-
-        then:
-
-        res.size() == 3
-        res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
-    }
-
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 

@@ -780,8 +780,8 @@ class SkillsService {
         wsHelper.apiDelete(url)
     }
 
-    def getDependencyGraph(String projId, String skillId=null) {
-        String url = skillId ? "/projects/${projId}/skills/${skillId}/dependency/graph" : "/projects/${projId}/dependency/graph"
+    def getDependencyGraph(String projId) {
+        String url = "/projects/${projId}/dependency/graph"
         wsHelper.adminGet(url)
     }
 
@@ -870,11 +870,6 @@ class SkillsService {
             url += "&version=${version}"
         }
         wsHelper.apiGet(url)
-    }
-
-    def getSkillsAvailableForDependency(String projId) {
-        String url = "/projects/${projId}/dependency/availableSkills"
-        wsHelper.adminGet(url)
     }
 
     def uploadIcon(Map props, File icon){
