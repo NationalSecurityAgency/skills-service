@@ -54,7 +54,7 @@ limitations under the License.
   import SharedSkillsFromOtherProjects
     from '@/components/skills/crossProjects/SharedSkillsFromOtherProjects';
   import SkillsService from '@/components/skills/SkillsService';
-  // import LoadingContainer from '@/components/utils/LoadingContainer';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
   import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector';
   import NoContent2 from '@/components/utils/NoContent2';
   import GraphUtils from '@/components/skills/dependencies/GraphUtils';
@@ -77,7 +77,7 @@ limitations under the License.
       GraphLegend,
       NoContent2,
       GraphNodeSortMethodSelector,
-      // LoadingContainer,
+      LoadingContainer,
       PrerequisiteSelector,
       DependencyTable,
     },

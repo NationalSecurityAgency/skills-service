@@ -57,6 +57,7 @@ limitations under the License.
   import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSelector2 from '@/components/skills/SkillsSelector2';
+  import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService';
 
   export default {
     name: 'PrerequisiteSelector',
@@ -95,14 +96,29 @@ limitations under the License.
     methods: {
       loadAllSkills() {
         this.loadingAllSkills = true;
-        SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
-          .then((skills) => {
-            this.allSkills = skills;
-            this.loadingAllSkills = false;
-          });
+        const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId);
+        const getSharedSkills = SkillsShareService.getSharedWithmeSkills(this.projectId);
+
+        Promise.all([getProjectSkillsAndBadges, getSharedSkills]).then((results) => {
+          const allSkills = results[0];
+          const sharedSkills = results[1];
+          if (sharedSkills && sharedSkills.length > 0) {
+            sharedSkills.forEach((skill) => {
+              const newSkill = {
+                name: skill.skillName,
+                type: 'Shared Skill',
+                ...skill,
+              };
+              allSkills.push(newSkill);
+            });
+          }
+          this.allSkills = allSkills;
+          this.loadingAllSkills = false;
+        });
       },
       updatePotentialSkills() {
         this.loadingPotentialSkills = true;
+
         SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
             if (this.selectedFromSkills.length > 0 && this.selectedFromSkills[0].skillId) {
