@@ -193,7 +193,8 @@ limitations under the License.
         const nodeId = params.nodes[0];
         let skillItem = null;
         let crossProj = false;
-        const depItem = this.dependenciesInternal.find((item) => item.dependsOn.id === nodeId);
+        const depItem = this.dependenciesInternal.find((item) => item.dependsOn && item.dependsOn.id === nodeId);
+
         if (depItem) {
           skillItem = depItem.dependsOn;
           crossProj = depItem.crossProject;
@@ -226,12 +227,14 @@ limitations under the License.
               background: 'lightgreen',
             },
           } : {};
-          this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
-          edges.push({
-            from: this.getNodeId(item.dependsOn),
-            to: this.getNodeId(item.skill),
-            arrows: 'to',
-          });
+          if (item.dependsOn) {
+            this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
+            edges.push({
+              from: this.getNodeId(item.dependsOn),
+              to: this.getNodeId(item.skill),
+              arrows: 'to',
+            });
+          }
         });
 
         const data = { nodes, edges };

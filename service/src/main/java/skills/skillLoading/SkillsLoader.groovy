@@ -734,8 +734,7 @@ class SkillsLoader {
             subjectIdLookupByProjectIdThenBySkillId[projectIdForLookup] = subjectIdLookupBySkillId
         }
 
-
-        List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
+        List<SkillDependencyInfo.SkillRelationship> deps = graphDBRes.collect {
             Map<String,String> subjectIdLookup = subjectIdLookupByProjectIdThenBySkillId[it.childProjectId]
             String childSubjectId = subjectIdLookup[it.childSkillId]
             new SkillDependencyInfo.SkillRelationship(
@@ -746,7 +745,24 @@ class SkillsLoader {
             )
         }?.sort({ a,b ->
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
-        }) as List<SkillDependencyInfo.SkillRelationshipItem>
+        }) as List<SkillDependencyInfo.SkillRelationship>
+
+        def badges = skillDefRepo.findAllBadgesForSkill([skillId], projectId);
+        if(badges) {
+            def skillInfo = getSkillDefWithExtra(userId, projectId, skillId, [ContainerType.Skill])
+            badges.forEach(it -> {
+                def badgeDeps = loadSkillDependencyInfo(projectId, userId, it.badgeId)
+                if(badgeDeps) {
+                    badgeDeps.dependencies.find( badge -> {
+                        if(badge.skill.skillId == it.badgeId) {
+                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: skillInfo.name, type: 'Skill');
+                        }
+                    })
+                    deps.addAll(badgeDeps.dependencies)
+                }
+            })
+        }
+
         return new SkillDependencyInfo(dependencies: deps)
     }
 
