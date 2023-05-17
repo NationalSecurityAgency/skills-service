@@ -132,8 +132,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill
-        cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj2/learning-path');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
 
@@ -147,34 +146,26 @@ describe('Cross-project Skills Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.visit('/administrator/projects/proj2/subjects/subj2/skills/skill3/prerequisites');
-        cy.contains('No Prerequisites Yet');
-
-        cy.get('[data-cy="depsSelector"]')
-            .click();
-        cy.contains('Project 1 : Very Great Skill # 1');
+        const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector"]').click()
+        cy.get(sharedSkillSelector).contains('Shared Skill:');
+        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
         // Project 3 should not see the shared skill
-        cy.visit('/administrator/projects/proj3');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj3/learning-path');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
         cy.get('[data-cy="skillsSharedWithMeCard"]')
             .contains('No Skills Available Yet...');
 
-        cy.visit('/administrator/projects/proj3/subjects/subj3/skills/skill4/prerequisites');
-        cy.contains('No Prerequisites Yet');
-
-        cy.get('[data-cy="depsSelector"]')
-            .click();
-        cy.contains('Project 1 : Very Great Skill # 1')
-            .should('not.exist');
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector"]').click()
+        cy.get(sharedSkillSelector).should('not.exist')
     });
 
     it('share with all projects', () => {
-        cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj1/learning-path');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
@@ -210,8 +201,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill
-        cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj2/learning-path');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
 
@@ -225,12 +215,12 @@ describe('Cross-project Skills Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.visit('/administrator/projects/proj2/subjects/subj2/skills/skill3/prerequisites');
-        cy.contains('No Prerequisites Yet');
-
-        cy.get('[data-cy="depsSelector"]')
-            .click();
-        cy.contains('Project 1 : Very Great Skill # 1');
+        cy.contains('No Learning Path Yet');
+        const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector"]').click()
+        cy.get(sharedSkillSelector).contains('Shared Skill:');
+        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
         // Project 3 should see the shared skill
@@ -249,17 +239,15 @@ describe('Cross-project Skills Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.visit('/administrator/projects/proj3/subjects/subj3/skills/skill4/prerequisites');
-        cy.contains('No Prerequisites Yet');
-
-        cy.get('[data-cy="depsSelector"]')
-            .click();
-        cy.contains('Project 1 : Very Great Skill # 1');
+        cy.contains('No Learning Path Yet');
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector"]').click()
+        cy.get(sharedSkillSelector).contains('Shared Skill:');
+        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
     });
 
     it('remove share', () => {
-        cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj1/learning-path');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
@@ -310,8 +298,7 @@ describe('Cross-project Skills Tests', () => {
 
         // -------------------------
         // Project 2 should see the skill2 but not skill1
-        cy.visit('/administrator/projects/proj2');
-        cy.clickNav('Learning Path');
+        cy.visit('/administrator/projects/proj2/learning-path');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
 
@@ -325,13 +312,8 @@ describe('Cross-project Skills Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.visit('/administrator/projects/proj2/subjects/subj2/skills/skill3/prerequisites');
-        cy.contains('No Prerequisites Yet');
-
-        cy.get('[data-cy="depsSelector"]')
-            .click();
-        cy.contains('Project 1 : Very Great Skill # 2');
-        cy.contains('Project 1 : Very Great Skill # 1')
-            .should('not.exist');
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector"]').click()
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]')
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').should('not.exist')
     });
 });

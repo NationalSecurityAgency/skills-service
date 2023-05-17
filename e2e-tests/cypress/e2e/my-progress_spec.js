@@ -55,7 +55,7 @@ describe('Navigation Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+        cy.addLearningPathItem(1, 2, 4)
 
         const badge1 = {
             projectId: 'proj1',

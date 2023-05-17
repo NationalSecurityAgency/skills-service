@@ -115,7 +115,7 @@ describe('Client Display Tests', () => {
                 version: 0,
                 helpUrl: 'http://doHelpOnThisSkill.com'
             });
-            cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+            cy.addLearningPathItem(1, 2, 4)
 
             cy.request('POST', '/admin/projects/proj1/badges/badge1', {
                 projectId: 'proj1',
