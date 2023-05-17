@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.time.TimeCategory
 import org.springframework.beans.factory.annotation.Autowired
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
@@ -250,7 +251,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 usernameForDisplay: "${userId}-Display",
                 userTags: [Organization : "XYZ", Agency: "ABC"],
         )
-        userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
+        userAttrsService.attrsAndUserTagsUpdateIntervalHours = 7
 
         when:
         Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
@@ -289,7 +290,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 usernameForDisplay: "${userId}-Display",
                 userTags: [Organization : "XYZ", Agency: "ABC"],
         )
-        userAttrsService.attrsAndUserTagsUpdateIntervalDays = 7
+        userAttrsService.attrsAndUserTagsUpdateIntervalHours = 7
 
         when:
         Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
@@ -297,7 +298,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
 
         // force userTagsLastUpdated date to be before attrsAndUserTagsUpdateIntervalDays
         UserAttrs userAttrs = userAttrsService.findByUserId(userId)
-        userAttrs.userTagsLastUpdated = new Date()-8
+        use(TimeCategory) {
+            userAttrs.userTagsLastUpdated = new Date()-8.hours
+        }
         userAttrsRepo.save(userAttrs)
 
         // remove a userTag and update another
