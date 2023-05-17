@@ -573,7 +573,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         def skill0IdMap0_before = graph.nodes.collectEntries { [it.skillId, it.id] }
         assert graph.edges.collect { "${it.fromId}->${it.toId}" }.sort() == expectedGraphRel.collect {
             "${skill0IdMap0_before.get(it.from)}->${skill0IdMap0_before.get(it.to)}"
-        }
+        }.sort()
     }
 
     def "badge skills are retained after the move from subject into another subject"() {
