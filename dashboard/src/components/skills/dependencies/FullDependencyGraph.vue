@@ -19,23 +19,21 @@ limitations under the License.
 
     <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
         @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills"/>
-
     <simple-card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
             <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
                          message="Here you can visualize skill prerequisites and dependencies for the entire project. However, please navigate to a single skill to add prerequisites."></no-content2>
         </div>
-        <div v-else class="row">
-          <div class="col-12 col-sm">
-            <graph-legend class="graph-legend" :items="legendItems"/>
+        <div v-else class="row legend-row">
+          <div class="col-12 mb-2 m-sm-0 col-sm-6">
+            <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
           </div>
-          <div class="col text-left text-sm-right mt-2">
-            <graph-node-sort-method-selector @value-changed="onSortNodeStrategyChange"/>
+          <div class="col text-sm-right mt-2">
+            <graph-node-sort-method-selector class="deps-overlay" @value-changed="onSortNodeStrategyChange"/>
           </div>
         </div>
       </loading-container>
-
       <div id="dependency-graph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden', 'height': '500px'}"></div>
     </simple-card>
 
@@ -56,7 +54,7 @@ limitations under the License.
   import SharedSkillsFromOtherProjects
     from '@/components/skills/crossProjects/SharedSkillsFromOtherProjects';
   import SkillsService from '@/components/skills/SkillsService';
-  import LoadingContainer from '@/components/utils/LoadingContainer';
+  // import LoadingContainer from '@/components/utils/LoadingContainer';
   import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector';
   import NoContent2 from '@/components/utils/NoContent2';
   import GraphUtils from '@/components/skills/dependencies/GraphUtils';
@@ -79,7 +77,7 @@ limitations under the License.
       GraphLegend,
       NoContent2,
       GraphNodeSortMethodSelector,
-      LoadingContainer,
+      // LoadingContainer,
       PrerequisiteSelector,
       DependencyTable,
     },
@@ -315,6 +313,14 @@ limitations under the License.
     content: "\f78c";
     font-weight: 900;
     font-size: 30px;
+  }
+
+  .legend-row {
+    position: absolute;
+    width: 100%;
+  }
+  .deps-overlay {
+    z-index: 99;
   }
 </style>
 

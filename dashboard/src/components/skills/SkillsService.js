@@ -82,7 +82,7 @@ export default {
       .then((response) => response.data);
   },
   getProjectSkillsAndBadgesWithImportedSkills(projectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=false`)
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=false&excludeReusedSkills=true`)
       .then((response) => response.data);
   },
   getGroupSkills(projectId, groupId) {
