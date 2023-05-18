@@ -15,15 +15,24 @@
  */
 package skills.intTests.community
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserTagRepo
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
 class GetProjectsCommunitySpecs extends DefaultIntSpec {
+
+    @Autowired
+    private PlatformTransactionManager transactionManager
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     def "get single project - community info is only returned for community members"() {
         List<String> users = getRandomUsers(2)
@@ -148,5 +157,241 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         forMyProjects[1].numSkills == 3
         forMyProjects[1].numBadges == 1
         !forMyProjects[1].isMyProject
+    }
+
+    def "user community project is not included in availableForMyProjects when root is not a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..3).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            rootUser.pinProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+        // 2nd project is NOT in the production mode, 3rd project has user community protection enabled
+        pristineDragonsUser.enableProdMode(projs[0])
+        pristineDragonsUser.enableProdMode(projs[2])
+
+        when:
+        def rootForMyProjects = rootUser.getAvailableMyProjects()
+
+        then:
+
+        rootForMyProjects.size() == 1
+        rootForMyProjects[0].projectId == projs[0].projectId
+        rootForMyProjects[0].name == projs[0].name
+        rootForMyProjects[0].totalPoints == 10
+        rootForMyProjects[0].numSubjects == 1
+        rootForMyProjects[0].numSkills == 1
+        rootForMyProjects[0].numBadges == 3
+        !rootForMyProjects[0].isMyProject
+    }
+
+    def "user community project is included in availableForMyProjects when root is a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..3).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            rootUser.pinProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+        // 2nd project is NOT in the production mode
+        pristineDragonsUser.enableProdMode(projs[0])
+        pristineDragonsUser.enableProdMode(projs[2])
+
+        when:
+        def rootForMyProjects = rootUser.getAvailableMyProjects()
+
+        then:
+
+        rootForMyProjects.size() == 2
+        rootForMyProjects[0].projectId == projs[0].projectId
+        rootForMyProjects[0].name == projs[0].name
+        rootForMyProjects[0].totalPoints == 10
+        rootForMyProjects[0].numSubjects == 1
+        rootForMyProjects[0].numSkills == 1
+        rootForMyProjects[0].numBadges == 3
+        !rootForMyProjects[0].isMyProject
+
+        rootForMyProjects[1].projectId == projs[2].projectId
+        rootForMyProjects[1].name == projs[2].name
+        rootForMyProjects[1].totalPoints == 30
+        rootForMyProjects[1].numSubjects == 3
+        rootForMyProjects[1].numSkills == 3
+        rootForMyProjects[1].numBadges == 1
+        !rootForMyProjects[1].isMyProject
+    }
+
+    def "user community project is not included in admin projects when admin is not a member of the UC"() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+
+        transactionTemplate.execute({
+            userTagRepo.deleteByUserId(pristineDragonsUser.userName)
+        })
+
+        when:
+        def adminProjects = pristineDragonsUser.getProjects()
+
+        then:
+        adminProjects.size() == 1
+        adminProjects[0].projectId == projs[0].projectId
+        adminProjects[0].name == projs[0].name
+    }
+
+    def "user community project is included in admin projects when admin is a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+
+        when:
+        def adminProjects = pristineDragonsUser.getProjects()
+
+        then:
+        adminProjects.size() == 2
+        adminProjects[0].projectId == projs[0].projectId
+        adminProjects[0].name == projs[0].name
+
+        adminProjects[1].projectId == projs[1].projectId
+        adminProjects[1].name == projs[1].name
+    }
+
+    def "user community project is not included in admin projects when root is not a member of the UC"() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            rootUser.pinProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+
+        transactionTemplate.execute({
+            userTagRepo.deleteByUserId(pristineDragonsUser.userName)
+        })
+
+        when:
+        def adminProjects = rootUser.getProjects()
+
+        then:
+
+        adminProjects.size() == 1
+        adminProjects[0].projectId == projs[0].projectId
+        adminProjects[0].name == projs[0].name
+    }
+
+    def "user community project is included in admin projects when root is a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            rootUser.pinProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            return proj;
+        }
+
+        when:
+        def adminProjects = rootUser.getProjects()
+
+        then:
+        adminProjects.size() == 2
+        adminProjects[0].projectId == projs[0].projectId
+        adminProjects[0].name == projs[0].name
+
+        adminProjects[1].projectId == projs[1].projectId
+        adminProjects[1].name == projs[1].name
     }
 }
