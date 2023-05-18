@@ -605,6 +605,45 @@ class CopyProjectSpecs extends DefaultIntSpec {
         apiSkills.skills.selfReporting?.numQuizQuestions == [5, 0, null, 1, null]
     }
 
+    def "copy project with badges in the learning path"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkills(p1Skills[0..9])
+
+        def badge = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, p1Skills[0].skillId)
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(p1.projectId, badge2.badgeId, p1Skills[1].skillId)
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(4).skillId, badge.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(5).skillId, badge2.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge.badgeId, badge2.badgeId)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copiedDeps = skillsService.getDependencyGraph(projToCopy.projectId)
+        then:
+        validateGraph(copiedDeps, [
+                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
+                new Edge(from: p1Skills[4].skillId, to: badge.badgeId),
+                new Edge(from: p1Skills[5].skillId, to: badge2.badgeId),
+                new Edge(from: badge.badgeId, to: badge2.badgeId)
+        ])
+    }
+
     static class Edge {
         String from
         String to
