@@ -135,8 +135,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem', numPerformToCompletion: 1 });
         cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem', numPerformToCompletion: 2 });
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval', numPerformToCompletion: 1 });
-        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
-        cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill3/prerequisite/proj1/skill2`);
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0);

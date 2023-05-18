@@ -101,7 +101,7 @@ describe('Client Display Accessibility tests', () => {
             version: 0,
             helpUrl: 'http://doHelpOnThisSkill.com'
         });
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`);
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: Cypress.env('proxyUser'),

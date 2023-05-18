@@ -104,7 +104,7 @@ describe('Accessibility Tests', () => {
 
         cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2');
 
-        cy.request('POST', `/admin/projects/MyNewtestProject/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/skill2/prerequisite/MyNewtestProject/skill1`);
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
         cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {
@@ -192,7 +192,7 @@ describe('Accessibility Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
 
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`);
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: Cypress.env('proxyUser'),

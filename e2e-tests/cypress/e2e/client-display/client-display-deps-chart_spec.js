@@ -60,7 +60,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.createSubject(1, 3);
         cy.createSkill(1, 3, 4);
-        cy.request('POST', `/admin/projects/proj1/skills/skill3Subj2/dependency/skill4Subj3`);
+        cy.request('POST', `/admin/projects/proj1/skill3Subj2/prerequisite/proj1/skill4Subj3`);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
@@ -173,7 +173,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(1, 1, 2);
 
         // create dependency from skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill1`);
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill2');
@@ -349,7 +349,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(1);
         // issue #659 was evidenced in the specific situation of a skill having only a single dependency which was a skill
         // shared from another project
-        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/projects/proj2/skills/skill42');
+        cy.request('POST', '/admin/projects/proj1/skill1/prerequisite/proj2/skill42');
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');
@@ -370,8 +370,8 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(1, 1, 3);
 
         // create dependency from skill3 -> skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`);
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/proj1/skill3/prerequisite/proj1/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill1`);
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill3');
@@ -384,7 +384,6 @@ describe('Client Display Prerequisites Tests', () => {
 
         // Go to child dependency page
         cy.clickOnNode(550, 262);
-        // cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
         // should render Prerequisites section
@@ -421,7 +420,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(1, 1, 2);
 
         // create dependency from skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill1`);
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill2');
@@ -449,8 +448,8 @@ describe('Client Display Prerequisites Tests', () => {
         });
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
-        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill3`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill3`);
 
         cy.cdVisit('/?internalBackButton=true');
 
@@ -498,7 +497,7 @@ describe('Client Display Prerequisites Tests', () => {
                 .format('x')
         });
         cy.createSkill(1, 1, 2);
-        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');

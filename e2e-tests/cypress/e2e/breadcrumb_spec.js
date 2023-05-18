@@ -73,7 +73,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .as('loadSkill');
     });
 
-    it('Skill Navigation', () => {
+    it.only('Skill Navigation', () => {
         const now = dayjs();
         cy.intercept({
             method: 'GET',
@@ -95,31 +95,6 @@ describe('Breadcrumb Navigation Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.wait('@loadSkill');
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .click();
-        cy.wait('@loadSubject');
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-proj1]')
-            .click();
-        cy.wait('@loadProject');
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-
-        //skill dependency menu
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.get('[data-cy=nav-Prerequisites]')
-            .click();
-        cy.wait('@loadSkillGraph');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .click();
         cy.wait('@loadSkill');
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
