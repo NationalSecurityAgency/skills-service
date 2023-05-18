@@ -23,7 +23,7 @@ limitations under the License.
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
             <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
-                         message="Here you can visualize skill prerequisites and dependencies for the entire project. However, please navigate to a single skill to add prerequisites."></no-content2>
+                         message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
         </div>
         <div v-else class="row legend-row">
           <div class="col-12 mb-2 m-sm-0 col-sm-6">

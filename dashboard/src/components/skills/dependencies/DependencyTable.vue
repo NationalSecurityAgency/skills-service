@@ -28,7 +28,7 @@ limitations under the License.
             <template v-slot:cell(edit)="data">
               <b-button @click="removeLearningPath(data)"
                         variant="outline-info" size="sm" class="text-info"
-                        :aria-label="`Remove shared skill path ${data.item}`"
+                        :aria-label="'Remove shared skill path ' + data.item"
                         data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></b-button>
             </template>
           </skills-b-table>

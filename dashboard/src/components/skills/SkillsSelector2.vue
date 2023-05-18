@@ -55,7 +55,7 @@ limitations under the License.
               <span v-if="option.type === 'Skill'"
               class="font-weight-bold skills-option-subject-name"
               data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
-              <span v-if="option.type === 'Shared Skill'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Project:</span>
+              <span v-if="option.type === 'Shared Skill'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-projectName">Project:</span>
               <span v-if="option.type === 'Shared Skill'"
                     class="font-weight-bold skills-option-subject-name"
                     data-cy="skillsSelector-projectName">{{ option.projectName }}</span>

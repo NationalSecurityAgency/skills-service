@@ -142,7 +142,7 @@ limitations under the License.
         </div>
         <div v-if="locked && skill.badgeDependencyInfo" class="text-center text-muted locked-text">
           *** Skill is part of <b>{{ skill.badgeDependencyInfo.length}}</b> badge(s) with prerequisite(s).
-          <span>Please go to the badge(s) to see its prerequisites.</span>
+          <span>Please see its prerequisites below.</span>
           ***
         </div>
 

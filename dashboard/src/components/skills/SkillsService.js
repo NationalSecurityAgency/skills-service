@@ -173,7 +173,7 @@ export default {
       .then((createdRuleResult) => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisiteValidate/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
       .then((createdRuleResult) => createdRuleResult.data);
   },
   skillWithNameExists(projectId, skillName) {
