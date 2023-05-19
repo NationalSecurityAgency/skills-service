@@ -341,11 +341,14 @@ class ProjAdminService {
         }
     }
 
-    private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder, String userId) {
+    private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder, String userId, Boolean isNotCommunityMember) {
         List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId, rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.projectId }
 
         List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
+        if (isNotCommunityMember) {
+            projects = projects.findAll { !it.protectedCommunityEnabled}
+        }
         Set<String> pinnedProjectIds = pinnedProjects.toSet()
 
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
@@ -402,7 +405,7 @@ class ProjAdminService {
         boolean isNotCommunityMember = !userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
         List<ProjectResult> finalRes
         if (isRoot) {
-            finalRes = loadProjectsForRoot(projectIdSortOrder, userId)
+            finalRes = loadProjectsForRoot(projectIdSortOrder, userId, isNotCommunityMember)
         } else {
             // sql join with UserRoles and there is 1-many relationship that needs to be normalized
             List<ProjSummaryResult> projects = projDefRepo.getProjectSummariesByUser(userId)
