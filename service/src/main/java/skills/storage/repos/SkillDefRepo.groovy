@@ -44,7 +44,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.created as created,
         s.version as version,
         s.totalPoints as totalPoints,
-        s.groupId as groupId
+        s.groupId as groupId,
+        s.type as type
         from SkillDef s, SkillDef subjectDef, SkillRelDef srd
          where
             subjectDef = srd.parent and s = srd.child and 

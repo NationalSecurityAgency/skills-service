@@ -809,20 +809,6 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('ID: skill2')
     });
 
-    it('add group\'s skill as a dependency', () => {
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 2);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/prerequisites');
-        cy.contains('No Prerequisites Yet');
-        cy.get('[data-cy="depsSelector"]').click();
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 1).as('skillIds');
-        cy.get('@skillIds').eq(0).contains('skill1');
-        cy.get('@skillIds').eq(0).click();
-        cy.get('[data-cy="simpleSkillsTable"]').contains('Very Great Skill 1');
-    });
-
     it('More than 10 skills are visible in the group', () => {
       cy.createSkillsGroup(1, 1, 1);
       for (let step=1; step < 100; step++) {

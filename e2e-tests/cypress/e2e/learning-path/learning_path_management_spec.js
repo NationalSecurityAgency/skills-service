@@ -176,4 +176,52 @@ describe('Learning Path Management Validation Tests', () => {
         ], 5, false, null, false);
 
     })
+
+    it('add group\'s skill as a prerequisite', () => {
+        cy.createSkillsGroup(1, 1, 15);
+        cy.addSkillToGroup(1, 1, 15, 16);
+        cy.addSkillToGroup(1, 1, 15, 17);
+
+        cy.visit('/administrator/projects/proj1/learning-path');
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click().type('16');
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill16"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click().type('17')
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill17"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.enabled')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 16'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 17'
+            }],
+        ], 5, false, null, false);
+    });
+
+    it('reused skills must NOT be available for prerequisites', () => {
+        cy.createSkill(1, 1, 15);
+        cy.reuseSkillIntoAnotherSubject(1, 15, 2);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.reuseSkillIntoAnotherGroup(1, 15, 1, 12);
+
+        cy.visit('/administrator/projects/proj1/learning-path');
+
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click().type('15');
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelectionItem-proj1-skill15"]')
+        cy.get('[data-cy="learningPathFromSkillSelector"] [data-cy="skillsSelector-skillId"]')
+            .should('have.length', 1)
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').clear().type('1');
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]').click();
+
+        cy.get('[data-cy="learningPathToSkillSelector"]').click().type('15')
+        cy.get('[data-cy="learningPathToSkillSelector"] [data-cy="skillsSelectionItem-proj1-skill15"]')
+        cy.get('[data-cy="learningPathToSkillSelector"] [data-cy="skillsSelector-skillId"]')
+            .should('have.length', 1)
+    });
 });
