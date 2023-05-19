@@ -445,7 +445,7 @@ describe('Skill Reuse Modal Tests', () => {
     it('skills with dependencies cannot be reused', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
-        cy.assignDep(1, 1, 3);
+        cy.addLearningPathItem(1, 3, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="selectAllSkillsBtn"]')
             .click();
@@ -524,8 +524,8 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 3, 4);
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 3)
 
         cy.reuseSkillIntoAnotherSubject(1, 4, 2);
         cy.reuseSkillIntoAnotherSubject(1, 5, 2);
@@ -563,8 +563,8 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 3, 4);
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 3)
 
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 4, 1, 12);

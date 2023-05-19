@@ -402,7 +402,7 @@ describe('Move Skills Tests', () => {
     it('move skills with deps from subject into a subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
-        cy.assignDep(1, 1, 3);
+        cy.addLearningPathItem(1, 3, 1)
         cy.createSubject(1, 3);
         cy.createSubject(1, 4);
 

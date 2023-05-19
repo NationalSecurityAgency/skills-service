@@ -35,7 +35,7 @@ describe('Accessibility Tests', () => {
         cy.assignSkillToBadge(1, 1, 1);
         cy.enableBadge(1, 1);
 
-        cy.assignDep(1, 2, 1);
+        cy.addLearningPathItem(1, 1, 2)
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
         cy.reportSkill(1, 1, 'u1',  m);

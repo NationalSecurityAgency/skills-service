@@ -532,6 +532,19 @@ Cypress.Commands.add("addLearningPathItem", (projNum, fromSkillNum, toSkillNum, 
     cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${projectId}/${prerequisiteSkill}`);
 });
 
+Cypress.Commands.add("addCrossProjectLearningPathItem", (projNum, fromSkillNum, toProjNum, toSkillNum, share = true) => {
+    const skill = `skill${toSkillNum}`
+    const projectId = `proj${toProjNum}`
+    const prerequisiteProj = `proj${projNum}`
+    const prerequisiteSkill = `skill${fromSkillNum}`
+
+    if (share) {
+        cy.request('PUT', `/admin/projects/${prerequisiteProj}/skills/${prerequisiteSkill}/shared/projects/${projectId}`);
+    }
+
+    cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${prerequisiteProj}/${prerequisiteSkill}`);
+});
+
 Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
     let timestamp = null
     if (Number.isInteger(date)) {

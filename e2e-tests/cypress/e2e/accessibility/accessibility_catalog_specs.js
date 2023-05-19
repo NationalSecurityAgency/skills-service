@@ -260,7 +260,7 @@ describe('Accessibility Tests', () => {
         cy.createSkill(2, 1, 4);
         cy.createSkill(2, 1, 5);
         cy.createSkill(2, 1, 6);
-        cy.assignDep(2, 5, 6);
+        cy.addLearningPathItem(2, 6, 5)
         cy.createSkill(2, 1, 7);
         cy.exportSkillToCatalog(2, 1, 7);
 

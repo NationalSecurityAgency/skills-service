@@ -33,7 +33,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         Cypress.Commands.add('clickOnNode', (x, y) => {
             cy.contains('Prerequisites');
-            cy.contains('Node Legend');
+            cy.get('[data-cy="graphLegend"]').contains('Legend');
             cy.wait(2000); // wait for chart
             // have to click twice to it to work...
             cy.get('#dependent-skills-network canvas')
@@ -56,7 +56,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.createSubject(1, 2);
         cy.createSkill(1, 2, 3);
-        cy.assignDep(1, 1, 3, 2)
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill3Subj2`);
 
         cy.createSubject(1, 3);
         cy.createSkill(1, 3, 4);
@@ -71,7 +71,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
         cy.get('[data-cy="breadcrumb-skill1"]').should('not.exist')
 
-        cy.clickOnNode(550, 320);
+        cy.clickOnNode(540, 200);
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj3')
         cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
         cy.get('[data-cy="breadcrumb-subj3"]').should('exist')
@@ -83,14 +83,14 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(1, 2, 3);
         cy.createSkill(1, 2, 4);
         cy.createSkill(1, 2, 5);
-        cy.assignDep(1, 1, 3, 2)
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill3Subj2`);
         cy.createSkill(1, 1, 6);
         cy.createSkill(1, 1, 7);
         cy.createSkill(1, 1, 8);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 320);
+        cy.clickOnNode(540, 200);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
         cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
@@ -134,21 +134,21 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(2, 1, 1);
         cy.createSkill(2, 1, 2);
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 1, 4);
-        cy.assignDep(1, 4, 5);
-        cy.assignDep(1, 5, 6);
-        cy.assignDep(1, 6, 7);
-        cy.assignDep(1, 7, 8);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 1)
+        cy.addLearningPathItem(1, 5, 4)
+        cy.addLearningPathItem(1, 6, 5)
+        cy.addLearningPathItem(1, 7, 6)
+        cy.addLearningPathItem(1, 8, 7)
 
-        cy.assignCrossProjectDep(1, 1, 2, 1);
-        cy.assignDep(2, 1, 2);
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
+        cy.addLearningPathItem(2, 2, 1)
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(225, 455);
+        cy.clickOnNode(225, 380);
         cy.contains('Project: This is project 2');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
         cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
@@ -156,14 +156,14 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(425, 460);
+        cy.clickOnNode(425, 380);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 2');
 
         // make sure that "this skill" node doesn't navigate away to another page
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(500, 34);
+        cy.clickOnNode(530, 460);
         cy.wait(500);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1');
     });
@@ -202,17 +202,17 @@ describe('Client Display Prerequisites Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.contains('Node Legend');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -231,10 +231,10 @@ describe('Client Display Prerequisites Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
@@ -243,7 +243,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.contains('Node Legend');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -262,10 +262,10 @@ describe('Client Display Prerequisites Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
@@ -275,7 +275,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.contains('Node Legend');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -296,11 +296,11 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(2, 1, 1, { numPerformToCompletion: 1 });
         cy.createSkill(2, 1, 2, { numPerformToCompletion: 1 });
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 2, 3);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 2)
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
+        cy.addLearningPathItem(2, 2, 1)
 
-        cy.assignCrossProjectDep(1, 1, 2, 1);
-        cy.assignDep(2, 1, 2);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
@@ -309,7 +309,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.contains('Node Legend');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('3');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')

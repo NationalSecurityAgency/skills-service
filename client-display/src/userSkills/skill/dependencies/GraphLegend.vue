@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class='graph-legend card skills-card-theme-border' style="min-width: 13rem;">
+  <div class='graph-legend card skills-card-theme-border' style="min-width: 13rem;" data-cy="graphLegend">
     <div class="card-header">
       <h6 class="card-title mb-0 float-left">Legend</h6>
     </div>

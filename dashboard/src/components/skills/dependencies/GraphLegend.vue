@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <simple-card class="legend" style="max-width: 18rem; min-width: 17rem;">
+  <simple-card class="legend" style="max-width: 18rem; min-width: 17rem;" data-cy="graphLegend">
     <div class='legend-title'>Legend</div>
     <div class='legend-scale'>
       <ul class='legend-labels'>

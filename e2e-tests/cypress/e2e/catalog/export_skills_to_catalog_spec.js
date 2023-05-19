@@ -1238,7 +1238,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(2, 1, 4);
         cy.createSkill(2, 1, 5);
         cy.createSkill(2, 1, 6);
-        cy.assignDep(2, 5, 6);
+        cy.addLearningPathItem(2, 6, 5)
         cy.createSkill(2, 1, 7);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');

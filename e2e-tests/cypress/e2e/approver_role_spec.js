@@ -55,8 +55,8 @@ describe('Approver Role Tests', () => {
             cy.assignSkillToBadge(projNum, 1, 2);
             cy.assignSkillToBadge(projNum, 2, 1);
             cy.createBadge(projNum, 1, { enabled: true })
-            cy.assignDep(projNum, 3, 1);
-            cy.assignDep(projNum, 3, 2);
+            cy.addLearningPathItem(projNum, 1, 3)
+            cy.addLearningPathItem(projNum, 1, 2)
 
             cy.reportSkill(projNum, 1, 'user0', 'yesterday');
             cy.reportSkill(projNum, 1, 'user0', 'now');
