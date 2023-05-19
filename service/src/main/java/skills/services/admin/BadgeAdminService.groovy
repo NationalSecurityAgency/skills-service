@@ -162,7 +162,7 @@ class BadgeAdminService {
         SkillDefWithExtra savedSkill
 
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
-            savedSkill = skillDefWithExtraRepo.save(skillDefinition)
+            savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
 
         if (identifyEligibleUsers) {

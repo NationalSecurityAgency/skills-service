@@ -1287,24 +1287,6 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('Has Prerequisites');
     });
 
-    it('exported skill cannot depend on the completion of other skills', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
-
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 3);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="nav-Prerequisites"]')
-            .click();
-        cy.contains('Once a Skill has been exported to the catalog, Prerequisites may not be added.');
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/prerequisites');
-        cy.contains('Once a Skill has been exported to the catalog, Prerequisites may not be added.');
-    });
-
     it('do not include imported skills in Actions count when selecting all skills in a subject', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);

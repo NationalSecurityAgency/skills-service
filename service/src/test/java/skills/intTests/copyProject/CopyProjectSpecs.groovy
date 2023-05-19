@@ -631,17 +631,20 @@ class CopyProjectSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(5).skillId, badge2.badgeId)
         skillsService.addLearningPathPrerequisite(p1.projectId, badge.badgeId, badge2.badgeId)
 
-        when:
-        def projToCopy = createProject(2)
-        skillsService.copyProject(p1.projectId, projToCopy)
-        def copiedDeps = skillsService.getDependencyGraph(projToCopy.projectId)
-        then:
-        validateGraph(copiedDeps, [
+        List expected = [
                 new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
                 new Edge(from: p1Skills[4].skillId, to: badge.badgeId),
                 new Edge(from: p1Skills[5].skillId, to: badge2.badgeId),
                 new Edge(from: badge.badgeId, to: badge2.badgeId)
-        ])
+        ]
+        when:
+        def projToCopy = createProject(2)
+        def originalDeps = skillsService.getDependencyGraph(p1.projectId)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copiedDeps = skillsService.getDependencyGraph(projToCopy.projectId)
+        then:
+        validateGraph(originalDeps, expected)
+        validateGraph(copiedDeps, expected)
     }
 
     static class Edge {

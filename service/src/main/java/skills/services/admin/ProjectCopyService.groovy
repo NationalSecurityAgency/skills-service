@@ -18,6 +18,8 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -27,39 +29,18 @@ import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.EditLevelRequest
-import skills.controller.request.model.NextLevelRequest
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SkillProjectCopyRequest
-import skills.controller.request.model.SkillsActionRequest
-import skills.controller.request.model.SubjectRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
 import skills.icons.CustomIconFacade
-import skills.services.AccessSettingsStorageService
-import skills.services.CreatedResourceLimitsValidator
-import skills.services.CustomValidationResult
-import skills.services.CustomValidator
-import skills.services.LevelDefinitionStorageService
-import skills.services.LockingService
+import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.storage.model.ProjDef
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefWithExtra
-import skills.storage.model.SkillRelDef
-import skills.storage.model.UserQuizAttempt
+import skills.storage.model.*
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.QuizToSkillDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.UserQuizAttemptRepo
+import skills.storage.repos.*
 import skills.utils.Props
 
 @Service
@@ -132,6 +113,9 @@ class ProjectCopyService {
     @Autowired
     CustomIconFacade customIconFacade
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     @Transactional
     @Profile
     void copyProject(String originalProjectId, ProjectRequest projectRequest) {
@@ -150,9 +134,17 @@ class ProjectCopyService {
         saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
         updateProjectAndSubjectLevels(fromProject, toProj)
         saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
+        flushEntityCache()
         saveDependencies(fromProject, toProj)
         saveReusedSkills(allCollectedSkills, fromProject, toProj)
         handleQuizBasedUserPointsAndAchievements(toProj)
+    }
+
+    private void flushEntityCache() {
+        // required because saving badges operation uses skillDefWithExtraRepo
+        // but follow-on queries utilize skillDefRepo, each one has its own cache
+        entityManager.flush()
+        entityManager.clear()
     }
 
     @Profile
