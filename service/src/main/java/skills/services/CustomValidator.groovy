@@ -41,7 +41,7 @@ class CustomValidator {
     @Value('#{"${skills.config.ui.userCommunityParagraphValidationRegex}"}')
     String userCommunityParagraphValidationRegex
 
-    @Value('#{"${skills.config.ui.forceValidationRegex}"}')
+    @Value('#{"${skills.config.ui.forceValidationRegex:null}"}')
     String forceValidationRegex
 
     @Value('#{"${skills.config.ui.paragraphValidationMessage}"}')
@@ -66,7 +66,7 @@ class CustomValidator {
     private String userCommunityParagraphValidationMsg
     private Pattern paragraphPattern
     private Pattern userCommunityParagraphPattern
-    private Pattern paragraphMustValidationPattern
+    private Pattern forceValidationPattern
 
     private String nameValidationMsg
     private Pattern nameRegex
@@ -97,7 +97,7 @@ class CustomValidator {
 
         if ( StringUtils.isNotBlank(forceValidationRegex)){
             log.info("Configuring paragraph force validator. regex=[{}]", forceValidationRegex)
-            paragraphMustValidationPattern = Pattern.compile(forceValidationRegex)
+            forceValidationPattern = Pattern.compile(forceValidationRegex)
         }
 
         nameValidationMsg = nameValidationMessage ?: "Name failed validation"
@@ -244,12 +244,12 @@ class CustomValidator {
         CustomValidationResult validationResult
 
         // check if there are embedded new lines
-        if (paragraphMustValidationPattern && (value =~ /\n/) ) {
+        if (forceValidationPattern && (value =~ /\n/) ) {
             String[] paragraphs = value.split("([\n])")
             for (String s : paragraphs) {
                 if (!s) { continue }
                 String toValidate = adjustForMarkdownSupport(s)
-                if (paragraphMustValidationPattern.matcher(toValidate).matches()) {
+                if (forceValidationPattern.matcher(toValidate).matches()) {
                     if (!regex.matcher(toValidate).matches()) {
                         validationResult = new CustomValidationResult(false, msg)
                     } else {
