@@ -110,11 +110,12 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createProject(2)
         cy.createSubject(2, 2);
         cy.createSkill(2, 2, 3);
-        cy.assignCrossProjectDep(1, 1, 2, 3, true, 2);
+        cy.request('PUT', `/admin/projects/proj2/skills/skill3Subj2/shared/projects/proj1`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj2/skill3Subj2`);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 320);
+        cy.clickOnNode(525, 200);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
         cy.get('[data-cy="breadcrumb-subj1"]').should('exist')
@@ -401,7 +402,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.createSkill(2, 1, 1);
         cy.log('after');
 
-        cy.assignCrossProjectDep(1, 1, 2, 1);
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill1');

@@ -1272,7 +1272,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
-        cy.assignCrossProjectDep(2, 1, 1, 1);
+        cy.addCrossProjectLearningPathItem(1, 1, 2, 1)
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="selectAllSkillsBtn"]')
