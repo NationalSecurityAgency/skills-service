@@ -135,17 +135,11 @@ limitations under the License.
       </div>
       <div v-if="skill.type === 'Skill'">
         <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
-            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct prerequisite(s).
+            *** Skill has <b-badge>{{ skill.dependencyInfo.numDirectDependents}}</b-badge> direct prerequisite(s).
             <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
             <span v-else>Please see its prerequisites below.</span>
           ***
         </div>
-        <div v-if="locked && skill.badgeDependencyInfo" class="text-center text-muted locked-text">
-          *** Skill is part of <b>{{ skill.badgeDependencyInfo.length}}</b> badge(s) with prerequisite(s).
-          <span>Please see its prerequisites below.</span>
-          ***
-        </div>
-
         <p v-if="skill.subjectName" class="text-secondary mt-3">
           {{ subjectDisplayName }}: {{ skill.subjectName }}
         </p>

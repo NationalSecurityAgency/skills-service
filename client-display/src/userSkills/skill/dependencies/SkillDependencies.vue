@@ -61,10 +61,8 @@ limitations under the License.
         dependenciesInternal: [],
         network: null,
         legendItems: [
-          { label: 'This Skill', color: 'lightblue', iconClass: 'fa-graduation-cap' },
-          { label: 'Prerequisites', color: 'lightgray', iconClass: 'fa-graduation-cap' },
-          { label: 'Achieved Prerequisites', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
-          { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
+          { label: 'Skill', color: 'lightgray', iconClass: 'fa-graduation-cap' },
+          { label: 'Badge', color: 'lightgray', iconClass: 'fa-award' },
         ],
         displayOptions: {
           layout: {
@@ -212,6 +210,8 @@ limitations under the License.
         const nodes = [];
         const edges = [];
         const createdSkillIds = [];
+        const onlyUnique = (value, index, array) => array.indexOf(value) === index;
+        const achievedIds = this.dependenciesInternal.filter((dep) => dep.achieved).map((dep) => dep.dependsOn.id).filter(onlyUnique);
         this.dependenciesInternal.forEach((item) => {
           const extraParentProps = item.skill.isThisSkill ? {
             color: {
@@ -219,7 +219,7 @@ limitations under the License.
               background: 'lightblue',
             },
           } : {};
-          this.buildNode(item.skill, false, createdSkillIds, nodes, extraParentProps);
+          this.buildNode(item.skill, false, createdSkillIds, nodes, achievedIds, extraParentProps);
 
           const extraChildProps = item.achieved ? {
             color: {
@@ -228,7 +228,7 @@ limitations under the License.
             },
           } : {};
           if (item.dependsOn) {
-            this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, extraChildProps);
+            this.buildNode(item.dependsOn, item.crossProject, createdSkillIds, nodes, achievedIds, extraChildProps);
             edges.push({
               from: this.getNodeId(item.dependsOn),
               to: this.getNodeId(item.skill),
@@ -240,17 +240,18 @@ limitations under the License.
         const data = { nodes, edges };
         return data;
       },
-      buildNode(skill, isCrossProject, createdSkillIds, nodes, extraProps = {}) {
+      buildNode(skill, isCrossProject, createdSkillIds, nodes, achievedIds, extraProps = {}) {
         if (!createdSkillIds.includes(skill.id)) {
           createdSkillIds.push(skill.id);
-          const found = this.dependenciesInternal.find((item) => item.skill.id === skill.id);
-          let skillColor = skill.isThisSkill ? 'lightblue' : 'lightgray';
-          if (found && found.achieved) {
-            skillColor = 'lightgreen';
+          const skillColor = skill.isThisSkill ? 'lightblue' : 'lightgray';
+          const isAchieved = achievedIds.includes(skill.id);
+          let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
+          if (skill.isThisSkill) {
+            label = `<b>This Skill</b>\n${label}`;
           }
           const node = {
             id: skill.id,
-            label: this.getLabel(skill, isCrossProject),
+            label,
             margin: 10,
             shape: 'icon',
             icon: {
@@ -264,10 +265,22 @@ limitations under the License.
             font: { multi: 'html', size: 20 },
           };
 
+          if (isAchieved) {
+            node.icon.color = 'lightgreen';
+            node.font.color = 'green';
+            node.label = `${node.label} ✓`;
+          }
+
           if (skill.type === 'Badge') {
             node.shape = 'icon';
             node.icon.code = '\uf559';
             node.icon.color = '#88a9fc';
+          }
+          if (skill.isThisSkill) {
+            node.margin = { top: 25 };
+          }
+          if (isCrossProject) {
+            node.margin = { top: 40 };
           }
           const res = Object.assign(node, extraProps);
           nodes.push(res);
@@ -278,10 +291,6 @@ limitations under the License.
       },
       appendForId(projectId, skillId) {
         return `${projectId}_${skillId}`;
-      },
-      getLabel(skill, isCrossProject) {
-        const label = isCrossProject ? `CROSS-${this.projectDisplayName.toUpperCase()} ${this.skillDisplayName.toUpperCase()}\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
-        return label;
       },
       isDependency() {
         const routeName = this.$route.name;
