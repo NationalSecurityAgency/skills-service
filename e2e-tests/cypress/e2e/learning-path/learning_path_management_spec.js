@@ -100,6 +100,8 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.wait(1000);
+
         cy.get(headerSelector).contains('From').click();
 
         cy.validateTable(tableSelector, [
@@ -239,6 +241,8 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.wait(1000);
+        
         cy.get(headerSelector).contains('From').click();
 
         cy.validateTable(tableSelector, [
