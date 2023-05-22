@@ -140,41 +140,6 @@ describe('Learning Path Management Validation Tests', () => {
             }],
         ], 5, false, null, false);
 
-        // Remove the connection from Badge 1 and Badge 2
-        cy.get('[data-cy="sharedSkillsTable-removeBtn"]').first().click();
-        cy.get('button').contains('Remove').click();
-
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 0,
-                value: 'Very Great Skill 5 Subj2'
-            }, {
-                colIndex: 1,
-                value: 'Badge 1'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Very Great Skill 6 Subj2'
-            }, {
-                colIndex: 1,
-                value: 'Badge 2'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Very Great Skill 7 Subj2'
-            }, {
-                colIndex: 1,
-                value: 'Very Great Skill 5 Subj2'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Very Great Skill 8 Subj2'
-            }, {
-                colIndex: 1,
-                value: 'Badge 1'
-            }],
-        ], 5, false, null, false);
-
     })
 
     it('add group\'s skill as a prerequisite', () => {
@@ -224,4 +189,233 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathToSkillSelector"] [data-cy="skillsSelector-skillId"]')
             .should('have.length', 1)
     });
+
+    it('Remove learning path item from the table', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill5 as a prerequisite for Badge1
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill6 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill6Subj2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill7 as a prerequisite for Skill5
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill7Subj2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill8 as a prerequisite for Badge1
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill8Subj2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.get(headerSelector).contains('From').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Badge 1'
+            }, {
+                colIndex: 1,
+                value: 'Badge 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 8 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+        ], 5, false, null, false);
+
+        // Remove the connection from Badge 1 and Badge 2
+        cy.get('[data-cy="sharedSkillsTable-removeBtn"]').first().click();
+        cy.get('button').contains('Remove').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 8 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+        ], 5, false, null, false);
+    })
+
+    it('Clicking a node fills in the from selector', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.clickOnNode(360, 200);
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
+
+        cy.clickOnNode(360, 300);
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 2');
+    })
+
+    it('Can remove a learning path route from the graph', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.clickOnNode(360, 250);
+        cy.get('button').contains('Remove').click();
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
+    })
+
+    it('Changing the From skill clears the To skill', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
+        cy.get('[data-cy="learningPathToSkillSelector"]').contains('Badge 2');
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Very Great Skill 5 Subj2');
+        cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
+    })
+
+    it('Changing the From skill clears errors', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+        cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+
+        cy.get('[data-cy="learningPathError"]').should('not.exist')
+    })
+
+    it('Changing the To skill clears errors', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+        cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
+
+        cy.get('[data-cy="learningPathToSkillSelector"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+
+        cy.get('[data-cy="learningPathError"]').should('not.exist')
+    })
 });
