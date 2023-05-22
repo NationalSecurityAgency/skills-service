@@ -15,6 +15,7 @@
  */
 package skills.intTests.community
 
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
@@ -87,7 +88,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
         // 2nd project is NOT in the production mode, 3rd project has user community protection enabled
         pristineDragonsUser.enableProdMode(projs[0])
@@ -130,7 +131,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
         // 2nd project is NOT in the production mode
         pristineDragonsUser.enableProdMode(projs[0])
@@ -179,7 +180,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
         // 2nd project is NOT in the production mode, 3rd project has user community protection enabled
         pristineDragonsUser.enableProdMode(projs[0])
@@ -221,7 +222,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
         // 2nd project is NOT in the production mode
         pristineDragonsUser.enableProdMode(projs[0])
@@ -270,7 +271,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
 
         transactionTemplate.execute({
@@ -293,7 +294,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
         List projs = (1..2).collect { int numProj ->
             def proj = SkillsFactory.createProject(numProj)
-            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
             pristineDragonsUser.createProject(proj)
 
             (1..numProj).each {
@@ -306,7 +307,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
 
         when:
@@ -342,7 +343,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
 
         transactionTemplate.execute({
@@ -366,7 +367,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
         List projs = (1..2).collect { int numProj ->
             def proj = SkillsFactory.createProject(numProj)
-            proj.enableProtectedUserCommunity = numProj == 3 // 3rd project has user community protection enabled
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
             pristineDragonsUser.createProject(proj)
             rootUser.pinProject(proj.projectId)
 
@@ -380,7 +381,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
             }
             def skills = SkillsFactory.createSkills(numProj, numProj, 1)
             pristineDragonsUser.createSkills(skills)
-            return proj;
+            return proj
         }
 
         when:
@@ -394,4 +395,103 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         adminProjects[1].projectId == projs[1].projectId
         adminProjects[1].name == projs[1].name
     }
+
+    def "user community project is included in my progress summary when user is a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            pristineDragonsUser.createProject(proj)
+            pristineDragonsUser.enableProdMode(proj)
+            pristineDragonsUser.addMyProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+                pristineDragonsUser.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+                badge.enabled = true
+                pristineDragonsUser.updateBadge(badge)
+            }
+
+            if (numProj == 2) {
+                proj.enableProtectedUserCommunity = true // 2nd project has user community protection enabled
+                pristineDragonsUser.updateProject(proj)
+            }
+            return proj
+        }
+
+        when:
+        def res = pristineDragonsUser.getMyProgressSummary()
+        def chartData = pristineDragonsUser.getApiGlobalMetricsData("allProjectsSkillEventsOverTimeMetricsBuilder", [start: (new Date() - 14).time, projIds: "${projs[0].projectId},${projs[1].projectId}"])
+        def myBadges = pristineDragonsUser.getMyProgressBadges()
+
+        then:
+        res.projectSummaries.size() == 2
+        res.projectSummaries.find { it.projectId == projs[0].projectId }
+        res.projectSummaries.find { it.projectId == projs[1].projectId }
+
+        chartData.find {it.project ==  projs[0].projectId}
+        chartData.find {it.project ==  projs[1].projectId}
+
+        myBadges.find {it.projectId ==  projs[0].projectId}
+        myBadges.find {it.projectId ==  projs[1].projectId}
+    }
+
+    def "user community project is not included in my progress summary when user is NOT a member of the UC"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            pristineDragonsUser.createProject(proj)
+            pristineDragonsUser.enableProdMode(proj)
+            allDragonsUser.addMyProject(proj.projectId)
+
+            (1..numProj).each {
+                def subj = SkillsFactory.createSubject(numProj, it)
+                pristineDragonsUser.createSubject(subj)
+            }
+            def skills = SkillsFactory.createSkills(numProj, numProj, 1)
+            pristineDragonsUser.createSkills(skills)
+            (1..(4-numProj)).each {
+                def badge = SkillsFactory.createBadge(numProj, it)
+                pristineDragonsUser.createBadge(badge)
+                pristineDragonsUser.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+                badge.enabled = true
+                pristineDragonsUser.updateBadge(badge)
+            }
+
+            if (numProj == 2) {
+                proj.enableProtectedUserCommunity = true // 2nd project has user community protection enabled
+                pristineDragonsUser.updateProject(proj)
+            }
+            return proj
+        }
+
+        when:
+        def res = allDragonsUser.getMyProgressSummary()
+        def chartData = allDragonsUser.getApiGlobalMetricsData("allProjectsSkillEventsOverTimeMetricsBuilder", [start: (new Date() - 14).time, projIds: "${projs[0].projectId},${projs[1].projectId}"])
+        def myBadges = allDragonsUser.getMyProgressBadges()
+
+        then:
+        res.projectSummaries.size() == 1
+        res.projectSummaries.find { it.projectId == projs[0].projectId }
+
+        chartData.find {it.project ==  projs[0].projectId}
+        !chartData.find {it.project ==  projs[1].projectId}
+
+        myBadges.find {it.projectId ==  projs[0].projectId}
+        !myBadges.find {it.projectId ==  projs[1].projectId}
+    }
+
 }

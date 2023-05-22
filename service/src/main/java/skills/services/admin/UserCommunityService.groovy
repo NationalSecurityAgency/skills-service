@@ -95,7 +95,7 @@ class UserCommunityService {
             List<UserTag> userTags = userTagRepo.findAllByUserIdAndKey(userId, userCommunityUserTagKey)
             belongsToUserCommunity = userTags?.find { it?.value == userCommunityUserTagValue }
         }
-        return belongsToUserCommunity
+        return belongsToUserCommunity as Boolean
     }
 
     EnableProjValidationRes validateProjectForCommunity(String projId) {
