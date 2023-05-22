@@ -15,7 +15,9 @@
  */
 package skills.storage.model;
 
+import jakarta.persistence.Convert;
 import jakarta.persistence.Lob;
+import skills.storage.converters.BooleanConverter;
 
 public interface ProjectSummaryResult {
     public abstract int getProjectRefId();
@@ -36,5 +38,8 @@ public interface ProjectSummaryResult {
 
     @Lob
     public abstract String getOrderVal();
+
+    @Convert(converter = BooleanConverter.class)
+    Boolean getProtectedCommunityEnabled();
 
 }

@@ -208,6 +208,10 @@ class SkillsLoader {
     MyProgressSummary loadMyProgressSummary(String userId) {
         MyProgressSummary myProgressSummary = new MyProgressSummary()
         List<ProjectSummaryResult> projectSummaries = projDefRepo.getProjectSummaries(userId)
+
+        if (!userCommunityService.isUserCommunityMember(userId)) {
+            projectSummaries = projectSummaries.findAll { !it.protectedCommunityEnabled }
+        }
         List<SettingsResult> customLevelTextForProjects = settingsService.getProjectSettingsForAllProjects('level.displayName')
         for (ProjectSummaryResult summaryResult : projectSummaries.sort({it.getOrderVal()})) {
             ProjectSummary summary = new ProjectSummary().fromProjectSummaryResult(summaryResult)
@@ -247,8 +251,10 @@ class SkillsLoader {
         skillDefWithExtraRepo.findAllMyBadgesForUser(userId).withCloseable { Stream<SkillDefWithExtra> rawBadges ->
             rawBadges?.forEach({
                 if (it.projectId) {
-                    ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
-                    badges << loadBadgeSummary(projDef, userId, it, Integer.MAX_VALUE, false, true)
+                    if (userCommunityService.isUserCommunityMember(userId) || !userCommunityService.isUserCommunityOnlyProject(it.projectId)) {
+                        ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
+                        badges << loadBadgeSummary(projDef, userId, it, Integer.MAX_VALUE, false, true)
+                    }
                 } else {
                     // we have to load badge skills, if no project level is defined then without loading skills,
                     // the client can't identify the project_ids involved in the global bage

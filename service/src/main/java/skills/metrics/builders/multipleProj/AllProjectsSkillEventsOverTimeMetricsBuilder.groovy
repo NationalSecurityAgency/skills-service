@@ -23,6 +23,7 @@ import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.services.UserEventService
+import skills.services.admin.UserCommunityService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
 
@@ -36,7 +37,10 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
     UserEventService userEventService
 
     @Autowired
-    private UserInfoService userInfoService;
+    private UserInfoService userInfoService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     static class ResCount {
         Integer num
@@ -59,7 +63,7 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
 
     @Override
     List<ProjResCount> build(Map<String, String> props) {
-        String userId = userInfoService.getCurrentUserId();
+        String userId = userInfoService.getCurrentUserId()
         Date startDate = MetricsParams.getStart(null, BUILDER_ID, props)
         EventType eventType = userEventService.determineAppropriateEventType(startDate)
 
@@ -69,6 +73,10 @@ class AllProjectsSkillEventsOverTimeMetricsBuilder implements GlobalMetricsBuild
         }
 
         List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props)
+
+        if (!userCommunityService.isUserCommunityMember(userId)) {
+            projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
+        }
         log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
 
         List<ProjResCount> projResCounts = []
