@@ -75,7 +75,6 @@ import FullDependencyGraph from '@//components/skills/dependencies/FullDependenc
 import SecuritySettings from '@/components/settings/SecuritySettings';
 import EmailSettings from '@/components/settings/EmailSettings';
 import SystemSettings from '@/components/settings/SystemSettings';
-import SkillDependencies from '@/components/skills/dependencies/SkillDependencies';
 import AddSkillEvent from '@/components/skills/AddSkillEvent';
 import InceptionSkills from '@/components/inception/InceptionSkills';
 import ClientDisplayPreview from '@/components/users/ClientDisplayPreview';
@@ -507,13 +506,13 @@ const router = new Router({
         },
       }, {
         name: 'FullDependencyGraph',
-        path: 'dependencies',
+        path: 'learning-path',
         component: FullDependencyGraph,
         meta: {
           requiresAuth: true,
           reportSkillId: 'VisitProjectDependencies',
           announcer: {
-            message: 'All Project Dependencies',
+            message: 'Project Learning Path',
           },
         },
       }, {
@@ -759,17 +758,6 @@ const router = new Router({
           reportSkillId: 'VisitSkillOverview',
           announcer: {
             message: 'Skill Overview',
-          },
-        },
-      }, {
-        name: 'SkillDependencies',
-        path: 'dependencies',
-        component: SkillDependencies,
-        meta: {
-          requiresAuth: true,
-          reportSkillId: 'VisitSkillDependencies',
-          announcer: {
-            message: 'Skill Dependencies',
           },
         },
       }, {

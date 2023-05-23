@@ -15,9 +15,7 @@
  */
 import moment from 'moment-timezone';
 
-const dateFormatter = value => moment.utc(value)
-    .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
-describe('Client Display Dependencies Tests', () => {
+describe('Client Display Prerequisites Snapshot Tests', () => {
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
         failureThreshold: 0.03, // threshold for entire image
@@ -32,8 +30,8 @@ describe('Client Display Dependencies Tests', () => {
         cy.createSubject(1, 1);
 
         Cypress.Commands.add('clickOnNode', (x, y) => {
-            cy.contains('Dependencies');
-            cy.contains('Node Legend');
+            cy.contains('Prerequisites');
+            cy.get('[data-cy="graphLegend"]').contains('Legend');
             cy.wait(2000); // wait for chart
             // have to click twice to it to work...
             cy.get('#dependent-skills-network canvas')
@@ -51,148 +49,6 @@ describe('Client Display Dependencies Tests', () => {
         cy.viewport(1280, 1280);
     });
 
-    it('Deps Chart - drill down into deps from another subject via click', () => {
-        cy.createSkill(1, 1, 1);
-
-        cy.createSubject(1, 2);
-        cy.createSkill(1, 2, 3);
-        cy.assignDep(1, 1, 3, 2)
-
-        cy.createSubject(1, 3);
-        cy.createSkill(1, 3, 4);
-        cy.request('POST', `/admin/projects/proj1/skills/skill3Subj2/dependency/skill4Subj3`);
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 262);
-
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
-
-        cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
-        cy.get('[data-cy="breadcrumb-skill1"]').should('not.exist')
-
-        cy.clickOnNode(550, 320);
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj3')
-        cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
-        cy.get('[data-cy="breadcrumb-subj3"]').should('exist')
-    })
-
-    it('Deps Chart - drill down into deps from another subject via click - verify that prev/next works in the dep', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSubject(1, 2);
-        cy.createSkill(1, 2, 3);
-        cy.createSkill(1, 2, 4);
-        cy.createSkill(1, 2, 5);
-        cy.assignDep(1, 1, 3, 2)
-        cy.createSkill(1, 1, 6);
-        cy.createSkill(1, 1, 7);
-        cy.createSkill(1, 1, 8);
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 320);
-
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
-        cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
-        cy.get('[data-cy="nextSkill"]').click()
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj2')
-
-        cy.get('[data-cy="prevSkill"]').click()
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
-
-        cy.get('[data-cy="breadcrumb-subj2"]').click()
-        cy.get('[data-cy="title"]').should('have.text', 'Subject 2');
-    })
-
-    it('Deps Chart - drill down into deps from another project and subject via click', () => {
-        cy.createSkill(1, 1, 1);
-
-        cy.createProject(2)
-        cy.createSubject(2, 2);
-        cy.createSkill(2, 2, 3);
-        cy.assignCrossProjectDep(1, 1, 2, 3, true, 2);
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 320);
-
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
-        cy.get('[data-cy="breadcrumb-subj1"]').should('exist')
-        cy.get('[data-cy="breadcrumb-skill1"]').should('exist')
-        cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
-        cy.contains('This is a cross-project skill!');
-    })
-
-    it('Deps Chart - make sure drill down via click works', () => {
-        const numSkills = 9;
-        for (let i = 0; i < numSkills; i += 1) {
-            cy.createSkill(1, 1, i, { name: `This is a very long name. yet is it ${i}` });
-        }
-
-        cy.createProject(2);
-        cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1);
-        cy.createSkill(2, 1, 2);
-
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 1, 4);
-        cy.assignDep(1, 4, 5);
-        cy.assignDep(1, 5, 6);
-        cy.assignDep(1, 6, 7);
-        cy.assignDep(1, 7, 8);
-
-        cy.assignCrossProjectDep(1, 1, 2, 1);
-        cy.assignDep(2, 1, 2);
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
-        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(225, 455);
-        cy.contains('Project: This is project 2');
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
-        cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
-        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(425, 460);
-        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 2');
-
-        // make sure that "this skill" node doesn't navigate away to another page
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
-        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(500, 34);
-        cy.wait(500);
-        cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1');
-    });
-
-    it('Deps Chart - clicking off of a node but inside the dependency graph does not cause an error', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-
-        // create dependency from skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
-
-        // Go to parent dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill2');
-
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2');
-        // should render dependencies section
-        cy.contains('Dependencies');
-
-        cy.get('#dependent-skills-network canvas')
-            .should('be.visible')
-            .click(50, 325, { force: true });
-
-        // should still be on the same page and no errors should have occurred (no errors are checked in afterEach)
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2');
-        cy.contains('Dependencies');
-    });
-
     it('Deps Chart - partially completed deps - 1 out 4', () => {
         const numSkills = 6;
         for (let i = 0; i < numSkills; i += 1) {
@@ -202,21 +58,31 @@ describe('Client Display Dependencies Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
-        cy.contains('Node Legend');
+        cy.contains('Prerequisites');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('25%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Not Yet')
 
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 1 out 4');
@@ -231,10 +97,10 @@ describe('Client Display Dependencies Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
@@ -242,12 +108,22 @@ describe('Client Display Dependencies Tests', () => {
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
-        cy.contains('Node Legend');
+        cy.contains('Prerequisites');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('75%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 3 out 4');
@@ -262,10 +138,10 @@ describe('Client Display Dependencies Tests', () => {
             });
         }
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 1, 3);
-        cy.assignDep(1, 2, 4);
-        cy.assignDep(1, 2, 5);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 1)
+        cy.addLearningPathItem(1, 4, 2)
+        cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
@@ -274,12 +150,22 @@ describe('Client Display Dependencies Tests', () => {
         cy.wait(1000);
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
-        cy.contains('Node Legend');
+        cy.contains('Prerequisites');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('100%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps');
@@ -296,11 +182,11 @@ describe('Client Display Dependencies Tests', () => {
         cy.createSkill(2, 1, 1, { numPerformToCompletion: 1 });
         cy.createSkill(2, 1, 2, { numPerformToCompletion: 1 });
 
-        cy.assignDep(1, 1, 2);
-        cy.assignDep(1, 2, 3);
+        cy.addLearningPathItem(1, 2, 1)
+        cy.addLearningPathItem(1, 3, 2)
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
+        cy.addLearningPathItem(2, 2, 1)
 
-        cy.assignCrossProjectDep(1, 1, 2, 1);
-        cy.assignDep(2, 1, 2);
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
@@ -308,12 +194,25 @@ describe('Client Display Dependencies Tests', () => {
         cy.reportSkill(2, 1, Cypress.env('proxyUser'), 'now');
 
         cy.navToTheFirstSkill();
-        cy.contains('Dependencies');
-        cy.contains('Node Legend');
+        cy.contains('Prerequisites');
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('3');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('100%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 3')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="2"]').contains('Skill')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="2"]').contains('Skill')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="2"]').contains('Skill')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
 
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps with cross-project skill');
     });
@@ -349,7 +248,7 @@ describe('Client Display Dependencies Tests', () => {
         cy.createSkill(1);
         // issue #659 was evidenced in the specific situation of a skill having only a single dependency which was a skill
         // shared from another project
-        cy.request('POST', '/admin/projects/proj1/skills/skill1/dependency/projects/proj2/skills/skill42');
+        cy.request('POST', '/admin/projects/proj1/skill1/prerequisite/proj2/skill42');
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');
@@ -357,21 +256,21 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.wait(4000);
         cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`, snapshotOptions);
     });
 
-    it('parent and child dependencies are properly displayed', () => {
+    it('parent and child Prerequisites are properly displayed', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
         // create dependency from skill3 -> skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill3/dependency/skill2`);
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/proj1/skill3/prerequisite/proj1/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill1`);
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill3');
@@ -384,10 +283,9 @@ describe('Client Display Dependencies Tests', () => {
 
         // Go to child dependency page
         cy.clickOnNode(550, 262);
-        // cy.cdVisit('/subjects/subj1/skills/skill3/dependency/skill2');
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
-        // should render dependencies section
+        // should render Prerequisites section
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
         cy.wait(4000);
         cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
@@ -398,47 +296,22 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.createProject(2);
         cy.createSubject(2, 1);
-        cy.log('before');
         cy.createSkill(2, 1, 1);
-        cy.log('after');
 
-        cy.assignCrossProjectDep(1, 1, 2, 1);
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
 
         // Go to parent dependency page
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 1');
-        // should render dependencies section
-        cy.contains('Dependencies');
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
         cy.wait(4000);
         cy.matchSnapshotImage(`CrossProject Dep with the same skillId`, snapshotOptions);
 
-    });
-
-    it('clicking off of a node but inside the dependency graph does not cause an error', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-
-        // create dependency from skill2 -> skill1
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill1`);
-
-        // Go to parent dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill2');
-
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2');
-        // should render dependencies section
-        cy.contains('Dependencies');
-
-        cy.get('#dependent-skills-network canvas')
-            .should('be.visible')
-            .click(50, 325, { force: true });
-
-        // should still be on the same page and no errors should have occurred (no errors are checked in afterEach)
-        cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2');
-        cy.contains('Dependencies');
     });
 
     it('deps are added to partially achieved skill', () => {
@@ -449,8 +322,8 @@ describe('Client Display Dependencies Tests', () => {
         });
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
-        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
-        cy.request('POST', `/admin/projects/proj1/skills/skill2/dependency/skill3`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill3`);
 
         cy.cdVisit('/?internalBackButton=true');
 
@@ -461,10 +334,10 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        const expectedMsg = 'You were able to earn partial points before the dependencies were added';
+        const expectedMsg = 'You were able to earn partial points before the prerequisites were added';
         cy.contains(expectedMsg);
-        // should render dependencies section
-        cy.contains('Dependencies');
+        // should render Prerequisites section
+        cy.contains('Prerequisites');
 
         cy.wait(4000);
         cy.matchSnapshotImage(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
@@ -498,7 +371,7 @@ describe('Client Display Dependencies Tests', () => {
                 .format('x')
         });
         cy.createSkill(1, 1, 2);
-        cy.request('POST', `/admin/projects/proj1/skills/skill1/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
 
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');
@@ -507,7 +380,7 @@ describe('Client Display Dependencies Tests', () => {
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
-        const msg = 'Congrats! You completed this skill before the dependencies were added';
+        const msg = 'Congrats! You completed this skill before the prerequisites were added';
         cy.contains(msg);
 
         cy.wait(4000);
@@ -538,4 +411,33 @@ describe('Client Display Dependencies Tests', () => {
         cy.contains(msg)
             .should('not.exist');
     });
+
+    it('badge skill with badge dependency displays correctly', () => {
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.createBadge(1, 2);
+        cy.assignSkillToBadge(1, 2, 2);
+        cy.createBadge(1, 2, { enabled: true });
+
+        cy.addLearningPathItem(1, 1, 2, true, true)
+        cy.addLearningPathItem(1, 3, 2, false, true)
+        cy.addLearningPathItem(1, 4, 3)
+
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.matchSnapshotImage(`BadgeSkill-WithBadgeDependencies`, snapshotOptions);
+    });
+
 });

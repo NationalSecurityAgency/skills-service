@@ -38,10 +38,16 @@
     "backgroundColorSecondary": "#a37ee6",
     "foregroundColor": "#fdfbfb"
   },
-  "graphLegendBorderColor": "1px solid grey",
   "quiz": {
     "incorrectAnswerColor": "#d67070",
     "correctAnswerColor": "#93f193",
     "selectedAnswerColor": "#2c9a2c"
+  },
+  "prerequisites": {
+    "achievedColor": "#6df28b",
+    "skillColor": "#ffe297",
+    "badgeColor": "#ceb6f4",
+    "thisSkillColor": "#7fbbfa",
+    "navButtonsColor": "#cce7f3"
   }
 }

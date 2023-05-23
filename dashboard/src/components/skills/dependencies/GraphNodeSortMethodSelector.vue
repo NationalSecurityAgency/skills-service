@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div>
+  <div class="deps-overlay">
       <b-form-radio-group id="radio-group-2" v-model="sortMethod"
                           name="graph-sort-method" button-variant="outline-hc" stacked buttons>
         <b-form-radio value="directed" v-b-tooltip.hover="msg.directed" :aria-label="msg.directed"><span><i
@@ -50,6 +50,20 @@ limitations under the License.
   };
 </script>
 
-<style scoped>
+<style>
+  .deps-overlay {
+    z-index: 99;
+    position: relative;
+  }
 
+</style>
+<style scoped>
+  .btn.btn-outline-hc {
+    background-color: #fff;
+  }
+
+  .btn.btn-outline-hc:hover {
+    background-color: #146c75;
+    color: #fff;
+  }
 </style>

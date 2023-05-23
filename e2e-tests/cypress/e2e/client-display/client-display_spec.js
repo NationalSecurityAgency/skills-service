@@ -128,7 +128,7 @@ describe('Client Display Tests', () => {
             version: 0,
             helpUrl: 'http://doHelpOnThisSkill.com'
         });
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`);
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: Cypress.env('proxyUser'),
@@ -190,7 +190,7 @@ describe('Client Display Tests', () => {
             .click();
         cy.contains('Lorem ipsum dolor sit amet');
         // 1 skill is locked
-        cy.contains('Skill has 1 direct dependent(s).');
+        cy.contains('Skill has 1 direct prerequisite(s).');
         cy.customA11y();
     });
 
@@ -487,6 +487,7 @@ describe('Client Display Tests', () => {
             .click();
 
         cy.wait(4000);
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
         cy.matchSnapshotImage('Skill-Dependency', snapshotOptions);
     });
 

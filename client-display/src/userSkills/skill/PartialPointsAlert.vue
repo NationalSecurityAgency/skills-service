@@ -17,15 +17,15 @@ limitations under the License.
     <div v-if="isPartiallyAchievedAndLocked || isFullyAchievedAndLocked">
         <div v-if="isPartiallyAchievedAndLocked" class="alert alert-info mt-2 text-center">
             <p>
-                <i class="fas fa-info-circle mr-1"></i> You were able to earn partial points before the dependencies were added. Don't worry you get to keep the points!!!
+                <i class="fas fa-info-circle mr-1"></i> You were able to earn partial points before the prerequisites were added. Don't worry you get to keep the points!!!
             </p>
             <hr>
-            <div class="text-center">Accomplish all of the dependencies to unlock the rest of the {{ skillDisplayName.toLowerCase() }}'s points!</div>
+            <div class="text-center">Accomplish all of the prerequisites to unlock the rest of the {{ skillDisplayName.toLowerCase() }}'s points!</div>
         </div>
 
         <div v-if="isFullyAchievedAndLocked" class="alert alert-success mt-2 text-center">
             <p>
-                <i class="fas fa-info-circle mr-1"></i> Congrats! You completed this {{ skillDisplayName.toLowerCase() }} before the dependencies were added. Don't worry you get to keep the points!!!
+                <i class="fas fa-info-circle mr-1"></i> Congrats! You completed this {{ skillDisplayName.toLowerCase() }} before the prerequisites were added. Don't worry, you get to keep the points!!!
             </p>
         </div>
     </div>

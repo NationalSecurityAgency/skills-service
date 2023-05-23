@@ -22,7 +22,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    const navDepsSelector = '[data-cy="nav-Dependencies"]';
     const navAddEventSelector = '[data-cy="nav-Add Event"]';
 
     it('verify subject cards are aligned properly when one subject has disabled skills and another does not', () => {
@@ -85,8 +84,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navDepsSelector)
-            .should('not.exist');
         cy.get(navAddEventSelector)
             .should('not.exist');
 
@@ -102,8 +99,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill4"]')
             .contains('This skill was imported')
             .should('not.exist');
-        cy.get(navDepsSelector)
-            .should('exist');
         cy.get(navAddEventSelector)
             .should('exist');
     });
@@ -135,8 +130,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navDepsSelector)
-            .should('not.exist');
         cy.get(navAddEventSelector)
             .should('not.exist');
 
@@ -152,8 +145,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill4"]')
             .contains('This skill was imported')
             .should('not.exist');
-        cy.get(navDepsSelector)
-            .should('exist');
         cy.get(navAddEventSelector)
             .should('exist');
     });
@@ -183,8 +174,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navDepsSelector)
-            .should('not.exist');
         cy.get(navAddEventSelector)
             .should('not.exist');
     });

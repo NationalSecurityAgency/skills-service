@@ -24,20 +24,15 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillDefForDependencyRes
-import skills.controller.result.model.DependencyCheckResult
-import skills.controller.result.model.SharedSkillResult
-import skills.controller.result.model.SkillDefGraphRes
-import skills.controller.result.model.SkillDefRes
-import skills.controller.result.model.SkillDepResult
-import skills.controller.result.model.SkillsGraphRes
+import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.storage.accessors.ProjDefAccessor
+import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
-import skills.storage.accessors.ProjDefAccessor
-import skills.storage.accessors.SkillDefAccessor
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
@@ -86,74 +81,24 @@ class SkillsDepsService {
         }?.sort { it.skillId }
     }
 
-    @Transactional()
-    void assignSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependendencyProjectId = null) {
-        SkillDef dependent = skillDefAccessor.getSkillDef(projectId, dependentSkillId)
-        SkillDef dependency = skillDefAccessor.getSkillDef(dependendencyProjectId ?: projectId, dependencySkillId)
-
-        if (skillCatalogService.isAvailableInCatalog(dependent)) {
-            throw new SkillException("Skill [${dependent.skillId}] has been shared to the catalog. Dependencies cannot be added to a skill shared to the catalog.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
-        }
-        if (skillDefRepo.wasThisSkillReusedElsewhere(dependent.id)) {
-            throw new SkillException("Skill [${dependent.skillId}] was reused in another subject or group. Dependencies cannot be added to a skill that was reused.", projectId, dependentSkillId, ErrorCode.DependenciesNotAllowed)
-        }
-
-        if (dependendencyProjectId) {
-            dependencyValidator.validateDependencyEligibility(projectId, dependency)
-        }
-
-        validateDependencyVersions(dependent, dependency)
-        checkForCircularGraphAndThrowException(dependent, dependency, SkillRelDef.RelationshipType.Dependence)
-        try {
-            skillRelDefRepo.save(new SkillRelDef(parent: dependent, child: dependency, type: SkillRelDef.RelationshipType.Dependence))
-        } catch (DataIntegrityViolationException e) {
-            String msg = "Skill dependency [${dependent.projectId}:${dependent.skillId}]=>[${dependency.projectId}:${dependency.skillId}] already exist.".toString()
-            log.error(msg, e)
-            throw new SkillException(msg, dependent.projectId, dependent.skillId, ErrorCode.FailedToAssignDependency)
-        }
-    }
-
-    private void validateDependencyVersions(SkillDef skill, SkillDef dependOnSkill) {
-        if (skill.version < dependOnSkill.version) {
-            throw new SkillException("Not allowed to depend on skill with a later version. " +
-                    "Skill [ID:${skill.skillId}, version ${skill.version}] can not depend on [ID:${dependOnSkill.skillId}, version ${dependOnSkill.version}]",
-                    skill.projectId, skill.skillId, ErrorCode.FailedToAssignDependency)
-        }
+    @Profile
+    private SkillDef loadSkillDefForLearningPath(String projectId, String id) {
+        return skillDefAccessor.getSkillDef(projectId, id, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup, SkillDef.ContainerType.Badge])
     }
 
     @Transactional()
-    void removeSkillDependency(String projectId, String dependentSkillId, String dependencySkillId, String dependencyProjectId = null) {
-        ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, SkillDef.ContainerType.Skill,
-                dependencyProjectId ?: projectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
+    void addLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
+        SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
+        SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
+
+        validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
+        skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
     }
 
-    @Transactional(readOnly = true)
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(String projectId) {
-        List<SkillDefSkinny> res = skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, "", Boolean.TRUE.toString(), Boolean.FALSE.toString())
-        // remove reused skills
-        res = res.findAll { !SkillReuseIdUtil.isTagged(it.skillId) }
-        List<SkillDefForDependencyRes> finalRes = res.collect {
-            new SkillDefForDependencyRes(
-                    skillId: it.skillId,
-                    name: InputSanitizer.unsanitizeName(it.name),
-                    projectId: it.projectId,
-                    version: it.version
-            )
-        }
-        List<SharedSkillResult> sharedSkills = shareSkillsService.getSharedSkillsFromOtherProjects(projectId)
-        sharedSkills.each {
-            finalRes.add(
-                new SkillDefForDependencyRes(
-                    skillId: it.skillId,
-                    name: InputSanitizer.unsanitizeName(it.skillName),
-                    projectId: projectId,
-                    otherProjectId: it.projectId,
-                    otherProjectName: InputSanitizer.unsanitizeName(it.projectName)
-                )
-            )
-        }
-
-        return finalRes
+    @Transactional()
+    void removeLearningPathItem(String projectId, String dependentSkillId, String dependencyProjectId, String dependencySkillId) {
+        ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, null,
+                dependencyProjectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
     static class GraphSkillDefEdge {
@@ -161,26 +106,13 @@ class SkillsDepsService {
         SkillDefGraphRes to
     }
 
+    @Profile
     @Transactional(readOnly = true)
     SkillsGraphRes getDependentSkillsGraph(String projectId) {
         List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
         return convertToSkillsGraphRes(edges)
     }
 
-
-    @Transactional(readOnly = true)
-    SkillsGraphRes getDependentSkillsGraph(String projectId, String skillId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
-
-        // must only keep the provide skill id and its descendants
-        List<GraphSkillDefEdge> collectedRes = []
-        List<GraphSkillDefEdge> startEdges = edges.findAll { it.from.skillId == skillId }
-        if(startEdges){
-            collectDescendants(edges, startEdges, collectedRes)
-        }
-
-        return convertToSkillsGraphRes(collectedRes)
-    }
 
     private static Comparator<SkillDefGraphRes> skillDefComparator = new Comparator<SkillDefGraphRes>() {
         @Override
@@ -204,6 +136,7 @@ class SkillsDepsService {
             SkillDefGraphRes graphRes = new SkillDefGraphRes()
             Props.copy(skillDefRes, graphRes)
             graphRes.id = it.value
+            graphRes.projectName = it.key.projectName
             return graphRes
         }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
@@ -235,7 +168,9 @@ class SkillsDepsService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.name = InputSanitizer.unsanitizeName(res.name)
-        res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        if(skillDef.type != SkillDef.ContainerType.Badge) {
+            res.numPerformToCompletion = skillDef.totalPoints / res.pointIncrement
+        }
         return res
     }
 
@@ -261,20 +196,22 @@ class SkillsDepsService {
                     skillId: it[2],
                     subjectId: it[3],
                     projectId: it[4],
-                    pointIncrement: it[5],
-                    totalPoints: it[6],
-                    type: it[7],
+                    projectName: it[5],
+                    pointIncrement: it[6],
+                    totalPoints: it[7],
+                    type: it[8],
             )
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[8],
-                    name: it[9],
-                    skillId: it[10],
-                    subjectId: it[11],
-                    projectId: it[12],
-                    pointIncrement: it[13],
-                    totalPoints: it[14],
-                    type: it[15],
+                    id: it[9],
+                    name: it[10],
+                    skillId: it[11],
+                    subjectId: it[12],
+                    projectId: it[13],
+                    projectName: it[14],
+                    pointIncrement: it[15],
+                    totalPoints: it[16],
+                    type: it[17],
             )
 
             new GraphSkillDefEdge(from: from, to: to)
@@ -282,47 +219,92 @@ class SkillsDepsService {
         })
     }
 
-    private void checkForCircularGraphAndThrowException(SkillDef skill1, SkillDef skill2, SkillRelDef.RelationshipType type) {
-        assert skill1.skillId != skill2.skillId || skill1.projectId != skill2.projectId
-
-        DependencyCheckResult dependencyCheckResult = checkForCircularGraph(skill1, skill2, type)
+    private void validateLearningPathItemAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
         if (!dependencyCheckResult.possible) {
-            throw new SkillException(dependencyCheckResult.reason, skill1.projectId, skill1.skillId, ErrorCode.FailedToAssignDependency)
+            throw new SkillException(dependencyCheckResult.reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
     }
 
-    private DependencyCheckResult checkForCircularGraph(SkillDef proposedParent, SkillDef proposedChild, SkillRelDef.RelationshipType type) {
-        try {
-            recursiveCircularDependenceCheck(proposedChild, proposedParent, [getDependencyCheckId(proposedParent), getDependencyCheckId(proposedChild)], type)
-        } catch (Throwable t) {
-            throw new SkillException(t.message, t, proposedParent.projectId, proposedParent.skillId)
-        }
+    @Transactional(readOnly = true)
+    DependencyCheckResult validatePossibleLearningPathItem(String projectId, String id, String prereqFromId, String prereqFromProjectId = null) {
+        SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
+        SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
+
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
+        return dependencyCheckResult
     }
 
-    private String getDependencyCheckId(SkillDef skill) {
-        return skill.projectId + ":" + skill.skillId
-    }
+    @Profile
+    DependencyCheckResult validateLearningPathItem(SkillDef skillDef, SkillDef prereqSkillDef) {
+        assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
 
-    private DependencyCheckResult recursiveCircularDependenceCheck(SkillDef parent, SkillDef originalParent, List<String> idPath, SkillRelDef.RelationshipType type, int currentIter = 0, int maxIter = 100) {
-        if (currentIter > maxIter) {
-            throw new IllegalStateException("Number of [$maxIter] iterations exceeded when checking for circular dependency for [${originalParent.skillId}]")
+        if ("false" == skillDef.enabled) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.NotEligible,
+                    reason: "Disabled nodes cannot be added. [${skillDef.projectId}-${skillDef.skillId}] is disabled")
+        }
+        if ("false" == prereqSkillDef.enabled) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.NotEligible,
+                    reason: "Disabled nodes cannot be added. [${prereqSkillDef.projectId}-${prereqSkillDef.skillId}] is disabled")
         }
 
-        List<SkillRelDef> relationships = skillRelDefRepo.findAllByParentAndType(parent, type)
-        if (relationships) {
-            if (relationships.find { it.child.skillId == originalParent.skillId }) {
-                return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last(), possible: false, reason: "Discovered circular dependency [${idPath.join(" -> ")} -> ${getDependencyCheckId(originalParent)}]".toString())
+        if (skillDef.projectId != prereqSkillDef.projectId) {
+            try {
+                dependencyValidator.validateDependencyEligibility(skillDef.projectId, prereqSkillDef)
+            } catch (SkillException e) {
+                return new DependencyCheckResult(possible: false,
+                        failureType: DependencyCheckResult.FailureType.NotEligible,
+                        reason: e.message)
             }
-            for ( SkillRelDef skillRelDef : relationships ) {
-                List<String> idPathCopy = new ArrayList<>(idPath)
-                idPathCopy.add(getDependencyCheckId(skillRelDef.child))
-                DependencyCheckResult res = recursiveCircularDependenceCheck(skillRelDef.child, originalParent, idPathCopy, type, currentIter++, maxIter)
-                if (!res.possible) {
-                    return res
-                }
+        }
+
+        if (skillCatalogService.isAvailableInCatalog(skillDef)) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.SkillInCatalog,
+                    reason: "Skill [${skillDef.skillId}] was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.")
+        }
+
+        if (skillDefRepo.wasThisSkillReusedElsewhere(skillDef.id)) {
+            return new DependencyCheckResult(possible: false,
+                    failureType: DependencyCheckResult.FailureType.ReusedSkill,
+                    reason: "Skill [${skillDef.skillId}] was reused in another subject or group and cannot have prerequisites in the learning path.")
+        }
+        if (skillDef.version < prereqSkillDef.version) {
+            String msg = "Not allowed to depend on skill with a later version. " +
+                    "Skill [ID:${skillDef.skillId}, version ${skillDef.version}] can not depend on [ID:${prereqSkillDef.skillId}, version ${prereqSkillDef.version}]".toString()
+            return new DependencyCheckResult(possible: false, failureType: DependencyCheckResult.FailureType.SkillVersion, reason: msg)
+        }
+
+        SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
+        CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(skillDef: skillDef, prereqSkillDef: prereqSkillDef, existingGraph: existingGraph)
+        if (prereqSkillDef.type == SkillDef.ContainerType.Badge) {
+            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(prereqSkillDef.id, prereqSkillDef.skillId, prereqSkillDef.name))
+        }
+        if (skillDef.type == SkillDef.ContainerType.Badge) {
+            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(skillDef.id, skillDef.skillId, skillDef.name))
+        }
+        if (existingGraph.nodes) {
+            List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge })
+            if (badgeNodes) {
+                circularLearningPathChecker.addAllBadgeAndSkills(badgeNodes.collect {
+                    Integer badgeId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
+                    return loadBadgeSkills(badgeId, it.skillId, it.name)
+                })
             }
         }
 
-        return new DependencyCheckResult(skillId: originalParent.skillId, dependentSkillId: idPath.last())
+        return circularLearningPathChecker.check()
+    }
+
+    @Profile
+    CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
+        List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
+        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
+        return new CircularLearningPathChecker.BadgeAndSkills(
+                badgeGraphNode: new CircularLearningPathChecker.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
+                skills: badgeSkillInfos
+        )
     }
 }

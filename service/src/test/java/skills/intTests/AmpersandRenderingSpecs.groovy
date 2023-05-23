@@ -782,19 +782,14 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
 
-        skillsService.assignDependency([projectId: proj.projectId, dependentSkillId: skill4.skillId, dependencySkillId: skill3.skillId])
-        skillsService.assignDependency([projectId: proj.projectId, dependentSkillId: skill3.skillId, dependencySkillId: skill2.skillId])
-        skillsService.assignDependency([projectId: proj.projectId, dependentSkillId: skill2.skillId, dependencySkillId: skill.skillId])
+        skillsService.addLearningPathPrerequisite(proj.projectId, skill4.skillId, skill3.skillId)
+        skillsService.addLearningPathPrerequisite(proj.projectId, skill3.skillId, skill2.skillId)
+        skillsService.addLearningPathPrerequisite(proj.projectId, skill2.skillId, skill.skillId)
 
         when:
-        def skillGraph = skillsService.getDependencyGraph(proj.projectId, skill4.skillId)
         def projectGraph = skillsService.getDependencyGraph(proj.projectId)
 
         then:
-        skillGraph.nodes.find {it.name == "A & B"}
-        skillGraph.nodes.find {it.name == "A &B"}
-        skillGraph.nodes.find {it.name == "A& B"}
-        skillGraph.nodes.find {it.name == "A&B"}
         projectGraph.nodes.find {it.name == "A & B"}
         projectGraph.nodes.find {it.name == "A &B"}
         projectGraph.nodes.find {it.name == "A& B"}

@@ -54,7 +54,7 @@ describe('Community Project Creation Tests', () => {
     it('community projected project cannot share skills for cross-project dependencies', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true})
 
-        cy.visit('/administrator/projects/proj1/dependencies')
+        cy.visit('/administrator/projects/proj1/learning-path')
         cy.get('[data-cy="restrictedUserCommunityWarning"]').contains('is restricted to Divine Dragon')
         cy.get('[data-cy="shareButton"]').should('not.exist')
     });

@@ -104,6 +104,7 @@ limitations under the License.
     <div class="row">
       <div class="col">
         <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"
+                      :badge-is-locked="badgeIsLocked"
                       :bar-size="skill.groupId ? 12 : 22"
                       :class="{ 'skills-navigable-item' : allowDrillDown }" data-cy="skillProgressBar"/>
       </div>
@@ -133,13 +134,12 @@ limitations under the License.
         </p>
       </div>
       <div v-if="skill.type === 'Skill'">
-        <div v-if="locked" class="text-center text-muted locked-text">
-            *** Skill has <b>{{ skill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-            <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
-            <span v-else>Please see its dependencies below.</span>
+        <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
+            *** Skill has <b-badge>{{ skill.dependencyInfo.numDirectDependents}}</b-badge> direct prerequisite(s).
+            <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
+            <span v-else>Please see its prerequisites below.</span>
           ***
         </div>
-
         <p v-if="skill.subjectName" class="text-secondary mt-3">
           {{ subjectDisplayName }}: {{ skill.subjectName }}
         </p>
@@ -243,6 +243,11 @@ limitations under the License.
         type: String,
         default: '',
       },
+      badgeIsLocked: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
     },
     data() {
       return {
@@ -255,7 +260,13 @@ limitations under the License.
     },
     computed: {
       locked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+        let hasBadgeDependency = false;
+        if (this.skill.badgeDependencyInfo && this.skill.badgeDependencyInfo.length > 0) {
+          if (this.skill.badgeDependencyInfo.find((item) => !item.achieved)) {
+            hasBadgeDependency = true;
+          }
+        }
+        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked || hasBadgeDependency;
       },
       isSkillComplete() {
         return this.skill && this.skill.meta && this.skill.meta.complete;

@@ -607,30 +607,9 @@ class AdminController {
     @GetMapping(value = '/projects/{projectId}/latestVersion', produces = 'application/json')
     Integer findLatestSkillVersion(@PathVariable('projectId') String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return skillsAdminService.findLatestSkillVersion(projectId)
+        return skillsAdminService.findMaxVersionByProjectId(projectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/dependency/availableSkills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<SkillDefForDependencyRes> getSkillsAvailableForDependency(@PathVariable("projectId") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        return skillsDepsService.getSkillsAvailableForDependency(projectId)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    RequestResult assignDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId,
-                                   @PathVariable("dependencySkillId") String dependencySkillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
-        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
-        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
-
-        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId)
-        return new RequestResult(success: true)
-    }
 
     @RequestMapping(value = "/projects/{projectId}/hasDependency", method = [RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -643,60 +622,55 @@ class AdminController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    RequestResult assignDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId,
-                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
-                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(dependencySkillId, "Dependent Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependency Skill Id", projectId)
-        SkillsValidator.isTrue(!dependentSkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependentSkillId)
-        SkillsValidator.isTrue(!dependencySkillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, dependencySkillId)
 
-        skillsDepsService.assignSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
+    @RequestMapping(value = "/projects/{projectId}/{id}/prerequisite/{prereqProjectId}/{prereqId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult addLearningPathItem(@PathVariable("projectId") String projectId,
+                                      @PathVariable("id") String id,
+                                      @PathVariable("prereqProjectId") String prereqProjectId,
+                                      @PathVariable("prereqId") String prereqId) {
+        SkillsValidator.isNotBlank(projectId, "To Project Id", projectId)
+        SkillsValidator.isNotBlank(id, "To Id", id)
+        SkillsValidator.isNotBlank(prereqProjectId, "From Project Id")
+        SkillsValidator.isNotBlank(prereqId, "From Id", prereqId)
+
+        SkillsValidator.isTrue(!id.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "To ID must not contain reuse tag", projectId, id)
+        SkillsValidator.isTrue(!prereqId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "From ID must not contain reuse tag", projectId, prereqId)
+
+        skillsDepsService.addLearningPathItem(projectId, id, prereqId, prereqProjectId)
         return new RequestResult(success: true)
     }
 
-
-    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/{id}/prerequisiteValidate/{prereqProjectId}/{prereqId}", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    RequestResult removeDependency(@PathVariable("projectId") String projectId,
-                                   @PathVariable("dependentSkillId") String dependentSkillId,
-                                   @PathVariable("dependencySkillId") String dependencySkillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
+    DependencyCheckResult validateLearningPathItem(@PathVariable("projectId") String projectId,
+                                      @PathVariable("id") String id,
+                                      @PathVariable("prereqProjectId") String prereqProjectId,
+                                      @PathVariable("prereqId") String prereqId) {
+        SkillsValidator.isNotBlank(projectId, "To Project Id", projectId)
+        SkillsValidator.isNotBlank(id, "To Id", id)
+        SkillsValidator.isNotBlank(prereqProjectId, "From Project Id")
+        SkillsValidator.isNotBlank(prereqId, "From Id", prereqId)
 
-        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId)
-        return new RequestResult(success: true)
+        SkillsValidator.isTrue(!id.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "To ID must not contain reuse tag", projectId, id)
+        SkillsValidator.isTrue(!prereqId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "From ID must not contain reuse tag", projectId, prereqId)
+
+        return skillsDepsService.validatePossibleLearningPathItem(projectId, id, prereqId, prereqProjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{dependentSkillId}/dependency/projects/{dependencyProjectId}/skills/{dependencySkillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/{id}/prerequisite/{prereqProjectId}/{prereqId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeDependencyFromAnotherProject(@PathVariable("projectId") String projectId,
-                                                     @PathVariable("dependentSkillId") String dependentSkillId,
-                                                     @PathVariable("dependencyProjectId") String dependencyProjectId,
-                                                     @PathVariable("dependencySkillId") String dependencySkillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(dependentSkillId, "Dependent Skill Id", projectId)
-        SkillsValidator.isNotBlank(dependencyProjectId, "Dependency Project Id", projectId)
-        SkillsValidator.isNotBlank(dependencySkillId, "Dependency Skill Id", projectId)
+                                                     @PathVariable("id") String id,
+                                                     @PathVariable("prereqProjectId") String prereqProjectId,
+                                                     @PathVariable("prereqId") String prereqId) {
+        SkillsValidator.isNotBlank(projectId, "To Project Id", projectId)
+        SkillsValidator.isNotBlank(id, "To Id", id)
+        SkillsValidator.isNotBlank(prereqProjectId, "From Project Id")
+        SkillsValidator.isNotBlank(prereqId, "From Id", prereqId)
 
-        skillsDepsService.removeSkillDependency(projectId, dependentSkillId, dependencySkillId, dependencyProjectId)
+        skillsDepsService.removeLearningPathItem(projectId, id, prereqProjectId, prereqId)
         return new RequestResult(success: true)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    SkillsGraphRes getDependencyForSkill(@PathVariable("projectId") String projectId,
-                                         @PathVariable("skillId") String skillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-
-        return skillsDepsService.getDependentSkillsGraph(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -768,6 +742,24 @@ class AdminController {
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
         List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        if (excludeReusedSkills) {
+            res = res.findAll { !it.isReused }
+        }
+        return res
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skillsAndBadges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    List<SkillDefSkinnyRes> getAllSkillsAndBadgesForProject(
+            @PathVariable("projectId") String projectId,
+            @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
+            @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
+            @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
+            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+
+        boolean excludeImportedSkillsBol = excludeImportedSkills
+        boolean includeDisabledBool = includeDisabled
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkillsAndBadges(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
         if (excludeReusedSkills) {
             res = res.findAll { !it.isReused }
         }

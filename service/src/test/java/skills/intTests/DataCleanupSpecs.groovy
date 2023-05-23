@@ -118,7 +118,7 @@ class DataCleanupSpecs extends DefaultIntSpec {
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
 
-        skillsService.assignDependency([projectId: project.projectId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(project.projectId, skills.get(0).skillId, skills.get(1).skillId)
         List<SkillDefPartial> beforeDelete = relDefRepo.getChildrenPartial( project.projectId, skills.get(0).skillId, SkillRelDef.RelationshipType.Dependence)
         assert beforeDelete.size() == 1
 

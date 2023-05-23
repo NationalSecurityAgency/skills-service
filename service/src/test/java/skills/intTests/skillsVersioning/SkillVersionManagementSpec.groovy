@@ -52,26 +52,6 @@ class SkillVersionManagementSpec extends DefaultIntSpec {
         versions == []
     }
 
-    def 'assigning dependent skills validates versions of the skills (dependency version must be less than or equal to the skill version)'(){
-        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(SkillsFactory.createSubject())
-        skillsService.createSkill(skills.get(0))
-        skillsService.createSkill(skills.get(1))
-        skillsService.createSkill(skills.get(2))
-
-
-        when:
-        def result1 = skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(0).skillId])
-        def result2 = skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(2).skillId])
-
-        then:
-        result1.success
-        !result2.success
-        result2.body.explanation == "Not allowed to depend on skill with a later version. Skill [ID:skill2, version 0] can not depend on [ID:skill3, version 1]"
-    }
-
     def 'correctly find max skill version for a project'() {
         setup:
         skillsService.createProject(SkillsFactory.createProject(1)).body

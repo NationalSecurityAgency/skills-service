@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
@@ -30,7 +31,7 @@ import java.util.stream.Stream
 
 import static skills.storage.model.SkillDef.*
 
-interface SkillDefWithExtraRepo extends CrudRepository<SkillDefWithExtra, Integer>, PagingAndSortingRepository<SkillDefWithExtra, Integer> {
+interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer>, PagingAndSortingRepository<SkillDefWithExtra, Integer> {
 
     List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, ContainerType type)
 

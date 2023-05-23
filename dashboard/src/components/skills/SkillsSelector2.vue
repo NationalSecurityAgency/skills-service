@@ -22,6 +22,7 @@ limitations under the License.
               :filterable="internalSearch"
               label="name"
               v-on:search="searchChanged"
+              v-on:input="valChanged"
               v-on:option:selected="added"
               v-on:option:deselecting="considerRemoval"
               :loading="isLoading"
@@ -31,7 +32,7 @@ limitations under the License.
       <template #option="option">
         <slot name="dropdown-item" :option="option">
           <div :data-cy="`skillsSelectionItem-${option.projectId}-${option.skillId}`">
-            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName">{{ option.name }}
+            <div class="h5 text-info skills-option-name" data-cy="skillsSelector-skillName"><span v-if="showType">{{ option.type }}:</span> {{ option.name }}
               <b-badge v-if="option.isReused" variant="success" size="sm" class="text-uppercase"
                        data-cy="reusedBadge"
                        style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
@@ -49,10 +50,15 @@ limitations under the License.
                     removeReuseTag(option.skillId)
                   }}</span></span>
               </span>
-              <span class="mx-2">|</span>
-              <span class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span><span
+              <span class="mx-2" v-if="option.type !== 'Badge'">|</span>
+              <span v-if="option.type === 'Skill'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span>
+              <span v-if="option.type === 'Skill'"
               class="font-weight-bold skills-option-subject-name"
               data-cy="skillsSelector-subjectName">{{ option.subjectName }}</span>
+              <span v-if="option.type === 'Shared Skill'" class="text-uppercase mr-1 font-italic" data-cy="skillsSelectionItem-projectName">Project:</span>
+              <span v-if="option.type === 'Shared Skill'"
+                    class="font-weight-bold skills-option-subject-name"
+                    data-cy="skillsSelector-projectName">{{ option.projectName }}</span>
               <span v-if="option.groupName">
                 <span class="mx-2">|</span>
                 <span class="text-uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
@@ -65,7 +71,7 @@ limitations under the License.
       </template>
       <template #selected-option-container="{ option }">
         <div style="display: flex; align-items: baseline">
-          <span class="selected-tag ml-2 mt-2 border rounded p-1">
+          <span v-if="multipleSelection" class="selected-tag ml-2 mt-2 border rounded p-1">
             <span>{{ option.name }}</span>
             <span class="border rounded ml-1 remove-x"
                   :aria-label="`remove ${option.name} skill option button`"
@@ -74,6 +80,7 @@ limitations under the License.
                   v-on:click.stop="considerRemoval(option)">❌
             </span>
           </span>
+          <span v-else class="ml-2 mt-2">{{ option.name }}</span>
         </div>
       </template>
       <template v-if="afterListSlotText" #list-footer>
@@ -150,6 +157,10 @@ limitations under the License.
         type: Boolean,
         default: false,
       },
+      showType: {
+        type: Boolean,
+        default: false,
+      },
     },
     data() {
       return {
@@ -157,6 +168,7 @@ limitations under the License.
         optionsInternal: [],
         multipleSelection: true,
         currentSearch: '',
+        isMounted: false,
       };
     },
     mounted() {
@@ -165,6 +177,7 @@ limitations under the License.
       if (this.onlySingleSelectedValue) {
         this.multipleSelection = false;
       }
+      this.isMounted = true;
     },
     watch: {
       selected: function watchUpdatesToSelected() {
@@ -218,6 +231,11 @@ limitations under the License.
       searchChanged(query, loadingFunction) {
         this.currentSearch = query;
         this.$emit('search-change', query, loadingFunction);
+      },
+      valChanged(val) {
+        if (this.isMounted && val === null) {
+          this.$emit('selection-removed');
+        }
       },
     },
   };

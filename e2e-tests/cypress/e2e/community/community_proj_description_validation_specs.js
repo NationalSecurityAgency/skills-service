@@ -146,30 +146,4 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
     });
 
-    it('community projected project cannot export skills to the catalog', () => {
-        cy.createProject(1, {enableProtectedUserCommunity: true})
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1)
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1')
-        cy.get('[data-cy="skillSelect-skill1"]').click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"] button').should('be.enabled');
-        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '1');
-
-        cy.get('[data-cy="skillActionsBtn"] button').click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]').click()
-
-        cy.get('[data-cy="userCommunityRestrictedWarning"]').contains('restricted to Divine Dragon')
-        cy.get('[data-cy="okButton"]').should('be.enabled')
-        cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
-    });
-
-    it('community projected project cannot share skills for cross-project dependencies', () => {
-        cy.createProject(1, {enableProtectedUserCommunity: true})
-
-        cy.visit('/administrator/projects/proj1/dependencies')
-        cy.get('[data-cy="restrictedUserCommunityWarning"]').contains('is restricted to Divine Dragon')
-        cy.get('[data-cy="shareButton"]').should('not.exist')
-    });
-
 });

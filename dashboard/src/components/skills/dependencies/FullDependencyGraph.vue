@@ -15,29 +15,34 @@ limitations under the License.
 */
 <template>
   <div id="full-dependent-skills-graph">
-    <sub-page-header title="Skill Dependencies"/>
+    <sub-page-header title="Learning Path"/>
 
-    <simple-card data-cy="fullDepsSkillsGraph">
+    <prerequisite-selector v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+        @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills"/>
+    <simple-card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <loading-container :is-loading="isLoading">
         <div v-if="!hasGraphData" class="my-5">
-            <no-content2 icon="fa fa-project-diagram" title="No Dependencies Yet..."
-                         message="Here you can visualize skill's dependencies for the entire project. However, please navigate to a single skill to add dependencies."></no-content2>
+            <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
+                         message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
         </div>
-        <div v-else class="row">
-          <div class="col-12 col-sm">
-            <graph-legend class="graph-legend" :items="legendItems"/>
+        <div v-else class="row legend-row">
+          <div class="col-12 mb-2 m-sm-0 col-sm-6">
+            <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
           </div>
-          <div class="col text-left text-sm-right mt-2">
-            <graph-node-sort-method-selector @value-changed="onSortNodeStrategyChange"/>
+          <div class="col text-sm-right mt-2">
+            <graph-node-sort-method-selector class="deps-overlay" @value-changed="onSortNodeStrategyChange"/>
           </div>
         </div>
       </loading-container>
-      <div v-if="showGraph" id="dependency-graph" style="height: 500px"></div>
+      <div id="dependency-graph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden', 'height': '500px'}"></div>
     </simple-card>
+
+    <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" />
 
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="mt-4"/>
 
     <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="this.$route.params.projectId" class="my-4"/>
+
   </div>
 </template>
 
@@ -57,10 +62,13 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SimpleCard from '@/components/utils/cards/SimpleCard';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import PrerequisiteSelector from './PrerequisiteSelector';
+  import DependencyTable from './DependencyTable';
 
   export default {
     name: 'FullDependencyGraph',
-    mixins: [ProjConfigMixin],
+    mixins: [ProjConfigMixin, MsgBoxMixin],
     components: {
       SharedSkillsFromOtherProjects,
       ShareSkillsWithOtherProjects,
@@ -70,18 +78,22 @@ limitations under the License.
       NoContent2,
       GraphNodeSortMethodSelector,
       LoadingContainer,
+      PrerequisiteSelector,
+      DependencyTable,
     },
     data() {
       return {
         isLoading: true,
         showGraph: true,
+        selectedFromSkills: [],
+        data: [],
         graph: {},
         network: null,
         nodes: {},
         edges: {},
         legendItems: [
-          { label: 'Skill Dependencies', color: 'lightgreen' },
-          { label: 'Cross Project Skill Dependencies', color: '#ffb87f' },
+          { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
+          { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
         ],
         displayOptions: {
           layout: {
@@ -95,6 +107,7 @@ limitations under the License.
           interaction: {
             selectConnectedEdges: false,
             navigationButtons: true,
+            selectable: true,
           },
           physics: {
             enabled: false,
@@ -122,6 +135,22 @@ limitations under the License.
       }
     },
     methods: {
+      updateSelectedFromSkills(item) {
+        this.selectedFromSkills = [item];
+      },
+      clearSelectedFromSkills() {
+        this.selectedFromSkills = [];
+      },
+      handleUpdate() {
+        this.selectedFromSkills = [];
+        this.graph = [];
+        this.network = null;
+        this.nodes = [];
+        this.edges = [];
+        this.isLoading = true;
+
+        this.loadGraphDataAndCreateGraph();
+      },
       loadGraphDataAndCreateGraph() {
         SkillsService.getDependentSkillsGraphForProject(this.$route.params.projectId)
           .then((response) => {
@@ -133,7 +162,6 @@ limitations under the License.
             this.isLoading = false;
           });
       },
-
       onSortNodeStrategyChange(newStrategy) {
         this.displayOptions.layout.hierarchical.sortMethod = newStrategy;
         this.createGraph();
@@ -146,10 +174,36 @@ limitations under the License.
           this.edges = [];
         }
 
-        const data = this.buildData();
+        this.data = this.buildData();
         if (this.hasGraphData) {
+          this.showGraph = true;
           const container = document.getElementById('dependency-graph');
-          this.network = new Network(container, data, this.displayOptions);
+          this.network = new Network(container, this.data, this.displayOptions);
+
+          this.network.on('selectNode', (params) => {
+            const selectedNode = params.nodes[0];
+            const nodeValue = this.nodes.find((node) => node.id === selectedNode);
+            this.selectedFromSkills = [nodeValue.details];
+          });
+
+          this.network.on('selectEdge', (params) => {
+            const allNodes = this.graph.nodes;
+            const selectedEdge = params.edges[0];
+            const connectedNodes = this.network.getConnectedNodes(selectedEdge);
+
+            const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
+            const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
+
+            const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
+            this.msgConfirm(message, 'Remove Learning Path?', 'Remove')
+              .then((ok) => {
+                if (ok) {
+                  SkillsService.removeDependency(toNode.projectId, toNode.skillId, fromNode.skillId, fromNode.projectId).then(() => {
+                    this.handleUpdate();
+                  });
+                }
+              });
+          });
         } else {
           this.showGraph = false;
         }
@@ -161,25 +215,38 @@ limitations under the License.
           const newNode = {
             id: node.id,
             label: GraphUtils.getLabel(node, isCrossProject),
-            margin: 10,
-            shape: 'box',
+            margin: {
+              top: 25,
+            },
+            shape: 'icon',
+            icon: {
+              face: '"Font Awesome 5 Free"',
+              code: '\uf19d',
+              weight: '900',
+              size: 50,
+              color: 'lightgreen',
+            },
             chosen: false,
+            details: node,
+            font: { multi: 'html', size: 20 },
             title: GraphUtils.getTitle(node, isCrossProject),
           };
           if (isCrossProject) {
-            newNode.color = {
-              border: 'orange',
-              background: '#ffb87f',
-            };
+            newNode.margin = { top: 40 };
+          }
+          if (node.type === 'Badge') {
+            newNode.icon.code = '\uf559';
+            newNode.icon.color = '#88a9fc';
           }
           this.nodes.push(newNode);
         });
         const sortedEdges = this.graph.edges.sort((a, b) => a.toId - b.toId);
         sortedEdges.forEach((edge) => {
           this.edges.push({
-            from: edge.fromId,
-            to: edge.toId,
+            from: edge.toId,
+            to: edge.fromId,
             arrows: 'to',
+            title: 'Click to remove this path',
           });
         });
 
@@ -248,6 +315,14 @@ limitations under the License.
     content: "\f78c";
     font-weight: 900;
     font-size: 30px;
+  }
+
+  .legend-row {
+    position: absolute;
+    width: 100%;
+  }
+  .deps-overlay {
+    z-index: 99;
   }
 </style>
 

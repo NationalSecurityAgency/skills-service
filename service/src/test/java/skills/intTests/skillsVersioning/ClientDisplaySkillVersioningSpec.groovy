@@ -32,8 +32,8 @@ class ClientDisplaySkillVersioningSpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId, dependentSkillId: skills.get(0).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(0).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(2).skillId, skills.get(1).skillId)
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date())
 
         when:

@@ -70,7 +70,7 @@ Cypress.Commands.add("cdClickBadges", () => {
 });
 
 Cypress.Commands.add("cdClickBadge", (badgeId) => {
-    cy.get(`[data-cy=badgeDetailsLink_${badgeId}]`).click();
+    cy.get(`[data-cy=badgeDetailsLink_badge${badgeId}]`).click();
     cy.contains('Badge Details');
     cy.validatePoweredBy();
 });

@@ -44,7 +44,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -70,7 +70,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createSkills(skills_subj2)
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(0).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -102,7 +102,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
             skillsService.assignSkillToSkillsGroup(group2.skillId, it)
         }
 
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills_subj2.get(0).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(0).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -122,12 +122,12 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(4).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(2).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(3).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(4).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(3).skillId, skills.get(5).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(5).skillId, skills.get(6).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -155,7 +155,7 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         skillsService.createProject(SkillsFactory.createProject())
         skillsService.createSubject(subject)
         skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
 
         when:
         def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId)
@@ -177,122 +177,4 @@ class AdminGraphDisplaySpec extends DefaultIntSpec {
         node2.type ==  "Skill"
     }
 
-    def "empty skill graph"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-
-        when:
-        def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
-
-        then:
-        !graph.nodes
-        !graph.edges
-    }
-
-    def "simple skill graph with 2 nodes"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-
-        when:
-        def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
-
-        then:
-        graph.nodes.collect { it.skillId }.sort() == [skills.get(0).skillId, skills.get(1).skillId,]
-
-        graph.edges.size() == 1
-        graph.edges.get(0).fromId == graph.nodes.find{ it.skillId == skills.get(0).skillId}.id
-        graph.edges.get(0).toId == graph.nodes.find{ it.skillId == skills.get(1).skillId}.id
-    }
-
-    def "skill graph with rich hierarchy"() {
-        List<Map> skills = SkillsFactory.createSkills(7)
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(2).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(3).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(4).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId, dependentSkillId: skills.get(5).skillId])
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(5).skillId, dependentSkillId: skills.get(6).skillId])
-
-        when:
-        def graphSkill0 = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
-        def graphSkill1 = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(1).skillId)
-        def graphSkill3 = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(3).skillId)
-        def graphSkill5 = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(5).skillId)
-
-        then:
-        graphSkill0.nodes.collect { it.skillId }.sort() == (0..6).collect { skills.get(it).skillId }
-        def idMap0 = graphSkill0.nodes.collectEntries {[it.skillId, it.id]}
-        def edges0 = graphSkill0.edges.collect { "${it.fromId}->${it.toId}" }
-        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(1).skillId)}")
-        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(2).skillId)}")
-        edges0.remove("${idMap0.get(skills.get(0).skillId)}->${idMap0.get(skills.get(3).skillId)}")
-        edges0.remove("${idMap0.get(skills.get(3).skillId)}->${idMap0.get(skills.get(4).skillId)}")
-        edges0.remove("${idMap0.get(skills.get(3).skillId)}->${idMap0.get(skills.get(5).skillId)}")
-        edges0.remove("${idMap0.get(skills.get(5).skillId)}->${idMap0.get(skills.get(6).skillId)}")
-        !edges0
-
-        // -------------------------
-        !graphSkill1.nodes
-        !graphSkill1.edges
-
-        // -------------------------
-        graphSkill3.nodes.collect { it.skillId }.sort() == (3..6).collect { skills.get(it).skillId }
-        graphSkill3.edges.size() == 3
-        def idMap3 = graphSkill3.nodes.collectEntries {[it.skillId, it.id]}
-        def edges3= graphSkill3.edges.collect { "${it.fromId}->${it.toId}" }
-        edges3.remove("${idMap3.get(skills.get(3).skillId)}->${idMap3.get(skills.get(4).skillId)}")
-        edges3.remove("${idMap3.get(skills.get(3).skillId)}->${idMap3.get(skills.get(5).skillId)}")
-        edges3.remove("${idMap3.get(skills.get(5).skillId)}->${idMap3.get(skills.get(6).skillId)}")
-        !edges3
-
-        // -------------------------
-        graphSkill5.nodes.collect { it.skillId }.sort() == (5..6).collect { skills.get(it).skillId }
-        graphSkill5.edges.size() == 1
-        graphSkill5.edges.get(0).fromId == graphSkill5.nodes.find{ it.skillId == skills.get(5).skillId}.id
-        graphSkill5.edges.get(0).toId == graphSkill5.nodes.find{ it.skillId == skills.get(6).skillId}.id
-    }
-
-    def "skill graph - verify attributes are populated in the nodes"() {
-        List<Map> skills = SkillsFactory.createSkills(2)
-        skills.get(1).pointIncrement = 20
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-        skillsService.assignDependency([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId, dependentSkillId: skills.get(1).skillId])
-
-        when:
-        def graph = skillsService.getDependencyGraph(SkillsFactory.defaultProjId, skills.get(0).skillId)
-
-        then:
-        def node1 = graph.nodes.find{ it.skillId == skills.get(0).skillId}
-        def node2 = graph.nodes.find{ it.skillId == skills.get(1).skillId}
-
-        node1.projectId == SkillsFactory.defaultProjId
-        node1.name ==  skills.get(0).name
-        node1.pointIncrement ==  skills.get(0).pointIncrement
-        node1.totalPoints == skills.get(0).pointIncrement * skills.get(0).numPerformToCompletion
-        node1.type ==  "Skill"
-
-        node2.projectId == SkillsFactory.defaultProjId
-        node2.name ==  skills.get(1).name
-        node2.pointIncrement ==  skills.get(1).pointIncrement
-        node2.totalPoints ==  skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
-        node2.type ==  "Skill"
-    }
 }

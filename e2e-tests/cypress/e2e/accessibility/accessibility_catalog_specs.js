@@ -104,7 +104,7 @@ describe('Accessibility Tests', () => {
 
         cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2');
 
-        cy.request('POST', `/admin/projects/MyNewtestProject/skills/skill2/dependency/skill1`);
+        cy.request('POST', `/admin/projects/MyNewtestProject/skill2/prerequisite/MyNewtestProject/skill1`);
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
         cy.request('POST', `/api/projects/MyNewtestProject/skills/skill1`, {
@@ -260,7 +260,7 @@ describe('Accessibility Tests', () => {
         cy.createSkill(2, 1, 4);
         cy.createSkill(2, 1, 5);
         cy.createSkill(2, 1, 6);
-        cy.assignDep(2, 5, 6);
+        cy.addLearningPathItem(2, 6, 5)
         cy.createSkill(2, 1, 7);
         cy.exportSkillToCatalog(2, 1, 7);
 
@@ -284,7 +284,7 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="dupSkill-diffId"]')
             .contains('Name Conflict');
         cy.get('[data-cy="dupSkill-skill5"]')
-            .contains('Has Dependencies');
+            .contains('Has Prerequisites');
 
         cy.customLighthouse();
         cy.customA11y();

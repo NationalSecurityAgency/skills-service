@@ -16,29 +16,6 @@
 import ThemeHelper from '@/common/theme/ThemeHelper';
 
 describe('ThemeHelper', () => {
-    it('test theme generation - colors', () => {
-        const theme = {
-            backgroundColor: '#626d7d',
-            pageTitleTextColor: '#fdfbfb',
-            textSecondaryColor: '#fdfdff',
-            textPrimaryColor: '#fdf9f9',
-        };
-        const res = ThemeHelper.build(theme);
-        const expected = 'body #app { background-color: #626d7d !important } '
-            + 'body #app .skills-theme-bottom-border-with-background-color { border-bottom-color: #626d7d !important } '
-            + 'body #app .skills-page-title-text-color { color: #fdfbfb !important } '
-            + 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border { border-color: #fdfbfb !important } '
-            + 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a, body #app .skills-theme-secondary-color, body #app .skills-theme-menu-secondary-color, body #app .skills-theme-menu-secondary-color .dropdown-item { color: #fdfdff !important } '
-            + 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color, body #app .leaderboardTable tr td, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item { color: #fdf9f9 !important } '
-            + 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover { background-color: #fdf9f9 !important } '
-            + 'body #app .skills-theme-filter-menu .dropdown-menu { border-color: #fdf9f9 !important } '
-            + 'body #app .apexcharts-toolbar svg { fill: #fdf9f9 !important } '
-            + 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu { background-color: #fff !important } '
-            + 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover { color: #fff !important } '
-            + 'body #app .apexcharts-menu.open { color: black !important; } '
-            + 'body #app .apexcharts-tooltip { color: black !important; }';
-        expect(res.css).toEqual(expected);
-    });
 
     it('stars', () => {
         const theme = {

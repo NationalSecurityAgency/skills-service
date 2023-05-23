@@ -96,23 +96,6 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('skill1');
     });
 
-    it('reused skills must NOT be available for dependencies', () => {
-        cy.createSkill(1, 1, 10);
-        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
-        cy.createSkillsGroup(1, 1, 12);
-        cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill10/dependencies');
-        cy.get('[data-cy="skillsSelector"]')
-            .click();
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
-            .should('have.length', 1)
-            .as('skillIds');
-        cy.get('@skillIds')
-            .eq(0)
-            .contains('skill1');
-    });
-
     it('cannot initiate reuse when finalization is pending', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
@@ -314,25 +297,6 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('not.exist');
 
-    });
-
-    it('cannot add dependencies to a reused skill', () => {
-        cy.reuseSkillIntoAnotherSubject(1, 1, 2);
-        cy.createSkill(1, 1, 3);
-
-        const expectedMsg = 'Once a Skill has been reused, Dependencies may not be added.';
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
-        cy.get('[data-cy="noContent"]')
-            .contains(expectedMsg);
-
-        // navigate down
-        cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="manageSkillBtn_skill1"]')
-            .click();
-        cy.clickNav('Dependencies');
-        cy.get('[data-cy="noContent"]')
-            .contains(expectedMsg);
     });
 
 });

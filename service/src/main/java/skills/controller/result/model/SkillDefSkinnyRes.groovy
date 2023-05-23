@@ -15,6 +15,8 @@
  */
 package skills.controller.result.model
 
+import skills.storage.model.SkillDef
+
 class SkillDefSkinnyRes {
 
     String skillId
@@ -39,4 +41,5 @@ class SkillDefSkinnyRes {
 
     String groupName
     String groupId
+    SkillDef.ContainerType type
 }

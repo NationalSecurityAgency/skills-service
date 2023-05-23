@@ -15,8 +15,8 @@ limitations under the License.
 */
 <template>
     <div class="mb-2">
-        <span class="text-muted">This {{ skillDisplayName }} has <b>{{ userSkill.dependencyInfo.numDirectDependents}}</b> direct dependent(s).
-            Click <i class="fas fa-lock icon"></i> to see its dependencies.</span>
+        <span class="text-muted">This {{ skillDisplayName }} has <b>{{ userSkill.dependencyInfo.numDirectDependents}}</b> prerequisite skill(s).
+            Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
     </div>
 </template>
 

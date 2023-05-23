@@ -44,7 +44,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.created as created,
         s.version as version,
         s.totalPoints as totalPoints,
-        s.groupId as groupId
+        s.groupId as groupId,
+        s.type as type
         from SkillDef s, SkillDef subjectDef, SkillRelDef srd
          where
             subjectDef = srd.parent and s = srd.child and 
@@ -54,6 +55,29 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             (s.enabled = 'true' or 'true' = ?5) and
             lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
     List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
+
+    @Query('''SELECT
+        s.id as id,
+        s.name as name,
+        s.skillId as skillId,
+        CASE WHEN s.type != 'Badge' THEN (SELECT subjectDef.skillId as subjectSkillId FROM SkillDef subjectDef, SkillRelDef srd WHERE (subjectDef = srd.parent and s = srd.child and 
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject')) END as subjectSkillId,
+        CASE WHEN s.type != 'Badge' THEN (SELECT subjectDef.name as subjectName FROM SkillDef subjectDef, SkillRelDef srd WHERE (subjectDef = srd.parent and s = srd.child and 
+            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject')) END as subjectName,            
+        s.projectId as projectId,
+        s.displayOrder as displayOrder,
+        s.created as created,
+        s.version as version,
+        s.totalPoints as totalPoints,
+        s.groupId as groupId,
+        s.type as type
+        from SkillDef s
+         where 
+            s.projectId = ?1 and (s.type = 'Skill' or s.type = 'Badge') and
+            (s.copiedFromProjectId is null or 'true' = ?3) and
+            (s.enabled = 'true' or 'true' = ?4) and
+            lower(s.name) like lower(CONCAT('%', ?2, '%'))''')
+    List<SkillDefSkinny> findAllSkinnySkillsAndBadgesSelectByProjectId(String id, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
     @Nullable
     @Query('''SELECT
@@ -317,6 +341,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     boolean existsByProjectIdAndNameAndTypeAllIgnoreCase(@Nullable String id, String name, SkillDef.ContainerType type)
     boolean existsByProjectIdAndNameAndTypeInAllIgnoreCase(@Nullable String id, String name, List<SkillDef.ContainerType> types)
 
+    @Nullable
     @Query('SELECT MAX (s.version) from SkillDef s where s.projectId=?1')
     Integer findMaxVersionByProjectId(String projectId)
 

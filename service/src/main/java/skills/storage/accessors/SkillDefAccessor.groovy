@@ -35,7 +35,6 @@ class SkillDefAccessor {
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
-
     SkillDef getSkillDef(String projectId, String skillId, List<SkillDef.ContainerType> containerTypes = [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup]) {
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
         if (!skillDef) {

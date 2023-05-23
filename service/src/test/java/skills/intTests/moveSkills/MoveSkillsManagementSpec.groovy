@@ -509,31 +509,23 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSkill(p1subj2g1)
 
         // add moved skill in the middle of a graph chain
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[1].skillId, dependentSkillId: p1Skills[0].skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[0].skillId, dependentSkillId: p1Skills[2].skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1Skills[2].skillId)
 
-        def skill0Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
-        def skill1Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
+        def graph_before = skillsService.getDependencyGraph(p1.projectId)
 
         when:
         skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g1.skillId)
 
-        def skill0Graph = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
-        def skill1Graph = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
+        def graph_after = skillsService.getDependencyGraph(p1.projectId)
 
         then:
-        validateGraph(skill0Graph_before, [
-                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId)
-        ])
-        validateGraph(skill1Graph_before, [
+        validateGraph(graph_before, [
                 new Edge(from: p1Skills[1].skillId, to: p1Skills[0].skillId),
                 new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
         ])
 
-        validateGraph(skill0Graph, [
-                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId)
-        ])
-        validateGraph(skill1Graph, [
+        validateGraph(graph_after, [
                 new Edge(from: p1Skills[1].skillId, to: p1Skills[0].skillId),
                 new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
         ])
@@ -550,31 +542,23 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSubject(p1subj2)
 
         // add moved skill in the middle of a graph chain
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[1].skillId, dependentSkillId: p1Skills[0].skillId])
-        skillsService.assignDependency([projectId: p1.projectId, skillId: p1Skills[0].skillId, dependentSkillId: p1Skills[2].skillId])
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1Skills[2].skillId)
 
-        def skill0Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
-        def skill1Graph_before = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
+        def graphBefore = skillsService.getDependencyGraph(p1.projectId)
 
         when:
         skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
-        def skill0Graph = skillsService.getDependencyGraph(p1.projectId, p1Skills[0].skillId)
-        def skill1Graph = skillsService.getDependencyGraph(p1.projectId, p1Skills[1].skillId)
+        def graph = skillsService.getDependencyGraph(p1.projectId)
 
         then:
-        validateGraph(skill0Graph_before, [
-                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId)
-        ])
-        validateGraph(skill1Graph_before, [
+        validateGraph(graphBefore, [
                 new Edge(from: p1Skills[1].skillId, to: p1Skills[0].skillId),
                 new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
         ])
 
-        validateGraph(skill0Graph, [
-                new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId)
-        ])
-        validateGraph(skill1Graph, [
+        validateGraph(graph, [
                 new Edge(from: p1Skills[1].skillId, to: p1Skills[0].skillId),
                 new Edge(from: p1Skills[0].skillId, to: p1Skills[2].skillId),
         ])
@@ -589,7 +573,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         def skill0IdMap0_before = graph.nodes.collectEntries { [it.skillId, it.id] }
         assert graph.edges.collect { "${it.fromId}->${it.toId}" }.sort() == expectedGraphRel.collect {
             "${skill0IdMap0_before.get(it.from)}->${skill0IdMap0_before.get(it.to)}"
-        }
+        }.sort()
     }
 
     def "badge skills are retained after the move from subject into another subject"() {
@@ -673,8 +657,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSubject(proj2_subj2)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         String user = getRandomUsers(1)[0]
         when:
@@ -722,8 +705,7 @@ class MoveSkillsManagementSpec extends DefaultIntSpec {
         skillsService.createSkill(proj2_subj2_group2)
 
         skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
-        skillsService.assignDependency([projectId         : proj2.projectId, skillId: proj2_skills.get(0).skillId,
-                                        dependentProjectId: proj1.projectId, dependentSkillId: proj1_skills.get(0).skillId,])
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
 
         String user = getRandomUsers(1)[0]
         when:

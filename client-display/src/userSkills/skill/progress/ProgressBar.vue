@@ -43,6 +43,11 @@ limitations under the License.
         type: Number,
         default: 22,
       },
+      badgeIsLocked: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
     },
     computed: {
       progress() {
@@ -73,7 +78,13 @@ limitations under the License.
         this.$emit('progressbar-clicked', skill);
       },
       isLocked() {
-        return this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved;
+        let hasBadgeDependency = false;
+        if (this.skill.badgeDependencyInfo && this.skill.badgeDependencyInfo.length > 0) {
+          if (this.skill.badgeDependencyInfo.find((item) => !item.achieved)) {
+            hasBadgeDependency = true;
+          }
+        }
+        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked || hasBadgeDependency;
       },
       getTotalPoints() {
         let totalPts;

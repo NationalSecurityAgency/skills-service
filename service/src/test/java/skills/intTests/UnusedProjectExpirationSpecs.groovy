@@ -142,8 +142,7 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         skillsService.updateProject(p5, originalProjectId)
 
         //a relationship added after the cutoff should prevent the project from being flagged
-        skillsService.assignDependency([projectId         : proj6.projectId, skillId: proj6_skills.get(0).skillId,
-                                        dependentSkillId: proj6_skills.get(1).skillId,])
+        skillsService.addLearningPathPrerequisite(proj6.projectId, proj6_skills.get(0).skillId, proj6_skills.get(1).skillId)
 
         //a project error after the cutoff date should prevent the project from being flagged
         errorService.invalidSkillReported(proj7.projectId, "fake_id")

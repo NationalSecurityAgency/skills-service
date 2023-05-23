@@ -588,7 +588,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.createSkill(2, 1, 2);
         cy.importSkillFromCatalog(2, 1, 1, 1);
 
-        cy.visit('/administrator/projects/proj2/dependencies');
+        cy.visit('/administrator/projects/proj2/learning-path');
         cy.get('[data-cy="skillSelector"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj2-skill2"]');

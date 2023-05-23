@@ -16,10 +16,20 @@
 package skills.controller.result.model
 
 class DependencyCheckResult {
-    String skillId
-    String dependentSkillId
-
+    static enum FailureType {
+        CircularLearningPath, BadgeOverlappingSkills, BadgeSkillIsAlreadyOnPath, AlreadyExist, SkillInCatalog, ReusedSkill, SkillVersion, NotEligible
+    }
     boolean possible = true
 
+    FailureType failureType
     String reason
+
+    // if violating skill was found inside of a badge,
+    // applies to CircularLearningPath, BadgeOverlappingSkills types
+    String violatingSkillInBadgeId
+    String violatingSkillInBadgeName
+
+    // applies to BadgeOverlappingSkills, BadgeSkillIsAlreadyOnPath, AlreadyExist types
+    String violatingSkillId
+    String violatingSkillName
 }

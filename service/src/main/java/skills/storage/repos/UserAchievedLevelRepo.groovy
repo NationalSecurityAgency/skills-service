@@ -72,12 +72,41 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     void deleteByProjectIdAndSkillIdAndUserIdAndLevel(String projectId, @Nullable String skillId, String userId, @Nullable Integer level)
 
-    @Query('''select sdParent.skillId as skillId, sdChild.skillId as childSkillId, sdChild.projectId as childProjectId, ua.skillId as childAchievedSkillId 
-    from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join UserAchievement ua on sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
-    List<ChildWithAchievementsInfo> findChildrenAndTheirAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
+    @Query(value = '''
+                select sdParent.skill_id  as skillId,
+                       sdChild.skill_id   as childSkillId,
+                       sdChild.project_id as childProjectId,
+                       ua.skill_id        as childAchievedSkillId
+                from skill_definition sdParent,
+                     skill_relationship_definition srd,
+                     skill_definition sdChild
+                         left join user_achievement ua
+                                   on sdChild.project_id = ua.project_id and sdChild.skill_id = ua.skill_id and
+                                      ua.user_id = :userId
+                where srd.parent_ref_id = sdParent.id
+                  and srd.child_ref_id = sdChild.id
+                  and (
+                    (sdParent.project_id = :projectId and sdParent.skill_id = :skillId)
+                    OR
+                    sdParent.id in (
+                        select badge.id
+                        from skill_definition badge,
+                            skill_relationship_definition badge_to_skill,
+                            skill_definition skill
+                        where badge_to_skill.parent_ref_id = badge.id
+                         and badge_to_skill.child_ref_id = skill.id
+                         and badge_to_skill.type = 'BadgeRequirement'
+                         and skill.project_id = :projectId
+                         and skill.skill_id = :skillId)
+                  )
+                  and srd.type = :relationshipType
+    ''', nativeQuery = true)
+    List<ChildWithAchievementsInfo> findChildrenAndTheirAchievements(@Param("userId") String userId,
+                                                                     @Param("projectId") String projectId,
+                                                                     @Param("skillId") String skillId,
+                                                                     @Param("relationshipType") String relationshipType)
+
+
 
     static interface ChildWithAchievementsInfo {
         String getSkillId()
@@ -87,13 +116,6 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
         String getChildAchievedSkillId()
     }
-
-    @Query(value = ''' select sdParent
-    from skill_relationship_definition srd, skill_definition sdChild, skill_definition sdParent
-        left join user_achievement ua on sdParent.id = ua.skill_ref_id and ua.user_id=?1
-    where srd.parent_ref_id=sdParent.id and srd.child_ref_id=sdChild.id and
-      sdChild.project_id=?2 and sdChild.skill_id=?3 and ua.id is null and srd.type=?4''', nativeQuery = true)
-    List<SkillDef> findNonAchievedParents(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query(''' select sdChild
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild

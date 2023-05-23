@@ -132,7 +132,7 @@ limitations under the License.
           { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
           { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
           { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
-          { name: 'Dependencies', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
+          { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
         ];
 
         if (!this.isReadOnlyProj) {

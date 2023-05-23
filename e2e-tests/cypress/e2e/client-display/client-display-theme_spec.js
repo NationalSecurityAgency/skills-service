@@ -31,7 +31,6 @@ describe('Client Display Tests', () => {
         'iphone-6',
         'ipad-2',
         'default',
-        // [1200, 1080],
     ];
 
     const renderWait = 4000;
@@ -115,7 +114,7 @@ describe('Client Display Tests', () => {
                 version: 0,
                 helpUrl: 'http://doHelpOnThisSkill.com'
             });
-            cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+            cy.addLearningPathItem(1, 2, 4)
 
             cy.request('POST', '/admin/projects/proj1/badges/badge1', {
                 projectId: 'proj1',
@@ -285,6 +284,8 @@ describe('Client Display Tests', () => {
                 .click();
             cy.contains('Badge 1');
             cy.contains('This is 3');
+            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
+            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
             cy.matchSnapshotImage(snapshotOptions);
         });
 
@@ -301,6 +302,8 @@ describe('Client Display Tests', () => {
                 .contains('1');
             cy.contains('This is 4');
             cy.contains('Earn up to 1,400 points');
+            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
+            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
             cy.matchSnapshotImage(snapshotOptions);
         });
 
@@ -323,10 +326,12 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=myRank]')
                 .contains('1');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Skill has 1 direct dependent(s).');
+            cy.contains('Skill has 1 direct prerequisite(s).');
             cy.contains('Earn up to 1,400 points');
             cy.contains('Description');
 
+            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
+            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
             cy.matchSnapshotImage(snapshotOptions);
         });
 
@@ -344,6 +349,7 @@ describe('Client Display Tests', () => {
             cy.contains('Skill Overview');
             cy.contains('This is 1');
             cy.contains('Lorem ipsum dolor sit amet');
+            cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '200')
             cy.matchSnapshotImage(snapshotOptions);
         });
 
@@ -408,7 +414,7 @@ describe('Client Display Tests', () => {
             cy.contains('Skill Overview');
             cy.contains('This is 4');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Achieved Dependencies');
+            cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
             cy.wait(4000);
             cy.matchSnapshotImage(snapshotOptions);
         });
@@ -537,6 +543,8 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
 
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 

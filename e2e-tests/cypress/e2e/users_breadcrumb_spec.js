@@ -32,7 +32,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`)
+        cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`)
 
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -96,7 +96,7 @@ describe('Users skills-display Breadcrumb Tests', () => {
         cy.request('POST', '/admin/projects/proj2/skills/skill1/shared/projects/proj1');
 
         // assigned proj2/skill1 as a dependency of proj1/skill3
-        cy.request('POST', '/admin/projects/proj1/skills/skill3/dependency/projects/proj2/skills/skill1');
+        cy.request('POST', '/admin/projects/proj1/skill3/prerequisite/proj2/skill1');
 
         cy.loginAsRootUser();
 

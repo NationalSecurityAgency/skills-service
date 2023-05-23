@@ -15,14 +15,20 @@ limitations under the License.
 */
 <template>
     <div>
-        <skills-spinner :loading="loading" />
+        <skills-spinner :loading="isLoading" />
 
-        <div v-if="!loading">
+        <div v-if="!isLoading">
             <skills-title>Badge Details</skills-title>
 
             <div class="card">
                 <div class="card-body">
                     <badge-details-overview :badge="badgeOverview"></badge-details-overview>
+
+                    <div v-if="locked" class="text-center text-muted locked-text">
+                      *** Badge has <b>{{ badge.dependencyInfo.numDirectDependents}}</b> direct prerequisite(s).
+                      <span>Please see its prerequisites below.</span>
+                      ***
+                    </div>
                 </div>
                 <div v-if="badge.helpUrl" class="card-footer text-left">
                   <a :href="badge.helpUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info skills-theme-btn">
@@ -32,7 +38,10 @@ limitations under the License.
             </div>
 
             <skills-progress-list @points-earned="refreshHeader" v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"
-                                  @scrollTo="scrollToLastViewedSkill" />
+                                  @scrollTo="scrollToLastViewedSkill" :badge-is-locked="locked"/>
+
+            <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"
+                                :skill-id="$route.params.badgeId"></skill-dependencies>
         </div>
     </div>
 </template>
@@ -53,6 +62,7 @@ limitations under the License.
       SkillsProgressList,
       BadgeDetailsOverview,
       SkillsSpinner,
+      'skill-dependencies': () => import(/* webpackChunkName: 'skillDependencies' */'@/userSkills/skill/dependencies/SkillDependencies'),
     },
     mixins: [ScrollSkillIntoViewMixin],
     beforeRouteEnter(to, from, next) {
@@ -67,29 +77,59 @@ limitations under the License.
     },
     data() {
       return {
-        loading: true,
+        loading: {
+          badge: true,
+          prerequisites: true,
+        },
         badge: null,
         badgeOverview: null,
         initialized: false,
         showDescriptions: false,
+        dependencies: [],
       };
     },
     watch: {
-      $route: 'fetchData',
+      $route: 'reloadData',
     },
     mounted() {
-      this.fetchData();
+      this.reloadData();
+    },
+    computed: {
+      locked() {
+        return this.badge.dependencyInfo && !this.badge.dependencyInfo.achieved;
+      },
+      isLoading() {
+        return this.loading.badge || this.loading.prerequisites;
+      },
     },
     methods: {
+      reloadData() {
+        this.loadDependencies().then(() => {
+          this.fetchData().then(() => this.handleScroll());
+        });
+      },
+      handleScroll() {
+        const foundLastViewedSkill = this.badge.skills.find((item) => item.isLastViewed === true);
+        this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
+        this.autoScrollToLastViewedSkill();
+      },
+      loadDependencies() {
+        this.loading.prerequisites = true;
+        return UserSkillsService.getSkillDependencies(this.$route.params.badgeId)
+          .then((res) => {
+            this.dependencies = res.dependencies;
+          }).finally(() => {
+            this.loading.prerequisites = false;
+          });
+      },
       fetchData() {
-        UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
+        this.loading.badge = true;
+        return UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
           .then((badgeSummary) => {
             this.badge = badgeSummary;
             this.badgeOverview = badgeSummary;
-            this.loading = false;
-            const foundLastViewedSkill = badgeSummary.skills.find((item) => item.isLastViewed === true);
-            this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
-            this.autoScrollToLastViewedSkill();
+          }).finally(() => {
+            this.loading.badge = false;
           });
       },
       refreshHeader(event) {

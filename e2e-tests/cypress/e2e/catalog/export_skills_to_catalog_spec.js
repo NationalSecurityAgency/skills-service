@@ -1221,7 +1221,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('7 more items');
     });
 
-    it('do not allow to export skills with dependencies', () => {
+    it('do not allow to export skills with prerequisites', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -1238,7 +1238,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(2, 1, 4);
         cy.createSkill(2, 1, 5);
         cy.createSkill(2, 1, 6);
-        cy.assignDep(2, 5, 6);
+        cy.addLearningPathItem(2, 6, 5)
         cy.createSkill(2, 1, 7);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
@@ -1263,16 +1263,16 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="dupSkill-diffId"]')
             .contains('Name Conflict');
         cy.get('[data-cy="dupSkill-skill5"]')
-            .contains('Has Dependencies');
+            .contains('Has Prerequisites');
     });
 
-    it('do not allow to export skills with global dependencies', () => {
+    it('do not allow to export skills with global prerequisites', () => {
         cy.createSkill(1, 1, 1);
 
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
-        cy.assignCrossProjectDep(2, 1, 1, 1);
+        cy.addCrossProjectLearningPathItem(1, 1, 2, 1)
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="selectAllSkillsBtn"]')
@@ -1284,25 +1284,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.contains('Cannot export 1 skill(s)');
         cy.get('[data-cy="dupSkill-skill1"]')
-            .contains('Has Dependencies');
-    });
-
-    it('exported skill cannot depend on the completion of other skills', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
-
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 3);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="nav-Dependencies"]')
-            .click();
-        cy.contains('Once a Skill has been exported to the catalog, Dependencies may not be added.');
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/dependencies');
-        cy.contains('Once a Skill has been exported to the catalog, Dependencies may not be added.');
+            .contains('Has Prerequisites');
     });
 
     it('do not include imported skills in Actions count when selecting all skills in a subject', () => {

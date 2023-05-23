@@ -77,6 +77,14 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills?excludeImportedSkills=true`)
       .then((response) => response.data);
   },
+  getProjectSkillsAndBadgesWithoutImportedSkills(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=true`)
+      .then((response) => response.data);
+  },
+  getProjectSkillsAndBadgesWithImportedSkills(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skillsAndBadges?excludeImportedSkills=false&excludeReusedSkills=true`)
+      .then((response) => response.data);
+  },
   getGroupSkills(projectId, groupId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/skills`)
       .then((response) => response.data.map((item) => ({ ...item, groupId })));
@@ -140,16 +148,12 @@ export default {
     })
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId));
   },
-  getDependentSkillsGraphForSkill(projectId, skillId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/graph`)
-      .then((res) => res.data);
-  },
   getDependentSkillsGraphForProject(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/graph`)
       .then((res) => res.data);
   },
   assignSkillToBadge(projectId, badgeId, skillId) {
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`)
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`, null, { handleError: false })
       .then((res) => res.data);
   },
   removeSkillFromBadge(projectId, badgeId, skillId) {
@@ -160,24 +164,16 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills`)
       .then((res) => res.data);
   },
-  getSkillsFroDependency(projectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/dependency/availableSkills`)
-      .then((res) => res.data);
-  },
   assignDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
-    if (dependentProjectId) {
-      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/projects/${encodeURIComponent(dependentProjectId)}/skills/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
+      return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
         .then((createdRuleResult) => createdRuleResult.data);
-    }
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`, null, { handleError: false })
+  },
+  validateDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisiteValidate/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
       .then((createdRuleResult) => createdRuleResult.data);
   },
   removeDependency(projectId, skillId, dependentSkillId, dependentProjectId) {
-    if (dependentProjectId) {
-      return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/projects/${encodeURIComponent(dependentProjectId)}/skills/${encodeURIComponent(dependentSkillId)}`)
-        .then((createdRuleResult) => createdRuleResult.data);
-    }
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/dependency/${encodeURIComponent(dependentSkillId)}`)
+    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(skillId)}/prerequisite/${encodeURIComponent(dependentProjectId)}/${encodeURIComponent(dependentSkillId)}`)
       .then((createdRuleResult) => createdRuleResult.data);
   },
   skillWithNameExists(projectId, skillName) {

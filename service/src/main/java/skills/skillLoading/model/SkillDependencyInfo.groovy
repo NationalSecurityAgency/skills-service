@@ -17,7 +17,7 @@ package skills.skillLoading.model
 
 class SkillDependencyInfo {
 
-    List<SkillRelationshipItem> dependencies
+    List<SkillRelationship> dependencies
 
     static class SkillRelationshipItem {
         String projectId
@@ -25,6 +25,7 @@ class SkillDependencyInfo {
         String skillId
         String skillName
         String subjectId
+        String type
     }
 
     static class SkillRelationship {

@@ -1804,7 +1804,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
 
-        skillsService.assignDependency([projectId: project1.projectId, skillId: skill2.skillId, dependentSkillId: skill.skillId])
+        skillsService.addLearningPathPrerequisite(project1.projectId, skill2.skillId, skill.skillId)
 
         when:
 
@@ -1835,7 +1835,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
 
-        skillsService.assignDependency([projectId: project1.projectId, skillId: skill2.skillId, dependentSkillId: skill.skillId])
+        skillsService.addLearningPathPrerequisite(project1.projectId, skill2.skillId, skill.skillId)
 
         when:
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
@@ -1878,7 +1878,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         when:
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
-        skillsService.assignDependency([projectId: project1.projectId, skillId: skill2.skillId, dependentSkillId: skill.skillId])
+        skillsService.addLearningPathPrerequisite(project1.projectId, skill2.skillId, skill.skillId)
 
         skillsService.deleteSkill([projectId: project1.projectId, subjectId: p1subj1.subjectId, skillId: skill.skillId])
 
@@ -1908,13 +1908,12 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill4)
 
         when:
-
         skillsService.exportSkillToCatalog(skill.projectId, skill4.skillId)
-        skillsService.assignDependency([projectId: skill4.projectId, dependentSkillId: skill4.skillId, dependencySkillId: skill.skillId, throwExceptionOnFailure: true])
+        skillsService.addLearningPathPrerequisite(skill4.projectId, skill4.skillId, skill.skillId)
 
         then:
         def e = thrown(SkillsClientException)
-        e.getMessage().contains("Dependencies cannot be added to a skill shared to the catalog.")
+        e.getMessage().contains("Skill [${skill4.skillId}] was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.")
     }
 
     def "cannot import skill from catalog with same name as skill already existing in destination project"() {
@@ -2163,7 +2162,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(p3skill6)
         skillsService.createSkill(p3skill7)
 
-        skillsService.assignDependency([projectId: p3skill6.projectId, dependentSkillId: p3skill6.skillId, dependencySkillId: p3skill5.skillId, throwExceptionOnFailure: true])
+        skillsService.addLearningPathPrerequisite(p3skill6.projectId, p3skill6.skillId, p3skill5.skillId)
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)

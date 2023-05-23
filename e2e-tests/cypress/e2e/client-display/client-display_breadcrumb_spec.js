@@ -129,7 +129,7 @@ describe('Client Display Breadcrumb Tests', () => {
             version: 0,
             helpUrl: 'http://doHelpOnThisSkill.com'
         });
-        cy.request('POST', `/admin/projects/proj1/skills/skill4/dependency/skill2`);
+        cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`);
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: Cypress.env('proxyUser'),
@@ -171,7 +171,7 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.request('POST', '/admin/projects/proj2/skills/skill1/shared/projects/proj1');
 
         // assigned proj2/skill1 as a dependency of proj1/skill3
-        cy.request('POST', '/admin/projects/proj1/skills/skill3/dependency/projects/proj2/skills/skill1');
+        cy.request('POST', '/admin/projects/proj1/skill3/prerequisite/proj2/skill1');
 
         // create global badge as root user
         cy.loginAsRootUser();

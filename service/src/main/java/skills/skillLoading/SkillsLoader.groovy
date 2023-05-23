@@ -527,8 +527,15 @@ class SkillsLoader {
         }
 
         SkillDependencySummary skillDependencySummary
+        def badgeDependencySummary = []
         if (!crossProjectId) {
             skillDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, skillId)
+            badges.each(it -> {
+                SkillDependencySummary badgeSummary = dependencySummaryLoader.loadDependencySummary(userId, projectId, it.badgeId)
+                if (badgeSummary) {
+                    badgeDependencySummary.push(badgeSummary);
+                }
+            })
         }
 
         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz ?
@@ -558,6 +565,7 @@ class SkillsLoader {
                         description: InputSanitizer.unsanitizeForMarkdown(skillDef.description),
                         href: getHelpUrl(helpUrlRootSetting, skillDef.helpUrl)),
                 dependencyInfo: skillDependencySummary,
+                badgeDependencyInfo: badgeDependencySummary,
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
                 selfReporting: loadSelfReporting(userId, skillDef, quizNameAndId),
@@ -726,19 +734,35 @@ class SkillsLoader {
             subjectIdLookupByProjectIdThenBySkillId[projectIdForLookup] = subjectIdLookupBySkillId
         }
 
-
-        List<SkillDependencyInfo.SkillRelationshipItem> deps = graphDBRes.collect {
+        List<SkillDependencyInfo.SkillRelationship> deps = graphDBRes.collect {
             Map<String,String> subjectIdLookup = subjectIdLookupByProjectIdThenBySkillId[it.childProjectId]
             String childSubjectId = subjectIdLookup[it.childSkillId]
             new SkillDependencyInfo.SkillRelationship(
-                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName)),
-                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName)),
+                    skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName), type: it.parentType),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName), type: it.childType),
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )
         }?.sort({ a,b ->
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
-        }) as List<SkillDependencyInfo.SkillRelationshipItem>
+        }) as List<SkillDependencyInfo.SkillRelationship>
+
+        def badges = skillDefRepo.findAllBadgesForSkill([skillId], projectId);
+        if(badges) {
+            def skillInfo = getSkillDefWithExtra(userId, projectId, skillId, [ContainerType.Skill])
+            badges.forEach(it -> {
+                def badgeDeps = loadSkillDependencyInfo(projectId, userId, it.badgeId)
+                if(badgeDeps) {
+                    badgeDeps.dependencies.each( badge -> {
+                        if(badge.skill.skillId == it.badgeId) {
+                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: skillInfo.name, type: 'Skill');
+                        }
+                    })
+                    deps.addAll(badgeDeps.dependencies)
+                }
+            })
+        }
+
         return new SkillDependencyInfo(dependencies: deps)
     }
 
@@ -879,6 +903,8 @@ class SkillsLoader {
         SettingsResult helpUrlRootSetting = settingsService.getProjectSetting(projDef.projectId, PROP_HELP_URL_ROOT)
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
+        def badgeDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projDef.projectId, badgeDefinition.skillId)
+
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
@@ -893,7 +919,8 @@ class SkillsLoader {
                 iconClass: badgeDefinition.iconClass,
                 helpUrl: helpUrl,
                 projectId: badgeDefinition.projectId,
-                projectName: InputSanitizer.unsanitizeName(projectName)
+                projectName: InputSanitizer.unsanitizeName(projectName),
+                dependencyInfo: badgeDependencySummary
         )
     }
 
@@ -1062,6 +1089,16 @@ class SkillsLoader {
 
                 String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
 
+                def badgeDependencySummary = []
+                if(skillDefAndUserPoints.badges) {
+                    skillDefAndUserPoints.badges.each(it -> {
+                        SkillDependencySummary badgeSummary = dependencySummaryLoader.loadDependencySummary(userId, skillDef.projectId, it.badgeId)
+                        if (badgeSummary) {
+                            badgeDependencySummary.push(badgeSummary);
+                        }
+                    })
+                }
+
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1074,6 +1111,7 @@ class SkillsLoader {
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
+                        badgeDependencyInfo: badgeDependencySummary,
                         selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
                         subjectName: subjectName,
                         subjectId: subjectId,

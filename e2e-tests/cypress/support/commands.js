@@ -525,25 +525,25 @@ Cypress.Commands.add("assignProjectToGlobalBadge", (badgeNum = 1, projNum = 1, l
 });
 
 
-Cypress.Commands.add("assignDep", (projNum, skillNum1, skillNum2, subj2Num=null) => {
-    let skill2Id = `skill${skillNum2}`
-    if (subj2Num) {
-        skill2Id = `${skill2Id}Subj2`;
-    }
-    cy.request('POST', `/admin/projects/proj${projNum}/skills/skill${skillNum1}/dependency/${skill2Id}`);
+Cypress.Commands.add("addLearningPathItem", (projNum, fromSkillNum, toSkillNum, isFromBadge = false, isToBadge = false) => {
+    const skill = isToBadge ? `badge${toSkillNum}` : `skill${toSkillNum}`
+    const prerequisiteSkill = isFromBadge? `badge${fromSkillNum}`: `skill${fromSkillNum}`
+    const projectId = `proj${projNum}`
+    cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${projectId}/${prerequisiteSkill}`);
 });
 
-Cypress.Commands.add("assignCrossProjectDep", (proj1Num, skillNum1, proj2Num, skillNum2, share=true, subj2Num=null) => {
-    let skill2Id = `skill${skillNum2}`
-    if (subj2Num) {
-        skill2Id = `${skill2Id}Subj2`;
-    }
+Cypress.Commands.add("addCrossProjectLearningPathItem", (projNum, fromSkillNum, toProjNum, toSkillNum, share = true) => {
+    const skill = `skill${toSkillNum}`
+    const projectId = `proj${toProjNum}`
+    const prerequisiteProj = `proj${projNum}`
+    const prerequisiteSkill = `skill${fromSkillNum}`
+
     if (share) {
-        cy.request('PUT', `/admin/projects/proj${proj2Num}/skills/${skill2Id}/shared/projects/proj${proj1Num}`);
+        cy.request('PUT', `/admin/projects/${prerequisiteProj}/skills/${prerequisiteSkill}/shared/projects/${projectId}`);
     }
-    cy.request('POST', `/admin/projects/proj${proj1Num}/skills/skill${skillNum1}/dependency/projects/proj${proj2Num}/skills/${skill2Id}`);
-});
 
+    cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${prerequisiteProj}/${prerequisiteSkill}`);
+});
 
 Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
     let timestamp = null
