@@ -33,6 +33,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
     def setup() {
         rootSkillsService = createRootSkillService()
+        skillsService.getCurrentUser() // initialize skillsService user_attrs
     }
 
     def "cannot access project endpoints with UC protection enabled if the user does not belong to the user community"() {
