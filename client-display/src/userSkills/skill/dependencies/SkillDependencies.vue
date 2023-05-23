@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card">
+    <div class="card" data-cy="prerequisitesCard">
         <div class="card-body p-0">
           <div class="pt-3 px-3">
             <div class="row legend-row">
