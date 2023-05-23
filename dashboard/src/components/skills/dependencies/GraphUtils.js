@@ -32,10 +32,7 @@ export default {
     return container;
   },
   getLabel(skillItem, isCrossProject) {
-    let res = isCrossProject ? `${this.truncate(skillItem.projectId, 10)} : ${skillItem.name} ` : skillItem.name;
-    res = this.truncate(res);
-
-    return res;
+    return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${skillItem.name} ` : skillItem.name;
   },
   truncate(strValue, truncateTo = 35) {
     return TruncateFilter(strValue, truncateTo);

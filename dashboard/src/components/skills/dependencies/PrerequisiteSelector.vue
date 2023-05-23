@@ -123,11 +123,11 @@ limitations under the License.
         SkillsService.getProjectSkillsAndBadgesWithImportedSkills(this.projectId)
           .then((skills) => {
             if (this.selectedFromSkills.length > 0 && this.selectedFromSkills[0].skillId) {
-              this.allPotentialSkills = skills.filter((skill) => skill.skillId !== this.selectedFromSkills[0].skillId);
+              this.allPotentialSkills = skills.filter((skill) => (skill.skillId !== this.selectedFromSkills[0].skillId || (skill.skillId === this.selectedFromSkills[0].skillId && skill.projectId !== this.selectedFromSkills[0].projectId)));
             }
             if (this.selectedToSkills.length > 0) {
               this.selectedToSkills.forEach((skill) => {
-                this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => potentialSkill.skillId !== skill.skillId);
+                this.allPotentialSkills = this.allPotentialSkills.filter((potentialSkill) => (potentialSkill.skillId !== skill.skillId || (potentialSkill.skillId === skill.skillId && potentialSkill.projectId !== skill.projectId)));
               });
             }
             this.loadingPotentialSkills = false;

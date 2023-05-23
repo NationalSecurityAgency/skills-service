@@ -338,6 +338,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             sd1.skillId as skillId,
             CASE WHEN sd1.type != 'Badge' THEN (SELECT subj1.skillId FROM  SkillDef subj1, SkillRelDef subj1Rel WHERE subj1 = subj1Rel.parent and subj1Rel.child = sd1 and subj1Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')) END as subjectId,
             sd1.projectId as projectId,
+            p1.name as projectName,
             sd1.pointIncrement as pointIncrement,
             sd1.totalPoints as totalPoints,
             sd1.type as skillType,
@@ -347,14 +348,17 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             sd2.skillId as skillId2,
             CASE WHEN sd2.type != 'Badge' THEN (SELECT subj2.skillId FROM  SkillDef subj2, SkillRelDef subj2Rel WHERE subj2 = subj2Rel.parent and subj2Rel.child = sd2 and subj2Rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')) END as subjectId2,
             sd2.projectId as projectId2,
+            p2.name as projectName2,
             sd2.pointIncrement as pointIncrement2,
             sd2.totalPoints as totalPoints2,
             sd2.type as skillType2
-        from SkillDef sd1, SkillDef sd2, SkillRelDef srd
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd, ProjDef p1, ProjDef p2
         where sd1 = srd.parent 
             and sd2 = srd.child
             and srd.type=?2 
             and sd1.projectId=?1
+            and p1.projectId = sd1.projectId
+            and p2.projectId = sd2.projectId
         ''')
     List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
 

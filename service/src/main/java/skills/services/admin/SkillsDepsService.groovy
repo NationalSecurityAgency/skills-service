@@ -136,6 +136,7 @@ class SkillsDepsService {
             SkillDefGraphRes graphRes = new SkillDefGraphRes()
             Props.copy(skillDefRes, graphRes)
             graphRes.id = it.value
+            graphRes.projectName = it.key.projectName
             return graphRes
         }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
@@ -195,20 +196,22 @@ class SkillsDepsService {
                     skillId: it[2],
                     subjectId: it[3],
                     projectId: it[4],
-                    pointIncrement: it[5],
-                    totalPoints: it[6],
-                    type: it[7],
+                    projectName: it[5],
+                    pointIncrement: it[6],
+                    totalPoints: it[7],
+                    type: it[8],
             )
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[8],
-                    name: it[9],
-                    skillId: it[10],
-                    subjectId: it[11],
-                    projectId: it[12],
-                    pointIncrement: it[13],
-                    totalPoints: it[14],
-                    type: it[15],
+                    id: it[9],
+                    name: it[10],
+                    skillId: it[11],
+                    subjectId: it[12],
+                    projectId: it[13],
+                    projectName: it[14],
+                    pointIncrement: it[15],
+                    totalPoints: it[16],
+                    type: it[17],
             )
 
             new GraphSkillDefEdge(from: from, to: to)

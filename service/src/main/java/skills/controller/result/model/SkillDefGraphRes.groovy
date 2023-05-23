@@ -25,6 +25,7 @@ class SkillDefGraphRes {
     String skillId
     String subjectId
     String projectId
+    String projectName
     Integer pointIncrement
     Integer totalPoints
     SkillDef.ContainerType type

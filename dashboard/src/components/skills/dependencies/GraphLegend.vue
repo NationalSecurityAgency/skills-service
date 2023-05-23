@@ -14,64 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <simple-card class="legend" style="max-width: 18rem; min-width: 17rem;" data-cy="graphLegend">
-    <div class='legend-title'>Legend</div>
-    <div class='legend-scale'>
-      <ul class='legend-labels'>
-        <li v-for="item in items" v-bind:key="item.label">
-          <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
-          <span v-else v-bind:style=' {background: item.color }'></span>{{ item.label }}
-        </li>
-      </ul>
-    </div>
-  </simple-card>
+  <div class="graph-legend" data-cy="graphLegend">
+    <span class="font-italic">Legend:</span>
+    <span v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0 ml-3">
+      <span class="border rounded p-2">
+        <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
+      </span>
+      <span class="ml-1">{{ item.label }}</span>
+    </span>
+  </div>
 </template>
 
 <script>
-  import SimpleCard from '../../utils/cards/SimpleCard';
-
   export default {
     name: 'GraphLegend',
-    components: { SimpleCard },
     props: ['items'],
   };
 </script>
 
 <style scoped>
-  .legend .legend-title {
-    text-align: left;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 90%;
+  .graph-legend {
+    font-size: 1rem;
   }
-
-  .legend .legend-scale ul {
-    margin: 0;
-    margin-bottom: 5px;
-    padding: 0;
-    float: left;
-    list-style: none;
-  }
-
-  .legend .legend-scale ul li {
-    font-size: 80%;
-    list-style: none;
-    margin-left: 0;
-    line-height: 18px;
-    margin-bottom: 2px;
-  }
-
-  .legend ul.legend-labels li span {
-    display: block;
-    float: left;
-    height: 16px;
-    width: 30px;
-    margin-right: 5px;
-    margin-left: 0;
-    border: 1px solid #999;
-  }
-
-  .legend a {
-    color: #777;
+  .legend-list-item i {
+    font-size: 1.2rem;
   }
 </style>

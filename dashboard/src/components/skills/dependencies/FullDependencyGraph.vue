@@ -93,7 +93,6 @@ limitations under the License.
         edges: {},
         legendItems: [
           { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
-          { label: 'Cross Project Skill', color: '#ffb87f', iconClass: 'fa-graduation-cap' },
           { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
         ],
         displayOptions: {
@@ -216,7 +215,9 @@ limitations under the License.
           const newNode = {
             id: node.id,
             label: GraphUtils.getLabel(node, isCrossProject),
-            margin: 10,
+            margin: {
+              top: 25,
+            },
             shape: 'icon',
             icon: {
               face: '"Font Awesome 5 Free"',
@@ -227,10 +228,11 @@ limitations under the License.
             },
             chosen: false,
             details: node,
+            font: { multi: 'html', size: 20 },
             title: GraphUtils.getTitle(node, isCrossProject),
           };
           if (isCrossProject) {
-            newNode.icon.color = '#ffb87f';
+            newNode.margin = { top: 40 };
           }
           if (node.type === 'Badge') {
             newNode.icon.code = '\uf559';
