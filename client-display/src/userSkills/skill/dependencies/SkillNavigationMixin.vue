@@ -21,11 +21,8 @@ limitations under the License.
     mixins: [NavigationErrorMixin],
     methods: {
       navigateToSkill(skillItem) {
-        console.log(skillItem);
         if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
-          console.log('inside first if');
           if (skillItem.isCrossProject) {
-            console.log('inside cross project');
             this.handlePush({
               name: 'crossProjectSkillDetails',
               params: {
