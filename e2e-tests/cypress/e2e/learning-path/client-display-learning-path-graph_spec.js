@@ -330,9 +330,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.createProject(2);
         cy.createSubject(2, 1);
-        cy.log('before');
         cy.createSkill(2, 1, 1);
-        cy.log('after');
 
         cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
 
