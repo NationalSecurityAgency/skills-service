@@ -131,7 +131,7 @@ const router = new VueRouter({
       },
     },
     {
-      path: '//badges/global/:badgeId/skills/:skillId',
+      path: '/badges/global/:badgeId/skills/:skillId',
       component: SkillDetails,
       name: 'globalBadgeSkillDetails',
       meta: {

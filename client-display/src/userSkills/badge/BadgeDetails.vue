@@ -15,9 +15,9 @@ limitations under the License.
 */
 <template>
     <div>
-        <skills-spinner :loading="loading" />
+        <skills-spinner :loading="isLoading" />
 
-        <div v-if="!loading">
+        <div v-if="!isLoading">
             <skills-title>Badge Details</skills-title>
 
             <div class="card">
@@ -77,7 +77,10 @@ limitations under the License.
     },
     data() {
       return {
-        loading: true,
+        loading: {
+          badge: true,
+          prerequisites: true,
+        },
         badge: null,
         badgeOverview: null,
         initialized: false,
@@ -86,33 +89,47 @@ limitations under the License.
       };
     },
     watch: {
-      $route: 'fetchData',
+      $route: 'reloadData',
     },
     mounted() {
-      this.fetchData();
-      this.loadDependencies();
+      this.reloadData();
     },
     computed: {
       locked() {
         return this.badge.dependencyInfo && !this.badge.dependencyInfo.achieved;
       },
+      isLoading() {
+        return this.loading.badge || this.loading.prerequisites;
+      },
     },
     methods: {
+      reloadData() {
+        this.loadDependencies().then(() => {
+          this.fetchData().then(() => this.handleScroll());
+        });
+      },
+      handleScroll() {
+        const foundLastViewedSkill = this.badge.skills.find((item) => item.isLastViewed === true);
+        this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
+        this.autoScrollToLastViewedSkill();
+      },
       loadDependencies() {
-        UserSkillsService.getSkillDependencies(this.$route.params.badgeId)
+        this.loading.prerequisites = true;
+        return UserSkillsService.getSkillDependencies(this.$route.params.badgeId)
           .then((res) => {
             this.dependencies = res.dependencies;
+          }).finally(() => {
+            this.loading.prerequisites = false;
           });
       },
       fetchData() {
-        UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
+        this.loading.badge = true;
+        return UserSkillsService.getBadgeSkills(this.$route.params.badgeId)
           .then((badgeSummary) => {
             this.badge = badgeSummary;
             this.badgeOverview = badgeSummary;
-            this.loading = false;
-            const foundLastViewedSkill = badgeSummary.skills.find((item) => item.isLastViewed === true);
-            this.lastViewedSkillId = foundLastViewedSkill ? foundLastViewedSkill.skillId : null;
-            this.autoScrollToLastViewedSkill();
+          }).finally(() => {
+            this.loading.badge = false;
           });
       },
       refreshHeader(event) {

@@ -15,9 +15,7 @@
  */
 import moment from 'moment-timezone';
 
-const dateFormatter = value => moment.utc(value)
-    .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
-describe('Client Display Prerequisites Tests', () => {
+describe('Client Display Prerequisites Snapshot Tests', () => {
     const snapshotOptions = {
         blackout: ['[data-cy=pointHistoryChart]'],
         failureThreshold: 0.03, // threshold for entire image

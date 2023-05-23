@@ -135,7 +135,8 @@ limitations under the License.
         }, 500);
       },
       initInternalDeps() {
-        const idForThisSkill = this.appendForId(this.$store.state.projectId, this.$route.params.skillId);
+        const idForThisSkill = this.$route.params.skillId ? this.appendForId(this.$store.state.projectId, this.$route.params.skillId) : null;
+        const idForThisBadge = this.$route.params.badgeId ? this.appendForId(this.$store.state.projectId, this.$route.params.badgeId) : null;
         this.dependenciesInternal = this.dependencies.map((item) => {
           const copy = { ...item };
           copy.dependsOn.id = this.getNodeId(copy.dependsOn);
@@ -143,8 +144,9 @@ limitations under the License.
 
           copy.skill.id = this.getNodeId(copy.skill);
           copy.skill.isThisSkill = idForThisSkill === copy.skill.id;
+          copy.skill.isThisBadge = idForThisBadge === copy.skill.id;
 
-          if (copy.skill.isThisSkill) {
+          if (copy.skill.isThisSkill || copy.skill.isThisBadge) {
             this.thisSkill = copy.skill;
           }
 
@@ -157,8 +159,9 @@ limitations under the License.
       },
       clearNetwork() {
         if (this.network) {
-          this.network.destroy();
+          return this.network.destroy();
         }
+        return true;
       },
       isSmallScreen() {
         const width = window.innerWidth;
@@ -260,7 +263,10 @@ limitations under the License.
           let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
           if (skill.isThisSkill) {
             label = `<b>This Skill</b>\n${label}`;
+          } else if (skill.isThisBadge) {
+            label = `<b>This Badge</b>\n${label}`;
           }
+
           const node = {
             id: skill.id,
             label,
@@ -292,7 +298,7 @@ limitations under the License.
             node.icon.code = '\uf559';
             node.icon.color = this.getBadgeColor();
           }
-          if (skill.isThisSkill) {
+          if (skill.isThisSkill || skill.isThisBadge) {
             node.margin = { top: 25 };
           }
           if (isCrossProject) {

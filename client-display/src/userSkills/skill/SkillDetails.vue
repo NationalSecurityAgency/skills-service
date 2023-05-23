@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
     <div class="text-primary">
-        <div v-if="!loading.dependencies && !loading.skill">
+        <div v-if="!isLoading">
             <skills-title>{{ skillDisplayName }} Overview</skills-title>
             <div class="card">
               <div class="pageControl" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !isCrossProject">
@@ -41,7 +41,7 @@ limitations under the License.
                                 :skill-id="$route.params.skillId" :subject-id="this.$route.params.subjectId"></skill-dependencies>
         </div>
         <div v-else>
-            <skills-spinner :loading="loading.dependencies || loading.skill" class="mt-5"/>
+            <skills-spinner :loading="isLoading" class="mt-5"/>
         </div>
     </div>
 </template>
@@ -88,6 +88,9 @@ limitations under the License.
       isCrossProject() {
         const routeName = this.$route.name;
         return routeName === 'crossProjectSkillDetails' || this.$route.params.crossProjectId;
+      },
+      isLoading() {
+        return this.loading.dependencies || this.loading.skill;
       },
     },
     methods: {

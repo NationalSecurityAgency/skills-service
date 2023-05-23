@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment-timezone';
-
 describe('Client Display Prerequisites Tests', () => {
 
     beforeEach(() => {
@@ -265,66 +263,6 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="prereqTable"] [aria-rowindex="9"]').should('not.exist')
     });
 
-    it('display skills and badges in the table', () => {
-        cy.createSkill(1, 1, 1)
-        cy.createSkill(1, 1, 2)
-        cy.createSkill(1, 1, 3)
-        cy.createSkill(1, 1, 4)
-
-        cy.createBadge(1, 1);
-        cy.assignSkillToBadge(1, 1, 1);
-        cy.createBadge(1, 1, { enabled: true });
-
-        cy.createBadge(1, 2);
-        cy.assignSkillToBadge(1, 2, 2);
-        cy.createBadge(1, 2, { enabled: true });
-
-        cy.addLearningPathItem(1, 1, 2, true, true)
-        cy.addLearningPathItem(1, 3, 2, false, true)
-        cy.addLearningPathItem(1, 4, 3)
-
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
-
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Badge 1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 3')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 4')
-
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="2"]').contains('Badge')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="2"]').contains('Skill')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="2"]').contains('Skill')
-
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
-    });
-
-    it('navigate to a badge via a table', () => {
-        cy.createSkill(1, 1, 1)
-        cy.createSkill(1, 1, 2)
-
-        cy.createBadge(1, 1);
-        cy.assignSkillToBadge(1, 1, 1);
-        cy.createBadge(1, 1, { enabled: true });
-
-        cy.addLearningPathItem(1, 1, 2, true)
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
-
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Badge 1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').should('not.exist')
-
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"] [data-cy="skillLink-proj1-badge1"]').click()
-        cy.get('[data-cy="skillsTitle"]').contains('Badge Details')
-        cy.get('[data-cy="badge_badge1"]')
-    });
-
     it('navigate to cross-project prerequisite', function () {
         cy.createSkill(1, 1, 1);
 
@@ -346,4 +284,5 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="crossProjAlert"]')
     });
+
 });

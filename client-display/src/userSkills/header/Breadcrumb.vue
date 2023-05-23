@@ -49,6 +49,11 @@ limitations under the License.
     mounted() {
       this.build();
     },
+    watch: {
+      $route: function routeChange() {
+        this.build();
+      },
+    },
     methods: {
       build() {
         const res = this.$route.path.split('/').filter((item) => item);
