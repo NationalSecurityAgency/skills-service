@@ -21,11 +21,8 @@ describe('Community Projects Tests', () => {
     before(() => {
         cy.beforeTestSuiteThatReusesData()
         cy.fixture('vars.json').then((vars) => {
-            cy.fixture('vars.json')
-              .then((vars) => {
-                  cy.request('POST', '/logout');
-                  cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-              });
+            cy.request('POST', '/logout');
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
             cy.logout();
             cy.login(vars.rootUser, vars.defaultPass, true);
             cy.request({
@@ -44,7 +41,7 @@ describe('Community Projects Tests', () => {
             cy.register(allDragonsUser, vars.defaultPass);
             cy.logout();
 
-            cy.login(vars.defaultUser, vars.defaultPass);
+            cy.loginAsAdminUser();
             cy.createProject(1, {enableProtectedUserCommunity: true})
             cy.createProject(2)
 
