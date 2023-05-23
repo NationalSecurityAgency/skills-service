@@ -753,7 +753,7 @@ class SkillsLoader {
             badges.forEach(it -> {
                 def badgeDeps = loadSkillDependencyInfo(projectId, userId, it.badgeId)
                 if(badgeDeps) {
-                    badgeDeps.dependencies.find( badge -> {
+                    badgeDeps.dependencies.each( badge -> {
                         if(badge.skill.skillId == it.badgeId) {
                             badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: skillInfo.name, type: 'Skill');
                         }

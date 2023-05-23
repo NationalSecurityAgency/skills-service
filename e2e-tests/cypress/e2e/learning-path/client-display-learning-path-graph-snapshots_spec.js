@@ -414,4 +414,32 @@ describe('Client Display Prerequisites Tests', () => {
             .should('not.exist');
     });
 
+    it('badge skill with badge dependency displays correctly', () => {
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.createBadge(1, 2);
+        cy.assignSkillToBadge(1, 2, 2);
+        cy.createBadge(1, 2, { enabled: true });
+
+        cy.addLearningPathItem(1, 1, 2, true, true)
+        cy.addLearningPathItem(1, 3, 2, false, true)
+        cy.addLearningPathItem(1, 4, 3)
+
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.matchSnapshotImage(`BadgeSkill-WithBadgeDependencies`, snapshotOptions);
+    });
+
 });

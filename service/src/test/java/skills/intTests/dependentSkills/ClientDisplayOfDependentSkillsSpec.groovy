@@ -592,4 +592,102 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         !skill2.dependencyInfo
 
     }
+
+    def "skill that's part of a badge and depends on a badge displays correctly"() {
+        String userId = "user1"
+        List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each{
+            it.pointIncrement = 50
+        }
+        def subject = SkillsFactory.createSubject()
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId], userId, new Date())
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: SkillsFactory.defaultProjId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: SkillsFactory.defaultProjId, badgeId: badge2.badgeId, skillId: skills.get(1).skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        // from badge 1 to skill 2
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, badge.badgeId)
+        // from skill 3 to badge 2
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, badge2.badgeId, skills.get(2).skillId)
+        // from skill 4 to skill 3
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(2).skillId, skills.get(3).skillId)
+
+        when:
+        def skillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(1).skillId)
+
+        then:
+        skillSummary.dependencies.size() == 3
+        skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[0].dependsOn.skillId == badge.badgeId
+        skillSummary.dependencies[1].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
+        skillSummary.dependencies[2].skill.skillId == skills.get(2).skillId
+        skillSummary.dependencies[2].dependsOn.skillId == skills.get(3).skillId
+    }
+
+    def "dependencies are shown correctly for a skill when its badge depends on another badge and other skills"() {
+        String userId = "user1"
+        List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each{
+            it.pointIncrement = 50
+        }
+        def subject = SkillsFactory.createSubject()
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId], userId, new Date())
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: SkillsFactory.defaultProjId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: SkillsFactory.defaultProjId, badgeId: badge2.badgeId, skillId: skills.get(1).skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        // from badge 1 to badge 2
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, badge2.badgeId, badge.badgeId)
+        // from skill 3 to badge 2
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, badge2.badgeId, skills.get(2).skillId)
+        // from skill 4 to skill 3
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(2).skillId, skills.get(3).skillId)
+
+        when:
+        def skillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(1).skillId)
+
+        then:
+        skillSummary.dependencies.size() == 3
+        skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[0].dependsOn.skillId == badge.badgeId
+        skillSummary.dependencies[1].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
+        skillSummary.dependencies[2].skill.skillId == skills.get(2).skillId
+        skillSummary.dependencies[2].dependsOn.skillId == skills.get(3).skillId
+    }
 }
