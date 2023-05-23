@@ -21,6 +21,11 @@ describe('Community Projects Tests', () => {
     before(() => {
         cy.beforeTestSuiteThatReusesData()
         cy.fixture('vars.json').then((vars) => {
+            cy.fixture('vars.json')
+              .then((vars) => {
+                  cy.request('POST', '/logout');
+                  cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+              });
             cy.logout();
             cy.login(vars.rootUser, vars.defaultPass, true);
             cy.request({
@@ -33,6 +38,7 @@ describe('Community Projects Tests', () => {
             });
             cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
             cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.request('POST', `/root/users/${Cypress.env('proxyUser')}/tags/dragons`, { tags: ['DivineDragon'] });
             cy.logout();
 
             cy.register(allDragonsUser, vars.defaultPass);
