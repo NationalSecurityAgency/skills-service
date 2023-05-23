@@ -23,15 +23,24 @@ limitations under the License.
       navigateToSkill(skillItem) {
         if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
           if (skillItem.isCrossProject) {
-            this.handlePush({
-              name: 'crossProjectSkillDetails',
-              params: {
-                subjectId: this.$route.params.subjectId,
+            if (this.$route.params.badgeId) {
+              const params = {
+                badgeId: this.$route.params.badgeId,
                 crossProjectId: skillItem.projectId,
-                skillId: this.$route.params.skillId,
                 dependentSkillId: skillItem.skillId,
-              },
-            });
+              };
+              this.handlePush({ name: 'crossProjectSkillDetailsUnderBadge', params });
+            } else {
+              this.handlePush({
+                name: 'crossProjectSkillDetails',
+                params: {
+                  subjectId: this.$route.params.subjectId,
+                  crossProjectId: skillItem.projectId,
+                  skillId: this.$route.params.skillId,
+                  dependentSkillId: skillItem.skillId,
+                },
+              });
+            }
           } else if (skillItem.type !== 'Badge') {
             this.handlePush({
               name: 'skillDetails',

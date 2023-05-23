@@ -321,4 +321,56 @@ describe('Client Display Prerequisites Badges Tests', () => {
         cy.get('[data-cy="skillsTitle"]').contains('Skill Overview') // title
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
     });
+
+    it('navigate to cross-project skill from badge via table', function() {
+        cy.createSkill(1, 1, 11)
+
+        cy.createBadge(1, 1 );
+        cy.assignSkillToBadge(1, 1, 11);
+        cy.createBadge(1, 1, { enabled: true, description: "Badge #1" });
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+
+        cy.request('PUT', `/admin/projects/proj2/skills/skill1/shared/projects/proj1`);
+        cy.request('POST', `/admin/projects/proj1/badge1/prerequisite/proj2/skill1`);
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.cdClickBadge(1);
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"] [data-cy="skillLink-proj2-skill1"]').click()
+        cy.get('[data-cy="skillProgress"]').contains('Project: This is project 2')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="crossProjAlert"]')
+    });
+
+    it('navigate to cross-project skill from badge via graph node click', function() {
+        cy.createSkill(1, 1, 11)
+
+        cy.createBadge(1, 1 );
+        cy.assignSkillToBadge(1, 1, 11);
+        cy.createBadge(1, 1, { enabled: true, description: "Badge #1" });
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+
+        cy.request('PUT', `/admin/projects/proj2/skills/skill1/shared/projects/proj1`);
+        cy.request('POST', `/admin/projects/proj1/badge1/prerequisite/proj2/skill1`);
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.cdClickBadge(1);
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+
+        cy.clickOnNode(540, 205);
+        cy.get('[data-cy="skillProgress"]').contains('Project: This is project 2')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="crossProjAlert"]')
+    });
 });

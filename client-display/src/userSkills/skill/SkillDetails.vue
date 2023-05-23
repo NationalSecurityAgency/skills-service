@@ -133,7 +133,7 @@ limitations under the License.
       },
       isDependency() {
         const routeName = this.$route.name;
-        return routeName === 'crossProjectSkillDetails';
+        return routeName === 'crossProjectSkillDetails' || routeName === 'crossProjectSkillDetailsUnderBadge';
       },
       prevButtonClicked() {
         const params = { skillId: this.skill.prevSkillId, projectId: this.$route.params.projectId };

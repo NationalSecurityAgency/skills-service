@@ -131,6 +131,14 @@ const router = new VueRouter({
       },
     },
     {
+      path: '/badges/:badgeId/crossProject/:crossProjectId/:dependentSkillId',
+      component: SkillDetails,
+      name: 'crossProjectSkillDetailsUnderBadge',
+      meta: {
+        title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
+      },
+    },
+    {
       path: '/badges/global/:badgeId/skills/:skillId',
       component: SkillDetails,
       name: 'globalBadgeSkillDetails',
