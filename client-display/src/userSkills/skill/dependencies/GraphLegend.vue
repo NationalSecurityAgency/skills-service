@@ -14,18 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class='graph-legend card skills-card-theme-border' style="min-width: 13rem;" data-cy="graphLegend">
-    <div class="card-header">
-      <h6 class="card-title mb-0 float-left">Legend</h6>
-    </div>
-    <div class='card-body'>
-      <ul class='text-left p-0 mb-0' data-cy="nodeLegend">
-        <li v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0">
-          <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
-          <span v-else v-bind:style=' {background: item.color }' class="mr-2 mb-0 border border-secondary rounded"></span>{{ item.label }}
-        </li>
-      </ul>
-    </div>
+  <div class='graph-legend text-left p-0 pt-1 text-primary' data-cy="graphLegend" aria-hidden="true">
+    <span class="font-italic">Legend:</span>
+    <span v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0 ml-3">
+      <span class="border rounded p-2">
+        <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
+      </span>
+      <span class="ml-1">{{ item.label }}</span>
+    </span>
   </div>
 </template>
 
@@ -37,16 +33,10 @@ limitations under the License.
 </script>
 
 <style scoped>
-  .legend-list-item {
-    font-size: 0.8rem;
-    list-style: none;
+  .graph-legend {
+    font-size: 1rem;
   }
-
-  .legend-list-item span {
-    display: block;
-    float: left;
-    height: 16px;
-    width: 30px;
+  .legend-list-item i {
+    font-size: 1.2rem;
   }
-
 </style>

@@ -149,7 +149,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(225, 380);
+        cy.clickOnNode(190, 335);
         cy.contains('Project: This is project 2');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
         cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
@@ -157,14 +157,14 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(425, 380);
+        cy.clickOnNode(418, 330);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 2');
 
         // make sure that "this skill" node doesn't navigate away to another page
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(530, 460);
+        cy.clickOnNode(530, 435);
         cy.wait(500);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1');
     });
@@ -219,6 +219,16 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('25%');
 
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Not Yet')
+
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 1 out 4');
     });
@@ -249,6 +259,16 @@ describe('Client Display Prerequisites Tests', () => {
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('75%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 3 out 4');
@@ -281,6 +301,16 @@ describe('Client Display Prerequisites Tests', () => {
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('100%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('5')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps');
@@ -315,6 +345,19 @@ describe('Client Display Prerequisites Tests', () => {
             .contains('3');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
             .contains('100%');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 3')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="2"]').contains('Skill')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="2"]').contains('Skill')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="2"]').contains('Skill')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
 
         cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps with cross-project skill');
     });
@@ -409,6 +452,8 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 1');
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
         // should render Prerequisites section
         cy.contains('Prerequisites');
         cy.wait(4000);
@@ -537,5 +582,144 @@ describe('Client Display Prerequisites Tests', () => {
         cy.contains('Very Great Skill 1');
         cy.contains(msg)
             .should('not.exist');
+    });
+
+    it('table paging renders after 8 elements', () => {
+        const numSkills = 10;
+        for (let i = 0; i < numSkills; i += 1) {
+            cy.createSkill(1, 1, i, {
+                name: `skill${i}`,
+                numPerformToCompletion: 1
+            });
+        }
+
+        for (let i = 0; i < numSkills - 1; i += 1) {
+            cy.addLearningPathItem(1, i, i+1)
+        }
+
+        cy.navToTheFirstSkill();
+        cy.get('[data-cy="graphLegend"]').contains('Legend');
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(9);
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('skill9')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"]').contains('skill0')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').contains('skill1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"]').contains('skill2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"]').contains('skill3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').contains('skill4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').should('not.exist')
+
+        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 1"]')
+        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 2"]')
+        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 3"]').should('not.exist')
+
+        // page 2
+        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 2"]').click()
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').contains('skill5')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').contains('skill6')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="8"]').contains('skill7')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="9"]').contains('skill8')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="10"]').should('not.exist')
+
+        cy.get('[data-cy="skillLink-proj1-skill8"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('skill8')
+        cy.get('[data-cy="prereqTablePaging"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"]').contains('skill0')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').contains('skill1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"]').contains('skill2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"]').contains('skill3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').contains('skill4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').contains('skill5')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').contains('skill6')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="8"]').contains('skill7')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="9"]').should('not.exist')
+    });
+
+    it('display skills and badges in the table', () => {
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.createBadge(1, 2);
+        cy.assignSkillToBadge(1, 2, 2);
+        cy.createBadge(1, 2, { enabled: true });
+
+        cy.addLearningPathItem(1, 1, 2, true, true)
+        cy.addLearningPathItem(1, 3, 2, false, true)
+        cy.addLearningPathItem(1, 4, 3)
+
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Badge 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 4')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="2"]').contains('Badge')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="2"]').contains('Skill')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="2"]').contains('Skill')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
+    });
+
+    it('navigate to a badge via a table', () => {
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.addLearningPathItem(1, 1, 2, true)
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Badge 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').should('not.exist')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"] [data-cy="skillLink-proj1-badge1"]').click()
+        cy.get('[data-cy="skillsTitle"]').contains('Badge Details')
+        cy.get('[data-cy="badge_badge1"]')
+    });
+
+    it('navigate to cross-project prerequisite', function () {
+        cy.createSkill(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.log('before');
+        cy.createSkill(2, 1, 1);
+        cy.log('after');
+
+        cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
+
+        // Go to parent dependency page
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"] [data-cy="skillLink-proj2-skill1"]').click()
+        cy.get('[data-cy="skillProgress"]').contains('Project: This is project 2')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="crossProjAlert"]')
     });
 });

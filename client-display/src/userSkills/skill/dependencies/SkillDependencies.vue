@@ -15,10 +15,8 @@ limitations under the License.
 */
 <template>
     <div class="card">
-        <div class="card-header">
-            <h5 class="h6 card-title mb-0 float-left">Prerequisites</h5>
-        </div>
-        <div class="card-body">
+        <div class="card-body p-0">
+          <div class="pt-3 px-3">
             <div class="row legend-row">
                 <div class="col-12 mb-2 m-sm-0 col-sm-6">
                     <graph-legend :items="legendItems" class="legend-component deps-overlay"/>
@@ -31,7 +29,10 @@ limitations under the License.
                         class="legend-component float-md-right deps-overlay"/>
                 </div>
             </div>
-            <div id="dependent-skills-network" style="height: 500px"></div>
+            <div id="dependent-skills-network" style="height: 500px" aria-hidden="true"></div>
+          </div>
+
+          <dependencies-details :prerequisites-links="dependencies" />
         </div>
     </div>
 </template>
@@ -41,12 +42,15 @@ limitations under the License.
   import { Network } from 'vis-network';
   import GraphLegend from '@/userSkills/skill/dependencies/GraphLegend';
   import SkillDependencySummary from '@/userSkills/skill/dependencies/SkillDependencySummary';
-  import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
+  import DependenciesDetails from '@/userSkills/skill/dependencies/DependenciesDetails';
+  import SkillNavigationMixin from '@/userSkills/skill/dependencies/SkillNavigationMixin';
+  import PrerequisiteColorsMixin from '@/userSkills/skill/dependencies/PrerequisiteColorsMixin';
 
   export default {
     name: 'SkillDependencies',
-    mixins: [NavigationErrorMixin],
+    mixins: [SkillNavigationMixin, PrerequisiteColorsMixin],
     components: {
+      DependenciesDetails,
       SkillDependencySummary,
       GraphLegend,
     },
@@ -61,8 +65,8 @@ limitations under the License.
         dependenciesInternal: [],
         network: null,
         legendItems: [
-          { label: 'Skill', color: 'lightgray', iconClass: 'fa-graduation-cap' },
-          { label: 'Badge', color: 'lightgray', iconClass: 'fa-award' },
+          { label: 'Skill', color: this.getSkillColor(), iconClass: 'fa-graduation-cap' },
+          { label: 'Badge', color: this.getBadgeColor(), iconClass: 'fa-award' },
         ],
         displayOptions: {
           layout: {
@@ -101,6 +105,35 @@ limitations under the License.
       this.cleanUp();
     },
     methods: {
+      setVisNetworkTabIndex() {
+        setTimeout(() => {
+          const elements = document.getElementsByClassName('vis-network');
+          if (elements && elements.length === 1) {
+            const element = elements[0];
+            if (element) {
+              element.setAttribute('tabindex', -1);
+            }
+          }
+        }, 500);
+      },
+      applyThemeToNavigationControls() {
+        setTimeout(() => {
+          const themePrimaryColor = this.getThemeTextPrimaryColor();
+          const themeNavButtonsColor = this.getThemeNavButtonsColor();
+          if (themePrimaryColor || themeNavButtonsColor) {
+            const networkElement = document.getElementById('dependent-skills-network');
+            if (networkElement) {
+              const buttons = document.getElementsByClassName('vis-button');
+              if (buttons && buttons.length > 0) {
+                for (let i = 0; i < buttons.length; i += 1) {
+                  const button = buttons[i];
+                  button.style.color = themeNavButtonsColor || themePrimaryColor;
+                }
+              }
+            }
+          }
+        }, 500);
+      },
       initInternalDeps() {
         const idForThisSkill = this.appendForId(this.$store.state.projectId, this.$route.params.skillId);
         this.dependenciesInternal = this.dependencies.map((item) => {
@@ -139,29 +172,7 @@ limitations under the License.
         this.network = new Network(container, data, this.displayOptions);
         this.network.on('click', (params) => {
           const skillItem = this.locateSelectedSkill(params);
-          if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
-            if (skillItem.isCrossProject) {
-              this.handlePush({
-                name: 'crossProjectSkillDetails',
-                params: {
-                  subjectId: this.$route.params.subjectId,
-                  crossProjectId: skillItem.projectId,
-                  skillId: this.$route.params.skillId,
-                  dependentSkillId: skillItem.skillId,
-                },
-              });
-            } else if (skillItem.type !== 'Badge') {
-              this.handlePush({
-                name: 'skillDetails',
-                params: {
-                  subjectId: skillItem.subjectId,
-                  skillId: skillItem.skillId,
-                },
-              });
-            } else {
-              this.handlePush(`/badges/${skillItem.skillId}/`);
-            }
-          }
+          this.navigateToSkill(skillItem);
         });
         const networkCanvas = container.getElementsByTagName('canvas')[0];
         this.network.on('hoverNode', () => {
@@ -172,14 +183,16 @@ limitations under the License.
         });
 
         this.focusOnParentNode();
+        this.setVisNetworkTabIndex();
+        this.applyThemeToNavigationControls();
       },
       focusOnParentNode() {
-        if (this.isSmallScreen()) {
+        if (this.isSmallScreen() || this.dependencies.length > 5) {
           const options = {
             scale: 0.7,
-            offset: { x: 0, y: 0 },
+            offset: { x: 0, y: 180 },
             animation: {
-              duration: 1500,
+              duration: 1200,
               easingFunction: 'easeInOutQuad',
             },
           };
@@ -223,8 +236,7 @@ limitations under the License.
 
           const extraChildProps = item.achieved ? {
             color: {
-              border: 'green',
-              background: 'lightgreen',
+              border: this.getAchievedColor(),
             },
           } : {};
           if (item.dependsOn) {
@@ -243,7 +255,7 @@ limitations under the License.
       buildNode(skill, isCrossProject, createdSkillIds, nodes, achievedIds, extraProps = {}) {
         if (!createdSkillIds.includes(skill.id)) {
           createdSkillIds.push(skill.id);
-          const skillColor = skill.isThisSkill ? 'lightblue' : 'lightgray';
+          const skillColor = skill.isThisSkill ? this.getThisSkillColor() : this.getSkillColor();
           const isAchieved = achievedIds.includes(skill.id);
           let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName;
           if (skill.isThisSkill) {
@@ -265,16 +277,20 @@ limitations under the License.
             font: { multi: 'html', size: 20 },
           };
 
+          const themePrimaryColor = this.getThemeTextPrimaryColor();
+          if (themePrimaryColor) {
+            node.font.color = themePrimaryColor;
+          }
+
           if (isAchieved) {
-            node.icon.color = 'lightgreen';
-            node.font.color = 'green';
-            node.label = `${node.label} ✓`;
+            node.font.color = this.getAchievedColor();
+            node.label = `${node.label} <b>✓</b>`;
           }
 
           if (skill.type === 'Badge') {
             node.shape = 'icon';
             node.icon.code = '\uf559';
-            node.icon.color = '#88a9fc';
+            node.icon.color = this.getBadgeColor();
           }
           if (skill.isThisSkill) {
             node.margin = { top: 25 };
@@ -335,9 +351,9 @@ limitations under the License.
         box-shadow: none !important;
     }
 
-    #dependent-skills-network .vis-button:after {
+    #dependent-skills-network .vis-button {
         font-size: 2em;
-        color: gray;
+        color: #8c8c8c;
         font-family: "Font Awesome 5 Free";
     }
 

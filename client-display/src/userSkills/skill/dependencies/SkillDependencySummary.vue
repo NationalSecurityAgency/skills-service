@@ -14,22 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-    <div class="card graph-legend skills-card-theme-border" data-cy="depsProgress">
-        <div class="card-header">
-            <h6 class="card-title mb-0 float-left">Progress</h6>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-8 text-left">
-                    <strong data-cy="numDeps">{{ numDependencies }}</strong> Prerequisites
-                </div>
-                <div class="col-4">
-                    <span class="text-muted" data-cy="depsPercentComplete">{{ percentComplete }}%</span>
-                </div>
-            </div>
-            <progress-bar bar-color="lightgreen" :val="percentComplete"></progress-bar>
-        </div>
-
+    <div class="graph-legend text-primary" data-cy="depsProgress">
+      <div class="row">
+          <div class="col-8 text-left">
+            <b-badge data-cy="numDeps" variant="info"><span style="font-size: 0.9rem">{{ numDependencies }}</span></b-badge> Prerequisites
+          </div>
+          <div class="col-4">
+              <span class="text-muted" data-cy="depsPercentComplete">{{ percentComplete }}%</span>
+          </div>
+      </div>
+      <progress-bar bar-color="lightgreen" :size="5" :val="percentComplete" class="mt-1" />
     </div>
 </template>
 
@@ -69,4 +63,9 @@ limitations under the License.
 </script>
 
 <style scoped>
+.card {
+  border: none;
+  font-size: 0.95rem;
+}
+
 </style>

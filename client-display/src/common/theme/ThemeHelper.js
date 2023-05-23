@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 export default {
-  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors'],
+  nonCSSConfig: ['charts', 'landingPageTitle', 'earnedTodayColor', 'beforeTodayColor', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites'],
   bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles'],
   selectorKey: {
     maxWidth: {
@@ -82,10 +82,12 @@ export default {
       styleName: 'color',
     },
     textPrimaryColor: [{
-      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color, body #app .leaderboardTable tr td, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item',
+      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color, '
+          + 'body #app table, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item, '
+          + 'body #app .b-pagination .page-item .page-link',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover',
+      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover, body #app .b-pagination .page-item.active .page-link',
       styleName: 'background-color',
     }, {
       selector: 'body #app .skills-theme-filter-menu .dropdown-menu',
@@ -125,10 +127,11 @@ export default {
     },
     tiles: {
       backgroundColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu, body #app .b-pagination .page-item .page-link',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover',
+        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover, '
+            + 'body #app .b-pagination .page-item.active .page-link',
         styleName: 'color',
       }],
       borderColor: [{

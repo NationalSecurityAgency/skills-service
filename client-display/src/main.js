@@ -23,6 +23,7 @@ import {
     FormInputPlugin,
     ButtonPlugin,
     TablePlugin,
+    PaginationPlugin,
     BadgePlugin,
     ProgressPlugin,
     SpinnerPlugin,
@@ -58,6 +59,7 @@ Vue.use(DropdownPlugin);
 Vue.use(FormInputPlugin);
 Vue.use(ButtonPlugin);
 Vue.use(TablePlugin);
+Vue.use(PaginationPlugin);
 Vue.use(BadgePlugin);
 Vue.use(ProgressPlugin);
 Vue.use(SpinnerPlugin);
