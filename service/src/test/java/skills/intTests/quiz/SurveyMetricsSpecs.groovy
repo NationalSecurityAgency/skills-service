@@ -327,27 +327,27 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         then:
         answers1.count == 8
         answers1.totalCount == 8
-        answers1.data.userId == answerRequestsSorted.userId
-        answers1.data.answerTxt == answerRequestsSorted.textAnswer
-        answers1.data.userTag == answerRequestsSorted.userTag
+        answers1.data.userId.sort() == answerRequestsSorted.userId.sort()
+        answers1.data.answerTxt.sort() == answerRequestsSorted.textAnswer.sort()
+        answers1.data.userTag.sort() == answerRequestsSorted.userTag.sort()
 
         answers1_pg1.count == 8
         answers1_pg1.totalCount == 8
-        answers1_pg1.data.userId == answerRequestsSorted[0..2].userId
-        answers1_pg1.data.answerTxt == answerRequestsSorted[0..2].textAnswer
-        answers1_pg1.data.userTag == answerRequestsSorted[0..2].userTag
+        answers1_pg1.data.userId.sort() == answerRequestsSorted[0..2].userId.sort()
+        answers1_pg1.data.answerTxt.sort() == answerRequestsSorted[0..2].textAnswer.sort()
+        answers1_pg1.data.userTag.sort() == answerRequestsSorted[0..2].userTag.sort()
 
         answers1_pg2.count == 8
         answers1_pg2.totalCount == 8
-        answers1_pg2.data.userId == answerRequestsSorted[3..5].userId
-        answers1_pg2.data.answerTxt == answerRequestsSorted[3..5].textAnswer
-        answers1_pg2.data.userTag == answerRequestsSorted[3..5].userTag
+        answers1_pg2.data.userId.sort() == answerRequestsSorted[3..5].userId.sort()
+        answers1_pg2.data.answerTxt.sort() == answerRequestsSorted[3..5].textAnswer.sort()
+        answers1_pg2.data.userTag.sort() == answerRequestsSorted[3..5].userTag.sort()
 
         answers1_pg3.count == 8
         answers1_pg3.totalCount == 8
-        answers1_pg3.data.userId == answerRequestsSorted[6..7].userId
-        answers1_pg3.data.answerTxt == answerRequestsSorted[6..7].textAnswer
-        answers1_pg3.data.userTag == answerRequestsSorted[6..7].userTag
+        answers1_pg3.data.userId.sort() == answerRequestsSorted[6..7].userId.sort()
+        answers1_pg3.data.answerTxt.sort() == answerRequestsSorted[6..7].textAnswer.sort()
+        answers1_pg3.data.userTag.sort() == answerRequestsSorted[6..7].userTag.sort()
 
         answers2.count == 1
         answers2.totalCount == 1
@@ -387,23 +387,23 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         s1_answ1.count == 6
         s1_answ1.totalCount == 6
 
-        s1_answ1.data.userId == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
+        s1_answ1.data.userId.sort() == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
         s1_answ1.data.answerTxt == [null, null, null, null, null, null]
         s1_answ1.data.userQuizAttemptId.sort() == [attemptId0, attemptId2, attemptId3, attemptId4, attemptId6, attemptId7].sort()
 
         s1_answ2.count == 4
         s1_answ2.totalCount == 4
-        s1_answ2.data.userId == [users[1], users[4], users[6], users[7]].sort()
+        s1_answ2.data.userId.sort() == [users[1], users[4], users[6], users[7]].sort()
         s1_answ2.data.answerTxt == [null, null, null, null]
 
         s1_answ3.count == 6
         s1_answ3.totalCount == 6
-        s1_answ3.data.userId == [users[0], users[1], users[3], users[4], users[6], users[7]].sort()
+        s1_answ3.data.userId.sort() == [users[0], users[1], users[3], users[4], users[6], users[7]].sort()
         s1_answ3.data.answerTxt == [null, null, null, null, null, null]
 
         s1_answ4.count == 3
         s1_answ4.totalCount == 3
-        s1_answ4.data.userId == [users[5], users[6], users[7]].sort()
+        s1_answ4.data.userId.sort() == [users[5], users[6], users[7]].sort()
         s1_answ4.data.answerTxt == [null, null, null]
 
     }

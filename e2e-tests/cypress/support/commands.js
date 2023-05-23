@@ -1178,7 +1178,7 @@ Cypress.Commands.add('addUserTag', (userTags) => {
             });
 
             cy.logout();
-            cy.login(vars.defaultUser, vars.defaultPass);
+            cy.loginAsAdminUser();
         });
 });
 
