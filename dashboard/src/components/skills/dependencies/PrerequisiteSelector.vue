@@ -81,6 +81,7 @@ limitations under the License.
     },
     watch: {
       selectedFromSkills: function skillWatch() {
+        this.clearToData();
         this.updatePotentialSkills();
       },
     },
