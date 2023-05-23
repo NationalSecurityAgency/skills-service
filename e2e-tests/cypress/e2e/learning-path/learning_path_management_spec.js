@@ -338,6 +338,33 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 2');
     })
 
+    it('Clicking a node clears the to selector and errors', () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.get('[data-cy="learningPathFromSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.clickOnNode(360, 300);
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 2');
+
+        cy.get('[data-cy="learningPathToSkillSelector"]')
+            .click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+
+        cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
+
+        cy.clickOnNode(360, 200);
+        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
+        cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
+        cy.get('[data-cy="learningPathError"]').should('not.exist')
+    })
+
     it('Can remove a learning path route from the graph', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
