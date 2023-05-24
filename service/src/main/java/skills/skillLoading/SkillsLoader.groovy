@@ -747,6 +747,29 @@ class SkillsLoader {
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
         }) as List<SkillDependencyInfo.SkillRelationship>
 
+        def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
+        deps.forEach(dep -> {
+            def badgesForDep = skillDefRepo.findAllBadgesForSkill([dep.skill.skillId], dep.skill.projectId)
+            badgesForDep.forEach(badge -> {
+                def skillInfo = getSkillDefWithExtra(userId, dep.skill.projectId, badge.badgeId, [ContainerType.Badge])
+                if(skillInfo) {
+                    def depsForBadge = loadSkillDependencyInfo(dep.skill.projectId, userId, badge.badgeId)
+                    if(depsForBadge) {
+                        depsForBadge.dependencies.each( depBadge -> {
+                          def newDependency = new SkillDependencyInfo.SkillRelationship(
+                                  skill: dep.skill,
+                                  dependsOn: depBadge.dependsOn,
+                                  achieved: depBadge.achieved,
+                                  crossProject: depBadge.crossProject
+                          )
+                          depsToAdd.add(newDependency)
+                        })
+                    }
+                }
+            })
+        })
+        deps.addAll(depsToAdd)
+
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], projectId);
         if(badges) {
             def skillInfo = getSkillDefWithExtra(userId, projectId, skillId, [ContainerType.Skill])
