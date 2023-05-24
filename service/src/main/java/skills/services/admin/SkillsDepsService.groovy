@@ -30,6 +30,7 @@ import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
@@ -91,7 +92,7 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
+        validateLearningPathItemAndThrowException(projectId, skillDef, prereqSkillDef)
         skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
     }
 
@@ -219,8 +220,8 @@ class SkillsDepsService {
         })
     }
 
-    private void validateLearningPathItemAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
-        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
+    private void validateLearningPathItemAndThrowException(String originalProjectId, SkillDef skillDef, SkillDef prereqSkillDef) {
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(originalProjectId, skillDef, prereqSkillDef)
         if (!dependencyCheckResult.possible) {
             throw new SkillException(dependencyCheckResult.reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
@@ -231,12 +232,12 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(projectId, skillDef, prereqSkillDef)
         return dependencyCheckResult
     }
 
     @Profile
-    DependencyCheckResult validateLearningPathItem(SkillDef skillDef, SkillDef prereqSkillDef) {
+    DependencyCheckResult validateLearningPathItem(String originalProjectId, SkillDef skillDef, SkillDef prereqSkillDef) {
         assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
 
         if ("false" == skillDef.enabled) {
@@ -275,6 +276,12 @@ class SkillsDepsService {
             String msg = "Not allowed to depend on skill with a later version. " +
                     "Skill [ID:${skillDef.skillId}, version ${skillDef.version}] can not depend on [ID:${prereqSkillDef.skillId}, version ${prereqSkillDef.version}]".toString()
             return new DependencyCheckResult(possible: false, failureType: DependencyCheckResult.FailureType.SkillVersion, reason: msg)
+        }
+
+        // shared skills from another project cannot cause a circular issue
+        ProjDef projDef = projDefAccessor.getProjDef(originalProjectId)
+        if (prereqSkillDef.projectId != projDef.projectId) {
+            return new DependencyCheckResult()
         }
 
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
