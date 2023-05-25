@@ -30,6 +30,7 @@ import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
@@ -301,7 +302,7 @@ class SkillsDepsService {
     @Profile
     CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
         List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
-        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
+        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(projectId: it.projectId, skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
         return new CircularLearningPathChecker.BadgeAndSkills(
                 badgeGraphNode: new CircularLearningPathChecker.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
                 skills: badgeSkillInfos

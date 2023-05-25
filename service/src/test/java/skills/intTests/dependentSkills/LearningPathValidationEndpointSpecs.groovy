@@ -553,4 +553,24 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         result.reason =="Skill [TestProject1:skill1] is not shared (or does not exist) to [TestProject2] project"
     }
 
+    def "allow shared cross-project skills to the learning path even it happens to have the same skill-id is one of the existing skills on the path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, proj2_subj, proj2_skills)
+        skillsService.shareSkill(p2.projectId, proj2_skills[0].skillId, p1.projectId)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[2].skillId)
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p2.projectId, proj2_skills[0].skillId)
+        then:
+        proj2_skills[0].skillId == p1Skills[0].skillId
+        result.possible == true
+    }
+
 }
