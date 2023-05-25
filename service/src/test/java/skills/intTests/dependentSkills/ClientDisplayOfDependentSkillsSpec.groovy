@@ -721,14 +721,12 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
 
         when:
         def skillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(1).skillId)
-        def secondSkillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
 
         then:
-        skillSummary.dependencies.size() == 1
+        skillSummary.dependencies.size() == 2
         skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
         skillSummary.dependencies[0].dependsOn.skillId == skills.get(0).skillId
-        secondSkillSummary.dependencies.size() == 1
-        secondSkillSummary.dependencies[0].skill.skillId == skills.get(0).skillId
-        secondSkillSummary.dependencies[0].dependsOn.skillId == skills.get(2).skillId
+        skillSummary.dependencies[1].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
     }
 }

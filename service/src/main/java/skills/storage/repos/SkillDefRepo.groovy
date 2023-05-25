@@ -319,6 +319,11 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         where r.parent.id=?1 and c.id = r.child and r.type=?2''')
     List<SkillDef> findChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
+    @Query(value='''select c.skillId 
+        from SkillRelDef r, SkillDef c 
+        where r.parent=c.id and r.child.skillId = ?1 and r.type=?2 and c.type=?3 ''')
+    List<String> findParentSkillsByIdAndRelationshipType(String childSkillId, RelationshipType relationshipType, ContainerType containerType)
+
     @Query(value='''select s.skillId as badgeId, s.name as name, c.skillId as skillId, s.type as skillType
         from SkillDef s, SkillRelDef r, SkillDef c 
         where s.id = r.parent and c.id = r.child and r.type='BadgeRequirement' and (

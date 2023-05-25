@@ -747,52 +747,38 @@ class SkillsLoader {
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
         }) as List<SkillDependencyInfo.SkillRelationship>
 
-        // Process the prerequisites for the given skill to identify if any of them are part of a badge
-        // If so, add the badge's prerequisites to the graph
         def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
         deps.forEach(dep -> {
-            def badgesForDep = skillDefRepo.findAllBadgesForSkill([dep.skill.skillId], dep.skill.projectId)
-            badgesForDep.forEach(badge -> {
-                if(badge.skillType === ContainerType.Badge) {
-                    def skillInfo = getSkillDefWithExtra(userId, dep.skill.projectId, badge.badgeId, [ContainerType.Badge])
-                    if (skillInfo) {
-                        def depsForBadge = loadSkillDependencyInfo(dep.skill.projectId, userId, badge.badgeId)
-                        if (depsForBadge) {
-                            depsForBadge.dependencies.each(depBadge -> {
-                                def newDependency = new SkillDependencyInfo.SkillRelationship(
-                                        skill: dep.skill,
-                                        dependsOn: depBadge.dependsOn,
-                                        achieved: depBadge.achieved,
-                                        crossProject: depBadge.crossProject
-                                )
-                                depsToAdd.add(newDependency)
-                            })
-                        }
-                    }
-                }
-            })
+            def updatedDepsForBadge = processDependenciesForBadges(dep.dependsOn.skillId, dep.dependsOn.projectId, userId)
+            depsToAdd.addAll(updatedDepsForBadge)
         })
         deps.addAll(depsToAdd)
 
-        // Process the current skill to see if it's part of a badge
-        // If so, add the badge's prerequisites to the graph
-        def badges = skillDefRepo.findAllBadgesForSkill([skillId], projectId);
-        if(badges) {
+        def newDepsToAdd = processDependenciesForBadges(skillId, projectId, userId)
+        deps.addAll(newDepsToAdd)
+
+        return new SkillDependencyInfo(dependencies: deps)
+    }
+
+    @Profile
+    List<SkillDependencyInfo.SkillRelationship> processDependenciesForBadges(String skillId, String projectId, String userId) {
+        def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
+        def badgesIds = skillDefRepo.findParentSkillsByIdAndRelationshipType(skillId, SkillRelDef.RelationshipType.BadgeRequirement, ContainerType.Badge)
+        if(badgesIds) {
             def skillInfo = getSkillDefWithExtra(userId, projectId, skillId, [ContainerType.Skill])
-            badges.forEach(it -> {
-                def badgeDeps = loadSkillDependencyInfo(projectId, userId, it.badgeId)
+            badgesIds.forEach(it -> {
+                def badgeDeps = loadSkillDependencyInfo(projectId, userId, it)
                 if(badgeDeps) {
                     badgeDeps.dependencies.each( badge -> {
-                        if(badge.skill.skillId == it.badgeId) {
+                        if(badge.skill.skillId == it) {
                             badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: skillInfo.name, type: 'Skill');
                         }
                     })
-                    deps.addAll(badgeDeps.dependencies)
+                    depsToAdd.addAll(badgeDeps.dependencies)
                 }
             })
         }
-
-        return new SkillDependencyInfo(dependencies: deps)
+        return depsToAdd
     }
 
     @Profile
