@@ -726,7 +726,7 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillSummary.dependencies.size() == 2
         skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
         skillSummary.dependencies[0].dependsOn.skillId == skills.get(0).skillId
-        skillSummary.dependencies[1].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[1].skill.skillId == skills.get(0).skillId
         skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
     }
 }

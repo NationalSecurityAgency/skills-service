@@ -116,7 +116,7 @@ class SkillsLoader {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
-    PostgresQlNativeRepo PostgresQlNativeRepo
+    PostgresQlNativeRepo postgresQlNativeRepo
 
     @Autowired
     SettingsService settingsService
@@ -719,7 +719,7 @@ class SkillsLoader {
 
     @Transactional(readOnly = true)
     SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
-        List<GraphRelWithAchievement> graphDBRes = PostgresQlNativeRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
+        List<GraphRelWithAchievement> graphDBRes = postgresQlNativeRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
 
         Map<String, Map<String,String>> subjectIdLookupByProjectIdThenBySkillId = [:]
         Map<String, List<Pair<String,String>>> byProjectIds = graphDBRes.collect { Pair.of(it.childProjectId, it.childSkillId)}.groupBy { it.first }
@@ -747,6 +747,11 @@ class SkillsLoader {
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
         }) as List<SkillDependencyInfo.SkillRelationship>
 
+        // Process any dependencies this skill's badge may have, if it's in a badge
+        def newDepsToAdd = processDependenciesForBadges(skillId, projectId, userId)
+        deps.addAll(newDepsToAdd)
+
+        // Process any dependencies the prerequisite badges may have, if they are in badges
         def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
         deps.forEach(dep -> {
             def updatedDepsForBadge = processDependenciesForBadges(dep.dependsOn.skillId, dep.dependsOn.projectId, userId)
@@ -754,10 +759,12 @@ class SkillsLoader {
         })
         deps.addAll(depsToAdd)
 
-        def newDepsToAdd = processDependenciesForBadges(skillId, projectId, userId)
-        deps.addAll(newDepsToAdd)
+        // Filter out any duplicate paths
+        deps.unique(true, { a, b ->
+            a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
+        })
 
-        return new SkillDependencyInfo(dependencies: deps)
+        return new SkillDependencyInfo(dependencies: deps.unique())
     }
 
     @Profile
@@ -765,13 +772,12 @@ class SkillsLoader {
         def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
         def badgesIds = skillDefRepo.findParentSkillsByIdAndRelationshipType(skillId, SkillRelDef.RelationshipType.BadgeRequirement, ContainerType.Badge)
         if(badgesIds) {
-            def skillInfo = getSkillDefWithExtra(userId, projectId, skillId, [ContainerType.Skill])
             badgesIds.forEach(it -> {
                 def badgeDeps = loadSkillDependencyInfo(projectId, userId, it)
                 if(badgeDeps) {
                     badgeDeps.dependencies.each( badge -> {
                         if(badge.skill.skillId == it) {
-                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: skillInfo.name, type: 'Skill');
+                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: null, type: 'Skill');
                         }
                     })
                     depsToAdd.addAll(badgeDeps.dependencies)
