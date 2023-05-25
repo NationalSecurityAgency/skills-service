@@ -92,7 +92,7 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        validateLearningPathItemAndThrowException(projectId, skillDef, prereqSkillDef)
+        validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
         skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
     }
 
@@ -220,8 +220,8 @@ class SkillsDepsService {
         })
     }
 
-    private void validateLearningPathItemAndThrowException(String originalProjectId, SkillDef skillDef, SkillDef prereqSkillDef) {
-        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(originalProjectId, skillDef, prereqSkillDef)
+    private void validateLearningPathItemAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
         if (!dependencyCheckResult.possible) {
             throw new SkillException(dependencyCheckResult.reason, skillDef.projectId, skillDef.skillId, ErrorCode.FailedToAssignDependency)
         }
@@ -232,12 +232,12 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
-        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(projectId, skillDef, prereqSkillDef)
+        DependencyCheckResult dependencyCheckResult = validateLearningPathItem(skillDef, prereqSkillDef)
         return dependencyCheckResult
     }
 
     @Profile
-    DependencyCheckResult validateLearningPathItem(String originalProjectId, SkillDef skillDef, SkillDef prereqSkillDef) {
+    DependencyCheckResult validateLearningPathItem(SkillDef skillDef, SkillDef prereqSkillDef) {
         assert skillDef.skillId != prereqSkillDef.skillId || skillDef.projectId != prereqSkillDef.projectId
 
         if ("false" == skillDef.enabled) {
@@ -278,12 +278,6 @@ class SkillsDepsService {
             return new DependencyCheckResult(possible: false, failureType: DependencyCheckResult.FailureType.SkillVersion, reason: msg)
         }
 
-        // shared skills from another project cannot cause a circular issue
-        ProjDef projDef = projDefAccessor.getProjDef(originalProjectId)
-        if (prereqSkillDef.projectId != projDef.projectId) {
-            return new DependencyCheckResult()
-        }
-
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
         CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(skillDef: skillDef, prereqSkillDef: prereqSkillDef, existingGraph: existingGraph)
         if (prereqSkillDef.type == SkillDef.ContainerType.Badge) {
@@ -308,7 +302,7 @@ class SkillsDepsService {
     @Profile
     CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
         List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
-        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
+        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(projectId: it.projectId, skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
         return new CircularLearningPathChecker.BadgeAndSkills(
                 badgeGraphNode: new CircularLearningPathChecker.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
                 skills: badgeSkillInfos

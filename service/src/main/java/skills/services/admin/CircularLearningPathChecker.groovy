@@ -33,10 +33,37 @@ class CircularLearningPathChecker {
     //private
     List<BadgeAndSkills> badgeAndSkills = []
     Map<String, BadgeAndSkills> badgeAndSkillsByBadgeId = [:]
-    Map<String, List<SkillInfo>> prerequisiteNodeLookup
-    Map<String, List<SkillInfo>> prerequisiteParentNodeLookup
+    PrerequisiteNodeLookup prerequisiteNodeLookup = new PrerequisiteNodeLookup()
+
     // contains all of the badges by following start node in the opposite direction of prerequisite path
     List<SkillInfo> startNodeBadgesOnParentPath
+
+    static class PrerequisiteNodeLookup {
+        Map<String, List<SkillInfo>> prerequisiteNodeLookup = [:]
+        Map<String, List<SkillInfo>> prerequisiteParentNodeLookup = [:]
+
+        void addEdgePairs(List<SkillDefGraphResPair> edgePairs) {
+            edgePairs.groupBy { getMapKey(it.node.projectId, it.node.skillId) }.each {
+                List<SkillInfo> values = it.value.collect { new SkillInfo(projectId: it.prerequisite.projectId, skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
+                prerequisiteNodeLookup[it.key] = values
+            }
+            edgePairs.groupBy { getMapKey(it.prerequisite.projectId, it.prerequisite.skillId) }.each {
+                prerequisiteParentNodeLookup[it.key] = it.value.collect { new SkillInfo(projectId: it.node.projectId, skillId: it.node.skillId, name: it.node.name, type: it.node.type) }
+            }
+        }
+        List<SkillInfo> get(SkillInfo current) {
+            return prerequisiteNodeLookup[getMapKey(current)]
+        }
+        List<SkillInfo> getParents(SkillInfo current) {
+            return prerequisiteParentNodeLookup[getMapKey(current)]
+        }
+        private String getMapKey(SkillInfo s) {
+            return getMapKey(s.projectId, s.skillId)
+        }
+        private String getMapKey(String projectId, String skillId) {
+            return "${projectId}-${skillId}".toString()
+        }
+    }
 
     // methods
     CircularLearningPathChecker addBadgeAndSkills(BadgeAndSkills b) {
@@ -71,6 +98,7 @@ class CircularLearningPathChecker {
         }
     }
     protected static class SkillInfo {
+        String projectId
         String skillId
         String name
         SkillDef.ContainerType type
@@ -108,18 +136,9 @@ class CircularLearningPathChecker {
                 }
             }
         }
-        // only project local skills dependencies can cause a circular path
-        edgePairs = edgePairs?.findAll({ it.prerequisite.projectId == skillDef.projectId })
-        prerequisiteNodeLookup = [:]
-        edgePairs.groupBy { it.node.skillId }.each {
-            prerequisiteNodeLookup[it.key] = it.value.collect { new SkillInfo(skillId: it.prerequisite.skillId, name: it.prerequisite.name, type: it.prerequisite.type) }
-        }
-        prerequisiteParentNodeLookup = [:]
-        edgePairs.groupBy { it.prerequisite.skillId }.each {
-            prerequisiteParentNodeLookup[it.key] = it.value.collect { new SkillInfo(skillId: it.node.skillId, name: it.node.name, type: it.node.type) }
-        }
-        SkillInfo skillInfo = new SkillInfo(skillId: skillDef.skillId, name: skillDef.name, type: skillDef.type)
-        SkillInfo prereqSkillInfo = new SkillInfo(skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
+        prerequisiteNodeLookup.addEdgePairs(edgePairs)
+        SkillInfo skillInfo = new SkillInfo(projectId: skillDef.projectId, skillId: skillDef.skillId, name: skillDef.name, type: skillDef.type)
+        SkillInfo prereqSkillInfo = new SkillInfo(projectId: prereqSkillDef.projectId, skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
         List<SkillInfo> path = [skillInfo, prereqSkillInfo]
 
         startNodeBadgesOnParentPath = []
@@ -182,7 +201,7 @@ class CircularLearningPathChecker {
         }
 
 
-        List<SkillInfo> prereqNodes = prerequisiteNodeLookup.get(current.skillId)
+        List<SkillInfo> prereqNodes = prerequisiteNodeLookup.get(current)
         return handlePrerequisiteNodes(prereqNodes, start, path, currentIter)
     }
 
@@ -191,7 +210,7 @@ class CircularLearningPathChecker {
             throw new IllegalStateException("Number of [1000] iterations exceeded when checking for circular dependency for [${start.skillId}]")
         }
 
-        List<SkillInfo> skillInfos = prerequisiteParentNodeLookup[start.skillId]
+        List<SkillInfo> skillInfos = prerequisiteNodeLookup.getParents(start)
         for (SkillInfo skillInfo : skillInfos) {
             if (skillInfo.type == SkillDef.ContainerType.Badge) {
                 badges.add(skillInfo)
@@ -205,7 +224,7 @@ class CircularLearningPathChecker {
                                                           List<SkillInfo> path,
                                                           int currentIter) {
         if (prereqNodes) {
-            SkillInfo sameNodeFound = prereqNodes.find { it.skillId == start.skillId }
+            SkillInfo sameNodeFound = prereqNodes.find { it.skillId == start.skillId && it.projectId == start.projectId }
             if (sameNodeFound) {
                 List<SkillInfo> pathCopy = new ArrayList<>(path)
                 pathCopy.add(sameNodeFound)
