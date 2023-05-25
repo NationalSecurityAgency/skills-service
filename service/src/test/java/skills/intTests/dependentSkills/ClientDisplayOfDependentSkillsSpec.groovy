@@ -633,17 +633,13 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         def skillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(1).skillId)
 
         then:
-        skillSummary.dependencies.size() == 5
+        skillSummary.dependencies.size() == 3
         skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
         skillSummary.dependencies[0].dependsOn.skillId == badge.badgeId
         skillSummary.dependencies[1].skill.skillId == skills.get(1).skillId
         skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
-        skillSummary.dependencies[2].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[2].skill.skillId == skills.get(2).skillId
         skillSummary.dependencies[2].dependsOn.skillId == skills.get(3).skillId
-        skillSummary.dependencies[3].skill.skillId == skills.get(1).skillId
-        skillSummary.dependencies[3].dependsOn.skillId == skills.get(2).skillId
-        skillSummary.dependencies[4].skill.skillId == skills.get(2).skillId
-        skillSummary.dependencies[4].dependsOn.skillId == skills.get(3).skillId
     }
 
     def "dependencies are shown correctly for a skill when its badge depends on another badge and other skills"() {
