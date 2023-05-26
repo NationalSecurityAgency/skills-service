@@ -28,7 +28,7 @@ limitations under the License.
             <template v-slot:cell(edit)="data">
               <b-button @click="removeLearningPath(data)"
                         variant="outline-info" size="sm" class="text-info"
-                        :aria-label="'Remove shared skill path ' + data.item"
+                        :aria-label="`Remove learning path route of ${data.item.fromItem} to ${data.item.toItem}`"
                         data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></b-button>
             </template>
           </skills-b-table>
@@ -125,6 +125,8 @@ limitations under the License.
             if (ok) {
               SkillsService.removeDependency(data.item.toNode.projectId, data.item.toNode.skillId, data.item.fromNode.skillId, data.item.fromNode.projectId).then(() => {
                 this.$emit('update');
+              }).finally(() => {
+                this.$nextTick(() => this.$announcer.assertive(`Successfully removed Learning Path route of ${data.item.fromItem} to ${data.item.toItem}`));
               });
             }
           });

@@ -204,6 +204,7 @@ limitations under the License.
                 }
               });
           });
+          this.setVisNetworkTabIndex();
         } else {
           this.showGraph = false;
         }
@@ -252,6 +253,17 @@ limitations under the License.
 
         const data = { nodes: this.nodes, edges: this.edges };
         return data;
+      },
+      setVisNetworkTabIndex() {
+        setTimeout(() => {
+          const elements = document.getElementsByClassName('vis-network');
+          if (elements && elements.length === 1) {
+            const element = elements[0];
+            if (element) {
+              element.setAttribute('tabindex', -1);
+            }
+          }
+        }, 500);
       },
     },
     computed: {
