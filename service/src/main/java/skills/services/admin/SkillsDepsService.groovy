@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -45,6 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger
 @Service
 @Slf4j
 class SkillsDepsService {
+
+    @Value('#{"${skills.circularLearningPathChecker.maxIterations:1000}"}')
+    int circularLearningPathCheckerMaxIterations
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
@@ -279,33 +283,31 @@ class SkillsDepsService {
         }
 
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
-        CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(skillDef: skillDef, prereqSkillDef: prereqSkillDef, existingGraph: existingGraph)
-        if (prereqSkillDef.type == SkillDef.ContainerType.Badge) {
-            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(prereqSkillDef.id, prereqSkillDef.skillId, prereqSkillDef.name))
-        }
-        if (skillDef.type == SkillDef.ContainerType.Badge) {
-            circularLearningPathChecker.addBadgeAndSkills(loadBadgeSkills(skillDef.id, skillDef.skillId, skillDef.name))
-        }
-        if (existingGraph.nodes) {
-            List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge })
-            if (badgeNodes) {
-                circularLearningPathChecker.addAllBadgeAndSkills(badgeNodes.collect {
-                    Integer badgeId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
-                    return loadBadgeSkills(badgeId, it.skillId, it.name)
-                })
-            }
-        }
-
+        List<CircularLearningPathChecker.BadgeAndSkills> loadedBadges = loadBadgeSkills(skillDef.projectId)
+        CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(
+                circularLearningPathCheckerMaxIterations: circularLearningPathCheckerMaxIterations,
+                skillDef: skillDef,
+                prereqSkillDef: prereqSkillDef,
+                existingGraph: existingGraph,
+                badgeAndSkills: loadedBadges)
         return circularLearningPathChecker.check()
     }
 
     @Profile
-    CircularLearningPathChecker.BadgeAndSkills loadBadgeSkills(Integer badgeRefId, String badgeId, String badgeName) {
-        List<SkillDef> badgeSkills = skillRelDefRepo.findChildrenByParent(badgeRefId, [SkillRelDef.RelationshipType.BadgeRequirement])
-        List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = badgeSkills?.collect { new CircularLearningPathChecker.SkillInfo(projectId: it.projectId, skillId: it.skillId, name: it.name, type: it.type, belongsToBadge: true, belongsToBadgeId: badgeId) }
-        return new CircularLearningPathChecker.BadgeAndSkills(
-                badgeGraphNode: new CircularLearningPathChecker.SkillInfo(skillId: badgeId, name: badgeName, type: SkillDef.ContainerType.Badge),
-                skills: badgeSkillInfos
-        )
+    List<CircularLearningPathChecker.BadgeAndSkills> loadBadgeSkills(String projectId) {
+        List<SkillRelDefRepo.ParentChildSkillIds> parentChildSkillIds = skillRelDefRepo.findParentAndChildrenSkillIdsForProject(projectId, SkillRelDef.RelationshipType.BadgeRequirement)
+        if (!parentChildSkillIds) {
+            return []
+        }
+        Map<String, List<SkillRelDefRepo.ParentChildSkillIds>> byBadgeId = parentChildSkillIds.groupBy { it.parentSkillId }
+        return byBadgeId.collect {
+            List<CircularLearningPathChecker.SkillInfo> badgeSkillInfos = it.value?.collect {
+                new CircularLearningPathChecker.SkillInfo(projectId: projectId, skillId: it.childSkillId, name: it.childSkillName, type: SkillDef.ContainerType.Skill, belongsToBadge: true, belongsToBadgeId: it.parentSkillId)
+            }
+            return new CircularLearningPathChecker.BadgeAndSkills(
+                    badgeGraphNode: new CircularLearningPathChecker.SkillInfo(projectId: projectId, skillId: it.key, name: it.value[0].parentSkillName, type: SkillDef.ContainerType.Badge),
+                    skills: badgeSkillInfos
+            )
+        }
     }
 }
