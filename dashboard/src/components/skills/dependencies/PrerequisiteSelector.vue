@@ -20,23 +20,25 @@ limitations under the License.
     <b-overlay :show="isLoading" rounded="sm" opacity="0.2">
       <div class="row ml-1 mr-3 my-2 no-gutters">
         <div class="col-lg ml-2 mt-1">
-          From:
-          <skills-selector2 :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
+          <label for="learningItemFromInput">From:</label>
+          <skills-selector2 id="learningItemFromInput" :options="allSkills" v-on:added="onFromSelected" v-on:removed="onFromDeselected"
                             @selection-removed="onFromSelectionRemoved"
-                            :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
+                            aria-label="Select a skill or a badge for the Learning Path's from step"
+                            :selected="selectedFromSkills" :onlySingleSelectedValue="true" placeholder="From Skill or Badge"
                             :showType=true data-cy="learningPathFromSkillSelector"></skills-selector2>
         </div>
         <div class="col-lg mt-1 ml-2">
-          To:
-          <skills-selector2 :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
+          <label for="learningItemToInput">To:</label>
+          <skills-selector2 id="learningItemToInput" :options="allPotentialSkills" v-on:added="onToSelected" v-on:removed="onToDeselected"
                             @selection-removed="onToSelectionRemoved" :disabled="selectedFromSkills.length === 0"
-                            :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="Select a Skill or Badge"
+                            :selected="selectedToSkills" :onlySingleSelectedValue="true" placeholder="To Skill or Badge"
                             :showType=true data-cy="learningPathToSkillSelector"></skills-selector2>
         </div>
         <div class="col-lg-auto text-right mt-1 ml-2 align-self-end">
           <button type="button"
                   class="btn btn-info btn-floating skills-theme-btn" @click="onAddPath"
                   data-cy="addLearningPathItemBtn"
+                  aria-label="Add item to the learning path"
                   :disabled="selectedFromSkills.length === 0 || !toSkillId || invalid">Add <i class="fas fa-plus-circle" aria-hidden="true"/></button>
         </div>
       </div>
@@ -44,7 +46,7 @@ limitations under the License.
 
       <ValidationProvider ref="learningPathValidator" :immediate="true"
                           rules="validLearningPath" v-slot="{errors, valid}" name="Skill Name">
-        <input v-model="toSkillId" class="d-none"/>
+        <input v-model="toSkillId" class="d-none" aria-hidden="true" aria-label="Used to validate learning path route"/>
         <div v-if="!valid" class="mx-3 alert alert-danger" data-cy="learningPathError"><i class="fas fa-exclamation-triangle" aria-hidden="true"/><span v-html="errors[0]" class="px-3"/></div>
       </ValidationProvider>
 
@@ -167,6 +169,9 @@ limitations under the License.
             if (res) {
               SkillsService.assignDependency(this.toProjectId, this.toSkillId, this.selectedFromSkills[0].skillId, this.selectedFromSkills[0].projectId)
                 .then(() => {
+                  const from = this.selectedFromSkills[0].name;
+                  const to = this.toSkillName;
+                  this.$nextTick(() => this.$announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
                   this.clearData();
                   this.$emit('update');
                 });
@@ -197,28 +202,30 @@ limitations under the License.
                   return true;
                 }
 
+                let reason = '';
                 if (res.failureType && res.failureType === 'CircularLearningPath') {
                   const additionalBadgeMsg = res.violatingSkillInBadgeName ? `under the badge <b>${res.violatingSkillInBadgeName}</b> ` : '';
-                  return `<b>${self.toSkillName}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
-                }
-                if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
-                  return 'Multiple badges on the same Learning path cannot have overlapping skills. '
+                  reason = `<b>${self.toSkillName}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
+                } else if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
+                  reason = 'Multiple badges on the same Learning path cannot have overlapping skills. '
                     + `Both <b>${res.violatingSkillInBadgeName}</b> badge and <b>${self.toSkillName}</b> badge have <b>${res.violatingSkillName}</b> skill.`;
-                }
-                if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
-                  return `Provided badge <b>${self.toSkillName}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
-                }
-                if (res.failureType && res.failureType === 'AlreadyExist') {
-                  return `Learning path from <b>${res.violatingSkillName}</b> to <b>${self.toSkillName}</b> already exists.`;
-                }
-                if (res.failureType && res.failureType === 'SkillInCatalog') {
-                  return `Skill <b>${self.toSkillName}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
-                }
-                if (res.failureType && res.failureType === 'ReusedSkill') {
-                  return `Skill <b>${self.toSkillName}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
+                } else if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
+                  reason = `Provided badge <b>${self.toSkillName}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
+                } else if (res.failureType && res.failureType === 'AlreadyExist') {
+                  reason = `Learning path from <b>${res.violatingSkillName}</b> to <b>${self.toSkillName}</b> already exists.`;
+                } else if (res.failureType && res.failureType === 'SkillInCatalog') {
+                  reason = `Skill <b>${self.toSkillName}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
+                } else if (res.failureType && res.failureType === 'ReusedSkill') {
+                  reason = `Skill <b>${self.toSkillName}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
+                } else {
+                  reason = res.reason;
                 }
 
-                return `${res.reason}`;
+                const div = document.createElement('div');
+                div.innerHTML = reason;
+                const reasonWithoutHtmlTags = div.textContent || div.innerText || '';
+                self.$nextTick(() => self.$announcer.polite(`Learning Path item cannot be added. ${reasonWithoutHtmlTags}`));
+                return `${reason}`;
               });
           },
         });

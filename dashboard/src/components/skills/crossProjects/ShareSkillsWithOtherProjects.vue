@@ -48,6 +48,7 @@ limitations under the License.
           <div class="row px-3">
             <div class="col text-center text-sm-left">
               <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
+                      aria-label="Share skill with another project"
                       :disabled="!shareButtonEnabled" data-cy="shareButton">
                 <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
               </button>
@@ -85,6 +86,8 @@ limitations under the License.
   import InlineHelp from '../../utils/InlineHelp';
   import MetricsCard from '../../metrics/utils/MetricsCard';
   import ProjectService from '../../projects/ProjectService';
+
+  const allProjectsConstant = 'ALL_SKILLS_PROJECTS';
 
   export default {
     name: 'ShareSkillsWithOtherProjects',
@@ -148,7 +151,7 @@ limitations under the License.
       },
       loadSharedSkills() {
         this.loading.sharedSkills = true;
-        SkillsShareService.getSharedSkills(this.projectId)
+        return SkillsShareService.getSharedSkills(this.projectId)
           .then((data) => {
             this.sharedSkills = data;
             this.loading.sharedSkillsInit = false;
@@ -163,7 +166,7 @@ limitations under the License.
           this.displayError = false;
           this.loading.sharedSkills = true;
           const selectedSkill = this.selectedSkills[0];
-          let sharedProjectId = 'ALL_SKILLS_PROJECTS';
+          let sharedProjectId = allProjectsConstant;
           if (!this.shareWithAllProjects) {
             sharedProjectId = this.selectedProject.projectId;
           }
@@ -172,7 +175,10 @@ limitations under the License.
               this.loading.sharedSkills = true;
               this.selectedProject = null;
               this.selectedSkills = [];
-              this.loadSharedSkills();
+              this.loadSharedSkills().then(() => {
+                const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId;
+                this.$nextTick(() => this.$announcer.assertive(`Skill with id of ${selectedSkill.skillId} was shared with ${sharedWith}`));
+              });
             });
         }
       },
@@ -190,13 +196,16 @@ limitations under the License.
       },
       deleteSharedSkill(itemToRemove) {
         this.loading.sharedSkills = true;
-        let sharedProjectId = 'ALL_SKILLS_PROJECTS';
+        let sharedProjectId = allProjectsConstant;
         if (!itemToRemove.sharedWithAllProjects) {
           sharedProjectId = itemToRemove.projectId;
         }
         SkillsShareService.deleteSkillShare(this.projectId, itemToRemove.skillId, sharedProjectId)
           .then(() => {
             this.loadSharedSkills();
+          }).finally(() => {
+            const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId;
+            this.$nextTick(() => this.$announcer.assertive(`Removed shared skill ${itemToRemove.skillId} from ${sharedWith}`));
           });
       },
       onSelectedProject(item) {

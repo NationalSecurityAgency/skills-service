@@ -17,9 +17,9 @@ limitations under the License.
   <div class="deps-overlay">
       <b-form-radio-group id="radio-group-2" v-model="sortMethod"
                           name="graph-sort-method" button-variant="outline-hc" stacked buttons>
-        <b-form-radio value="directed" v-b-tooltip.hover="msg.directed" :aria-label="msg.directed"><span><i
+        <b-form-radio value="directed" v-b-tooltip.hover="msg.directed" :aria-label="msg.directed" tabindex="-1"><span><i
           class="fas fa-vector-square"></i> Directed</span></b-form-radio>
-        <b-form-radio value="hubsize" v-b-tooltip.hover="msg.hubsize" :aria-label="msg.hubsize"><span><i
+        <b-form-radio value="hubsize" v-b-tooltip.hover="msg.hubsize" :aria-label="msg.hubsize" tabindex="-1"><span><i
           class="fas fa-bezier-curve"></i> Hubsize</span></b-form-radio>
       </b-form-radio-group>
   </div>
