@@ -762,7 +762,7 @@ class SkillsLoader {
 
         // Filter out any duplicate paths
         deps.unique(true, { a, b ->
-            a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
+            a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId ?: a.dependsOn.projectId <=> b.dependsOn.projectId ?: a.skill.projectId <=> b.skill.projectId
         })
 
         return new SkillDependencyInfo(dependencies: deps)
