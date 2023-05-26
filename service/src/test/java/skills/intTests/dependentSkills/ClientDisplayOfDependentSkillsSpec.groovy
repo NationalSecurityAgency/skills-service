@@ -690,4 +690,43 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         skillSummary.dependencies[2].skill.skillId == skills.get(2).skillId
         skillSummary.dependencies[2].dependsOn.skillId == skills.get(3).skillId
     }
+
+    def "dependencies are shown correctly when a prerequisite skill is part of a badge that has prerequisites"() {
+        String userId = "user1"
+        List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each{
+            it.pointIncrement = 50
+        }
+        def subject = SkillsFactory.createSubject()
+
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(2).skillId], userId, new Date())
+        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(3).skillId], userId, new Date())
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: SkillsFactory.defaultProjId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        // from skill 1 to skill 2
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(1).skillId, skills.get(0).skillId)
+        // from skill 3 to badge 1 (skill 1)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, badge.badgeId, skills.get(2).skillId)
+
+        when:
+        def skillSummary = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(1).skillId)
+
+        then:
+        skillSummary.dependencies.size() == 2
+        skillSummary.dependencies[0].skill.skillId == skills.get(1).skillId
+        skillSummary.dependencies[0].dependsOn.skillId == skills.get(0).skillId
+        skillSummary.dependencies[1].skill.skillId == skills.get(0).skillId
+        skillSummary.dependencies[1].dependsOn.skillId == skills.get(2).skillId
+    }
 }
