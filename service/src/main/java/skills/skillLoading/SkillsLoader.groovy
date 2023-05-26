@@ -718,6 +718,7 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     SkillDependencyInfo loadSkillDependencyInfo(String projectId, String userId, String skillId) {
         List<GraphRelWithAchievement> graphDBRes = postgresQlNativeRepo.getDependencyGraphWithAchievedIndicator(projectId, skillId, userId)
 
@@ -764,13 +765,13 @@ class SkillsLoader {
             a.skill.skillId <=> b.skill.skillId ?: a.dependsOn.skillId <=> b.dependsOn.skillId
         })
 
-        return new SkillDependencyInfo(dependencies: deps.unique())
+        return new SkillDependencyInfo(dependencies: deps)
     }
 
     @Profile
     List<SkillDependencyInfo.SkillRelationship> processDependenciesForBadges(String skillId, String projectId, String userId) {
         def depsToAdd = new ArrayList<SkillDependencyInfo.SkillRelationship>()
-        def badgesIds = skillDefRepo.findParentSkillsByIdAndRelationshipType(skillId, SkillRelDef.RelationshipType.BadgeRequirement, ContainerType.Badge)
+        def badgesIds = skillDefRepo.findParentSkillsByIdAndRelationshipType(skillId, SkillRelDef.RelationshipType.BadgeRequirement, ContainerType.Badge, projectId)
         if(badgesIds) {
             badgesIds.forEach(it -> {
                 def badgeDeps = loadSkillDependencyInfo(projectId, userId, it)
