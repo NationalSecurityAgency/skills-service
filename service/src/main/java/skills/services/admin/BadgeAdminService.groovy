@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
@@ -41,6 +42,9 @@ import skills.utils.Props
 @Service
 @Slf4j
 class BadgeAdminService {
+
+    @Value('#{"${skills.circularLearningPathChecker.maxIterations:1000}"}')
+    int circularLearningPathCheckerMaxIterations
 
     @Autowired
     LockingService lockingService
@@ -259,7 +263,7 @@ class BadgeAdminService {
     private void validateAgainstLearningPath(String projectId, String badgeId, String skillid) {
         SkillDef badge = skillDefAccessor.getSkillDef(projectId, badgeId, [SkillDef.ContainerType.Badge])
         SkillsGraphRes existingGraph = skillsDepsService.getDependentSkillsGraph(projectId)
-
+        List<CircularLearningPathChecker.BadgeAndSkills> badgeAndSkills = skillsDepsService.loadBadgeSkills(projectId)
         if (existingGraph.nodes) {
             List<SkillDefGraphRes> badgeNodes = existingGraph.nodes.findAll { it.skillId == badge.skillId }
             if (badgeNodes) {
@@ -271,16 +275,9 @@ class BadgeAdminService {
                         SkillDef skillDef = skillDefItem.skillId == badge.skillId ? badge : skillDefAccessor.getSkillDef(projectId, skillDefItem.skillId, [skillDefItem.type])
                         SkillDef prreqDef = prereqDefItem.skillId == badge.skillId ? badge : skillDefAccessor.getSkillDef(projectId, prereqDefItem.skillId, [prereqDefItem.type])
                         CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(
+                                circularLearningPathCheckerMaxIterations: circularLearningPathCheckerMaxIterations,
+                                badgeAndSkills: badgeAndSkills,
                                 skillDef: skillDef, prereqSkillDef: prreqDef, existingGraph: existingGraph, performAlreadyExistCheck: false)
-
-                        List<SkillDefGraphRes> badgeNodesOnly = existingGraph.nodes.findAll({ it.type == SkillDef.ContainerType.Badge })
-                        if (badgeNodesOnly) {
-                            circularLearningPathChecker.addAllBadgeAndSkills(badgeNodesOnly.collect {
-                                Integer badgeIdInGraph = skillDefRepo.getIdByProjectIdAndSkillIdAndType(it.projectId, it.skillId, SkillDef.ContainerType.Badge)
-                                return skillsDepsService.loadBadgeSkills(badgeIdInGraph, it.skillId, it.name)
-                            })
-                        }
-
                         DependencyCheckResult dependencyCheckResult = circularLearningPathChecker.check()
                         if (!dependencyCheckResult.possible) {
                             String msg = "Adding skill [${skillid}] to badge [${badge.skillId}] violates the Learning Path. Reason: ${dependencyCheckResult.reason}"

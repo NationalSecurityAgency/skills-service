@@ -401,7 +401,7 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         result.reason == "Multiple badges on the same Learning path cannot have overlapping skills. Both badge [Test Badge 1] and [Test Badge 2] badge have [${p1Skills[3].name}] skill."
     }
 
-    def "badge -> skill -> [adding this learning path item] -> skill -> badge: cannot add the same badge twice"() {
+    def "badge -> skill -> [adding this learning path item] -> skill -> badge: cannot add the same skill twice"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(10, 1, 1, 100)
@@ -553,4 +553,83 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         result.reason =="Skill [TestProject1:skill1] is not shared (or does not exist) to [TestProject2] project"
     }
 
+    def "allow shared cross-project skills to the learning path even it happens to have the same skill-id is one of the existing skills on the path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 1)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, proj2_subj, proj2_skills)
+        skillsService.shareSkill(p2.projectId, proj2_skills[0].skillId, p1.projectId)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, p1Skills[2].skillId)
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p2.projectId, proj2_skills[0].skillId)
+        then:
+        proj2_skills[0].skillId == p1Skills[0].skillId
+        result.possible == true
+    }
+
+    def "badge[skill1] -> badge (skill 2) + skill2 -> skill1 circular dependency"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[1].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1.projectId, badge2.badgeId)
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1.projectId, p1Skills[0].skillId)
+        then:
+        result.possible == false
+        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
+        result.violatingSkillInBadgeId == badge2.badgeId
+        result.violatingSkillInBadgeName == badge2.name
+        result.reason == "Discovered circular prerequisite [Skill:skill2 -> Skill:skill1 -> Badge:badge1 -> Badge:badge2(Skill:skill2)]"
+    }
+
+    def "skill2 -> skill1 + badge[skill1] -> badge[skill 2] circular dependency"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[1].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1.projectId, p1Skills[0].skillId)
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1.projectId, badge2.badgeId)
+        then:
+        result.possible == false
+        result.failureType == DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath.toString()
+        !result.violatingSkillInBadgeId
+        !result.violatingSkillInBadgeName
+        result.violatingSkillId == p1Skills[0].skillId
+        result.violatingSkillName == p1Skills[0].name
+        result.reason == "Badge [Test Badge 1] has skill [Test Skill 1] which already exists on the Learning Path."
+    }
 }

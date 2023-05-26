@@ -146,4 +146,66 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
     });
 
+    it('self report reject messages are validated against custom validators', () => {
+        cy.intercept('POST', '/admin/projects/proj1/approvals/reject').as('reject');
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+        cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
+        cy.get('[data-cy="approveBtn"]').should('be.enabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="rejectBtn"]').click();
+        cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
+        cy.get('[data-cy="rejectionInputMsg"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="rejectionInputMsgError"]').should('not.be.visible')
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="rejectionInputMsg"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - May not contain divinedragon word.');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}');
+        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
+        cy.get('[data-cy="confirmRejectionBtn"]').click();
+
+        cy.wait('@reject');
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+        ]);
+    });
 });
