@@ -49,12 +49,21 @@ limitations under the License.
     },
     mounted() {
       this.numDependencies = 0;
+      let numCompleted = 0;
+      const alreadyCountedIds = [];
       this.dependencies.forEach((dependency) => {
-        if (dependency.dependsOn) {
-          this.numDependencies += 1;
+        const { dependsOn } = dependency;
+        if (dependsOn) {
+          const lookup = `${dependsOn.projectId}-${dependsOn.skillId}`;
+          if (!alreadyCountedIds.includes(lookup)) {
+            this.numDependencies += 1;
+            if (dependency.achieved) {
+              numCompleted += 1;
+            }
+            alreadyCountedIds.push(lookup);
+          }
         }
       });
-      const numCompleted = this.dependencies.filter((item) => item.achieved).length;
       if (this.numDependencies > 0 && numCompleted > 0) {
         this.percentComplete = Math.floor((numCompleted / this.numDependencies) * 100);
       }

@@ -90,12 +90,14 @@ limitations under the License.
       const prerequisites = [];
       this.prerequisitesLinks.forEach((link) => {
         const prereq = link.dependsOn;
-        if (!alreadyAddedIds.includes(prereq.id)) {
+        const lookup = `${prereq.projectId}-${prereq.skillId}`;
+        if (!alreadyAddedIds.includes(lookup)) {
           prerequisites.push({
             ...prereq,
             achieved: link.achieved,
             isCrossProject: link.crossProject,
           });
+          alreadyAddedIds.push(lookup);
         }
       });
 

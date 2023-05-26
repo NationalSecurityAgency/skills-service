@@ -285,4 +285,55 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="crossProjAlert"]')
     });
 
+    it('learning path graph with multiple links to the same prerequisite', function() {
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+        cy.createSkill(1, 1, 5)
+        cy.createSkill(1, 1, 6)
+        cy.createSkill(1, 1, 7)
+        cy.createSkill(1, 1, 8)
+
+        cy.addLearningPathItem(1, 1, 2)
+        cy.addLearningPathItem(1, 2, 3)
+
+        cy.addLearningPathItem(1, 4, 5)
+        cy.addLearningPathItem(1, 5, 6)
+
+        cy.addLearningPathItem(1, 1, 6)
+        cy.addLearningPathItem(1, 5, 3)
+
+        cy.addLearningPathItem(1, 3, 7)
+        cy.addLearningPathItem(1, 6, 7)
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
+        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+        cy.cdVisit('/subjects/subj1/skills/skill7');
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Skill 1')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 2')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 3')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('Skill 4')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"] [aria-colindex="1"]').contains('Skill 5')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"] [aria-colindex="1"]').contains('Skill 6')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').should('not.exist')
+
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"] [aria-colindex="3"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').should('not.exist')
+
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
+            .contains('6');
+        cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
+            .contains('33%');
+    });
+
 });
