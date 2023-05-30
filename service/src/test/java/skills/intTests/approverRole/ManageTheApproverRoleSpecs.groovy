@@ -158,7 +158,7 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
     def "approver can not mutate project's data"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(1,)
+        def skills = SkillsFactory.createSkills(2,)
         skills[0].pointIncrement = 200
         skills[0].numPerformToCompletion = 5
         skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
@@ -192,6 +192,16 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
             user1Service.addOrUpdateProjectSetting(proj.projectId, "one", "two")
         }
         skillsService.addOrUpdateProjectSetting(proj.projectId, "one", "two")
+
+        hasPermissionException {
+            user1Service.addLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
+        }
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
+
+        hasPermissionException {
+            user1Service.deleteLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
+        }
+        skillsService.deleteLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
     }
 
     def "approver can approve self reporting requests"() {

@@ -22,6 +22,9 @@ limitations under the License.
       loadProjConfig() {
         return this.$store.dispatch('afterProjConfigStateLoaded').then((projConfig) => projConfig);
       },
+      isReadOnlyProjMethod() {
+        return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.user_project_role);
+      },
     },
     computed: {
       isLoadingProjConfig() {
@@ -40,7 +43,7 @@ limitations under the License.
         return this.$store.getters.projConfig && this.$store.getters.projConfig['help.url.root'];
       },
       isReadOnlyProj() {
-        return this.$store.getters.projConfig && UserRolesUtil.isReadOnlyProjRole(this.$store.getters.projConfig.user_project_role);
+        return this.isReadOnlyProjMethod();
       },
       userProjRole() {
         return this.$store.getters.projConfig && this.$store.getters.projConfig.user_project_role;
