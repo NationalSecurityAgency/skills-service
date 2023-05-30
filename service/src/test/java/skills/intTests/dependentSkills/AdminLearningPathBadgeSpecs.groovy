@@ -386,6 +386,59 @@ class AdminLearningPathBadgeSpecs extends DefaultIntSpec {
         ].sort()
     }
 
+    def "able to add skill1->skill2 when both skills are under the same badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId,  p1Skills[1].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph) == [
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[0].skillId}]",
+        ].sort()
+    }
+
+    def "able to add skill1->skill2 when both skills are under 2 separate badges"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[1].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId,  p1Skills[1].skillId)
+
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        then:
+        edges(graph) == [
+                "[Skill:${p1Skills[1].skillId}] prerequisite for [Skill:${p1Skills[0].skillId}]",
+        ].sort()
+    }
+
     private List<String> edges(def graph) {
         def idToSkillIdMap = graph.nodes.collectEntries {[it.id, it]}
         return graph.edges.collect {
