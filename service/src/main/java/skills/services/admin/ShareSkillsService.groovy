@@ -45,6 +45,9 @@ class ShareSkillsService {
     @Autowired
     SkillDefAccessor skillDefAccessor
 
+    @Autowired
+    SkillsDepsService skillsDepsService
+
     @Transactional(readOnly = true)
     List<SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
@@ -99,6 +102,11 @@ class ShareSkillsService {
 
         if (!skillShareDef){
             throw new SkillException("Failed to find skill share definition for project [$projectId] skill [$skillId] => [$sharedToProjectId] project", projectId, skillId)
+        }
+        if (sharedToProjectId == ALL_SKILLS_PROJECTS) {
+            skillsDepsService.removeAllLearningPathItemsBySkillId(projectId, skillId)
+        } else {
+            skillsDepsService.removeAllLearningPathItemsBySkillIdAndProjectId(sharedToProjectId, skillId, projectId)
         }
         skillShareDefRepo.delete(skillShareDef)
     }

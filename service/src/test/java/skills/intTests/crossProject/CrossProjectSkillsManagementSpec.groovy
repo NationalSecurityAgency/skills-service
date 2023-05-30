@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 
 class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
@@ -662,4 +663,199 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         results.size() == 1
     }
 
+    def "removing shared skill removes it from learning paths"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
+
+        def proj1SharedSkills = skillsService.getSharedSkills(proj1.projectId)
+        def proj1SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj1.projectId)
+
+        def proj2SharedSkills = skillsService.getSharedSkills(proj2.projectId)
+        def proj2SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj2.projectId)
+
+        def hasDependencyBeforeDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        skillsService.deleteShared(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+
+        def proj1SharedSkills_afterDelete = skillsService.getSharedSkills(proj1.projectId)
+        def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
+        def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        then:
+        proj1SharedSkills.size() == 1
+        proj2SharedWithMeSkills.size() == 1
+        !proj1SharedWithMeSkills
+        !proj2SharedSkills
+        hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyBeforeDelete[0].hasDependency == true
+
+        proj1SharedSkills_afterDelete.size() == 0
+        proj2SharedWithMeSkills_afterDelete.size() == 0
+        hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyAfterDelete[0].hasDependency == false
+    }
+
+    def "removing shared skill with all projects removes it from learning paths"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, 'ALL_SKILLS_PROJECTS')
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
+
+        def proj1SharedSkills = skillsService.getSharedSkills(proj1.projectId)
+        def proj1SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj1.projectId)
+
+        def proj2SharedSkills = skillsService.getSharedSkills(proj2.projectId)
+        def proj2SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj2.projectId)
+
+        def hasDependencyBeforeDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        skillsService.deleteShared(proj1.projectId, proj1_skills.get(0).skillId, 'ALL_SKILLS_PROJECTS')
+
+        def proj1SharedSkills_afterDelete = skillsService.getSharedSkills(proj1.projectId)
+        def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
+        def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        then:
+        proj1SharedSkills.size() == 1
+        proj2SharedWithMeSkills.size() == 1
+        !proj1SharedWithMeSkills
+        !proj2SharedSkills
+        hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyBeforeDelete[0].hasDependency == true
+
+        proj1SharedSkills_afterDelete.size() == 0
+        proj2SharedWithMeSkills_afterDelete.size() == 0
+        hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyAfterDelete[0].hasDependency == false
+    }
+
+    def "deleting shared skill removes it from learning paths"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, proj2.projectId)
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
+
+        def proj1SharedSkills = skillsService.getSharedSkills(proj1.projectId)
+        def proj1SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj1.projectId)
+
+        def proj2SharedSkills = skillsService.getSharedSkills(proj2.projectId)
+        def proj2SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj2.projectId)
+
+        def hasDependencyBeforeDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        skillsService.deleteSkill([projectId: proj1.projectId, subjectId: proj1_subj.subjectId, skillId: proj1_skills.get(0).skillId,])
+
+        def proj1SharedSkills_afterDelete = skillsService.getSharedSkills(proj1.projectId)
+        def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
+        def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        then:
+        proj1SharedSkills.size() == 1
+        proj2SharedWithMeSkills.size() == 1
+        !proj1SharedWithMeSkills
+        !proj2SharedSkills
+        hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyBeforeDelete[0].hasDependency == true
+
+        proj1SharedSkills_afterDelete.size() == 0
+        proj2SharedWithMeSkills_afterDelete.size() == 0
+        hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyAfterDelete[0].hasDependency == false
+    }
+
+    def "deleting shared skill with all projects removes it from learning paths"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj2_skills)
+
+        when:
+        skillsService.shareSkill(proj1.projectId, proj1_skills.get(0).skillId, 'ALL_SKILLS_PROJECTS')
+        skillsService.addLearningPathPrerequisite(proj2.projectId, proj2_skills.get(0).skillId, proj1.projectId, proj1_skills.get(0).skillId)
+
+        def proj1SharedSkills = skillsService.getSharedSkills(proj1.projectId)
+        def proj1SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj1.projectId)
+
+        def proj2SharedSkills = skillsService.getSharedSkills(proj2.projectId)
+        def proj2SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj2.projectId)
+
+        def hasDependencyBeforeDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        skillsService.deleteSkill([projectId: proj1.projectId, subjectId: proj1_subj.subjectId, skillId: proj1_skills.get(0).skillId,])
+
+        def proj1SharedSkills_afterDelete = skillsService.getSharedSkills(proj1.projectId)
+        def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
+        def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
+
+        then:
+        proj1SharedSkills.size() == 1
+        proj2SharedWithMeSkills.size() == 1
+        !proj1SharedWithMeSkills
+        !proj2SharedSkills
+        hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyBeforeDelete[0].hasDependency == true
+
+        proj1SharedSkills_afterDelete.size() == 0
+        proj2SharedWithMeSkills_afterDelete.size() == 0
+        hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
+        hasDependencyAfterDelete[0].hasDependency == false
+    }
 }
