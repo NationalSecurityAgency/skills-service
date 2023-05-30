@@ -436,4 +436,22 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
                  from global_badge_level_definition
                  where project_id = ?1) levelReq''', nativeQuery = true)
     boolean belongsToGlobalBadge(String projectId)
+
+    @Query(value = '''SELECT srd FROM SkillRelDef srd, SkillDef skill, SkillDef relatedSkill
+                      WHERE srd.type = 'Dependence' AND
+                      srd.child = skill AND
+                      srd.parent = relatedSkill AND 
+                      skill.projectId = :originalProjectId AND 
+                      skill.skillId = :skillId AND 
+                      relatedSkill.projectId = :projectId''')
+    List<SkillRelDef> findAllDependenciesForSkillIdAndProjectIdForProject(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("originalProjectId") String originalProjectId)
+
+    @Query(value = '''SELECT srd FROM SkillRelDef srd, SkillDef skill, SkillDef relatedSkill
+                      WHERE srd.type = 'Dependence' AND
+                      srd.child = skill AND
+                      srd.parent = relatedSkill AND
+                      skill.projectId = :projectId AND 
+                      skill.skillId = :skillId AND 
+                      relatedSkill.projectId != :projectId''')
+    List<SkillRelDef> findAllDependenciesForSkillIdAndProjectId(@Param("projectId") String projectId, @Param("skillId") String skillId)
 }

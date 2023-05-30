@@ -106,6 +106,18 @@ class SkillsDepsService {
                 dependencyProjectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
     }
 
+    @Transactional()
+    void removeAllLearningPathItemsBySkillId(String projectId, String skillId) {
+        def relationships = skillRelDefRepo.findAllDependenciesForSkillIdAndProjectId(projectId, skillId)
+        skillRelDefRepo.deleteAllById(relationships.collect{it.id})
+    }
+
+    @Transactional()
+    void removeAllLearningPathItemsBySkillIdAndProjectId(String projectId, String skillId, String originalProjectId) {
+        def relationships = skillRelDefRepo.findAllDependenciesForSkillIdAndProjectIdForProject(projectId, skillId, originalProjectId)
+        skillRelDefRepo.deleteAllById(relationships.collect{it.id})
+    }
+
     static class GraphSkillDefEdge {
         SkillDefGraphRes from
         SkillDefGraphRes to
