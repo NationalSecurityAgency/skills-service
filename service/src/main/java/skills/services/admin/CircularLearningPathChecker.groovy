@@ -141,6 +141,8 @@ class CircularLearningPathChecker {
         Boolean circularCheckProvidedBecauseFollowingSkillsUnderBadge = false
 
         Boolean circularCheckBadgeLoadedDueToPreviousSkill = false
+        // when following all of badges for a given skill, keep track which badge Id is follow
+        String circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = null
 
         @Override
         protected Object clone() throws CloneNotSupportedException {
@@ -201,10 +203,10 @@ class CircularLearningPathChecker {
         SkillInfo sameNodeFound = path.find { SkillInfo checkItem ->
             boolean sameItem = checkItem.skillId == current.skillId && checkItem.projectId == current.projectId && checkItem.type == current.type;
             boolean skillLoadedDueToBadge = current.type == SkillDef.ContainerType.Skill && current.circularCheckBadgeLoadedDueToPreviousSkill
-            if (skillLoadedDueToBadge) {
+            if (sameItem && skillLoadedDueToBadge) {
                 List<SkillInfo> checkTheseBadges = badgeAndSkillsLookup.findBadgesThisSkillBelongsTo(checkItem.skillId)
                 if (checkTheseBadges) {
-                    SkillInfo compliantBadge = checkTheseBadges.find {it.skillId == current.belongsToBadgeId }
+                    SkillInfo compliantBadge = checkTheseBadges.find {it.skillId == current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId }
                     sameItem = (compliantBadge == null)
                 }
             }
@@ -246,6 +248,7 @@ class CircularLearningPathChecker {
             for ( SkillInfo pNode : skillsUnderBadgeToCheck ) {
                 SkillInfo skillCopy = pNode.clone()
                 skillCopy.circularCheckBadgeLoadedDueToPreviousSkill = current.circularCheckBadgeLoadedDueToPreviousSkill
+                skillCopy.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId
                 DependencyCheckResult res = recursiveCircularPrerequisiteCheck(skillCopy, pathCopy, currentIter+1)
                 if (!res.possible) {
                     return res
@@ -271,7 +274,7 @@ class CircularLearningPathChecker {
             badgesOnPath = badgesOnPath.findAll { it.type == SkillDef.ContainerType.Badge }
             for (SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
                 BadgeAndSkills badge = badgeAndSkillsLookup.getBadgeByBadgeId(badgeOnPathSkillInfo.skillId)
-                if (badge.badgeHasSkillId(current.skillId)) {
+                if (badge.badgeHasSkillId(current.skillId) && badge.badgeGraphNode.skillId != current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId) {
                     return new DependencyCheckResult(possible: false,
                             failureType: DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath,
                             violatingSkillId: current.skillId,
@@ -283,9 +286,14 @@ class CircularLearningPathChecker {
             if (!current.circularCheckProvidedBecauseFollowingSkillsUnderBadge) {
                 List<SkillInfo> badgesIBelongTo = badgeAndSkillsLookup.findBadgesThisSkillBelongsTo(current.skillId)
                 if (badgesIBelongTo) {
+                    // do not follow try to walk down badge that is currently being checked
+                    if (current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId) {
+                        badgesIBelongTo = badgesIBelongTo.findAll( { it.skillId != current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId })
+                    }
                     for (SkillInfo badgeIBelongTo : badgesIBelongTo) {
                         SkillInfo myBadge = badgeIBelongTo.clone()
                         myBadge.circularCheckBadgeLoadedDueToPreviousSkill = true
+                        myBadge.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = myBadge.skillId
                         List<SkillInfo> pathCopy = new ArrayList<>(path)
                         pathCopy.add(current)
                         DependencyCheckResult res = recursiveCircularPrerequisiteCheck(myBadge, pathCopy, currentIter + 1)
@@ -304,7 +312,10 @@ class CircularLearningPathChecker {
         List<SkillInfo> pathCopy = new ArrayList<>(path)
         pathCopy.add(current)
         for ( SkillInfo pNode : prereqNodes ) {
-            DependencyCheckResult res = recursiveCircularPrerequisiteCheck(pNode, pathCopy, currentIter+1)
+            SkillInfo nodeCopy = pNode.clone()
+            nodeCopy.circularCheckBadgeLoadedDueToPreviousSkill = current.circularCheckBadgeLoadedDueToPreviousSkill
+            nodeCopy.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId
+            DependencyCheckResult res = recursiveCircularPrerequisiteCheck(nodeCopy, pathCopy, currentIter+1)
             if (!res.possible) {
                 return res
             }
