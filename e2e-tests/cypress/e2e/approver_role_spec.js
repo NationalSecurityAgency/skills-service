@@ -335,7 +335,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it('/prerequisites page - approver role has no mutation controls', function () {
+    it('/learning-path page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/learning-path`);
@@ -350,6 +350,15 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="graphLegend"]')
+            cy.get('[data-cy="learningPathFromSkillSelector"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="learningPathToSkillSelector"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="addLearningPathItemBtn"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+            cy.get('[aria-rowindex="1"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[aria-rowindex="2"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'View','not.')
