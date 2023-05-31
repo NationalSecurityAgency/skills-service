@@ -44,6 +44,7 @@ limitations under the License.
 <script>
   import SkillsService from '@/components/skills/SkillsService';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import LoadingContainer from '../../utils/LoadingContainer';
   import NoContent2 from '../../utils/NoContent2';
   import MetricsCard from '../../metrics/utils/MetricsCard';
@@ -51,7 +52,7 @@ limitations under the License.
 
   export default {
     name: 'DependencyTable',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin],
     props: ['isLoading', 'data'],
     components: {
       MetricsCard,
@@ -60,6 +61,26 @@ limitations under the License.
       SkillsBTable,
     },
     data() {
+      const fields = [
+        {
+          key: 'fromItem',
+          label: 'From',
+          sortable: true,
+        },
+        {
+          key: 'toItem',
+          label: 'To',
+          sortable: true,
+        },
+      ];
+      if (!this.isReadOnlyProjMethod()) {
+        fields.push({
+          key: 'edit',
+          label: 'Remove',
+          sortable: false,
+        });
+      }
+
       return {
         learningPaths: [],
         isProcessing: true,
@@ -69,23 +90,7 @@ limitations under the License.
             bordered: false,
             outlined: true,
             stacked: 'md',
-            fields: [
-              {
-                key: 'fromItem',
-                label: 'From',
-                sortable: true,
-              },
-              {
-                key: 'toItem',
-                label: 'To',
-                sortable: true,
-              },
-              {
-                key: 'edit',
-                label: 'Remove',
-                sortable: false,
-              },
-            ],
+            fields,
             pagination: {
               server: false,
               currentPage: 1,
