@@ -86,7 +86,7 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/projects/proj1')
-        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('All Dragons')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
 
         cy.get('[data-cy="btn_edit-project"]').click()
 
@@ -97,7 +97,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
         cy.get('[data-cy="saveProjectButton"]').click()
-        cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('Divine Dragon')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access is restricted to Divine Dragon users only and cannot be lifted/disabled');
