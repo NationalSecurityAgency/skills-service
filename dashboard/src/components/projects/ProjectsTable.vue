@@ -62,8 +62,13 @@ limitations under the License.
                            :aria-label="`Manage Project ${data.item.name}  via link`">
                 <div class="h5">{{ data.item.name }}</div>
               </router-link>
-
-              <div class="text-muted" style="font-size: 0.9rem;">ID: {{ data.item.projectId }}</div>
+              <div v-if="data.item.userCommunity" class="my-2" data-cy="userCommunity">
+                <span class="border p-1 border-danger rounded"><i
+                  class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
+                  class="text-secondary font-italic ml-1">{{ beforeCommunityLabel }}</span> <span
+                  class="font-weight-bold text-primary">{{ data.item.userCommunity }}</span> <span
+                  class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
+              </div>
               <div class="mt-2">
                 <i class="fas fa-user-shield text-success" style="font-size: 1.05rem;" aria-hidden="true"></i> <i>Role:</i> <span data-cy="userRole">{{ data.item.userRole | userRole }}</span>
               </div>
@@ -71,15 +76,15 @@ limitations under the License.
             <div class="col-auto ml-auto mr-0">
               <router-link :data-cy="`manageProjBtn_${data.item.projectId}`" :to="{ name:'Subjects', params: { projectId: data.item.projectId, project: data.item }}"
                            :aria-label="`Manage Project ${data.item.name}`"
-                           class="btn btn-outline-primary btn-sm mr-2">
+                           class="btn btn-outline-primary btn-sm mr-2 mt-1">
                 <span class="d-none d-sm-inline">{{ isProjReadOnly(data.item) ? 'View' : 'Manage' }} </span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
               </router-link>
-              <b-button v-if="isRootUser" class="mr-2" @click="unpin(data.item)" data-cy="unpin" size="sm"
+              <b-button v-if="isRootUser" class="mr-2 mt-1" @click="unpin(data.item)" data-cy="unpin" size="sm"
                         variant="outline-primary" :aria-label="'remove pin for project '+ data.item.name"
                         :aria-pressed="data.item.pinned">
                 <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
               </b-button>
-              <b-button-group v-if="!isProjReadOnly(data.item)" size="sm" class="ml-0">
+              <b-button-group v-if="!isProjReadOnly(data.item)" size="sm" class="ml-0 mt-1">
                 <b-button @click="showProjectEditModal(data.item)"
                           variant="outline-primary" :data-cy="`editProjectId${data.item.projectId}`"
                           :aria-label="'edit Project '+data.item.name"
@@ -160,6 +165,7 @@ limitations under the License.
 <script>
   import dayjs from '@/common-components/DayJsCustomizer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import ProjectService from '@/components/projects/ProjectService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
@@ -169,7 +175,7 @@ limitations under the License.
 
   export default {
     name: 'ProjectsTable',
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, CommunityLabelsMixin],
     props: ['projects', 'copyProjectDisabled'],
     data() {
       return {

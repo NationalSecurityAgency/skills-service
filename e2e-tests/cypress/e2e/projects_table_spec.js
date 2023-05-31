@@ -60,47 +60,47 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'proj11'
+                value: 'project 11'
             }],
             [{
                 colIndex: 0,
-                value: 'proj10'
+                value: 'project 10'
             }],
             [{
                 colIndex: 0,
-                value: 'proj9'
+                value: 'project 9'
             }],
             [{
                 colIndex: 0,
-                value: 'proj8'
+                value: 'project 8'
             }],
             [{
                 colIndex: 0,
-                value: 'proj7'
+                value: 'project 7'
             }],
             [{
                 colIndex: 0,
-                value: 'proj6'
+                value: 'project 6'
             }],
             [{
                 colIndex: 0,
-                value: 'proj5'
+                value: 'project 5'
             }],
             [{
                 colIndex: 0,
-                value: 'proj4'
+                value: 'project 4'
             }],
             [{
                 colIndex: 0,
-                value: 'proj3'
+                value: 'project 3'
             }],
             [{
                 colIndex: 0,
-                value: 'proj2'
+                value: 'project 2'
             }],
             [{
                 colIndex: 0,
-                value: 'proj1'
+                value: 'project 1'
             }],
         ], 10);
 
@@ -111,47 +111,47 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'proj1'
+                value: 'project 1'
             }],
             [{
                 colIndex: 0,
-                value: 'proj2'
+                value: 'project 2'
             }],
             [{
                 colIndex: 0,
-                value: 'proj3'
+                value: 'project 3'
             }],
             [{
                 colIndex: 0,
-                value: 'proj4'
+                value: 'project 4'
             }],
             [{
                 colIndex: 0,
-                value: 'proj5'
+                value: 'project 5'
             }],
             [{
                 colIndex: 0,
-                value: 'proj6'
+                value: 'project 6'
             }],
             [{
                 colIndex: 0,
-                value: 'proj7'
+                value: 'project 7'
             }],
             [{
                 colIndex: 0,
-                value: 'proj8'
+                value: 'project 8'
             }],
             [{
                 colIndex: 0,
-                value: 'proj9'
+                value: 'project 9'
             }],
             [{
                 colIndex: 0,
-                value: 'proj10'
+                value: 'project 10'
             }],
             [{
                 colIndex: 0,
-                value: 'proj11'
+                value: 'project 11'
             }],
         ], 10);
     });
@@ -190,12 +190,9 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'MyBrandNewtestProject'
+                value: 'My Brand New test Project'
             }],
         ], 10);
-
-        cy.contains('My Brand New test Project');
-        cy.contains('ID: MyBrandNewtestProject');
 
         cy.get('[data-cy="projectsTable-resetBtn"]')
             .click();
@@ -231,7 +228,7 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'proj10'
+                value: 'project 10'
             }],
         ], 10);
 
@@ -280,21 +277,15 @@ describe('Projects Table Tests', () => {
         cy.get('button[data-cy=saveProjectButton]')
             .click();
 
-        /* focus is automatically getting switched back to the edit button which pre-emptively moves the cursor out of the text input field before
+        /* focus is automatically getting switched back to the edit button which pre-emptively moves the cursor out of the text input field
           before the full text has been entered depending on test timing
          */
-        cy.wait(600);
+        cy.wait(2000);
         cy.get('[data-cy="projectsTable-projectFilter"]').should('be.enabled')
         cy.get('[data-cy="projectsTable-projectFilter"]')
             .type('Changed');
         cy.get('[data-cy="projectsTable-filterBtn"]')
             .click();
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 0,
-                value: 'proj1'
-            }],
-        ], 10);
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -319,7 +310,6 @@ describe('Projects Table Tests', () => {
         cy.get('button[data-cy=saveProjectButton]')
             .click();
         cy.get('[data-cy="projCell_proj1A"]')
-            .contains('ID: proj1A');
     });
 
     it('Manage existing project using Button', function () {
@@ -391,43 +381,43 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'proj1'
+                value: 'project 1'
             }],
             [{
                 colIndex: 0,
-                value: 'proj2'
+                value: 'project 2'
             }],
             [{
                 colIndex: 0,
-                value: 'proj3'
+                value: 'project 3'
             }],
             [{
                 colIndex: 0,
-                value: 'proj4'
+                value: 'project 4'
             }],
             [{
                 colIndex: 0,
-                value: 'proj5'
+                value: 'project 5'
             }],
             [{
                 colIndex: 0,
-                value: 'proj6'
+                value: 'project 6'
             }],
             [{
                 colIndex: 0,
-                value: 'proj7'
+                value: 'project 7'
             }],
             [{
                 colIndex: 0,
-                value: 'proj8'
+                value: 'project 8'
             }],
             [{
                 colIndex: 0,
-                value: 'proj9'
+                value: 'project 9'
             }],
             [{
                 colIndex: 0,
-                value: 'proj10'
+                value: 'project 10'
             }],
         ], 10);
 
@@ -437,43 +427,43 @@ describe('Projects Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'proj10'
+                value: 'project 10'
             }],
             [{
                 colIndex: 0,
-                value: 'proj9'
+                value: 'project 9'
             }],
             [{
                 colIndex: 0,
-                value: 'proj8'
+                value: 'project 8'
             }],
             [{
                 colIndex: 0,
-                value: 'proj7'
+                value: 'project 7'
             }],
             [{
                 colIndex: 0,
-                value: 'proj6'
+                value: 'project 6'
             }],
             [{
                 colIndex: 0,
-                value: 'proj5'
+                value: 'project 5'
             }],
             [{
                 colIndex: 0,
-                value: 'proj4'
+                value: 'project 4'
             }],
             [{
                 colIndex: 0,
-                value: 'proj3'
+                value: 'project 3'
             }],
             [{
                 colIndex: 0,
-                value: 'proj2'
+                value: 'project 2'
             }],
             [{
                 colIndex: 0,
-                value: 'proj1'
+                value: 'project 1'
             }],
         ], 10);
     });
@@ -514,7 +504,7 @@ describe('Projects Table Tests', () => {
             [
                 {
                     colIndex: 0,
-                    value: 'proj1'
+                    value: 'project 1'
                 },
                 {
                     colIndex: 1,
