@@ -285,6 +285,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         adminProjects.size() == 1
         adminProjects[0].projectId == projs[0].projectId
         adminProjects[0].name == projs[0].name
+        !adminProjects[0].userCommunity
     }
 
     def "user community project is included in admin projects when admin is a member of the UC"() {
@@ -317,9 +318,11 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         adminProjects.size() == 2
         adminProjects[0].projectId == projs[0].projectId
         adminProjects[0].name == projs[0].name
+        adminProjects[0].userCommunity == 'All Dragons'
 
         adminProjects[1].projectId == projs[1].projectId
         adminProjects[1].name == projs[1].name
+        adminProjects[1].userCommunity == 'Divine Dragon'
     }
 
     def "user community project is not included in admin projects when root is not a member of the UC"() {
@@ -358,6 +361,7 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         adminProjects.size() == 1
         adminProjects[0].projectId == projs[0].projectId
         adminProjects[0].name == projs[0].name
+        !adminProjects[0].userCommunity
     }
 
     def "user community project is included in admin projects when root is a member of the UC"() {
@@ -391,9 +395,11 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         adminProjects.size() == 2
         adminProjects[0].projectId == projs[0].projectId
         adminProjects[0].name == projs[0].name
+        adminProjects[0].userCommunity == 'All Dragons'
 
         adminProjects[1].projectId == projs[1].projectId
         adminProjects[1].name == projs[1].name
+        adminProjects[1].userCommunity == 'Divine Dragon'
     }
 
     def "user community project is included in my progress summary when user is a member of the UC"() {
