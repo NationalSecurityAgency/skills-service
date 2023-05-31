@@ -32,6 +32,17 @@ limitations under the License.
           <i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
         </b-button>
       </div>
+      <div slot="subTitle" v-if="project">
+        <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
+          <span class="border p-1 border-danger rounded"><i
+            class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
+          class="text-secondary font-italic ml-1">{{ beforeCommunityLabel }}</span> <span
+          class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
+          class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
+        </div>
+        <div class="h6"><span class="border p-1 border-info rounded mr-1 mb-2">
+          <i class="fas fa-fingerprint text-info" aria-hidden="true"/></span> <span class="font-italic text-muted">Project ID</span>: {{ project.projectId }}</div>
+      </div>
       <div slot="subSubTitle" v-if="project">
         <b-button-group v-if="!isReadOnlyProj" class="mb-3" size="sm">
           <b-button @click="displayEditProject"
@@ -172,14 +183,6 @@ limitations under the License.
         }
 
         const stats = [];
-        if (this.project.userCommunity) {
-          stats.push({
-            label: this.beforeCommunityLabel,
-            preformatted: `<div class="h5 font-weight-bold mb-0">${this.project.userCommunity}</div>`,
-            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${this.afterCommunityLabel}</div>`,
-            icon: 'fas fa-shield-alt text-danger',
-          });
-        }
         stats.push({
           label: visibilityLabel,
           preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
