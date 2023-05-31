@@ -128,4 +128,23 @@ describe('Community Projects Tests', () => {
         cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStat_For"]').contains('All Dragons')
         cy.get('[data-cy="pageHeaderStat"] [data-cy="pageHeaderStatSecondaryLabel_For"]').contains('Nation')
     });
+
+    it('uc label on projects table', () => {
+        for (let i = 0; i < 8; i++) {
+            cy.createProject(i + 3)
+        }
+        cy.visit('/administrator')
+        cy.get('[data-cy="projCell_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+        cy.get('[data-cy="projCell_proj2"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj3"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj4"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj5"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj6"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj7"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj8"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj9"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+        cy.get('[data-cy="projCell_proj10"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
+    });
+
+
 });
