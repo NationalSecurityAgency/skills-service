@@ -91,6 +91,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(tableSelector).contains('View Run')
         cy.get(headerSelector)
             .contains('User')
             .click();
@@ -111,6 +112,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row2-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(tableSelector).contains('View Run')
         cy.get(headerSelector)
             .contains('User')
             .click();
@@ -130,6 +132,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
         cy.visit('/administrator/quizzes/quiz2/results');
         const tableSelector = '[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(tableSelector).contains('View Run')
         cy.get(headerSelector)
             .contains('User')
             .click();
