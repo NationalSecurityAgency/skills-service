@@ -392,7 +392,7 @@ describe('Project Settings Tests', () => {
             .click({ force: true });
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
-        cy.get('[data-cy="pageHeaderStat"]')
+        cy.get('[data-cy="pageHeaderStat_Protection"]')
             .eq(0)
             .should('include.text', 'PRIVATE');
         cy.get('[data-cy="pageHeaderStat"]')
