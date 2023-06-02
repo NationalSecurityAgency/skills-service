@@ -109,7 +109,7 @@ describe('Community Projects Tests', () => {
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
     });
 
-    it.only('show community indicator using defaults on the project page - via direct page loading', () => {
+    it('show community indicator using defaults on the project page - via direct page loading', () => {
 
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
