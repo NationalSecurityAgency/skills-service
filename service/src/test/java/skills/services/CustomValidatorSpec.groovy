@@ -374,6 +374,17 @@ line two
 
 """).valid
 
+        !validator.validateDescription("""(A)
+
+```
+line one
+
+(B)
+line two
+```
+
+""").valid
+
         validator.validateDescription("""(A) empty
 ```
 
