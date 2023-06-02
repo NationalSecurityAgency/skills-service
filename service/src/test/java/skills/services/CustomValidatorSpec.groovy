@@ -647,6 +647,10 @@ if (a == true) {
 
 <em>(A) <del>cool</del>, not cool</em>""").valid
 
+        validator.validateDescription('<span style=\"font-size:16.0pt;\nline-height:107%\">(A) fancy formatting</span>').valid
+        validator.validateDescription("""<span style="font-size:16.0pt;
+line-height:107%">(A) fancy formatting</span>""").valid
+
         validator.validateDescription("""### (A) this is a heading""").valid
         validator.validateDescription("""### <em class="some-class" unknown>(A)</em> this is a heading""").valid
         validator.validateDescription("""### <strong><em>(A)</em></strong> this is a heading""").valid
