@@ -29,6 +29,7 @@ import skills.controller.request.model.*
 import skills.services.admin.UserCommunityService
 import skills.utils.InputSanitizer
 
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @Slf4j
@@ -76,6 +77,7 @@ class CustomValidator {
     private static final Pattern HEADER_OR_BLOCK_QUOTE = ~/^([\n]?[#>]{1,}[\s])+/
     private static final Pattern BOLD_AND_ITALICS = ~/^(\s*)[*_]{1,3}([^*_]+)[*_]{1,3}/
     private static final Pattern HTML = ~/(?s)<[\/]?\w+(?: .+?)*>/
+    private static final Pattern CODEBLOCK = ~/(?ms)(^[`]{3}$.*?^[`]{3}$)/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
@@ -203,6 +205,15 @@ class CustomValidator {
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
+
+        // remove two+ newlines from codeblocks so we do not split
+        StringBuilder out = new StringBuilder()
+        Matcher matcher = CODEBLOCK.matcher(toValidate)
+        while(matcher.find()) {
+            matcher.appendReplacement(out, matcher.group(1).replaceAll(/[\n]{2,}+/, '\n'))
+        }
+        matcher.appendTail(out)
+        toValidate = out.toString()
 
         return toValidate.trim()
     }

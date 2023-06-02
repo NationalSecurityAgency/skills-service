@@ -355,6 +355,29 @@ if (a == true) {
 <br>
 (A) new sentence after a few new lines
 ```""").valid
+
+        validator.validateDescription("""(A)
+```
+<template>
+</template>
+```
+
+""").valid
+
+        validator.validateDescription("""(A)
+
+```
+line one
+
+line two
+```
+
+""").valid
+
+        validator.validateDescription("""(A) empty
+```
+
+```""").valid
     }
 
     def "support markdown headers"() {

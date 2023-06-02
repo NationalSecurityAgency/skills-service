@@ -223,6 +223,29 @@ class AdminEditSpecs extends DefaultIntSpec {
         updated.description == "second"
     }
 
+    def "Edit project description with code block"() {
+        String descWithCodeBlock = """(A)
+```
+<template>
+</template>
+```
+
+"""
+        Map proj = SkillsFactory.createProject()
+        proj.description = "first"
+        skillsService.createProject(proj)
+
+        when:
+        def start = skillsService.getProjectDescription(proj.projectId)
+        proj.description = descWithCodeBlock
+        skillsService.updateProject(proj, proj.projectId)
+        def updated = skillsService.getProjectDescription(proj.projectId)
+
+        then:
+        start.description == "first"
+        updated.description == descWithCodeBlock
+    }
+
     def "Create project with invalid json"(){
         when:
 
@@ -636,6 +659,28 @@ class AdminEditSpecs extends DefaultIntSpec {
         def subject = skillsService.getSubject([subjectId: 'mySubj', projectId: proj1.projectId])
         then:
         subject.description == 'this is a description <a href="http://somewhere">I\'m a link</a>'
+    }
+
+    def "Allow codeblock in Subject description"(){
+        String descWithCodeBlock = """(A)
+```
+<template>
+</template>
+```
+
+"""
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+        def subj = SkillsFactory.createSubject(1, 1)
+        subj.subjectId = 'mySubj'
+        subj.description = descWithCodeBlock
+        skillsService.createSubject(subj)
+
+        def subject = skillsService.getSubject([subjectId: 'mySubj', projectId: proj1.projectId])
+        then:
+        subject.description == descWithCodeBlock
     }
 
     def "Prevent injection in Skill description"(){
