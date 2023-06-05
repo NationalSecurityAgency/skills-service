@@ -154,6 +154,24 @@ paragraph"""
         resGood.body.valid
     }
 
+    def "check codeblock against description validation endpoint"() {
+        String descWithCodeBlock = """(A)
+```
+<template>
+</template>
+```
+
+"""
+        when:
+        def res = skillsService.checkCustomDescriptionValidation("should not jabberwocky have")
+        def resGood = skillsService.checkCustomDescriptionValidation(descWithCodeBlock)
+        then:
+        !res.body.valid
+        res.body.msg == "paragraphs may not contain jabberwocky"
+
+        resGood.body.valid
+    }
+
     def "check against name validation endpoint"() {
         when:
         def res = skillsService.checkCustomNameValidation("should not jabberwocky have")
