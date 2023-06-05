@@ -145,9 +145,15 @@ class SkillsService {
 
     @Profile
     def createProjectAndSubjectAndSkills(Map projProps, Map subjProps, List skills) {
-        createProject(projProps)
-        createSubject(subjProps)
-        createSkills(skills)
+        if (projProps) {
+            createProject(projProps)
+        }
+        if (subjProps) {
+            createSubject(subjProps)
+        }
+        if (skills) {
+            createSkills(skills)
+        }
     }
 
     @Profile
@@ -733,6 +739,26 @@ class SkillsService {
         }
         if (version >= 0) {
             url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
+    def getApiSkills(String projectId, String query = null, String userId = null, Integer limit = null, Integer page = null, String orderBy = null, Boolean ascending = null) {
+        String url = "/projects/${projectId}/skills?query=${query ?: ''}"
+        if (userId != null) {
+            url = "${url}&userId=${userId}"
+        }
+        if (limit != null) {
+            url = "${url}&limit=${limit}"
+        }
+        if (ascending != null) {
+            url = "${url}&ascending=${ascending}"
+        }
+        if (orderBy != null) {
+            url = "${url}&orderBy=${orderBy}"
+        }
+        if (page != null) {
+            url = "${url}&page=${page}"
         }
         wsHelper.apiGet(url)
     }

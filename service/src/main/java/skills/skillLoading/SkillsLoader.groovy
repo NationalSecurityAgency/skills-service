@@ -131,9 +131,6 @@ class SkillsLoader {
     SkillEventsSupportRepo skillEventsSupportRepo
 
     @Autowired
-    SkillsLoader skillsLoader
-
-    @Autowired
     GlobalBadgesService globalBadgesService
 
     @Autowired
