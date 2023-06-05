@@ -98,6 +98,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(CAST(expiration.expiringUnused AS BOOLEAN), false) as expiring,
                     expiration.expirationTriggeredDate as expirationTriggered,
                     events.latest AS lastReportedSkill,
+                    COALESCE(CAST(userCommunity.protectedCommunityEnabled AS BOOLEAN), false) as protectedCommunityEnabled,
                     pd.created,
                     GREATEST(skills.skillUpdated, badges.badgeUpdated, subjects.subjectUpdated, pd.updated) as lastEdited
                 FROM project_definition pd
@@ -109,6 +110,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, value AS protectedCommunityEnabled FROM settings WHERE setting = 'user_community' and value = 'true') userCommunity ON userCommunity.project_id = pd.project_id
             """, nativeQuery = true)
     @Nullable
     List<ProjSummaryResult> getAllSummaries()
@@ -232,6 +234,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(subjects.subjectCount, 0) AS numSubjects,
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     COALESCE(CAST(expiration.expiringUnused AS BOOLEAN), false) as expiring,
+                    COALESCE(CAST(userCommunity.protectedCommunityEnabled AS BOOLEAN), false) as protectedCommunityEnabled,
                     expiration.expirationTriggeredDate as expirationTriggered,
                     events.latest AS lastReportedSkill,
                     pd.created
@@ -244,6 +247,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, value AS expiringUnused, updated as expirationTriggeredDate FROM settings WHERE type = 'Project' AND setting = 'expiration.expiring.unused' AND value = 'true') expiration ON expiration.project_id = pd.project_id
+                LEFT JOIN (SELECT project_id, value AS protectedCommunityEnabled FROM settings WHERE setting = 'user_community' and value = 'true') userCommunity ON userCommunity.project_id = pd.project_id
                 WHERE LOWER(pd.name) LIKE LOWER(CONCAT('%',?1,'%'))
             """, nativeQuery = true)
     @Nullable

@@ -354,6 +354,9 @@ class ProjAdminService {
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             ProjectResult res = convert(it, projectIdSortOrder, pinnedProjectIds)
             res.userRole = RoleName.ROLE_SUPER_DUPER_USER
+            if (isNotCommunityMember) {
+                res.userCommunity = null
+            }
             return res
         })
 
@@ -378,9 +381,17 @@ class ProjAdminService {
         Map<String, Integer> projectIdSortOrder = [:]
         List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userInfoService.getCurrentUserId(), rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.value }
-        return projects?.unique({ it.projectId })?.collect({
+        boolean isNotCommunityMember = !userCommunityService.isUserCommunityMember(userInfoService.currentUserId);
+        if (isNotCommunityMember) {
+            projects = projects.findAll { !it.protectedCommunityEnabled}
+        }
+        List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             return convert(it, projectIdSortOrder, pinnedProjects?.toSet())
         })
+        if (isNotCommunityMember) {
+            finalRes.each { it.userCommunity = null }
+        }
+        return finalRes
     }
 
     private validateRootUser(){

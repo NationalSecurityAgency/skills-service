@@ -500,4 +500,71 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         !myBadges.find {it.projectId ==  projs[1].projectId}
     }
 
+    def "user community project is not included in get all projects when root is not a member of the UC"() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            return proj
+        }
+
+        transactionTemplate.execute({
+            userTagRepo.deleteByUserId(pristineDragonsUser.userName)
+        })
+
+        when:
+        def allProjects = rootUser.getAllProjects().sort { it.projectId }
+        def searchProjects = rootUser.searchProjects("2")
+
+        then:
+
+        allProjects.size() == 2
+        allProjects[0].projectId == 'Inception'
+
+        allProjects[1].projectId == projs[0].projectId
+        allProjects[1].name == projs[0].name
+        !allProjects[1].userCommunity
+
+        !searchProjects
+    }
+
+    def "user community project is included in get all projects when root is a member of the UC"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            return proj
+        }
+
+        when:
+        def allProjects = rootUser.getAllProjects().sort { it.projectId }
+        def searchProjects = rootUser.searchProjects("2")
+
+        then:
+        allProjects.size() == 3
+
+        allProjects[0].projectId == 'Inception'
+
+        allProjects[1].projectId == projs[0].projectId
+        allProjects[1].name == projs[0].name
+        allProjects[1].userCommunity == 'All Dragons'
+
+        allProjects[2].projectId == projs[1].projectId
+        allProjects[2].name == projs[1].name
+        allProjects[2].userCommunity == 'Divine Dragon'
+
+        searchProjects.size() == 1
+        searchProjects[0].projectId == projs[1].projectId
+        searchProjects[0].name == projs[1].name
+        searchProjects[0].userCommunity == 'Divine Dragon'
+    }
+
 }
