@@ -109,6 +109,28 @@ describe('Community Projects Tests', () => {
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
     });
 
+    it('show community indicator using defaults on the project page - via direct page loading', () => {
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.userCommunityBeforeLabel = null
+                conf.userCommunityAfterLabel = null
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visit('/administrator/projects/proj1')
+        cy.wait('@loadConfig');
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('Divine Dragon')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For').should('not.exist')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('Nation').should('not.exist')
+
+        cy.visit('/administrator/projects/proj2')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('All Dragons')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For').should('not.exist')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('Nation').should('not.exist')
+    });
+
     it('show community indicator on the project page - via navigation', () => {
         cy.visit('/administrator')
         cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')

@@ -18,10 +18,10 @@ limitations under the License.
     name: 'CommunityLabelsMixin',
     computed: {
       beforeCommunityLabel() {
-        return (this.$store.getters.config && this.$store.getters.config.userCommunityBeforeLabel) || 'Supports';
+        return (this.$store.getters.config && this.$store.getters.config.userCommunityBeforeLabel) || '';
       },
       afterCommunityLabel() {
-        return (this.$store.getters.config && this.$store.getters.config.userCommunityAfterLabel) || 'Community';
+        return (this.$store.getters.config && this.$store.getters.config.userCommunityAfterLabel) || '';
       },
       currentUserCommunity() {
         return this.$store.getters.userInfo?.userCommunity;
