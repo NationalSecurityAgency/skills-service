@@ -203,6 +203,9 @@ limitations under the License.
             // removed already selected items
             this.optionsInternal = this.optionsInternal.filter((el) => !this.selected.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
           }
+          if (this.optionsInternal && this.optionsInternal.length === 0) {
+            this.$announcer.polite('No elements found. Consider changing the search query');
+          }
         }
       },
       considerRemoval(removedItem) {
