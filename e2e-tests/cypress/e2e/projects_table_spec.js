@@ -303,8 +303,7 @@ describe('Projects Table Tests', () => {
 
         cy.get('[data-cy=editProjectIdproj1]')
             .click();
-        cy.get('[data-cy="idInputEnableControl"] a')
-            .click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy="idInputValue"]')
             .type('A');
         cy.get('button[data-cy=saveProjectButton]')
