@@ -1802,8 +1802,7 @@ describe('Global Badges Tests', () => {
 
         cy.get('button[data-cy=btn_edit-badge]')
             .click();
-        cy.get('[data-cy=idInputEnableControl] a')
-            .click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}a_new_id');
         cy.get('button[data-cy=saveBadgeButton]')

@@ -1837,8 +1837,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=btn_edit-badge]')
             .click();
-        cy.get('[data-cy=idInputEnableControl] a')
-            .click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}iwasedited');
         cy.get('button[data-cy=saveBadgeButton]')
