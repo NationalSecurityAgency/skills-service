@@ -351,6 +351,12 @@ limitations under the License.
               };
               this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
+            } else {
+              const theErrors = Object.values(this.$refs.observer.errors).flat();
+              if (theErrors && theErrors.length > 0) {
+                const msg = `There are ${theErrors.length} form error${theErrors.length > 1 ? 's' : ''}. ${theErrors.join(' and ')}`;
+                this.$nextTick(() => this.$announcer.polite(msg));
+              }
             }
           });
       },
