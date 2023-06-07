@@ -31,6 +31,9 @@ describe('Accessibility Tests', () => {
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' })
         cy.createSkill(1, 1, 4)
 
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
+
         cy.createBadge(1)
         cy.assignSkillToBadge(1, 1, 1);
         cy.enableBadge(1, 1);
@@ -69,6 +72,23 @@ describe('Accessibility Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy=projCard_proj1_manageBtn]').click();
         cy.get('[data-cy=manageBtn_subj1]');
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y()
+    });
+
+    it('project and subject reused skills', () => {
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y()
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="projectLastReportedSkill"]')
 
         cy.customLighthouse();
         cy.injectAxe();
