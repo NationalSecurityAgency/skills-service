@@ -31,9 +31,6 @@ describe('Accessibility Tests', () => {
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' })
         cy.createSkill(1, 1, 4)
 
-        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
-        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
-
         cy.createBadge(1)
         cy.assignSkillToBadge(1, 1, 1);
         cy.enableBadge(1, 1);
@@ -61,6 +58,9 @@ describe('Accessibility Tests', () => {
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 13, 'user@skills.org', '2021-02-24 10:00', false);
+
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
     });
 
     after(() => {
