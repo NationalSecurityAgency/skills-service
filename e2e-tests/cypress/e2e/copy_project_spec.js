@@ -235,6 +235,7 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="idInputValue"]').should('have.value', 'LoremIpsum')
 
         cy.realPress('Tab');
+        cy.realPress('Tab');
         cy.contains('Enable to override auto-generated value').should('be.visible');
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
