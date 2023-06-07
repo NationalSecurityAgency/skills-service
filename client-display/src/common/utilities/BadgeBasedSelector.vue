@@ -22,6 +22,7 @@ limitations under the License.
              @click="updateValue(item.value)"
              @keydown.enter="updateValue(item.value)"
              tabindex="0"
+             :aria-label="`${item.label} filter. ${item.value !== value ? 'Click to Select.' : 'Currently Selected.'}`"
              data-cy="badge-selector">{{ item.label }}</b-badge>
   </span>
 </template>

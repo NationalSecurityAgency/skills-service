@@ -16,7 +16,8 @@ limitations under the License.
 <template>
   <div class="card h-100" @click.stop="openMyBadges" @keydown.enter="openMyBadges"
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges"
-       tabindex="0">
+       tabindex="0"
+       :aria-label="`You have earned ${numBadgesCompleted} badge${numBadgesCompleted !== 1 ? 's' : ''}. Click to navigate to My Badges page.`">
     <div class="card-header">
       <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
     </div>
