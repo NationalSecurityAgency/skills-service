@@ -57,8 +57,7 @@ limitations under the License.
                         @shown="tooltipShowing=true"
                         @hidden="tooltipShowing=false"/>
 
-              <div class="mt-2">
-                <label>Description</label>
+              <div class="mt-3">
                 <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">
                   <markdown-editor v-model="subjectInternal.description"
                                    aria-errormessage="subjectDescError"

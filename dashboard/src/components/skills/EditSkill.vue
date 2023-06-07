@@ -221,7 +221,6 @@ limitations under the License.
             <hr class="mt-0"/>
 
             <div class="">
-            <label class="label">Description</label>
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
                 <markdown-editor v-model="skillInternal.description" data-cy="skillDescription"/>

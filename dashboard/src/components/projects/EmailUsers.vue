@@ -95,15 +95,14 @@ limitations under the License.
           <hr />
           <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
           <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
-            <b-form-group class="w-100" id="subject-line-input-group" label="Subject Line" label-for="subject-line-input" label-class="text-muted">
-              <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
-            </b-form-group>
+            <label for="subject-line-input">Subject Line</label>
+            <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
           </div>
           <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
-            <b-form-group class="w-100" id="body-input-group" label="Email Body" label-for="body-input" label-class="text-muted">
-              <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body" :resizable="true" :allow-attachments="false"
-                               :use-html="true" />
-            </b-form-group>
+            <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"
+                             label="Email Body"
+                             :resizable="true" :allow-attachments="false"
+                             :use-html="true"/>
           </div>
           <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
             <b-button class="mr-3" data-cy="previewUsersEmail"

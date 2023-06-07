@@ -77,12 +77,10 @@ limitations under the License.
 
         <div class="row mt-3" v-if="showDescription">
           <div class="col-12">
-            <label id="quizDescriptionLabel" for="quizDescription">Description</label>
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="400"
                                 v-slot="{errors}"
                                 name="Quiz/Survey Description">
               <markdown-editor id="quizDescription"
-                               aria-labelledby="quizDescriptionLabel"
                                v-model="quizInternal.description" data-cy="quizDescription"></markdown-editor>
               <small role="alert" class="form-text text-danger mb-3"
                      data-cy="quizDescriptionError">{{ errors[0] }}</small>

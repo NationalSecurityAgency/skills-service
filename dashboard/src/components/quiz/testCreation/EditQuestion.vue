@@ -24,12 +24,11 @@ limitations under the License.
       <skills-spinner :is-loading="loading"/>
       <b-container v-if="!loading" fluid data-cy="editQuestionModal">
         <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
-        <div class="mb-2">
-          <span class="font-weight-bold text-primary">Question:</span>
-        </div>
 
         <ValidationProvider rules="required|maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Question">
           <markdown-editor v-if="showQuestion && questionDefInternal"
+                           label="Question"
+                           label-class="font-weight-bold text-primary"
                            :resizable="true"
                            v-focus
                            markdownHeight="150px"
@@ -39,7 +38,7 @@ limitations under the License.
         </ValidationProvider>
 
         <div class="mt-3 mb-2">
-          <span class="font-weight-bold text-primary">Answers:</span>
+          <span class="font-weight-bold text-primary">Answers</span>
         </div>
         <div v-if="questionDef.quizType === 'Survey'" class="row mb-2 no-gutters">
           <div class="col">

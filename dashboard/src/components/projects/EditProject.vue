@@ -98,10 +98,11 @@ limitations under the License.
         </div>
         <div class="row">
           <div class="mt-2 col-12">
-            <label>Description</label>
               <ValidationProvider rules="maxDescriptionLength|customProjectDescriptionValidator" :debounce="250" v-slot="{errors}"
                                   name="Project Description">
-                <markdown-editor v-if="!isEdit || descriptionLoaded" v-model="internalProject.description" @input="updateDescription"></markdown-editor>
+                <markdown-editor v-if="!isEdit || descriptionLoaded"
+                                 v-model="internalProject.description"
+                                 @input="updateDescription" />
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
           </div>
