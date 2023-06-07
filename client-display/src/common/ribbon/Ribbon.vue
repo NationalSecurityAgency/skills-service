@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="non-semantic-protector">
-    <h3
+    <div
       :style="{ 'background': color }"
       class="category-ribbon">
       <span
@@ -33,7 +33,7 @@ limitations under the License.
       <span
         :style="{ 'border-color': `${shadowColor0} transparent ${shadowColor0} ${shadowColor0}` }"
         class="ribbon-shadow-0 after" />
-    </h3>
+    </div>
   </div>
 </template>
 
@@ -72,7 +72,7 @@ limitations under the License.
     position: relative;
     z-index: 1;
 
-    h3.category-ribbon {
+    .category-ribbon {
       font-size: 1rem;
       color: #ffffff;
     }
