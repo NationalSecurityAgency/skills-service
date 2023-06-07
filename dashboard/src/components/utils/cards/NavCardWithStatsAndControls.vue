@@ -69,7 +69,7 @@ limitations under the License.
                              :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
                       <span>{{ secCount.count }}</span>
                     </b-badge>
-                    <span class="text-left text-secondary text-uppercase ml-1"
+                    <span class="text-left text-uppercase ml-1"
                           style="font-size: 0.8rem">{{ secCount.label }}</span>
                   </div>
                 </div>
