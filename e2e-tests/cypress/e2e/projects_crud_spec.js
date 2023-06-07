@@ -86,8 +86,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.get('[data-cy=btn_edit-project]')
             .click();
-        cy.get('[data-cy=idInputEnableControl] a')
-            .click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}editedProjectId');
         cy.get('button[data-cy=saveProjectButton]')

@@ -775,8 +775,7 @@ describe('Skills Tests', () => {
         cy.get('[data-cy="newSkillButton"]').click();
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enabled');
+    cy.get('[data-cy=enableIdInput]').click({force: true});
 
     const errMsg = 'Skill ID may only contain alpha-numeric, underscore or percent characters';
 
@@ -812,8 +811,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=newSkillButton]').click();
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33');
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
-    cy.get('[data-cy="idInputEnableControl"]').contains('Enabled');
+    cy.get('[data-cy=enableIdInput]').click({force: true});
 
     const errMsg = 'Skill ID may only contain alpha-numeric, underscore or percent characters';
 
@@ -872,7 +870,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=breadcrumb-skill1]').should('be.visible');
     cy.get('[data-cy=editSkillButton_skill1]').click();
-    cy.get('[data-cy=idInputEnableControl] a').click();
+    cy.get('[data-cy=enableIdInput]').click({force: true});
     cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
     cy.get('input[data-cy=skillPointIncrement]').click();
     cy.get('[data-cy=saveSkillButton]').click();
