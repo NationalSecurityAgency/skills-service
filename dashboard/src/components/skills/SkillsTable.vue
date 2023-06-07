@@ -217,7 +217,7 @@ limitations under the License.
                           title="Copy Skill">
                   <i class="fas fa-copy" aria-hidden="true" />
                 </b-button>
-                <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="0">
+                <span :id="`deleteSkillButton-wrapper_${data.item.skillId}`" class="d-inline-block" tabindex="-1">
                   <b-button :id="`deleteSkillButton_${data.item.skillId}`"
                             :ref="`deleteSkillButton_${data.item.skillId}`"
                             @click="deleteSkill(data.item)" variant="outline-primary"
