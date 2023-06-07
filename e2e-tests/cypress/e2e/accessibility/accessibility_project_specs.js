@@ -95,6 +95,16 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     });
 
+    it('Edit Project - clicking on a description label puts focus in the description input', () => {
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]').should('have.focus')
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
+        cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
+    });
+
     it('project - new subject modal', () => {
         cy.visit('/administrator/projects/proj1');
 

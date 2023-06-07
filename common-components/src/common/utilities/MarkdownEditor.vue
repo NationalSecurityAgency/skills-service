@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div id="markdown-editor" @drop="attachFile">
     <label v-if="showLabel"
+           data-cy="markdownEditorLabel"
            :class="`${labelClass}`"
            for="toastuiEditor" @click="focusOnMarkdownEditor">{{ label }}</label>
     <editor id="toastuiEditor" :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
