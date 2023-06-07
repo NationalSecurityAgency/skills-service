@@ -31,9 +31,6 @@ describe('Accessibility Tests', () => {
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' })
         cy.createSkill(1, 1, 4)
 
-        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
-        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
-
         cy.createBadge(1)
         cy.assignSkillToBadge(1, 1, 1);
         cy.enableBadge(1, 1);
@@ -61,6 +58,9 @@ describe('Accessibility Tests', () => {
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 13, 'user@skills.org', '2021-02-24 10:00', false);
+
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
     });
 
     after(() => {
@@ -93,6 +93,16 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y()
+    });
+
+    it('Edit Project - clicking on a description label puts focus in the description input', () => {
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]').should('have.focus')
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
+        cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
     });
 
     it('project - new subject modal', () => {

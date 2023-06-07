@@ -57,11 +57,11 @@ limitations under the License.
           </div>
 
           <div class="form-group">
-            <label>User Agreement</label>
             <ValidationProvider rules="noscript" v-slot="{errors}"
                                 name="User Agreement">
               <markdown-editor v-model="userAgreement"
                                @input="updateUserAgreement"
+                               label="User Agreement"
                                :resizable="true"
                                aria-errormessage="userAgreementError"
                                aria-describedby="userAgreementError"
