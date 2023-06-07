@@ -18,7 +18,7 @@ limitations under the License.
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges"
        tabindex="0">
     <div class="card-header">
-      <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
+      <div class="h6 card-title mb-0 text-uppercase">My Badges</div>
     </div>
     <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">

@@ -17,7 +17,7 @@ limitations under the License.
   <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()" @keydown.enter="openMyRankDetails"
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank" tabindex="0">
     <div class="card-header">
-      <h3 class="h6 card-title mb-0 text-uppercase">My Rank</h3>
+      <div class="h6 card-title mb-0 text-uppercase">My Rank</div>
     </div>
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">

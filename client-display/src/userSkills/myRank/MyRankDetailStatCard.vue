@@ -28,7 +28,7 @@ limitations under the License.
                 <h1 v-else>{{ valueWithChecks | number }}</h1>
             </span>
           </div>
-          <h2 class="h5">{{ label }}</h2>
+          <div class="h5">{{ label }}</div>
         </div>
       </div>
     </div>
