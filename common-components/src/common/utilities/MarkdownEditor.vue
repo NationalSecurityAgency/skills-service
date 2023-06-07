@@ -15,7 +15,10 @@ limitations under the License.
 */
 <template>
   <div id="markdown-editor" @drop="attachFile">
-    <editor :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+    <label v-if="showLabel"
+           :class="`${labelClass}`"
+           for="toastuiEditor" @click="focusOnMarkdownEditor">{{ label }}</label>
+    <editor id="toastuiEditor" :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
       class="markdown"
       data-cy="markdownEditorInput"
       ref="toastuiEditor"
@@ -26,6 +29,7 @@ limitations under the License.
       :height="markdownHeight"
       @change="onEditorChange"
       @keydown="handleTab"
+      @focus="handleFocus"
     ></editor>
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
@@ -78,9 +82,17 @@ limitations under the License.
         type: Boolean,
         default: true,
       },
-      name: {
+      label: {
         type: String,
         default: 'Description',
+      },
+      showLabel: {
+        type: Boolean,
+        default: true,
+      },
+      labelClass: {
+        type: String,
+        default: '',
       },
       markdownHeight: {
         type: String,
@@ -198,6 +210,9 @@ limitations under the License.
           this.$emit('input', this.markdownText());
         }
       },
+      focusOnMarkdownEditor() {
+        this.$refs.toastuiEditor.invoke('focus');
+      },
       setLabelForMoreButton() {
         this.$nextTick(() => {
           const toolbarElem = document.getElementsByClassName('more toastui-editor-toolbar-icons')[0];
@@ -213,6 +228,11 @@ limitations under the License.
             event.stopPropagation();
             this.$refs.editorFeatureLinkRef?.focus({ focusVisible: true });
           }
+        }
+      },
+      handleFocus() {
+        if (this.label) {
+          this.$nextTick(() => this.$announcer.polite(this.label));
         }
       },
       attachFile(event) {

@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <b-card style="min-height: 330px;">
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-          <div id="reportSkillMsg" class="text-left mb-2 skills-theme-primary-color" data-cy="selfReportSkillMsg">
+          <div :id="`reportSkillMsg-${skill.skillId}`" class="text-left mb-2 skills-theme-primary-color" data-cy="selfReportSkillMsg">
              ** Submit with {{ isJustitificationRequired ? 'a' : 'an' }}
                 <span v-if="!isJustitificationRequired" class="text-muted">optional</span> justification and it will enter an approval queue.
           </div>
@@ -24,11 +24,14 @@ limitations under the License.
             <div class="col-12">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Approval Justification">
                 <markdown-editor class="form-text"
-                                 id="approvalRequiredMsg"
+                                 :id="`approvalRequiredMsg-${skill.skillId}`"
+                                 ref="approvalRequiredMsg"
                                  v-model="approvalRequestedMsg"
                                  data-cy="selfReportMsgInput"
-                                 aria-describedby="reportSkillMsg"
+                                 :aria-describedby="`reportSkillMsg-${skill.skillId}`"
                                  markdownHeight="250px"
+                                 label="Justification"
+                                 :show-label="false"
                                  :aria-label="isJustitificationRequired ? 'Optional request approval justification' : 'Required request approval justification'"
                                  :placeholder="`Justification (${isJustitificationRequired ? 'required' : 'optional'})`"
                                  :resizable="true"
@@ -100,6 +103,9 @@ limitations under the License.
       },
       cancel() {
         this.$emit('cancel');
+      },
+      focusOnMarkdownEditor() {
+        this.$refs.approvalRequiredMsg.focusOnMarkdownEditor();
       },
     },
   };

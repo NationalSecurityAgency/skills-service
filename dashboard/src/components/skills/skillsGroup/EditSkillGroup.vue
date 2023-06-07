@@ -59,7 +59,6 @@ limitations under the License.
         </div>
 
         <div class="mt-3">
-          <label class="label">Description</label>
           <div class="control">
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
               <markdown-editor v-if="internalGroup && (!isEdit || !isLoading)"
