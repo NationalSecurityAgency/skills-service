@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div class="card h-100 skills-my-rank" @click.stop="openMyRankDetails()" @keydown.enter="openMyRankDetails"
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank" tabindex="0"
-       :aria-label="`Your rank position is number ${displayData.userSkillsRanking.position}. Click to navigate to My Rank page.`">
+       aria-label="Click to navigate to My Rank page">
     <div class="card-header">
       <h3 class="h6 card-title mb-0 text-uppercase">My Rank</h3>
     </div>
