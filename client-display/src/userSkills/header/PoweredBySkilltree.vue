@@ -19,7 +19,7 @@ limitations under the License.
        @mouseover="isHovering = true"
        @mouseout="isHovering = false"
        data-cy="skillTreePoweredBy">
-    <a :href="docsHost" target="_blank" class="skills-page-title-text-color">
+    <a :href="docsHost" target="_blank" class="skills-page-title-text-color" aria-label="Powered by SkillTree">
       <div class="poweredByLabel pb-2 skills-theme-brand"
            :class="{'animate__animated':animatePowerByLabel, 'animate__backInUp' : animatePowerByLabel}">powered by
       </div>

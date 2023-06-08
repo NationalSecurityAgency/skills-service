@@ -277,7 +277,7 @@ describe('Navigation Tests', () => {
             .contains('Global Badge 1')
             .should('be.visible');
         getIframeBody()
-            .find('h4')
+            .find('[data-cy="gb_proj1"]')
             .contains('Project: This is project 1')
             .should('be.visible');
         getIframeBody()

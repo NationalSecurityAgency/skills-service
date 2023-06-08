@@ -16,9 +16,10 @@ limitations under the License.
 <template>
   <div class="card h-100" @click.stop="openMyBadges" @keydown.enter="openMyBadges"
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myBadges"
-       tabindex="0">
+       tabindex="0"
+       aria-label="Click to navigate to My Badges page.">
     <div class="card-header">
-      <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
+      <div class="h6 card-title mb-0 text-uppercase">My Badges</div>
     </div>
     <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">

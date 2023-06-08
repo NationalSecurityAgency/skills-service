@@ -16,9 +16,9 @@ limitations under the License.
 <template>
     <div class="card" data-cy="myBadges">
         <div class="card-header">
-            <h6 class="card-title mb-0 float-left text-uppercase">
+            <div class="h6 card-title mb-0 float-left text-uppercase">
                 My Earned Badges
-            </h6>
+            </div>
             <span v-if="badges && badges.length > 0" class="text-muted float-right">
                 <span class="badge badge-info">{{ badges.length }}</span> Badge<span v-if="badges.length > 1">s</span> Earned
             </span>

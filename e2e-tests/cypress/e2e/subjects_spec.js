@@ -634,7 +634,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
 
         cy.get('[data-cy=btn_edit-subject]').click();
-        cy.get('[data-cy=idInputEnableControl] a').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
         cy.get('[data-cy=saveSubjectButton]').click();
         cy.wait('@saveSubject1');
@@ -1012,8 +1012,7 @@ describe('Subjects Tests', () => {
       cy.get('[data-cy=breadcrumb-subj1]').should('exist');
       cy.get('[data-cy=btn_edit-subject]').click();
       cy.contains('Editing Existing Subject').should('be.visible');
-        cy.get('[data-cy=idInputEnableControl] a')
-            .click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy=idInputValue]')
             .type('11111111');
         cy.get('[data-cy=saveSubjectButton]')

@@ -393,21 +393,9 @@ describe('Project Settings Tests', () => {
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
         cy.get('[data-cy="pageHeaderStat_Protection"]')
-            .eq(0)
-            .should('include.text', 'PRIVATE');
-        cy.get('[data-cy="pageHeaderStat"]')
-            .eq(0)
-            .should('include.text', 'Invite Only');
-
-        cy.get('[data-cy="nav-Access"')
-            .click();
-        cy.wait(200);
-        cy.get('[data-cy="pageHeaderStat"]')
-            .eq(0)
-            .should('include.text', 'PRIVATE');
-        cy.get('[data-cy="pageHeaderStat"]')
-            .eq(0)
-            .should('include.text', 'Invite Only');
+            .contains('PRIVATE');
+        cy.get('[data-cy="pageHeaderStatSecondaryLabel_Protection"]')
+            .contains('Invite Only');
     });
 
     it('project-level settings: project description', () => {

@@ -71,7 +71,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy="projectName"]')
             .type('Other Project Name');
         cy.get('[data-cy="enableIdInput"]')
-            .click();
+            .click({force: true});
         cy.getIdField()
             .clear()
             .type('MyNewtestProject');
@@ -130,7 +130,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.wait('@loadProjects');
         cy.clickButton('Project');
         cy.get('[data-cy="enableIdInput"]')
-            .click();
+            .click({force: true});
         cy.getIdField()
             .type('InitValue');
 
@@ -152,7 +152,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy="projectName"]')
             .type('New Project');
         cy.get('[data-cy="enableIdInput"]')
-            .click();
+            .click({force: true});
         cy.getIdField()
             .clear();
         cy.get('[data-cy=idError]')
@@ -180,7 +180,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.clickButton('Project');
 
         cy.get('[data-cy="enableIdInput"]')
-            .click();
+            .click({force: true});
         cy.getIdField()
             .type('ProjectId');
         cy.get('[data-cy="projectName"]')
@@ -251,7 +251,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.clickButton('Project');
 
         cy.get('[data-cy="enableIdInput"]')
-            .click();
+            .click({force: true});
 
         cy.getIdField()
             .type('12');

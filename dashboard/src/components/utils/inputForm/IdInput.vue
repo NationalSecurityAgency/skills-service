@@ -14,29 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <ValidationProvider :rules="rules" v-slot="{ errors }" :debounce="500" :name="label" ref="idVp">
-    <div class="form-group mt-0 mb-0">
-      <div class="row">
-        <div class="col">
-          <label for="idInput">* {{ label }}</label>
-        </div>
-        <div class="col text-right" data-cy="idInputEnableControl">
-          <i class="fas fa-question-circle mr-1 text-secondary"
-             id="idInputHelp"
-             aria-label="Enable ID input to override auto-generated value."
-             role="alert"
-             tabindex="0"
-             @keydown.esc="handleEscape"/>
-
-          <b-tooltip target="idInputHelp"
-                     title="Enable to override auto-generated value."
-                     placement="left"
-                     @shown="tooltipShown"
-                     @hidden="tooltipHidden"/>
-          <b-link v-if="!canEdit" @click="toggle" aria-label="enable manual ID override" data-cy="enableIdInput">Enable</b-link>
-          <span v-else>Enabled <i class="fa fa-check fa-sm text-muted"/></span>
-        </div>
+  <div class="form-group mt-0 mb-0">
+    <div class="row">
+      <div class="col">
+        <label for="idInput">* {{ label }}</label>
       </div>
+      <div class="col text-right" data-cy="idInputEnableControl">
+        <b-form-checkbox v-model="canEdit"
+                         class="d-inline-block mr-1"
+                         name="Enable Id"
+                         aria-label="Enable to edit identifier's value"
+                         :disabled="canEdit"
+                         data-cy="enableIdInput"
+                         @change="notifyAboutEditStateChange"
+                         switch>
+          Enable
+        </b-form-checkbox>
+        <i class="fas fa-question-circle mr-1 text-secondary"
+           id="idInputHelp"
+           aria-label="Enable ID input to override auto-generated value."
+           role="alert"
+           tabindex="0"
+           @keydown.esc="handleEscape"/>
+
+        <b-tooltip target="idInputHelp"
+                   title="Enable to override auto-generated value."
+                   placement="left"
+                   @shown="tooltipShown"
+                   @hidden="tooltipHidden"/>
+      </div>
+    </div>
+    <ValidationProvider :rules="rules" v-slot="{ errors }" :debounce="500" :name="label" ref="idVp">
       <input type="text" class="form-control" id="idInput" v-model="internalValue" :disabled="!canEdit"
               @input="dataChanged" aria-required="true"
               :aria-invalid="errors && errors.length > 0"
@@ -44,8 +52,8 @@ limitations under the License.
               aria-describedby="idError"
              data-cy="idInputValue">
       <small role="alert" class="form-text text-danger" data-cy="idError" id="idError">{{ errors[0]}}</small>
-    </div>
-  </ValidationProvider>
+    </ValidationProvider>
+  </div>
 </template>
 
 <script>
@@ -84,9 +92,8 @@ limitations under the License.
       }
     },
     methods: {
-      toggle() {
-        this.canEdit = !this.canEdit;
-        this.$emit('can-edit', this.canEdit);
+      notifyAboutEditStateChange(newValue) {
+        this.$emit('can-edit', newValue);
       },
       dataChanged() {
         this.$emit('input', this.internalValue);

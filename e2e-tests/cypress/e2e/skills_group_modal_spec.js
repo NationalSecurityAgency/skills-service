@@ -32,7 +32,6 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
         cy.get('[data-cy="groupName"]').type('Great !@#$% Name %^&*(+_)(');
-        // cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
         cy.get('[data-cy="idInputValue"]').should('have.value','GreatNameGroup');
 
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
@@ -47,7 +46,7 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
         cy.get('[data-cy="idInputValue"]').should('be.disabled');
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy="idInputValue"]').should('be.enabled');
 
         cy.get('[data-cy="groupName"]').type('Great');
@@ -78,7 +77,7 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
 
         // so id doesn't change anymore
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
 
         // max value
         // Group Name cannot exceed 100 characters.
@@ -142,7 +141,7 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
 
         // now let's test id field
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy="idInputValue"]').clear();
         cy.get('[data-cy="idInputValue"]').type('skill1');
         cy.get('[data-cy="idError"]').contains('The value for the Group ID is already taken.');
@@ -208,7 +207,7 @@ describe('Skills Group Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="editSkillButton_group2"]').click();
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy="idInputValue"]').should('have.value','group2');
         cy.get('[data-cy="idInputValue"]').clear().type('newId');
         cy.get('[data-cy="saveGroupButton"]').click();
@@ -217,7 +216,7 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="editSkillButton_group2"]').should('not.exist');
 
         cy.get('[data-cy="editSkillButton_newId"]').click();
-        cy.get('[data-cy="idInputEnableControl"]').contains('Enable').click();
+        cy.get('[data-cy=enableIdInput]').click({force: true});
         cy.get('[data-cy="idInputValue"]').should('have.value','newId');
 
     });

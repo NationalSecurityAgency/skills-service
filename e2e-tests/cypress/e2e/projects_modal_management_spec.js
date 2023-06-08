@@ -180,9 +180,7 @@ describe('Projects Modal Management Tests', () => {
             .should('have.value', 'InitValue');
 
         cy.get('[data-cy="enableIdInput"]')
-            .click();
-        cy.contains('Enabled')
-            .not('a');
+            .click({force: true});
 
         cy.get('[data-cy="projectName"]')
             .type('MoreValue');

@@ -30,7 +30,7 @@ limitations under the License.
     </div>
 
     <div class="card-header">
-      <h3 class="h6 card-title mb-0 float-left">{{ levelDisplayName }} Breakdown</h3>
+      <div class="h6 card-title mb-0 float-left">{{ levelDisplayName }} Breakdown</div>
     </div>
     <div class="card-body m-0 p-0 pl-2 mr-1 mt-1">
       <apexchart

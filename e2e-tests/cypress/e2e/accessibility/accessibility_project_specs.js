@@ -58,6 +58,9 @@ describe('Accessibility Tests', () => {
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 75, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill('proj1', 13, 'user@skills.org', '2021-02-24 10:00', false);
+
+        cy.reuseSkillIntoAnotherSubject(1, 3, 2);
+        cy.reuseSkillIntoAnotherSubject(1, 4, 2);
     });
 
     after(() => {
@@ -73,6 +76,33 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y()
+    });
+
+    it('project and subject reused skills', () => {
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y()
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="projectLastReportedSkill"]')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y()
+    });
+
+    it('Edit Project - clicking on a description label puts focus in the description input', () => {
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]').should('have.focus')
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
+        cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
     });
 
     it('project - new subject modal', () => {
@@ -154,7 +184,7 @@ describe('Accessibility Tests', () => {
         cy.visit('/administrator/projects/proj1/metrics');
         cy.get('[data-cy="metricsCard-header"').contains('Users per day');
         cy.get('[data-cy="distinctNumUsersOverTime"]').contains('This chart needs at least 2 days of user activity.');
-        cy.get('[data-cy="projectLastReportedSkill"]')
+        cy.get('[data-cy="projectLastReportedSkillValue"]')
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4')
 
         cy.customLighthouse();

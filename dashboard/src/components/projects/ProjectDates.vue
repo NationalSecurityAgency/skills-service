@@ -25,7 +25,7 @@ limitations under the License.
     <span v-if="loadLastReportedDate" data-cy="projectLastReportedSkill">
       <span class="text-secondary small font-italic">Last Reported Skill: </span>
       <b-spinner v-if="isLoading" label="Loading..." small type="grow" variant="info"></b-spinner>
-      <slim-date-cell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true"/>
+      <slim-date-cell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true" data-cy="projectLastReportedSkillValue"/>
     </span>
   </span>
 </template>

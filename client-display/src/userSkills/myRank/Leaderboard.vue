@@ -36,7 +36,7 @@ limitations under the License.
 
       <div v-if="optedOut" class="mx-3">
         <div class="alert alert-danger">
-          <i class="fas fa-users-slash mr-2"></i>You selected to <b>opt-out</b> from ranking. Your name will <b>not</b> appear in the leaderboard and you will not be ranked against other users.
+          <i class="fas fa-users-slash mr-2" aria-hidden="true"></i>You selected to <b>opt-out</b> from ranking. Your name will <b>not</b> appear in the leaderboard and you will not be ranked against other users.
             If you want to re-enter the leaderboard and ranking then please adjust your preferences in the SkillTree dashboard.
         </div>
       </div>
@@ -59,31 +59,33 @@ limitations under the License.
         </template>
 
         <template #head(rank)="data">
-            <i class="fas fa-sort-amount-up"></i> {{ data.label }}
+            <i class="fas fa-sort-amount-up" aria-hidden="true"></i> {{ data.label }}
         </template>
         <template v-slot:cell(rank)="data">
-          <div class="mt-2 bigger-text text-left text-sm-center"  style="min-width: 4rem;">
-            <b-badge class="font-weight-bold" style="font-size: 0.8rem;">#{{ data.value }}</b-badge>
+          <div class="mt-2 bigger-text text-left text-sm-center" style="min-width: 4rem;">
+            <b-badge class="font-weight-bold"
+                     :aria-label="`Ranked number ${data.value}`"
+                     style="font-size: 0.8rem;">#{{ data.value }}</b-badge>
           </div>
         </template>
 
         <template #head(user)="data">
           <div class="text-left">
-            <i class="far fa-user"></i> {{ data.label }}
+            <i class="far fa-user" aria-hidden="true"></i> {{ data.label }}
           </div>
         </template>
         <template v-slot:cell(user)="data">
           <div class="text-left mt-2 bigger-text" data-cy="userColumn">
-            <i class="fas fa-user-circle text-dark skills-theme-primary-color" style="font-size: 1.8rem;"></i> <span class="align-text-bottom text-info skills-theme-primary-color">{{ getUser(data.item) }}</span>
-            <i v-if="data.item.rank <=3" class="fas fa-medal ml-2" :class="medalClass(data.item)"></i>
-            <span v-if="data.item.isItMe" class="align-text-bottom ml-2" ><span class="h5"><b-badge><i class="far fa-hand-point-left"></i> You!</b-badge></span></span>
+            <i class="fas fa-user-circle text-dark skills-theme-primary-color" style="font-size: 1.8rem;" aria-hidden="true"></i> <span class="align-text-bottom text-info skills-theme-primary-color">{{ getUser(data.item) }}</span>
+            <i v-if="data.item.rank <=3" class="fas fa-medal ml-2" :class="medalClass(data.item)" aria-hidden="true"></i>
+            <span v-if="data.item.isItMe" class="align-text-bottom ml-2" ><span class="h5"><b-badge><i class="far fa-hand-point-left" aria-hidden="true"></i> You!</b-badge></span></span>
           </div>
         </template>
 
-        <i class="fas fa-running"></i>
+        <i class="fas fa-running" aria-hidden="true"></i>
         <template #head(progress)="data">
           <div class="text-left">
-            <i class="fas fa-running"></i> {{ data.label }}
+            <i class="fas fa-running" aria-hidden="true"></i> {{ data.label }}
           </div>
         </template>
         <template v-slot:cell(progress)="data">
@@ -100,7 +102,7 @@ limitations under the License.
         </template>
 
         <template #head(firstVisit)="data">
-          <i class="far fa-clock"></i> {{ data.label }}
+          <i class="far fa-clock" aria-hidden="true"></i> {{ data.label }}
         </template>
         <template v-slot:cell(firstVisit)="data">
           <div class="mt-1 text-left text-sm-center" data-cy="userFirstSeen">
@@ -178,6 +180,7 @@ limitations under the License.
           })
           .finally(() => {
             this.loading = false;
+            this.$nextTick(() => this.$announcer.polite('Leaderboard data loaded'));
           });
       },
       medalClass(item) {

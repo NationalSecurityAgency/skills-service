@@ -70,7 +70,7 @@ limitations under the License.
                     class="skills-theme-btn"
                     :disabled="selfReportDisabled"
                     variant="info"
-                    @click="showApprovalJustification = true"
+                    @click="displayApprovalJustificationInput"
                     data-cy="requestApprovalBtn">
             Begin Request
             <i class="far fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
@@ -79,6 +79,7 @@ limitations under the License.
       </div>
       <b-overlay :show="requestApprovalLoading">
         <justification-input v-if="showApprovalJustification"
+                             ref="justificationInput"
                            class="mt-1"
                            @report-skill="reportSkill"
                            @cancel="showApprovalJustification = false; focusOnRef('beginRequestBtn')"
@@ -224,6 +225,10 @@ limitations under the License.
       },
     },
     methods: {
+      displayApprovalJustificationInput() {
+        this.showApprovalJustification = true;
+        this.$nextTick(() => this.$refs.justificationInput.focusOnMarkdownEditor());
+      },
       navToQuiz() {
         this.handlePush({
           name: 'quizPage',

@@ -147,7 +147,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
 
         // id is not taken
-        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="idError"]').should('not.be.visible')
         cy.get('[data-cy="idInputValue"]').clear().type('quiz1');
         cy.get('[data-cy="idError"]').contains('The value for the Quiz/Survey ID is already taken')
@@ -188,7 +188,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
 
         // custom description validation
-        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="quizDescription"]').type('a jabberwocky b');
         cy.get('[data-cy="quizDescriptionError"]').contains('Quiz/Survey Description - paragraphs may not contain jabberwocky')
         cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
@@ -282,7 +282,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="managesQuizLink_quiz2"]').should('exist')
         cy.get('[data-cy="managesQuizBtn_quiz2"]').should('exist')
 
-        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="idInputValue"]').type('A');
         cy.get('[data-cy="saveQuizButton"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
@@ -341,7 +341,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
-        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="idInputValue"]').type('A');
         cy.get('[data-cy="saveQuizButton"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
