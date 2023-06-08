@@ -18,7 +18,7 @@ limitations under the License.
        :class="{ 'skills-navigable-item': !isSummaryOnly }" data-cy="myRank" tabindex="0"
        aria-label="Click to navigate to My Rank page">
     <div class="card-header">
-      <h3 class="h6 card-title mb-0 text-uppercase">My Rank</h3>
+      <div class="h6 card-title mb-0 text-uppercase">My Rank</div>
     </div>
     <div class="card-body">
       <span class="fa-stack skills-icon user-rank-stack">

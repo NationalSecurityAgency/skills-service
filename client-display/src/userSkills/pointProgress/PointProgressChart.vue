@@ -28,7 +28,7 @@ limitations under the License.
         </div>
     </div>
     <div class="card-header">
-      <h3 class="h6 card-title mb-0 float-left">Point History</h3>
+      <div class="h6 card-title mb-0 float-left">Point History</div>
       <button v-if="chartWasZoomed" @click="resetZoom"
               data-cy="pointProgressChart-resetZoomBtn"
               class="reset-zoom-btn btn btn-outline-info btn-sm skills-theme-btn"><i class="fas fa-search-minus"></i> Reset Zoom</button>

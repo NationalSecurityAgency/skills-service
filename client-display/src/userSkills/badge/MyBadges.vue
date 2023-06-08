@@ -19,7 +19,7 @@ limitations under the License.
        tabindex="0"
        aria-label="Click to navigate to My Badges page.">
     <div class="card-header">
-      <h6 class="card-title mb-0 text-uppercase">My Badges</h6>
+      <div class="h6 card-title mb-0 text-uppercase">My Badges</div>
     </div>
     <div class="card-body">
             <span class="fa-stack skills-icon user-rank-stack">

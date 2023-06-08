@@ -60,11 +60,11 @@ limitations under the License.
                     <my-rank-encouragement-card icon="fa fa-user-astronaut" :icon-color="infoCards().iconColors[0]" class="mb-2">
 
                         <span v-if="rankingDistribution.pointsToPassNextUser === -1">
-                            <h4 class="mb-2">Wow!! You are in the lead!</h4>
+                            <div class="h4 mb-2">Wow!! You are in the lead!</div>
                             <div class="">That's one small step for man, one giant leap for mankind. </div>
                         </span>
                         <span v-else>
-                            <h4 class="mb-2">Just <strong>{{rankingDistribution.pointsToPassNextUser | number }}</strong> more points...</h4>
+                            <div class="h4 mb-2">Just <strong>{{rankingDistribution.pointsToPassNextUser | number }}</strong> more points...</div>
                             <div class="">to pass the next participant. That's one small step for man, one giant leap for mankind. </div>
                         </span>
 
@@ -72,11 +72,11 @@ limitations under the License.
 
                     <my-rank-encouragement-card icon="fa fa-running" :icon-color="infoCards().iconColors[1]" class="mb-2">
                          <span v-if="rankingDistribution.pointsAnotherUserToPassMe === -1">
-                            <h4 class="mb-2">You just got started!!</h4>
+                            <div class="h4 mb-2">You just got started!!</div>
                             <div class="">Exciting times, enjoy gaining those points!</div>
                         </span>
                         <span v-else>
-                            <h4 class="mb-2">Rank may drop in 1, 2.., <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points</h4>
+                            <div class="h4 mb-2">Rank may drop in 1, 2.., <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points</div>
                             <div class="">There is a competitor right behind you, only <strong>{{ rankingDistribution.pointsAnotherUserToPassMe | number }}</strong> points behind. Don't let them pass you!</div>
                         </span>
                     </my-rank-encouragement-card>
@@ -84,11 +84,11 @@ limitations under the License.
                     <my-rank-encouragement-card icon="fa fa-glass-cheers" :icon-color="infoCards().iconColors[2]">
                         <span v-if="myRank">
                             <span v-if="numUsersBehindMe <= 0">
-                                <h4 class="mb-2">Earn those point riches!</h4>
+                                <div class="h4 mb-2">Earn those point riches!</div>
                                 <div class="">Earn {{ skillDisplayName }} and you will pass your fellow app users in no time!</div>
                             </span>
                             <span v-else>
-                                <h4 class="mb-2"><strong>{{ numUsersBehindMe | number }}</strong> reasons to celebrate</h4>
+                                <div class="h4 mb-2"><strong>{{ numUsersBehindMe | number }}</strong> reasons to celebrate</div>
                                 <div class="">That's how many fellow app users have less points than you. Be Proud!!!</div>
                             </span>
                         </span>
