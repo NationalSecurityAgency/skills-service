@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card subject-tile skills-navigable-item" style="height: 100%" data-cy="subjectTile" tabindex="0">
+  <div class="card subject-tile skills-navigable-item" style="height: 100%" data-cy="subjectTile" tabindex="0"
+       :aria-label="`Click to navigate to the ${subject.subject} subject page.`">
     <div class="card-body text-primary">
       <ribbon :color="ribbonColor" class="subject-tile-ribbon">
         {{ subject.subject }}
