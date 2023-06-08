@@ -36,8 +36,10 @@ limitations under the License.
 
         <div class="text-sm-left text-center skills-text-description col-lg-10">
             <div class="row">
-                <div v-if="badge.badgeHtml" class="h4 mb-1 col-md-8" v-html="badge.badgeHtml" />
-                <div v-else class="h4 mb-1 col-md-8">{{ badge.badge }}</div>
+              <div class="h4 mb-1 col-md-8" data-cy="badgeTitle">
+                <div v-if="badge.badgeHtml"  v-html="badge.badgeHtml" />
+                <div v-else>{{ badge.badge }}</div>
+              </div>
                 <div class="col-md-4 text-right">
                     <small class=" float-right text-navy" :class="{ 'text-success': percent === 100 }">
                         <i v-if="percent === 100" class="fa fa-check"/> {{ percent }}% Complete
