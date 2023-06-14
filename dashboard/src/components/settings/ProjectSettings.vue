@@ -23,6 +23,7 @@ limitations under the License.
           <div class="col col-md-3 text-secondary" id="projectVisibilityLabel">
             Project Discoverability: <inline-help target-id="projectVisibilityHelp" :html-msg="projectVisibilityHelpMsg" />
           </div>
+          <div class="w-100 d-md-none d-lg-none"></div>
           <div class="col">
             <b-form-select v-model="settings.projectVisibility.value"
                            :options="projectVisibilityOptions"
@@ -39,6 +40,7 @@ limitations under the License.
               target-id="hideProjectDescriptionHelp"
               msg="Determines whether a project description is displayed only in the Progress and Rankings Manage My Projects page, or everywhere that the project is displayed"/>
           </div>
+          <div class="w-100 d-md-none d-lg-none"></div>
           <div class="col">
             <b-form-select v-model="settings.hideProjectDescription.value"
                            @input="hideProjectDescriptionChanged"
@@ -57,6 +59,7 @@ limitations under the License.
                 target-id="pointsForLevelsHelp"
                 msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
             </div>
+            <div class="w-100 d-md-none d-lg-none"></div>
             <div class="col">
               <b-form-checkbox v-model="settings.levelPointsEnabled.value"
                                name="check-button"
@@ -78,6 +81,7 @@ limitations under the License.
                   target-id="rootHelpUrlHelp"
                   msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
               </div>
+              <div class="w-100 d-md-none d-lg-none"></div>
               <div class="col">
                 <b-form-input v-model="settings.helpUrlHost.value"
                               placeholder="http://www.HelpArticlesHost.com"
@@ -104,6 +108,7 @@ limitations under the License.
                 target-id="selfReportSwitchHelp"
                 msg="Will serve as a default when creating new skills."/>
             </div>
+            <div class="w-100 d-md-none d-lg-none"></div>
             <div class="col">
               <b-form-checkbox v-model="selfReport.enabled"
                                name="check-button"
@@ -130,6 +135,8 @@ limitations under the License.
                       <div class="row m-0">
                         <b-form-radio class="mr-2" value="Approval" :disabled="!selfReport.enabled">Approval Queue (reviewed by project admins first)</b-form-radio>
                         <span class="text-muted mr-3 ml-2">|</span>
+                        <div class="w-100 d-md-none d-lg-none"></div>
+                        <span class="d-md-none d-lg-none" style="padding-left: 30px;"></span>
                         <label for="self-report-checkbox" class="m-0">
                           <b-form-checkbox data-cy="justificationRequiredCheckbox" id="justification-required-checkbox"
                                            class="d-inline" v-model="settings.selfReportJustificationRequired.value"
@@ -153,6 +160,7 @@ limitations under the License.
                 target-id="rankAndLeaderboardOptOutHelp"
                 msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
             </div>
+            <div class="w-100 d-md-none d-lg-none"></div>
             <div class="col">
               <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
                                name="check-button"
@@ -172,6 +180,7 @@ limitations under the License.
                 target-id="customLabelsSwitchHelp"
                 msg="Enabling allows for setting custom labels in the Skills Display component"/>
             </div>
+            <div class="w-100 d-md-none d-lg-none"></div>
             <div class="col">
               <b-form-checkbox v-model="showCustomLabelsConfigToggle"
                                name="check-button"
@@ -192,6 +201,7 @@ limitations under the License.
                           target-id="projectDisplayTextHelp"
                           msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
+                      <div class="w-100 d-md-none d-lg-none"></div>
                       <div class="col">
                         <b-form-input v-model="settings.projectDisplayName.value"
                                       data-cy="projectDisplayTextInput"
@@ -216,6 +226,7 @@ limitations under the License.
                           target-id="subjectDisplayTextHelp"
                           msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
+                      <div class="w-100 d-md-none d-lg-none"></div>
                       <div class="col">
                         <b-form-input v-model="settings.subjectDisplayName.value"
                                       data-cy="subjectDisplayTextInput"
@@ -240,6 +251,7 @@ limitations under the License.
                           target-id="groupDisplayTextHelp"
                           msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
+                      <div class="w-100 d-md-none d-lg-none"></div>
                       <div class="col">
                         <b-form-input v-model="settings.groupDisplayName.value"
                                       data-cy="groupDisplayTextInput"
@@ -265,6 +277,7 @@ limitations under the License.
                           target-id="skillDisplayTextHelp"
                           msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
+                      <div class="w-100 d-md-none d-lg-none"></div>
                       <div class="col">
                         <b-form-input v-model="settings.skillDisplayName.value"
                                       data-cy="skillDisplayTextInput"
@@ -289,6 +302,7 @@ limitations under the License.
                           target-id="levelDisplayTextHelp"
                           msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
+                      <div class="w-100 d-md-none d-lg-none"></div>
                       <div class="col">
                         <b-form-input v-model="settings.levelDisplayName.value"
                                       data-cy="levelDisplayTextInput"
@@ -316,6 +330,7 @@ limitations under the License.
                 target-id="groupDescriptionsHelp"
                 msg="Toggle this setting to always show the group's descriptions in this project"/>
             </div>
+            <div class="w-100 d-md-none d-lg-none"></div>
             <div class="col">
               <b-form-checkbox v-model="settings.groupDescriptions.value"
                                name="check-button"
