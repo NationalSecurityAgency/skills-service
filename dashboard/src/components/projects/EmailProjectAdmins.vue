@@ -24,30 +24,38 @@ limitations under the License.
       <b-card body-class="p-0">
           <div class="m-4 h5 text-uppercase">Email Content</div>
           <div class="m-4"><b-badge variant="info" data-cy="projectAdminCount">{{this.currentCount|number}}</b-badge> Project Administrators</div>
-          <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
-            <label for="subject-line-input">Subject Line</label>
-            <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
-          </div>
-          <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
-            <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"
-                             label="Email Body"
-                             :resizable="true" :allow-attachments="false"
-                             :use-html="true"/>
-          </div>
-          <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
-            <b-button class="mr-3" data-cy="previewAdminEmail"
-                      v-b-tooltip.hover="'this will send a test email to the current user'"
-                      :disabled="isEmailDisabled"
-                      @click="previewEmail"
-                      variant="outline-primary" aria-label="preview email to project administrators">
-              <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
-            </b-button>
-            <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
-                      :disabled="isEmailDisabled"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
-            <transition name="fade">
-              <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
-            </transition>
-          </div>
+          <ValidationObserver ref="observer" v-slot="{invalid, emailUsers}" slim>
+            <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
+              <label for="subject-line-input">Subject Line</label>
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Email Subject" class="w-100">
+                <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>
+                <small role="alert" id="emailSubjectError" class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
+            </div>
+            <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
+              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Email Body" class="w-100">
+                <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"
+                                 label="Email Body"
+                                 :resizable="true" :allow-attachments="false"
+                                 :use-html="true"/>
+                <small role="alert" id="emailBodyError" class="form-text text-danger">{{ errors[0] }}</small>
+              </ValidationProvider>
+            </div>
+            <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
+              <b-button class="mr-3" data-cy="previewAdminEmail"
+                        v-b-tooltip.hover="'this will send a test email to the current user'"
+                        :disabled="isEmailDisabled || invalid"
+                        @click="previewEmail"
+                        variant="outline-primary" aria-label="preview email to project administrators">
+                <span>Preview</span> <i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye']" style="font-size:1rem;" aria-hidden="true"/>
+              </b-button>
+              <b-button variant="outline-primary" class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
+                        :disabled="isEmailDisabled || invalid"><i :class="[emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk']" /> Email</b-button>
+              <transition name="fade">
+                <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
+              </transition>
+            </div>
+          </ValidationObserver>
       </b-card>
     </b-overlay>
   </div>
