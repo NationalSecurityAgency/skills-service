@@ -93,7 +93,7 @@ limitations under the License.
           </div>
 
           <hr />
-          <ValidationObserver ref="observer" v-slot="{invalid, emailUsers}" slim>
+          <ValidationObserver ref="observer" v-slot="{invalid}" slim>
             <div class="pl-2 ml-2 pr-2 mr-2 h5 pb-2 text-uppercase">Email Content</div>
             <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
               <label for="subject-line-input">Subject Line</label>
