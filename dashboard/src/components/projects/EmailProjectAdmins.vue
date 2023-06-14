@@ -24,7 +24,7 @@ limitations under the License.
       <b-card body-class="p-0">
           <div class="m-4 h5 text-uppercase">Email Content</div>
           <div class="m-4"><b-badge variant="info" data-cy="projectAdminCount">{{this.currentCount|number}}</b-badge> Project Administrators</div>
-          <ValidationObserver ref="observer" v-slot="{invalid, emailUsers}" slim>
+          <ValidationObserver ref="observer" v-slot="{invalid}" slim>
             <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
               <label for="subject-line-input">Subject Line</label>
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Email Subject" class="w-100">
