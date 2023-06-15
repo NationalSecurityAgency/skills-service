@@ -118,6 +118,36 @@ class OAuth2UserConverterServiceSpec extends Specification {
         result == expected
     }
 
+    def "Gitlab OAuth Converter with no lastname"() {
+        OAuth2UserConverterService service = new OAuth2UserConverterService()
+        service.lookup = new FormSecurityConfiguration().oAuth2UserConverterMap()
+
+        final String providerId = 'gitlab'
+        final String userName = 'joeuser'
+        final String firstName = 'Joe'
+        final String lastName = ''
+        final String email = "${userName}@email.com"
+        Map<String, Object> attributes = [
+                name: "${firstName} ${lastName}",
+                email: email,
+        ]
+
+        OAuth2User oAuth2User = createOAuth2User(userName, attributes)
+        UserInfo expected = new UserInfo(
+                username: "${userName}-${providerId}",
+                usernameForDisplay: userName,
+                email: email,
+                firstName: firstName,
+                lastName: 'UNKNOWN'
+        )
+
+        when:
+        UserInfo result = service.convert(providerId, oAuth2User)
+
+        then:
+        result == expected
+    }
+
     def "Keycloak OAuth Converter"() {
         OAuth2UserConverterService service = new OAuth2UserConverterService()
         service.lookup = new FormSecurityConfiguration().oAuth2UserConverterMap()

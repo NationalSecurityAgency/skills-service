@@ -132,7 +132,7 @@ class OAuth2UserConverterService {
                 throw new SkillsAuthorizationException("Email must be available in your public GitLab profile")
             }
             String name = oAuth2User.attributes.get(NAME)
-            if (!name) {
+            if (!name?.trim()) {
                 throw new SkillsAuthorizationException("Name must be available in your public GitLab profile")
             }
             String firstName = name?.tokenize()?.first()
@@ -140,6 +140,10 @@ class OAuth2UserConverterService {
             tokens?.pop()
             tokens?.remove(username)
             String lastName = tokens?.join(' ')
+
+            if (!lastName) {
+                lastName = 'UNKNOWN'
+            }
 
             return new UserInfo(
                     username: "${username}-${providerId}",
