@@ -134,7 +134,7 @@ limitations under the License.
                     :next-focus-el="previousFocus"
                     @shown="tooltipShowing=true"
                     @hidden="tooltipShowing=false"
-                    msg="Uncheck to disable. When disabled skill events are applied immediately."/>
+                    :msg="skillInternal.timeWindowEnabled ? 'Uncheck to disable. When disabled, there is no limit on how often a skill can be performed.' : 'Check to enable. When enabled, this limits how often a skill can be performed.'"/>
 
                 </label>
                 <div class="row">
