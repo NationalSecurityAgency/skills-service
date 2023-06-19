@@ -98,9 +98,6 @@ class InviteOnlyProjectService {
     UserAttrsRepo userAttrsRepo
 
     @Autowired
-    UserCommunityService userCommunityService
-
-    @Autowired
     UIConfigProperties uiConfigProperties
 
     /**
@@ -414,7 +411,6 @@ class InviteOnlyProjectService {
 
         PrettyTime prettyTime = new PrettyTime()
         String relativeTime = prettyTime.format(existingToken.expires)
-        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: [recipientEmail],
                 type: Notification.Type.InviteOnlyReminder.toString(),
@@ -424,7 +420,7 @@ class InviteOnlyProjectService {
                         publicUrl       : publicUrl,
                         relativeTime    : relativeTime,
                         inviteCode      : existingToken.token,
-                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                        communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                 ],
         )
         notifier.sendNotification(request)

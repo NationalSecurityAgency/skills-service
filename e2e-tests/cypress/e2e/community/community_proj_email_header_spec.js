@@ -67,7 +67,7 @@ describe('Community Project Email Header/Footer Tests', () => {
         });
     });
 
-    it('UC protected project has UC communityHeaderDescriptor value replaced in header/footer in invite email', () => {
+    it('UC protected project has UC default communityHeaderDescriptor value replaced in header/footer in invite email', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.intercept('GET', '/admin/projects/proj1/settings')
           .as('getSettings');
@@ -144,11 +144,11 @@ describe('Community Project Email Header/Footer Tests', () => {
 
         cy.getHeaderFromEmail()
           .then((header) => {
-              expect(header).to.equal('For Divine Dragon Only')
+              expect(header).to.equal('For All Dragons Only')
           });
         cy.getFooterFromEmail(false)
           .then((footer) => {
-              expect(footer).to.equal('For Divine Dragon Only')
+              expect(footer).to.equal('For All Dragons Only')
           });
     });
 
