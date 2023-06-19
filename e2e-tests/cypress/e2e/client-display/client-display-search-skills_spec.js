@@ -79,4 +79,19 @@ describe('Client Display Search Skills Tests', () => {
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1 Subj2')
     });
 
+    it('search results in default theme', () => {
+        cy.cdVisit('/');
+        cy.get('[data-cy="searchSkillsAcrossSubjects"]')
+            .click()
+        cy.wait(5000)
+        cy.matchSnapshotImageForElement('.vs__dropdown-menu')
+    });
+
+    it('search results in configured theme', () => {
+        cy.cdVisit('/?enableTheme=true');
+        cy.get('[data-cy="searchSkillsAcrossSubjects"]')
+            .click()
+        cy.wait(5000)
+        cy.matchSnapshotImageForElement('.vs__dropdown-menu')
+    });
 });

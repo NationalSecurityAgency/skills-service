@@ -23,14 +23,17 @@ limitations under the License.
           v-on:option:selected="navToSkill"
           data-cy="searchSkillsAcrossSubjects">
         <template #option="option">
-          <div class="py-1" :data-cy="`searchRes-${option.skillId}`">
-            <div data-cy="subjectName">
-              <span class="font-italic ">Subject:</span> <span class="text-info skills-theme-primary-color">{{ option.subjectName }}</span>
+          <div class="py-1 skill-res-row" :data-cy="`searchRes-${option.skillId}`">
+            <div data-cy="subjectName" aria-hidden="true">
+              <span class="font-italic ">Subject:</span> <span class="text-info skills-theme-primary-color alt-color-handle-hover">{{ option.subjectName }}</span>
             </div>
             <div class="row">
-              <div class="col h4" data-cy="skillName"><i class="fas fa-graduation-cap text-info skills-theme-primary-color" aria-hidden="true" />  <span v-if="option.skillNameHtml" v-html="option.skillNameHtml"></span><span v-else>{{ option.skillName }}</span></div>
-              <div class="col-auto skills-theme-primary-color" data-cy="points" :class="{'text-success': option.userAchieved}">
-                <i option v-if="option.userAchieved" class="fas fa-check" aria-hidden=""/> {{ option.userCurrentPoints}} / {{ option.totalPoints }} <span class="font-italic">Points</span>
+              <div class="col h4" data-cy="skillName"
+                :aria-label="`Selected ${option.skillName} skill from ${option.subjectName} subject. You have earned ${option.userCurrentPoints} points out of ${option.totalPoints} for this skill. Click to navigate to the skill. Type to search for a skill across all subjects.`">
+                <i class="fas fa-graduation-cap text-info skills-theme-primary-color alt-color-handle-hover" aria-hidden="true" />  <span v-if="option.skillNameHtml" v-html="option.skillNameHtml"></span><span v-else>{{ option.skillName }}</span>
+              </div>
+              <div class="col-auto skills-theme-primary-color alt-color-handle-hover" data-cy="points" :class="{'text-success': option.userAchieved}" aria-hidden="true">
+                <i option v-if="option.userAchieved" class="fas fa-check" aria-hidden=""/> {{ option.userCurrentPoints }} / {{ option.totalPoints }} <span class="font-italic">Points</span>
               </div>
             </div>
           </div>
@@ -76,6 +79,13 @@ limitations under the License.
               });
             }
             this.searchRes = results;
+            if (results && results.length > 0) {
+              const firstRes = results[0];
+              // eslint-disable-next-line max-len
+              this.$nextTick(() => this.$announcer.polite(`Showing ${results.length} skills for ${this.query ? this.query : 'an empty'} search string. Selected ${firstRes.skillName} skill from ${firstRes.subjectName} subject. You have earned ${firstRes.userCurrentPoints} points out of ${firstRes.totalPoints} for this skill. Click to navigate to the skill.`));
+            } else {
+              this.$nextTick(() => this.$announcer.assertive(`No skills found for ${this.query} search string. Consider changing the search query.`));
+            }
           });
       },
       queryChanged(query, loading) {
@@ -100,5 +110,7 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+.vs__dropdown-option--highlight .alt-color-handle-hover {
+  color: white !important;
+}
 </style>

@@ -141,7 +141,7 @@ export default {
         styleName: 'color',
       }],
       borderColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu, body #app .vs__dropdown-toggle',
         styleName: 'border-color',
       }],
       watermarkIconColor: {

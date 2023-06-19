@@ -33,7 +33,7 @@ class ClientDisplaySkillSearchSpec extends DefaultIntSpec {
 
     }
 
-    def "get skills without search"() {
+    def "get skills"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(10, 1, 1, 100, 2)
@@ -64,7 +64,7 @@ class ClientDisplaySkillSearchSpec extends DefaultIntSpec {
         when:
         def skills = skillsService.getApiSkills(p1.projectId)
         def skillsWithFilter = skillsService.getApiSkills(p1.projectId, "10", )
-        println JsonOutput.prettyPrint(JsonOutput.toJson(skillsWithFilter))
+        def skillsWithFilterAndZeroResults = skillsService.getApiSkills(p1.projectId, "1039933", )
         then:
         skills.totalCount == 20
         skills.count == 20
@@ -92,6 +92,23 @@ class ClientDisplaySkillSearchSpec extends DefaultIntSpec {
         skillsWithFilter.totalCount == 20
         skillsWithFilter.count == 3
         skillsWithFilter.data.skillName == ["010", "Test Skill 10", "Test Skill 10 Subject2"]
+
+        skillsWithFilterAndZeroResults.totalCount == 20
+        skillsWithFilterAndZeroResults.count == 0
+        !skillsWithFilterAndZeroResults.data
+    }
+
+    def "empty projects"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        when:
+        def skills = skillsService.getApiSkills(p1.projectId)
+        then:
+        skills.totalCount == 0
+        skills.count == 0
+        !skills.data
     }
 
 }
