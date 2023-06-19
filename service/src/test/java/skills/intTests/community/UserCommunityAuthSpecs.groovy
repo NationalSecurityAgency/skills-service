@@ -18,6 +18,7 @@ package skills.intTests.community
 import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -187,8 +188,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         pristineDragonsUser.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String invite = extractInviteFromEmail(email.html)
 
         allDragonsUser.joinProject(proj.projectId, invite)
 
