@@ -377,7 +377,7 @@ describe('Community Project Email Header/Footer Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false})
         cy.createSubject();
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
-        cy.reportSkill(1, 1, 'user1', '2020-09-17 11:00', true, 'Please Approve');
+        cy.reportSkill(1, 1, 'skills@skills.org', '2020-09-17 11:00', true, 'Please Approve');
 
         // remove request email
         cy.getEmails();
