@@ -178,7 +178,7 @@ describe('Client Display Theme Components Tests', () => {
 
         cy.get('[data-cy="pointHistoryChart-animationEnded"]');
         cy.wait(1111);
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImage(snapshotOptions);
     });
 
 });
