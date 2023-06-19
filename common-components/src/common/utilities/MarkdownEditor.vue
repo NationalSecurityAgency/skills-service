@@ -31,6 +31,7 @@ limitations under the License.
       @change="onEditorChange"
       @keydown="handleTab"
       @focus="handleFocus"
+      @load="fixToolbarButtonSelectorAccessibilityIssues"
     ></editor>
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
@@ -67,12 +68,13 @@ limitations under the License.
   import fontSize from 'tui-editor-plugin-font-size';
   import 'tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css';
   import MarkdownMixin from './MarkdownMixin';
+  import MarkdownAccessibilityMixin from './MarkdownAccessibilityMixin';
   import FileUploadService from './FileUploadService';
 
   export default {
     name: 'MarkdownEditor',
     components: { Editor },
-    mixins: [MarkdownMixin],
+    mixins: [MarkdownMixin, MarkdownAccessibilityMixin],
     props: {
       value: String,
       resizable: {
