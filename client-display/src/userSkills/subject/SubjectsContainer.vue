@@ -15,14 +15,15 @@ limitations under the License.
 */
 <template>
   <div>
-    <div v-if="!(subjects && subjects.length > 0)" class="card">
+    <div v-if="!hasData" class="card">
       <div class="card-body">
         <no-data-yet class="my-2"
                      :title="`${this.subjectDisplayName}s have not been added yet.`"
                      :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>
       </div>
     </div>
-    <div v-else class="row">
+    <search-all-project-skills v-if="hasData" />
+    <div v-if="hasData" class="row">
       <div v-for="(subject, index) in subjects" :key="`unique-subject-${index}`"
            class="btn user-skill-subject-tile col-md-4"
            @click="openUserSkillSubject(subject, index)"
@@ -37,10 +38,12 @@ limitations under the License.
   import NoDataYet from '@/common-components/utilities/NoDataYet';
   import SubjectTile from '@/userSkills/subject/SubjectTile';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
+  import SearchAllProjectSkills from '@/userSkills/searchSkills/SearchAllProjectSkills';
 
   export default {
     mixins: [NavigationErrorMixin],
     components: {
+      SearchAllProjectSkills,
       NoDataYet,
       SubjectTile,
     },
@@ -48,6 +51,11 @@ limitations under the License.
       subjects: {
         type: Array,
         required: true,
+      },
+    },
+    computed: {
+      hasData() {
+        return this.subjects && this.subjects.length > 0;
       },
     },
     methods: {

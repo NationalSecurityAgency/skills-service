@@ -24,12 +24,12 @@ on:
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/publish-image-snapshot.yml'
       - '.gitlab-ci.yml'
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
+#  pull_request:
+#    paths-ignore:
+#      - 'README.md'
+#      - '.github/workflows/build-and-test-postgres.yml'
+#      - '.github/workflows/publish-image-snapshot.yml'
+#      - '.gitlab-ci.yml'
 
 jobs:
   build-skills-service-for-ui-tests:

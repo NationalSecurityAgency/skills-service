@@ -51,6 +51,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
+import skills.utils.TablePageUtil
 
 import java.nio.charset.StandardCharsets
 
@@ -197,7 +198,7 @@ class AdminController {
                                               @RequestParam Boolean ascending,
                                               @RequestParam(required = false, defaultValue = "") String query) {
 
-        PageRequest pagingRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
+        PageRequest pagingRequest = TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
         return inviteOnlyProjectService.getPendingInvites(projectId, URLDecoder.decode(query, StandardCharsets.UTF_8), pagingRequest)
     }
 
@@ -1376,7 +1377,7 @@ class AdminController {
         TotalCountAwareResult<ProjectNameAwareSkillDefRes> res = skillCatalogService.getSkillsAvailableInCatalog(projectId,
                 URLDecoder.decode(projectNameSearch, StandardCharsets.UTF_8),
                 URLDecoder.decode(subjectNameSearch, StandardCharsets.UTF_8),
-                URLDecoder.decode(skillNameSearch, StandardCharsets.UTF_8), createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+                URLDecoder.decode(skillNameSearch, StandardCharsets.UTF_8), TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
         TableResult tr = new TableResult()
         tr.count = res.results?.size()
         tr.totalCount = res.total
@@ -1396,7 +1397,7 @@ class AdminController {
                                         @RequestParam int page,
                                         @RequestParam String orderBy,
                                         @RequestParam Boolean ascending) {
-        TotalCountAwareResult<ExportedSkillRes> res = skillCatalogService.getSkillsExportedByProject(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending, orderBy=='importedProjectCount'))
+        TotalCountAwareResult<ExportedSkillRes> res = skillCatalogService.getSkillsExportedByProject(projectId, TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending, orderBy=='importedProjectCount'))
 
         TableResult tr = new TableResult()
         tr.count = res.results?.size()
@@ -1418,7 +1419,7 @@ class AdminController {
                                                    @RequestParam int page,
                                                    @RequestParam String orderBy,
                                                    @RequestParam Boolean ascending) {
-        skillCatalogService.getSkillsImportedFromCatalog(projectId, createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
+        skillCatalogService.getSkillsImportedFromCatalog(projectId, TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending))
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/imported/stats", method = RequestMethod.GET, produces = "application/json")
@@ -1559,18 +1560,5 @@ class AdminController {
         return success
     }
 
-    private static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
-        PageRequest pageRequest
-        if (useUnsafeSort) {
-            pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
-        } else {
-            pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        }
-
-        return pageRequest
-    }
 }
 

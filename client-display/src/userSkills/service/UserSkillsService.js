@@ -224,6 +224,12 @@ export default {
     return response;
   },
 
+  searchSkills(query) {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills`, {
+      params: ({ ...this.getUserIdAndVersionParams(), query, limit: 5 }),
+    }).then((result) => result.data);
+  },
+
   validateDescription(description) {
     const body = {
       value: description,

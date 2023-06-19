@@ -78,10 +78,12 @@ function terminalLog(violations) {
 addMatchImageSnapshotCommand();
 
 Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions, commandOptions) => {
+    cy.wait(1500);
     cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, selector)
 })
 
 Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions) => {
+    cy.wait(1500);
     cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, null)
 })
 

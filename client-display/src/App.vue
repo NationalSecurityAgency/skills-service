@@ -246,6 +246,7 @@ limitations under the License.
   @import '../node_modules/material-icons/iconfont/material-icons.css';
   @import '../node_modules/material-icons/css/material-icons.css';
   @import '../node_modules/@fortawesome/fontawesome-free/css/all.css';
+  @import '../node_modules/vue-select/dist/vue-select.css';
 
   .skills-display-container {
     max-width: 1140px;

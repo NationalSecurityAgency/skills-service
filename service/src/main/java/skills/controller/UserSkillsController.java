@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.unit.DataSize;
@@ -38,6 +39,7 @@ import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
+import skills.controller.result.model.TableResult;
 import skills.controller.result.model.UploadAttachmentResult;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
@@ -48,12 +50,15 @@ import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
 import skills.skillLoading.SkillsLoader;
+import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
 import skills.storage.model.Attachment;
 import skills.utils.MetricsLogger;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import skills.utils.TablePageUtil;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -76,6 +81,9 @@ class UserSkillsController {
 
     @Autowired
     private SkillsLoader skillsLoader;
+
+    @Autowired
+    private SkillsService skillsService;
 
     @Autowired
     private UserInfoService userInfoService;
@@ -146,6 +154,25 @@ class UserSkillsController {
                                 @RequestParam(name = "userId", required = false) String userIdParam) {
         String userId = userInfoService.getUserName(userIdParam);
         return skillsLoader.getUserLevel(projectId, userId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public TableResult getProjectSkills(HttpServletRequest request,
+                                        @PathVariable("projectId") String projectId,
+                                        @RequestParam(name = "userId", required = false) String userIdParam,
+                                        @RequestParam(name = "idType", required = false) String idType,
+                                        @RequestParam(required = false, defaultValue = "10") int limit,
+                                        @RequestParam(required = false, defaultValue = "1") int page,
+                                        @RequestParam(required = false, defaultValue = "skillName") String orderBy,
+                                        @RequestParam(required = false, defaultValue = "true") Boolean ascending,
+                                        @RequestParam(required = false, defaultValue = "") String query) {
+
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending);
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+
+        return skillsService.getSkillsForProject(userId, projectId, query, pageRequest);
     }
 
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")

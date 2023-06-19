@@ -87,13 +87,15 @@ export default {
           + 'body #app .b-pagination .page-item .page-link',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover, body #app .b-pagination .page-item.active .page-link',
+      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover, '
+          + 'body #app .b-pagination .page-item.active .page-link, '
+          + 'body #app .vs__dropdown-option--highlight',
       styleName: 'background-color',
     }, {
       selector: 'body #app .skills-theme-filter-menu .dropdown-menu',
       styleName: 'border-color',
     }, {
-      selector: 'body #app .apexcharts-toolbar svg',
+      selector: 'body #app .apexcharts-toolbar svg, body #app .vs__open-indicator',
       styleName: 'fill',
     }],
     textPrimaryMutedColor: [{
@@ -127,15 +129,19 @@ export default {
     },
     tiles: {
       backgroundColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu, body #app .b-pagination .page-item .page-link',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, '
+            + 'body #app .apexcharts-menu.apexcharts-menu-open, '
+            + 'body #app .dropdown-menu, body #app .b-pagination .page-item .page-link, '
+            + 'body #app .vs__dropdown-toggle, body #app .vs__dropdown-menu',
         styleName: 'background-color',
       }, {
         selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover, '
-            + 'body #app .b-pagination .page-item.active .page-link',
+            + 'body #app .b-pagination .page-item.active .page-link, '
+            + 'body #app .vs__dropdown-option--highlight, body #app .vs__dropdown-option--highlight .skills-theme-primary-color',
         styleName: 'color',
       }],
       borderColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu',
+        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu, body #app .vs__dropdown-toggle',
         styleName: 'border-color',
       }],
       watermarkIconColor: {

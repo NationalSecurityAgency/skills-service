@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -779,4 +780,60 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Transactional
     @Query('''update SkillDef set displayOrder=?2 where skillId=?1''')
     void setSkillDisplayOrder(String skillId, Integer displayOrder)
+
+    static interface SkillPreviewItemDbRes {
+        String getSkillId()
+        String getSkillName()
+        String getSubjectName()
+        String getSubjectId()
+        Integer getPointIncrement()
+        Integer getTotalPoints()
+
+        Integer getUserCurrentPoints()
+        Boolean getUserAchieved()
+    }
+
+    @Query(value = '''select count(skill.id)
+                    from skill_definition skill
+                    where skill.enabled = 'true'
+                      and skill.type = 'Skill'
+                      and skill.project_id = :projectId
+    ''', nativeQuery = true)
+    long countSkillPreviewItems(@Param('projectId') String projectId)
+
+    @Query(value = '''select count(skill.id)
+                    from skill_definition skill
+                    where skill.enabled = 'true'
+                      and skill.type = 'Skill'
+                      and skill.project_id = :projectId
+                      and LOWER(skill.name) LIKE LOWER(CONCAT('%',:query,'%'))
+    ''', nativeQuery = true)
+    long countSkillPreviewItems(@Param('projectId') String projectId, @Param('query') String query)
+
+    @Query(value = '''select skill.skill_id        as skillId,
+                           skill.name            as skillName,
+                           subject.name          as subjectName,
+                           subject.skill_id      as subjectId,
+                           skill.point_increment as pointIncrement,
+                           skill.total_points    as totalPoints,
+                           case when ua.id is not null then true else false end as userAchieved,
+                           case when up.points is not null then up.points else 0 end userCurrentPoints
+                    from skill_relationship_definition relationship,
+                         skill_definition subject,
+                         skill_definition skill
+                            left join user_achievement ua on skill.id = ua.skill_ref_id and ua.user_id = :userId
+                            left join user_points up on skill.id = up.skill_ref_id and up.user_id = :userId
+                    where skill.enabled = 'true'
+                      and skill.id = relationship.child_ref_id
+                      and subject.id = relationship.parent_ref_id
+                      and subject.type = 'Subject'
+                      and skill.type = 'Skill'
+                      and skill.project_id = :projectId
+                      and LOWER(skill.name) LIKE LOWER(CONCAT('%',:query,'%'))
+    ''', nativeQuery = true)
+    List<SkillPreviewItemDbRes> findSkillPreviewItems(@Param('projectId') String projectId,
+                                                      @Param('userId') String userId,
+                                                      @Param('query') String query,
+                                                      PageRequest pageRequest)
+
 }
