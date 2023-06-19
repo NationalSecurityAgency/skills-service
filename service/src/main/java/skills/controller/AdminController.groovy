@@ -444,19 +444,6 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}/prerequisiteValidate", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    DependencyCheckResult validateLearningPathForAssignSkillToBadge(@PathVariable("projectId") String projectId,
-                                                            @PathVariable("badgeId") String badgeId,
-                                                            @PathVariable("skillId") String skillId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
-        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
-        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
-
-        return badgeAdminService.validateAgainstLearningPath(projectId, badgeId, skillId, false)
-    }
-
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeSkillFromBadge(@PathVariable("projectId") String projectId,

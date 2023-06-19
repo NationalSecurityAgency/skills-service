@@ -156,11 +156,6 @@ export default {
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}`, null, { handleError: false })
       .then((res) => res.data);
   },
-  validateSkillToBadgeDependency(projectId, badgeId, skillId) {
-    const url = `/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/${encodeURIComponent(skillId)}/prerequisiteValidate`;
-    return axios.get(url)
-      .then((createdRuleResult) => createdRuleResult.data);
-  },
   assignSkillsToBadge(projectId, badgeId, skillIds, handleError = true) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/badge/${encodeURIComponent(badgeId)}/skills/add`;
     return axios.post(url, {

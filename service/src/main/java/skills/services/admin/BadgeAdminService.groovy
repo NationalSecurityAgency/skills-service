@@ -268,7 +268,7 @@ class BadgeAdminService {
     }
 
     @Profile
-    DependencyCheckResult validateAgainstLearningPath(String projectId, String badgeId, String skillid, Boolean throwExceptionWhenNotPossible=true) {
+    private void validateAgainstLearningPath(String projectId, String badgeId, String skillid) {
         SkillDef badge = skillDefAccessor.getSkillDef(projectId, badgeId, [SkillDef.ContainerType.Badge])
         SkillsGraphRes existingGraph = skillsDepsService.getDependentSkillsGraph(projectId)
         List<CircularLearningPathChecker.BadgeAndSkills> badgeAndSkills = skillsDepsService.loadBadgeSkills(projectId)
@@ -288,18 +288,13 @@ class BadgeAdminService {
                                 skillDef: skillDef, prereqSkillDef: prreqDef, existingGraph: existingGraph, performAlreadyExistCheck: false)
                         DependencyCheckResult dependencyCheckResult = circularLearningPathChecker.check()
                         if (!dependencyCheckResult.possible) {
-                            if (throwExceptionWhenNotPossible) {
-                                String msg = "Adding skill [${skillid}] to badge [${badge.skillId}] violates the Learning Path. Reason: ${dependencyCheckResult.reason}"
-                                throw new SkillException(msg, projectId, skillid, ErrorCode.LearningPathViolation)
-                            } else {
-                                return dependencyCheckResult
-                            }
+                            String msg = "Adding skill [${skillid}] to badge [${badge.skillId}] violates the Learning Path. Reason: ${dependencyCheckResult.reason}"
+                            throw new SkillException(msg, projectId, null, ErrorCode.LearningPathViolation)
                         }
                     }
                 }
             }
         }
-        return new DependencyCheckResult()
     }
 
     @Transactional()
