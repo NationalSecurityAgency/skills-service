@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
+import skills.UIConfigProperties
 import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -84,6 +85,9 @@ class AccessSettingsController {
 
     @Autowired
     UserNameService userNameService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -187,14 +191,14 @@ class AccessSettingsController {
                         "modifying subjects, skills and badges.  Thank you for being part of the SkillTree Community!\n\n" +
                         "Always yours,\n\n" +
                         "-SkillTree Bot"
-                contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId)
+                contactUsersService.sendEmail("SkillTree - You've been added as an admin", emailBody, userId, null, uiConfigProperties.ui.defaultCommunityDescriptor)
             } else if (roleName == RoleName.ROLE_PROJECT_APPROVER) {
                 def emailBody = "Congratulations!  You've just been added as a Project Approver for the SkillTree project [${project.name}](${publicUrl}administrator/projects/${project.projectId}).\n\n" +
                         "The Project Approver role is allowed to approve and deny Self Reporting approval requests while only getting a read-only view of the project." +
                         " Thank you for being part of the SkillTree Community!\n\n" +
                         "Always yours,\n\n" +
                         "-SkillTree Bot"
-                contactUsersService.sendEmail("SkillTree - You've been added as an approver", emailBody, userId)
+                contactUsersService.sendEmail("SkillTree - You've been added as an approver", emailBody, userId, null, uiConfigProperties.ui.defaultCommunityDescriptor)
             }
         }
 

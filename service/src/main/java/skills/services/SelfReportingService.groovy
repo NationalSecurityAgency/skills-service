@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import skills.UIConfigProperties
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -31,6 +32,7 @@ import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.ProjAdminService
 import skills.services.admin.SkillCatalogService
+import skills.services.admin.UserCommunityService
 import skills.services.events.SkillEventsService
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.settings.SettingsService
@@ -101,6 +103,12 @@ class SelfReportingService {
 
     @Autowired
     SplitWorkloadService splitWorkloadService
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
@@ -203,6 +211,7 @@ class SelfReportingService {
         if (userRoleRes) {
             ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
             UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+            Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
             Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                     userIds: userRoleRes.collect { it.userId },
                     type: Notification.Type.SkillApprovalRequested.toString(),
@@ -217,6 +226,7 @@ class SelfReportingService {
                             publicUrl     : publicUrl,
                             projectName   : projDef.name,
                             replyTo       : userAttrs?.email,
+                            communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                     ],
             )
             notifier.sendNotification(request)

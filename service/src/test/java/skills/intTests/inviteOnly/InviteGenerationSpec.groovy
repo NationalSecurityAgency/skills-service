@@ -52,8 +52,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         greenMail.getReceivedMessages().find { it.getAllRecipients()[0].toString() == "someemail@email.foo" }
         greenMail.getReceivedMessages().find { it.getAllRecipients()[0].toString() == "numbertwo@email.bar" }
         greenMail.getReceivedMessages().find{ it.getAllRecipients()[0].toString() == "numberone@email.baz"}
-        greenMail.getReceivedMessages().each {
-            String inviteCode = extractInviteFromEmail(it.content.toString())
+        EmailUtils.getEmail(greenMail).each {
+            String inviteCode = extractInviteFromEmail(it.html)
             assert !inviteCodes.contains(inviteCode), "non-unique invite code was generated"
             inviteCodes.add(inviteCode)
         }
@@ -75,11 +75,11 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         def result = skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo", "numbertwo", "@email.baz"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
+        def emails = EmailUtils.getEmails(greenMail)
 
         then:
-        email.length == 1
-        email[0].getAllRecipients()[0].toString() == "someemail@email.foo"
+        emails.size() == 1
+        emails[0].recipients[0].toString() == "someemail@email.foo"
         result.projectId == proj.projectId
         result.successful.size() == 1
         result.successful[0] == "someemail@email.foo"
@@ -107,8 +107,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1S", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String expiredCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String expiredCode = extractInviteFromEmail(email.html)
         Thread.currentThread().sleep(1200)
         userService.joinProject(proj.projectId, expiredCode)
 
@@ -136,8 +136,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
 
         when:
@@ -167,8 +167,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [userEmail]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         createAcctService.joinProject(proj.projectId, inviteCode)
 
         skillsService.revokeInviteOnlyProjectAccess(proj.projectId, userId)
@@ -200,8 +200,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
 
         when:
@@ -234,8 +234,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
 
         when:
         userService.joinProject(proj2.projectId, inviteCode)

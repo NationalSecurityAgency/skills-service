@@ -142,11 +142,11 @@ class InviteOnlyManagementSpec extends InviteOnlyBaseSpec {
         skillsService.remindUserOfPendingInvite(proj.projectId, "someemail@email.foo")
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
+        def email = EmailUtils.getEmail(greenMail, 0)
 
         then:
-        email.subject == "SkillTree Project Invitation Reminder"
-        email.content.toString().contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
+        email.subj == "SkillTree Project Invitation Reminder"
+        email.html.contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
     }
 
     def "cannot remind user of pending invite if invite ie expired"() {

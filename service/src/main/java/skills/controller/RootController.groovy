@@ -24,6 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.web.bind.annotation.*
+import skills.UIConfigProperties
 import skills.auth.AuthMode
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
@@ -104,6 +105,9 @@ class RootController {
     @Autowired
     FeatureService featureService
 
+    @Autowired
+    UIConfigProperties uiConfigProperties
+
     @GetMapping('/rootUsers')
     @ResponseBody
     List<UserRoleRes> getRootUsers() {
@@ -171,7 +175,7 @@ class RootController {
                 "Users with the Root role can also assign Supervisor and Root roles to other dashboard users. Thank you for being part of the SkillTree Community!\n\n" +
                 "Always yours,\n\n" +
                 "-SkillTree Bot"
-        contactUsersService.sendEmail("SkillTree - You've been added as root", emailBody, userId)
+        contactUsersService.sendEmail("SkillTree - You've been added as root", emailBody, userId, null, uiConfigProperties.ui.defaultCommunityDescriptor)
         projAdminService.pinAllExistingProjectsWhereUserIsAdminExceptInception(userId)
         return new RequestResult(success: true)
     }

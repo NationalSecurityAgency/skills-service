@@ -96,7 +96,9 @@ jobs:
         parallel: false
         group: 'skills-service with Email Confirmation'
         tag: "${{ github.workflow }}"
-        spec: cypress/e2e/verify_email_spec.js
+        spec: |
+          cypress/e2e/verify_email_spec.js
+          cypress/e2e/verify_email_spec.js
         env: verifyEmail=true
         browser: chrome
       env:

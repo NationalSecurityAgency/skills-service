@@ -26,7 +26,9 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsService
+import skills.utils.WaitFor
 import spock.lang.IgnoreIf
 
 import jakarta.mail.internet.MimeMessage
@@ -36,9 +38,7 @@ import java.time.Duration
 class PasswordResetSpec extends DefaultIntSpec {
 
     GreenMail greenMail = new GreenMail(ServerSetupTest.SMTP)
-
     SkillsService rootSkillsService
-
 
     def setup() {
         greenMail.start()
@@ -79,14 +79,16 @@ class PasswordResetSpec extends DefaultIntSpec {
         String url = "http://localhost:${localPort}/resetPassword"
 
         template.postForEntity(url, entity, String.class)
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def emails = EmailUtils.getEmails(greenMail)
 
         then:
-        greenMail.getReceivedMessages().length == 1
-        MimeMessage msg = greenMail.getReceivedMessages()[0]
-        msg.getAllRecipients()[0].toString() == "randomuser@skills.org"
-        msg.getSubject() == "SkillTree Password Reset"
-        msg.getContent().toString().contains('href="http://localhost:' + localPort + '/reset-password/')
-        msg.getFrom()[0].toString() == "resetspec@skilltreetests"
+        emails.size() == 1
+        def msg =emails[0]
+        msg.recipients[0].toString() == "randomuser@skills.org"
+        msg.subj == "SkillTree Password Reset"
+        msg.html.contains('href="http://localhost:' + localPort + '/reset-password/')
+        msg.fromEmail[0] == "resetspec@skilltreetests"
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -102,9 +104,9 @@ class PasswordResetSpec extends DefaultIntSpec {
         String url = "http://localhost:${localPort}/resetPassword"
         template.postForEntity(url, entity, String.class)
 
-        MimeMessage msg = greenMail.getReceivedMessages()[0]
-
-        def match = msg.content.toString() =~ /href=".*\/reset-password\/([^"]+)"/
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def match = email.html =~ /href=".*\/reset-password\/([^"]+)"/
         String token = match[0][1]
 
         when:
@@ -138,7 +140,8 @@ class PasswordResetSpec extends DefaultIntSpec {
         String url = "http://localhost:${localPort}/resetPassword"
         template.postForEntity(url, entity, String.class)
 
-        MimeMessage msg = greenMail.getReceivedMessages()[0]
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def email = EmailUtils.getEmail(greenMail, 0)
         String token = "fake"
 
         when:
@@ -170,9 +173,9 @@ class PasswordResetSpec extends DefaultIntSpec {
         String url = "http://localhost:${localPort}/resetPassword"
         template.postForEntity(url, entity, String.class)
 
-        MimeMessage msg = greenMail.getReceivedMessages()[0]
-
-        def match = msg.content.toString() =~ /href=".*\/reset-password\/([^"]+)"/
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def match = email.html =~ /href=".*\/reset-password\/([^"]+)"/
         String token = match[0][1]
         Thread.currentThread().sleep(500) //wait for token to become invalid
 

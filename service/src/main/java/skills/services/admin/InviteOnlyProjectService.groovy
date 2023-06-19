@@ -24,20 +24,20 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.thymeleaf.context.Context
+import skills.UIConfigProperties
 import skills.auth.*
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.*
+import skills.notify.EmailNotifier
+import skills.notify.Notifier
 import skills.services.AccessSettingsStorageService
-import skills.services.EmailSendingService
 import skills.services.FeatureService
 import skills.services.ProjectInvite
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
-import skills.services.settings.SettingsService
-import skills.settings.EmailSettingsService
+import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjectAccessToken
 import skills.storage.model.auth.RoleName
@@ -45,7 +45,6 @@ import skills.storage.model.auth.UserRole
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.ProjectAccessTokenRepo
 import skills.storage.repos.UserAttrsRepo
-import skills.storage.repos.UserRoleRepo
 import skills.utils.Expiration
 import skills.utils.ExpirationUtils
 import skills.utils.PatternsUtil
@@ -58,10 +57,6 @@ class InviteOnlyProjectService {
     private static final String DEFAULT_DURATION = "PT24H"
 
     private static final int MAX_GENERATION_ATTEMPTS = 5
-    private static final String INVITE_TEMPLATE = "project_invitation.html"
-    private static final String INVITE_REMINDER_TEMPLATE = "project_invitation_reminder.html"
-
-    private static final Pattern REPLACE_ZERO_ELEMENTS = ~/\b0\s\S+\s?/
 
     @Value('#{"${skills.authorization.invite.validateEmail:false}"}')
     Boolean validateInviteEmail
@@ -79,9 +74,6 @@ class InviteOnlyProjectService {
     ProjDefRepo projDefRepo
 
     @Autowired
-    UserRoleRepo userRoleRepoa
-
-    @Autowired
     InviteCodeGenerator codeGenerator
 
     @Autowired
@@ -97,16 +89,19 @@ class InviteOnlyProjectService {
     ProjAdminService projAdminService
 
     @Autowired
-    EmailSendingService emailService
-
-    @Autowired
-    SettingsService settingsService
+    EmailNotifier notifier
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     /**
      * Generates an invite token for a specific project
@@ -141,7 +136,7 @@ class InviteOnlyProjectService {
             accessToken.project = projDef
             accessToken.expires = expiration.expiresOn
             accessToken.created = created
-            accessToken.recipientEmail = email?.toLowerCase();
+            accessToken.recipientEmail = email?.toLowerCase()
             accessToken = projectAccessTokenRepo.save(accessToken)
 
             ProjectInvite invite = new ProjectInvite()
@@ -258,27 +253,17 @@ class InviteOnlyProjectService {
      * @return The list of emails that were successfully sent as well as those that could not be sent
      */
     @Transactional
-    public InviteUsersResult inviteUsers(String projectId, List<String> emailAddresses, String duration=DEFAULT_DURATION) {
+    InviteUsersResult inviteUsers(String projectId, List<String> emailAddresses, String duration=DEFAULT_DURATION) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotEmpty(emailAddresses, "emailAddresses")
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
         SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
 
-        final List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
-
-        final String htmlHeader =  emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null
-        final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
-        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
-
+        String publicUrl = featureService.getPublicUrl()
         if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send project invite email")
         }
 
-        if (!publicUrl.endsWith("/")){
-            publicUrl += "/"
-        }
-
-        final String url = "${publicUrl}"
         final successfullySent = []
         final List<String> couldNotBeSent = []
         final List<String> couldNotBeSentErrors = []
@@ -291,16 +276,20 @@ class InviteOnlyProjectService {
                     try {
                         ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
 
-                        Context templateContext = new Context()
-                        templateContext.setVariable("validTime", invite.validFor)
-                        templateContext.setVariable("inviteCode", invite.token)
-                        templateContext.setVariable("projectId", invite.projectId)
-                        templateContext.setVariable("projectName", invite.projectName)
-                        templateContext.setVariable("publicUrl", url)
-                        templateContext.setVariable("htmlHeader", htmlHeader)
-                        templateContext.setVariable("htmlFooter", htmlFooter)
-
-                        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation", email, INVITE_TEMPLATE, templateContext)
+                        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
+                        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                                userIds: [email],
+                                type: Notification.Type.InviteOnly.toString(),
+                                keyValParams: [
+                                        projectName     : invite.projectName,
+                                        projectId       : invite.projectId,
+                                        publicUrl       : publicUrl,
+                                        validTime       : invite.validFor,
+                                        inviteCode      : invite.token,
+                                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                                ],
+                        )
+                        notifier.sendNotification(request)
                         successfullySent << email
                     } catch (Exception e) {
                         log.error("Error sending project invites, [${successfullySent?.size()}] successful, [${emailAddresses.minus(successfullySent)?.size()}] unsuccessful", e)
@@ -345,7 +334,7 @@ class InviteOnlyProjectService {
      * @return true if the project exists and has been configured as an invite only project
      */
     @Transactional(readOnly = true)
-    public boolean isInviteOnlyProject(String projectId) {
+    boolean isInviteOnlyProject(String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         return settingsDataAccessor.getProjectSetting(projectId, Settings.INVITE_ONLY_PROJECT.settingName)?.isEnabled()
     }
@@ -358,7 +347,7 @@ class InviteOnlyProjectService {
      * @return
      */
     @Transactional(readOnly = true)
-    public boolean canUserAccess(String projectId, String userId, String idType) {
+    boolean canUserAccess(String projectId, String userId, String idType) {
         if (authMode == AuthMode.PKI) {
             userId = userInfoService.getUserName(userId, true, idType)
         }
@@ -367,7 +356,7 @@ class InviteOnlyProjectService {
     }
 
     @Transactional(readOnly = true)
-    public TableResult getPendingInvites(String projectId, String userEmailQuery, PageRequest pagingRequest) {
+    TableResult getPendingInvites(String projectId, String userEmailQuery, PageRequest pagingRequest) {
         if (!isInviteOnlyProject(projectId)) {
             throw new SkillsAuthorizationException("Project is not configured as Invite Only")
         }
@@ -384,7 +373,7 @@ class InviteOnlyProjectService {
     }
 
     @Transactional(readOnly = false)
-    public void extendValidity(String projectId, String recipientEmail, String duration) {
+    void extendValidity(String projectId, String recipientEmail, String duration) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(recipientEmail, "recipientEmail")
         SkillsValidator.isNotBlank(duration, "extensionDuration")
@@ -401,29 +390,19 @@ class InviteOnlyProjectService {
     }
 
     @Transactional(readOnly = false)
-    public void deleteInvite(String projectId, String recipientEmail) {
+    void deleteInvite(String projectId, String recipientEmail) {
         projectAccessTokenRepo.deleteByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
     }
 
-    public void remindUser(String projectId, String recipientEmail) {
+    void remindUser(String projectId, String recipientEmail) {
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
         SkillsValidator.isTrue(enabled, "Project Invites can only be used if email has been configured for this instance", projectId)
 
-        final List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
-
-        final String htmlHeader =  emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null
-        final String htmlFooter = emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null
-
-        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
+        String publicUrl = featureService.getPublicUrl()
         if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send project invite email")
         }
 
-        if (!publicUrl.endsWith("/")){
-            publicUrl += "/"
-        }
-
-        final String url = "${publicUrl}"
         ProjectAccessToken existingToken = projectAccessTokenRepo.findByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
         if (!existingToken) {
             throw new SkillException("No project invite exists for [${recipientEmail}]", projectId)
@@ -435,16 +414,20 @@ class InviteOnlyProjectService {
 
         PrettyTime prettyTime = new PrettyTime()
         String relativeTime = prettyTime.format(existingToken.expires)
-        Context templateContext = new Context()
-        templateContext.setVariable("relativeTime", relativeTime)
-        templateContext.setVariable("inviteCode", existingToken.token)
-        templateContext.setVariable("projectId", existingToken.project.projectId)
-        templateContext.setVariable("projectName", existingToken.project.name)
-        templateContext.setVariable("publicUrl", url)
-        templateContext.setVariable("htmlHeader", htmlHeader)
-        templateContext.setVariable("htmlFooter", htmlFooter)
-
-        emailService.sendEmailWithThymeleafTemplate("SkillTree Project Invitation Reminder", recipientEmail, INVITE_REMINDER_TEMPLATE, templateContext)
+        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: [recipientEmail],
+                type: Notification.Type.InviteOnlyReminder.toString(),
+                keyValParams: [
+                        projectName     : existingToken.project.name,
+                        projectId       : existingToken.project.projectId,
+                        publicUrl       : publicUrl,
+                        relativeTime    : relativeTime,
+                        inviteCode      : existingToken.token,
+                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                ],
+        )
+        notifier.sendNotification(request)
     }
 
     private ProjectInviteStatus convert(ProjectAccessToken token) {

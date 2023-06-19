@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.UIConfigProperties
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.GlobalSettingsRequest
@@ -73,6 +74,9 @@ class ProjectExpirationService {
 
     @Autowired
     LockingService lockingService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     @Transactional
     public void flagOldProjects(Date expireOlderThan) {
@@ -152,7 +156,8 @@ class ProjectExpirationService {
                                 expiresOn       : expirationDate.toLocalDateTime().format(DateTimeFormatter.ISO_DATE),
                                 expiringIn      : days == 0 ? "today" : "in ${days} day${days == 1 ? '' : 's'}",
                                 createdOn       : it.created.toLocalDateTime().format(DateTimeFormatter.ISO_DATE),
-                                unusedProjectExpirationInDays : unusedProjectExpirationInDays
+                                unusedProjectExpirationInDays : unusedProjectExpirationInDays,
+                                communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                         ],
                 )
                 notifier.sendNotification(request)

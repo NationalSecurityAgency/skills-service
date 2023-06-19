@@ -15,13 +15,15 @@
  */
 package skills.notify.builders
 
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
-import org.thymeleaf.spring6.SpringTemplateEngine
 import skills.storage.model.Notification
+
+import java.util.regex.Pattern
 
 @Service
 @Slf4j
@@ -30,8 +32,9 @@ class NotificationEmailBuilderManager {
     @Autowired
     ApplicationContext appContext
 
-    @Autowired
-    SpringTemplateEngine thymeleafTemplateEngine;
+    JsonSlurper jsonSlurper = new JsonSlurper()
+
+    private static final Pattern COMMUNITY_DESCRIPTOR = ~/(?i)\{\{\s?community.descriptor\s?\}\}/
 
     private final Map<String, NotificationEmailBuilder> lookup = [:]
 
@@ -48,7 +51,21 @@ class NotificationEmailBuilderManager {
     NotificationEmailBuilder.Res build(Notification notification, Formatting formatting) {
         NotificationEmailBuilder builder = lookup.get(notification.type)
         assert builder
+        if (formattingContainsCommunityVar(formatting)) {
+            def parsed = jsonSlurper.parseText(notification.encodedParams)
+            String communityHeaderDescriptor = parsed.communityHeaderDescriptor
+            assert communityHeaderDescriptor, "User Community Header variable found in header/footer, but no replace value found in encodedParams"
+            formatting.htmlHeader = COMMUNITY_DESCRIPTOR.matcher(formatting.htmlHeader).replaceAll(communityHeaderDescriptor)
+            formatting.plaintextHeader = COMMUNITY_DESCRIPTOR.matcher(formatting.plaintextHeader).replaceAll(communityHeaderDescriptor)
+            formatting.htmlFooter = COMMUNITY_DESCRIPTOR.matcher(formatting.htmlFooter).replaceAll(communityHeaderDescriptor)
+            formatting.plaintextFooter = COMMUNITY_DESCRIPTOR.matcher(formatting.plaintextFooter).replaceAll(communityHeaderDescriptor)
+        }
         return builder.build(notification, formatting)
+    }
+
+    private boolean formattingContainsCommunityVar(Formatting formatting) {
+        return (formatting.htmlHeader =~ COMMUNITY_DESCRIPTOR || formatting.plaintextHeader =~ COMMUNITY_DESCRIPTOR ||
+                formatting.htmlFooter =~ COMMUNITY_DESCRIPTOR || formatting.plaintextFooter =~ COMMUNITY_DESCRIPTOR)
     }
 
 }

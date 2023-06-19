@@ -167,11 +167,11 @@ class OAuth2UserConverterService {
             assert username, "Error getting name attribute of oAuth2User [${oAuth2User}] from providerId [$providerId]"
             String email =  oAuth2User.attributes.get(EMAIL)
             if (!email) {
-                throw new SkillsAuthorizationException("Email must be available in your public GitLab profile")
+                throw new SkillsAuthorizationException("Email must be available in your public profile")
             }
             String name = oAuth2User.attributes.get(NAME)
             if (!name) {
-                throw new SkillsAuthorizationException("Name must be available in your public GitLab profile")
+                throw new SkillsAuthorizationException("Name must be available in your public profile")
             }
             String firstName = name?.tokenize()?.first()
             List tokens = name?.tokenize()
