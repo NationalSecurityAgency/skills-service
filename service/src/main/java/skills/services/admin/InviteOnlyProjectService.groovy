@@ -273,7 +273,6 @@ class InviteOnlyProjectService {
                     try {
                         ProjectInvite invite = generateProjectInviteToken(projectId, email, created, duration)
 
-                        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
                         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                                 userIds: [email],
                                 type: Notification.Type.InviteOnly.toString(),
@@ -283,7 +282,7 @@ class InviteOnlyProjectService {
                                         publicUrl       : publicUrl,
                                         validTime       : invite.validFor,
                                         inviteCode      : invite.token,
-                                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                                        communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                                 ],
                         )
                         notifier.sendNotification(request)
