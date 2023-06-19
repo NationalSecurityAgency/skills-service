@@ -623,8 +623,8 @@ Cypress.Commands.add("configureApproverForUser", (projNum, approverUserId, userI
 
 Cypress.Commands.add("getLinkFromEmail", () => {
     cy.getEmails().then((emails) => {
-        const localPart = /http(?:s)?:\/\/[^:]+:\d+\/([^"]+)/
-        const match = emails[0].text.match(localPart)
+        const localPart = /http(?:s)?:\/\/[^:]+:\d+\/([^"\n]+)/
+        const match = emails[0].html.match(localPart)
         if(match) {
             return match[1]
         }
