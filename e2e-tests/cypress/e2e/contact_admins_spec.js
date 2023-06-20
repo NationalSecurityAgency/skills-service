@@ -239,4 +239,46 @@ describe('Contact Project Admins Specs', () => {
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)').should('not.exist');
     });
 
+    it('validation works correctly', () => {
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
+            .as('isRoot');
+
+        cy.intercept('POST', '/root/users/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.visit('/administrator/');
+
+        cy.get('[data-cy="nav-Contact Admins"]')
+            .click();
+        cy.wait('@isRoot');
+
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('test');
+        cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
+        cy.get('#emailSubjectError').contains('paragraphs may not contain jabberwocky')
+
+        cy.get('[data-cy="emailUsers_subject"]').clear();
+        cy.get('[data-cy="emailUsers_subject"]').type('test');
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
+        cy.get('#emailSubjectError').should('be.empty');
+
+        cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
+        cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
+
+        cy.get('[data-cy="emailUsers_body"]').clear();
+        cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
+        cy.get('#emailBodyError').should('be.empty');
+    });
+
 });
