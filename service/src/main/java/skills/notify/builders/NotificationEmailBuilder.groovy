@@ -26,10 +26,15 @@ interface NotificationEmailBuilder {
         String html
         String replyToEmail
         /**
-         * Flag that the builder can be used to indicate that all recipients should be included in a single email
+         * Flag that the builder can use to indicate that all recipients should be included in a single email
          * as opposed to sending one email per recipient
          */
         boolean singleEmailToAllRecipients
+        /**
+         * Flag that the builder can use to indicate that userIds are really email addresses and no
+         * userId to email address should be performed
+         */
+        boolean userIdsAreEmailAdresses
         List<String> ccRecipients
     }
 

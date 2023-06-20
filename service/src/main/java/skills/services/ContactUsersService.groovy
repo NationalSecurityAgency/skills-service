@@ -21,12 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.UIConfigProperties
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.QueryUsersCriteriaRequest
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
+import skills.services.admin.UserCommunityService
 import skills.storage.model.Notification
 import skills.storage.model.QueryUsersCriteria
 import skills.storage.model.SubjectLevelCriteria
@@ -60,6 +62,12 @@ class ContactUsersService {
     @Autowired
     UserAttrsService userAttrsService
 
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
+
     @Transactional(readOnly = true)
     Long countAllProjectAdminsWithEmail() {
         return accessSettingsStorageService.countUserIdsWithRoleAndEmail(RoleName.ROLE_PROJECT_ADMIN)
@@ -76,6 +84,7 @@ class ContactUsersService {
                             htmlBody    : emailBody,
                             emailSubject: emailSubject,
                             rawBody     : emailBody,
+                            communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                     ]
             )
             emailNotifier.sendNotification(request)
@@ -97,11 +106,18 @@ class ContactUsersService {
     }
 
     @Transactional
-    void sendEmail(String emailSubject, String emailBodyAsMarkdown, String userId) {
+    void sendEmail(String emailSubject, String emailBodyAsMarkdown, String userId, String projectId=null, String communityHeaderDescriptor=null) {
         Parser parser = Parser.builder().build()
         HtmlRenderer renderer = HtmlRenderer.builder().build()
         def markdown = parser.parse(emailBodyAsMarkdown)
         String parsedBody = renderer.render(markdown)
+        if (!communityHeaderDescriptor) {
+            if (projectId) {
+                communityHeaderDescriptor = userCommunityService.isUserCommunityOnlyProject(projectId) ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+            } else {
+                communityHeaderDescriptor = uiConfigProperties.ui.defaultCommunityDescriptor
+            }
+        }
 
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: [userId],
@@ -110,6 +126,7 @@ class ContactUsersService {
                         htmlBody    : parsedBody,
                         emailSubject: emailSubject,
                         rawBody     : emailBodyAsMarkdown,
+                        communityHeaderDescriptor : communityHeaderDescriptor,
                 ]
         )
         emailNotifier.sendNotification(request)
@@ -128,9 +145,10 @@ class ContactUsersService {
     }
 
     @Transactional
-    void contactUsers(ContactUsersRequest contactUsersRequest) {
+    void contactUsers(ContactUsersRequest contactUsersRequest, String projectId) {
         UserInfo currentUser = userInfoService.getCurrentUser()
         String sender = currentUser.getEmail()
+        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
 
         retrieveMatchingUserIds(contactUsersRequest.queryCriteria).withCloseable { Stream<String> userIds ->
             Closure sendNotification = { List<String> batch ->
@@ -143,6 +161,7 @@ class ContactUsersService {
                                 emailSubject: contactUsersRequest.emailSubject,
                                 rawBody     : contactUsersRequest.emailBody,
                                 replyTo     : sender,
+                                communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                         ]
                 )
                 emailNotifier.sendNotification(request)

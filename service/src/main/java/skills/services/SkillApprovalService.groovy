@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.UIConfigProperties
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
@@ -33,6 +34,7 @@ import skills.controller.result.model.*
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.SkillCatalogService
+import skills.services.admin.UserCommunityService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
@@ -95,6 +97,12 @@ class SkillApprovalService {
 
     @Autowired
     UserRoleRepo userRoleRepo
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     static class ConfExistInfo {
         boolean projConfExist = false;
@@ -312,6 +320,7 @@ class SkillApprovalService {
         String sender = currentUser.getEmail()
 
         ProjectSummaryResult projDef = projDefRepo.getProjectName(skillDefinition.projectId)
+        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(skillDefinition.projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: [skillApproval.userId],
                 type: Notification.Type.SkillApprovalResponse.toString(),
@@ -324,7 +333,8 @@ class SkillApprovalService {
                         projectId    : skillDefinition.projectId,
                         rejectionMsg : rejectionMsg,
                         publicUrl    : publicUrl,
-                        replyTo     : sender,
+                        replyTo      : sender,
+                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                 ],
         )
         notifier.sendNotification(request)

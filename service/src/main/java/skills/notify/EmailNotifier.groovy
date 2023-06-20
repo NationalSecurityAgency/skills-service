@@ -194,7 +194,7 @@ class EmailNotifier implements Notifier {
 
                 if (!emailRes.singleEmailToAllRecipients) {
                     userIds.each {
-                        String email = getEmail(it)
+                        String email = emailRes.userIdsAreEmailAdresses ? it : getEmail(it)
                         if (email) {
                             boolean failed = !dispatchState.doWithErrHandling(notification, {
                                 sendingService.sendEmail(emailRes.subject, email, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail, emailRes.ccRecipients)
@@ -205,7 +205,7 @@ class EmailNotifier implements Notifier {
                         }
                     }
                 } else {
-                    List<String> emails = getEmails(userIds)
+                    List<String> emails = emailRes.userIdsAreEmailAdresses ? userIds : getEmails(userIds)
                     if (emails) {
                         boolean failed = !dispatchState.doWithErrHandling(notification, {
                             sendingService.sendEmail(emailRes.subject, emails, emailRes.html, emailRes.plainText, notification.requestedOn, senderForBatch, fromEmail, emailRes.ccRecipients)

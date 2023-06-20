@@ -73,7 +73,7 @@ class FeatureService {
     String getPublicUrl() {
         String publicUrl = emailSettingsService.fetchEmailSettings()?.publicUrl
         if (!publicUrl) {
-            log.warn("Skill approval notifications are disabled since email setting [${publicUrl}] is NOT set")
+            log.warn("Notifications are disabled since email setting [${publicUrl}] is NOT set")
             return null
         }
 

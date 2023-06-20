@@ -195,5 +195,52 @@ describe('Verify Email Tests', () => {
         });
       });
     });
+
+    it('register dashboard and confirm email address', () => {
+      Cypress.Commands.add('navToSettings', () => {
+        cy.get('[data-cy="settings-button"]')
+          .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
+          .should('not.be.disabled');
+        cy.get('[data-cy="settingsButton-navToSettings"]')
+          .click();
+      });
+      cy.intercept({
+        method: 'GET',
+        url: '/root/global/settings/GLOBAL.EMAIL'
+      }).as('loadTemplateSettings');
+      cy.fixture('vars.json').then((vars) => {
+        cy.login(vars.rootUser, vars.defaultPass, true);
+        cy.visit('/');
+        cy.navToSettings();
+        cy.get('[data-cy="nav-Email"]').click();
+        cy.wait('@loadTemplateSettings');
+        cy.get('[data-cy=htmlEmailHeader]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+        cy.get('[data-cy=ptHeaderTitle]').click();
+        cy.get('[data-cy=plaintextEmailHeader]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=htmlEmailFooter]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+        cy.get('[data-cy=ptFooterTitle]').click();
+        cy.get('[data-cy=plaintextEmailFooter]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=emailTemplateSettingsSave]').click();
+        cy.logout();
+
+        cy.visit('/request-account');
+        cy.contains('New Account')
+        cy.get('#firstName').type("Robert")
+        cy.get('#lastName').type("Smith")
+        cy.get('#email').type("rob.smith@madeup.org")
+        cy.get('#password').type("password")
+        cy.get('#password_confirmation').type("password")
+        cy.contains('Create Account').click()
+        cy.getHeaderFromEmail()
+          .then((header) => {
+            expect(header).to.equal('For All Dragons Only')
+          });
+        cy.getFooterFromEmail(false)
+          .then((footer) => {
+            expect(footer).to.equal('For All Dragons Only')
+          });
+      });
+    });
   }
 });

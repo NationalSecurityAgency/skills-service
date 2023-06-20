@@ -21,12 +21,14 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import skills.UIConfigProperties
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.ProjAdminService
+import skills.services.admin.UserCommunityService
 import skills.storage.model.Notification
 
 @Slf4j
@@ -51,6 +53,12 @@ class ContactOwnerService {
     @Autowired
     ProjAdminService projAdminService
 
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
+
     @Transactional
     def contactProjectOwner(String projectId, String msg) {
         SkillsValidator.isTrue(featureService.isEmailServiceFeatureEnabled(), "Email has not been configured for this instance of SkillTree");
@@ -67,6 +75,7 @@ class ContactOwnerService {
         def markdown = parser.parse(msg)
         String parsedBody = renderer.render(markdown)
 
+        Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: projectAdmins,
                 type: Notification.Type.ContactOwner,
@@ -77,6 +86,7 @@ class ContactOwnerService {
                         userDisplay: displayName,
                         projectName: projectName,
                         replyTo: email,
+                        communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
                 ]
         )
 

@@ -1213,16 +1213,16 @@ class AdminController {
         contactUsersRequest?.queryCriteria?.projectId = projectId
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
-        contactUsersService.contactUsers(contactUsersRequest)
+        contactUsersService.contactUsers(contactUsersRequest, projectId)
         return RequestResult.success()
     }
 
     @RequestMapping(value="/projects/{id}/previewEmail", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
-    RequestResult testEmail(@RequestBody ContactUsersRequest contactUsersRequest) {
+    RequestResult testEmail(@PathVariable("id") String projectId, @RequestBody ContactUsersRequest contactUsersRequest) {
         SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
         SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
         String userId = userInfoService.getCurrentUserId()
-        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
+        contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId, projectId)
         return RequestResult.success()
     }
 

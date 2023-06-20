@@ -22,20 +22,25 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import org.thymeleaf.context.Context
+import skills.UIConfigProperties
 import skills.auth.SecurityMode
 import skills.auth.UserAuthService
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.SettingsResult
-import skills.notify.builders.Formatting
+import skills.notify.EmailNotifier
+import skills.notify.Notifier
+import skills.notify.builders.PasswordResetNotificationBuilder
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
-import skills.settings.EmailSettingsService
+import skills.storage.model.Notification
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
 import skills.utils.Expiration
 import skills.utils.ExpirationUtils
+
+import java.time.format.DateTimeFormatter
 
 @Slf4j
 @Component
@@ -57,10 +62,16 @@ class PasswordManagementService {
     UserAttrsService attrsService
 
     @Autowired
-    EmailSendingService emailService
+    FeatureService featureService
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    EmailNotifier notifier
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
 
     @Transactional(readOnly = true)
     UserToken loadToken(String token) {
@@ -69,7 +80,7 @@ class PasswordManagementService {
 
     @Transactional()
     void createResetPasswordTokenAndNotifyUser(User user) {
-        createTokenAndNotifyUser(user, "SkillTree Password Reset", "password_reset.html", RESET_PW_TOKEN_TYPE)
+        createTokenAndNotifyUser(user, Notification.Type.PasswordReset.toString(), RESET_PW_TOKEN_TYPE)
     }
 
     @Transactional()
@@ -82,12 +93,12 @@ class PasswordManagementService {
         }
         // remove any existing tokens and then issue a new one
         deleteTokensForUser(user.id, VERIFY_EMAIL_TOKEN_TYPE)
-        createTokenAndNotifyUser(user, "Please verify your email address", "verify_email.html", VERIFY_EMAIL_TOKEN_TYPE)
+        createTokenAndNotifyUser(user, Notification.Type.VerifyEmail.toString(), VERIFY_EMAIL_TOKEN_TYPE)
     }
 
     @Transactional()
-    void createTokenAndNotifyUser(User user, String subject, String template, String type) {
-        UserToken token = tokenRepo.findByUserIdAndType(user.userId, type)
+    void createTokenAndNotifyUser(User user, String notificationType, String tokenType) {
+        UserToken token = tokenRepo.findByUserIdAndType(user.userId, tokenType)
 
         SettingsResult expirationSetting = settingsService.getGlobalSetting(Settings.GLOBAL_RESET_TOKEN_EXPIRATION.settingName)
         String duration = DEFAULT_TOKEN_EXPIRATION
@@ -100,7 +111,7 @@ class PasswordManagementService {
         if (!token) {
             token = new UserToken()
             token.user = user
-            token.type = type
+            token.type = tokenType
         }
 
         token.setToken(UUID.randomUUID().toString())
@@ -114,38 +125,25 @@ class PasswordManagementService {
 
         String email = attrs.email
         String name = "${attrs.firstName} ${attrs.lastName}"
-
-        List<SettingsResult> emailSettings = settingsService.getGlobalSettingsByGroup(EmailSettingsService.settingsGroup);
-
-        Formatting formatting = new Formatting(
-                htmlHeader: emailSettings.find {it.setting == EmailSettingsService.htmlHeader }?.value ?: null,
-                plaintextHeader: emailSettings.find { it.setting == EmailSettingsService.plaintextHeader }?.value ?: null,
-                htmlFooter: emailSettings.find { it.setting == EmailSettingsService.htmlFooter }?.value ?: null,
-                plaintextFooter: emailSettings.find { it.setting == EmailSettingsService.plaintextFooter }?.value ?:null
-        )
-
-        String publicUrl = emailSettings.find { it.setting == EmailSettingsService.publicUrl }?.value ?: null
+        String publicUrl = featureService.getPublicUrl()
         if (!publicUrl) {
             throw new SkillException("No public URL is configured for the system, unable to send ${type} email")
         }
 
-        if (!publicUrl.endsWith("/")){
-            publicUrl += "/"
-        }
-
-        String url = "${publicUrl}"
-
-        Context templateContext = new Context()
-        templateContext.setVariable("recipientName", name)
-        templateContext.setVariable("email", email)
-        templateContext.setVariable("senderName", "The team")
-        templateContext.setVariable("validTime", expiration.validFor)
-        templateContext.setVariable("publicUrl", url)
-        templateContext.setVariable("token", token.token)
-        templateContext.setVariable("htmlHeader", formatting.htmlHeader)
-        templateContext.setVariable("htmlFooter", formatting.htmlFooter)
-
-        emailService.sendEmailWithThymeleafTemplate(subject, email, template, templateContext)
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: [email],
+                type: notificationType,
+                keyValParams: [
+                    recipientName            : name,
+                    email                    : email,
+                    senderName               : "The team",
+                    validTime                : expiration.validFor,
+                    publicUrl                : publicUrl,
+                    token                    : token.token,
+                    communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
+                ],
+        )
+        notifier.sendNotification(request)
     }
 
     @Transactional(readOnly = true)

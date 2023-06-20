@@ -16,8 +16,12 @@
 package skills.services
 
 import groovy.json.JsonOutput
+import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSender
+import org.thymeleaf.spring6.SpringTemplateEngine
 import skills.notify.EmailNotifier
+import skills.notify.builders.ContactUsersNotificationBuilder
+import skills.notify.builders.Formatting
 import skills.notify.builders.NotificationEmailBuilder
 import skills.notify.builders.NotificationEmailBuilderManager
 import skills.services.settings.SettingsService
@@ -91,6 +95,66 @@ class EmailNotifierSpec extends Specification {
         0 * notificationsRepo.deleteById(1)
         0 * notificationsRepo.flush()
         1 * notificationsRepo.save({ it.userId == JsonOutput.toJson(["fake1"]) && it.id == 1 && it.failedCount == 1})
+    }
+
+    def "community descriptor will be replaced when configured"() {
+        String UC_REPLACEMENT = 'UC REPLACEMENT'
+        Notification notification = new Notification(
+                requestedOn: new Date(),
+                created: new Date(),
+                userId: JsonOutput.toJson(["fake1", "fake2"]),
+                failedCount: 0,
+                encodedParams: JsonOutput.toJson([
+                        htmlBody    : "body",
+                        emailSubject: "subject",
+                        rawBody     : "body",
+                        communityHeaderDescriptor : UC_REPLACEMENT
+                ]),
+                type: Notification.Type.ContactUsers,
+                id: 1,
+        )
+        Formatting formatting = new Formatting(htmlHeader: 'For {{ community.descriptor }} Only')
+        ApplicationContext appContext = Mock(ApplicationContext)
+        appContext.getBeansOfType(NotificationEmailBuilder) >> ['beanName' : new ContactUsersNotificationBuilder(thymeleafTemplateEngine: new SpringTemplateEngine())]
+        NotificationEmailBuilderManager notificationEmailBuilderManager = new NotificationEmailBuilderManager(appContext: appContext)
+
+        when:
+        notificationEmailBuilderManager.init()
+        NotificationEmailBuilder.Res res = notificationEmailBuilderManager.build(notification, formatting)
+
+        then:
+        formatting
+        formatting.htmlHeader.contains(UC_REPLACEMENT)
+    }
+
+    def "will error if header contains community.descriptor replacement var, but communityHeaderDescriptor is not in the encoded params"() {
+        String UC_REPLACEMENT = 'UC REPLACEMENT'
+        Notification notification = new Notification(
+                requestedOn: new Date(),
+                created: new Date(),
+                userId: JsonOutput.toJson(["fake1", "fake2"]),
+                failedCount: 0,
+                encodedParams: JsonOutput.toJson([
+                        htmlBody    : "body",
+                        emailSubject: "subject",
+                        rawBody     : "body",
+                        communityHeaderDescriptor : null
+                ]),
+                type: Notification.Type.ContactUsers,
+                id: 1,
+        )
+        Formatting formatting = new Formatting(htmlHeader: 'For {{ community.descriptor }} Only')
+        ApplicationContext appContext = Mock(ApplicationContext)
+        appContext.getBeansOfType(NotificationEmailBuilder) >> ['beanName' : new ContactUsersNotificationBuilder(thymeleafTemplateEngine: new SpringTemplateEngine())]
+        NotificationEmailBuilderManager notificationEmailBuilderManager = new NotificationEmailBuilderManager(appContext: appContext)
+
+        when:
+        notificationEmailBuilderManager.init()
+        NotificationEmailBuilder.Res res = notificationEmailBuilderManager.build(notification, formatting)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("User Community Header variable found in header/footer, but no replace value found in encodedParams.")
     }
 
 }

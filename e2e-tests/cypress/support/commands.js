@@ -622,20 +622,33 @@ Cypress.Commands.add("configureApproverForUser", (projNum, approverUserId, userI
 });
 
 Cypress.Commands.add("getLinkFromEmail", () => {
-    cy.request({
-        "method":"GET",
-        "url": "http://localhost:1081/api/emails"
-    }).then((response) => {
-        if (response.isOkStatusCode && response.body) {
-            const localPart = /[http(?:s)?:\/\/^[:]+:\d+\/([^"]+)]/
-            const match = response.body[0].text.match(localPart)
-            if(match) {
-                return match[1]
-            }
-            return '';
-        } else {
-            return '';
+    cy.getEmails().then((emails) => {
+        const localPart = /http(?:s)?:\/\/[^:]+:\d+\/([^"\n]+)/
+        const match = emails[0].html.match(localPart)
+        if(match) {
+            return match[1]
         }
+        return '';
+    });
+});
+Cypress.Commands.add("getHeaderFromEmail", () => {
+    cy.getEmails().then((emails) => {
+        const localPart = /^(.*)\n/  // first line
+        const match = emails[0].text.match(localPart)
+        if(match) {
+            return match[1]
+        }
+        return '';
+    })
+});
+Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
+    cy.getEmails().then((emails) => {
+        const localPart = /.*\n(.*)$/s // last line
+        const match = emails[0].text.match(localPart)
+        if(match) {
+            return match[1]
+        }
+        return '';
     });
 });
 

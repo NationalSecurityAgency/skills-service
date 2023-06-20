@@ -91,7 +91,7 @@ class CreateAccountController {
         userInfo = createUser(userInfo)
 
         if (verifyEmailAddresses) {
-            passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.email)
+            passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.username)
         } else {
             userAuthService.autologin(userInfo, password, request, response)
         }

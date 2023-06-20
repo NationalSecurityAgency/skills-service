@@ -103,8 +103,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
 
@@ -138,8 +138,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
         def res = newService.addSkill([projectId: proj.projectId, skillId: skill.skillId])
@@ -168,8 +168,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
 
@@ -209,8 +209,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
 
@@ -250,8 +250,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
 
@@ -290,10 +290,12 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         when:
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
-        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        WaitFor.wait {
+            greenMail.getReceivedMessages().length > 0
+        }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         newService.joinProject(proj.projectId, invite)
 
@@ -324,8 +326,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
         greenMail.reset()
 
@@ -336,8 +338,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        email = greenMail.getReceivedMessages()
-        inviteCode = extractInviteFromEmail(email[0].content.toString())
+        email = EmailUtils.getEmail(greenMail, 0)
+        inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
 
         when:
@@ -364,8 +366,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
         greenMail.reset()
         //to allow a user to accept a second invite we have to clear out the invite tables - accepted invites are retained for a configurable period of days
@@ -375,8 +377,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        email = greenMail.getReceivedMessages()
-        inviteCode = extractInviteFromEmail(email[0].content.toString())
+        email = EmailUtils.getEmail(greenMail, 0)
+        inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
         def summary = userService.getMyProgressSummary()
 
@@ -410,8 +412,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u1Email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def inviteCode = extractInviteFromEmail(email.html)
         userService.joinProject(proj.projectId, inviteCode)
 
         then:
@@ -448,8 +450,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [addy]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def inviteCode = extractInviteFromEmail(email.html)
         def res = userService.joinProject(proj.projectId, inviteCode)
 
         then:
@@ -485,8 +487,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [addy.toUpperCase()]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def inviteCode = extractInviteFromEmail(email.html)
         def res = userService.joinProject(proj.projectId, inviteCode)
 
         then:
@@ -552,8 +554,8 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [EmailUtils.generateEmaillAddressFor(user)]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()[0]
-        def invite = extractInviteFromEmail(email.content)
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
 
         shouldBeAbleToContact.joinProject(proj.projectId, invite)
         greenMail.reset()

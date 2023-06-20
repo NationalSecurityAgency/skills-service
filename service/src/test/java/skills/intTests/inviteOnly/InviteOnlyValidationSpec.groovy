@@ -53,8 +53,8 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u1Email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         def resp = userService.validateInvite(proj.projectId, inviteCode)
 
         then:
@@ -92,8 +92,8 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u0email]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
 
         def resp = userService.validateInvite(proj.projectId, inviteCode)
 
@@ -130,8 +130,8 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [u0email.toUpperCase()]])
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         def userService = createService(params)
         def resp = userService.validateInvite(proj.projectId, inviteCode)
 
@@ -161,9 +161,10 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1S", recipients: [u1Email]])
         Thread.sleep(1200)
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         def resp = userService.validateInvite(proj.projectId, inviteCode)
 
         then:
@@ -193,8 +194,9 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         def u1Email = EmailUtils.generateEmaillAddressFor(users[1])
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT3M", recipients: [u1Email]])
 
-        def email = greenMail.getReceivedMessages()
-        String inviteCode = extractInviteFromEmail(email[0].content.toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String inviteCode = extractInviteFromEmail(email.html)
         def resp = userService.validateInvite(proj2.projectId, inviteCode)
 
         then:
