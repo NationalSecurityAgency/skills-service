@@ -156,7 +156,7 @@ limitations under the License.
         'isEmailEnabled',
       ]),
       isContactButtonInline() {
-        const currentLen = (this.projectName.length + this.projectDisplayName.length + 5) * 1.2;
+        const currentLen = (this.projectName.length + this.projectDisplayName.length + 10) * 1.2;
         const titleWidthPx = currentLen * this.oneRem;
         return this.windowWidth > titleWidthPx;
       },
