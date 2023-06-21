@@ -581,4 +581,54 @@ describe('Contact Project Users Specs', () => {
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)').should('not.exist');
     });
 
+    it('validation works correctly', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        })
+            .as('createProject');
+
+        cy.intercept('POST', '/admin/projects/proj1/previewEmail', {
+            statusCode: 200,
+            body: {
+                success: true
+            }
+        });
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/contactUsersCount')
+            .as('updateCount');
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/levels')
+            .as('getSubjectLevels');
+
+        cy.visit('/administrator/projects/proj1/contact-users');
+        cy.get('[data-cy="nav-Contact Users"]')
+            .click();
+        cy.wait('@emailSupported');
+
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('test');
+        cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+        cy.get('#emailSubjectError').contains('paragraphs may not contain jabberwocky')
+
+        cy.get('[data-cy="emailUsers_subject"]').clear();
+        cy.get('[data-cy="emailUsers_subject"]').type('test');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
+        cy.get('#emailSubjectError').should('be.empty');
+
+        cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+        cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
+
+        cy.get('[data-cy="emailUsers_body"]').clear();
+        cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
+        cy.get('#emailBodyError').should('be.empty');
+    });
 });
