@@ -31,7 +31,7 @@ limitations under the License.
       @change="onEditorChange"
       @keydown="handleTab"
       @focus="handleFocus"
-      @load="fixToolbarButtonSelectorAccessibilityIssues"
+      @load="fixAccessibilityIssues"
     ></editor>
     <div class="editor-help-footer border px-3 py-2 rounded-bottom">
       <div class="row small">
@@ -121,15 +121,6 @@ limitations under the License.
       };
     },
     mounted() {
-      this.intervalId = setInterval(() => {
-        this.intervalRuns += 1;
-        if (this.intervalRuns <= this.maxIntervalAttempts) {
-          this.setLabelForMoreButton();
-        } else {
-          clearInterval(this.intervalId);
-        }
-      }, 250);
-      this.setLabelForMoreButton();
       if (this.allowAttachments) {
         this.$refs.toastuiEditor.invoke('addCommand', 'wysiwyg', 'attachFile', () => {
           this.$refs.fileInputRef.click();
@@ -173,7 +164,7 @@ limitations under the License.
           ['heading', 'bold', 'italic', 'strike'],
           ['hr', 'quote'],
           ['ul', 'ol', 'indent', 'outdent'],
-          ['table', 'image', 'link'],
+          ['image', 'link'],
           ['code', 'codeblock'],
           ['scrollSync'],
         ];
@@ -216,20 +207,24 @@ limitations under the License.
       focusOnMarkdownEditor() {
         this.$refs.toastuiEditor.invoke('focus');
       },
-      setLabelForMoreButton() {
-        this.$nextTick(() => {
-          const toolbarElem = document.getElementsByClassName('more toastui-editor-toolbar-icons')[0];
-          if (toolbarElem) {
-            toolbarElem.setAttribute('aria-label', 'More');
-          }
-        });
-      },
       handleTab(mode, event) {
         const eventType = event.key.toUpperCase();
         if (eventType === 'TAB' || eventType === 'ESCAPE') {
           if (!event.shiftKey) {
             event.stopPropagation();
             this.$refs.editorFeatureLinkRef?.focus({ focusVisible: true });
+          }
+        } else if (event.ctrlKey && event.altKey && !event.shiftKey) {
+          if (event.key === 't') {
+            this.clickOnHeaderToolbarButton();
+          } else if (event.key === 's') {
+            this.clickOnFontSizeToolbarButton();
+          } else if (event.key === 'i') {
+            this.clickOnImageToolbarButton();
+          } else if (event.key === 'r') {
+            this.clickOnLinkToolbarButton();
+          } else if (event.key === 'a') {
+            this.clickOnAttachmentToolbarButton();
           }
         }
       },
