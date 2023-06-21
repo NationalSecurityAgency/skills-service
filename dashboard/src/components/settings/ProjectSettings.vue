@@ -20,10 +20,10 @@ limitations under the License.
     <simple-card>
       <loading-container :is-loading="isLoading">
         <div class="row" data-cy="projectVisibility">
-          <div class="col col-md-3 text-secondary" id="projectVisibilityLabel">
+          <div class="col-md-5 col-xl-3 text-secondary" id="projectVisibilityLabel">
             Project Discoverability: <inline-help target-id="projectVisibilityHelp" :html-msg="projectVisibilityHelpMsg" />
           </div>
-          <div class="col">
+          <div class="col-md-7 col-xl-9">
             <b-form-select v-model="settings.projectVisibility.value"
                            :options="projectVisibilityOptions"
                            @input="projectVisibilityChanged"
@@ -33,13 +33,13 @@ limitations under the License.
         </div>
 
         <div class="row mt-3">
-          <div class="col col-md-3 text-secondary" id="hideProjectDescriptionLabel">
+          <div class="col-md-5 col-xl-3 text-secondary" id="hideProjectDescriptionLabel">
             Project Description:
             <inline-help
               target-id="hideProjectDescriptionHelp"
               msg="Determines whether a project description is displayed only in the Progress and Rankings Manage My Projects page, or everywhere that the project is displayed"/>
           </div>
-          <div class="col">
+          <div class="col-md-7 col-xl-9">
             <b-form-select v-model="settings.hideProjectDescription.value"
                            @input="hideProjectDescriptionChanged"
                            aria-labelledby="hideProjectDescriptionLabel"
@@ -51,13 +51,13 @@ limitations under the License.
         </div>
 
           <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="pointsForLevelsLabel">
+            <div class="col-md-5 col-xl-3 text-secondary" id="pointsForLevelsLabel">
               Use Points For Levels:
               <inline-help
                 target-id="pointsForLevelsHelp"
                 msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
             </div>
-            <div class="col">
+            <div class="col-md-7 col-xl-9">
               <b-form-checkbox v-model="settings.levelPointsEnabled.value"
                                name="check-button"
                                v-on:input="levelPointsEnabledChanged"
@@ -72,13 +72,13 @@ limitations under the License.
           <ValidationProvider rules="root_help_url|customUrlValidator" v-slot="{errors}"
                               name="Root Help Url">
             <div class="row mt-3">
-              <div class="col col-md-3 text-secondary" id="rootHelpUrlLabel">
+              <div class="col-md-5 col-xl-3 text-secondary" id="rootHelpUrlLabel">
                 Root Help Url:
                 <inline-help
                   target-id="rootHelpUrlHelp"
                   msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
               </div>
-              <div class="col">
+              <div class="col-md-7 col-xl-9">
                 <b-form-input v-model="settings.helpUrlHost.value"
                               placeholder="http://www.HelpArticlesHost.com"
                               data-cy="rootHelpUrlInput"
@@ -98,13 +98,13 @@ limitations under the License.
           </ValidationProvider>
 
           <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="selfReportLabel">
+            <div class="col-md-5 col-xl-3 text-secondary" id="selfReportLabel">
               Self Report Default:
               <inline-help
                 target-id="selfReportSwitchHelp"
                 msg="Will serve as a default when creating new skills."/>
             </div>
-            <div class="col">
+            <div class="col-md-7 col-xl-9">
               <b-form-checkbox v-model="selfReport.enabled"
                                name="check-button"
                                v-on:input="selfReportingControl"
@@ -147,13 +147,13 @@ limitations under the License.
           </div>
 
           <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
+            <div class="col-md-5 col-xl-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
               Rank Opt-Out for ALL Admins:
               <inline-help
                 target-id="rankAndLeaderboardOptOutHelp"
                 msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
             </div>
-            <div class="col">
+            <div class="col-md-7 col-xl-9">
               <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
                                name="check-button"
                                v-on:input="rankAndLeaderboardOptOutChanged"
@@ -166,13 +166,13 @@ limitations under the License.
           </div>
 
           <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="customLabelsLabel">
+            <div class="col-md-5 col-xl-3 text-secondary" id="customLabelsLabel">
               Custom Labels:
               <inline-help
                 target-id="customLabelsSwitchHelp"
                 msg="Enabling allows for setting custom labels in the Skills Display component"/>
             </div>
-            <div class="col">
+            <div class="col-md-7 col-xl-9">
               <b-form-checkbox v-model="showCustomLabelsConfigToggle"
                                name="check-button"
                                aria-labelledby="customLabelsLabel"
@@ -186,13 +186,13 @@ limitations under the License.
                   <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
                                       name="Project Display Text">
                     <div class="row mb-1">
-                      <div class="col col-md-3 text-secondary" id="projectDisplayTextLabel">
+                      <div class="col-md-5 col-xl-3 text-secondary" id="projectDisplayTextLabel">
                         Project Display Text:
                         <inline-help
                           target-id="projectDisplayTextHelp"
                           msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
-                      <div class="col">
+                      <div class="col-md-7 col-xl-9">
                         <b-form-input v-model="settings.projectDisplayName.value"
                                       data-cy="projectDisplayTextInput"
                                       v-on:input="projectDisplayNameChanged"
@@ -210,13 +210,13 @@ limitations under the License.
                   <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
                                       name="Subject Display Text">
                     <div class="row mb-1">
-                      <div class="col col-md-3 text-secondary" id="subjectDisplayTextLabel">
+                      <div class="col-md-5 col-xl-3 text-secondary" id="subjectDisplayTextLabel">
                         Subject Display Text:
                         <inline-help
                           target-id="subjectDisplayTextHelp"
                           msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
-                      <div class="col">
+                      <div class="col-md-7 col-xl-9">
                         <b-form-input v-model="settings.subjectDisplayName.value"
                                       data-cy="subjectDisplayTextInput"
                                       v-on:input="subjectDisplayNameChanged"
@@ -234,13 +234,13 @@ limitations under the License.
                   <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
                                       name="Group Display Text">
                     <div class="row mb-1">
-                      <div class="col col-md-3 text-secondary" id="groupDisplayTextLabel">
+                      <div class="col-md-5 col-xl-3 text-secondary" id="groupDisplayTextLabel">
                         Group Display Text:
                         <inline-help
                           target-id="groupDisplayTextHelp"
                           msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
-                      <div class="col">
+                      <div class="col-md-7 col-xl-9">
                         <b-form-input v-model="settings.groupDisplayName.value"
                                       data-cy="groupDisplayTextInput"
                                       v-on:input="groupDisplayNameChanged"
@@ -259,13 +259,13 @@ limitations under the License.
                   <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
                                       name="Skill Display Text">
                     <div class="row mb-1">
-                      <div class="col col-md-3 text-secondary" id="skillDisplayTextLabel">
+                      <div class="col-md-5 col-xl-3 text-secondary" id="skillDisplayTextLabel">
                         Skill Display Text:
                         <inline-help
                           target-id="skillDisplayTextHelp"
                           msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
-                      <div class="col">
+                      <div class="col-md-7 col-xl-9">
                         <b-form-input v-model="settings.skillDisplayName.value"
                                       data-cy="skillDisplayTextInput"
                                       v-on:input="skillDisplayNameChanged"
@@ -283,13 +283,13 @@ limitations under the License.
                   <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"
                                       name="Level Display Text">
                     <div class="row">
-                      <div class="col col-md-3 text-secondary" id="levelDisplayTextLabel">
+                      <div class="col-md-5 col-xl-3 text-secondary" id="levelDisplayTextLabel">
                         Level Display Text:
                         <inline-help
                           target-id="levelDisplayTextHelp"
                           msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                       </div>
-                      <div class="col">
+                      <div class="col-md-7 col-xl-9">
                         <b-form-input v-model="settings.levelDisplayName.value"
                                       data-cy="levelDisplayTextInput"
                                       v-on:input="levelDisplayNameChanged"
@@ -310,13 +310,13 @@ limitations under the License.
           </div>
 
           <div class="row mt-3">
-            <div class="col col-md-3 text-secondary" id="groupDescriptions">
+            <div class="col-md-5 col-xl-3 text-secondary" id="groupDescriptions">
               Always Show Group Descriptions:
               <inline-help
                 target-id="groupDescriptionsHelp"
                 msg="Toggle this setting to always show the group's descriptions in this project"/>
             </div>
-            <div class="col">
+            <div class="col-md-7 col-xl-9">
               <b-form-checkbox v-model="settings.groupDescriptions.value"
                                name="check-button"
                                v-on:input="groupDescriptionsChanged"
