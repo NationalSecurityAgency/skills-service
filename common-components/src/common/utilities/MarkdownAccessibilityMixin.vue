@@ -17,7 +17,7 @@ limitations under the License.
   const getMenuItem = () => document.querySelector('.toastui-editor-popup-body [aria-role="menu"]');
   const getMenuPopup = () => document.querySelector('.toastui-editor-popup-body');
   const getMarkdownEditor = () => document.getElementById('toastuiEditor');
-  const getHeaderButton = () => getMarkdownEditor().querySelector('.heading');
+  const getHeaderButton = () => getMarkdownEditor()?.querySelector('.heading');
 
   const getMouseEvent = () => new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
 
@@ -26,8 +26,10 @@ limitations under the License.
     methods: {
       clickOnHeaderToolbarButton() {
         const btn = getHeaderButton();
-        btn.dispatchEvent(getMouseEvent());
-        btn.focus();
+        if (btn) {
+          btn.dispatchEvent(getMouseEvent());
+          btn.focus();
+        }
       },
       clickOnFontSizeToolbarButton() {
         this.doClickOnToolbarButton('[skilltree-id="fontSizeBtn"]');
@@ -42,9 +44,12 @@ limitations under the License.
         this.doClickOnToolbarButton('.attachment-button');
       },
       doClickOnToolbarButton(selector) {
-        const btn = getMarkdownEditor().querySelector(selector);
-        btn.dispatchEvent(getMouseEvent());
-        btn.focus();
+        const markdownEditor = getMarkdownEditor();
+        if (markdownEditor) {
+          const btn = markdownEditor.querySelector(selector);
+          btn.dispatchEvent(getMouseEvent());
+          btn.focus();
+        }
       },
       fixAccessibilityIssues() {
         this.fixHeaderButtonIssues();
@@ -55,8 +60,11 @@ limitations under the License.
       },
       fixInsertUrlButtonIssues() {
         this.$nextTick(() => {
-          const imageButton = getMarkdownEditor().querySelector('.link');
-          imageButton.addEventListener('click', this.handleUrlButtonClick);
+          const markdownEditor = getMarkdownEditor();
+          if (markdownEditor) {
+            const imageButton = markdownEditor.querySelector('.link');
+            imageButton.addEventListener('click', this.handleUrlButtonClick);
+          }
         });
       },
       handleUrlButtonClick() {
@@ -68,8 +76,11 @@ limitations under the License.
       },
       fixInsertImageButtonIssues() {
         this.$nextTick(() => {
-          const imageButton = getMarkdownEditor().querySelector('.image');
-          imageButton.addEventListener('click', this.handleImageButtonClick);
+          const markdownEditor = getMarkdownEditor();
+          if (markdownEditor) {
+            const imageButton = markdownEditor.querySelector('.image');
+            imageButton.addEventListener('click', this.handleImageButtonClick);
+          }
         });
       },
       handleImageButtonClick() {
@@ -103,10 +114,13 @@ limitations under the License.
       },
       fixFontSizeButtonIssues() {
         this.$nextTick(() => {
-          const fontButton = getMarkdownEditor().querySelector('[aria-label="F"]');
-          fontButton.setAttribute('aria-label', 'Font Size');
-          fontButton.setAttribute('skilltree-id', 'fontSizeBtn');
-          fontButton.addEventListener('click', this.handleFontSizeButtonClick);
+          const markdownEditor = getMarkdownEditor();
+          if (markdownEditor) {
+            const fontButton = markdownEditor.querySelector('[aria-label="F"]');
+            fontButton.setAttribute('aria-label', 'Font Size');
+            fontButton.setAttribute('skilltree-id', 'fontSizeBtn');
+            fontButton.addEventListener('click', this.handleFontSizeButtonClick);
+          }
         });
       },
       handleFontSizeButtonClick() {
@@ -125,11 +139,14 @@ limitations under the License.
         if (attemptNum <= 10) {
           setTimeout(() => {
             this.$nextTick(() => {
-              const moreButton = getMarkdownEditor().querySelector('.more');
-              if (moreButton) {
-                moreButton.setAttribute('aria-label', 'More Toolbar Controls');
-              } else {
-                this.fixMoreButtonAriaLabel(attemptNum + 1);
+              const markdownEditor = getMarkdownEditor();
+              if (markdownEditor) {
+                const moreButton = markdownEditor.querySelector('.more');
+                if (moreButton) {
+                  moreButton.setAttribute('aria-label', 'More Toolbar Controls');
+                } else {
+                  this.fixMoreButtonAriaLabel(attemptNum + 1);
+                }
               }
             });
           }, 300);
