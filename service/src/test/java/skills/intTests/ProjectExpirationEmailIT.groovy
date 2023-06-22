@@ -21,7 +21,9 @@ import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.ProjectExpirationService
+import skills.settings.EmailSettingsService
 import skills.storage.model.UserAttrs
 import skills.utils.WaitFor
 
@@ -40,6 +42,19 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
     }
 
     def "email notification formatted appropriately"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
         def proj1 = SkillsFactory.createProject(1)
 
         skillsService.createProject(proj1)
@@ -63,13 +78,12 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.*If you take no action, Project Inception will be deleted today \(\d{4}-\d{2}-\d{2}\).*If you wish to stop receiving these emails, visit http:\/\/localhost:\d+\/administrator\/projects\/Inception in the SkillTree dashboard and click the 'Keep' button or delete your Project.*/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.*If you take no action, Project Inception will be deleted today \(\d{4}-\d{2}-\d{2}\).*If you wish to stop receiving these emails, visit http:\/\/localhost:\d+\/administrator\/projects\/Inception in the SkillTree dashboard and click the 'Keep' button or delete your Project.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)<h1>Your SkillTree Project Isn't Being Used!<\/h1>.+?/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your SkillTree Project Isn't Being Used!<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>Your SkillTree Project Test Project#1, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.<\/p>.+?/
         Pattern p2 = ~/(?s)<p>If you take no action, Project Test Project#1 will be deleted today \(\d{4}-\d{2}-\d{2}\).<\/p>.+?/
-        Pattern p3 = ~/(?s)<p>If you wish to stop receiving these emails, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.<\/p>.*/
-
+        Pattern p3 = ~/(?s)<p>If you wish to stop receiving these emails, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.<\/p>.*For All Dragons Only/
 
         then:
         emails.size() == 3
@@ -82,4 +96,66 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
         emails.find { p2.matcher(it.html).find() }
         emails.find { p3.matcher(it.html).find() }
     }
+
+    def "email notification formatted appropriately for user community protected project"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+        def proj1 = SkillsFactory.createProject(1)
+        proj1.enableProtectedUserCommunity = true
+
+        skillsService.createProject(proj1)
+        Date flagForExpiration = new Date()
+        expirationService.flagOldProjects(flagForExpiration)
+
+        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+
+        createService(otherUser)
+        rootSkillsService.saveUserTag(otherUser, 'dragons', ['DivineDragon'])
+        skillsService.addProjectAdmin(proj1.projectId, otherUser)
+
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
+
+        when:
+        expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Your SkillTree Project Inception, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.*If you take no action, Project Inception will be deleted today \(\d{4}-\d{2}-\d{2}\).*If you wish to stop receiving these emails, visit http:\/\/localhost:\d+\/administrator\/projects\/Inception in the SkillTree dashboard and click the 'Keep' button or delete your Project.*For All Dragons Only/
+
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your SkillTree Project Isn't Being Used!<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>Your SkillTree Project Test Project#1, created on \d{4}-\d{2}-\d{2} hasn't been used in at least \d+ days?.<\/p>.+?/
+        Pattern p2 = ~/(?s)<p>If you take no action, Project Test Project#1 will be deleted today \(\d{4}-\d{2}-\d{2}\).<\/p>.+?/
+        Pattern p3 = ~/(?s)<p>If you wish to stop receiving these emails, visit <a href="http:\/\/localhost:\d+\/administrator\/projects\/TestProject1">Test Project#1<\/a> in the SkillTree dashboard and click the 'Keep' button or delete your Project.<\/p>.*For All Dragons Only/
+        
+        then:
+        emails.size() == 3
+        emails.collect {it.recipients[0] }.sort() == [rootUserUserAttrs.email, projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
+        emails.find { it.subj == "SkillTree Project is expiring!" }
+        emails.find {it.recipients == [otherProjectAdminUserAttrs.email]}
+        emails.find { plaintTextMatch.matcher(it.plainText).find() }
+        emails.findAll {h1.matcher(it.html).find() }?.size() == 3
+        emails.find { p1.matcher(it.html).find() }
+        emails.find { p2.matcher(it.html).find() }
+        emails.find { p3.matcher(it.html).find() }
+    }
+
 }
