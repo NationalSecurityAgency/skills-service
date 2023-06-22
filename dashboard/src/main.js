@@ -238,7 +238,7 @@ router.afterEach((from, to) => {
   // drilling-down (for example projects page into a single project page)
   // the focus is placed on the next tabbable element which happens to in the footer
   // (when skills.config.ui.supportLinkN properties are utilized)
-  if (from.path !== to.path) {
+  if (from.name !== to.name) {
     setTimeout(() => {
       Vue.nextTick(() => {
         const preSkipButtonPlaceholder = document.querySelector('#preSkipToContentPlaceholder');
