@@ -481,10 +481,9 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.visit('/administrator/');
                 cy.get('[data-cy=subPageHeader]')
                     .contains('Projects');
-                cy.get('button.dropdown-toggle')
-                    .first()
-                    .click({ force: true });
-                cy.contains('Settings')
+                cy.get('[data-cy="settings-button"]')
+                    .click();
+                cy.get('[data-cy="settingsButton-navToSettings"]')
                     .click();
                 cy.wait('@checkRoot');
                 cy.clickNav('Security');

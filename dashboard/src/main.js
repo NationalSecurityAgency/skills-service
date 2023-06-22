@@ -241,9 +241,11 @@ router.afterEach((from, to) => {
   if (from.path !== to.path) {
     setTimeout(() => {
       Vue.nextTick(() => {
-        const preSkipButtonPlaceholder = document.querySelector('#preSkipToContentPlaceholder').focus();
+        const preSkipButtonPlaceholder = document.querySelector('#preSkipToContentPlaceholder');
         if (preSkipButtonPlaceholder) {
+          preSkipButtonPlaceholder.setAttribute('tabindex', 0);
           preSkipButtonPlaceholder.focus();
+          preSkipButtonPlaceholder.setAttribute('tabindex', -1);
         }
       });
     }, 150);

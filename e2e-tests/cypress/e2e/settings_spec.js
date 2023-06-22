@@ -36,15 +36,6 @@ describe('Settings Tests', () => {
     const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
 
     it('paging controls are visible if number of records are larger then smallest page size', () => {
-        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
-            .as('getEligibleForRoot');
-        cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
-            .as('addRoot');
-        cy.intercept({
-            method: 'GET',
-            url: '/app/projects'
-        })
-            .as('loadProjects');
         cy.intercept({
             method: 'GET',
             url: '/root/isRoot'
@@ -93,16 +84,8 @@ describe('Settings Tests', () => {
         })
             .as('loadRootUsers');
 
-        cy.visit('/administrator/');
-        cy.get('[data-cy=subPageHeader]')
-            .contains('Projects');
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
-            .click();
+        cy.visit('/settings/security');
         cy.wait('@checkRoot');
-        cy.clickNav('Security');
         cy.wait('@loadRootUsers');
         cy.get('[data-cy=skillsBTableTotalRows]')
             .should('have.text', '15');
@@ -117,11 +100,6 @@ describe('Settings Tests', () => {
             .as('addRoot');
         cy.intercept({
             method: 'GET',
-            url: '/app/projects'
-        })
-            .as('loadProjects');
-        cy.intercept({
-            method: 'GET',
             url: '/root/isRoot'
         })
             .as('checkRoot');
@@ -130,16 +108,8 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/users/roles/ROLE_SUPER_DUPER_USER**')
             .as('loadRootUsers');
 
-        cy.visit('/administrator/');
-        cy.get('[data-cy=subPageHeader]')
-            .contains('Projects');
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
-            .click();
+        cy.visit('/settings/security');
         cy.wait('@checkRoot');
-        cy.clickNav('Security');
         cy.wait('@loadRootUsers');
         cy.validateTable(rootUsrTableSelector, [
             [{
@@ -251,10 +221,9 @@ describe('Settings Tests', () => {
         cy.wait('@isSupervisor');
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -290,10 +259,9 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -372,10 +340,9 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.get('[data-cy=settingsButton-navToSettings]')
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -521,10 +488,9 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -578,10 +544,9 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('button.dropdown-toggle')
-            .first()
-            .click({ force: true });
-        cy.contains('Settings')
+        cy.get('[data-cy="settings-button"]')
+            .click();
+        cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
         cy.wait('@checkRoot');
         cy.contains('Security')
