@@ -38,6 +38,8 @@ describe('Copy Invite URL Tests', () => {
 
         cy.visit('/administrator/projects/proj1')
         cy.contains('No Subjects Yet')
+        cy.get('[data-cy="projectLastReportedSkillValue"]').should('have.text', 'Never')
+        cy.wait(1500)
         cy.location().then((loc) => {
             const expectedProj1URL = `${loc.origin}${proj1Share}`
             const expectedProj2URL = `${loc.origin}/progress-and-rankings/projects/proj2?invited=true`
@@ -63,6 +65,9 @@ describe('Copy Invite URL Tests', () => {
                 .click()
             cy.get('[data-cy="projCard_proj2_manageBtn"]')
                 .click()
+            cy.contains('No Subjects Yet')
+            cy.get('[data-cy="projectLastReportedSkillValue"]').should('have.text', 'Never')
+            cy.wait(1500)
 
             cy.get('[data-cy="shareProjBtn"]')
                 .realClick();

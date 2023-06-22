@@ -213,7 +213,7 @@ router.beforeEach((to, from, next) => {
 });
 
 const DEFAULT_TITLE = 'SkillTree Dashboard';
-router.afterEach((from, to) => {
+router.afterEach((to, from) => {
   if (to.meta.reportSkillId) {
     SkillsConfiguration.afterConfigure()
       .then(() => {
