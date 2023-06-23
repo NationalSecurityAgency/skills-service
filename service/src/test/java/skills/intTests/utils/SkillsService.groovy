@@ -662,6 +662,10 @@ class SkillsService {
         wsHelper.adminPost(getAddSkillToBadgeUrl(props.projectId, props.badgeId, props.skillId), props)
     }
 
+    def assignSkillsToBadge(String projectId, String badgeId, List<String> skillIds) {
+        wsHelper.adminPost(getAddSkillsToBadgeUrl(projectId, badgeId), [skillIds: skillIds])
+    }
+
     def assignSkillToSkillsGroup(String groupId, Map props) {
         wsHelper.adminPost(getAddSkillToSkillsGroupUrl(props.projectId, props.subjectId, groupId, props.skillId), props)
     }
@@ -1831,6 +1835,10 @@ class SkillsService {
 
     private String getAddSkillToBadgeUrl(String project, String badge, String skillId) {
         return "${getProjectUrl(project)}/badge/${badge}/skills/${skillId}".toString()
+    }
+
+    private String getAddSkillsToBadgeUrl(String project, String badge) {
+        return "${getProjectUrl(project)}/badge/${badge}/skills/add".toString()
     }
 
     private String getAddSkillToGlobalBadgeUrl(String badge, String project, String skillId) {
