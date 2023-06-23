@@ -130,8 +130,8 @@ describe('Quiz Metrics With Reused Data Tests', () => {
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
-        cy.get(headerSelector)
-            .contains('User')
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
+        cy.get(`${headerSelector} [data-cy="usrColumnHeader"]`)
             .click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user10' }],

@@ -15,6 +15,8 @@ limitations under the License.
 */
 <template>
   <div class="bg-white header">
+    <!--  see usage of preSkipToContentPlaceholder in main.js  -->
+    <span id="preSkipToContentPlaceholder" tabindex="-1" aria-hidden="true" data-cy="preSkipToContentPlaceholder"/>
     <a
       class="skip-main btn btn-primary"
       @click="focusOnMainContent"

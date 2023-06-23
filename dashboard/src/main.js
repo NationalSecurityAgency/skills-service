@@ -213,7 +213,7 @@ router.beforeEach((to, from, next) => {
 });
 
 const DEFAULT_TITLE = 'SkillTree Dashboard';
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   if (to.meta.reportSkillId) {
     SkillsConfiguration.afterConfigure()
       .then(() => {
@@ -232,6 +232,24 @@ router.afterEach((to) => {
     }
     document.title = newTitle;
   });
+
+  // this hack is needed because otherwise when navigating between
+  // pages the focus is placed onto the next visible element which in case of
+  // drilling-down (for example projects page into a single project page)
+  // the focus is placed on the next tabbable element which happens to in the footer
+  // (when skills.config.ui.supportLinkN properties are utilized)
+  if (from.name !== to.name) {
+    setTimeout(() => {
+      Vue.nextTick(() => {
+        const preSkipButtonPlaceholder = document.querySelector('#preSkipToContentPlaceholder');
+        if (preSkipButtonPlaceholder) {
+          preSkipButtonPlaceholder.setAttribute('tabindex', 0);
+          preSkipButtonPlaceholder.focus();
+          preSkipButtonPlaceholder.setAttribute('tabindex', -1);
+        }
+      });
+    }, 150);
+  }
 });
 
 store.dispatch('loadConfigState').finally(() => {

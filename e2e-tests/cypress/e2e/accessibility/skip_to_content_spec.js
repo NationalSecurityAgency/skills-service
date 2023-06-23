@@ -21,6 +21,7 @@ describe('Skip To Content Tests', () => {
         cy.enableProdMode(1);
 
         Cypress.Commands.add("skipToContentAndValidate", (mainContentIdForSelector) => {
+            cy.wait(1500)
             cy.get('[data-cy="skillTreeLogo"]').tab({ shift: true })
             cy.get('[data-cy="skipToContentButton"]').should('be.visible')
             cy.get('[data-cy="skipToContentButton"]').should('have.focus')
@@ -125,6 +126,33 @@ describe('Skip To Content Tests', () => {
         cy.visit('/settings/');
         cy.get('[data-cy="generalSettingsSave"]')
         cy.skipToContentAndValidate('#mainContent2')
+    });
+
+    it('navigating to a new page should put focus right before "Skip To Content" button', () => {
+        cy.createSubject(1,1)
+        cy.createSkill(1,1,1)
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+
+        cy.wait(1500)
+        cy.get('[data-cy="preSkipToContentPlaceholder"]').should('have.focus')
+        cy.get('body').tab()
+        cy.get('[data-cy="skipToContentButton"]').should('have.focus')
+
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="projectLastReportedSkillValue"]').should('have.text', 'Never')
+        cy.wait(1500)
+        cy.get('[data-cy="preSkipToContentPlaceholder"]').should('have.focus')
+        cy.get('body').tab()
+        cy.get('[data-cy="skipToContentButton"]').should('have.focus')
+
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
+        cy.wait(1500)
+        cy.get('[data-cy="preSkipToContentPlaceholder"]').should('have.focus')
+        cy.get('body').tab()
+        cy.get('[data-cy="skipToContentButton"]').should('have.focus')
     });
 
 });

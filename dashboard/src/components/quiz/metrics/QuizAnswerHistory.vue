@@ -26,7 +26,7 @@ limitations under the License.
           <span class="text-primary"><i class="fas fa-check-double skills-color-projects" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
         <template #head(userIdForDisplay)="data">
-          <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
+          <span class="text-primary" data-cy="usrColumnHeader"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
         <template #head(updated)="data">
           <span class="text-primary"><i class="far fa-clock skills-color-events" aria-hidden="true"></i> {{ data.label }}</span>

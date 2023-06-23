@@ -71,6 +71,7 @@ limitations under the License.
 
             <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId, name: proj.projectName } }"
                          tag="a"
+                         :aria-label="`Click to navigate to ${proj.projectName} project page.`"
                          class="project-link" :data-cy="`project-link-${proj.projectId}`" tabindex="0">
               <project-link-card
                 :ref="`proj${proj.projectId}`"

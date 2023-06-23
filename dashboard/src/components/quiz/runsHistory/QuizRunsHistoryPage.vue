@@ -57,7 +57,7 @@ limitations under the License.
                       tableStoredStateId="quizRunsHistoryTable"
                       data-cy="quizRunsHistoryTable">
         <template #head(userIdForDisplay)="data">
-          <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
+          <span class="text-primary" data-cy="usrColumnHeader"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
         </template>
         <template #head(status)="data">
           <span class="text-primary"><i class="fas fa-trophy skills-color-points" aria-hidden="true"></i> {{ data.label }}</span>
