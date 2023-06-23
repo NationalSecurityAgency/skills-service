@@ -289,7 +289,7 @@ class BadgeAdminService {
                         DependencyCheckResult dependencyCheckResult = circularLearningPathChecker.check()
                         if (!dependencyCheckResult.possible) {
                             String msg = "Adding skill [${skillid}] to badge [${badge.skillId}] violates the Learning Path. Reason: ${dependencyCheckResult.reason}"
-                            throw new SkillException(msg, projectId, null, ErrorCode.LearningPathViolation)
+                            throw new SkillException(msg, projectId, skillid, ErrorCode.LearningPathViolation)
                         }
                     }
                 }
