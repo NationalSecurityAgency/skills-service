@@ -861,10 +861,10 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[id="accessNotificationPanel"]').should('be.visible');
         cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
 
-        cy.getEmails().then((emails) => {
-            expect(emails[0].subject).to.equal('SkillTree Project Invitation Reminder');
-            expect(emails[0].to.text).to.equal('abc@abc.org');
-            expect(emails[0].textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+        cy.getEmails(5).then((emails) => {
+            const reminderEmail = emails.find((e) => e.subject === 'SkillTree Project Invitation Reminder')
+            expect(reminderEmail.to.text).to.equal('abc@abc.org');
+            expect(reminderEmail.textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
         });
     });
 
@@ -940,10 +940,10 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[id="accessNotificationPanel"]').should('be.visible');
         cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
 
-        cy.getEmails().then((emails) => {
-            expect(emails[0].subject).to.equal('SkillTree Project Invitation Reminder');
-            expect(emails[0].to.text).to.equal('abc@abc.org');
-            expect(emails[0].textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+        cy.getEmails(5).then((emails) => {
+            const reminderEmail = emails.find((e) => e.subject === 'SkillTree Project Invitation Reminder')
+            expect(reminderEmail.to.text).to.equal('abc@abc.org');
+            expect(reminderEmail.textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
         });
     });
 
