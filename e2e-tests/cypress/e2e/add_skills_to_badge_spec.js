@@ -45,6 +45,12 @@ describe('Add Multiple Skills to Badge Tests', () => {
           .click({ force: true });
         cy.get('[data-cy="skillSelect-skill3"]')
           .click({ force: true });
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('be.checked');
+        cy.get('[data-cy="skillSelect-skill4"]').should('not.be.checked');
+
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillAddToBadgeBtn"]')
@@ -68,6 +74,11 @@ describe('Add Multiple Skills to Badge Tests', () => {
           .contains('Successfully added 2 skills to the [Badge 1] badge.');
         cy.get('[data-cy="okButton"]')
           .click();
+
+        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill2"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill3"]').should('not.be.checked');
+        cy.get('[data-cy="skillSelect-skill4"]').should('not.be.checked');
 
         // verify badge contains all skills
         cy.visit('/administrator/projects/proj1/badges/badge1');

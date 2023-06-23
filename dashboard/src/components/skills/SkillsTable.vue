@@ -839,6 +839,7 @@ limitations under the License.
       },
       handleSkillsAddedToBadge(skillsAddedToBadgeResult) {
         const { destination, skillsAddedToBadge } = skillsAddedToBadgeResult;
+        this.changeSelectionForAll(false);
         this.$nextTick(() => this.$announcer.polite(`added ${skillsAddedToBadge.length} skill${skillsAddedToBadge.length > 1 ? 's' : ''} to badge ${destination.name}`));
       },
       handleSkillsTagged(tagResult) {
