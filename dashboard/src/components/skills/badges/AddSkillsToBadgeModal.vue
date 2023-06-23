@@ -56,6 +56,7 @@ limitations under the License.
                 </div>
                 <div class="col-auto">
                   <b-button size="sm" class="float-right text-uppercase" variant="info"
+                            :aria-label="`Select ${dest.name} badge`"
                             @click="selectDestination(dest)"
                             :data-cy="`selectDest_${dest.badgeId}`">
                     <i class="fas fa-check-circle"/> Select
