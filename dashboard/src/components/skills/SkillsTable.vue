@@ -78,6 +78,9 @@ limitations under the License.
                 <b-dropdown-item @click="handleSkillMoveRequest" data-cy="skillMoveBtn"><i
                   class="fas fa-shipping-fast"></i> Move Skills
                 </b-dropdown-item>
+                <b-dropdown-item @click="handleAddSkillsToBadgeRequest" data-cy="skillAddToBadgeBtn"><i
+                  class="fas fa-award"></i> Add To Badge
+                </b-dropdown-item>
                 <b-dropdown-divider />
                 <b-dropdown-item @click="handleAddSkillTagRequest" data-cy="tagSkillBtn"><i
                   class="fas fa-tag"></i> Tag Skills
@@ -371,12 +374,17 @@ limitations under the License.
                                 type="move"
                                 @action-success="handleSkillsAreReusedOrMoved"
                                 @hidden="handleExportModalIsClosed"/>
-    <add-skill-tag id="tagSkillsModal" v-if="tagSkillsInfo.show"
+    <add-skills-to-badge-modal id="addSkillsToBadgeModal" v-if="addSkillsToBadgeInfo.show"
+                                v-model="addSkillsToBadgeInfo.show"
+                                :skills="addSkillsToBadgeInfo.skills"
+                                @action-success="handleSkillsAddedToBadge"
+                                @hidden="handleExportModalIsClosed"/>
+    <add-skill-tag id="addTagSkillsModal" v-if="tagSkillsInfo.show"
                                 v-model="tagSkillsInfo.show"
                                 :skills="tagSkillsInfo.skills"
                                 @action-success="handleSkillsTagged"
                                 @hidden="handleExportModalIsClosed"/>
-    <remove-skill-tag id="tagSkillsModal" v-if="removeTagSkillsInfo.show"
+    <remove-skill-tag id="removeTagSkillsModal" v-if="removeTagSkillsInfo.show"
                    v-model="removeTagSkillsInfo.show"
                    :skills="removeTagSkillsInfo.skills"
                    @action-success="handleSkillsTagRemoved"
@@ -399,6 +407,7 @@ limitations under the License.
   import EditImportedSkill from '@/components/skills/skillsGroup/EditImportedSkill';
   import ReuseOrMoveSkillsModal from '@/components/skills/reuseSkills/ReuseOrMoveSkillsModal';
   import AddSkillTag from '@/components/skills/tags/AddSkillTag';
+  import AddSkillsToBadgeModal from '@/components/skills/badges/AddSkillsToBadgeModal';
   import RemoveSkillTag from '@/components/skills/tags/RemoveSkillTag';
   import SettingsService from '@/components/settings/SettingsService';
   import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation';
@@ -473,6 +482,7 @@ limitations under the License.
     components: {
       SkillNameRouterLink,
       SkillRemovalValidation,
+      AddSkillsToBadgeModal,
       ReuseOrMoveSkillsModal,
       AddSkillTag,
       RemoveSkillTag,
@@ -519,6 +529,10 @@ limitations under the License.
           skills: [],
         },
         moveSkillsInfo: {
+          show: false,
+          skills: [],
+        },
+        addSkillsToBadgeInfo: {
           show: false,
           skills: [],
         },
@@ -823,6 +837,10 @@ limitations under the License.
               });
           });
       },
+      handleSkillsAddedToBadge(skillsAddedToBadgeResult) {
+        const { destination, skillsAddedToBadge } = skillsAddedToBadgeResult;
+        this.$nextTick(() => this.$announcer.polite(`added ${skillsAddedToBadge.length} skill${skillsAddedToBadge.length > 1 ? 's' : ''} to badge ${destination.name}`));
+      },
       handleSkillsTagged(tagResult) {
         const { skills, tag } = tagResult;
         this.skills = this.skills.map((skill) => {
@@ -1086,6 +1104,10 @@ limitations under the License.
       handleSkillMoveRequest() {
         this.moveSkillsInfo.skills = this.skills.filter((item) => item.selected);
         this.moveSkillsInfo.show = true;
+      },
+      handleAddSkillsToBadgeRequest() {
+        this.addSkillsToBadgeInfo.skills = this.skills.filter((item) => item.selected);
+        this.addSkillsToBadgeInfo.show = true;
       },
       handleAddSkillTagRequest() {
         this.tagSkillsInfo.skills = this.skills.filter((item) => item.selected);

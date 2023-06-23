@@ -429,6 +429,34 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/add", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult assignSkillsToBadge(@PathVariable("projectId") String projectId,
+                                      @PathVariable("badgeId") String badgeId,
+                                      @RequestBody SkillIdsRequest skillsIdsRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotEmpty(skillsIdsRequest?.skillIds, "Skill Ids", projectId)
+        String reusedSkillId = skillsIdsRequest.skillIds.find {it.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()) }
+        SkillsValidator.isTrue(!reusedSkillId, "Skill ID must not contain reuse tag", projectId, reusedSkillId)
+
+        badgeAdminService.addSkillsToBadge(projectId, badgeId, skillsIdsRequest.skillIds)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}/prerequisiteValidate", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    DependencyCheckResult validateLearningPathForAssignSkillToBadge(@PathVariable("projectId") String projectId,
+                                                            @PathVariable("badgeId") String badgeId,
+                                                            @PathVariable("skillId") String skillId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
+
+        return badgeAdminService.validateAgainstLearningPath(projectId, badgeId, skillId, false)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/badge/{badgeId}/skills/{skillId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult removeSkillFromBadge(@PathVariable("projectId") String projectId,
