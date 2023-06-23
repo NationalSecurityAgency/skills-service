@@ -23,5 +23,6 @@ import groovy.transform.ToString
 class SkillsActionRequest {
     String subjectId
     String groupId
+    String badgeId
     List<String> skillIds
 }
