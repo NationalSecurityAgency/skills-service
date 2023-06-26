@@ -69,6 +69,7 @@ limitations under the License.
                   <div class="col-auto">
                     <b-button size="sm" class="float-right text-uppercase" variant="info"
                               @click="selectDestination(dest)"
+                              :aria-label="`Select ${dest.subjectName} subject`"
                               :data-cy="`selectDest_subj${dest.subjectId}${dest.groupId ? dest.groupId : ''}`">
                       <i class="fas fa-check-circle"/> Select
                     </b-button>
