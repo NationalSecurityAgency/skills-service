@@ -580,7 +580,7 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
 
         when:
         def skillSummary = skillsService.getSkillSummary(userId, SkillsFactory.defaultProjId, subject.subjectId)
-
+        def skillDepInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
         then:
         skillSummary.skills.size() == 2
 
@@ -591,6 +591,14 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         def skill2 = skillSummary.skills.find { it.skillId == "skill2" }
         !skill2.dependencyInfo
 
+        skillDepInfo.dependencies.size() == 1
+        skillDepInfo.dependencies[0].skill.skillId == skills.get(0).skillId
+        skillDepInfo.dependencies[0].skill.skillName == skills.get(0).name
+        skillDepInfo.dependencies[0].skill.subjectId == subject.subjectId
+        skillDepInfo.dependencies[0].skill.type == 'Skill'
+        skillDepInfo.dependencies[0].dependsOn.skillId == badge2.badgeId
+        skillDepInfo.dependencies[0].dependsOn.skillName == badge2.name
+        skillDepInfo.dependencies[0].dependsOn.type == 'Badge'
     }
 
     def "skill that's part of a badge and depends on a badge displays correctly"() {

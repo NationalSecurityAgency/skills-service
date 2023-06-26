@@ -775,7 +775,9 @@ class SkillsLoader {
                 if(badgeDeps) {
                     badgeDeps.dependencies.each( badge -> {
                         if(badge.skill.skillId == it) {
-                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId, skillName: null, type: 'Skill');
+                            SkillDefRepo.SkillNameAndSubjectId nameAndSubjectId = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillId)
+                            badge.skill = new SkillDependencyInfo.SkillRelationshipItem(projectId: projectId, projectName: null, skillId: skillId,
+                                    skillName: nameAndSubjectId?.skillName, subjectId: nameAndSubjectId?.subjectId, type: 'Skill');
                         }
                     })
                     depsToAdd.addAll(badgeDeps.dependencies)
