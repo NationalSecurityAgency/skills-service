@@ -32,6 +32,12 @@ limitations under the License.
       userCommunityRestrictedDescriptor() {
         return this.$store.getters.config.userCommunityRestrictedDescriptor;
       },
+      userCommunityDocsLabel() {
+        return (this.$store.getters.config && this.$store.getters.config.userCommunityDocsLabel) || 'Learn More';
+      },
+      userCommunityDocsLink() {
+        return (this.$store.getters.config && this.$store.getters.config.userCommunityDocsLink) || null;
+      },
     },
     methods: {
       isRestrictedUserCommunity(communityName) {
