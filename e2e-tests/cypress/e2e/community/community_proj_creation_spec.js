@@ -40,6 +40,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        cy.get('[data-cy="userCommunityDocsLink"]').should('not.exist')
         const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
         cy.get('[data-cy="restrictCommunity"]').click({force: true})
@@ -47,6 +48,22 @@ describe('Community Project Creation Tests', () => {
 
         cy.get('[data-cy="saveProjectButton"]').click()
         cy.get('[data-cy="projectCard_one"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+    });
+
+    it('show docs links if configured', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.userCommunityDocsLabel = 'User Community Docs';
+                conf.userCommunityDocsLink = 'https://somedocs.com';
+                res.send(conf);
+            });
+        })
+        cy.visit('/administrator')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        cy.get('[data-cy="userCommunityDocsLink"] a').contains( 'User Community Docs')
+        cy.get('[data-cy="userCommunityDocsLink"] a[href="https://somedocs.com"]')
     });
 
     it('create non-restricted community project', () => {
