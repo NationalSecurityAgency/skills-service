@@ -835,5 +835,20 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                                                       @Param('userId') String userId,
                                                       @Param('query') String query,
                                                       PageRequest pageRequest)
+    static interface SkillNameAndSubjectId {
+        String getSkillName()
+        String getSubjectId()
+    }
+
+    @Nullable
+    @Query('''select sdChild.name as skillName, sdParent.skillId as subjectId
+            from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+            where 
+                srd.parent=sdParent and 
+                srd.child=sdChild and 
+                srd.parent.type = 'Subject' and
+                sdChild.projectId = ?1 and
+                sdChild.skillId = ?2''')
+    SkillNameAndSubjectId getSkillNameByProjectIdAndSkillId(String projectId, String skillId)
 
 }
