@@ -491,4 +491,29 @@ describe('Markdown Tests', () => {
         cy.clickSave();
     });
 
+    it.only('image at the start of the editor gets a new line', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get(markdownInput).clear()
+
+        cy.clickToolbarButton('image')
+        cy.get('div.toastui-editor-popup.toastui-editor-popup-add-image').contains('URL').click()
+        cy.get('#toastuiImageUrlInput').type('https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png')
+        cy.get('.toastui-editor-ok-button').click()
+
+        cy.get(markdownInput).then(($el) => {
+            const text = $el.html();
+
+            expect(text).to.eq('<p><br class="ProseMirror-trailingBreak"></p><p><img src="https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png" alt="image" contenteditable="false"><img class="ProseMirror-separator" alt=""><br class="ProseMirror-trailingBreak"></p>');
+        })
+    });
 });
