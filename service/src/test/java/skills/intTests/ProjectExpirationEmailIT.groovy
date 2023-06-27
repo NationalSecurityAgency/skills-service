@@ -29,8 +29,7 @@ import skills.utils.WaitFor
 
 import java.util.regex.Pattern
 
-@SpringBootTest(properties = ['skills.h2.port=9150',
-        'skills.config.expirationGracePeriod=0'],
+@SpringBootTest(properties = ['skills.config.expirationGracePeriod=0'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class ProjectExpirationEmailIT extends DefaultIntSpec {
 
@@ -112,25 +111,28 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
         settingRequest.setting = EmailSettingsService.plaintextFooter
         rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
 
-        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+        List<String> users = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        SkillsService divineDragonSkillsService = createService(users.first())
+        SkillsService regularDragonSkillsService = createService(users.last())
+        divineDragonSkillsService.getPublicConfigs() // will create user_attrs entry
+        regularDragonSkillsService.getPublicConfigs() // will create user_attrs entry
+
+        rootSkillsService.saveUserTag(regularDragonSkillsService.userName, 'dragons', ['DivineDragon'])
         def proj1 = SkillsFactory.createProject(1)
         proj1.enableProtectedUserCommunity = true
 
-        skillsService.createProject(proj1)
+        regularDragonSkillsService.createProject(proj1)
         Date flagForExpiration = new Date()
         expirationService.flagOldProjects(flagForExpiration)
 
-        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
-
-        createService(otherUser)
-        rootSkillsService.saveUserTag(otherUser, 'dragons', ['DivineDragon'])
-        skillsService.addProjectAdmin(proj1.projectId, otherUser)
+        rootSkillsService.saveUserTag(divineDragonSkillsService.userName, 'dragons', ['DivineDragon'])
+        regularDragonSkillsService.addProjectAdmin(proj1.projectId, divineDragonSkillsService.userName)
 
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(regularDragonSkillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(divineDragonSkillsService.userName)
         UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
 
         when:
