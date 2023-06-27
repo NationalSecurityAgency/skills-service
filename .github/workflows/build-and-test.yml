@@ -107,10 +107,10 @@ jobs:
     steps:
     - name: Install libs
       run: |
-        apt-get update
-        apt-get install -y postgresql-client
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
         psql --version
-        apt-get install fonts-noto-color-emoji
+        sudo apt-get install fonts-noto-color-emoji
 
     - uses: actions/checkout@v3
 
