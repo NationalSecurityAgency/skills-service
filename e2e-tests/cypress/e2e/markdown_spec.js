@@ -491,7 +491,7 @@ describe('Markdown Tests', () => {
         cy.clickSave();
     });
 
-    it.only('image at the start of the editor gets a new line', () => {
+    it('image at the start of the editor gets a new line', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
             subjectId: 'subj1',
