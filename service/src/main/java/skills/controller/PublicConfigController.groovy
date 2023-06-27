@@ -16,6 +16,7 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.BooleanUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -189,6 +190,16 @@ class PublicConfigController {
             // remove all userCommunity keys
             Set<String> userCommunityKeys = res.keySet().findAll { StringUtils.startsWith(it, 'userCommunity') }
             userCommunityKeys.each { res.remove(it)}
+
+            // remove supportLinks that are protected by user community
+            String protectedConfigEnd = "userCommunityProtected"
+            List<String> propsToRemove = res.findAll {
+                it.key.endsWith(protectedConfigEnd) && it.value?.equalsIgnoreCase("true")
+            }.collect { it.key.replaceAll(/${protectedConfigEnd}$/, "") }
+            List<String> keysToRemove = res.findAll { Map.Entry<String, String> entry ->
+                propsToRemove.find { entry.key.startsWith(it) }
+            }.collect { it.key }
+            keysToRemove.each { res.remove(it) }
         }
     }
 

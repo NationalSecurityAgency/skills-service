@@ -69,7 +69,7 @@ limitations under the License.
           <div v-if="!isEditAndCommunityProtected && !isCopyAndCommunityProtected">
             <ValidationObserver v-slot="{ pending, invalid }">
               <div class="row">
-                <div class="col">
+                <div class="col-lg">
                   <ValidationProvider rules="projectCommunityRequirements"
                                       name="Failed Minimum Requirement" v-slot="{ errors }">
                     <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"
@@ -86,6 +86,10 @@ limitations under the License.
                       <span v-html="errors[0]"/>
                     </div>
                   </ValidationProvider>
+                </div>
+                <div v-if="userCommunityDocsLink" class="col-lg-auto" data-cy="userCommunityDocsLink">
+                  <a :href="userCommunityDocsLink" target="_blank" style="text-decoration: underline">{{ userCommunityDocsLabel }}</a>
+                  <i class="fas fa-external-link-alt ml-1" aria-hidden="true" style="font-size: 0.9rem;"/>
                 </div>
               </div>
               <div v-if="!pending">
