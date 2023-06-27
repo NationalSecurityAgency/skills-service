@@ -190,6 +190,12 @@ limitations under the License.
       },
     },
     methods: {
+      moveCursorToStart() {
+        return this.$refs.toastuiEditor.invoke('moveCursorToStart');
+      },
+      insertText(newValue) {
+        return this.$refs.toastuiEditor.invoke('insertText', newValue);
+      },
       markdownText() {
         return this.$refs.toastuiEditor.invoke('getMarkdown');
       },
@@ -198,6 +204,17 @@ limitations under the License.
       },
       onEditorChange() {
         this.attachmentError = '';
+
+        // This looks for an image at the start of the description and adds a newline before it
+        // eslint-disable-next-line no-useless-escape
+        const imgMatch = /^\!\[.*\]\(.*\)/;
+        const current = this.markdownText();
+        if (current.match(imgMatch)) {
+          this.moveCursorToStart();
+          this.insertText('\n');
+          this.moveCursorToStart();
+        }
+
         if (this.useHtml) {
           this.$emit('input', this.htmlText());
         } else {
