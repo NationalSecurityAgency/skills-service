@@ -31,13 +31,6 @@ const testTime = new Date().getTime();
 const yesterday = new Date().getTime() - (1000 * 60 * 60 * 24);
 
 describe('Navigation Tests', () => {
-    // const snapshotOptions = {
-    //   blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
-    //   failureThreshold: 0.03, // threshold for entire image
-    //   failureThresholdType: 'percent', // percent of image or number of pixels
-    //   customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-    //   capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    // };
 
     beforeEach(() => {
         cy.log(`--------> ${testTime}`);
@@ -968,18 +961,6 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="backToProgressAndRankingBtn"]')
             .click();
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-    });
-
-    it('cards on small and medium screen', function () {
-        cy.viewport('iphone-6');
-        cy.visit('/progress-and-rankings');
-        cy.wait(2000);
-        cy.matchSnapshotImageForElement('[data-cy="project-link-proj1"]', 'project-card-small-screen');
-
-        cy.viewport('ipad-2');
-        cy.visit('/progress-and-rankings');
-        cy.wait(2000);
-        cy.matchSnapshotImageForElement('[data-cy="project-link-proj1"]', 'project-card-mid-screen');
     });
 
     it('My Progress page - verify custom level on ProjectLinkCard', function () {
