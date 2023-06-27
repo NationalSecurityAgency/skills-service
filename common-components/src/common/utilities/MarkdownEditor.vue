@@ -207,7 +207,7 @@ limitations under the License.
 
         // This looks for an image at the start of the description and adds a newline before it
         // eslint-disable-next-line no-useless-escape
-        const imgMatch = /^\!\[.*\]\(data:image.*\)/;
+        const imgMatch = /^\!\[.*\]\(.*\)/;
         const current = this.markdownText();
         if (current.match(imgMatch)) {
           this.moveCursorToStart();
