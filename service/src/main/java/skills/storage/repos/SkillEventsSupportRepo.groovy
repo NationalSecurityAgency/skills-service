@@ -70,7 +70,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.enabled as enabled
         from SkillDef s, SkillRelDef srd 
         where
-            s.id = srd.parent and  
+            s.id = srd.parent.id and  
             srd.child.id=?1 and 
             srd.type in ?2''')
     List<TinySkillDef> findTinySkillDefsParentsByChildIdAndTypeIn(Integer childId, List<SkillRelDef.RelationshipType> types)
@@ -93,7 +93,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         from UserPoints up, SkillRelDef srd
         where
             up.userId=?1 and  
-            up.skillRefId = srd.child and  
+            up.skillRefId = srd.child.id and  
             srd.parent.id=?2''')
     List<TinyUserPoints> findTotalTinyUserPointsByUserIdAndParentId(String usedId, Integer parentId)
 
@@ -196,8 +196,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                 EXISTS  (SELECT true
                 from SkillDef s1, SkillRelDef sr1
                 where
-                    badge.id = sr1.parent and
-                    s1.id = sr1.child and 
+                    badge.id = sr1.parent.id and
+                    s1.id = sr1.child.id and 
                     sr1.type = 'BadgeRequirement' and 
                     s1.projectId = ?1 and 
                     s1.skillId = ?2)
@@ -271,7 +271,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.readOnly as readOnly
         from SkillDef s, SkillRelDef srd 
         where
-            s.id = srd.parent and  
+            s.id = srd.parent.id and  
             srd.child.id=?1 and 
             srd.type in (?2)''')
     List<SkillDefMin> findParentSkillsByChildIdAndType(Integer childId, List<SkillRelDef.RelationshipType> type)

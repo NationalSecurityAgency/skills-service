@@ -182,8 +182,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         from SkillRelDef srd, SkillDef sdChild, SkillDef sdParent
             inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
         where 
-            srd.parent=sdParent.id and 
-            srd.child=sdChild.id and
+            srd.parent.id = sdParent.id and 
+            srd.child.id=sdChild.id and
             sdChild.id in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
                 where

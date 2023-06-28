@@ -318,7 +318,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
 
     @Query('''SELECT sd2 
         from SkillDef sd1, SkillDefWithExtra sd2, SkillRelDef srd 
-        where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
+        where sd1 = srd.parent and sd2.id = srd.child.id and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId=?2''')
     List<SkillDefWithExtra> getChildrenWithExtraAttrs(@Nullable String projectId, String parentSkillId, List<SkillRelDef.RelationshipType> types)
 
