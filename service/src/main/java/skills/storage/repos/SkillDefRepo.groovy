@@ -185,7 +185,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and 
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and 
       sdParent.projectId=?1 and sdParent.skillId=?2''' )
     @Nullable
     Integer calculateChildSkillsHighestDisplayOrder(String projectId, String skillId)
@@ -195,28 +195,28 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     Integer calculateHighestDisplayOrderByProjectIdAndType(String projectId, SkillDef.ContainerType type)
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and  
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and sdChild.enabled = 'true' and  
       sdParent.projectId=?1 and sdParent.skillId=?2 and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForSubject(String projectId, String skillId, Integer version)
 
 
     @Query(value = '''SELECT sum(sdChild.totalPoints) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.enabled = 'true' and 
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and sdChild.enabled = 'true' and 
       sdParent.projectId=?1 and srd.type=?2 and sdChild.version<=?3 ''' )
     @Nullable
     Integer calculateTotalPointsForProject(String projectId, RelationshipType relationshipType, Integer version)
 
     @Query(value='''SELECT c 
         from SkillDef s, SkillRelDef r, SkillDef c 
-        where s.id=r.parent and c.id = r.child and 
+        where s.id=r.parent.id and c.id = r.child.id and 
              s.projectId=?1 and s.skillId=?2 and c.displayOrder>?3 and r.type in (?4)
              order by c.displayOrder asc''')
     List<SkillDef> findNextSkillDefs(String projectId, String skillId, int afterDisplayOrder, List<RelationshipType> relationshipType, Pageable pageable)
 
     @Query(value='''SELECT c 
         from SkillDef s, SkillRelDef r, SkillDef c 
-        where s.id=r.parent and c.id = r.child and 
+        where s.id=r.parent.id and c.id = r.child.id and 
              s.projectId=?1 and s.skillId=?2 and c.displayOrder<?3 and r.type in (?4)
              order by c.displayOrder desc''')
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, List<RelationshipType> relationshipType, Pageable pageable)
@@ -242,7 +242,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
 
     @Query('''select count(c) 
             from SkillRelDef r, SkillDef c 
-            where r.parent.id=?1 and c.id = r.child and r.type=?2 and c.type = 'Skill' and c.enabled = ?3
+            where r.parent.id=?1 and c.id = r.child.id and r.type=?2 and c.type = 'Skill' and c.enabled = ?3
         ''')
     long countChildSkillsByIdAndRelationshipTypeAndEnabled(Integer parentSkillRefId, RelationshipType relationshipType, String enabled)
 
@@ -255,7 +255,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then 1 end) as numSkillsReused,
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then c.totalPoints end) as totalPointsReused
             from SkillRelDef r, SkillDef c 
-            where r.parent.id=?1 and c.id = r.child and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+            where r.parent.id=?1 and c.id = r.child.id and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         ''')
     SkillCounts getSkillsCountsForParentId(Integer parentSkillRefId)
 
@@ -278,7 +278,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
           r.parent.id=?1
            and (
             (r.child.id = r2.parent.id 
-             and c.id = r2.child 
+             and c.id = r2.child.id 
              and c.type = 'Skill'
              and r.type = 'RuleSetDefinition' 
              and r2.type = 'SkillsGroupRequirement' 
@@ -312,29 +312,29 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
 
     @Query(value='''select count(c) 
         from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+        where r.parent.id=?1 and c.id = r.child.id and r.type=?2''')
     long countChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select c 
         from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+        where r.parent.id=?1 and c.id = r.child.id and r.type=?2''')
     List<SkillDef> findChildSkillsByIdAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value='''select c.skillId 
         from SkillRelDef r, SkillDef c 
-        where r.parent=c.id and r.child.skillId = ?1 and r.type=?2 and c.type=?3 and c.projectId=?4''')
+        where r.parent.id=c.id and r.child.skillId = ?1 and r.type=?2 and c.type=?3 and c.projectId=?4''')
     List<String> findParentSkillsByIdAndRelationshipType(String childSkillId, RelationshipType relationshipType, ContainerType containerType, String projectId)
 
     @Query(value='''select s.skillId as badgeId, s.name as name, c.skillId as skillId, s.type as skillType
         from SkillDef s, SkillRelDef r, SkillDef c 
-        where s.id = r.parent and c.id = r.child and r.type='BadgeRequirement' and (
+        where s.id = r.parent.id and c.id = r.child.id and r.type='BadgeRequirement' and (
               (s.type='Badge' and s.projectId=?2) or s.type='GlobalBadge') and s.enabled='true' and
-              c.id = r.child and c.skillId in ?1 and c.type='Skill' and c.projectId=?2 order by c.skillId, s.skillId''')
+              c.id = r.child.id and c.skillId in ?1 and c.type='Skill' and c.projectId=?2 order by c.skillId, s.skillId''')
     List<SimpleBadgeRes> findAllBadgesForSkill(List<String> skillId, String projectId)
 
     @Query(value='''select sum(c.totalPoints) 
         from SkillRelDef r, SkillDef c 
-        where r.parent.id=?1 and c.id = r.child and r.type=?2''')
+        where r.parent.id=?1 and c.id = r.child.id and r.type=?2''')
     long sumChildSkillsTotalPointsBySkillAndRelationshipType(Integer parentSkillRefId, RelationshipType relationshipType)
 
     @Query(value = "SELECT COUNT(DISTINCT s.userId) from UserPoints s where s.projectId=?1 and s.skillId=?2")
@@ -354,7 +354,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query(value='''SELECT count(c) 
         from SkillDef s, SkillRelDef r, SkillDef c 
         where 
-            s.id = r.parent and c.id = r.child and 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId=?1 and c.projectId=?1 and
             s.skillId=?2 and r.type=?3''')
     Integer countChildren(@Nullable String projectId, String skillId, RelationshipType relationshipType)
@@ -362,7 +362,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query(value='''SELECT count(c) 
         from SkillDef s, SkillRelDef r, SkillDef c 
         where 
-            s.id = r.parent and c.id = r.child and 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId is null and
             s.skillId=?1 and r.type=?2''')
     Integer countGlobalChildren(String skillId, RelationshipType relationshipType)
@@ -495,8 +495,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, ProjDef  p
             where 
                 sdChild.projectId = p.projectId and 
-                srd.parent=sdParent.id and 
-                srd.child=sdChild.id and 
+                srd.parent.id = sdParent.id and 
+                srd.child.id=sdChild.id and 
                 sdChild.projectId=?1 and 
                 sdChild.skillId=?2 and 
                 srd.type IN ('RuleSetDefinition', 'GroupSkillToSubject')

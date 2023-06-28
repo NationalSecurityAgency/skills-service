@@ -62,7 +62,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 
-            s.id = r.parent and c.id = r.child and 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId=?1 and c.projectId=?1 and c.enabled = 'true' and
             s.skillId=?2 and r.type=?3 and c.version<=?4
             order by c.skillId asc
@@ -73,7 +73,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?5
         where 
-            s.id = r.parent and c.id = r.child and 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId=?1 and c.projectId=?1 and
             s.skillId in ?2 and r.type=?3 and c.version<=?4
             order by c.skillId asc''')
@@ -84,7 +84,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         from SkillDefWithExtra s, SkillRelDef r, SkillDefWithExtra c 
         left join UserAchievement ua on c.skillId = ua.skillId and c.projectId = ua.projectId and ua.userId=?4
         where 
-            s.id = r.parent and c.id = r.child and 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId is null and c.enabled = 'true' and
             s.skillId=?1 and r.type=?2 and c.version<=?3
         order by c.skillId asc''')

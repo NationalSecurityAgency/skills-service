@@ -541,7 +541,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             and approval.userId=?1
             and (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
       )
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
+      where srd.parent=sdParent and  srd.child=sdChild and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
 
@@ -556,28 +556,28 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn=null and approval.approverUserId=null
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and sdChild.enabled = 'true' and
+      where srd.parent=sdParent and  srd.child=sdChild and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
 
     @Query('''select sdChild.id, achievement.id
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      where srd.parent=sdParent and  srd.child=sdChild and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirAchievements(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type, Integer version)
 
     @Query('''select sdParent.id as parentId, sdChild.id as childId, achievement.id as achievementId
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and
+      where srd.parent=sdParent and  srd.child=sdChild and
       sdParent.projectId=?2 and srd.type=?3 and sdChild.version<=?4''')
     List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForProject(String userId, String projectId, SkillRelDef.RelationshipType type, Integer version)
 
     @Query('''select sdParent.id as parentId, sdChild.id as childId, achievement.id as achievementId
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement achievement on sdChild.projectId = achievement.projectId and sdChild.skillId = achievement.skillId and achievement.userId=?1
-      where srd.parent=sdParent.id and  srd.child=sdChild.id and srd.type=?2 and sdChild.version<=?3''')
+      where srd.parent=sdParent and  srd.child=sdChild and srd.type=?2 and sdChild.version<=?3''')
     List<SkillWithChildAndAchievementIndicator> findAllChildrenAndTheirAchievementsForGlobal(String userId, SkillRelDef.RelationshipType type, Integer version)
 
     static interface SkillWithChildAndAchievementIndicator {
