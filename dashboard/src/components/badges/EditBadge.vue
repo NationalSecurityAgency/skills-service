@@ -61,6 +61,56 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
+          <div class="form-group">
+            <label><b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Reward Time Limit
+              <inline-help
+                target-id="timeLimitHelp"
+                :next-focus-el="previousFocus"
+                @shown="tooltipShowing=true"
+                @hidden="tooltipShowing=false"
+                :msg="badgeInternal.timeLimitEnabled ? 'Uncheck to disable. When disabled, there is no reward for completing a badge within the time limit.' : 'Check to enable. When enabled, users will be rewarded for completing the badge within the time limit.'"/>
+            </label>
+            <div class="row">
+              <div class="col-12 col-sm">
+                <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
+                  <div class="input-group">
+                    <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationHrs"
+                           value="8" :disabled="!badgeInternal.timeLimitEnabled"
+                           :aria-required="badgeInternal.timeLimitEnabled"
+                           ref="timeLimitHours" data-cy="timeLimitHours"
+                           v-on:keydown.enter="handleSubmit(updateBadge)"
+                           id="timeLimitHours" :aria-label="`time window hours ${maxTimeLimitMessage}`"
+                           aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
+                           aria-errormessage="skillHoursError"/>
+                    <div class="input-group-append">
+                      <span class="input-group-text" id="hours-append">Hours</span>
+                    </div>
+                  </div>
+                  <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
+              <div class="col-12 col-sm">
+                <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitHours|cantBe0IfHours0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
+                  <div class="input-group">
+                    <input class="form-control d-inline"  type="text" v-model="badgeInternal.expirationMins"
+                           value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
+                           v-on:keydown.enter="handleSubmit(updateBadge)"
+                           :aria-required="badgeInternal.timeLimitEnabled"
+                           aria-label="time window minutes"
+                           aria-describedby="skillMinutesError"
+                           aria-errormessage="skillMinutesError"
+                           :aria-invalid="errors && errors.length > 0"/>
+                    <div class="input-group-append">
+                      <span class="input-group-text" id="minutes-append">Minutes</span>
+                    </div>
+                  </div>
+                  <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
+                </ValidationProvider>
+              </div>
+            </div>
+
+          </div>
+
           <help-url-input class="mt-3"
                           :next-focus-el="previousFocus"
                           @shown="tooltipShowing=true"
@@ -177,7 +227,15 @@ limitations under the License.
     },
     data() {
       const badgeInternal = {
-        originalBadgeId: this.badge.badgeId, isEdit: this.isEdit, description: '', startDate: null, endDate: null, badgeId: this.badge.badgeId, ...this.badge,
+        originalBadgeId: this.badge.badgeId,
+        isEdit: this.isEdit,
+        description: '',
+        startDate: null,
+        endDate: null,
+        badgeId: this.badge.badgeId,
+        expirationHrs: this.badge.expirationHrs,
+        expirationMins: this.badge.expirationMins,
+        ...this.badge,
       };
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
@@ -194,6 +252,9 @@ limitations under the License.
           helpUrl: this.badge.helpUrl,
           startDate: this.toDate(this.badge.startDate),
           endDate: this.toDate(this.badge.endDate),
+          expirationHrs: 8,
+          expirationMins: 0,
+          timeLimitEnabled: false,
         },
         limitTimeframe: limitedTimeframe,
         show: this.value,
@@ -202,7 +263,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         loadingComponent: true,
-        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate'],
+        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate', 'expirationMins', 'expirationHrs'],
         restoredFromStorage: false,
       };
     },
@@ -220,6 +281,9 @@ limitations under the License.
       componentName() {
         const badgeScope = this.badgeInternal.projectId ? this.badgeInternal.projectId : 'Global';
         return `${badgeScope}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
+      },
+      maxTimeLimitMessage() {
+        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / 60} hours`;
       },
     },
     watch: {
@@ -252,8 +316,6 @@ limitations under the License.
             } else {
               this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
             }
-          } else if (this.isEdit) {
-            this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
           }
         }).finally(() => {
           this.loadingComponent = false;
@@ -356,6 +418,12 @@ limitations under the License.
       toggleIconDisplay(shouldDisplay) {
         this.displayIconManager = shouldDisplay;
       },
+      resetTimeLimit(checked) {
+        if (!checked) {
+          this.badgeInternal.expirationHrs = 8;
+          this.badgeInternal.expirationMins = 0;
+        }
+      },
       assignCustomValidation() {
         // only want to validate for a new badge, existing subjects will override
         // name and badge id
@@ -452,6 +520,60 @@ limitations under the License.
               valid = dayjs(self.badgeInternal.endDate).isAfter(dayjs());
             }
             return valid;
+          },
+        });
+
+        const validateLimit = (windowHours, windowMinutes, validator) => {
+          let hours = 0;
+          let minutes = 0;
+          if (windowHours) {
+            hours = parseInt(windowHours, 10);
+          }
+
+          if (windowMinutes) {
+            minutes = parseInt(windowMinutes, 10);
+          }
+
+          if (validator === 'hoursMaxTimeLimit' && hours === 0) {
+            return true;
+          }
+          if (validator === 'minutesMaxTimeLimit' && minutes === 0) {
+            return true;
+          }
+
+          return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
+        };
+
+        extend('hoursMaxTimeLimit', {
+          message: () => this.maxTimeLimitMessage,
+          params: ['target'],
+          validate(value, { target }) {
+            return validateLimit(value, target, 'hoursMaxTimeLimit');
+          },
+        });
+        extend('minutesMaxTimeLimit', {
+          message: () => this.maxTimeLimitMessage,
+          params: ['target'],
+          validate(value, { target }) {
+            return validateLimit(target, value, 'minutesMaxTimeLimit');
+          },
+        });
+        extend('cantBe0IfHours0', {
+          message: (field) => `${field} must be > 0 if Hours = 0`,
+          validate(value) {
+            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationHrs, 10) > 0) {
+              return true;
+            }
+            return false;
+          },
+        });
+        extend('cantBe0IfMins0', {
+          message: (field) => `${field} must be > 0 if Minutes = 0`,
+          validate(value) {
+            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationMins, 10) > 0) {
+              return true;
+            }
+            return false;
           },
         });
       },

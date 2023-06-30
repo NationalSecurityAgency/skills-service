@@ -40,4 +40,14 @@ class SkillBadgeSummary {
     String projectName
 
     SkillDependencySummary dependencyInfo
+
+    int numberOfUsersAchieved
+    int expirationInterval
+    Date firstPerformedSkill
+    Date expirationDate
+    String firstPerformedSkillFormatted
+    String expirationDateFormatted
+    boolean hasExpired
+    int achievementPosition
+    boolean achievedWithinExpiration
 }

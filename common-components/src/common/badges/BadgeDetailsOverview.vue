@@ -21,6 +21,10 @@ limitations under the License.
                     <i :class="iconCss" style="font-size: 4em; min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
+                    <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute gold" style="bottom: 5px; right: 25px;"></i>
+                    <i v-if="badge.achievementPosition === 1" class="fas fa-trophy position-absolute user-trophy gold"></i>
+                    <i v-else-if="badge.achievementPosition === 2" class="fas fa-trophy position-absolute user-trophy silver"></i>
+                    <i v-else-if="badge.achievementPosition === 3" class="fas fa-trophy position-absolute user-trophy bronze"></i>
                     <div v-if="badge.gem" class="text-muted">
                         <small>Expires {{ badge.endDate | relativeTime() }}</small>
                     </div>
@@ -49,6 +53,22 @@ limitations under the License.
 
             <div class="mb-2">
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
+            </div>
+
+            <div class="alert alert-success" v-if="badge">
+              <div v-if="badge.numberOfUsersAchieved > 0">
+                <i class="fas fa-trophy" style="padding-right: 10px;"></i>
+                <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{ badge.numberOfUsersAchieved === 1 ? 'person has' : 'people have'}} achieved this badge so far</span>
+                <span v-else-if="badge.badgeAchieved && badge.numberOfUsersAchieved > 1">{{badge.numberOfUsersAchieved - 1}} other {{ (badge.numberOfUsersAchieved - 1) === 1 ? 'person has' : 'people have'}} achieved this badge so far</span>
+                <span v-else>You've achieved this badge</span>
+                <span v-if="badge.achievementPosition > 0 && badge.achievementPosition < 4"> - and you were the {{badge.achievementPosition === 1 ? 'first' : badge.achievementPosition === 2 ? 'second' : 'third'}}!</span>
+              </div>
+              <div v-else>No one has achieved this badge yet - you could be the first!</div>
+
+              <div v-if="badge.firstPerformedSkillFormatted && badge.firstPerformedSkillFormatted !== 'never' && !badge.badgeAchieved">
+                <i class="fas fa-clock" style="padding-right: 10px;"></i> You started working on this badge <span :title="badge.firstPerformedSkill">{{ badge.firstPerformedSkillFormatted }}</span>.
+                <span v-if="!badge.hasExpired && badge.expirationDateFormatted && badge.expirationDateFormatted !== 'never'"> Achieve it {{badge.expirationDateFormatted}} for a bonus!</span>
+              </div>
             </div>
 
             <p v-if="badge && badge.description" class="">
@@ -101,5 +121,20 @@ limitations under the License.
 </script>
 
 <style scoped>
+  .user-trophy {
+    bottom: 5px;
+    right: 5px;
+  }
 
+  .gold {
+    color: #c9b037;
+  }
+
+  .silver {
+    color: #b4b4b4;
+  }
+
+  .bronze {
+    color: #6a3805;
+  }
 </style>

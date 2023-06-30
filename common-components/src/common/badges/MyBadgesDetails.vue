@@ -36,6 +36,10 @@ limitations under the License.
                               <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                               <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
                               <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
+                              <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute gold" style="bottom: 5px; right: 25px;"></i>
+                              <i v-if="badge.achievementPosition === 1" class="fas fa-trophy position-absolute user-trophy gold"></i>
+                              <i v-else-if="badge.achievementPosition === 2" class="fas fa-trophy position-absolute user-trophy silver"></i>
+                              <i v-else-if="badge.achievementPosition === 3" class="fas fa-trophy position-absolute user-trophy bronze"></i>
                               <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
                               <div class="card-title mb-0 text-truncate">
                                   {{ badge.badge }}
@@ -93,5 +97,22 @@ limitations under the License.
 <style>
   .earned-badge {
     cursor: pointer;
+  }
+
+  .user-trophy {
+    bottom: 5px;
+    right: 5px;
+  }
+
+  .gold {
+    color: #c9b037;
+  }
+
+  .silver {
+    color: #b4b4b4;
+  }
+
+  .bronze {
+    color: #6a3805;
   }
 </style>
