@@ -58,6 +58,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Nullable
     List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey, Pageable pageable)
 
+    @Nullable
+    @Query('''select min(u.performedOn) from UserPerformedSkill u where u.projectId = ?1 and u.userId = ?2 and u.skillId in ?3''')
+    Date findFirstPerformedSkill(String projectId, String userId, List<String> skillIds)
+
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)

@@ -16,6 +16,7 @@
 package skills.skillLoading
 
 import callStack.profiler.Profile
+import groovy.time.TimeCategory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
@@ -53,6 +54,7 @@ import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
+import skills.utils.RelativeTimeUtil
 
 import java.util.stream.Stream
 
@@ -901,9 +903,12 @@ class SkillsLoader {
     @Profile
     private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
         List<SkillSummaryParent> skillsRes = []
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
 
+        def skillIds = groupChildrenMeta.childrenWithPoints.collect{ it -> it.skillDef.skillId }
+        Date firstPerformedSkill = userPerformedSkillRepo.findFirstPerformedSkill(projDef.projectId, userId, skillIds)
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
+//            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -913,9 +918,12 @@ class SkillsLoader {
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
+        int achievementPosition = -1;
         if (achievements) {
             // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
+            def achievementList = achievedLevelRepository.findAllAchievementsForProjectAndSkill(projDef.projectId, badgeDefinition.skillId)
+            achievementPosition = achievementList.indexOf(userId) + 1
         }
 
         int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
@@ -925,6 +933,19 @@ class SkillsLoader {
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
         def badgeDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projDef.projectId, badgeDefinition.skillId)
+        def numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
+
+        Date expirationDate
+        if(firstPerformedSkill) {
+            expirationDate = new Date(firstPerformedSkill?.getTime())
+        }
+        boolean achievedWithinExpiration = false
+        if(expirationDate) {
+            expirationDate.minutes += badgeDefinition.pointIncrementInterval
+            if(achievements) {
+                achievedWithinExpiration = RelativeTimeUtil.isInThePast(achievements.first().achievedOn, expirationDate)
+            }
+        }
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
@@ -941,7 +962,17 @@ class SkillsLoader {
                 helpUrl: helpUrl,
                 projectId: badgeDefinition.projectId,
                 projectName: InputSanitizer.unsanitizeName(projectName),
-                dependencyInfo: badgeDependencySummary
+                dependencyInfo: badgeDependencySummary,
+                numberOfUsersAchieved: numberOfUsersAchieved,
+                expirationInterval: badgeDefinition.pointIncrementInterval,
+                firstPerformedSkillFormatted: RelativeTimeUtil.relativeTimeFromNow(firstPerformedSkill),
+                expirationDateFormatted: RelativeTimeUtil.relativeTimeFromNow(expirationDate),
+                hasExpired: expirationDate ? RelativeTimeUtil.isInThePast(expirationDate) : null,
+                firstPerformedSkill: firstPerformedSkill,
+                expirationDate: expirationDate,
+                achievementPosition: achievementPosition,
+                achievedWithinExpiration: achievedWithinExpiration
+
         )
     }
 

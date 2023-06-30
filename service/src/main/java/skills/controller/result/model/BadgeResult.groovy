@@ -47,4 +47,6 @@ class BadgeResult {
     String helpUrl
 
     String enabled
+
+    int expirationInterval
 }

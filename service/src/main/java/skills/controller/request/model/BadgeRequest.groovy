@@ -29,4 +29,7 @@ class BadgeRequest {
 
     String helpUrl
     String enabled
+
+    int pointIncrementInterval = 60 * 8
+
 }

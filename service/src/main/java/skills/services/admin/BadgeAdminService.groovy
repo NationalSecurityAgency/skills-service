@@ -330,6 +330,7 @@ class BadgeAdminService {
                 endDate: skillDef.endDate,
                 helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl),
                 enabled: skillDef.enabled,
+                expirationInterval: skillDef.pointIncrementInterval
         )
 
         if (loadRequiredSkills) {

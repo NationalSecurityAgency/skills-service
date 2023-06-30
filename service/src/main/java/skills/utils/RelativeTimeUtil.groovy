@@ -39,6 +39,21 @@ class RelativeTimeUtil {
         long months = period.getMonths()
         long years = period.getYears()
         String formatted
+        Boolean inTheFuture = false
+
+        if ( years < 0 ) {
+            years = Math.abs(years);
+            inTheFuture = true
+        }
+        if ( months < 0 ) {
+            months = Math.abs(months);
+            inTheFuture = true
+        }
+        if ( days < 0 ) {
+            days = Math.abs(days);
+            inTheFuture = true
+        }
+
         if (years > 0) {
             formatted = "$years year${years > 1 ? 's':''}"
             if (months > 0) {
@@ -53,10 +68,48 @@ class RelativeTimeUtil {
             formatted = "$days day${days > 1 ? 's' : ''}"
         }
 
-        return formatted+" ago"
+        return inTheFuture ? ("in " + formatted) : (formatted + " ago")
     }
 
     public static String relativeTimeFromNow(Date eventTime) {
         return relativeTimeBetween(eventTime, new Date())
+    }
+
+    public static boolean isInThePast(Date eventTime) {
+        LocalDate localDateEvent = eventTime.toLocalDate()
+        LocalDate localDateEnd = new Date().toLocalDate()
+        if (localDateEvent == localDateEnd) {
+            return false
+        }
+
+        Period period = Period.between(localDateEvent, localDateEnd)
+        long days = period.getDays()
+        long months = period.getMonths()
+        long years = period.getYears()
+
+        if( years < 0 || days < 0 || months < 0 ) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    public static boolean isInThePast(Date startTime, Date endTime) {
+        LocalDate localDateEvent = startTime.toLocalDate()
+        LocalDate localDateEnd = endTime.toLocalDate()
+        if (localDateEvent == localDateEnd) {
+            return false
+        }
+
+        Period period = Period.between(localDateEvent, localDateEnd)
+        long days = period.getDays()
+        long months = period.getMonths()
+        long years = period.getYears()
+
+        if( years < 0 || days < 0 || months < 0 ) {
+            return false
+        } else {
+            return true
+        }
     }
 }
