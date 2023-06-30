@@ -23,10 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionCallback
+import org.springframework.transaction.support.TransactionTemplate
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
+import skills.storage.model.SkillsDBLock
 import skills.storage.model.UserAttrs
 import skills.storage.repos.ClientPrefRepo
 import skills.storage.repos.NotificationsRepo
@@ -77,6 +82,9 @@ class DefaultIntSpec extends Specification {
 
     @Autowired
     NotificationsRepo notificationsRepo
+
+    @Autowired
+    PlatformTransactionManager transactionManager
 
     @Autowired(required=false)
     MockUserInfoService mockUserInfoService
@@ -277,6 +285,17 @@ class DefaultIntSpec extends Specification {
         }
 
         return userIds
+    }
+
+    protected <T> T runInTransaction(Closure<T> inTransactionLogic) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
+        return transactionTemplate.execute(new TransactionCallback<T>() {
+            @Override
+            T doInTransaction(TransactionStatus status) {
+                return inTransactionLogic.call()
+            }
+        })
     }
 
 }
