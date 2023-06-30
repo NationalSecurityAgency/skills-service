@@ -120,34 +120,34 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query(''' select sdChild
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement ua on sdChild.id = ua.skillRefId and ua.userId=?1
-      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and
       sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
     List<SkillDef> findNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query(''' select count(sdChild.id)
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement ua on sdChild.id = ua.skillRefId and ua.userId=?1
-      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and
       sdParent.projectId=?2 and sdParent.skillId=?3 and ua.id is null and srd.type=?4''')
     Long countNonAchievedChildren(String userId, String projectId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query(''' select count(sdChild.id)
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join UserAchievement ua on sdChild.id = ua.skillRefId and ua.userId=?1
-      where srd.parent=sdParent.id and srd.child=sdChild.id and
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and
       sdParent.projectId is null and sdParent.skillId=?2 and ua.id is null and srd.type=?3''')
     Long countNonAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)
 
     @Query('''select sdParent.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
-      where srd.parent=sdParent.id and srd.child=sdChild.id and sdChild.skillId=ua.skillId and ua.level is null and 
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and sdChild.skillId=ua.skillId and ua.level is null and 
       sdParent.projectId=?1 and sdParent.type=?2 group by sdParent.name''')
     List<LabelCountInfo> getUsageFacetedViaSubject(String projectId, SkillDef.ContainerType subjectType, Pageable pageable)
 
     @Query('''select sdChild.name as label, count(ua) as countRes
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       left outer join UserAchievement ua ON sdChild.skillId=ua.skillId 
-      where srd.parent=sdParent.id and srd.child=sdChild.id and ua.level is null and 
+      where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and ua.level is null and 
       sdParent.projectId=?1 and sdParent.skillId=?2 and sdParent.type=?3 group by sdChild.name''')
     List<LabelCountInfo> getSubjectUsageFacetedViaSkill(String projectId, String subjectId, SkillDef.ContainerType subjectType, Pageable pageable)
 
@@ -222,7 +222,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where 
-      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      srd.parent.id = sdParent.id and  srd.child.id=sdChild.id and
       sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
     int countAchievedChildren(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
@@ -230,7 +230,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select sum(ua.pointsWhenAchieved) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where 
-      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      srd.parent.id = sdParent.id and  srd.child.id=sdChild.id and
       sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type=?4''')
     int sumAchievedChildrenPoints(String userId, @Nullable String projectId, String skillId, SkillRelDef.RelationshipType type)
@@ -239,7 +239,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select count(ua) 
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where 
-      srd.parent=sdParent.id and  srd.child=sdChild.id and
+      srd.parent.id = sdParent.id and  srd.child.id=sdChild.id and
       sdChild.projectId = ua.projectId and sdChild.skillId = ua.skillId and ua.userId=?1 and 
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type=?3''')
     int countAchievedGlobalSkills(String userId, String skillId, SkillRelDef.RelationshipType type)

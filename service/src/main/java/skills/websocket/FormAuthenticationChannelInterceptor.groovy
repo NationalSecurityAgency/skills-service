@@ -106,5 +106,9 @@ class FormAuthenticationChannelInterceptor implements ChannelInterceptor {
             return headers.get(name)?.first()
         }
 
+        @Override
+        String getContentType() {
+            return "application/json"
+        }
     }
 }

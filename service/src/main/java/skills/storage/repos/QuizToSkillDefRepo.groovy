@@ -42,16 +42,16 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     }
 
     @Nullable
-    @Query('''select q.quizId as quizId,
-                     max(q.name) as quizName,
-                     max(q.type) as quizType,
-                     max(qToS.skillRefId) as skillRefId, 
-                     count(question.id) as numQuestions
-            from QuizToSkillDef qToS, QuizDef q
-                left join QuizQuestionDef question on (q.quizId = question.quizId)
-            where qToS.skillRefId = ?1
-                and q.id = qToS.quizRefId
-            group by q.quizId''')
+    @Query(value = '''select q.quiz_id as quizId,
+                   max(q.name) as quizName,
+                   max(q.type) as quizType,
+                   max(qToS.skill_ref_id) as skillRefId,
+                   count(question.id) as numQuestions
+            from quiz_to_skill_definition qToS, quiz_definition q
+                 left join quiz_question_definition question on (q.quiz_id = question.quiz_id)
+            where qToS.skill_ref_id = ?1
+              and q.id = qToS.quiz_ref_id
+            group by q.quiz_id''', nativeQuery = true)
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
     @Nullable
@@ -61,7 +61,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                        ur.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')) OR ur.roleName = 'ROLE_SUPER_DUPER_USER') and ur.userId = ?2
                    ) as canUserAccess
               from QuizToSkillDef quiz, SkillDefWithExtra child
-              join SkillRelDef srd on srd.child = child and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+              join SkillRelDef srd on srd.child.id = child.id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
               join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
               where
                     quiz.quizRefId = ?1 AND
@@ -78,16 +78,16 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     List<ProjectIdAndSkillId> getSkillsForQuiz(Integer quizRefId)
 
     @Nullable
-    @Query('''select q.quizId as quizId, 
-                    max(q.name) as quizName,
-                    max(q.type) as quizType,
-                    qToS.skillRefId as skillRefId,
-                    count(question.id) as numQuestions
-            from QuizToSkillDef qToS, QuizDef q
-             left join QuizQuestionDef question on (q.quizId = question.quizId) 
-            where qToS.skillRefId in ?1
-                and q.id = qToS.quizRefId
-            group by q.quizId, qToS.skillRefId''')
+    @Query(value = '''select q.quiz_id as quizId,
+               max(q.name) as quizName,
+               max(q.type) as quizType,
+               qToS.skill_ref_id as skillRefId,
+               count(question.id) as numQuestions
+        from quiz_to_skill_definition qToS, quiz_definition q
+             left join quiz_question_definition question on (q.quiz_id = question.quiz_id)
+        where qToS.skill_ref_id in ?1
+          and q.id = qToS.quiz_ref_id
+        group by q.quiz_id, qToS.skill_ref_id, qToS.skill_ref_id, q.quiz_id''', nativeQuery = true)
     List<QuizNameAndId> getQuizInfoSkillIdRef(List<Integer> skillIdRef)
 
     void deleteBySkillRefId(Integer skillRefId)

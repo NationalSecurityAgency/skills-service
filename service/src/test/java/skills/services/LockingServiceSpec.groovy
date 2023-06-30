@@ -15,13 +15,7 @@
  */
 package skills.services
 
-
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionStatus
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionCallback
-import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.storage.model.SkillsDBLock
 
@@ -35,61 +29,52 @@ class LockingServiceSpec extends DefaultIntSpec {
     @Autowired
     LockingService lockingService
 
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-
-    @Transactional
     def "lock global settings"() {
         when:
-        SkillsDBLock lock = lockingService.lockGlobalSettings()
+        SkillsDBLock lock = runInTransaction { lockingService.lockGlobalSettings() }
 
         then:
         lock
     }
 
-    @Transactional
     def "lock projects"() {
         when:
-        SkillsDBLock lock = lockingService.lockProjects()
+        SkillsDBLock lock = runInTransaction { lockingService.lockProjects() }
 
         then:
         lock
     }
 
-    @Transactional
     def "lock global badges"() {
         when:
-        SkillsDBLock lock = lockingService.lockGlobalBadges()
+        SkillsDBLock lock = runInTransaction { lockingService.lockGlobalBadges() }
 
         then:
         lock
     }
 
-    @Transactional
     def "lock event compaction"() {
         when:
-        SkillsDBLock lock = lockingService.lockEventCompaction()
+        SkillsDBLock lock = runInTransaction { lockingService.lockEventCompaction() }
 
         then:
         lock
     }
 
-    @Transactional
     def "lock project expiration"() {
         when:
-        SkillsDBLock lock = lockingService.lockForProjectExpiration()
+        SkillsDBLock lock = runInTransaction { lockingService.lockForProjectExpiration() }
 
         then:
         lock
     }
 
-    @Transactional
     def "lock for skill reporting"() {
         when:
-        SkillsDBLock lock = lockingService.lockForSkillReporting("user", "project")
+        SkillsDBLock lock = runInTransaction { lockingService.lockForSkillReporting("user", "project") }
 
         then:
-        lock
+        lock.lock == "reportSkill_userproject"
     }
 
     def "test concurrent locks for user project"() {
@@ -102,37 +87,27 @@ class LockingServiceSpec extends DefaultIntSpec {
         Runnable longRunning = new Runnable() {
             @Override
             void run() {
-                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
-                transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
-                transactionTemplate.execute(new TransactionCallback<Boolean>() {
-                    @Override
-                    Boolean doInTransaction(TransactionStatus status) {
-                        SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
-                        t1Start.set(System.currentTimeMillis())
-                        Thread.currentThread().sleep(sleepTime)
-                        return true;
-                    }
-                })
+                runInTransaction {
+                    SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
+                    t1Start.set(System.currentTimeMillis())
+                    Thread.currentThread().sleep(sleepTime)
+                    return true;
+                }
             }
         }
 
         Runnable immediate = new Runnable() {
             @Override
             void run() {
-                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
-                transactionTemplate.setPropagationBehaviorName("PROPAGATION_REQUIRES_NEW")
-                boolean result = transactionTemplate.execute(new TransactionCallback<Boolean>() {
-                    @Override
-                    Boolean doInTransaction(TransactionStatus status) {
-                            try {
-                                SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
-                                t2Start.set(System.currentTimeMillis())
-                                return true
-                            } catch (e) {
-                                e.printStackTrace()
-                            }
+                boolean result =runInTransaction {
+                    try {
+                        SkillsDBLock lock = lockingService.lockForSkillReporting("aUser", "aProject")
+                        t2Start.set(System.currentTimeMillis())
+                        return true
+                    } catch (e) {
+                        e.printStackTrace()
                     }
-                })
+                }
                 assert result
             }
         }

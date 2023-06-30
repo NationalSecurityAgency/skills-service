@@ -21,8 +21,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import skills.controller.exceptions.SkillException
-import skills.storage.model.ProjDef
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
@@ -36,7 +34,7 @@ class LockingService {
     SkillsDBLockRepo skillsDBLockRepo
 
     @Autowired
-    PostgresQlNativeRepo PostgresQlNativeRepo
+    PostgresQlNativeRepo postgresQlNativeRepo
 
     SkillsDBLock lockGlobalSettings() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_settings_lock")
@@ -102,7 +100,7 @@ class LockingService {
 
     SkillsDBLock lockForUserCreateOrUpdate(String userId) {
         String key = "update_" + userId
-        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
+        SkillsDBLock lock = postgresQlNativeRepo.insertLockOrSelectExisting(key)
         return lock
     }
 
@@ -120,13 +118,13 @@ class LockingService {
 
     SkillsDBLock lockForSkillReporting(String userId, String projectId) {
         String key = "reportSkill_" + userId + projectId
-        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
+        SkillsDBLock lock = postgresQlNativeRepo.insertLockOrSelectExisting(key)
         return lock
     }
 
     SkillsDBLock lockUserQuizAttempt(Integer quizAttemptId) {
         String key = "quizAttempt_" + quizAttemptId
-        SkillsDBLock lock = PostgresQlNativeRepo.insertLockOrSelectExisting(key)
+        SkillsDBLock lock = postgresQlNativeRepo.insertLockOrSelectExisting(key)
         return lock
     }
 
