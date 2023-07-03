@@ -95,6 +95,7 @@ import QuizRunsHistoryPage from '@/components/quiz/runsHistory/QuizRunsHistoryPa
 import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
+import VideoConfigPage from '@/components/video/VideoConfigPage';
 
 Vue.use(Router);
 
@@ -771,6 +772,17 @@ const router = new Router({
             message: 'Skill Users',
           },
         },
+      }, {
+        name: 'ConfigureVideo',
+        path: 'configVideo',
+        component: VideoConfigPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Configure Video',
+          },
+        },
+        props: true,
       }, {
         name: 'AddSkillEvent',
         path: 'addSkillEvent',

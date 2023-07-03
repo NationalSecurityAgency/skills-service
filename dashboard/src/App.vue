@@ -142,6 +142,7 @@ limitations under the License.
 // Import Bootstrap and BootstrapVue source SCSS files
 @import "~bootstrap/scss/bootstrap";
 @import '~bootstrap-vue/src/index.scss';
+@import '~video.js/dist/video-js.css';
 </style>
 
 <style>
