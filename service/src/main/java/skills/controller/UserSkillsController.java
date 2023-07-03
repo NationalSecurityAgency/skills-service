@@ -47,6 +47,7 @@ import skills.icons.CustomIconFacade;
 import skills.services.AttachmentService;
 import skills.services.SelfReportingService;
 import skills.services.VersionService;
+import skills.services.VideoCaptionsService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -115,6 +116,9 @@ class UserSkillsController {
 
     @Autowired
     AttachmentService attachmentService;
+
+    @Autowired
+    VideoCaptionsService videoCaptionsService;
 
     @Value("${skills.config.allowedAttachmentMimeTypes}")
     List<MediaType> allowedAttachmentMimeTypes;
@@ -501,6 +505,13 @@ class UserSkillsController {
         AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
         AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
         return attachmentService.saveAttachment(file, projectId, quizId, skillId);
+    }
+
+    @GetMapping(value = "/videos/{videoId}/captions", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    public String getVideoCaptions(@PathVariable("videoId") String videoId) {
+        return videoCaptionsService.getVideoCaptions(videoId);
     }
 
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
