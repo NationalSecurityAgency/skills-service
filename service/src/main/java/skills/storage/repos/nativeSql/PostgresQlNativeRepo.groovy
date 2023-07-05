@@ -25,6 +25,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefPartial
 import skills.storage.model.SkillsDBLock
 import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.SkillsDBLockRepo
 import skills.storage.repos.UserPointsRepo
 
 import jakarta.persistence.EntityManager
@@ -45,6 +46,9 @@ class PostgresQlNativeRepo {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    SkillsDBLockRepo skillsDBLockRepo
 
     void decrementPointsForDeletedSkill(String projectId, String deletedSkillId, String parentSubjectSkillId) {
         String q = '''
@@ -485,11 +489,7 @@ class PostgresQlNativeRepo {
     }
 
     SkillsDBLock insertLockOrSelectExisting(String lockKey) {
-        Query query = entityManager.createStoredProcedureQuery("f_select_lock_and_insert", SkillsDBLock)
-                        .registerStoredProcedureParameter("_lockKey", String, ParameterMode.IN)
-        query.setParameter("_lockKey", lockKey)
-        SkillsDBLock dbLock = query.getSingleResult()
-        return dbLock
+        return skillsDBLockRepo.insertLockOrSelectExisting(lockKey)
     }
 
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(String projectId, String subjectId, String userId, int minimumPoints) {

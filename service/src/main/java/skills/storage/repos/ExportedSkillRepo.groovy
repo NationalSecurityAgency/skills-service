@@ -60,7 +60,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
                 case when localSkillOnName.name is not null then true else false end as skillNameAlreadyExist  
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        join SkillRelDef srd on srd.child.id = es.skill.id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(srd.child.skillId) and localSkillOnId.projectId = ?1)
         left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(srd.child.name) and localSkillOnName.projectId = ?1)
@@ -74,7 +74,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
     @Query('''select count(es) 
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        join SkillRelDef srd on srd.child.id = es.skill.id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where 
              es.projectId <> ?1 and
@@ -93,7 +93,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
                 case when localSkillOnName.name is not null then true else false end as skillNameAlreadyExist   
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        join SkillRelDef srd on srd.child.id = es.skill.id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         left join SkillDef localSkillOnId on (lower(localSkillOnId.skillId) = lower(srd.child.skillId) and localSkillOnId.projectId = :projectId)
         left join SkillDef localSkillOnName on (lower(localSkillOnName.name) = lower(srd.child.name) and localSkillOnName.projectId = :projectId)
@@ -115,7 +115,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
         select count(es.skill)
         from ExportedSkill es
         join ProjDef project on project.projectId = es.projectId
-        join SkillRelDef srd on srd.child = es.skill and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+        join SkillRelDef srd on srd.child.id = es.skill.id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
         join SkillDef subject on subject = srd.parent and subject.type = 'Subject'
         where
             es.projectId <> :projectId and 

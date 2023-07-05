@@ -55,4 +55,7 @@ interface SkillsDBLockRepo extends CrudRepository<SkillsDBLock, Integer> {
     @Modifying
     @Query(value="delete from skills_db_locks where created < ?1  and expires='true'", nativeQuery=true)
     void deleteByCreatedBeforeAndExpires(Date date)
+
+    @Query(value="select * from f_select_lock_and_insert(?1);", nativeQuery=true)
+    SkillsDBLock insertLockOrSelectExisting(String lockKey)
 }

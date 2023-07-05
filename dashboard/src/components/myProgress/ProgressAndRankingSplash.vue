@@ -20,7 +20,7 @@ limitations under the License.
         <div class="text-center">
           <img src="/static/img/skilltree_logo.svg" alt="SkillTree Logo"/>
         </div>
-        <div class="h4 text-center mb-4 text-primary font-italic above-background">A micro-learning <b>gamification</b> traning</div>
+        <div class="h4 text-center mb-4 text-primary font-italic above-background">A micro-learning <b>gamification</b> training platform</div>
         <div class="row">
           <div class="col-md-6 col-lg mt-2">
             <b-card body-class="text-center" style="border-top: 5px solid #007c49;" class="h-100">

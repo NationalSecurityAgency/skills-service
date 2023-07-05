@@ -36,7 +36,6 @@ import spock.lang.IgnoreIf
 import java.util.concurrent.atomic.AtomicInteger
 
 @Slf4j
-@IgnoreIf({ SpockSettings.DB_NOT_POSTGRESQL })
 class ConcurrencySpecs extends DefaultIntSpec {
 
     @Autowired
