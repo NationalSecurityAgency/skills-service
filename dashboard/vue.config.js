@@ -130,7 +130,7 @@ module.exports = {
       '^/resetPassword$' : proxyConf,
       '^/performPasswordReset$' : proxyConf,
       '^/isFeatureSupported$' : proxyConf,
-      '^/resendEmailVerification$' : proxyConf,
+      '^/resendEmailVerification/' : proxyConf,
       '^/verifyEmail$' : proxyConf,
       '^/userEmailIsVerified/' : proxyConf,
     },
