@@ -226,6 +226,9 @@ limitations under the License.
       },
     },
     data() {
+      const expirationHrs = this.badge.expirationInterval ? Math.floor((this.badge.expirationInterval / 60)) : 8;
+      const expirationMins = this.badge.expirationInterval ? this.badge.expirationInterval % 60 : 0;
+      const timeLimitEnabled = this.badge.expirationInterval > 0;
       const badgeInternal = {
         originalBadgeId: this.badge.badgeId,
         isEdit: this.isEdit,
@@ -233,8 +236,9 @@ limitations under the License.
         startDate: null,
         endDate: null,
         badgeId: this.badge.badgeId,
-        expirationHrs: this.badge.expirationHrs,
-        expirationMins: this.badge.expirationMins,
+        expirationHrs,
+        expirationMins,
+        timeLimitEnabled,
         ...this.badge,
       };
       // convert string to Date objects
@@ -252,9 +256,9 @@ limitations under the License.
           helpUrl: this.badge.helpUrl,
           startDate: this.toDate(this.badge.startDate),
           endDate: this.toDate(this.badge.endDate),
-          expirationHrs: 8,
-          expirationMins: 0,
-          timeLimitEnabled: false,
+          expirationHrs,
+          expirationMins,
+          timeLimitEnabled,
         },
         limitTimeframe: limitedTimeframe,
         show: this.value,
@@ -316,6 +320,8 @@ limitations under the License.
             } else {
               this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
             }
+          } else if (!this.isEdit) {
+            this.badgeInternal = Object.assign(this.badgeInternal, this.originalBadge);
           }
         }).finally(() => {
           this.loadingComponent = false;
