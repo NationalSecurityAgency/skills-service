@@ -146,7 +146,7 @@ describe('Verify Email Tests', () => {
         method: 'POST',
         url: '/root/saveSystemSettings',
         body: {
-          resetTokenExpiration: 'PT5S',
+          resetTokenExpiration: 'PT15S',
           publicUrl: 'http://localhost:8082/',
           fromEmail: 'noreploy@skilltreeemail.org',
         }
@@ -165,8 +165,9 @@ describe('Verify Email Tests', () => {
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
         .and('contain', 'Email Verification Sent!');
 
-      cy.wait(6*1000)
+      cy.wait(16*1000)
       cy.getLinkFromEmail().then((confirmEmailLink) => {
+        cy.resetEmail();
         cy.visit(confirmEmailLink);
 
         // link is expired, request a new one
@@ -178,8 +179,8 @@ describe('Verify Email Tests', () => {
           .and('contain', 'Email Verification Sent!');
 
         // confirm email with new link and login
-        cy.getLinkFromEmail().then((confirmEmailLink) => {
-          cy.visit(confirmEmailLink);
+        cy.getLinkFromEmail().then((confirmEmailLink2) => {
+          cy.visit(confirmEmailLink2);
           cy.wait('@verifyEmail');
           cy.get('[data-cy="emailConfirmation"]').should('be.visible')
             .and('contain', 'Email Address Successfully Confirmed!');
