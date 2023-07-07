@@ -39,21 +39,6 @@ class RelativeTimeUtil {
         long months = period.getMonths()
         long years = period.getYears()
         String formatted
-        Boolean inTheFuture = false
-
-        if ( years < 0 ) {
-            years = Math.abs(years);
-            inTheFuture = true
-        }
-        if ( months < 0 ) {
-            months = Math.abs(months);
-            inTheFuture = true
-        }
-        if ( days < 0 ) {
-            days = Math.abs(days);
-            inTheFuture = true
-        }
-
         if (years > 0) {
             formatted = "$years year${years > 1 ? 's':''}"
             if (months > 0) {
@@ -68,7 +53,7 @@ class RelativeTimeUtil {
             formatted = "$days day${days > 1 ? 's' : ''}"
         }
 
-        return inTheFuture ? ("in " + formatted) : (formatted + " ago")
+        return formatted+" ago"
     }
 
     public static String relativeTimeFromNow(Date eventTime) {

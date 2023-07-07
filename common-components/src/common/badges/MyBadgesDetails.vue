@@ -36,10 +36,11 @@ limitations under the License.
                               <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
                               <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
                               <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
-                              <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute gold" style="bottom: 5px; right: 25px;"></i>
-                              <i v-if="badge.achievementPosition === 1" class="fas fa-trophy position-absolute user-trophy gold"></i>
-                              <i v-else-if="badge.achievementPosition === 2" class="fas fa-trophy position-absolute user-trophy silver"></i>
-                              <i v-else-if="badge.achievementPosition === 3" class="fas fa-trophy position-absolute user-trophy bronze"></i>
+                              <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute skills-color-orange" style="bottom: 5px; right: 5px;"></i>
+
+                              <span v-if="badge.achievementPosition <= 3" class="position-absolute user-trophy">
+                                <i v-for="index in numberOfStars(badge.achievementPosition)" :key="index" :class="'fa fa-star ' + classNames[badge.achievementPosition - 1] + ' star-' + index"></i>
+                              </span>
                               <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
                               <div class="card-title mb-0 text-truncate">
                                   {{ badge.badge }}
@@ -67,6 +68,8 @@ limitations under the License.
     data() {
       return {
         colors: ['text-info', 'text-warning', 'text-danger', 'text-primary'],
+        positionNames: ['first', 'second', 'third'],
+        classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
       };
     },
     props: {
@@ -90,29 +93,44 @@ limitations under the License.
         const color = this.colors[colorIndex];
         return `${icon} ${color}`;
       },
+      numberOfStars(position) {
+        let numberOfStars = 0;
+        if (position === 1) {
+          numberOfStars = 3;
+        } else if (position === 2) {
+          numberOfStars = 2;
+        } else if (position === 3) {
+          numberOfStars = 1;
+        }
+        return numberOfStars;
+      },
     },
   };
 </script>
 
 <style>
+  @keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
   .earned-badge {
     cursor: pointer;
   }
 
   .user-trophy {
-    bottom: 5px;
-    right: 5px;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    text-align: center;
   }
 
-  .gold {
-    color: #c9b037;
+  .star-1 {
+    animation: pop-in 0.5s;
   }
-
-  .silver {
-    color: #b4b4b4;
+  .star-2 {
+    animation: pop-in 1s;
   }
-
-  .bronze {
-    color: #6a3805;
+  .star-3 {
+    animation: pop-in 1.5s;
   }
 </style>

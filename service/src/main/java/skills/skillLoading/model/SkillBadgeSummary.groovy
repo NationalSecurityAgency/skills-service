@@ -45,8 +45,6 @@ class SkillBadgeSummary {
     int expirationInterval
     Date firstPerformedSkill
     Date expirationDate
-    String firstPerformedSkillFormatted
-    String expirationDateFormatted
     boolean hasExpired
     int achievementPosition
     boolean achievedWithinExpiration
