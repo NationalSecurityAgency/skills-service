@@ -61,22 +61,7 @@ class RelativeTimeUtil {
     }
 
     public static boolean isInThePast(Date eventTime) {
-        LocalDate localDateEvent = eventTime.toLocalDate()
-        LocalDate localDateEnd = new Date().toLocalDate()
-        if (localDateEvent == localDateEnd) {
-            return false
-        }
-
-        Period period = Period.between(localDateEvent, localDateEnd)
-        long days = period.getDays()
-        long months = period.getMonths()
-        long years = period.getYears()
-
-        if( years < 0 || days < 0 || months < 0 ) {
-            return false
-        } else {
-            return true
-        }
+        return isInThePast(eventTime, new Date())
     }
 
     public static boolean isInThePast(Date startTime, Date endTime) {
