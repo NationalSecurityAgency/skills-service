@@ -21,10 +21,11 @@ limitations under the License.
                     <i :class="iconCss" style="font-size: 4em; min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
-                    <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute gold" style="bottom: 5px; right: 25px;"></i>
-                    <i v-if="badge.achievementPosition === 1" class="fas fa-trophy position-absolute user-trophy gold"></i>
-                    <i v-else-if="badge.achievementPosition === 2" class="fas fa-trophy position-absolute user-trophy silver"></i>
-                    <i v-else-if="badge.achievementPosition === 3" class="fas fa-trophy position-absolute user-trophy bronze"></i>
+                    <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute skills-color-orange" style="bottom: 5px; right: 5px;"></i>
+
+                    <span v-if="badge.achievementPosition <= 3" class="position-absolute user-trophy">
+                      <i v-for="index in numberOfStars" :key="index" :class="'fa fa-star ' + classNames[badge.achievementPosition - 1] + ' star-' + index"></i>
+                    </span>
                     <div v-if="badge.gem" class="text-muted">
                         <small>Expires {{ badge.endDate | relativeTime() }}</small>
                     </div>
@@ -58,16 +59,18 @@ limitations under the License.
             <div class="alert alert-success" v-if="badge">
               <div v-if="badge.numberOfUsersAchieved > 0">
                 <i class="fas fa-trophy" style="padding-right: 10px;"></i>
-                <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{ badge.numberOfUsersAchieved === 1 ? 'person has' : 'people have'}} achieved this badge so far</span>
-                <span v-else-if="badge.badgeAchieved && badge.numberOfUsersAchieved > 1">{{badge.numberOfUsersAchieved - 1}} other {{ (badge.numberOfUsersAchieved - 1) === 1 ? 'person has' : 'people have'}} achieved this badge so far</span>
+                <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{usersAchieved}} achieved this badge so far - you could be next!</span>
+                <span v-else-if="badge.badgeAchieved && badge.numberOfUsersAchieved > 1">{{badge.numberOfUsersAchieved - 1}} other {{otherUsersAchieved}} achieved this badge so far</span>
                 <span v-else>You've achieved this badge</span>
-                <span v-if="badge.achievementPosition > 0 && badge.achievementPosition < 4"> - and you were the {{badge.achievementPosition === 1 ? 'first' : badge.achievementPosition === 2 ? 'second' : 'third'}}!</span>
+                <span v-if="achievementOrder !== ''"> - and you were the {{achievementOrder}}!</span>
               </div>
-              <div v-else>No one has achieved this badge yet - you could be the first!</div>
+              <div v-else><i class="fas fa-car-side" style="padding-right: 10px;"></i> No one has achieved this badge yet - you could be the first!</div>
 
-              <div v-if="badge.firstPerformedSkillFormatted && badge.firstPerformedSkillFormatted !== 'never' && !badge.badgeAchieved">
-                <i class="fas fa-clock" style="padding-right: 10px;"></i> You started working on this badge <span :title="badge.firstPerformedSkill">{{ badge.firstPerformedSkillFormatted }}</span>.
-                <span v-if="!badge.hasExpired && badge.expirationDateFormatted && badge.expirationDateFormatted !== 'never'"> Achieve it {{badge.expirationDateFormatted}} for a bonus!</span>
+              <div v-if="badge.firstPerformedSkill && !badge.badgeAchieved">
+                <i class="fas fa-clock" style="padding-right: 10px;"></i> You started working on this badge <span :title="badge.firstPerformedSkill">{{ badge.firstPerformedSkill | relativeTime() }}</span>.
+                <span v-if="!badge.hasExpired && badge.expirationDate">
+                   Achieve it {{ badge.expirationDate | relativeTime() }} for a bonus!
+                </span>
               </div>
             </div>
 
@@ -106,6 +109,12 @@ limitations under the License.
         default: false,
       },
     },
+    data() {
+      return {
+        positionNames: ['first', 'second', 'third'],
+        classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
+      };
+    },
     computed: {
       percent() {
         if (this.badge.numTotalSkills === 0) {
@@ -116,25 +125,48 @@ limitations under the License.
       iconCss() {
         return `${this.badge.iconClass} ${this.iconColor}`;
       },
+      achievementOrder() {
+        return this.badge.achievementPosition > 0 && this.badge.achievementPosition < 4 ? this.positionNames[this.badge.achievementPosition - 1] : '';
+      },
+      usersAchieved() {
+        return this.badge.numberOfUsersAchieved === 1 ? 'person has' : 'people have';
+      },
+      otherUsersAchieved() {
+        return (this.badge.numberOfUsersAchieved - 1) === 1 ? 'person has' : 'people have';
+      },
+      numberOfStars() {
+        let numberOfStars = 0;
+        if (this.badge.achievementPosition === 1) {
+          numberOfStars = 3;
+        } else if (this.badge.achievementPosition === 2) {
+          numberOfStars = 2;
+        } else if (this.badge.achievementPosition === 3) {
+          numberOfStars = 1;
+        }
+        return numberOfStars;
+      },
     },
   };
 </script>
 
 <style scoped>
+  @keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
   .user-trophy {
-    bottom: 5px;
-    right: 5px;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    text-align: center;
   }
-
-  .gold {
-    color: #c9b037;
+  .star-1 {
+    animation: pop-in 0.5s;
   }
-
-  .silver {
-    color: #b4b4b4;
+  .star-2 {
+    animation: pop-in 1s;
   }
-
-  .bronze {
-    color: #6a3805;
+  .star-3 {
+    animation: pop-in 1.5s;
   }
 </style>

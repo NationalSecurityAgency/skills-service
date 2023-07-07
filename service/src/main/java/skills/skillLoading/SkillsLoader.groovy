@@ -965,8 +965,6 @@ class SkillsLoader {
                 dependencyInfo: badgeDependencySummary,
                 numberOfUsersAchieved: numberOfUsersAchieved,
                 expirationInterval: badgeDefinition.pointIncrementInterval,
-                firstPerformedSkillFormatted: RelativeTimeUtil.relativeTimeFromNow(firstPerformedSkill),
-                expirationDateFormatted: RelativeTimeUtil.relativeTimeFromNow(expirationDate),
                 hasExpired: expirationDate ? RelativeTimeUtil.isInThePast(expirationDate) : null,
                 firstPerformedSkill: firstPerformedSkill,
                 expirationDate: expirationDate,
