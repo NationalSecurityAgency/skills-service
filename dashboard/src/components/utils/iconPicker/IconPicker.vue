@@ -21,6 +21,7 @@ limitations under the License.
        aria-roledescription="icon selector button"
        aria-label="icon selector"
        tabindex="0"
+       :disabled=true
        data-cy="iconPicker">
     <div class="card-body text-primary" style="min-height: 4rem;">
       <i
@@ -41,6 +42,10 @@ limitations under the License.
       customIconWidth: {
         type: Number,
         default: 48,
+      },
+      disabled: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {

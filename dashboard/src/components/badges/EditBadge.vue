@@ -27,7 +27,7 @@ limitations under the License.
         <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
         <div v-if="displayIconManager === false" class="text-left">
           <div class="media">
-            <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true)"
+            <icon-picker :startIcon="badgeInternal.iconClass" @select-icon="toggleIconDisplay(true, false)"
                          class="mr-3"></icon-picker>
             <div class="media-body">
               <div class="form-group">
@@ -61,55 +61,80 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
-          <div class="form-group">
-            <label><b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Reward Time Limit
-              <inline-help
-                target-id="timeLimitHelp"
-                :next-focus-el="previousFocus"
-                @shown="tooltipShowing=true"
-                @hidden="tooltipShowing=false"
-                :msg="badgeInternal.timeLimitEnabled ? 'Uncheck to disable. When disabled, there is no reward for completing a badge within the time limit.' : 'Check to enable. When enabled, users will be rewarded for completing the badge within the time limit.'"/>
-            </label>
-            <div class="row">
-              <div class="col-12 col-sm">
-                <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
-                  <div class="input-group">
-                    <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationHrs"
-                           value="8" :disabled="!badgeInternal.timeLimitEnabled"
-                           :aria-required="badgeInternal.timeLimitEnabled"
-                           ref="timeLimitHours" data-cy="timeLimitHours"
-                           v-on:keydown.enter="handleSubmit(updateBadge)"
-                           id="timeLimitHours" :aria-label="`time window hours ${maxTimeLimitMessage}`"
-                           aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
-                           aria-errormessage="skillHoursError"/>
-                    <div class="input-group-append">
-                      <span class="input-group-text" id="hours-append">Hours</span>
+          <b-card class="mt-1">
+            <div class="form-group">
+              <label><b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Bonus Award
+                <inline-help
+                  target-id="timeLimitHelp"
+                  :next-focus-el="previousFocus"
+                  @shown="tooltipShowing=true"
+                  @hidden="tooltipShowing=false"
+                  :msg="badgeInternal.timeLimitEnabled ? 'Uncheck to disable. When disabled, there is no reward for completing a badge within the time limit.' : 'Check to enable. When enabled, users will be rewarded for completing the badge within the time limit.'"/>
+              </label>
+              <div class="row" style="padding-bottom: 10px;">
+                <div class="text-left col">
+                  <div class="media">
+                    <icon-picker :startIcon="badgeInternal.awardIconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>
+                    <div class="media-body">
+                      <div class="form-group">
+                        <label for="badgeName">Award Name</label>
+                        <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator"
+                                            v-slot="{errors}" name="Award Name">
+                          <input v-focus class="form-control" id="awardName" type="text" v-model="badgeInternal.awardName"
+                                 aria-required="true" data-cy="awardName"
+                                 v-on:keydown.enter="handleSubmit(updateBadge)"
+                                 :aria-invalid="errors && errors.length > 0"
+                                 :disabled="!badgeInternal.timeLimitEnabled"
+                                 aria-errormessage="awardNameError"
+                                 aria-describedby="awardNameError"/>
+                          <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="awardNameError" id="awardNameError">{{ errors[0] }}
+                          </small>
+                        </ValidationProvider>
+                      </div>
                     </div>
                   </div>
-                  <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
-                </ValidationProvider>
+                </div>
               </div>
-              <div class="col-12 col-sm">
-                <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitHours|cantBe0IfHours0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
-                  <div class="input-group">
-                    <input class="form-control d-inline"  type="text" v-model="badgeInternal.expirationMins"
-                           value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
-                           v-on:keydown.enter="handleSubmit(updateBadge)"
-                           :aria-required="badgeInternal.timeLimitEnabled"
-                           aria-label="time window minutes"
-                           aria-describedby="skillMinutesError"
-                           aria-errormessage="skillMinutesError"
-                           :aria-invalid="errors && errors.length > 0"/>
-                    <div class="input-group-append">
-                      <span class="input-group-text" id="minutes-append">Minutes</span>
+              <div class="row">
+                <div class="col-12 col-sm">
+                  <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
+                    <div class="input-group">
+                      <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationHrs"
+                             value="8" :disabled="!badgeInternal.timeLimitEnabled"
+                             :aria-required="badgeInternal.timeLimitEnabled"
+                             ref="timeLimitHours" data-cy="timeLimitHours"
+                             v-on:keydown.enter="handleSubmit(updateBadge)"
+                             id="timeLimitHours" :aria-label="`time window hours ${maxTimeLimitMessage}`"
+                             aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="skillHoursError"/>
+                      <div class="input-group-append">
+                        <span class="input-group-text" id="hours-append">Hours</span>
+                      </div>
                     </div>
-                  </div>
-                  <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
-                </ValidationProvider>
+                    <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 col-sm">
+                  <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitHours|cantBe0IfHours0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
+                    <div class="input-group">
+                      <input class="form-control d-inline"  type="text" v-model="badgeInternal.expirationMins"
+                             value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
+                             v-on:keydown.enter="handleSubmit(updateBadge)"
+                             :aria-required="badgeInternal.timeLimitEnabled"
+                             aria-label="time window minutes"
+                             aria-describedby="skillMinutesError"
+                             aria-errormessage="skillMinutesError"
+                             :aria-invalid="errors && errors.length > 0"/>
+                      <div class="input-group-append">
+                        <span class="input-group-text" id="minutes-append">Minutes</span>
+                      </div>
+                    </div>
+                    <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
+                  </ValidationProvider>
+                </div>
               </div>
             </div>
-
-          </div>
+          </b-card>
 
           <help-url-input class="mt-3"
                           :next-focus-el="previousFocus"
@@ -148,9 +173,7 @@ limitations under the License.
                                       ref="endDateValidationProvider">
                     <datepicker :inline="true" v-model="badgeInternal.endDate" name="endDate"
                                 key="gemTo" data-cy="endDatePicker" aria-required="true"></datepicker>
-                    <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="endDateError">{{
-                        errors[0]
-                      }}</small>
+                    <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="endDateError">{{errors[0]}}</small>
                   </ValidationProvider>
                 </b-col>
               </b-row>
@@ -160,7 +183,7 @@ limitations under the License.
         <div v-else>
           <icon-manager @selected-icon="onSelectedIcon"></icon-manager>
           <div class="text-right mr-2">
-            <b-button variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection
+            <b-button variant="secondary" @click="toggleIconDisplay(false, false)" class="mt-4">Cancel Icon Selection
             </b-button>
           </div>
         </div>
@@ -239,6 +262,8 @@ limitations under the License.
         expirationHrs,
         expirationMins,
         timeLimitEnabled,
+        awardIconClass: 'fas fa-car-side',
+        awardName: 'Speedy Finish',
         ...this.badge,
       };
       // convert string to Date objects
@@ -259,6 +284,8 @@ limitations under the License.
           expirationHrs,
           expirationMins,
           timeLimitEnabled,
+          awardIconClass: 'fas fa-car-side',
+          awardName: 'Speedy Finish',
         },
         limitTimeframe: limitedTimeframe,
         show: this.value,
@@ -269,6 +296,7 @@ limitations under the License.
         loadingComponent: true,
         keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate', 'expirationMins', 'expirationHrs'],
         restoredFromStorage: false,
+        isAwardIcon: false,
       };
     },
     created() {
@@ -399,7 +427,11 @@ limitations under the License.
         }
       },
       onSelectedIcon(selectedIcon) {
-        this.badgeInternal.iconClass = `${selectedIcon.css}`;
+        if (this.isAwardIcon) {
+          this.badgeInternal.awardIconClass = `${selectedIcon.css}`;
+        } else {
+          this.badgeInternal.iconClass = `${selectedIcon.css}`;
+        }
         this.displayIconManager = false;
       },
       onEnableGemFeature(value) {
@@ -421,8 +453,9 @@ limitations under the License.
         this.canEditBadgeId = !this.canEditBadgeId && !this.isEdit;
         this.updateBadgeId();
       },
-      toggleIconDisplay(shouldDisplay) {
+      toggleIconDisplay(shouldDisplay, isAwardIcon) {
         this.displayIconManager = shouldDisplay;
+        this.isAwardIcon = isAwardIcon;
       },
       resetTimeLimit(checked) {
         if (!checked) {
