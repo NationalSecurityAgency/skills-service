@@ -136,56 +136,6 @@ limitations under the License.
             </div>
           </b-card>
 
-          <div class="form-group">
-            <label><b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Reward Time Limit
-              <inline-help
-                target-id="timeLimitHelp"
-                :next-focus-el="previousFocus"
-                @shown="tooltipShowing=true"
-                @hidden="tooltipShowing=false"
-                :msg="badgeInternal.timeLimitEnabled ? 'Uncheck to disable. When disabled, there is no reward for completing a badge within the time limit.' : 'Check to enable. When enabled, users will be rewarded for completing the badge within the time limit.'"/>
-            </label>
-            <div class="row">
-              <div class="col-12 col-sm">
-                <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
-                  <div class="input-group">
-                    <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationHrs"
-                           value="8" :disabled="!badgeInternal.timeLimitEnabled"
-                           :aria-required="badgeInternal.timeLimitEnabled"
-                           ref="timeLimitHours" data-cy="timeLimitHours"
-                           v-on:keydown.enter="handleSubmit(updateBadge)"
-                           id="timeLimitHours" :aria-label="`time window hours ${maxTimeLimitMessage}`"
-                           aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
-                           aria-errormessage="skillHoursError"/>
-                    <div class="input-group-append">
-                      <span class="input-group-text" id="hours-append">Hours</span>
-                    </div>
-                  </div>
-                  <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-              <div class="col-12 col-sm">
-                <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitHours|cantBe0IfHours0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
-                  <div class="input-group">
-                    <input class="form-control d-inline"  type="text" v-model="badgeInternal.expirationMins"
-                           value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
-                           v-on:keydown.enter="handleSubmit(updateBadge)"
-                           :aria-required="badgeInternal.timeLimitEnabled"
-                           aria-label="time window minutes"
-                           aria-describedby="skillMinutesError"
-                           aria-errormessage="skillMinutesError"
-                           :aria-invalid="errors && errors.length > 0"/>
-                    <div class="input-group-append">
-                      <span class="input-group-text" id="minutes-append">Minutes</span>
-                    </div>
-                  </div>
-                  <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-            </div>
-
-          </div>
-
           <help-url-input class="mt-3"
                           :next-focus-el="previousFocus"
                           @shown="tooltipShowing=true"
@@ -506,12 +456,6 @@ limitations under the License.
       toggleIconDisplay(shouldDisplay, isAwardIcon) {
         this.displayIconManager = shouldDisplay;
         this.isAwardIcon = isAwardIcon;
-      },
-      resetTimeLimit(checked) {
-        if (!checked) {
-          this.badgeInternal.expirationHrs = 8;
-          this.badgeInternal.expirationMins = 0;
-        }
       },
       resetTimeLimit(checked) {
         if (!checked) {
