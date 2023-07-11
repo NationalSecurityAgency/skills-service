@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.jpa.domain.JpaSort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -40,6 +39,8 @@ import skills.services.admin.*
 import skills.services.admin.moveSkills.SkillsMoveService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -153,6 +154,9 @@ class AdminController {
 
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -537,6 +541,22 @@ class AdminController {
 
         validateAndSaveSkill(projectId, subjectId, skillId, skillRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
+                            @PathVariable("skillId") String skillId,
+                            @RequestBody SkillVideoAttrs skillVideoAttrsRequest) {
+        skillAttributeService.saveVideoAttrs(projectId, skillId, skillVideoAttrsRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SkillVideoAttrs getSkillVideoAttrs(@PathVariable("projectId") String projectId,
+                                      @PathVariable("skillId") String skillId) {
+        return skillAttributeService.getVideoAttrs(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)

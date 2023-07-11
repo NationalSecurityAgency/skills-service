@@ -51,4 +51,13 @@ class SkillDefAccessor {
         return skillDef
     }
 
+    Integer getSkillDefId(String projectId, String skillId, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+        Integer skillDefId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(projectId, skillId, containerType)
+        if (!skillDefId) {
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId] with type [${containerType}]", projectId, skillId)
+        }
+        return skillDefId
+    }
+
+
 }

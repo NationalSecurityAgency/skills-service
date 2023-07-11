@@ -1792,6 +1792,15 @@ class SkillsService {
         return wsHelper.adminPost(url, [])
     }
 
+    def saveSkillVideoAttributes(String projectId, String skillId, Map videoAttrs) {
+        String url = "/projects/${projectId}/skills/${skillId}/video"
+        return wsHelper.adminPost(url, videoAttrs)
+    }
+    def getSkillVideoAttributes(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/video"
+        return wsHelper.adminGet(url)
+    }
+
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()
     }

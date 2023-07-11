@@ -371,6 +371,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     List<Integer> getUniqueVersionList(String projectId)
 
 
+    @Nullable
     @Query("SELECT s.id from SkillDef s where s.projectId=?1 and s.skillId=?2 and s.type=?3")
     Integer getIdByProjectIdAndSkillIdAndType(String projectId, String skillId, ContainerType containerType)
 
