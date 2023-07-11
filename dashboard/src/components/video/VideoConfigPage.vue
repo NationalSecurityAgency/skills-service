@@ -16,6 +16,7 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Configure Video"/>
+    <b-overlay :show="loading">
     <b-card>
       <div class="row">
         <div class="col">
@@ -51,18 +52,21 @@ limitations under the License.
       </b-form-group>
 
       <b-button variant="outline-info" @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
-      <b-button variant="outline-success" class="ml-2">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
-      <b-card v-if="preview" class="mt-2" header="Video Preview" body-class="p-0">
+      <b-button variant="outline-success" class="ml-2" @click="saveSettings">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
+      <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success"><i class="fas fa-check" /> Saved</span>
+      <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0">
         <skills-video-player v-if="!refreshingPreview"
           :video="{ url: this.videoConf.url, videoType: this.videoConf.videoType }" @player-destroyed="turnOffRefresh"/>
       </b-card>
     </b-card>
+    </b-overlay>
   </div>
 </template>
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsVideoPlayer from '@/components/video/SkillsVideoPlayer';
+  import VideoService from './VideoService';
 
   export default {
     name: 'VideoConfigPage',
@@ -77,7 +81,12 @@ limitations under the License.
         },
         preview: false,
         refreshingPreview: false,
+        loading: true,
+        showSavedMsg: false,
       };
+    },
+    mounted() {
+      this.loadSettings();
     },
     methods: {
       setupPreview() {
@@ -89,6 +98,34 @@ limitations under the License.
       },
       turnOffRefresh() {
         this.refreshingPreview = false;
+      },
+      saveSettings() {
+        this.preview = false;
+        this.loading = true;
+        const settings = {
+          videoUrl: this.videoConf.url,
+          videoType: this.videoConf.videoType,
+        };
+        VideoService.saveVideoSettings(this.$route.params.projectId, this.$route.params.skillId, settings)
+          .then(() => {
+            this.showSavedMsg = true;
+            setTimeout(() => {
+              this.showSavedMsg = false;
+            }, 3500);
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+      },
+      loadSettings() {
+        this.loading = true;
+        VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
+          .then((videoSettings) => {
+            this.videoConf.url = videoSettings.videoUrl;
+            this.videoConf.videoType = videoSettings.videoType;
+          }).finally(() => {
+            this.loading = false;
+          });
       },
     },
   };
