@@ -28,6 +28,9 @@ limitations under the License.
     props: {
       video: Object,
     },
+    destroyed() {
+      this.$emit('player-destroyed', true);
+    },
     data() {
       return {
         videoOptions: {

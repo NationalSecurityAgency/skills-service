@@ -30,11 +30,32 @@ limitations under the License.
         </div>
       </div>
 
-      <b-button variant="info" @click="setupPreview">Preview</b-button>
+      <b-form-group label="Player captions:" label-for="videoCaptionsInput">
+        <b-form-textarea
+          id="videoCaptionsInput"
+          v-model="videoConf.captions"
+          placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format"
+          rows="3"
+          max-rows="6"
+        ></b-form-textarea>
+      </b-form-group>
 
-      <div v-if="preview" class="mt-2">
-        <skills-video-player :video="{ url: this.videoConf.url, videoType: this.videoConf.videoType }" />
-      </div>
+      <b-form-group label="Transcript:" label-for="videoTranscriptInput">
+        <b-form-textarea
+          id="videoTranscriptInput"
+          v-model="videoConf.transcript"
+          placeholder="Please enter video's transcript here. Video transcript will be available for download."
+          rows="3"
+          max-rows="6"
+        ></b-form-textarea>
+      </b-form-group>
+
+      <b-button variant="outline-info" @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
+      <b-button variant="outline-success" class="ml-2">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
+      <b-card v-if="preview" class="mt-2" header="Video Preview" body-class="p-0">
+        <skills-video-player v-if="!refreshingPreview"
+          :video="{ url: this.videoConf.url, videoType: this.videoConf.videoType }" @player-destroyed="turnOffRefresh"/>
+      </b-card>
     </b-card>
   </div>
 </template>
@@ -50,14 +71,24 @@ limitations under the License.
       return {
         videoConf: {
           url: '',
-          videoType: 'video/webm',
+          videoType: '',
+          captions: '',
+          transcript: '',
         },
         preview: false,
+        refreshingPreview: false,
       };
     },
     methods: {
       setupPreview() {
-        this.preview = true;
+        if (this.preview) {
+          this.refreshingPreview = true;
+        } else {
+          this.preview = true;
+        }
+      },
+      turnOffRefresh() {
+        this.refreshingPreview = false;
       },
     },
   };
