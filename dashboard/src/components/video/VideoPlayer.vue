@@ -78,12 +78,15 @@ limitations under the License.
           console.log(`Current position: ${thePlayer.currentTime()}`);
         });
 
-        thePlayer.addRemoteTextTrack({
-          src: '/api/videos/vidId/captions',
-          kind: 'subtitles',
-          srclang: 'en',
-          label: 'English',
-        });
+        console.log(`captions url: ${this.options.captionsUrl}`);
+        if (this.options.captionsUrl) {
+          thePlayer.addRemoteTextTrack({
+            src: this.options.captionsUrl,
+            kind: 'subtitles',
+            srclang: 'en',
+            label: 'English',
+          });
+        }
       });
     },
     beforeDestroy() {

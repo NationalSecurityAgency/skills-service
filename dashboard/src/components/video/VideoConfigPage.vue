@@ -56,7 +56,7 @@ limitations under the License.
       <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success"><i class="fas fa-check" /> Saved</span>
       <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0">
         <skills-video-player v-if="!refreshingPreview"
-          :video="{ url: this.videoConf.url, videoType: this.videoConf.videoType }" @player-destroyed="turnOffRefresh"/>
+          :video="computedVideoConf" @player-destroyed="turnOffRefresh"/>
       </b-card>
     </b-card>
     </b-overlay>
@@ -88,6 +88,18 @@ limitations under the License.
     mounted() {
       this.loadSettings();
     },
+    computed: {
+      computedVideoConf() {
+        const captionsUrl = this.videoConf.captions && this.videoConf.captions.trim().length > 0
+          ? `/api/projects/${this.$route.params.projectId}/skills/${this.$route.params.skillId}/videoCaptions`
+          : null;
+        return {
+          url: this.videoConf.url,
+          videoType: this.videoConf.videoType,
+          captionsUrl,
+        };
+      },
+    },
     methods: {
       setupPreview() {
         if (this.preview) {
@@ -105,6 +117,8 @@ limitations under the License.
         const settings = {
           videoUrl: this.videoConf.url,
           videoType: this.videoConf.videoType,
+          captions: this.videoConf.captions,
+          transcript: this.videoConf.transcript,
         };
         VideoService.saveVideoSettings(this.$route.params.projectId, this.$route.params.skillId, settings)
           .then(() => {
@@ -123,6 +137,8 @@ limitations under the License.
           .then((videoSettings) => {
             this.videoConf.url = videoSettings.videoUrl;
             this.videoConf.videoType = videoSettings.videoType;
+            this.videoConf.captions = videoSettings.captions;
+            this.videoConf.transcript = videoSettings.transcript;
           }).finally(() => {
             this.loading = false;
           });

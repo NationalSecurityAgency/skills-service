@@ -43,6 +43,7 @@ limitations under the License.
               type: this.video.videoType,
             },
           ],
+          captionsUrl: this.video.captionsUrl,
         },
       };
     },

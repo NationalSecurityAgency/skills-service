@@ -507,11 +507,11 @@ class UserSkillsController {
         return attachmentService.saveAttachment(file, projectId, quizId, skillId);
     }
 
-    @GetMapping(value = "/videos/{videoId}/captions", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     @Profile
-    public String getVideoCaptions(@PathVariable("videoId") String videoId) {
-        return videoCaptionsService.getVideoCaptions(videoId);
+    public String getVideoCaptions(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        return videoCaptionsService.getVideoCaptions(projectId, skillId);
     }
 
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
