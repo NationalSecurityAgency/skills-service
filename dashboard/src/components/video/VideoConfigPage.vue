@@ -55,8 +55,32 @@ limitations under the License.
       <b-button variant="outline-success" class="ml-2" @click="saveSettings">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
       <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success"><i class="fas fa-check" /> Saved</span>
       <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0">
-        <skills-video-player v-if="!refreshingPreview"
-          :video="computedVideoConf" @player-destroyed="turnOffRefresh"/>
+        <video-player v-if="!refreshingPreview"
+                      :options="computedVideoConf"
+                      @player-destroyed="turnOffRefresh"
+                      @watched-progress="updatedWatchProgress"
+        />
+
+        <div v-if="watchedProgress" class="p-3">
+          <div class="row">
+            <div class="col-2">Total Duration:</div>
+            <div class="col">{{ watchedProgress.videoDuration }} Seconds</div>
+          </div>
+          <div class="row">
+            <div class="col-2">Time Watched:</div>
+            <div class="col">{{ watchedProgress.totalWatchTime }} Seconds</div>
+          </div>
+          <div class="row">
+            <div class="col-2">% Watched:</div>
+            <div class="col">{{ watchedProgress.percentWatched }}%</div>
+          </div>
+          <div class="row">
+            <div class="col-2">Watched Segments:</div>
+            <div class="col">
+              <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"> {{ segment.start }} Seconds -> {{ segment.stop }} Seconds</div>
+            </div>
+          </div>
+        </div>
       </b-card>
     </b-card>
     </b-overlay>
@@ -65,12 +89,12 @@ limitations under the License.
 
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import SkillsVideoPlayer from '@/components/video/SkillsVideoPlayer';
-  import VideoService from './VideoService';
+  import VideoService from '@/components/video/VideoService';
+  import VideoPlayer from '@/components/video/VideoPlayer';
 
   export default {
     name: 'VideoConfigPage',
-    components: { SkillsVideoPlayer, SubPageHeader },
+    components: { VideoPlayer, SubPageHeader },
     data() {
       return {
         videoConf: {
@@ -79,6 +103,7 @@ limitations under the License.
           captions: '',
           transcript: '',
         },
+        watchedProgress: null,
         preview: false,
         refreshingPreview: false,
         loading: true,
@@ -142,6 +167,9 @@ limitations under the License.
           }).finally(() => {
             this.loading = false;
           });
+      },
+      updatedWatchProgress(progress) {
+        this.watchedProgress = progress;
       },
     },
   };
