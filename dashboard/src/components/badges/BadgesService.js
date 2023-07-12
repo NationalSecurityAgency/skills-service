@@ -18,10 +18,10 @@ import axios from 'axios';
 const enrichBadgeObjWithRequiredAtts = (badge) => {
   const copy = { ...badge };
   if (!badge.timeLimitEnabled) {
-    copy.pointIncrementInterval = 0;
+    copy.awardAttrs.numMinutes = 0;
   } else {
     // convert to minutes
-    copy.pointIncrementInterval = ((parseInt(badge.expirationHrs, 10) * 60) + parseInt(badge.expirationMins, 10));
+    copy.awardAttrs.numMinutes = ((parseInt(badge.expirationHrs, 10) * 60) + parseInt(badge.expirationMins, 10));
   }
 
   return copy;
@@ -30,14 +30,14 @@ export default {
   enhanceWithTimeWindow(badge) {
     const copy = { ...badge };
 
-    copy.timeLimitEnabled = badge.expirationInterval > 0;
+    copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0;
     if (!copy.timeLimitEnabled) {
       // set to default if window is disabled
       copy.expirationHrs = 8;
       copy.expirationMins = 0;
     } else {
-      copy.expirationHrs = Math.floor(badge.expirationInterval / 60);
-      copy.expirationMins = badge.expirationInterval % 60;
+      copy.expirationHrs = Math.floor(badge.awardAttrs.numMinutes / 60);
+      copy.expirationMins = badge.awardAttrs.numMinutes % 60;
     }
 
     return copy;

@@ -17,6 +17,7 @@ package skills.controller.result.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import groovy.transform.Canonical
+import skills.services.attributes.BonusAwardAttrs
 
 @Canonical
 class BadgeResult {
@@ -48,5 +49,5 @@ class BadgeResult {
 
     String enabled
 
-    int expirationInterval
+    BonusAwardAttrs awardAttrs
 }

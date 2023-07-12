@@ -42,8 +42,6 @@ class SkillDefParent {
     int numMaxOccurrencesIncrementInterval
     int totalPoints
 
-//    int expirationInterval
-
     int version
 
     String iconClass

@@ -21,10 +21,13 @@ limitations under the License.
                     <i :class="iconCss" style="font-size: 4em; min-width: 3rem;, max-width: 4rem;"/>
                     <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
-                    <i v-if="badge.achievedWithinExpiration" class="fas fa-car-side position-absolute skills-color-orange" style="bottom: 5px; right: 5px;"></i>
 
-                    <span v-if="badge.achievementPosition <= 3" class="position-absolute user-trophy">
-                      <i v-for="index in numberOfStars" :key="index" :class="'fa fa-star ' + classNames[badge.achievementPosition - 1] + ' star-' + index"></i>
+                    <span v-if="badge.achievementPosition > 0 && badge.achievementPosition <= 3" class="position-absolute user-trophy">
+                      <span :class="'fa-stack fa-2x ' + classNames[badge.achievementPosition - 1]" style="vertical-align: top; font-size:32px;">
+                        <i class="fas fa-certificate"></i>
+                        <i class="fas fa-ribbon fa-stack-1x" style="padding-top: 5px;"></i>
+                        <span style="font-size:.4em; color:#000000;" class="fa-stack-1x">{{positionNameShort[badge.achievementPosition - 1]}}</span>
+                      </span>
                     </span>
                     <div v-if="badge.gem" class="text-muted">
                         <small>Expires {{ badge.endDate | relativeTime() }}</small>
@@ -34,6 +37,11 @@ limitations under the License.
                     </div>
                     <div v-else-if="displayProjectName" class="text-muted text-center text-truncate" data-cy="badgeProjectName">
                         <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
+                    </div>
+
+                    <div v-if="badge.achievedWithinExpiration" class="bonus-award">
+                      <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
+                      <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
                     </div>
                 </div>
             </div>
@@ -71,6 +79,10 @@ limitations under the License.
                 <span v-if="!badge.hasExpired && badge.expirationDate">
                    Achieve it {{ badge.expirationDate | relativeTime() }} for a bonus!
                 </span>
+              </div>
+
+              <div v-if="badge.badgeAchieved && badge.achievedWithinExpiration">
+                <i :class="badge.awardAttrs.iconClass" style="padding-right: 7px;"></i> You've earned the {{ badge.awardAttrs.name }} bonus!
               </div>
             </div>
 
@@ -112,6 +124,7 @@ limitations under the License.
     data() {
       return {
         positionNames: ['first', 'second', 'third'],
+        positionNameShort: ['1st', '2nd', '3rd'],
         classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
       };
     },
@@ -155,18 +168,18 @@ limitations under the License.
     100% { opacity: 1; transform: scale(1); }
   }
   .user-trophy {
-    bottom: 2px;
-    left: 0;
-    right: 0;
-    text-align: center;
-  }
-  .star-1 {
-    animation: pop-in 0.5s;
-  }
-  .star-2 {
+    top: -8px;
+    right: -20px;
     animation: pop-in 1s;
   }
-  .star-3 {
-    animation: pop-in 1.5s;
+  .bonus-award {
+    bottom: 5px;
+    left: 0px;
+    right: 0px;
+    font-size: 32px;
+    animation: pop-in 1s;
+  }
+  .award-icon {
+    height: 36px;
   }
 </style>

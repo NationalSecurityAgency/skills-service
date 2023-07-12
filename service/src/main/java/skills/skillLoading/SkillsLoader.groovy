@@ -43,6 +43,7 @@ import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.SkillAttributeService
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -152,6 +153,9 @@ class SkillsLoader {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -940,8 +944,11 @@ class SkillsLoader {
             expirationDate = new Date(firstPerformedSkill?.getTime())
         }
         boolean achievedWithinExpiration = false
-        if(expirationDate) {
-            expirationDate.minutes += badgeDefinition.pointIncrementInterval
+
+        def attributes = skillAttributeService.getBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
+
+        if(expirationDate && attributes?.numMinutes > 0) {
+            expirationDate.minutes += attributes.numMinutes
             if(achievements) {
                 achievedWithinExpiration = RelativeTimeUtil.isInThePast(achievements.first().achievedOn, expirationDate)
             }
@@ -964,13 +971,12 @@ class SkillsLoader {
                 projectName: InputSanitizer.unsanitizeName(projectName),
                 dependencyInfo: badgeDependencySummary,
                 numberOfUsersAchieved: numberOfUsersAchieved,
-                expirationInterval: badgeDefinition.pointIncrementInterval,
                 hasExpired: expirationDate ? RelativeTimeUtil.isInThePast(expirationDate) : null,
                 firstPerformedSkill: firstPerformedSkill,
                 expirationDate: expirationDate,
                 achievementPosition: achievementPosition,
-                achievedWithinExpiration: achievedWithinExpiration
-
+                achievedWithinExpiration: achievedWithinExpiration,
+                awardAttrs: attributes
         )
     }
 

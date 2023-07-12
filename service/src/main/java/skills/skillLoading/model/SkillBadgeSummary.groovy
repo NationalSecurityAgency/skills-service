@@ -15,6 +15,8 @@
  */
 package skills.skillLoading.model
 
+import skills.services.attributes.BonusAwardAttrs
+
 class SkillBadgeSummary {
 
     String badge
@@ -41,8 +43,8 @@ class SkillBadgeSummary {
 
     SkillDependencySummary dependencyInfo
 
+    BonusAwardAttrs awardAttrs
     int numberOfUsersAchieved
-    int expirationInterval
     Date firstPerformedSkill
     Date expirationDate
     boolean hasExpired

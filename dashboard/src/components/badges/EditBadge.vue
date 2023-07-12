@@ -63,7 +63,8 @@ limitations under the License.
 
           <b-card class="mt-1">
             <div class="form-group">
-              <label><b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Bonus Award
+              <label>
+                <b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Bonus Award
                 <inline-help
                   target-id="timeLimitHelp"
                   :next-focus-el="previousFocus"
@@ -74,13 +75,13 @@ limitations under the License.
               <div class="row" style="padding-bottom: 10px;">
                 <div class="text-left col">
                   <div class="media">
-                    <icon-picker :startIcon="badgeInternal.awardIconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>
+                    <icon-picker :startIcon="badgeInternal.awardAttrs.iconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>
                     <div class="media-body">
                       <div class="form-group">
-                        <label for="badgeName">Award Name</label>
+                        <label for="awardName">Award Name</label>
                         <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator"
                                             v-slot="{errors}" name="Award Name">
-                          <input v-focus class="form-control" id="awardName" type="text" v-model="badgeInternal.awardName"
+                          <input v-focus class="form-control" id="awardName" type="text" v-model="badgeInternal.awardAttrs.name"
                                  aria-required="true" data-cy="awardName"
                                  v-on:keydown.enter="handleSubmit(updateBadge)"
                                  :aria-invalid="errors && errors.length > 0"
@@ -105,13 +106,13 @@ limitations under the License.
                              ref="timeLimitHours" data-cy="timeLimitHours"
                              v-on:keydown.enter="handleSubmit(updateBadge)"
                              id="timeLimitHours" :aria-label="`time window hours ${maxTimeLimitMessage}`"
-                             aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
-                             aria-errormessage="skillHoursError"/>
+                             aria-describedby="badgeHoursError" :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="badgeHoursError"/>
                       <div class="input-group-append">
                         <span class="input-group-text" id="hours-append">Hours</span>
                       </div>
                     </div>
-                    <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
+                    <small role="alert" class="form-text text-danger" data-cy="badgeHoursError" id="badgeHoursError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
                 <div class="col-12 col-sm">
@@ -122,14 +123,14 @@ limitations under the License.
                              v-on:keydown.enter="handleSubmit(updateBadge)"
                              :aria-required="badgeInternal.timeLimitEnabled"
                              aria-label="time window minutes"
-                             aria-describedby="skillMinutesError"
-                             aria-errormessage="skillMinutesError"
+                             aria-describedby="badgeMinutesError"
+                             aria-errormessage="badgeMinutesError"
                              :aria-invalid="errors && errors.length > 0"/>
                       <div class="input-group-append">
                         <span class="input-group-text" id="minutes-append">Minutes</span>
                       </div>
                     </div>
-                    <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
+                    <small role="alert" class="form-text text-danger" data-cy="badgeMinutesError" id="badgeMinutesError">{{ errors[0] }}</small>
                   </ValidationProvider>
                 </div>
               </div>
@@ -249,9 +250,19 @@ limitations under the License.
       },
     },
     data() {
-      const expirationHrs = this.badge.expirationInterval ? Math.floor((this.badge.expirationInterval / 60)) : 8;
-      const expirationMins = this.badge.expirationInterval ? this.badge.expirationInterval % 60 : 0;
-      const timeLimitEnabled = this.badge.expirationInterval > 0;
+      let awardAttrs;
+      if (this.badge.awardAttrs && this.badge.awardAttrs.name !== null) {
+        awardAttrs = this.badge.awardAttrs;
+      } else {
+        awardAttrs = {
+          name: 'Speedy Finish',
+          iconClass: 'fas fa-car-side',
+          numMinutes: 0,
+        };
+      }
+      const expirationHrs = awardAttrs.numMinutes ? Math.floor((awardAttrs.numMinutes / 60)) : 8;
+      const expirationMins = awardAttrs.numMinutes ? awardAttrs.numMinutes % 60 : 0;
+      const timeLimitEnabled = awardAttrs.numMinutes > 0;
       const badgeInternal = {
         originalBadgeId: this.badge.badgeId,
         isEdit: this.isEdit,
@@ -262,10 +273,9 @@ limitations under the License.
         expirationHrs,
         expirationMins,
         timeLimitEnabled,
-        awardIconClass: 'fas fa-car-side',
-        awardName: 'Speedy Finish',
         ...this.badge,
       };
+      badgeInternal.awardAttrs = awardAttrs;
       // convert string to Date objects
       badgeInternal.startDate = this.toDate(this.badge.startDate);
       badgeInternal.endDate = this.toDate(this.badge.endDate);
@@ -284,8 +294,11 @@ limitations under the License.
           expirationHrs,
           expirationMins,
           timeLimitEnabled,
-          awardIconClass: 'fas fa-car-side',
-          awardName: 'Speedy Finish',
+          awardAttrs: {
+            name: 'Speedy Finish',
+            iconClass: 'fas fa-car-side',
+            numMinutes: 60 * 8,
+          },
         },
         limitTimeframe: limitedTimeframe,
         show: this.value,
@@ -428,7 +441,7 @@ limitations under the License.
       },
       onSelectedIcon(selectedIcon) {
         if (this.isAwardIcon) {
-          this.badgeInternal.awardIconClass = `${selectedIcon.css}`;
+          this.badgeInternal.awardAttrs.iconClass = `${selectedIcon.css}`;
         } else {
           this.badgeInternal.iconClass = `${selectedIcon.css}`;
         }
