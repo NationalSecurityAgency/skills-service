@@ -945,7 +945,7 @@ class SkillsLoader {
         }
         boolean achievedWithinExpiration = false
 
-        def attributes = skillAttributeService.getBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
+        def attributes = skillAttributeService.getBadgeBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
 
         if(expirationDate && attributes?.numMinutes > 0) {
             expirationDate.minutes += attributes.numMinutes

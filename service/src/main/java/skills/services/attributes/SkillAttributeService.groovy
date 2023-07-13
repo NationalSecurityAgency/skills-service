@@ -44,12 +44,20 @@ class SkillAttributeService {
         return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
     }
 
-    void saveBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
+    void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs, SkillDef.ContainerType.Badge)
     }
 
-    BonusAwardAttrs getBonusAwardAttrs(String projectId, String skillId) {
+    BonusAwardAttrs getBadgeBonusAwardAttrs(String projectId, String skillId) {
         return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class, SkillDef.ContainerType.Badge)
+    }
+
+    void saveBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs)
+    }
+
+    BonusAwardAttrs getBonusAwardAttrs(String projectId, String skillId) {
+        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class)
     }
 
     private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T videoAttrs, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {

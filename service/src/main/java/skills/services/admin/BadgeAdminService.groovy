@@ -174,7 +174,7 @@ class BadgeAdminService {
         }
 
         if(savedSkill && badgeRequest.awardAttrs) {
-            skillAttributeService.saveBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
+            skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
         }
 
         if (identifyEligibleUsers) {
@@ -327,7 +327,7 @@ class BadgeAdminService {
 
     @Profile
     private BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
-        def awardAttributes = skillAttributeService.getBonusAwardAttrs(skillDef.projectId, skillDef.skillId)
+        def awardAttributes = skillAttributeService.getBadgeBonusAwardAttrs(skillDef.projectId, skillDef.skillId)
         BadgeResult res = new BadgeResult(
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
