@@ -1956,7 +1956,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="btn_Badges"]')
             .click();
 
-        cy.get('[data-cy="iconPicker"]')
+        cy.get('[data-cy="iconPicker"]').first()
             .click();
         cy.get('a.nav-link')
             .contains('Custom')

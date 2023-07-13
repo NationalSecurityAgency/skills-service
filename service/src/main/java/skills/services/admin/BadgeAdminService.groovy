@@ -173,7 +173,7 @@ class BadgeAdminService {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
 
-        if(savedSkill && badgeRequest.awardAttrs) {
+        if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {
             skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
         }
 
