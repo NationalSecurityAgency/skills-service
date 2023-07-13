@@ -61,26 +61,35 @@ limitations under the License.
                       @watched-progress="updatedWatchProgress"
         />
 
-        <div v-if="watchedProgress" class="p-3">
+        <div v-if="watchedProgress" class="p-3 pt-4">
           <div class="row">
             <div class="col-2">Total Duration:</div>
             <div class="col">{{ watchedProgress.videoDuration }} Seconds</div>
           </div>
           <div class="row">
             <div class="col-2">Time Watched:</div>
-            <div class="col">{{ watchedProgress.totalWatchTime }} Seconds</div>
+            <div class="col">{{ watchedProgress.totalWatchTime.toFixed(2) }} Seconds</div>
           </div>
           <div class="row">
             <div class="col-2">% Watched:</div>
             <div class="col">{{ watchedProgress.percentWatched }}%</div>
           </div>
           <div class="row">
+            <div class="col-2">Current Position:</div>
+            <div class="col">{{ watchedProgress.currentPosition.toFixed(2) }} Seconds</div>
+          </div>
+          <div class="row">
             <div class="col-2">Watched Segments:</div>
             <div class="col">
-              <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"> {{ segment.start }} Seconds -> {{ segment.stop }} Seconds</div>
+              <div v-if="watchedProgress.currentStart && watchedProgress.lastKnownPosition"> {{ watchedProgress.currentStart.toFixed(2) }} Seconds -> {{ watchedProgress.lastKnownPosition.toFixed(2) }} Seconds</div>
+              <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"> {{ segment.start.toFixed(2) }} Seconds -> {{ segment.stop.toFixed(2) }} Seconds</div>
             </div>
           </div>
         </div>
+
+        <pre>
+          {{ JSON.stringify(watchedProgress, null, 2)}}
+        </pre>
       </b-card>
     </b-card>
     </b-overlay>
@@ -123,6 +132,12 @@ limitations under the License.
           videoType: this.videoConf.videoType,
           captionsUrl,
         };
+      },
+      currentSegmentStart() {
+        return this.watchedProgress.currentStart ? this.watchedProgress.currentStart.toFixed(2) : 'N/A';
+      },
+      currentSegmentLastKnownPosition() {
+        return this.watchedProgress.lastKnownPosition ? this.watchedProgress.lastKnownPosition.toFixed(2) : 'N/A';
       },
     },
     methods: {

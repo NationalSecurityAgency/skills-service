@@ -21,6 +21,7 @@ limitations under the License.
 
 <script>
   import videojs from 'video.js';
+  import WatchedSegmentsUtil from '@/components/video/WatchedSegmentsUtil';
 
   export default {
     name: 'VideoPlayer',
@@ -46,62 +47,28 @@ limitations under the License.
         watchProgress: {
           watchSegments: [],
           currentStart: null,
-          currentStop: null,
+          lastKnownPosition: null,
           totalWatchTime: 0,
           videoDuration: 0,
           percentWatched: 0,
+          currentPosition: 0,
         },
       };
     },
     mounted() {
       this.player = videojs(this.$refs.videoPlayer, this.videoOptions, () => {
         this.player.log('onPlayerReady', this);
-
         const thePlayer = this.player;
-        this.player.ready(() => {
-          // thePlayer.currentTime(10);
-
-          // get the current time, should be 120 seconds
-          // eslint-disable-next-line no-console
-          console.log(thePlayer.currentTime());
-          // eslint-disable-next-line no-console
-          console.log(`duration: ${thePlayer.duration()}`);
-          // eslint-disable-next-line no-console
-          console.log(thePlayer.remainingTime());
-        });
         thePlayer.on('loadedmetadata', () => {
           this.watchProgress.videoDuration = thePlayer.duration().toFixed(2);
           this.$emit('watched-progress', this.watchProgress);
         });
-        thePlayer.on('play', () => {
-          // eslint-disable-next-line no-console
-          console.log(`Video playback started: ${thePlayer.currentTime()}`);
-          this.watchProgress.currentStart = thePlayer.currentTime();
-        });
-        thePlayer.on('pause', () => {
-          // eslint-disable-next-line no-console
-          console.log(`Video playback paused: ${thePlayer.currentTime()}`);
-          this.watchProgress.currentStop = thePlayer.currentTime();
-          this.updateProgress();
-        });
-        thePlayer.on('seeking', () => {
-          // eslint-disable-next-line no-console
-          console.log(`Video seeking: ${thePlayer.currentTime()}`);
-        });
-        thePlayer.on('seeked', () => {
-          // eslint-disable-next-line no-console
-          console.log(`Video seek ended: ${thePlayer.currentTime()}`);
-        });
-        thePlayer.on('ended', () => {
-          // eslint-disable-next-line no-console
-          console.log('Video playback ended.');
-        });
         thePlayer.on('timeupdate', () => {
           // eslint-disable-next-line no-console
-          console.log(`Current position: ${thePlayer.currentTime()}`);
+          // console.log(`Current position: ${thePlayer.currentTime()}`);
+          // this.watchProgress.lastKnownPosition = thePlayer.currentTime();
+          this.updateProgress(thePlayer.currentTime());
         });
-
-        console.log(`captions url: ${this.options.captionsUrl}`);
         if (this.options.captionsUrl) {
           thePlayer.addRemoteTextTrack({
             src: this.options.captionsUrl,
@@ -114,8 +81,8 @@ limitations under the License.
     },
     beforeDestroy() {
       if (this.player) {
-        // eslint-disable-next-line no-console
-        console.log(`Destroying, current time is: ${this.player.currentTime()}`);
+        // // eslint-disable-next-line no-console
+        // console.log(`Destroying, current time is: ${this.player.currentTime()}`);
         this.player.dispose();
       }
     },
@@ -123,14 +90,8 @@ limitations under the License.
       this.$emit('player-destroyed', true);
     },
     methods: {
-      updateProgress() {
-        const newSegment = { start: this.watchProgress.currentStart.toFixed(2), stop: this.watchProgress.currentStop.toFixed(2) };
-        this.watchProgress.watchSegments.push(newSegment);
-        this.watchProgress.currentStart = null;
-        this.watchProgress.currentStop = null;
-        const sum = this.watchProgress.watchSegments.map((segment) => segment.stop - segment.start).reduce((acc, cur) => acc + cur, 0);
-        this.watchProgress.totalWatchTime = sum.toFixed(2);
-        this.watchProgress.percentWatched = Math.trunc((this.watchProgress.totalWatchTime / this.watchProgress.videoDuration) * 100);
+      updateProgress(currentTime) {
+        WatchedSegmentsUtil.updateProgress(this.watchProgress, currentTime);
         this.$emit('watched-progress', this.watchProgress);
       },
     },
