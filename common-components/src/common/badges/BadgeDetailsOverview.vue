@@ -64,7 +64,7 @@ limitations under the License.
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
 
-            <div class="alert alert-success" v-if="badge">
+            <div class="alert alert-success" v-if="badge && !badge.global">
               <div v-if="badge.numberOfUsersAchieved > 0">
                 <i class="fas fa-trophy" style="padding-right: 10px;"></i>
                 <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{usersAchieved}} achieved this badge so far - you could be next!</span>
