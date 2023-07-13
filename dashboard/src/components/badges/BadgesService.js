@@ -30,14 +30,20 @@ export default {
   enhanceWithTimeWindow(badge) {
     const copy = { ...badge };
 
-    copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0;
-    if (!copy.timeLimitEnabled) {
-      // set to default if window is disabled
+    if (badge && badge.awardAttrs && badge.awardAttrs.numMinutes) {
+      copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0;
+      if (!copy.timeLimitEnabled) {
+        // set to default if window is disabled
+        copy.expirationHrs = 8;
+        copy.expirationMins = 0;
+      } else {
+        copy.expirationHrs = Math.floor(badge.awardAttrs.numMinutes / 60);
+        copy.expirationMins = badge.awardAttrs.numMinutes % 60;
+      }
+    } else {
+      copy.timeLimitEnabled = false;
       copy.expirationHrs = 8;
       copy.expirationMins = 0;
-    } else {
-      copy.expirationHrs = Math.floor(badge.awardAttrs.numMinutes / 60);
-      copy.expirationMins = badge.awardAttrs.numMinutes % 60;
     }
 
     return copy;
