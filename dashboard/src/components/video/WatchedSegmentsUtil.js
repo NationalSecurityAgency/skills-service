@@ -23,9 +23,16 @@ export default {
   updateProgress(watchProgress, currentTime) {
     /* eslint-disable no-param-reassign */
     watchProgress.currentPosition = currentTime;
+    if (watchProgress.start !== null
+      && watchProgress.lastKnownPosition !== null
+      && watchProgress.start > currentTime
+      && currentTime < watchProgress.lastKnownPosition) {
+      // nothing to do
+      return;
+    }
     if (this.isTimeInSegments(watchProgress.watchSegments, currentTime)) {
       // if there is an existing segment then need to close it and join it with the next segment
-      if (watchProgress.currentStart) {
+      if (watchProgress.currentStart !== null && watchProgress.currentStart >= 0) {
         const newSegment = {
           start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
           stop: watchProgress.lastKnownPosition,
@@ -36,23 +43,35 @@ export default {
       }
     } else {
       // check to see if there is an existing segment to join
-      const existingSegmentIndex = watchProgress.watchSegments.findIndex((s) => Math.abs(currentTime - s.stop) < 2);
-      if (existingSegmentIndex > -1) {
-        const existingSegment = watchProgress.watchSegments[existingSegmentIndex];
-        const newSegment = (watchProgress.currentStart && watchProgress.lastKnownPosition) ? {
-          start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-          stop: watchProgress.lastKnownPosition,
-        } : null;
-        watchProgress.currentStart = existingSegment.start;
-        watchProgress.lastKnownPosition = currentTime;
+      const existingBeforeSegment = watchProgress.watchSegments.findIndex((s) => {
+        const diff = currentTime - s.stop;
+        return diff > 0 && diff < 2;
+      });
+      const existingAfterSegment = watchProgress.watchSegments.findIndex((s) => {
+        const diff = s.start - currentTime;
+        return diff > 0 && diff < 2;
+      });
 
-        watchProgress.watchSegments.splice(existingSegmentIndex, 1);
-        if (newSegment) {
-          watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
-        }
+      if (existingBeforeSegment > -1) {
+        const existingSegment = { ...watchProgress.watchSegments[existingBeforeSegment] };
+          const newSegment = watchProgress.currentStart && watchProgress.lastKnownPosition ? {
+            start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
+            stop: watchProgress.lastKnownPosition,
+          } : null;
+          watchProgress.currentStart = existingSegment.start > 1 ? existingSegment.start : 0;
+          watchProgress.lastKnownPosition = currentTime;
+          watchProgress.watchSegments.splice(existingBeforeSegment, 1);
+          if (newSegment) {
+            watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
+          }
+      } else if (existingAfterSegment > -1) {
+        const existingSegment = { ...watchProgress.watchSegments[existingAfterSegment] };
+        watchProgress.currentStart = Math.min(existingSegment.start, watchProgress.currentStart);
+        watchProgress.lastKnownPosition = Math.max(existingSegment.stop, watchProgress.lastKnownPosition);
+        watchProgress.watchSegments.splice(existingAfterSegment, 1);
       } else {
-        if (!watchProgress.currentStart) {
-          watchProgress.currentStart = currentTime;
+        if (watchProgress.currentStart === null || watchProgress.currentStart === undefined) {
+          watchProgress.currentStart = currentTime > 1 ? currentTime : 0;
         }
         if (watchProgress.lastKnownPosition && Math.abs(watchProgress.lastKnownPosition - currentTime) > 1.2) {
           const newSegment = {
@@ -67,6 +86,9 @@ export default {
       const sum = watchProgress.watchSegments.map((segment) => segment.stop - segment.start)
         .reduce((acc, cur) => acc + cur, 0);
       watchProgress.totalWatchTime = sum + (watchProgress.lastKnownPosition - watchProgress.currentStart);
+      if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
+        watchProgress.totalWatchTime = watchProgress.videoDuration;
+      }
       watchProgress.percentWatched = Math.trunc((watchProgress.totalWatchTime / watchProgress.videoDuration) * 100);
     }
     /* eslint-enable no-param-reassign */
@@ -79,7 +101,6 @@ export default {
     return foundIndex >= 0;
   },
   addToSegments(existingSegments, newSegement) {
-    // console.log(`adding new segment ${JSON.stringify(newSegement)} to ${JSON.stringify(existingSegments)} types[${typeof newSegement.start}]`);
     const copy = existingSegments.map((item) => ({ ...item }));
     const existingSegment = copy.find((item) => doesOverlap(item, newSegement) || doesCover(item, newSegement));
     if (existingSegment) {
@@ -92,7 +113,6 @@ export default {
         }
       }
     } else {
-      // console.log('pushing new setment');
       copy.push(newSegement);
     }
 
@@ -108,7 +128,6 @@ export default {
       }
     });
 
-    // console.log(`result: ${JSON.stringify(res)}`);
     return res;
   },
 };

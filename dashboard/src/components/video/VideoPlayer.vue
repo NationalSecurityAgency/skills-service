@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-<div>
-  <video ref="videoPlayer" class="video-js vjs-fluid"></video>
-</div>
+  <div>
+    <video ref="videoPlayer" class="video-js vjs-fluid"></video>
+  </div>
 </template>
 
 <script>
@@ -60,13 +60,10 @@ limitations under the License.
         this.player.log('onPlayerReady', this);
         const thePlayer = this.player;
         thePlayer.on('loadedmetadata', () => {
-          this.watchProgress.videoDuration = thePlayer.duration().toFixed(2);
+          this.watchProgress.videoDuration = thePlayer.duration();
           this.$emit('watched-progress', this.watchProgress);
         });
         thePlayer.on('timeupdate', () => {
-          // eslint-disable-next-line no-console
-          // console.log(`Current position: ${thePlayer.currentTime()}`);
-          // this.watchProgress.lastKnownPosition = thePlayer.currentTime();
           this.updateProgress(thePlayer.currentTime());
         });
         if (this.options.captionsUrl) {
@@ -81,8 +78,6 @@ limitations under the License.
     },
     beforeDestroy() {
       if (this.player) {
-        // // eslint-disable-next-line no-console
-        // console.log(`Destroying, current time is: ${this.player.currentTime()}`);
         this.player.dispose();
       }
     },

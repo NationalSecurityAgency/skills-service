@@ -240,12 +240,28 @@ describe('WatchedSegmentsUtil', () => {
       currentPosition: 2.447199,
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 6.16186);
+    WatchedSegmentsUtil.updateProgress(watchProgress, 7.16186);
+    WatchedSegmentsUtil.updateProgress(watchProgress, 8.16186);
     expect(watchProgress.currentStart).toEqual(0);
-    expect(watchProgress.lastKnownPosition).toEqual(6.16186);
+    expect(watchProgress.lastKnownPosition).toEqual(8.16186);
     expect(watchProgress.watchSegments).toEqual([{ start: 16.716899, stop: 19.852886 }]);
-    // expect(Math.round(watchProgress.totalWatchTime * 100) / 100).toEqual(26.01);
-    // expect(watchProgress.percentWatched).toEqual(26);
-    // expect(watchProgress.currentPosition).toEqual(8.01);
   });
+
+  it('updated progress - join the segment after me', () => {
+    const watchProgress = {
+      watchSegments: [{ start: 17.334524, stop: 18.845907 }, { start: 25.97116, stop: 28.562337 }],
+      currentStart: 0,
+      lastKnownPosition: 16.71553,
+      totalWatchTime: 20.81809,
+      videoDuration: 46.613333,
+      percentWatched: 44,
+      currentPosition: 16.71553,
+    };
+    WatchedSegmentsUtil.updateProgress(watchProgress, 16.983822);
+    expect(watchProgress.currentStart).toEqual(0);
+    expect(watchProgress.lastKnownPosition).toEqual(18.845907);
+    expect(watchProgress.watchSegments).toEqual([{ start: 25.97116, stop: 28.562337 }]);
+  });
+
 });
 

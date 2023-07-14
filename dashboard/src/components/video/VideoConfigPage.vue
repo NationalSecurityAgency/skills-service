@@ -63,33 +63,34 @@ limitations under the License.
 
         <div v-if="watchedProgress" class="p-3 pt-4">
           <div class="row">
-            <div class="col-2">Total Duration:</div>
-            <div class="col">{{ watchedProgress.videoDuration }} Seconds</div>
+            <div class="col-6 col-lg-3 col-xl-2">Total Duration:</div>
+            <div class="col"><span class="text-primary">{{ watchedProgress.videoDuration.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
           </div>
           <div class="row">
-            <div class="col-2">Time Watched:</div>
-            <div class="col">{{ watchedProgress.totalWatchTime.toFixed(2) }} Seconds</div>
+            <div class="col-6 col-lg-3 col-xl-2">Time Watched:</div>
+            <div class="col"><span class="text-primary">{{ watchedProgress.totalWatchTime.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
           </div>
           <div class="row">
-            <div class="col-2">% Watched:</div>
-            <div class="col">{{ watchedProgress.percentWatched }}%</div>
+            <div class="col-6 col-lg-3 col-xl-2">% Watched:</div>
+            <div class="col"><span class="text-primary">{{ watchedProgress.percentWatched }}%</span></div>
           </div>
           <div class="row">
-            <div class="col-2">Current Position:</div>
-            <div class="col">{{ watchedProgress.currentPosition.toFixed(2) }} Seconds</div>
+            <div class="col-6 col-lg-3 col-xl-2">Current Position:</div>
+            <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
           </div>
           <div class="row">
-            <div class="col-2">Watched Segments:</div>
+            <div class="col-6 col-lg-3 col-xl-2">Watched Segments:</div>
             <div class="col">
-              <div v-if="watchedProgress.currentStart && watchedProgress.lastKnownPosition"> {{ watchedProgress.currentStart.toFixed(2) }} Seconds -> {{ watchedProgress.lastKnownPosition.toFixed(2) }} Seconds</div>
-              <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"> {{ segment.start.toFixed(2) }} Seconds -> {{ segment.stop.toFixed(2) }} Seconds</div>
+              <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
+                <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
+                <span class="text-primary">{{ watchedProgress.lastKnownPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+              </div>
+              <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
+                <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+              </div>
             </div>
           </div>
         </div>
-
-        <pre>
-          {{ JSON.stringify(watchedProgress, null, 2)}}
-        </pre>
       </b-card>
     </b-card>
     </b-overlay>
