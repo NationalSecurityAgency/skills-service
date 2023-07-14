@@ -123,7 +123,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 0.19, stop: 5.67 }, { start: 12.56, stop: 23.98 }],
         currentStart: null,
-        lastKnownPosition: null,
+        lastKnownStopPosition: null,
         totalWatchTime: 23,
         videoDuration: 45,
         percentWatched: 12,
@@ -131,7 +131,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 8.92);
     expect(watchProgress.currentStart).toEqual(8.92);
-    expect(watchProgress.lastKnownPosition).toEqual(8.92);
+    expect(watchProgress.lastKnownStopPosition).toEqual(8.92);
     expect(watchProgress.watchSegments).toEqual([{ start: 0.19, stop: 5.67 }, { start: 12.56, stop: 23.98 }]);
   });
 
@@ -139,7 +139,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 0, stop: 5 }],
       currentStart: 10,
-      lastKnownPosition: 20,
+      lastKnownStopPosition: 20,
       totalWatchTime: 15,
       videoDuration: 100,
       percentWatched: 15,
@@ -147,7 +147,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 2);
     expect(watchProgress.currentStart).toBeNull();
-    expect(watchProgress.lastKnownPosition).toBeNull();
+    expect(watchProgress.lastKnownStopPosition).toBeNull();
     expect(watchProgress.watchSegments).toEqual([{ start: 0, stop: 5 }, { start: 10, stop: 20 }]);
     expect(watchProgress.totalWatchTime).toEqual(15);
     expect(watchProgress.percentWatched).toEqual(15);
@@ -157,7 +157,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 2, stop: 7 }],
       currentStart: 22,
-      lastKnownPosition: 23,
+      lastKnownStopPosition: 23,
       totalWatchTime: 6,
       videoDuration: 100,
       percentWatched: 6,
@@ -165,7 +165,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 8.01);
     expect(watchProgress.currentStart).toEqual(2);
-    expect(watchProgress.lastKnownPosition).toEqual(8.01);
+    expect(watchProgress.lastKnownStopPosition).toEqual(8.01);
     expect(watchProgress.watchSegments).toEqual([{ start: 22, stop: 23 }]);
     expect(watchProgress.totalWatchTime).toEqual(7.01);
     expect(watchProgress.percentWatched).toEqual(7);
@@ -176,7 +176,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 2, stop: 7 }],
       currentStart: null,
-      lastKnownPosition: null,
+      lastKnownStopPosition: null,
       totalWatchTime: 5,
       videoDuration: 100,
       percentWatched: 5,
@@ -184,7 +184,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 8.99);
     expect(watchProgress.currentStart).toEqual(2);
-    expect(watchProgress.lastKnownPosition).toEqual(8.99);
+    expect(watchProgress.lastKnownStopPosition).toEqual(8.99);
     expect(watchProgress.watchSegments).toEqual([]);
     expect(watchProgress.totalWatchTime).toEqual(6.99);
     expect(watchProgress.percentWatched).toEqual(6);
@@ -195,7 +195,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 2, stop: 7 }],
       currentStart: null,
-      lastKnownPosition: null,
+      lastKnownStopPosition: null,
       totalWatchTime: 5,
       videoDuration: 100,
       percentWatched: 5,
@@ -203,7 +203,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 9.01);
     expect(watchProgress.currentStart).toEqual(9.01);
-    expect(watchProgress.lastKnownPosition).toEqual(9.01);
+    expect(watchProgress.lastKnownStopPosition).toEqual(9.01);
     expect(watchProgress.watchSegments).toEqual([{ start: 2, stop: 7 }]);
     expect(watchProgress.totalWatchTime).toEqual(5);
     expect(watchProgress.percentWatched).toEqual(5);
@@ -214,7 +214,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 2, stop: 7 }, { start: 30, stop: 50 }],
       currentStart: null,
-      lastKnownPosition: null,
+      lastKnownStopPosition: null,
       totalWatchTime: 25,
       videoDuration: 100,
       percentWatched: 25,
@@ -222,7 +222,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 8.01);
     expect(watchProgress.currentStart).toEqual(2);
-    expect(watchProgress.lastKnownPosition).toEqual(8.01);
+    expect(watchProgress.lastKnownStopPosition).toEqual(8.01);
     expect(watchProgress.watchSegments).toEqual([{ start: 30, stop: 50 }]);
     expect(Math.round(watchProgress.totalWatchTime * 100) / 100).toEqual(26.01);
     expect(watchProgress.percentWatched).toEqual(26);
@@ -233,7 +233,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 0, stop: 5.692021 }, { start: 16.716899, stop: 19.852886 }],
       currentStart: null,
-      lastKnownPosition: null,
+      lastKnownStopPosition: null,
       totalWatchTime: 8.828008,
       videoDuration: 46.61,
       percentWatched: 18,
@@ -243,7 +243,7 @@ describe('WatchedSegmentsUtil', () => {
     WatchedSegmentsUtil.updateProgress(watchProgress, 7.16186);
     WatchedSegmentsUtil.updateProgress(watchProgress, 8.16186);
     expect(watchProgress.currentStart).toEqual(0);
-    expect(watchProgress.lastKnownPosition).toEqual(8.16186);
+    expect(watchProgress.lastKnownStopPosition).toEqual(8.16186);
     expect(watchProgress.watchSegments).toEqual([{ start: 16.716899, stop: 19.852886 }]);
   });
 
@@ -251,7 +251,7 @@ describe('WatchedSegmentsUtil', () => {
     const watchProgress = {
       watchSegments: [{ start: 17.334524, stop: 18.845907 }, { start: 25.97116, stop: 28.562337 }],
       currentStart: 0,
-      lastKnownPosition: 16.71553,
+      lastKnownStopPosition: 16.71553,
       totalWatchTime: 20.81809,
       videoDuration: 46.613333,
       percentWatched: 44,
@@ -259,7 +259,7 @@ describe('WatchedSegmentsUtil', () => {
     };
     WatchedSegmentsUtil.updateProgress(watchProgress, 16.983822);
     expect(watchProgress.currentStart).toEqual(0);
-    expect(watchProgress.lastKnownPosition).toEqual(18.845907);
+    expect(watchProgress.lastKnownStopPosition).toEqual(18.845907);
     expect(watchProgress.watchSegments).toEqual([{ start: 25.97116, stop: 28.562337 }]);
   });
 

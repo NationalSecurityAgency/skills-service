@@ -81,9 +81,9 @@ limitations under the License.
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Watched Segments:</div>
             <div class="col">
-              <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
+              <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
                 <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
-                <span class="text-primary">{{ watchedProgress.lastKnownPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+                <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
               </div>
               <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
                 <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
@@ -133,12 +133,6 @@ limitations under the License.
           videoType: this.videoConf.videoType,
           captionsUrl,
         };
-      },
-      currentSegmentStart() {
-        return this.watchedProgress.currentStart ? this.watchedProgress.currentStart.toFixed(2) : 'N/A';
-      },
-      currentSegmentLastKnownPosition() {
-        return this.watchedProgress.lastKnownPosition ? this.watchedProgress.lastKnownPosition.toFixed(2) : 'N/A';
       },
     },
     methods: {

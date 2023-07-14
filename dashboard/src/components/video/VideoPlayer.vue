@@ -47,7 +47,7 @@ limitations under the License.
         watchProgress: {
           watchSegments: [],
           currentStart: null,
-          lastKnownPosition: null,
+          lastKnownStopPosition: null,
           totalWatchTime: 0,
           videoDuration: 0,
           percentWatched: 0,

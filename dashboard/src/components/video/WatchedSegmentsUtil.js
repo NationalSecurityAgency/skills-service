@@ -24,9 +24,9 @@ export default {
     /* eslint-disable no-param-reassign */
     watchProgress.currentPosition = currentTime;
     if (watchProgress.start !== null
-      && watchProgress.lastKnownPosition !== null
+      && watchProgress.lastKnownStopPosition !== null
       && watchProgress.start > currentTime
-      && currentTime < watchProgress.lastKnownPosition) {
+      && currentTime < watchProgress.lastKnownStopPosition) {
       // nothing to do
       return;
     }
@@ -35,11 +35,11 @@ export default {
       if (watchProgress.currentStart !== null && watchProgress.currentStart >= 0) {
         const newSegment = {
           start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-          stop: watchProgress.lastKnownPosition,
+          stop: watchProgress.lastKnownStopPosition,
         };
         watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
         watchProgress.currentStart = null;
-        watchProgress.lastKnownPosition = null;
+        watchProgress.lastKnownStopPosition = null;
       }
     } else {
       // check to see if there is an existing segment to join
@@ -54,12 +54,12 @@ export default {
 
       if (existingBeforeSegment > -1) {
         const existingSegment = { ...watchProgress.watchSegments[existingBeforeSegment] };
-          const newSegment = watchProgress.currentStart && watchProgress.lastKnownPosition ? {
+          const newSegment = watchProgress.currentStart && watchProgress.lastKnownStopPosition ? {
             start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-            stop: watchProgress.lastKnownPosition,
+            stop: watchProgress.lastKnownStopPosition,
           } : null;
           watchProgress.currentStart = existingSegment.start > 1 ? existingSegment.start : 0;
-          watchProgress.lastKnownPosition = currentTime;
+          watchProgress.lastKnownStopPosition = currentTime;
           watchProgress.watchSegments.splice(existingBeforeSegment, 1);
           if (newSegment) {
             watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
@@ -67,25 +67,25 @@ export default {
       } else if (existingAfterSegment > -1) {
         const existingSegment = { ...watchProgress.watchSegments[existingAfterSegment] };
         watchProgress.currentStart = Math.min(existingSegment.start, watchProgress.currentStart);
-        watchProgress.lastKnownPosition = Math.max(existingSegment.stop, watchProgress.lastKnownPosition);
+        watchProgress.lastKnownStopPosition = Math.max(existingSegment.stop, watchProgress.lastKnownStopPosition);
         watchProgress.watchSegments.splice(existingAfterSegment, 1);
       } else {
         if (watchProgress.currentStart === null || watchProgress.currentStart === undefined) {
           watchProgress.currentStart = currentTime > 1 ? currentTime : 0;
         }
-        if (watchProgress.lastKnownPosition && Math.abs(watchProgress.lastKnownPosition - currentTime) > 1.2) {
+        if (watchProgress.lastKnownStopPosition && Math.abs(watchProgress.lastKnownStopPosition - currentTime) > 1.2) {
           const newSegment = {
             start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-            stop: watchProgress.lastKnownPosition,
+            stop: watchProgress.lastKnownStopPosition,
           };
           watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
           watchProgress.currentStart = currentTime;
         }
-        watchProgress.lastKnownPosition = currentTime;
+        watchProgress.lastKnownStopPosition = currentTime;
       }
       const sum = watchProgress.watchSegments.map((segment) => segment.stop - segment.start)
         .reduce((acc, cur) => acc + cur, 0);
-      watchProgress.totalWatchTime = sum + (watchProgress.lastKnownPosition - watchProgress.currentStart);
+      watchProgress.totalWatchTime = sum + (watchProgress.lastKnownStopPosition - watchProgress.currentStart);
       if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
         watchProgress.totalWatchTime = watchProgress.videoDuration;
       }
