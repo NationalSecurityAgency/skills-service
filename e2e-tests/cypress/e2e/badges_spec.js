@@ -2257,4 +2257,69 @@ describe('Badges Tests', () => {
             .should('exist');
 
     });
+
+    it('add bonus award to badge', () => {
+        cy.createBadge(1, 1);
+
+        cy.intercept('GET', '/admin/projects/proj1/badges/badge1')
+            .as('loadBadge1');
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@loadBadge1');
+
+        cy.get('[data-cy="btn_edit-badge"]').click();
+        cy.get('[data-cy="timeLimitCheckbox"').click({force: true});
+        cy.get('input[data-cy=awardName]')
+            .type('{selectall}Bonus Award Name');
+        cy.get('input[data-cy=timeLimitHours]')
+            .type('{selectall}150');
+        cy.get('input[data-cy=timeLimitMinutes]')
+            .type('{selectall}30');
+        cy.get('button[data-cy=saveBadgeButton]')
+            .click();
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@loadBadge1');
+
+        cy.get('[data-cy="btn_edit-badge"]').click();
+
+        cy.get('input[data-cy=awardName]').should('have.value', 'Bonus Award Name');
+        cy.get('input[data-cy=timeLimitHours]').should('have.value', '150');
+        cy.get('input[data-cy=timeLimitMinutes]').should('have.value', '30');
+    });
+
+    it('can not save badge with bad award data', () => {
+        cy.createBadge(1, 1);
+
+        cy.intercept('GET', '/admin/projects/proj1/badges/badge1')
+            .as('loadBadge1');
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@loadBadge1');
+
+        cy.get('[data-cy="btn_edit-badge"]').click();
+        cy.get('[data-cy="timeLimitCheckbox"').click({force: true});
+        cy.get('input[data-cy=timeLimitHours]')
+            .type('{selectall}800');
+        cy.get('input[data-cy=timeLimitMinutes]')
+            .type('{selectall}900');
+        cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');
+    });
+
+    it('can edit existing badge award', () => {
+        cy.createBadge(1, 1, {awardAttrs: {iconClass: 'test-icon', name: 'Test Badge Award', numMinutes: 120}});
+
+        cy.intercept('GET', '/admin/projects/proj1/badges/badge1')
+            .as('loadBadge1');
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@loadBadge1');
+
+        cy.get('[data-cy="btn_edit-badge"]').click();
+        cy.get('[data-cy="timeLimitCheckbox"').should('be.checked');
+
+        cy.get('input[data-cy=awardName]').should('have.value', 'Test Badge Award');
+        cy.get('input[data-cy=timeLimitHours]').should('have.value', '2');
+        cy.get('input[data-cy=timeLimitMinutes]').should('have.value', '0');
+    });
 });

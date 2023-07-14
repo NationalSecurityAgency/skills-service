@@ -2304,4 +2304,17 @@ describe('Global Badges Tests', () => {
             .contains('Live')
             .should('exist');
     });
+
+    it('global badges do not have awards', () => {
+        cy.createGlobalBadge(1);
+
+        cy.visit('/administrator/globalBadges');
+
+        cy.get('[data-cy="badgeCard-globalBadge1"]')
+            .contains('Global Badge 1');
+
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]')
+            .click();
+        cy.get('[data-cy="awardName"]').should('not.exist');
+    });
 });

@@ -876,6 +876,37 @@ describe('Client Display Tests', () => {
         cy.contains('I am a description');
         cy.matchSnapshotImageForElement('.project-description', 'Project-Description', snapshotOptions);
     });
+
+    it('badges details page shows achievement info for skills', () => {
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2'
+        });
+        cy.assignSkillToBadge(1, 2, 5);
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2',
+            enabled: true,
+        });
+        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.get('[data-cy=achievedBadges]')
+            .contains('Badge 2');
+        cy.get('[data-cy=availableBadges]')
+            .contains('Badge 1');
+
+        cy.get('[data-cy=badge_badge1]').contains('No one has achieved this badge yet - you could be the first!');
+        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a day ago.');
+
+        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('1st')
+        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
+        cy.get('[data-cy=badge_badge2]').contains("You've achieved this badge - and you were the first!")
+    });
 });
 
 
