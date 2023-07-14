@@ -15,7 +15,7 @@
  */
 package skills.storage.repos
 
-
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillAttributesDef
@@ -24,4 +24,21 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
 
     @Nullable
     SkillAttributesDef findBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
+
+    static interface VideoSummaryAttributes {
+        String getUrl()
+        String getType()
+        Boolean getHasCaptions()
+        Boolean getHasTranscript()
+    }
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'videoUrl' as url,
+           attributes ->> 'videoType' as type,
+           case when attributes -> 'captions' is not null then true else false end   as hasCaptions,
+           case when attributes -> 'transcript' is not null then true else false end as hasTranscript
+        from skill_attributes_definition
+        where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
+    VideoSummaryAttributes getVideoSummary(Integer skillRefId)
+
 }

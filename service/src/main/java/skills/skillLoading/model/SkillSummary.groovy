@@ -44,4 +44,6 @@ class SkillSummary extends SkillSummaryParent {
 
     List<SimpleBadgeRes> badges
     List<SkillTag> tags = []
+
+    VideoSummary videoSummary
 }

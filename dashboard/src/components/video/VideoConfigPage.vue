@@ -100,7 +100,7 @@ limitations under the License.
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import VideoService from '@/components/video/VideoService';
-  import VideoPlayer from '@/components/video/VideoPlayer';
+  import VideoPlayer from '@/common-components/video/VideoPlayer';
 
   export default {
     name: 'VideoConfigPage',

@@ -153,6 +153,16 @@ limitations under the License.
           <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
         </p>
 
+        <div class="px-2">
+          <video-player v-if="skill.videoSummary" :options="{
+                url: skill.videoSummary.videoUrl,
+                type: null,
+                captionsUrl: null,
+              }"
+                        @watched-progress="updateVideoProgress"
+          />
+        </div>
+
         <div>
           <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>
         </div>
@@ -199,6 +209,7 @@ limitations under the License.
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
+  import VideoPlayer from '@/common-components/video/VideoPlayer';
 
   export default {
     name: 'SkillProgress2',
@@ -212,6 +223,7 @@ limitations under the License.
       SkillSummaryCards,
       ProgressBar,
       MarkdownText,
+      VideoPlayer,
     },
     props: {
       skill: Object,
@@ -360,6 +372,10 @@ limitations under the License.
       },
       genLink(b) {
         return { name: b.skillType === 'GlobalBadge' ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
+      updateVideoProgress(watchProgress) {
+        // eslint-disable-next-line no-console
+        console.log(watchProgress);
       },
     },
   };

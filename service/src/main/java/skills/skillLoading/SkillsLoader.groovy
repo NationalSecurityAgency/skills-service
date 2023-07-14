@@ -154,6 +154,9 @@ class SkillsLoader {
     UserCommunityService userCommunityService
 
     @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
+
+    @Autowired
     SkillAttributeService skillAttributeService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
@@ -576,7 +579,23 @@ class SkillsLoader {
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
+                videoSummary: getVideoSummary(skillDef.id)
         )
+    }
+
+    @Profile
+    private VideoSummary getVideoSummary(Integer skillDefId) {
+        VideoSummary res = null
+        SkillAttributesDefRepo.VideoSummaryAttributes videoSummaryAttributes = skillAttributesDefRepo.getVideoSummary(skillDefId)
+        if (videoSummaryAttributes) {
+            res = new VideoSummary(
+                    videoUrl: videoSummaryAttributes.url,
+                    videoType: videoSummaryAttributes.type,
+                    hasCaptions: videoSummaryAttributes.hasCaptions,
+                    hasTranscript: videoSummaryAttributes.hasTranscript
+            )
+        }
+        return res
     }
 
     void documentLastViewedSkillId(String projectId, String skillId) {

@@ -21,7 +21,7 @@ limitations under the License.
 
 <script>
   import videojs from 'video.js';
-  import WatchedSegmentsUtil from '@/components/video/WatchedSegmentsUtil';
+  import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 
   export default {
     name: 'VideoPlayer',
