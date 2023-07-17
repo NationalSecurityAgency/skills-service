@@ -1710,6 +1710,39 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
+    it('description is validated against custom validators', () => {
+        cy.intercept('GET', `/supervisor/badges`)
+          .as('getGlobalBadges');
+
+        cy.visit('/administrator/globalBadges');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[data-cy="btn_Global Badges"]')
+          .click();
+
+        cy.get('[data-cy="badgeName"]')
+          .type('Great Name');
+
+        cy.get('[data-cy="badgeNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.enabled');
+
+        cy.get('input[data-cy=badgeName]')
+          .type('{selectall}(A) Updated Badge Name');
+        cy.get('[data-cy="badgeNameError"]')
+          .contains('Badge Name - names may not contain (A)');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.disabled');
+
+        cy.get('input[data-cy=badgeName]')
+          .type('{selectall}(B) A Updated Badge Name');
+        cy.get('[data-cy="badgeNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.enabled');
+    });
+
     it('edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',

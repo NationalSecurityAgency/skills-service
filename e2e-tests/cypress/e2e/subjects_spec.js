@@ -595,6 +595,35 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
     });
 
+    it('name is validated against custom validators', () => {
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.clickButton('Subject');
+
+        cy.get('[data-cy="subjectNameInput"]').type('Great Name');
+
+        cy.get('[data-cy="subjectNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveSubjectButton"]')
+          .should('be.enabled');
+
+        cy.get('input[data-cy=subjectNameInput]')
+          .type('{selectall}(A) Updated Subject Name');
+        cy.get('[data-cy="subjectNameError"]')
+          .contains('Subject Name - names may not contain (A)');
+        cy.get('[data-cy="saveSubjectButton"]')
+          .should('be.disabled');
+
+        cy.get('input[data-cy=subjectNameInput]')
+          .type('{selectall}(B) A Updated Subject Name');
+        cy.get('[data-cy="subjectNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveSubjectButton"]')
+          .should('be.enabled');
+    });
+
     it('edit in place', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
