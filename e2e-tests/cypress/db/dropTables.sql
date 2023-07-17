@@ -44,6 +44,8 @@ drop table IF EXISTS exported_skills CASCADE;
 
 drop table IF EXISTS skill_updated_queue CASCADE;
 
+drop table IF EXISTS skill_attributes_definition CASCADE;
+
 drop table IF EXISTS skill_definition CASCADE;
 
 drop table IF EXISTS custom_icons CASCADE;
