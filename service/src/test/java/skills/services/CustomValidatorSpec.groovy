@@ -47,6 +47,27 @@ class CustomValidatorSpec extends Specification {
         result.valid
     }
 
+    def "Test custom name validation value between parens"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '(?i)^(?!\\s*[(].*?(?:BD|BAD)[^()]*?[)]).*$'
+        validator.nameValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+
+        validator.validateName("(B)name").valid
+        validator.validateName("(A) name").valid
+        !validator.validateName("(BD)name").valid
+        !validator.validateName(" (BD)name").valid
+        !validator.validateName("(BAD)name").valid
+        !validator.validateName("  (BAD)name").valid
+        validator.validateName("(A) name (C)").valid
+        validator.validateName("(A) name BAD (C)").valid
+        !validator.validateName("(A) name (BAD) (C)").valid
+    }
+
     def "test custom paragraph validation"(){
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
@@ -102,14 +123,11 @@ Paragraph three
         result.valid
     }
 
-
     def "ignore blank values"() {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
-        validator.paragraphValidationMessage = 'fail'
 
         validator.nameValidationRegex = '^\\(A\\).*$'
-        validator.paragraphValidationMessage = 'fail'
 
         when:
         validator.init()
