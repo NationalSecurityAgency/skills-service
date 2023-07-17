@@ -161,7 +161,7 @@ class AccessSettingsController {
             throw new SkillException("Provided [${roleName}] is not a project role.", projectId, null, ErrorCode.BadParam)
         }
         String userId = userNameService.normalizeUserId(userKey)
-        String currentUser = userInfoService.getCurrentUser()
+        String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to myself. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
         }
