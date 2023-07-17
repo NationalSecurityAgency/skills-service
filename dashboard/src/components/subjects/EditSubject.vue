@@ -35,7 +35,7 @@ limitations under the License.
                   <div class="form-group">
                     <label for="subjName">Subject Name</label>
                     <ValidationProvider
-                      rules="required|minNameLength|maxSubjectNameLength|uniqueName"
+                      rules="required|minNameLength|maxSubjectNameLength|uniqueName|customNameValidator"
                       v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
@@ -45,7 +45,7 @@ limitations under the License.
                              aria-errormessage="subjectNameError"
                              aria-describedby="subjectNameError"
                              data-cy="subjectNameInput">
-                      <small role="alert" class="form-text text-danger" id="subjectNameError">{{errors[0]}}</small>
+                      <small role="alert" class="form-text text-danger" data-cy="subjectNameError" id="subjectNameError">{{errors[0]}}</small>
                     </ValidationProvider>
                   </div>
                 </div>
