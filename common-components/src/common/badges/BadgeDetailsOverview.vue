@@ -39,7 +39,7 @@ limitations under the License.
                         <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
                     </div>
 
-                    <div v-if="badge.achievedWithinExpiration" class="bonus-award">
+                    <div v-if="badge.achievedWithinExpiration" class="bonus-award mt-2 border-top">
                       <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
                       <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
                     </div>
@@ -64,25 +64,25 @@ limitations under the License.
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
 
-            <div class="alert alert-success" v-if="badge && !badge.global">
+            <div class="alert alert-success" v-if="badge && !badge.global" style="font-size: 1.2em;">
               <div v-if="badge.numberOfUsersAchieved > 0">
-                <i class="fas fa-trophy" style="padding-right: 10px;"></i>
-                <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{usersAchieved}} achieved this badge so far - you could be next!</span>
+                <i class="fas fa-trophy award-info-icon"></i>
+                <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{usersAchieved}} achieved this badge so far - <span class="time-style">you could be next!</span></span>
                 <span v-else-if="badge.badgeAchieved && badge.numberOfUsersAchieved > 1">{{badge.numberOfUsersAchieved - 1}} other {{otherUsersAchieved}} achieved this badge so far</span>
                 <span v-else>You've achieved this badge</span>
-                <span v-if="achievementOrder !== ''"> - and you were the {{achievementOrder}}!</span>
+                <span v-if="achievementOrder !== ''"> - <span class="time-style">and you were the {{achievementOrder}}!</span></span>
               </div>
-              <div v-else><i class="fas fa-car-side" style="padding-right: 10px;"></i> No one has achieved this badge yet - you could be the first!</div>
+              <div v-else><i class="fas fa-car-side award-info-icon"></i>No one has achieved this badge yet - <span class="time-style">you could be the first!</span></div>
 
               <div v-if="badge.firstPerformedSkill && !badge.badgeAchieved">
-                <i class="fas fa-clock" style="padding-right: 10px;"></i> You started working on this badge <span :title="badge.firstPerformedSkill">{{ badge.firstPerformedSkill | relativeTime() }}</span>.
+                <i class="fas fa-clock award-info-icon"></i>You started working on this badge <span :title="badge.firstPerformedSkill" class="time-style">{{ badge.firstPerformedSkill | relativeTime() }}</span>.
                 <span v-if="!badge.hasExpired && badge.expirationDate">
-                   Achieve it {{ badge.expirationDate | relativeTime() }} for a bonus!
+                   Achieve it <span class="time-style">{{ badge.expirationDate | relativeTime() }}</span> for the <i :class="badge.awardAttrs.iconClass"></i> <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
                 </span>
               </div>
 
               <div v-if="badge.badgeAchieved && badge.achievedWithinExpiration">
-                <i :class="badge.awardAttrs.iconClass" style="padding-right: 7px;"></i> You've earned the {{ badge.awardAttrs.name }} bonus!
+                <i :class="badge.awardAttrs.iconClass" class="award-info-icon"></i>You've earned the <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
               </div>
             </div>
 
@@ -181,5 +181,11 @@ limitations under the License.
   }
   .award-icon {
     height: 36px;
+  }
+  .time-style {
+    font-weight: bold;
+  }
+  .award-info-icon {
+    width: 24px;
   }
 </style>

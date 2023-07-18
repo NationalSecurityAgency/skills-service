@@ -42,7 +42,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Nullable
     @Query('''select ua.userId from UserAchievement ua where ua.projectId = ?1 and ua.skillId = ?2 order by ua.achievedOn asc''')
-    List<String> findAllAchievementsForProjectAndSkill(String projectId, String skillId)
+    List<String> findAllAchievementsForProjectAndSkill(String projectId, String skillId, Pageable pageable)
 
     @Nullable
     @Query('''select ua.achievedOn from UserAchievement ua where ua.userId= ?1 and ua.projectId=?2 and ua.skillId=?3''')

@@ -53,7 +53,7 @@ limitations under the License.
                               </div>
                               <div data-cy="dateBadgeAchieved" class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
 
-                              <div v-if="badge.achievedWithinExpiration" class="bonus-award">
+                              <div v-if="badge.achievedWithinExpiration" class="bonus-award mt-2 border-top">
                                 <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
                                 <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
                               </div>
