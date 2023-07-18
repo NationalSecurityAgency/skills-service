@@ -131,6 +131,21 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').clear()
         cy.get('[data-cy="quizNameError"]').contains('Quiz Name is required')
         cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        
+        // custom validators
+        cy.get('[data-cy="quizName"]')
+          .type('{selectall}(A) Updated Quiz/Survey Name');
+        cy.get('[data-cy="quizNameError"]')
+          .contains('Quiz Name - names may not contain (A)');
+        cy.get('[data-cy="saveQuizButton"]')
+          .should('be.disabled');
+
+        cy.get('[data-cy="quizName"]')
+          .type('{selectall}(B) A Updated Quiz/Survey Name');
+        cy.get('[data-cy="quizNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveQuizButton"]')
+          .should('be.enabled');
     });
 
     it('Quiz Modal Validation: Quiz Id', function () {

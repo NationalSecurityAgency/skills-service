@@ -769,6 +769,7 @@ Cypress.Commands.add("logout", () => {
 
 Cypress.Commands.add("clickSave", () => {
     cy.get("button:contains('Save')").click();
+    cy.closeToasts();
 });
 
 Cypress.Commands.add("clickButton", (label) => {
@@ -1079,10 +1080,13 @@ Cypress.Commands.add('wrapIframe', () => {
       .then(cy.wrap)
 });
 
-Cypress.Commands.add('closeToasts', () => {
+Cypress.Commands.add('closeToasts', (retry=true) => {
     cy.get('body').then((body) => {
         if (body.find('header.toast-header').length > 0) {
             cy.get('button.close').click({ multiple: true });
+        } else if (retry) {
+            cy.wait(500);
+            cy.closeToasts(false);
         }
     });
 });

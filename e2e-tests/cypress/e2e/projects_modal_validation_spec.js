@@ -162,6 +162,40 @@ describe('Projects Modal Validation Tests', () => {
             .should('be.disabled');
     });
 
+    it('name is validated against custom validators', () => {
+        cy.intercept('GET', '/app/projects')
+          .as('loadProjects');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProjects');
+        cy.clickButton('Project');
+
+        cy.get('[data-cy="projectName"]')
+          .type('Great Name');
+
+        cy.get('[data-cy="projectNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveProjectButton"]')
+          .should('be.enabled');
+
+        cy.get('[data-cy="projectName"]')
+          .type('{selectall}(A) Updated Project Name');
+        cy.get('[data-cy="projectNameError"]')
+          .contains('Project Name - names may not contain (A)');
+        cy.get('[data-cy="saveProjectButton"]')
+          .should('be.disabled');
+
+        cy.get('[data-cy="projectName"]')
+          .type('{selectall}(B) A Updated Project Name');
+        cy.get('[data-cy="projectNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveProjectButton"]')
+          .should('be.enabled')
+    });
+
     it('Project name must be > 3 chars < 50 chars', () => {
         const minLenMsg = 'Project Name cannot be less than 3 characters.';
         const maxLenMsg = 'Project Name cannot exceed 50 characters.';

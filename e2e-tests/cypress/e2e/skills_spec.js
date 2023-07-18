@@ -766,6 +766,30 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
   });
 
+  it('name is validated against custom validators', () => {
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.wait('@loadSubject');
+    cy.get('[data-cy="newSkillButton"]').click();
+
+    cy.get('[data-cy="skillName"]').type('Great Name');
+    cy.get('[data-cy="skillNameError"]')
+      .should('not.be.visible');
+    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+    cy.get('[data-cy="skillName"]')
+      .type('{selectall}(A) Updated Skill Name');
+    cy.get('[data-cy="skillNameError"]').contains('Skill Name - names may not contain (A)');
+    cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+
+    cy.get('[data-cy="skillName"]')
+      .type('{selectall}(B) A Updated Skill Name');
+    cy.get('[data-cy="skillNameError"]')
+      .should('not.be.visible');
+    cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+  });
+
   it('skill id must only contain alpha number characters or underscore', () => {
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1')
       .as('loadSubject');

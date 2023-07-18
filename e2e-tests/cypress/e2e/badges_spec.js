@@ -1784,8 +1784,36 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="saveBadgeButton"]')
             .should('be.enabled');
         cy.get('[data-cy="badgeDescriptionError"]')
-            .contains('Subject Description - paragraphs may not contain jabberwocky')
+            .contains('Badge Name - paragraphs may not contain jabberwocky')
             .should('not.exist');
+    });
+
+    it('name is validated against custom validators', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.wait('@loadBadges');
+        cy.clickButton('Badge');
+
+        cy.get('#badgeName')
+          .type('Great Name');
+
+        cy.get('[data-cy="badgeNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.enabled');
+
+        cy.get('input[data-cy=badgeName]')
+          .type('{selectall}(A) Updated Badge Name');
+        cy.get('[data-cy="badgeNameError"]')
+          .contains('Badge Name - names may not contain (A)');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.disabled');
+
+        cy.get('input[data-cy=badgeName]')
+          .type('{selectall}(B) A Updated Badge Name');
+        cy.get('[data-cy="badgeNameError"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="saveBadgeButton"]')
+          .should('be.enabled');
     });
 
     it('edit in place', () => {
