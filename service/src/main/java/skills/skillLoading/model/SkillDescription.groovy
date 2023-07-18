@@ -25,4 +25,6 @@ class SkillDescription {
     SkillDef.ContainerType type
 
     SelfReportingInfo selfReporting
+
+    VideoSummary videoSummary
 }

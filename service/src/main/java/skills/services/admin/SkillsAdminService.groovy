@@ -119,6 +119,9 @@ class SkillsAdminService {
     @Autowired
     AttachmentService attachmentService
 
+    @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
+
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
         boolean isImportedByOtherProjects = false
@@ -643,6 +646,9 @@ class SkillsAdminService {
         }
 
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
+
+        String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(res.id)
+        finalRes.hasVideoConfigured = StringUtils.isNotBlank(videoUrl)
         return finalRes
     }
 

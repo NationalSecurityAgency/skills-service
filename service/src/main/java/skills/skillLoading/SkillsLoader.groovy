@@ -20,6 +20,7 @@ import groovy.time.TimeCategory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -679,7 +680,7 @@ class SkillsLoader {
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType.toString(), version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId, relationshipType)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
@@ -712,12 +713,23 @@ class SkillsLoader {
     }
 
     private SkillDescription createSkillDescription(SkillDefWithExtraRepo.SkillDescDBRes it, SettingsResult helpUrlRootSetting, SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval) {
+        VideoSummary videoSummary = null
+        if (StringUtils.isNotBlank(it.videoUrl)) {
+            videoSummary = new VideoSummary(
+                    videoUrl: it.videoUrl,
+                    videoType: it.videoType,
+                    hasCaptions: it.videoHasCaptions,
+                    hasTranscript: it.videoHasTranscript
+            )
+        }
+
         SkillDescription skillDescription = new SkillDescription(
                 skillId: it.getSkillId(),
                 description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                 href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                 achievedOn: it.getAchievedOn(),
                 type: it.getType(),
+                videoSummary: videoSummary
         )
         skillDescription
     }

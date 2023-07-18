@@ -100,6 +100,7 @@ limitations under the License.
                   @points-earned="onPointsEarned"
                   @add-tag-filter="addTagFilter"
                   :child-skill-highlight-string="searchString"
+                  :video-collapsed-by-default="true"
               />
             </div>
           </div>
@@ -150,6 +151,7 @@ limitations under the License.
     if (foundSkill) {
       foundSkill.description = desc;
       foundSkill.achievedOn = desc.achievedOn;
+      foundSkill.videoSummary = desc.videoSummary;
     }
   };
 
