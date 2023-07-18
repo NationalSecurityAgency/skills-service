@@ -25,6 +25,8 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
     @Nullable
     SkillAttributesDef findBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
 
+    int deleteBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
+
     static interface VideoSummaryAttributes {
         String getUrl()
         String getType()

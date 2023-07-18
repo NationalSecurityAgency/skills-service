@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillDef
@@ -38,6 +39,15 @@ class SkillAttributeService {
 
     void saveVideoAttrs(String projectId, String skillId, SkillVideoAttrs videoAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
+    }
+
+    @Transactional
+    boolean deleteVideoAttrs(String projectId, String skillId) {
+        int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video)
+        if (numRemoved > 1) {
+            throw new IllegalStateException("There is more than 1 Video attributes for [${projectId}-${skillId}]")
+        }
+        return numRemoved > 0
     }
 
     SkillVideoAttrs getVideoAttrs(String projectId, String skillId) {
@@ -78,5 +88,10 @@ class SkillAttributeService {
         }
         T res = mapper.readValue(skillAttributesDef.attributes, clazz)
         return  res
+    }
+
+    private int deleteAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type) {
+        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, SkillDef.ContainerType.Skill)
+        return skillAttributesDefRepo.deleteBySkillRefIdAndType(skillDefId, type)
     }
 }

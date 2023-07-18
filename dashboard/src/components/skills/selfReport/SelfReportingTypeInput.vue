@@ -69,7 +69,7 @@ limitations under the License.
           <template>
             <div class="row m-0 no-gutters">
                 <b-form-radio class="d-inline-block" value="Video" :disabled="isVideoChoiceDisabled" data-cy="videoRadio">Video</b-form-radio>
-                <span v-if="isVideoChoiceDisabled" class="font-italic text-secondary ml-2">
+                <span v-if="isVideoChoiceDisabled" class="font-italic text-secondary ml-2" data-cy="videoSelectionMsg">
                   <span v-if="!isEdit">(Please create skill and configure video settings first)</span>
                   <span v-else>(Please configure video settings first)</span>
                 </span>

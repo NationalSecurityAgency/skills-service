@@ -21,6 +21,11 @@ export default {
     return axios.post(url, videoSettings)
       .then((response) => response.data);
   },
+  deleteVideoSettings(projectId, skillId) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/video`;
+    return axios.delete(url)
+      .then((response) => response.data);
+  },
   getVideoSettings(projectId, skillId) {
     const url = `/admin/projects/${projectId}/skills/${skillId}/video`;
     return axios.get(url)

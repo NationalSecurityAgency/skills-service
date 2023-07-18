@@ -57,7 +57,6 @@ limitations under the License.
     },
     mounted() {
       this.player = videojs(this.$refs.videoPlayer, this.videoOptions, () => {
-        this.player.log('onPlayerReady', this);
         const thePlayer = this.player;
         thePlayer.on('loadedmetadata', () => {
           this.watchProgress.videoDuration = thePlayer.duration();

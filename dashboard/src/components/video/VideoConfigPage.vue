@@ -18,43 +18,86 @@ limitations under the License.
     <sub-page-header title="Configure Video"/>
     <b-overlay :show="loading">
     <b-card>
+      <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
       <div class="row">
-        <div class="col">
-          <b-form-group label="Video URL:" label-for="videoUrlInput">
-            <b-form-input id="videoUrlInput" v-model="videoConf.url"/>
+        <div class="col-md">
+          <b-form-group label="* Video URL:" label-for="videoUrlInput">
+            <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
+              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl"/>
+              <small role="alert" class="form-text text-danger" id="videoUrlError">{{errors[0]}}</small>
+            </ValidationProvider>
           </b-form-group>
         </div>
-        <div class="col-3">
+        <div class="col-md-3">
           <b-form-group label="Video Type:" label-for="videoTypeInput">
-            <b-form-input id="videoTypeInput" v-model="videoConf.videoType"/>
+            <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Type">
+               <b-form-input id="videoTypeInput" v-model="videoConf.videoType" data-cy="videoType"/>
+               <small role="alert" class="form-text text-danger" id="videoTypeError">{{errors[0]}}</small>
+            </ValidationProvider>
           </b-form-group>
         </div>
       </div>
 
-      <b-form-group label="Player captions:" label-for="videoCaptionsInput">
-        <b-form-textarea
-          id="videoCaptionsInput"
-          v-model="videoConf.captions"
-          placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format"
-          rows="3"
-          max-rows="6"
-        ></b-form-textarea>
+      <b-form-group label="Captions:" label-for="videoCaptionsInput">
+        <div slot="label">
+          <div class="row">
+            <div class="col my-auto">Captions:</div>
+            <div v-if="!videoConf.captions" class="col-auto"><b-button variant="link" class="underline p-0" tag="a" @click="fillInCaptionsExample">Fill Example</b-button></div>
+          </div>
+        </div>
+        <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
+          <b-form-textarea
+            id="videoCaptionsInput"
+            v-model="videoConf.captions"
+            placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
+            rows="3"
+            max-rows="6"
+            data-cy="videoCaptions"
+          ></b-form-textarea>
+          <small role="alert" class="form-text text-danger" id="videoCaptionsError">{{errors[0]}}</small>
+        </ValidationProvider>
       </b-form-group>
 
       <b-form-group label="Transcript:" label-for="videoTranscriptInput">
+        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Transcript">
         <b-form-textarea
           id="videoTranscriptInput"
           v-model="videoConf.transcript"
-          placeholder="Please enter video's transcript here. Video transcript will be available for download."
+          placeholder="Please enter video's transcript here. Video transcript will be available for download (optional)"
           rows="3"
           max-rows="6"
+          data-cy="videoTranscript"
         ></b-form-textarea>
+          <small role="alert" id="videoTranscriptError" class="form-text text-danger" data-cy="videoTranscriptError">{{ errors[0] }}</small>
+        </ValidationProvider>
       </b-form-group>
 
-      <b-button variant="outline-info" @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
-      <b-button variant="outline-success" class="ml-2" @click="saveSettings">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
-      <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success"><i class="fas fa-check" /> Saved</span>
-      <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0">
+      <div v-if="overallErrMsg" class="alert alert-danger">
+        {{ overallErrMsg }}
+      </div>
+
+        <div class="row">
+          <div class="col-sm mt-2">
+            <b-button variant="outline-info"
+                      :disabled="!hasVideoUrl"
+                      data-cy="previewVideoSettingsBtn"
+                      @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
+            <b-button variant="outline-success"
+                      class="ml-2"
+                      :disabled="!hasVideoUrl || invalid"
+                      data-cy="saveVideoSettingsBtn"
+                      @click="handleSubmit(submitSaveSettingsForm)">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
+            <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
+          </div>
+          <div class="col-auto mt-2">
+            <b-button variant="outline-danger"
+                      :disabled="!formHasAnyData"
+                      data-cy="clearVideoSettingsBtn"
+                      @click="confirmClearSettings">Clear <i class="fas fa-ban" aria-hidden="true"/></b-button>
+          </div>
+        </div>
+      </ValidationObserver>
+      <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0" data-cy="videoPreviewCard">
         <video-player v-if="!refreshingPreview"
                       :options="computedVideoConf"
                       @player-destroyed="turnOffRefresh"
@@ -72,7 +115,7 @@ limitations under the License.
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">% Watched:</div>
-            <div class="col"><span class="text-primary">{{ watchedProgress.percentWatched }}%</span></div>
+            <div class="col"><span class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Current Position:</div>
@@ -98,13 +141,16 @@ limitations under the License.
 </template>
 
 <script>
+  import { extend } from 'vee-validate';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import VideoService from '@/components/video/VideoService';
   import VideoPlayer from '@/common-components/video/VideoPlayer';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
 
   export default {
     name: 'VideoConfigPage',
     components: { VideoPlayer, SubPageHeader },
+    mixins: [MsgBoxMixin],
     data() {
       return {
         videoConf: {
@@ -118,7 +164,11 @@ limitations under the License.
         refreshingPreview: false,
         loading: true,
         showSavedMsg: false,
+        overallErrMsg: null,
       };
+    },
+    created() {
+      this.assignCustomValidation();
     },
     mounted() {
       this.loadSettings();
@@ -134,6 +184,12 @@ limitations under the License.
           captionsUrl,
         };
       },
+      hasVideoUrl() {
+        return this.videoConf.url && this.videoConf.url.trim().length > 0;
+      },
+      formHasAnyData() {
+        return this.videoConf.url || this.videoConf.videoType || this.videoConf.captions || this.videoConf.transcript;
+      },
     },
     methods: {
       setupPreview() {
@@ -145,6 +201,16 @@ limitations under the License.
       },
       turnOffRefresh() {
         this.refreshingPreview = false;
+      },
+      submitSaveSettingsForm() {
+        this.$refs.observer.validate()
+          .then((res) => {
+            if (!res) {
+              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
+            } else {
+              this.saveSettings();
+            }
+          });
       },
       saveSettings() {
         this.preview = false;
@@ -166,6 +232,27 @@ limitations under the License.
             this.loading = false;
           });
       },
+      confirmClearSettings() {
+        this.msgConfirm('Video settings will be permanently cleared. Are you sure you want to proceed?', 'Please Confirm!', 'Yes, Do clear')
+          .then((res) => {
+            if (res) {
+              this.clearSettings();
+            }
+          });
+      },
+      clearSettings() {
+        this.loading = true;
+        this.videoConf.url = '';
+        this.videoConf.videoType = '';
+        this.videoConf.captions = '';
+        this.videoConf.transcript = '';
+        this.preview = false;
+        // this.$refs.observer.reset();
+        VideoService.deleteVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
+          .finally(() => {
+            this.loading = false;
+          });
+      },
       loadSettings() {
         this.loading = true;
         VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
@@ -181,10 +268,38 @@ limitations under the License.
       updatedWatchProgress(progress) {
         this.watchedProgress = progress;
       },
+      assignCustomValidation() {
+        const self = this;
+        extend('videoUrlMustBePresent', {
+          message: (field) => `${field} is not valid without Video URL field`,
+          validate() {
+            return self.videoConf.url && self.videoConf.url.trim().length > 0;
+          },
+        });
+      },
+      fillInCaptionsExample() {
+        if (!this.videoConf.captions) {
+          this.videoConf.captions = 'WEBVTT\n'
+            + '\n'
+            + '1\n'
+            + '00:00:00.500 --> 00:00:04.000\n'
+            + 'This is the very first caption!\n'
+            + '\n'
+            + '2\n'
+            + '00:00:04.100 --> 00:00:08.000\n'
+            + 'Enjoying this captions example?\n'
+            + '\n'
+            + '3\n'
+            + '00:00:08.100 --> 00:00:12.500\n'
+            + 'Last caption';
+        }
+      },
     },
   };
 </script>
 
 <style scoped>
-
+.underline {
+  text-decoration: underline;
+}
 </style>
