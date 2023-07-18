@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 // var moment = require('moment-timezone');
-import WatchedSegmentsUtil from '@/components/video/WatchedSegmentsUtil.js';
+import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil.js';
 
 describe('WatchedSegmentsUtil', () => {
   it('add first segment', () => {
