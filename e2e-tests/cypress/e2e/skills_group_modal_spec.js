@@ -124,7 +124,10 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
 
         // validate against skill
-        cy.get('[data-cy="groupName"]').type('Very Great Skill 1');
+        cy.get('[data-cy="groupName"]').type('Very Great Skill 1a');
+        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
+        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+        cy.get('[data-cy="groupName"]').type('{backspace}');
         cy.get('[data-cy=groupNameError]').contains('The value for the Group Name is already taken.').should('be.visible');
         cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
         cy.get('[data-cy="groupName"]').type('a');
@@ -133,7 +136,10 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="groupName"]').clear()
         // validate against group
-        cy.get('[data-cy="groupName"]').type('Awesome Group 1');
+        cy.get('[data-cy="groupName"]').type('Awesome Group 1a');
+        cy.get('[data-cy="groupNameError"]').should('not.be.visible');
+        cy.get('[data-cy="saveGroupButton"]').should('be.enabled');
+        cy.get('[data-cy="groupName"]').type('{backspace}');
         cy.get('[data-cy=groupNameError]').contains('The value for the Group Name is already taken.').should('be.visible');
         cy.get('[data-cy="saveGroupButton"]').should('be.disabled');
         cy.get('[data-cy="groupName"]').type('a');
