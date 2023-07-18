@@ -64,7 +64,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     @Query(value='''SELECT c.skill_id               as skillId,
                            convert_from(lo_get(CAST(c.description as oid)), 'UTF8') as description,
-                           c.help_url               as helpUrl,
+                           convert_from(lo_get(CAST(c.help_url as oid)), 'UTF8') as helpUrl,
                            ua.achieved_on           as achievedOn,
                            c.self_reporting_type     as selfReportingType,
                            c.type                  as type,
