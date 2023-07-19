@@ -324,6 +324,19 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
+    it('configure video for a skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.injectAxe();
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', {delay: 0})
+        cy.customLighthouse();
+        cy.customA11y();
+    });
+
     it('badges', () => {
         cy.visit('/administrator/');
         cy.injectAxe();
