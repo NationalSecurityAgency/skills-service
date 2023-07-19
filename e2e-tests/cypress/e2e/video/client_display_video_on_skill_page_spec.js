@@ -120,6 +120,7 @@ describe('Display Video on Skill Page Tests', () => {
     });
 
     it('achieve skill by watching the video', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
@@ -137,6 +138,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.wait(15000)
         cy.get('[data-cy="successAlert"]').contains('You just earned 100 points')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.wait('@reportSkill1')
     });
 
     it('skill with unmet prerequisites will not allow to play the video', () => {
@@ -176,5 +178,24 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="videoIsLockedMsg"]').should('not.exist')
     });
+
+    it('watch video when subject has insufficient points', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, pointIncrement: 33, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(15000)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 100)
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
+        cy.get('[data-cy="successAlert"]').should('not.exist')
+        cy.get('[data-cy="videoError"]').contains('Insufficient project points')
+    });
+
 
 });

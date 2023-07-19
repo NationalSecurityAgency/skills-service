@@ -15,13 +15,13 @@ limitations under the License.
 */
 <template>
   <div v-if="skill.videoSummary && skill.videoSummary.videoUrl" :data-cy="`skillVideo-${skill.skillId}`">
-    <div v-if="videoCollapsed && !skill.isLocked" class="alert alert-info">
+    <div v-if="videoCollapsed" class="alert alert-info" data-cy="videoCollapsed">
       <div class="row">
         <div class="col my-auto"><i class="fas fa-tv mr-1" style="font-size: 1.2rem;" aria-hidden="true"/> This {{ this.skillDisplayName }} has a video.</div>
-        <div class="col-auto text-right"><b-button variant="info" @click="videoCollapsed = false"><i class="fas fa-play"></i> Watch</b-button></div>
+        <div class="col-auto text-right"><b-button variant="info" @click="videoCollapsed = false" data-cy="expandVideoBtn"><i class="fas fa-play"></i> Watch</b-button></div>
       </div>
     </div>
-    <b-overlay v-if="skill.isLocked" :show="true" :no-fade="true">
+    <b-overlay v-if="!videoCollapsed && skill.isLocked" :show="true" :no-fade="true">
       <template #overlay>
         <div class="text-center text-primary" style="color: #143740 !important;" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
@@ -75,7 +75,7 @@ limitations under the License.
       </div>
     </div>
 
-    <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="selfReportError">
+    <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="videoError">
       <i class="fas fa-exclamation-triangle" /> {{ errNotification.msg }}
     </div>
   </div>
