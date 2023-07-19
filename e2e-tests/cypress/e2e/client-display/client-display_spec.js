@@ -900,12 +900,13 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=availableBadges]')
             .contains('Badge 1');
 
-        cy.get('[data-cy=badge_badge1]').contains('No one has achieved this badge yet - you could be the first!');
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a day ago.');
+        cy.get('[data-cy=badge_badge1]').contains('No one has achieved this badge yet - ');
+        cy.get('[data-cy=badge_badge1]').contains('you could be the first!');
 
         cy.get('[data-cy=earnedBadgeLink_badge2]').contains('1st')
         cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("You've achieved this badge - and you were the first!")
+        cy.get('[data-cy=badge_badge2]').contains("You've achieved this badge - ")
+        cy.get('[data-cy=badge_badge2]').contains('and you were the first!');
     });
 
     it('badge achieved in third place, one person achieved other badge', () => {
@@ -940,7 +941,6 @@ describe('Client Display Tests', () => {
             .contains('Badge 1');
 
         cy.get('[data-cy=badge_badge1]').contains('1 person has achieved this badge so far - you could be next!');
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a day ago.');
 
         cy.get('[data-cy=earnedBadgeLink_badge2]').contains('3rd')
         cy.get('[data-cy=earnedBadgeLink_badge2]').click();
@@ -985,59 +985,10 @@ describe('Client Display Tests', () => {
             .contains('Badge 1');
 
         cy.get('[data-cy=badge_badge1]').contains('2 people have achieved this badge so far - you could be next!');
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a day ago.');
 
         cy.get('[data-cy=earnedBadgeLink_badge2]').contains('2nd')
         cy.get('[data-cy=earnedBadgeLink_badge2]').click();
         cy.get('[data-cy=badge_badge2]').contains("2 other people have achieved this badge so far - and you were the second!")
-    });
-
-    it('badge started two weeks ago', () => {
-
-        const lastYear = new Date().getTime() - (1000 * 60 * 60 * 24 * 14)
-
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), lastYear);
-
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge 14 days ago.');
-
-    });
-
-    it('badge started a month ago', () => {
-
-        const lastYear = new Date().getTime() - (1000 * 60 * 60 * 24 * 32)
-
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), lastYear);
-
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a month ago.');
-
-    });
-
-    it('badge started a year ago', () => {
-
-        const lastYear = new Date().getTime() - (1000 * 60 * 60 * 24 * 365)
-
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), lastYear);
-
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=badge_badge1]').contains('You started working on this badge a year ago.');
-
     });
 
     it('badge with a bonus award in progress', () => {
@@ -1072,7 +1023,42 @@ describe('Client Display Tests', () => {
             .contains('Badge 1');
 
         cy.get('[data-cy=badgeDetailsLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("You started working on this badge a day ago. Achieve it in a day for a bonus!")
+        cy.get('[data-cy=badge_badge2]').contains("You started working on this badge a day ago. Achieve it in a day for the Test Badge Award bonus!")
+    });
+
+    it('badge with a bonus award in progress as of 2 weeks ago', () => {
+
+        const twoWeeksAgo = new Date().getTime() - (1000 * 60 * 60 * 24 * 14)
+        const fifteenDays = (60 * 24 * 15)
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2',
+            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': fifteenDays}
+        });
+        cy.assignSkillToBadge(1, 2, 5);
+        cy.assignSkillToBadge(1, 2, 1);
+
+        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
+            projectId: 'proj1',
+            badgeId: 'badge2',
+            name: 'Badge 2',
+            enabled: true,
+            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': fifteenDays}
+        });
+
+        cy.reportSkill(1, 5, Cypress.env('proxyUser'), twoWeeksAgo); // achieve badge 2
+
+        cy.cdVisit('/');
+        cy.cdClickBadges();
+        cy.get('[data-cy=availableBadges]')
+            .contains('Badge 2');
+        cy.get('[data-cy=availableBadges]')
+            .contains('Badge 1');
+
+        cy.get('[data-cy=badgeDetailsLink_badge2]').click();
+        cy.get('[data-cy=badge_badge2]').contains("You started working on this badge 14 days ago.")
     });
 
     it('badge with a bonus award completed', () => {
