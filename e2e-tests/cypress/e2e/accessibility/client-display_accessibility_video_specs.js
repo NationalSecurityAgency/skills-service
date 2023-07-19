@@ -40,6 +40,7 @@ describe('Client Display Accessibility Video Tests', () => {
         cy.customA11y();
     });
 
+
     it('skill with unmet prerequisites will not allow to play the video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
