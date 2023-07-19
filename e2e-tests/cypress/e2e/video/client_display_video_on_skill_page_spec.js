@@ -20,7 +20,7 @@ describe('Display Video on Skill Page Tests', () => {
     beforeEach(() => {
     });
 
-    it.only('display video on skill page', () => {
+    it('display video on skill page', () => {
         cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions')
             .as('getVideoCaptions');
         cy.createProject(1)
