@@ -16,7 +16,7 @@
 
 describe('Configure Video Tests', () => {
 
-
+    const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
     });
 
@@ -96,6 +96,109 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
     });
 
+    it('video url is required', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="videoType"]').type('video/webm', { delay: 0 })
+        cy.get('[data-cy="videoTypeErr"]').contains('Video Type is not valid without Video URL field')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoCaptions"]').type('captions', { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions is not valid without Video URL field')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').type('transcript', { delay: 0 })
+        cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without Video URL field')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoUrl"]').type(testVideo, { delay: 0 })
+
+        cy.get('[data-cy="videoTypeErr"]').should('not.be.visible')
+        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+
+        // validation should work after clear
+        cy.get('[data-cy="clearVideoSettingsBtn"]').click()
+        cy.get('footer .btn-danger').contains('Yes, Do clear').click()
+        cy.get('[data-cy="videoUrl"]').should('be.empty')
+        cy.get('[data-cy="videoType"]').should('be.empty')
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="videoType"]').type('video/webm', { delay: 0 })
+        cy.get('[data-cy="videoTypeErr"]').contains('Video Type is not valid without Video URL field')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+    });
+
+    it('clear attributes', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        const vidAttr = { videoUrl: 'http://someurl.mp4', videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', vidAttr.videoUrl)
+        cy.get('[data-cy="videoType"]').should('have.value', vidAttr.videoType)
+        cy.get('[data-cy="videoCaptions"]').should('have.value', vidAttr.captions)
+        cy.get('[data-cy="videoTranscript"]').should('have.value', vidAttr.transcript)
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="clearVideoSettingsBtn"]').click()
+        cy.get('footer .btn-danger').contains('Yes, Do clear').click()
+
+        cy.get('[data-cy="videoUrl"]').should('be.empty')
+        cy.get('[data-cy="videoType"]').should('be.empty')
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.disabled')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').should('be.empty')
+        cy.get('[data-cy="videoType"]').should('be.empty')
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.disabled')
+    });
+
+    it('fill caption example', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="fillCaptionsExamples"]').click()
+        cy.get('[data-cy="videoCaptions"]').should('contain.value', 'WEBVTT')
+        cy.get('[data-cy="fillCaptionsExamples"]').should('not.exist')
+    });
+
     it('preview video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -105,7 +208,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="videoUrl"]').type('/static/videos/create-quiz.mp4')
+        cy.get('[data-cy="videoUrl"]').type(testVideo)
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.enabled')
@@ -120,7 +223,15 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
     });
 
-
-
-
+    it('transcript custom description validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoTranscript"]').type('jabberwocky', { delay: 0 })
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+    });
 });

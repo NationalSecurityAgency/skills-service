@@ -23,8 +23,8 @@ limitations under the License.
         <div class="col-md">
           <b-form-group label="* Video URL:" label-for="videoUrlInput">
             <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
-              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl"/>
-              <small role="alert" class="form-text text-danger" id="videoUrlError">{{errors[0]}}</small>
+              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate"/>
+              <small role="alert" class="form-text text-danger" id="videoUrlError" data-cy="videoUrlErr">{{errors[0]}}</small>
             </ValidationProvider>
           </b-form-group>
         </div>
@@ -32,7 +32,7 @@ limitations under the License.
           <b-form-group label="Video Type:" label-for="videoTypeInput">
             <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Type">
                <b-form-input id="videoTypeInput" v-model="videoConf.videoType" data-cy="videoType"/>
-               <small role="alert" class="form-text text-danger" id="videoTypeError">{{errors[0]}}</small>
+               <small role="alert" class="form-text text-danger" id="videoTypeError" data-cy="videoTypeErr">{{errors[0]}}</small>
             </ValidationProvider>
           </b-form-group>
         </div>
@@ -42,7 +42,11 @@ limitations under the License.
         <div slot="label">
           <div class="row">
             <div class="col my-auto">Captions:</div>
-            <div v-if="!videoConf.captions" class="col-auto"><b-button variant="link" class="underline p-0" tag="a" @click="fillInCaptionsExample">Fill Example</b-button></div>
+            <div v-if="!videoConf.captions" class="col-auto">
+              <b-button variant="outline-info" size="sm"
+                        aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
+                        @click="fillInCaptionsExample" data-cy="fillCaptionsExamples"><i class="fas fa-plus"></i> Add Example</b-button>
+            </div>
           </div>
         </div>
         <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
@@ -54,7 +58,7 @@ limitations under the License.
             max-rows="6"
             data-cy="videoCaptions"
           ></b-form-textarea>
-          <small role="alert" class="form-text text-danger" id="videoCaptionsError">{{errors[0]}}</small>
+          <small role="alert" class="form-text text-danger" id="videoCaptionsError" data-cy="videoCaptionsError">{{errors[0]}}</small>
         </ValidationProvider>
       </b-form-group>
 
@@ -81,11 +85,13 @@ limitations under the License.
             <b-button variant="outline-info"
                       :disabled="!hasVideoUrl"
                       data-cy="previewVideoSettingsBtn"
+                      aria-label="Preview video"
                       @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
             <b-button variant="outline-success"
                       class="ml-2"
                       :disabled="!hasVideoUrl || invalid"
                       data-cy="saveVideoSettingsBtn"
+                      aria-label="Save video settings"
                       @click="handleSubmit(submitSaveSettingsForm)">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
             <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
           </div>
@@ -93,6 +99,7 @@ limitations under the License.
             <b-button variant="outline-danger"
                       :disabled="!formHasAnyData"
                       data-cy="clearVideoSettingsBtn"
+                      aria-label="Clear video settings"
                       @click="confirmClearSettings">Clear <i class="fas fa-ban" aria-hidden="true"/></b-button>
           </div>
         </div>
@@ -197,6 +204,7 @@ limitations under the License.
           this.refreshingPreview = true;
         } else {
           this.preview = true;
+          this.$nextTick(() => this.$announcer.polite('Opened video preview card below. Navigate down to it.'));
         }
       },
       turnOffRefresh() {
@@ -227,6 +235,7 @@ limitations under the License.
             setTimeout(() => {
               this.showSavedMsg = false;
             }, 3500);
+            this.$nextTick(() => this.$announcer.polite('Video settings were saved'));
           })
           .finally(() => {
             this.loading = false;
@@ -251,6 +260,8 @@ limitations under the License.
         VideoService.deleteVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .finally(() => {
             this.loading = false;
+            this.validate();
+            this.$nextTick(() => this.$announcer.polite('Video settings were cleared'));
           });
       },
       loadSettings() {
@@ -273,7 +284,9 @@ limitations under the License.
         extend('videoUrlMustBePresent', {
           message: (field) => `${field} is not valid without Video URL field`,
           validate() {
-            return self.videoConf.url && self.videoConf.url.trim().length > 0;
+            const toValidate = self.videoConf.url ? self.videoConf.url.trim() : null;
+            const res = toValidate !== null && toValidate.length > 0;
+            return res;
           },
         });
       },
@@ -292,7 +305,12 @@ limitations under the License.
             + '3\n'
             + '00:00:08.100 --> 00:00:12.500\n'
             + 'Last caption';
+          this.$nextTick(() => this.$announcer.polite('Example captions were added'));
+          this.$nextTick(() => this.validate());
         }
+      },
+      validate() {
+        this.$refs.observer.validate();
       },
     },
   };
