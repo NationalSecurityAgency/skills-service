@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.storage.repos.SkillAttributesDefRepo
 
 @Service
 @Slf4j
@@ -29,8 +30,16 @@ class VideoCaptionsService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
+
     String getVideoCaptions(String projectId, String skillId) {
-        SkillVideoAttrs skillVideoAttrs = skillAttributeService.getVideoAttrs(projectId, skillId)
-        return StringUtils.isNotBlank(skillVideoAttrs?.captions) ? skillVideoAttrs.captions : ""
+        String res = skillAttributesDefRepo.getVideoCaptionsByProjectAndSkillId(projectId, skillId)
+        return StringUtils.isNotBlank(res) ? res : ""
+    }
+
+    String getVideoTranscript(String projectId, String skillId) {
+        String res = skillAttributesDefRepo.getVideoTranscriptsByProjectAndSkillId(projectId, skillId)
+        return StringUtils.isNotBlank(res) ? res : ""
     }
 }

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="skill.videoSummary && skill.videoSummary.videoUrl">
+  <div v-if="skill.videoSummary && skill.videoSummary.videoUrl" :data-cy="`skillVideo-${skill.skillId}`">
     <div v-if="videoCollapsed && !skill.isLocked" class="alert alert-info">
       <div class="row">
         <div class="col my-auto"><i class="fas fa-tv mr-1" style="font-size: 1.2rem;" aria-hidden="true"/> This {{ this.skillDisplayName }} has a video.</div>
@@ -23,7 +23,7 @@ limitations under the License.
     </div>
     <b-overlay v-if="skill.isLocked" :show="true" :no-fade="true">
       <template #overlay>
-        <div class="text-center text-primary" style="color: #143740 !important;">
+        <div class="text-center text-primary" style="color: #143740 !important;" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
           <div class="font-weight-bold">Complete this {{ skillDisplayName.toLowerCase() }}'s prerequisites to unlock the video</div>
         </div>
@@ -38,25 +38,41 @@ limitations under the License.
         </div>
       </div>
     </b-overlay>
-    <video-player v-if="!videoCollapsed && !skill.isLocked" :options="{
-              url: skill.videoSummary.videoUrl,
-              type: null,
-              captionsUrl: null,
-            }" @watched-progress="updateVideoProgress" />
-    <div v-if="!isAlreadyAchieved && !justAchieved && !skill.isLocked && !videoCollapsed" class="alert alert-info mt-2">
-      <div class="row">
-        <div class="col">
-          <i class="fas fa-video font-size-2 mr-1" aria-hidden="true"></i>
-          Earn <b>{{ skill.totalPoints }}</b> for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
-        </div>
-        <div class="col-auto text-right">
-          <span class="font-italic">Watched: </span> <b>{{ percentWatched }}</b>%
+    <div v-if="!videoCollapsed && !skill.isLocked">
+      <video-player :options="videoConf" @watched-progress="updateVideoProgress" />
+      <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="alert alert-info mt-2" data-cy="watchVideoAlert">
+        <div class="row">
+          <div class="col-md my-auto" data-cy="watchVideoMsg">
+            <i class="fas fa-video font-size-2 mr-1" aria-hidden="true"></i>
+            Earn <b>{{ skill.totalPoints }}</b> for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
+          </div>
+          <div class="col-md-auto text-right my-auto">
+            <span v-if="skill.videoSummary.hasTranscript">
+              <b-spinner v-if="transcript.loading" small />
+              <b-button style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
+                        variant="link"
+                        data-cy="viewTranscriptBtn"
+                        @click="loadTranscript">View Transcript</b-button>
+              <span aria-hidden="true" class="mr-1">|</span>
+            </span>
+            <span class="font-italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%
+          </div>
         </div>
       </div>
-    </div>
-    <div v-if="justAchieved" class="alert alert-success mt-2">
-      <i class="fas fa-birthday-cake text-success mr-1" style="font-size: 1.2rem"></i> Congrats! You just earned <span
-        class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
+      <div v-if="!isSelfReportTypeVideo && skill.videoSummary.hasTranscript" class="text-right">
+        <b-spinner v-if="transcript.loading" small />
+        <b-button style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
+                  variant="link"
+                  data-cy="viewTranscriptBtn"
+                  @click="loadTranscript">View Transcript</b-button>
+      </div>
+      <b-card v-if="transcript.show" header="Video Transcript" class="mt-1 skills-card-theme-border" data-cy="videoTranscript">
+        {{ transcript.transcript }}
+      </b-card>
+      <div v-if="justAchieved" class="alert alert-success mt-2" data-cy="successAlert">
+        <i class="fas fa-birthday-cake text-success mr-1" style="font-size: 1.2rem"></i> Congrats! You just earned <span
+          class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
+      </div>
     </div>
 
     <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="selfReportError">
@@ -86,6 +102,19 @@ limitations under the License.
       isAlreadyAchieved() {
         return this.skill.points > 0;
       },
+      videoConf() {
+        const captionsUrl = this.skill.videoSummary.hasCaptions
+          ? `/api/projects/${this.skill.projectId}/skills/${this.skill.skillId}/videoCaptions`
+          : null;
+        return {
+          url: this.skill.videoSummary.videoUrl,
+          videoType: this.skill.videoSummary.videoType ? this.skill.videoSummary.videoType : null,
+          captionsUrl,
+        };
+      },
+      isSelfReportTypeVideo() {
+        return this.skill.selfReporting.enabled && this.skill.selfReporting.type === 'Video';
+      },
     },
     data() {
       return {
@@ -96,12 +125,17 @@ limitations under the License.
           msg: '',
         },
         justAchieved: false,
+        transcript: {
+          show: false,
+          loading: false,
+          transcript: '',
+        },
       };
     },
     methods: {
       updateVideoProgress(watchProgress) {
         this.percentWatched = watchProgress.percentWatched;
-        if (watchProgress.percentWatched > 96) {
+        if (watchProgress.percentWatched > 96 && !this.justAchieved) {
           UserSkillsService.reportSkill(this.skill.skillId)
             .then((res) => {
               if (res.pointsEarned > 0) {
@@ -124,6 +158,16 @@ limitations under the License.
               }
             });
         }
+      },
+      loadTranscript() {
+        this.transcript.loading = true;
+        UserSkillsService.getVideoTranscript(this.skill.skillId)
+          .then((res) => {
+            this.transcript.transcript = res;
+            this.transcript.loading = false;
+            this.transcript.show = true;
+            this.$nextTick(() => this.$announcer.polite('Transcript displayed'));
+          });
       },
     },
   };

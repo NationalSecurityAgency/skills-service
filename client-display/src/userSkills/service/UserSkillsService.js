@@ -253,6 +253,11 @@ export default {
     }, { handleErrorCode: false });
   },
 
+  getVideoTranscript(skillId) {
+    return axios.get(`${store.state.serviceUrl}${this.getServicePath()}/${encodeURIComponent(store.state.projectId)}/skills/${skillId}/videoTranscript`)
+        .then((result) => result.data);
+  },
+
   getServicePath() {
     return '/api/projects';
   },

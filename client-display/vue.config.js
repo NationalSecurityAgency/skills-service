@@ -29,6 +29,7 @@ exportObject.devServer = {
   proxy: {
     '/admin': proxyConf,
     '^/api/': proxyConf,
+    '^/static/videos/': proxyConf,
   },
 };
 

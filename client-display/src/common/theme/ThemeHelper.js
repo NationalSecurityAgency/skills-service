@@ -40,7 +40,7 @@ export default {
       selector: 'body #app .skills-page-title-text-color',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border',
+      selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border, body #app .card.skills-card-theme-border .card-header',
       styleName: 'border-color',
     }],
     pageTitle: {

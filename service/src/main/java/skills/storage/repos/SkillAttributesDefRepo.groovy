@@ -49,4 +49,23 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
         where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
     String getVideoUrlBySkillRefId(Integer skillRefId)
 
+    @Nullable
+    @Query(value = '''select sa.attributes ->> 'captions' as captions
+        from skill_attributes_definition sa, skill_definition sd
+        where sa.type= 'Video'
+            and sd.id = sa.skill_ref_id  
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+    ''', nativeQuery = true)
+    String getVideoCaptionsByProjectAndSkillId(String projectId, String skillId)
+
+    @Nullable
+    @Query(value = '''select sa.attributes ->> 'transcript' as captions
+        from skill_attributes_definition sa, skill_definition sd
+        where sa.type= 'Video'
+            and sd.id = sa.skill_ref_id  
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+    ''', nativeQuery = true)
+    String getVideoTranscriptsByProjectAndSkillId(String projectId, String skillId)
 }
