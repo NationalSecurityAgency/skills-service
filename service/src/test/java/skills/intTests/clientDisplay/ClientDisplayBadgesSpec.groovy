@@ -777,4 +777,127 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.skills[0].selfReporting.requestedOn == requestedDate.time
         !summary.skills[1].selfReporting.enabled
     }
+
+    def "load badge with awards"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 200
+        allSkills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",awardAttrs: [name: 'Test Award', iconClass: 'abc', numMinutes: 120]]
+        skillsService.addBadge(badge)
+
+        allSkills.each {
+            skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: it.skillId])
+            badge.enabled  = 'true'
+            skillsService.updateBadge(badge, badge.badgeId)
+        }
+
+        List<String> users = getRandomUsers(1)
+
+        when:
+        def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge1)
+        then:
+        summary.awardAttrs
+        summary.awardAttrs.name == "Test Award"
+        summary.awardAttrs.iconClass == "abc"
+        summary.awardAttrs.numMinutes == 120
+        summary.numberOfUsersAchieved == 0
+        summary.hasExpired == false
+        summary.firstPerformedSkill == null
+        summary.expirationDate == null
+        summary.achievementPosition == -1
+        summary.achievedWithinExpiration == false
+    }
+
+    def "load badge with award and user activity"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 1
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",awardAttrs: [name: 'Test Award', iconClass: 'abc', numMinutes: 120]]
+        skillsService.addBadge(badge)
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: allSkills[0].skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        List<String> users = getRandomUsers(3)
+        def currentDate = new Date()
+        def expirationDate = currentDate.clone()
+        expirationDate.minutes += 120
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], currentDate)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[1], currentDate)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[2], currentDate)
+
+        when:
+        def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge1)
+        def userTwoSummary = skillsService.getBadgeSummary(users[1], proj1.projectId, badge1)
+        def userThreeSummary = skillsService.getBadgeSummary(users[2], proj1.projectId, badge1)
+        then:
+        summary.awardAttrs
+        summary.awardAttrs.name == "Test Award"
+        summary.awardAttrs.iconClass == "abc"
+        summary.awardAttrs.numMinutes == 120
+        summary.numberOfUsersAchieved == 3
+        summary.hasExpired == false
+        summary.achievementPosition == 1
+        summary.achievedWithinExpiration == true
+        userTwoSummary.achievementPosition == 2
+        userThreeSummary.achievementPosition == 3
+
+    }
+
+    def "load badge with expired award"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(2, 1, 1)
+        allSkills[0].pointIncrement = 200
+        allSkills[0].numPerformToCompletion = 2
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(allSkills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",awardAttrs: [name: 'Test Award', iconClass: 'abc', numMinutes: 120]]
+        skillsService.addBadge(badge)
+
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: allSkills[0].skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        List<String> users = getRandomUsers(1)
+        def currentDate = new Date() - 1
+        def expirationDate = currentDate.clone()
+        expirationDate.minutes += 120
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], currentDate)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], new Date())
+
+        when:
+        def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge1)
+        then:
+        summary.awardAttrs
+        summary.awardAttrs.name == "Test Award"
+        summary.awardAttrs.iconClass == "abc"
+        summary.awardAttrs.numMinutes == 120
+        summary.numberOfUsersAchieved == 1
+        summary.hasExpired == true
+        summary.achievementPosition == 1
+        summary.achievedWithinExpiration == false
+    }
 }
