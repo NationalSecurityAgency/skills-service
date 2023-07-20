@@ -812,7 +812,7 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.numberOfUsersAchieved == 0
         summary.hasExpired == false
         summary.firstPerformedSkill == null
-        summary.expirationDate == null
+        summary.expirationDate == 0
         summary.achievementPosition == -1
         summary.achievedWithinExpiration == false
     }
