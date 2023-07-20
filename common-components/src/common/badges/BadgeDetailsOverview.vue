@@ -26,7 +26,9 @@ limitations under the License.
                       <span :class="'fa-stack fa-2x ' + classNames[badge.achievementPosition - 1]" style="vertical-align: top; font-size:32px;">
                         <i class="fas fa-certificate"></i>
                         <i class="fas fa-ribbon fa-stack-1x" style="padding-top: 5px;"></i>
+                        <span class="sr-only">You finished in </span>
                         <span style="font-size:.4em; color:#000000;" class="fa-stack-1x">{{positionNameShort[badge.achievementPosition - 1]}}</span>
+                        <span class="sr-only"> place</span>
                       </span>
                     </span>
                     <div v-if="badge.gem" class="text-muted">
@@ -41,7 +43,9 @@ limitations under the License.
 
                     <div v-if="badge.achievedWithinExpiration" class="bonus-award mt-2 border-top">
                       <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
+                      <span class="sr-only">You got the </span>
                       <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
+                      <span class="sr-only"> bonus</span>
                     </div>
                 </div>
             </div>
