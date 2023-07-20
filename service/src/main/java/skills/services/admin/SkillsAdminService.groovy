@@ -146,7 +146,7 @@ class SkillsAdminService {
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, originalSkillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-
+        validateSelfReportVideo(skillRequest, skillDefinition)
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
             SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, skillRequest.skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
             if (idExists) {
@@ -875,6 +875,19 @@ class SkillsAdminService {
         Integer latestSkillVersion = findMaxVersionByProjectId(skillRequest.projectId) ?: 0
         if (skillRequest.version > (latestSkillVersion + 1)) {
             throw new SkillException("Latest skill version is [${latestSkillVersion}]; max supported version is latest+1 but provided [${skillRequest.version}] version", skillRequest.projectId, skillRequest.skillId, skills.controller.exceptions.ErrorCode.BadParam)
+        }
+    }
+
+    @Profile
+    private void validateSelfReportVideo(SkillRequest skillRequest, SkillDefWithExtra existingSkillDefinition) {
+        if (skillRequest.selfReportingType == SelfReportingType.Video.toString()) {
+            if (!existingSkillDefinition) {
+                throw new SkillException("selfReportingType=Video is not allowed when creating a new skill", skillRequest.projectId, skillRequest.skillId)
+            }
+            String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(existingSkillDefinition.id)
+            if (StringUtils.isBlank(videoUrl)) {
+                throw new SkillException("Video URL must be configured prior to attempting to set selfReportingType=Video", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
+            }
         }
     }
 
