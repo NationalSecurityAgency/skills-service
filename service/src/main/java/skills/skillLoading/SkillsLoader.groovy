@@ -978,7 +978,7 @@ class SkillsLoader {
                 numberOfUsersAchieved: numberOfUsersAchieved,
                 hasExpired: expirationDate ? expirationDate.before(new Date()) : null,
                 firstPerformedSkill: firstPerformedSkill,
-                expirationDate: expirationDate.getTime(),
+                expirationDate: expirationDate ? expirationDate.getTime() : null,
                 achievementPosition: achievementPosition,
                 achievedWithinExpiration: achievedWithinExpiration,
                 awardAttrs: attributes
