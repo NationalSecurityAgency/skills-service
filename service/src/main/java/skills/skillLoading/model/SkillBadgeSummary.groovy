@@ -46,7 +46,7 @@ class SkillBadgeSummary {
     BonusAwardAttrs awardAttrs
     int numberOfUsersAchieved
     Date firstPerformedSkill
-    Date expirationDate
+    long expirationDate
     boolean hasExpired
     int achievementPosition
     boolean achievedWithinExpiration

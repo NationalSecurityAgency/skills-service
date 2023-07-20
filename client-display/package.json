@@ -20,6 +20,7 @@
     "setup:common": "npx symlink-dir ../common-components/src/common src/common-components"
   },
   "dependencies": {
+    "@chenfengyuan/vue-countdown": "^1.1.5",
     "@fortawesome/fontawesome-free": "5.15.4",
     "@toast-ui/editor": "3.2.1",
     "@toast-ui/vue-editor": "3.2.2",
