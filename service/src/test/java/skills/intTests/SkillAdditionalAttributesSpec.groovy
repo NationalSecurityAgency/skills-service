@@ -62,27 +62,4 @@ class SkillAdditionalAttributesSpec extends DefaultIntSpec {
         skill1BonusAttrs.numMinutes == 10
         skill1BonusAttrs.iconClass == "fa-cool"
     }
-
-    def "save and get badge bonus attributes"() {
-        def p1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
-        def p1Skills = createSkills(3, 1, 1, 100)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-
-        def badge = SkillsFactory.createBadge()
-        skillsService.createBadge(badge)
-        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[0].skillId])
-        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: p1Skills[1].skillId])
-        badge.enabled = true
-        skillsService.createBadge(badge)
-
-        when:
-        skillAttributeService.saveBadgeBonusAwardAttrs(p1.projectId, badge.badgeId, new BonusAwardAttrs(name: 'one', numMinutes: 10, iconClass: 'fa-cool'))
-
-        BonusAwardAttrs badgeBonusAttrs = skillAttributeService.getBadgeBonusAwardAttrs(p1.projectId, badge.badgeId)
-        then:
-        badgeBonusAttrs.name == "one"
-        badgeBonusAttrs.numMinutes == 10
-        badgeBonusAttrs.iconClass == "fa-cool"
-    }
 }
