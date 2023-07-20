@@ -58,14 +58,20 @@ describe('Configure Video Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 2)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
         cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .should('be.enabled');
         cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
+
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+
         cy.get('[data-cy="saveSkillButton"]').click()
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [value="selfReportingType"]')
