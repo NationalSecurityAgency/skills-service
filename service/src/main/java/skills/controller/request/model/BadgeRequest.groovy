@@ -16,6 +16,7 @@
 package skills.controller.request.model
 
 import groovy.transform.Canonical
+import skills.services.attributes.BonusAwardAttrs
 
 @Canonical
 class BadgeRequest {
@@ -29,4 +30,8 @@ class BadgeRequest {
 
     String helpUrl
     String enabled
+
+    int pointIncrementInterval = 60 * 8
+    BonusAwardAttrs awardAttrs
+
 }

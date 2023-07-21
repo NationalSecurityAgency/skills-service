@@ -44,6 +44,14 @@ class SkillAttributeService {
         return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
     }
 
+    void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs, SkillDef.ContainerType.Badge)
+    }
+
+    BonusAwardAttrs getBadgeBonusAwardAttrs(String projectId, String skillId) {
+        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class, SkillDef.ContainerType.Badge)
+    }
+
     void saveBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs)
     }
@@ -52,8 +60,8 @@ class SkillAttributeService {
         return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class)
     }
 
-    private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T videoAttrs) {
-        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, SkillDef.ContainerType.Skill)
+    private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T videoAttrs, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
         SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
         if (!skillAttributesDef) {
             skillAttributesDef = new SkillAttributesDef(skillRefId: skillDefId, type: type)
@@ -62,8 +70,8 @@ class SkillAttributeService {
         skillAttributesDefRepo.save(skillAttributesDef)
     }
 
-    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz) {
-        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, SkillDef.ContainerType.Skill)
+    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
         SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
         if (!skillAttributesDef) {
             return clazz.getDeclaredConstructor().newInstance()

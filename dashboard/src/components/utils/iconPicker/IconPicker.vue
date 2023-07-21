@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div class="card"
+  <button class="icon-button"
        @click="selectIcon"
        @keypress.enter="selectIcon"
        role="button"
        aria-roledescription="icon selector button"
        aria-label="icon selector"
        tabindex="0"
+       :disabled="disabled"
        data-cy="iconPicker">
     <div class="card-body text-primary" style="min-height: 4rem;">
-      <i
-        :class="[selectedIconClass]" />
+      <i :class="[selectedIconClass]" />
     </div>
-  </div>
+  </button>
 </template>
 
 <script>
@@ -41,6 +41,10 @@ limitations under the License.
       customIconWidth: {
         type: Number,
         default: 48,
+      },
+      disabled: {
+        type: Boolean,
+        default: false,
       },
     },
     data() {
@@ -69,5 +73,16 @@ limitations under the License.
 <style scoped>
   i {
     font-size: 3rem;
+  }
+
+  .icon-button {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25em;
+    background-color: #fff;
+  }
+
+  .icon-button:disabled {
+    background-color: lightgrey;
+    cursor: none;
   }
 </style>

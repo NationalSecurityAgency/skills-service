@@ -32,10 +32,20 @@ limitations under the License.
                                       custom
                                       :data-cy="`earnedBadgeLink_${badge.badgeId}`">
                           <div class="card h-100 skills-card-theme-border skills-navigable-item text-center">
-                            <div class="card-body earned-badge">
-                              <i class="fa fa-check-circle position-absolute text-success" style="right: 10px; top: 10px;"/>
+                            <div class="card-body earned-badge" :style="{ 'margin-top': !badge.achievedWithinExpiration ? '30px' : '' }">
+                              <i class="fa fa-check-circle position-absolute text-success" v-if="badge.achievementPosition > 3" style="right: 10px; top: 10px;"/>
                               <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 10px; left: 10px; color: purple"></i>
                               <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 10px; left: 10px; color: blue"></i>
+
+                              <span v-if="badge.achievementPosition > 0 && badge.achievementPosition <= 3" class="position-absolute user-trophy">
+                                <span :class="'fa-stack fa-2x ' + classNames[badge.achievementPosition - 1]" style="vertical-align: top; font-size: 32px;">
+                                  <i class="fas fa-certificate"></i>
+                                  <i class="fas fa-award fa-stack-1x" style="padding-top: 5px;"></i>
+                                  <span class="sr-only">You finished in </span>
+                                  <span style="font-size:.4em; color:#000000;" class="fa-stack-1x">{{positionNameShort[badge.achievementPosition - 1]}}</span>
+                                  <span class="sr-only"> place</span>
+                                </span>
+                              </span>
                               <i :class="getIconCss(badge.iconClass, index)" style="font-size: 5em;"/>
                               <div class="card-title mb-0 text-truncate">
                                   {{ badge.badge }}
@@ -44,6 +54,13 @@ limitations under the License.
                                 <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{badge.projectName}}</small>
                               </div>
                               <div data-cy="dateBadgeAchieved" class="text-muted mb-2"><i class="far fa-clock text-secondary" style="font-size: 0.8rem;"></i> {{ badge.dateAchieved | relativeTime() }}</div>
+
+                              <div v-if="badge.achievedWithinExpiration" class="bonus-award mt-2 border-top">
+                                <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
+                                <span class="sr-only">You got the </span>
+                                <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
+                                <span class="sr-only"> bonus</span>
+                              </div>
                             </div>
                           </div>
                         </router-link>
@@ -63,6 +80,9 @@ limitations under the License.
     data() {
       return {
         colors: ['text-info', 'text-warning', 'text-danger', 'text-primary'],
+        positionNames: ['first', 'second', 'third'],
+        positionNameShort: ['1st', '2nd', '3rd'],
+        classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
       };
     },
     props: {
@@ -91,7 +111,28 @@ limitations under the License.
 </script>
 
 <style>
+  @keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
   .earned-badge {
     cursor: pointer;
+  }
+
+  .user-trophy {
+    top: -8px;
+    right: -20px;
+    animation: pop-in 1s;
+  }
+
+  .bonus-award {
+    bottom: 5px;
+    left: 0px;
+    right: 0px;
+    font-size: 32px;
+    animation: pop-in 1s;
+  }
+  .award-icon {
+    height: 36px;
   }
 </style>

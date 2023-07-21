@@ -31,6 +31,7 @@ import skills.controller.result.model.DependencyCheckResult
 import skills.controller.result.model.SkillDefGraphRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.services.*
+import skills.services.attributes.SkillAttributeService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
@@ -90,6 +91,9 @@ class BadgeAdminService {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
@@ -167,6 +171,10 @@ class BadgeAdminService {
 
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
+        }
+
+        if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {
+            skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
         }
 
         if (identifyEligibleUsers) {
@@ -319,6 +327,7 @@ class BadgeAdminService {
 
     @Profile
     private BadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
+        def awardAttributes = skillAttributeService.getBadgeBonusAwardAttrs(skillDef.projectId, skillDef.skillId)
         BadgeResult res = new BadgeResult(
                 badgeId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -330,6 +339,7 @@ class BadgeAdminService {
                 endDate: skillDef.endDate,
                 helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl),
                 enabled: skillDef.enabled,
+                awardAttrs: awardAttributes
         )
 
         if (loadRequiredSkills) {

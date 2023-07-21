@@ -41,6 +41,10 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     List<UserAchievement> findAllByUserIdAndNotifiedOrderByCreatedAsc(String userId, String notified)
 
     @Nullable
+    @Query('''select ua.userId from UserAchievement ua where ua.projectId = ?1 and ua.skillId = ?2''')
+    List<String> findAllAchievementsForProjectAndSkill(String projectId, String skillId, Pageable pageable)
+
+    @Nullable
     @Query('''select ua.achievedOn from UserAchievement ua where ua.userId= ?1 and ua.projectId=?2 and ua.skillId=?3''')
     Date getAchievedDateByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
 
@@ -834,6 +838,12 @@ join UserTag ut on ut.userId = ua.userId
 where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
 ''')
     List<UserTagCount> countNumAchievedByUserTag(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("userTagKey") String userTagKey)
+
+    @Nullable
+    @Query(value = '''
+select count(distinct ua) from UserAchievement ua where ua.projectId = :projectId and ua.skillId = :skillId
+''')
+    int countNumAchievedForSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
     @Query(value = '''select count(ua) as totalCount,
                       sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,

@@ -423,4 +423,94 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         ex.message.contains("errorCode:LearningPathViolation")
         ex.message.contains("Adding skill [skill4] to badge [badge1] violates the Learning Path. Reason: Multiple badges on the same Learning path cannot have overlapping skills. Both badge [Test Badge 1] and [Test Badge 2] badge have [Test Skill 4] skill.")
     }
+
+    def "can add bonus award attributes to a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+        assert badgeResult.awardAttrs == [ name: null, iconClass: null, numMinutes: null]
+
+        badgeResult.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+
+        when:
+        skillsService.updateBadge(badgeResult, badge1.badgeId)
+        def updatedBadgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+
+        then:
+        updatedBadgeResult.awardAttrs
+        updatedBadgeResult.awardAttrs.name == "Test Badge"
+        updatedBadgeResult.awardAttrs.iconClass == "abc"
+        updatedBadgeResult.awardAttrs.numMinutes == 60
+
+    }
+
+    def "can remove bonus award attributes from a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        badge1.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+        skillsService.createBadge(badge1)
+
+        def badgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+        assert badgeResult.awardAttrs == [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+
+        badgeResult.awardAttrs = [ name: null, iconClass: null, numMinutes: null ];
+
+        when:
+        skillsService.updateBadge(badgeResult, badge1.badgeId)
+        def updatedBadgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+
+        then:
+        updatedBadgeResult.awardAttrs
+        updatedBadgeResult.awardAttrs.name == null
+        updatedBadgeResult.awardAttrs.iconClass == null
+        updatedBadgeResult.awardAttrs.numMinutes == null
+    }
+
+    def "can edit bonus award attributes for a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        badge1.enabled = true
+        badge1.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+        skillsService.createBadge(badge1)
+
+        def badgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+        assert badgeResult.awardAttrs == [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+
+        badgeResult.awardAttrs = [ name: 'Speedy Finish Award', iconClass: 'def', numMinutes: 600 ];
+
+        when:
+        skillsService.updateBadge(badgeResult, badge1.badgeId)
+        def updatedBadgeResult = skillsService.getBadge(p1.projectId, badge1.badgeId)
+
+        then:
+        updatedBadgeResult.awardAttrs
+        updatedBadgeResult.awardAttrs.name == "Speedy Finish Award"
+        updatedBadgeResult.awardAttrs.iconClass == "def"
+        updatedBadgeResult.awardAttrs.numMinutes == 600
+    }
 }

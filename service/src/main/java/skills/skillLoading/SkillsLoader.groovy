@@ -16,6 +16,7 @@
 package skills.skillLoading
 
 import callStack.profiler.Profile
+import groovy.time.TimeCategory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
@@ -42,6 +43,8 @@ import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.BonusAwardAttrs
+import skills.services.attributes.SkillAttributeService
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -53,7 +56,6 @@ import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
-
 import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
@@ -150,6 +152,9 @@ class SkillsLoader {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -901,9 +906,9 @@ class SkillsLoader {
     @Profile
     private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
         List<SkillSummaryParent> skillsRes = []
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
 
         if (loadSkills) {
-            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -913,9 +918,33 @@ class SkillsLoader {
         }
 
         List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
+        int achievementPosition = -1;
         if (achievements) {
             // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
+            def achievementList = achievedLevelRepository.findAllAchievementsForProjectAndSkill(projDef.projectId, badgeDefinition.skillId, PageRequest.of(0, 3, Sort.Direction.ASC, 'achievedOn'))
+            achievementPosition = achievementList.indexOf(userId) + 1
+        }
+
+        BonusAwardAttrs attributes = skillAttributeService.getBadgeBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
+        Date firstPerformedSkill = null
+        Date expirationDate = null
+        boolean achievedWithinExpiration = false
+
+        if(attributes.numMinutes > 0 && attributes.name != null && attributes.iconClass != null) {
+            def skillIds = groupChildrenMeta.childrenWithPoints.collect { it -> it.skillDef.skillId }
+            firstPerformedSkill = userPerformedSkillRepo.findFirstPerformedSkill(projDef.projectId, userId, skillIds)
+
+            if(firstPerformedSkill) {
+                expirationDate = new Date(firstPerformedSkill?.getTime())
+            }
+
+            if(expirationDate && attributes?.numMinutes > 0) {
+                expirationDate.minutes += attributes.numMinutes
+                if(achievements) {
+                    achievedWithinExpiration = achievements.first().achievedOn.before(expirationDate)
+                }
+            }
         }
 
         int numAchievedSkills = achievedLevelRepository.countAchievedChildren(userId, projDef?.projectId, badgeDefinition.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
@@ -925,6 +954,7 @@ class SkillsLoader {
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
         def badgeDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projDef.projectId, badgeDefinition.skillId)
+        def numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
@@ -941,7 +971,14 @@ class SkillsLoader {
                 helpUrl: helpUrl,
                 projectId: badgeDefinition.projectId,
                 projectName: InputSanitizer.unsanitizeName(projectName),
-                dependencyInfo: badgeDependencySummary
+                dependencyInfo: badgeDependencySummary,
+                numberOfUsersAchieved: numberOfUsersAchieved,
+                hasExpired: expirationDate ? expirationDate.before(new Date()) : null,
+                firstPerformedSkill: firstPerformedSkill,
+                expirationDate: expirationDate ? expirationDate.getTime() : 0,
+                achievementPosition: achievementPosition,
+                achievedWithinExpiration: achievedWithinExpiration,
+                awardAttrs: attributes
         )
     }
 
