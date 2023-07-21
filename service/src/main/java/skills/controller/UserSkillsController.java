@@ -496,8 +496,8 @@ class UserSkillsController {
                                              @RequestParam(name = "quizId", required = false) String quizId,
                                              @RequestParam(name = "skillId", required = false) String skillId) {
         log.info("Project ID ["+projectId+"], quizId ["+quizId+"], skillId ["+skillId+"]");
-        SkillsValidator.isTrue(StringUtils.isNotBlank(projectId) || StringUtils.isNotBlank(quizId) || StringUtils.isNotBlank(skillId),
-                "At least one of projectId, quizId, or skillId must be supplied.");
+        SkillsValidator.isTrue(StringUtils.isBlank(projectId) || StringUtils.isBlank(quizId),
+                "Attachment cannot be associated to both a projectId and a quizId");
         AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
         AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
         return attachmentService.saveAttachment(file, projectId, quizId, skillId);

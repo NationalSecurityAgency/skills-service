@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.util.unit.DataSize
 import skills.intTests.utils.*
+import skills.services.AttachmentService
 import skills.storage.model.Attachment
 import skills.utils.GroovyToJavaByteUtils
 
@@ -41,6 +42,9 @@ class AttachmentSpecs extends DefaultIntSpec {
 
     @Autowired
     TransactionHelper transactionHelper
+
+    @Autowired
+    AttachmentService attachmentService
 
     SkillsService supervisorService
 
@@ -148,7 +152,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         result.explanation.contains('Unexpected Error')
     }
 
-    def "attempt to upload attachment without providing associated projectId, quizId, or skillId"() {
+    def "attempt to upload attachment that is a associated to both a projectId and a quizId"() {
         Map proj = SkillsFactory.createProject()
         skillsService.createProject(proj)
         String filename = 'test-pdf.pdf'
@@ -156,13 +160,13 @@ class AttachmentSpecs extends DefaultIntSpec {
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
         when:
-        def result = skillsService.uploadAttachment(resource)
+        def result = skillsService.uploadAttachment(resource, "projectId", null, "quizId")
 
         then:
         result
         !result.success
         result.errorCode == 'BadParam'
-        result.explanation.equals('At least one of projectId, quizId, or skillId must be supplied.')
+        result.explanation.equals('Attachment cannot be associated to both a projectId and a quizId')
     }
 
     def "upload attachment with just projectId"() {
@@ -286,6 +290,75 @@ class AttachmentSpecs extends DefaultIntSpec {
         result.filename == resources.last().filename
         attachments
         attachments.size() == 1
+    }
+
+    def "attachment gets proper id's assigned on creation when present description markdown"() {
+        Map proj = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
+        def badge = SkillsFactory.createBadge()
+        def quiz = QuizDefFactory.createQuizSurvey()
+        String filename = 'test-pdf.pdf'
+        String contents = 'Test is a test'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+
+        when:
+        def projAttachRes = skillsService.uploadAttachment(resource)
+        proj.description = "description with [${filename}](/api/download/${projAttachRes.uuid})".toString()
+        skillsService.createProject(proj)
+
+        def subjAttachRes = skillsService.uploadAttachment(resource)
+        subject.description = "description with [${filename}](/api/download/${subjAttachRes.uuid})".toString()
+        skillsService.createSubject(subject)
+
+        def skillAttachRes = skillsService.uploadAttachment(resource)
+        skill.description = "description with [${filename}](/api/download/${skillAttachRes.uuid})".toString()
+        skillsService.createSkill(skill)
+
+        def skillsGroupAttachRes = skillsService.uploadAttachment(resource)
+        skillsGroup.description = "description with [${filename}](/api/download/${skillsGroupAttachRes.uuid})".toString()
+        skillsService.createSkill(skillsGroup)
+
+        def badgeAttachRes = skillsService.uploadAttachment(resource)
+        badge.description = "description with [${filename}](/api/download/${badgeAttachRes.uuid})".toString()
+        skillsService.createBadge(badge)
+
+        def quizAttachRes = skillsService.uploadAttachment(resource)
+        quiz.description = "description with [${filename}](/api/download/${quizAttachRes.uuid})".toString()
+        skillsService.createQuizDef(quiz)
+
+        Attachment projAttach = attachmentService.getAttachment(projAttachRes.uuid)
+        Attachment subjAttach = attachmentService.getAttachment(subjAttachRes.uuid)
+        Attachment skillAttach = attachmentService.getAttachment(skillAttachRes.uuid)
+        Attachment skillsGroupAttach = attachmentService.getAttachment(skillsGroupAttachRes.uuid)
+        Attachment badgeAttach = attachmentService.getAttachment(badgeAttachRes.uuid)
+        Attachment quizAttach = attachmentService.getAttachment(quizAttachRes.uuid)
+
+        then:
+        projAttach.projectId == proj.projectId
+        projAttach.quizId == null
+        projAttach.skillId == null
+
+        subjAttach.projectId == subject.projectId
+        subjAttach.quizId == null
+        subjAttach.skillId == subject.subjectId
+
+        skillAttach.projectId == skill.projectId
+        skillAttach.quizId == null
+        skillAttach.skillId == skill.skillId
+
+        skillsGroupAttach.projectId == skillsGroup.projectId
+        skillsGroupAttach.quizId == null
+        skillsGroupAttach.skillId == skillsGroup.skillId
+
+        badgeAttach.projectId == badge.projectId
+        badgeAttach.quizId == null
+        badgeAttach.skillId == badge.badgeId
+
+        quizAttach.projectId == null
+        quizAttach.quizId == quiz.quizId
+        quizAttach.skillId == null
     }
 
     private List<Attachment> findAll() {

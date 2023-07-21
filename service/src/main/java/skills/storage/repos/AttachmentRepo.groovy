@@ -31,8 +31,7 @@ class AttachmentRepo {
     @PersistenceContext
     EntityManager entityManager;
 
-    void saveAttachment(Attachment attachment, InputStream is) {
-        attachment.setContent(BlobProxy.generateProxy(is, attachment.size))
+    void saveAttachment(Attachment attachment) {
         entityManager.persist(attachment)
     }
 

@@ -125,6 +125,7 @@ class BadgeAdminService {
         }
 
         boolean identifyEligibleUsers = false
+        boolean isEdit = true
 
         if (skillDefinition) {
             String existingEnabled = skillDefinition.enabled;
@@ -141,6 +142,7 @@ class BadgeAdminService {
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
+            isEdit = false
             ProjDef projDef
             if (type == SkillDef.ContainerType.Badge) {
                 projDef = projDefAccessor.getProjDef(projectId)
@@ -170,6 +172,10 @@ class BadgeAdminService {
 
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
+        }
+
+        if (!isEdit) {
+            attachmentService.updateAttachmentsFoundInMarkdown(badgeRequest?.description, projectId, null, badgeRequest.badgeId)
         }
 
         if (identifyEligibleUsers) {
