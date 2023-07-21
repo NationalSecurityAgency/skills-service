@@ -37,6 +37,7 @@ import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.quiz.QuizToSkillService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
@@ -132,7 +133,7 @@ class SkillsAdminService {
 
     @Transactional()
     @Profile
-    SaveSkillTmpRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null) {
+    SaveSkillTmpRes saveSkill(String originalSkillId, SkillRequest skillRequest, boolean performCustomValidation=true, String groupId=null, boolean validateVideoAttrs = true) {
         lockingService.lockProject(skillRequest.projectId)
 
         validateSkillVersion(skillRequest)
@@ -146,7 +147,7 @@ class SkillsAdminService {
         }
 
         SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, originalSkillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
-        validateSelfReportVideo(skillRequest, skillDefinition)
+        validateSelfReportVideo(skillRequest, skillDefinition, validateVideoAttrs)
         if (!skillDefinition || !skillDefinition.skillId.equalsIgnoreCase(skillRequest.skillId)) {
             SkillDef idExists = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(skillRequest.projectId, skillRequest.skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
             if (idExists) {
@@ -879,14 +880,16 @@ class SkillsAdminService {
     }
 
     @Profile
-    private void validateSelfReportVideo(SkillRequest skillRequest, SkillDefWithExtra existingSkillDefinition) {
+    private void validateSelfReportVideo(SkillRequest skillRequest, SkillDefWithExtra existingSkillDefinition, boolean validateVideoAttrs) {
         if (skillRequest.selfReportingType == SelfReportingType.Video.toString()) {
-            if (!existingSkillDefinition) {
-                throw new SkillException("selfReportingType=Video is not allowed when creating a new skill", skillRequest.projectId, skillRequest.skillId)
-            }
-            String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(existingSkillDefinition.id)
-            if (StringUtils.isBlank(videoUrl)) {
-                throw new SkillException("Video URL must be configured prior to attempting to set selfReportingType=Video", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
+            if (validateVideoAttrs) {
+                if (!existingSkillDefinition) {
+                    throw new SkillException("selfReportingType=Video is not allowed when creating a new skill", skillRequest.projectId, skillRequest.skillId)
+                }
+                String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(existingSkillDefinition.id)
+                if (StringUtils.isBlank(videoUrl)) {
+                    throw new SkillException("Video URL must be configured prior to attempting to set selfReportingType=Video", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
+                }
             }
             if (skillRequest.numPerformToCompletion > 1) {
                 throw new SkillException("When selfReportingType=Video numPerformToCompletion must equal to 1 but [${skillRequest.numPerformToCompletion}] was provided", existingSkillDefinition.projectId, existingSkillDefinition.skillId)

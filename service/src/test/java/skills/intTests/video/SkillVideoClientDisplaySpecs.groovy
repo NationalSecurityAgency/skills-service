@@ -23,7 +23,7 @@ import skills.storage.model.SkillDef
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
-class SkillVideoClientDisplaySpecSpecs extends DefaultIntSpec {
+class SkillVideoClientDisplaySpecs extends DefaultIntSpec {
 
     def "get video attributes for a single skill" () {
         def p1 = createProject(1)
@@ -185,5 +185,68 @@ class SkillVideoClientDisplaySpecSpecs extends DefaultIntSpec {
         skill5VidSummary.hasTranscript == false
 
         !skill6VidSummary
+    }
+
+    def "get captions endpoint" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl  : "http://some.url",
+                videoType : "video",
+                transcript: "transcript",
+                captions  : "captions",
+        ])
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkill(p1Skills[0])
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                videoUrl  : "http://some.url",
+                videoType : "video",
+                transcript: "transcript",
+        ])
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkill(p1Skills[1])
+
+        when:
+        def skill1Captions = skillsService.getVideoCaptions(p1.projectId, p1Skills[0].skillId)
+        def skill2Captions = skillsService.getVideoCaptions(p1.projectId, p1Skills[1].skillId)
+
+        then:
+        skill1Captions == "captions"
+        !skill2Captions
+    }
+
+    def "get transcript endpoint" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl  : "http://some.url",
+                videoType : "video",
+                transcript: "transcript",
+                captions  : "captions",
+        ])
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkill(p1Skills[0])
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                videoUrl  : "http://some.url",
+                videoType : "video",
+        ])
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkill(p1Skills[1])
+
+        when:
+        def skill1T = skillsService.getVideoTranscript(p1.projectId, p1Skills[0].skillId)
+        def skill2T = skillsService.getVideoTranscript(p1.projectId, p1Skills[1].skillId)
+
+        then:
+        skill1T == "transcript"
+        !skill2T
     }
 }

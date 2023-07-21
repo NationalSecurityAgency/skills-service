@@ -1804,6 +1804,18 @@ class SkillsService {
         String url = "/projects/${projectId}/skills/${skillId}/video"
         return wsHelper.adminGet(url)
     }
+    def deleteSkillVideoAttributes(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/video"
+        return wsHelper.adminDelete(url)
+    }
+    def getVideoCaptions(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/videoCaptions"
+        return wsHelper.get(url, "api", null, false)
+    }
+    def getVideoTranscript(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/videoTranscript"
+        return wsHelper.get(url, "api", null, false)
+    }
 
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()

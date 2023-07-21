@@ -79,7 +79,9 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                          skill_relationship_definition r,
                          skill_definition c
                              left join user_achievement ua on c.skill_id = ua.skill_id and c.project_id = ua.project_id and ua.user_id = ?5
-                             left join skill_attributes_definition sad on c.id = sad.skill_ref_id and sad.type = 'Video'
+                             left join skill_attributes_definition sad on
+                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = sad.skill_ref_id 
+                               and sad.type = 'Video'
                     where s.id = r.parent_ref_id
                       and c.id = r.child_ref_id
                       and s.project_id = ?1

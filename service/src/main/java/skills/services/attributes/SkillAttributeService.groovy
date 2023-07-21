@@ -90,9 +90,8 @@ class SkillAttributeService {
         skillAttributesDefRepo.save(skillAttributesDef)
     }
 
-    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
-        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
-        SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
+    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz) {
+        SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, type.toString())
         if (!skillAttributesDef) {
             return clazz.getDeclaredConstructor().newInstance()
         }

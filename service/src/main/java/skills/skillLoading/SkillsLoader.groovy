@@ -580,12 +580,13 @@ class SkillsLoader {
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
-                videoSummary: getVideoSummary(skillDef.id)
+                videoSummary: getVideoSummary(skillDef)
         )
     }
 
     @Profile
-    private VideoSummary getVideoSummary(Integer skillDefId) {
+    private VideoSummary getVideoSummary(SkillDefWithExtra skillDef) {
+        Integer skillDefId = skillDef.copiedFrom ?: skillDef.id
         VideoSummary res = null
         SkillAttributesDefRepo.VideoSummaryAttributes videoSummaryAttributes = skillAttributesDefRepo.getVideoSummary(skillDefId)
         if (videoSummaryAttributes) {

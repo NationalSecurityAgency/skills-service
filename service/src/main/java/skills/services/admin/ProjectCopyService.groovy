@@ -386,9 +386,8 @@ class ProjectCopyService {
                     skillRequest.subjectId = subjectId
                     skillRequest.type = fromSkill.type?.toString()
                     skillRequest.version = 0
-                    if (fromSkill.selfReportingType && fromSkill.selfReportingType != SkillDef.SelfReportingType.Video) {
-                        skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
-                    }
+
+                    skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                     if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
                         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)
                         skillRequest.quizId = quizNameAndId.quizId
@@ -404,7 +403,7 @@ class ProjectCopyService {
                         groupNumSkillsRequired = fromSkill.numSkillsRequired
                         skillRequest.numSkillsRequired = -1
                     }
-                    SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes = skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
+                    SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes = skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId, false)
                     if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
                         createSkills(originalProjectId, desProjectId, subjectId, allCollectedSkills, fromSkill.skillId)
                     }
@@ -414,10 +413,6 @@ class ProjectCopyService {
                     }
 
                     handleVideoAttributes(fromSkill, saveSkillTmpRes)
-                    if (fromSkill?.selfReportingType == SkillDef.SelfReportingType.Video) {
-                        skillRequest.selfReportingType = SkillDef.SelfReportingType.Video.toString()
-                        skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
-                    }
                 }
     }
 

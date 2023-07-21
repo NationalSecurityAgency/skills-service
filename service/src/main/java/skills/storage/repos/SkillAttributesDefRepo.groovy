@@ -53,7 +53,7 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
     @Query(value = '''select sa.attributes ->> 'captions' as captions
         from skill_attributes_definition sa, skill_definition sd
         where sa.type= 'Video'
-            and sd.id = sa.skill_ref_id  
+            and (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id  
             and sd.project_id = ?1
             and sd.skill_id = ?2
     ''', nativeQuery = true)
@@ -63,9 +63,20 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
     @Query(value = '''select sa.attributes ->> 'transcript' as captions
         from skill_attributes_definition sa, skill_definition sd
         where sa.type= 'Video'
-            and sd.id = sa.skill_ref_id  
+            and (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id  
             and sd.project_id = ?1
             and sd.skill_id = ?2
     ''', nativeQuery = true)
     String getVideoTranscriptsByProjectAndSkillId(String projectId, String skillId)
+
+
+    @Nullable
+    @Query(value = '''select sa.*
+        from skill_attributes_definition sa, skill_definition sd
+        where (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id 
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+            and sa.type= ?3    
+    ''', nativeQuery = true)
+    SkillAttributesDef findByProjectIdAndSkillIdAndType(String projectId, String skillId, String type)
 }

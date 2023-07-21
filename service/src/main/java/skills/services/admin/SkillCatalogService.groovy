@@ -17,6 +17,7 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -34,6 +35,8 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.events.pointsAndAchievements.InsufficientPointsForFinalizationValidator
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.storage.accessors.ProjDefAccessor
@@ -108,6 +111,9 @@ class SkillCatalogService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -316,6 +322,7 @@ class SkillCatalogService {
         copy.subjectId = subjectTo.skillId
         copy.version = skillsAdminService.findMaxVersionByProjectId(projectIdTo)
         copy.numPerformToCompletion = numToCompletion
+
         copy.selfReportingType = original.selfReportingType?.toString()
         if (original.selfReportingType && original.selfReportingType == SkillDef.SelfReportingType.Quiz) {
             QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(original.id)
@@ -325,7 +332,7 @@ class SkillCatalogService {
         copy.name = newName
         copy.skillId = newSkillId
 
-        skillsAdminService.saveSkill(copy.skillId, copy, true, groupId)
+        skillsAdminService.saveSkill(copy.skillId, copy, true, groupId, false)
     }
 
     @Transactional

@@ -24,7 +24,7 @@ import skills.storage.model.SkillDef
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
-class SkillVideoConfigSpecSpecs extends DefaultIntSpec {
+class SkillVideoConfigSpecs extends DefaultIntSpec {
 
     def "not allowed to save self-report=video when creating a skill"() {
         def p1 = createProject(1)
@@ -90,6 +90,51 @@ class SkillVideoConfigSpecSpecs extends DefaultIntSpec {
         attributes.videoType == "video"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
+    }
+
+    def "delete video attributs" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some1.url",
+                videoType: "video1",
+                transcript: "transcript1",
+                captions: "captions1",
+        ])
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                videoUrl: "http://some2.url",
+                videoType: "video2",
+                transcript: "transcript2",
+                captions: "captions2",
+        ])
+
+        when:
+        def skill1Attributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        def skill2Attributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+        skillsService.deleteSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+        def skill1AttributesAfter = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        def skill2AttributesAfter = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+        then:
+        skill1Attributes.videoUrl == "http://some1.url"
+        skill1Attributes.videoType == "video1"
+        skill1Attributes.captions == "captions1"
+        skill1Attributes.transcript == "transcript1"
+
+        skill2Attributes.videoUrl == "http://some2.url"
+        skill2Attributes.videoType == "video2"
+        skill2Attributes.captions == "captions2"
+        skill2Attributes.transcript == "transcript2"
+
+        skill1AttributesAfter.videoUrl == "http://some1.url"
+        skill1AttributesAfter.videoType == "video1"
+        skill1AttributesAfter.captions == "captions1"
+        skill1AttributesAfter.transcript == "transcript1"
+
+        !skill2AttributesAfter.videoUrl
     }
 
     def "sanitize captions and transcript"() {

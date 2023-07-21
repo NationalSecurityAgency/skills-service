@@ -24,7 +24,7 @@ import skills.storage.model.SkillDef
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
-class SkillVideoFeaturesSpecSpecs extends DefaultIntSpec {
+class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
     def "copy project with skill that has video configured" () {
         def p1 = createProject(1)
@@ -53,4 +53,40 @@ class SkillVideoFeaturesSpecSpecs extends DefaultIntSpec {
         attributes.transcript == "transcript"
         skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
     }
+
+    def "imported skills return video attributes" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                videoType: "video",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkill(p1Skills[0])
+
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        skillsService.importSkillFromCatalog(p2.projectId, p2subj1.subjectId, p1.projectId, p1Skills[0].skillId)
+
+        when:
+        def attributes = skillsService.getSkillVideoAttributes(p2.projectId, p1Skills[0].skillId)
+        def skill = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
+        then:
+        attributes.videoUrl == "http://some.url"
+        attributes.videoType == "video"
+        attributes.captions == "captions"
+        attributes.transcript == "transcript"
+        skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
+    }
+
+
+
 }
