@@ -56,8 +56,6 @@ import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
-import skills.utils.RelativeTimeUtil
-
 import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
@@ -911,7 +909,6 @@ class SkillsLoader {
         SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
 
         if (loadSkills) {
-//            SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -925,7 +922,7 @@ class SkillsLoader {
         if (achievements) {
             // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
-            def achievementList = achievedLevelRepository.findAllAchievementsForProjectAndSkill(projDef.projectId, badgeDefinition.skillId, PageRequest.of(0, 3))
+            def achievementList = achievedLevelRepository.findAllAchievementsForProjectAndSkill(projDef.projectId, badgeDefinition.skillId, PageRequest.of(0, 3, Sort.Direction.ASC, 'achievedOn'))
             achievementPosition = achievementList.indexOf(userId) + 1
         }
 

@@ -55,31 +55,4 @@ class RelativeTimeUtil {
 
         return formatted+" ago"
     }
-
-    public static String relativeTimeFromNow(Date eventTime) {
-        return relativeTimeBetween(eventTime, new Date())
-    }
-
-    public static boolean isInThePast(Date eventTime) {
-        return isInThePast(eventTime, new Date())
-    }
-
-    public static boolean isInThePast(Date startTime, Date endTime) {
-        LocalDate localDateEvent = startTime.toLocalDate()
-        LocalDate localDateEnd = endTime.toLocalDate()
-        if (localDateEvent == localDateEnd) {
-            return false
-        }
-
-        Period period = Period.between(localDateEvent, localDateEnd)
-        long days = period.getDays()
-        long months = period.getMonths()
-        long years = period.getYears()
-
-        if( years < 0 || days < 0 || months < 0 ) {
-            return false
-        } else {
-            return true
-        }
-    }
 }
