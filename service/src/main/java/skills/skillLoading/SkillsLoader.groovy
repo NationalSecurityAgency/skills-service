@@ -701,7 +701,7 @@ class SkillsLoader {
             }
         }
         if (skillGroupIds) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptionsForSkillsGroups(projectId, skillGroupIds, SkillRelDef.RelationshipType.SkillsGroupRequirement, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptionsForSkillsGroups(projectId, skillGroupIds, SkillRelDef.RelationshipType.SkillsGroupRequirement.toString(), version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdInForSkillsDisplay(userId, projectId, skillGroupIds)
             approvalLookup = approvals.groupBy { it.getSkillId() }
             dbRes.each {

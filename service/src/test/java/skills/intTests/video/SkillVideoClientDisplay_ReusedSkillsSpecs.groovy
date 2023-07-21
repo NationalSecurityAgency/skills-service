@@ -18,18 +18,21 @@ package skills.intTests.video
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
-class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
+class SkillVideoClientDisplay_ReusedSkillsSpecs extends DefaultIntSpec {
 
     def "get video attributes for a single skill" () {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(6, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
@@ -67,22 +70,14 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
 
         def user = getRandomUsers(1).first()
 
-        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
-
-        def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1Skills.collect {
-                [projectId: it.projectId, skillId: it.skillId]
-        })
-
         when:
-        def skill = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[0].skillId)
-        def skill1 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[1].skillId)
-        def skill2 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[2].skillId)
-        def skill3 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[3].skillId)
-        def skill4 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[4].skillId)
-        def skill5 = skillsService.getSingleSkillSummary(user, p2.projectId, p1Skills[5].skillId)
+        skillsService.reuseSkills(p1.projectId, p1Skills.collect { it.skillId }, p1subj2.subjectId)
+        def skill = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def skill1 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0))
+        def skill2 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[2].skillId, 0))
+        def skill3 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[3].skillId, 0))
+        def skill4 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[4].skillId, 0))
+        def skill5 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[5].skillId, 0))
         println JsonOutput.prettyPrint(JsonOutput.toJson(skill1))
         then:
         skill.videoSummary.videoUrl == "http://some.url"
@@ -124,6 +119,8 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(6, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl  : "http://some.url",
@@ -159,24 +156,18 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
                 videoUrl: "http://some.url",
         ])
 
-        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
-
-        def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1Skills.collect {
-            [projectId: it.projectId, skillId: it.skillId]
-        })
-
         def user = getRandomUsers(1).first()
         when:
-        def descriptions = skillsService.getSubjectDescriptions(p2.projectId, p2subj1.subjectId, user)
-        def skill1VidSummary = descriptions.find { it.skillId == p1Skills[0].skillId }.videoSummary
-        def skill2VidSummary = descriptions.find { it.skillId == p1Skills[1].skillId }.videoSummary
-        def skill3VidSummary = descriptions.find { it.skillId == p1Skills[2].skillId }.videoSummary
-        def skill4VidSummary = descriptions.find { it.skillId == p1Skills[3].skillId }.videoSummary
-        def skill5VidSummary = descriptions.find { it.skillId == p1Skills[4].skillId }.videoSummary
-        def skill6VidSummary = descriptions.find { it.skillId == p1Skills[5].skillId }.videoSummary
+        skillsService.reuseSkills(p1.projectId, p1Skills.collect { it.skillId }, p1subj2.subjectId)
+
+        def descriptions = skillsService.getSubjectDescriptions(p1.projectId, p1subj2.subjectId, user)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(descriptions))
+        def skill1VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0) }.videoSummary
+        def skill2VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0) }.videoSummary
+        def skill3VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[2].skillId, 0) }.videoSummary
+        def skill4VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[3].skillId, 0) }.videoSummary
+        def skill5VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[4].skillId, 0) }.videoSummary
+        def skill6VidSummary = descriptions.find { it.skillId == SkillReuseIdUtil.addTag(p1Skills[5].skillId, 0) }.videoSummary
         then:
         skill1VidSummary.videoUrl == "http://some.url"
         skill1VidSummary.videoType == "video"
@@ -211,6 +202,8 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(2, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl  : "http://some.url",
@@ -229,17 +222,11 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
         p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Video
         skillsService.createSkill(p1Skills[1])
 
-        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
-        def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1Skills.collect {
-            [projectId: it.projectId, skillId: it.skillId]
-        })
-
         when:
-        def skill1Captions = skillsService.getVideoCaptions(p2.projectId, p1Skills[0].skillId)
-        def skill2Captions = skillsService.getVideoCaptions(p2.projectId, p1Skills[1].skillId)
+        skillsService.reuseSkills(p1.projectId, p1Skills.collect { it.skillId }, p1subj2.subjectId)
+
+        def skill1Captions = skillsService.getVideoCaptions(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def skill2Captions = skillsService.getVideoCaptions(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0))
 
         then:
         skill1Captions == "captions"
@@ -251,6 +238,8 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(2, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl  : "http://some.url",
@@ -268,17 +257,10 @@ class SkillVideoClientDisplay_ImpotedSkillsSpecs extends DefaultIntSpec {
         p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Video
         skillsService.createSkill(p1Skills[1])
 
-        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
-        def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1Skills.collect {
-            [projectId: it.projectId, skillId: it.skillId]
-        })
-
         when:
-        def skill1T = skillsService.getVideoTranscript(p2.projectId, p1Skills[0].skillId)
-        def skill2T = skillsService.getVideoTranscript(p2.projectId, p1Skills[1].skillId)
+        skillsService.reuseSkills(p1.projectId, p1Skills.collect { it.skillId }, p1subj2.subjectId)
+        def skill1T = skillsService.getVideoTranscript(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        def skill2T = skillsService.getVideoTranscript(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0))
 
         then:
         skill1T == "transcript"
