@@ -61,7 +61,9 @@ class SkillAttributeService {
     }
 
     SkillVideoAttrs getVideoAttrs(String projectId, String skillId) {
-        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        skillVideoAttrs.captions = InputSanitizer.unSanitizeCaption(skillVideoAttrs.captions)
+        return skillVideoAttrs
     }
 
     void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {

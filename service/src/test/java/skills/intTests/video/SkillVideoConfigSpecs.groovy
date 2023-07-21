@@ -156,6 +156,31 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attributes.transcript == "<a href=\"http://skillcooolexample.com/\">transcript</a>"
     }
 
+    def "keep --> in captions"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        String sampleCaption = '''WEBVTT
+
+    1
+    00:00:00.500 --> 00:00:04.000
+    This is the very first caption!'''
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "<a href='http://skillcooolexample.com/' onclick='evilDoing()'>transcript</a>",
+                captions: sampleCaption.toString(),
+        ])
+
+        when:
+        def attributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        String caption = skillsService.getVideoCaptions(p1.projectId, p1Skills[0].skillId)
+        then:
+        attributes.captions == sampleCaption
+        caption == sampleCaption
+    }
+
     def "video attributes must provide videoUrl"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

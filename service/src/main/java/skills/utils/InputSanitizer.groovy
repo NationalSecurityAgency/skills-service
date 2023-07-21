@@ -37,6 +37,7 @@ class InputSanitizer {
     private static final Pattern AMP = ~/&amp;/
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
+    private static final Pattern CAPTION_ARROW = ~/--&gt;/
 
     private static final SAFE_LIST = Safelist.relaxed()
             .addTags('del', 'skills-display')
@@ -49,6 +50,13 @@ class InputSanitizer {
         }
 
         return Jsoup.clean(input, "", SAFE_LIST, print)
+    }
+    static String unSanitizeCaption(String input) {
+        if (!input) {
+            return input;
+        }
+
+        return CAPTION_ARROW.matcher(input).replaceAll("-->")
     }
 
     static String sanitizeUrl(String uri) {

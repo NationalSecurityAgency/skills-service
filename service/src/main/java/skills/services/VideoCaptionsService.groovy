@@ -20,8 +20,8 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.services.attributes.SkillAttributeService
-import skills.services.attributes.SkillVideoAttrs
 import skills.storage.repos.SkillAttributesDefRepo
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -35,6 +35,9 @@ class VideoCaptionsService {
 
     String getVideoCaptions(String projectId, String skillId) {
         String res = skillAttributesDefRepo.getVideoCaptionsByProjectAndSkillId(projectId, skillId)
+        if (StringUtils.isNotBlank(res)) {
+            return InputSanitizer.unSanitizeCaption(res)
+        }
         return StringUtils.isNotBlank(res) ? res : ""
     }
 
