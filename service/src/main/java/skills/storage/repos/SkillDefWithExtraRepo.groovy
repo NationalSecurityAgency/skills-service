@@ -95,8 +95,8 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
     List<SkillDescDBRes> findAllChildSkillsDescriptions(String projectId, String parentSkillId, String relationshipType, int version, String userId)
 
     @Query(value='''SELECT c.skill_id                                                                     as skillId,
-                           c.description                                                                  as description,
-                           c.help_url                                                                     as helpUrl,
+                           convert_from(lo_get(CAST(c.description as oid)), 'UTF8') as description,
+                           convert_from(lo_get(CAST(c.help_url as oid)), 'UTF8') as helpUrl,
                            ua.achieved_on                                                                 as achievedOn,
                            c.self_reporting_type                                                          as selfReportingType,
                            c.type                                                                         as type,
