@@ -16,13 +16,11 @@
 package skills.intTests.community
 
 import groovy.util.logging.Slf4j
+import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.EmailUtils
-import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
+import skills.intTests.utils.*
 import skills.storage.model.auth.RoleName
+import skills.utils.GroovyToJavaByteUtils
 import skills.utils.WaitFor
 
 import static skills.intTests.utils.SkillsFactory.createProject
@@ -196,6 +194,42 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "cannot download attachments associated with a UC protected project if the user does not belong to the user community"() {
+        when:
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        Map proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        Map subject = SkillsFactory.createSubject()
+        Map skill = SkillsFactory.createSkill()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
+        def badge = SkillsFactory.createBadge()
+        String filename = 'test-pdf.pdf'
+        String contents = 'Test is a test'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+
+        pristineDragonsUser.createProject(proj)
+        pristineDragonsUser.createSubject(subject)
+        pristineDragonsUser.createSkill(skill)
+        pristineDragonsUser.createSkill(skillsGroup)
+        pristineDragonsUser.createBadge(badge)
+        def projAttachment = skillsService.uploadAttachment(resource, proj.projectId)
+        def subjAttachment = skillsService.uploadAttachment(resource, proj.projectId, subject.subjectId)
+        def skillAttachment = skillsService.uploadAttachment(resource, proj.projectId, skill.skillId)
+        def skillsGroupAttachment = skillsService.uploadAttachment(resource, proj.projectId, skillsGroup.skillId)
+        def badgeAttachment = skillsService.uploadAttachment(resource, proj.projectId, badge.badgeId)
+
+        then:
+        validateForbidden { allDragonsUser.downloadAttachment(projAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(subjAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(skillAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(skillsGroupAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(badgeAttachment.href) }
     }
 
     String extractInviteFromEmail(String emailBody) {

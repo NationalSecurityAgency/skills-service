@@ -27,6 +27,7 @@ limitations under the License.
 
         <ValidationProvider rules="required|maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Question">
           <markdown-editor v-if="showQuestion && questionDefInternal"
+                           :quiz-id="quizId"
                            label="Question"
                            label-class="font-weight-bold text-primary"
                            :resizable="true"
@@ -238,6 +239,9 @@ limitations under the License.
       },
       maxAnswersAllowed() {
         return this.$store.getters.config.maxAnswersPerQuizQuestion;
+      },
+      quizId() {
+        return this.questionDef.quizId ? this.questionDef.quizId : this.$route.params.quizId;
       },
     },
     methods: {

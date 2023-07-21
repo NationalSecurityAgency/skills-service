@@ -19,6 +19,10 @@ class UploadAttachmentResult {
     String filename
     String contentType
     String href
+    String uuid
     Long size
     String userId
+    String projectId
+    String quizId
+    String skillId
 }

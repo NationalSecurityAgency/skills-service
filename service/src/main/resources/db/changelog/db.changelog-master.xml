@@ -2461,4 +2461,54 @@
 
     </changeSet>
 
+    <changeSet id="41" author="skills team">
+        <addColumn tableName="attachments">
+            <column name="project_id" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="attachments">
+            <column name="quiz_id" type="varchar(255)"/>
+        </addColumn>
+        <addColumn tableName="attachments">
+            <column name="skill_id" type="varchar(255)"/>
+        </addColumn>
+
+        <createIndex indexName="index_attachments_project_id"
+                     tableName="attachments">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_attachments_quiz_id"
+                     tableName="attachments">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_attachments_skill_id"
+                     tableName="attachments">
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="attachments"
+                                 constraintName="fk_attachments_project_definition_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="quiz_id"
+                                 baseTableName="attachments"
+                                 constraintName="fk_attachments_quiz_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="quiz_id"
+                                 referencedTableName="quiz_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="attachments"
+                                 constraintName="fk_attachments_proj_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
+
+    </changeSet>
+
 </databaseChangeLog>

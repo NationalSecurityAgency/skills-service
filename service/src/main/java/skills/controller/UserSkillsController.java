@@ -35,6 +35,7 @@ import skills.auth.UserInfoService;
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied;
 import skills.controller.exceptions.AttachmentValidator;
 import skills.controller.exceptions.SkillException;
+import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
@@ -490,10 +491,16 @@ class UserSkillsController {
     @RequestMapping(value = "/upload", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
     @Profile
-    public UploadAttachmentResult uploadFile(@RequestParam("file") MultipartFile file) {
+    public UploadAttachmentResult uploadFile(@RequestParam("file") MultipartFile file,
+                                             @RequestParam(name = "projectId", required = false) String projectId,
+                                             @RequestParam(name = "quizId", required = false) String quizId,
+                                             @RequestParam(name = "skillId", required = false) String skillId) {
+        log.info("Project ID ["+projectId+"], quizId ["+quizId+"], skillId ["+skillId+"]");
+        SkillsValidator.isTrue(StringUtils.isNotBlank(projectId) || StringUtils.isNotBlank(quizId) || StringUtils.isNotBlank(skillId),
+                "At least one of projectId, quizId, or skillId must be supplied.");
         AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
         AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
-        return attachmentService.saveAttachment(file);
+        return attachmentService.saveAttachment(file, projectId, quizId, skillId);
     }
 
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)

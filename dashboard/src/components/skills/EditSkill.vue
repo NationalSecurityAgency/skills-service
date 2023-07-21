@@ -223,7 +223,10 @@ limitations under the License.
             <div class="">
             <div class="control">
               <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-model="skillInternal.description" data-cy="skillDescription"/>
+                <markdown-editor v-model="skillInternal.description"
+                                 :project-id="skillInternal.projectId"
+                                 :skill-id="isEdit ? skillInternal.skillId : null"
+                                 data-cy="skillDescription"/>
                 <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>
             </div>

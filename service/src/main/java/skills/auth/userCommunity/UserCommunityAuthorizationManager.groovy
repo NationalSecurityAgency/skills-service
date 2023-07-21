@@ -36,7 +36,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
+import skills.services.AttachmentService
 import skills.services.admin.UserCommunityService
+import skills.storage.model.Attachment
 
 import java.util.function.Supplier
 import java.util.regex.Matcher
@@ -55,8 +57,10 @@ import java.util.regex.Pattern
 class UserCommunityAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
+    private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
 
     private RequestMatcher projectsRequestMatcher
+    private RequestMatcher attachmentsRequestMatcher
 
     @Autowired
     UserCommunityService userCommunityService
@@ -65,12 +69,17 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @Lazy
     UserAuthService userAuthService
 
+    @Autowired
+    @Lazy
+    AttachmentService attachmentService
+
     AuthenticatedAuthorizationManager authenticatedAuthorizationManager
 
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
+        attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
     }
 
     @Override
@@ -83,9 +92,14 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             return authenticatedDecision
         }
         AuthorizationDecision vote = null // ACCESS_ABSTAIN
+        String projectId = null
         if (projectsRequestMatcher.matches(request)) {
+            projectId = extractProjectId(request)
+        } else if (attachmentsRequestMatcher.matches(request)) {
+            projectId = extractProjectIdForAttachment(request)
+        }
+        if (projectId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
-            String projectId = extractProjectId(request)
             Boolean isUserCommunityOnlyProject = projectId && userCommunityService.isUserCommunityOnlyProject(projectId)
             if (isUserCommunityOnlyProject) {
                 log.debug("project id [{}] requires user community only access", projectId)
@@ -107,6 +121,17 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         Matcher pid = PROJECT_ID.matcher(url)
         if (pid.matches()) {
             return pid.group(1)
+        }
+        return StringUtils.EMPTY
+    }
+
+    private String extractProjectIdForAttachment(HttpServletRequest request) {
+        String url = getRequestUrl(request)
+        Matcher pid = ATTACHMENT_UUID.matcher(url)
+        if (pid.matches()) {
+            String uuid = pid.group(1)
+            Attachment attachment = attachmentService.getAttachment(uuid);
+            return attachment?.projectId
         }
         return StringUtils.EMPTY
     }

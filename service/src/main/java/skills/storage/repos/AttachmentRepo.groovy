@@ -31,16 +31,22 @@ class AttachmentRepo {
     @PersistenceContext
     EntityManager entityManager;
 
-    void saveAttachment(String filename, String contentType, String uuid, Long size, InputStream is, String userId) {
-        Attachment attachment = new Attachment(filename: filename, contentType: contentType, uuid: uuid, size: size, userId: userId)
-        attachment.setContent(BlobProxy.generateProxy(is, size))
+    void saveAttachment(Attachment attachment, InputStream is) {
+        attachment.setContent(BlobProxy.generateProxy(is, attachment.size))
         entityManager.persist(attachment)
     }
 
-    Attachment getAttachmentByUuidAndFilename(String uuid) {
+    Attachment getAttachmentByUuid(String uuid) {
         String query = "SELECT a from Attachment a where a.uuid = :uuid"
         Query getAttachment = entityManager.createQuery(query, Attachment)
         getAttachment.setParameter('uuid', uuid)
         return getAttachment.getSingleResult()
+    }
+
+    Integer deleteBySkillIdAndProjectIdIsNull(String skillId) {
+        String query = "DELETE from Attachment a where a.skillId = :skillId and projectId is null"
+        Query deleteAttachment = entityManager.createQuery(query)
+        deleteAttachment.setParameter('skillId', skillId)
+        return deleteAttachment.executeUpdate()
     }
 }

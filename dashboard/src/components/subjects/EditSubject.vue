@@ -60,6 +60,8 @@ limitations under the License.
               <div class="mt-3">
                 <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">
                   <markdown-editor v-model="subjectInternal.description"
+                                   :project-id="subjectInternal.projectId"
+                                   :skill-id="isEdit ? subjectInternal.subjectId : null"
                                    aria-errormessage="subjectDescError"
                                    aria-describedby="subjectDescError"
                                    :aria-invalid="errors && errors.length > 0"/>

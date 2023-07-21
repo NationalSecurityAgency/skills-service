@@ -36,22 +36,43 @@ class AttachmentService {
     UserInfoService userInfoService
 
     @Transactional
-    UploadAttachmentResult saveAttachment(MultipartFile file) {
+    UploadAttachmentResult saveAttachment(MultipartFile file,
+                                          String projectId,
+                                          String quizId,
+                                          String skillId) {
         String userId = userInfoService.getCurrentUserId();
         String uuid = UUID.randomUUID().toString()
-        attachmentRepo.saveAttachment(file.originalFilename, file.contentType, uuid, file.size, file.inputStream, userId);
+
+        Attachment attachment = new Attachment(
+                filename: file.originalFilename,
+                contentType: file.contentType,
+                uuid: uuid,
+                size: file.size,
+                userId: userId,
+                projectId: projectId,
+                quizId: quizId,
+                skillId: skillId)
+        attachmentRepo.saveAttachment(attachment, file.inputStream);
         return new UploadAttachmentResult(
                 filename: file.originalFilename,
                 contentType: file.contentType,
                 href: "/api/download/${uuid}",
+                uuid: uuid,
                 size: file.size,
                 userId: userId,
+                projectId: projectId,
+                quizId: quizId,
+                skillId: skillId,
         )
     }
 
     @Transactional(readOnly = true)
     Attachment getAttachment(String uuid) {
-        return attachmentRepo.getAttachmentByUuidAndFilename(uuid)
+        return attachmentRepo.getAttachmentByUuid(uuid)
+    }
+
+    Integer deleteGlobalBadgeAttachments(String globalBadgeId) {
+        return attachmentRepo.deleteBySkillIdAndProjectIdIsNull(globalBadgeId)
     }
 
 }

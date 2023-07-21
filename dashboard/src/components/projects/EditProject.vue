@@ -106,6 +106,8 @@ limitations under the License.
                                   name="Project Description">
                 <markdown-editor v-if="!isEdit || descriptionLoaded"
                                  v-model="internalProject.description"
+                                 :project-id="internalProject.projectId"
+                                 :allow-attachments="isEdit"
                                  @input="updateDescription" />
                 <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>
               </ValidationProvider>

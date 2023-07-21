@@ -912,16 +912,20 @@ class SkillsService {
         body.put("customIcon", icon)
         wsHelper.supervisorUpload("/icons/upload", body)
     }
-    def uploadAttachment(Resource attachment){
+    def uploadAttachment(Resource attachment, String projectId=null, String skillId=null, String quizId=null){
         Map body = [:]
         body.put("file", attachment)
+        if (projectId) { body.put("projectId", projectId)}
+        if (skillId) { body.put("skillId", skillId)}
+        if (quizId) { body.put("quizId", quizId)}
         wsHelper.apiUpload("/upload", body)
     }
     // note - not supported, used for testing purposes only
-    def uploadAttachments(List<Resource> attachments){
+    def uploadAttachments(List<Resource> attachments, String projectId='TestProject1'){
         Map body = [:]
         attachments.each { attachment ->
             body.put("file", attachment)
+            body.put("projectId", projectId)
         }
         wsHelper.apiUpload("/upload", body)
     }

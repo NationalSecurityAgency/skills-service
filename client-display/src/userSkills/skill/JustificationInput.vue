@@ -27,6 +27,8 @@ limitations under the License.
                                  :id="`approvalRequiredMsg-${skill.skillId}`"
                                  ref="approvalRequiredMsg"
                                  v-model="approvalRequestedMsg"
+                                 :project-id="skill.projectId"
+                                 :skill-id="skills.skillId"
                                  data-cy="selfReportMsgInput"
                                  :aria-describedby="`reportSkillMsg-${skill.skillId}`"
                                  markdownHeight="250px"

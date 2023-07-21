@@ -109,6 +109,18 @@ limitations under the License.
         type: Boolean,
         default: false,
       },
+      projectId: {
+        type: String,
+        default: null,
+      },
+      quizId: {
+        type: String,
+        default: null,
+      },
+      skillId: {
+        type: String,
+        default: null,
+      },
     },
     data() {
       return {
@@ -265,6 +277,15 @@ limitations under the License.
             if (file.size <= this.maxAttachmentSize) {
               const data = new FormData();
               data.append('file', file);
+              if (this.projectId) {
+                data.append('projectId', this.projectId);
+              }
+              if (this.quizId) {
+                data.append('quizId', this.quizId);
+              }
+              if (this.skillId) {
+                data.append('skillId', this.skillId);
+              }
               FileUploadService.upload('/api/upload', data, (response) => {
                 this.$refs.toastuiEditor.invoke('exec', 'addLink', {
                   linkUrl: response.data.href,

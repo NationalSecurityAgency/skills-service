@@ -50,6 +50,12 @@ class Attachment {
 
     String userId;
 
+    String projectId;
+
+    String quizId;
+
+    String skillId;
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created

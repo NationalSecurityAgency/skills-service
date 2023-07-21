@@ -63,6 +63,8 @@ limitations under the License.
             <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
               <markdown-editor v-if="internalGroup && (!isEdit || !isLoading)"
                                v-model="internalGroup.description"
+                               :project-id="internalGroup.projectId"
+                               :skill-id="isEdit ? internalGroup.skillId : null"
                                :aria-invalid="errors && errors.length > 0"
                                aria-errormessage="groupDescriptionError"
                                aria-describedby="groupDescriptionError"

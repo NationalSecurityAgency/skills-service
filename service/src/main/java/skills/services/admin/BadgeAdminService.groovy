@@ -91,6 +91,9 @@ class BadgeAdminService {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
+    @Autowired
+    AttachmentService attachmentService
+
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
@@ -213,6 +216,10 @@ class BadgeAdminService {
         assert badgeDefinition.type == type
 
         ruleSetDefGraphService.deleteSkillWithItsDescendants(badgeDefinition)
+
+        if (projectId == null) {
+            attachmentService.deleteGlobalBadgeAttachments(badgeId)
+        }
 
         // reset display order attribute - make sure the order is continuous - 0...N
         ProjDef projDef

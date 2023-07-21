@@ -62,6 +62,7 @@ limitations under the License.
               <markdown-editor v-model="userAgreement"
                                @input="updateUserAgreement"
                                label="User Agreement"
+                               :allow-attachments="false"
                                :resizable="true"
                                aria-errormessage="userAgreementError"
                                aria-describedby="userAgreementError"
