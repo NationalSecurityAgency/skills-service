@@ -106,17 +106,6 @@ limitations under the License.
         const color = this.colors[colorIndex];
         return `${icon} ${color}`;
       },
-      numberOfStars(position) {
-        let numberOfStars = 0;
-        if (position === 1) {
-          numberOfStars = 3;
-        } else if (position === 2) {
-          numberOfStars = 2;
-        } else if (position === 3) {
-          numberOfStars = 1;
-        }
-        return numberOfStars;
-      },
     },
   };
 </script>
