@@ -78,7 +78,6 @@ class SkillVideoClientDisplay_ReusedSkillsSpecs extends DefaultIntSpec {
         def skill3 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[3].skillId, 0))
         def skill4 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[4].skillId, 0))
         def skill5 = skillsService.getSingleSkillSummary(user, p1.projectId, SkillReuseIdUtil.addTag(p1Skills[5].skillId, 0))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(skill1))
         then:
         skill.videoSummary.videoUrl == "http://some.url"
         skill.videoSummary.videoType == "video"

@@ -16,14 +16,19 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Configure Video"/>
-    <b-overlay :show="loading">
+    <b-overlay :show="loading.video || loading.skill">
     <b-card>
+      <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Video attributes of <span
+        v-if="isImported"><b-badge variant="success"><i class="fas fa-book" aria-hidden="true"/> Imported</b-badge></span><span v-if="isReused"><b-badge variant="success"><i class="fas fa-recycle" aria-hidden="true"/> Reused</b-badge></span>
+        skills are read-only.
+      </div>
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
       <div class="row">
         <div class="col-md">
           <b-form-group label="* Video URL:" label-for="videoUrlInput">
             <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
-              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate"/>
+              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate" :disabled="isReadOnly"/>
               <small role="alert" class="form-text text-danger" id="videoUrlError" data-cy="videoUrlErr">{{errors[0]}}</small>
             </ValidationProvider>
           </b-form-group>
@@ -31,7 +36,7 @@ limitations under the License.
         <div class="col-md-3">
           <b-form-group label="Video Type:" label-for="videoTypeInput">
             <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Type">
-               <b-form-input id="videoTypeInput" v-model="videoConf.videoType" data-cy="videoType"/>
+               <b-form-input id="videoTypeInput" v-model="videoConf.videoType" data-cy="videoType" :disabled="isReadOnly"/>
                <small role="alert" class="form-text text-danger" id="videoTypeError" data-cy="videoTypeErr">{{errors[0]}}</small>
             </ValidationProvider>
           </b-form-group>
@@ -42,7 +47,7 @@ limitations under the License.
         <div slot="label">
           <div class="row">
             <div class="col my-auto">Captions:</div>
-            <div v-if="!videoConf.captions" class="col-auto">
+            <div v-if="!videoConf.captions && !isReadOnly" class="col-auto">
               <b-button variant="outline-info" size="sm"
                         aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
                         @click="fillInCaptionsExample" data-cy="fillCaptionsExamples"><i class="fas fa-plus"></i> Add Example</b-button>
@@ -57,6 +62,7 @@ limitations under the License.
             rows="3"
             max-rows="6"
             data-cy="videoCaptions"
+            :disabled="isReadOnly"
           ></b-form-textarea>
           <small role="alert" class="form-text text-danger" id="videoCaptionsError" data-cy="videoCaptionsError">{{errors[0]}}</small>
         </ValidationProvider>
@@ -71,6 +77,7 @@ limitations under the License.
           rows="3"
           max-rows="6"
           data-cy="videoTranscript"
+          :disabled="isReadOnly"
         ></b-form-textarea>
           <small role="alert" id="videoTranscriptError" class="form-text text-danger" data-cy="videoTranscriptError">{{ errors[0] }}</small>
         </ValidationProvider>
@@ -80,7 +87,7 @@ limitations under the License.
         {{ overallErrMsg }}
       </div>
 
-        <div class="row">
+        <div class="row" v-if="!isReadOnly">
           <div class="col-sm mt-2">
             <b-button variant="outline-info"
                       :disabled="!hasVideoUrl"
@@ -153,6 +160,7 @@ limitations under the License.
   import VideoService from '@/components/video/VideoService';
   import VideoPlayer from '@/common-components/video/VideoPlayer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsService from '../skills/SkillsService';
 
   export default {
     name: 'VideoConfigPage',
@@ -166,10 +174,14 @@ limitations under the License.
           captions: '',
           transcript: '',
         },
+        skillInfo: {},
         watchedProgress: null,
         preview: false,
         refreshingPreview: false,
-        loading: true,
+        loading: {
+          video: true,
+          skill: true,
+        },
         showSavedMsg: false,
         overallErrMsg: null,
       };
@@ -179,6 +191,7 @@ limitations under the License.
     },
     mounted() {
       this.loadSettings();
+      this.loadSkillInfo();
     },
     computed: {
       computedVideoConf() {
@@ -196,6 +209,15 @@ limitations under the License.
       },
       formHasAnyData() {
         return this.videoConf.url || this.videoConf.videoType || this.videoConf.captions || this.videoConf.transcript;
+      },
+      isImported() {
+        return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0 && !this.skillInfo.reusedSkill;
+      },
+      isReused() {
+        return this.skillInfo && this.skillInfo.reusedSkill;
+      },
+      isReadOnly() {
+        return this.isReused || this.isImported;
       },
     },
     methods: {
@@ -222,7 +244,7 @@ limitations under the License.
       },
       saveSettings() {
         this.preview = false;
-        this.loading = true;
+        this.loading.video = true;
         const settings = {
           videoUrl: this.videoConf.url,
           videoType: this.videoConf.videoType,
@@ -238,7 +260,7 @@ limitations under the License.
             this.$nextTick(() => this.$announcer.polite('Video settings were saved'));
           })
           .finally(() => {
-            this.loading = false;
+            this.loading.video = false;
           });
       },
       confirmClearSettings() {
@@ -250,7 +272,7 @@ limitations under the License.
           });
       },
       clearSettings() {
-        this.loading = true;
+        this.loading.video = true;
         this.videoConf.url = '';
         this.videoConf.videoType = '';
         this.videoConf.captions = '';
@@ -259,13 +281,13 @@ limitations under the License.
         // this.$refs.observer.reset();
         VideoService.deleteVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .finally(() => {
-            this.loading = false;
+            this.loading.video = false;
             this.validate();
             this.$nextTick(() => this.$announcer.polite('Video settings were cleared'));
           });
       },
       loadSettings() {
-        this.loading = true;
+        this.loading.video = true;
         VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .then((videoSettings) => {
             this.videoConf.url = videoSettings.videoUrl;
@@ -273,7 +295,17 @@ limitations under the License.
             this.videoConf.captions = videoSettings.captions;
             this.videoConf.transcript = videoSettings.transcript;
           }).finally(() => {
-            this.loading = false;
+            this.loading.video = false;
+          });
+      },
+      loadSkillInfo() {
+        this.loading.skill = true;
+        SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
+          .then((response) => {
+            this.skillInfo = response;
+          })
+          .finally(() => {
+            this.loading.skill = false;
           });
       },
       updatedWatchProgress(progress) {

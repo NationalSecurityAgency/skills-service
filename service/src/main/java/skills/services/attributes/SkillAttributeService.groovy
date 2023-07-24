@@ -26,6 +26,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillAttributesDefRepo
+import skills.storage.repos.SkillDefRepo
 import skills.utils.InputSanitizer
 
 @Service
@@ -34,6 +35,9 @@ class SkillAttributeService {
 
     @Autowired
     SkillDefAccessor skillDefAccessor
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
@@ -48,6 +52,8 @@ class SkillAttributeService {
         if (StringUtils.isNotBlank(videoAttrs.transcript)){
             videoAttrs.transcript = InputSanitizer.sanitize(videoAttrs.transcript)?.trim()
         }
+        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
+        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
 

@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -198,5 +199,73 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("videoUrl was not provided")
+    }
+
+    def "do not allow to set video attributes on an imported skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        skillsService.importSkillFromCatalog(p2.projectId, p2subj1.subjectId, p1.projectId, p1Skills[0].skillId)
+
+        when:
+        skillsService.saveSkillVideoAttributes(p2.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                videoType: "video",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot set video attributes of read-only skill")
+    }
+
+    def "do not allow to set video attributes on reused skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(6, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        skillsService.reuseSkills(p1.projectId, p1Skills.collect { it.skillId }, p1subj2.subjectId)
+        String reusedSkillId = SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0)
+        when:
+        skillsService.saveSkillVideoAttributes(p1.projectId, reusedSkillId, [
+                videoUrl: "http://some.url",
+                videoType: "video",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot set video attributes of read-only skill")
+    }
+
+    def "can only set video attributes for a skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1skillsGroup])
+        def p1Skills = createSkills(6, 1, 1, 100)
+        p1Skills.each {
+            skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)
+        }
+        when:
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1skillsGroup.skillId, [
+                videoUrl: "http://some.url",
+                videoType: "video",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Failed to find skillId")
     }
 }

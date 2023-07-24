@@ -886,7 +886,8 @@ class SkillsAdminService {
                 if (!existingSkillDefinition) {
                     throw new SkillException("selfReportingType=Video is not allowed when creating a new skill", skillRequest.projectId, skillRequest.skillId)
                 }
-                String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(existingSkillDefinition.id)
+                Integer idToValidate = existingSkillDefinition.copiedFrom ?: existingSkillDefinition.id
+                String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(idToValidate)
                 if (StringUtils.isBlank(videoUrl)) {
                     throw new SkillException("Video URL must be configured prior to attempting to set selfReportingType=Video", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
                 }
