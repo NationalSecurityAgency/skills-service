@@ -51,6 +51,7 @@ describe('Configure Video Tests', () => {
     });
 
     it('set skill self-report type to video', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1').as('getSubjectSkills')
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
@@ -73,11 +74,12 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
 
         cy.get('[data-cy="saveSkillButton"]').click()
-        cy.get('[data-cy="skillsTable"] [data-cy="manageSkillBtn_skill1"]')
-
-        cy.get('[data-cy="skillsTable-additionalColumns"] [value="selfReportingType"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
+        cy.wait('@getSubjectSkills').then(() => {
+            cy.get('[data-cy="skillsTable"] [data-cy="manageSkillBtn_skill1"]')
+            cy.get('[data-cy="skillsTable-additionalColumns"] [value="selfReportingType"]')
+                .click({ force: true });
+            cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
+        })
     });
 
     it('configure video with all attributes', () => {
