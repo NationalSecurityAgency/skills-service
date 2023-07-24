@@ -150,7 +150,7 @@ limitations under the License.
         <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
         <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
         <catalog-import-status :skill="skill" />
-        <skill-video :skill="skillInternal"
+        <skill-video v-if="skillInternal" :skill="skillInternal"
                      :video-collapsed-by-default="videoCollapsedByDefault"
                      @points-earned="pointsEarned"
                      class="mt-2" />
@@ -266,7 +266,7 @@ limitations under the License.
       return {
         childSkillsInternal: [],
         videoCollapsed: this.videoCollapsedByDefault,
-        skillInternal: {},
+        skillInternal: null,
       };
     },
     mounted() {
@@ -276,7 +276,7 @@ limitations under the License.
     },
     computed: {
       locked() {
-        return this.skillInternal.isLocked || this.badgeIsLocked;
+        return (this.skillInternal && this.skillInternal.isLocked) || this.badgeIsLocked;
       },
       isSkillComplete() {
         return this.skill && this.skill.meta && this.skill.meta.complete;

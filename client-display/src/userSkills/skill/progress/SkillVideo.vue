@@ -98,6 +98,9 @@ limitations under the License.
         required: false,
       },
     },
+    mounted() {
+      this.trackAchievement = this.skill.selfReporting.enabled && this.skill.selfReporting.type && this.skill.selfReporting.type === 'Video';
+    },
     computed: {
       isAlreadyAchieved() {
         return this.skill.points > 0;
@@ -124,6 +127,7 @@ limitations under the License.
           enable: false,
           msg: '',
         },
+        trackAchievement: true,
         justAchieved: false,
         transcript: {
           show: false,
@@ -135,7 +139,7 @@ limitations under the License.
     methods: {
       updateVideoProgress(watchProgress) {
         this.percentWatched = watchProgress.percentWatched;
-        if (watchProgress.percentWatched > 96 && !this.justAchieved) {
+        if (this.trackAchievement && watchProgress.percentWatched > 96 && !this.justAchieved) {
           UserSkillsService.reportSkill(this.skill.skillId)
             .then((res) => {
               if (res.pointsEarned > 0) {
