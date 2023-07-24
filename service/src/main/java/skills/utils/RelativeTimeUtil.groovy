@@ -55,8 +55,4 @@ class RelativeTimeUtil {
 
         return formatted+" ago"
     }
-
-    public static String relativeTimeFromNow(Date eventTime) {
-        return relativeTimeBetween(eventTime, new Date())
-    }
 }

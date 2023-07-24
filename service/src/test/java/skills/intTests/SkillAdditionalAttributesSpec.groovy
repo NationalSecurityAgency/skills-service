@@ -18,6 +18,7 @@ package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
 import skills.services.attributes.BonusAwardAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.storage.repos.SkillDefRepo
