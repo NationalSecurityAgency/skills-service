@@ -141,6 +141,23 @@ describe('Display Video on Skill Page Tests', () => {
         cy.wait('@reportSkill1')
     });
 
+    it('skill is only achieved for self-report-type of Video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(18000) // 15-second video but just to be sure added extra 3 seconds
+        cy.get('[data-cy="successAlert"]').should('not.exist')
+    });
+
     it('skill with unmet prerequisites will not allow to play the video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
