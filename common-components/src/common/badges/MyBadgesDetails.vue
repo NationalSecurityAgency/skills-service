@@ -135,4 +135,16 @@ limitations under the License.
   .award-icon {
     height: 36px;
   }
+  .skills-color-gold {
+    color: #fee101;
+  }
+  .skills-color-silver {
+    color: #a7a7ad;
+  }
+  .skills-color-bronze {
+    color: #a77044;
+  }
+  .skills-color-orange {
+    color: #e76f51fc;
+  }
 </style>

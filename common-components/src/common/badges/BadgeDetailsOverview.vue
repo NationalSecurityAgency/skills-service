@@ -229,6 +229,18 @@ limitations under the License.
     font-weight: bold;
   }
   .award-info-icon {
-    width: 24px;
+    width: 30px;
+  }
+  .skills-color-gold {
+    color: #fee101;
+  }
+  .skills-color-silver {
+    color: #a7a7ad;
+  }
+  .skills-color-bronze {
+    color: #a77044;
+  }
+  .skills-color-orange {
+    color: #e76f51fc;
   }
 </style>
