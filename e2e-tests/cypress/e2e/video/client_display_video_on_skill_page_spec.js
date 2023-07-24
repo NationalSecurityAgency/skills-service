@@ -96,6 +96,24 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="videoTranscript"]').contains('another')
     });
 
+    it('ability to view transcript on an achieved skill', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser') })
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').should('not.exist')
+        cy.get('[data-cy="viewTranscriptBtn"]').click()
+        cy.get('[data-cy="videoTranscript"]').contains('another')
+    });
+
     it('points messages and progress is only shown when skill is selfReport=Video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -132,11 +150,13 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
         cy.get('[data-cy="successAlert"]').contains('You just earned 100 points')
+        cy.get('[data-cy="successAlert"] [data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
         cy.wait('@reportSkill1')
     });
@@ -213,6 +233,5 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="successAlert"]').should('not.exist')
         cy.get('[data-cy="videoError"]').contains('Insufficient project points')
     });
-
 
 });
