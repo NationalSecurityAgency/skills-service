@@ -958,7 +958,7 @@ class SkillsLoader {
             achievementPosition = achievementList.indexOf(userId) + 1
         }
 
-        BonusAwardAttrs attributes = skillAttributeService.getBadgeBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
+        BonusAwardAttrs attributes = skillAttributeService.getBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
         Date firstPerformedSkill = null
         Date expirationDate = null
         boolean achievedWithinExpiration = false

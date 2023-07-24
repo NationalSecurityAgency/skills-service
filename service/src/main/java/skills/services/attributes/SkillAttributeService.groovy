@@ -70,10 +70,6 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs, SkillDef.ContainerType.Badge)
     }
 
-    BonusAwardAttrs getBadgeBonusAwardAttrs(String projectId, String skillId) {
-        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class, SkillDef.ContainerType.Badge)
-    }
-
     void saveBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs)
     }
