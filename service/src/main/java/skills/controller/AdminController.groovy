@@ -552,6 +552,14 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSkillVideoAttrs(@PathVariable("projectId") String projectId,
+                                      @PathVariable("skillId") String skillId) {
+        skillAttributeService.deleteVideoAttrs(projectId, skillId)
+        return new RequestResult(success: true)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillVideoAttrs getSkillVideoAttrs(@PathVariable("projectId") String projectId,

@@ -20,6 +20,7 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -36,6 +37,8 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.icons.CustomIconFacade
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.*
@@ -112,6 +115,9 @@ class ProjectCopyService {
 
     @Autowired
     CustomIconFacade customIconFacade
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @PersistenceContext
     EntityManager entityManager;
@@ -373,12 +379,14 @@ class ProjectCopyService {
         skillDefs?.findAll { it.enabled == "true" && (!it.copiedFrom) }
                 .sort { it.displayOrder }
                 .each { SkillDefWithExtra fromSkill ->
+
                     SkillProjectCopyRequest skillRequest = new SkillProjectCopyRequest()
                     Props.copy(fromSkill, skillRequest)
                     skillRequest.projectId = desProjectId
                     skillRequest.subjectId = subjectId
                     skillRequest.type = fromSkill.type?.toString()
                     skillRequest.version = 0
+
                     skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                     if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
                         QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)
@@ -395,7 +403,7 @@ class ProjectCopyService {
                         groupNumSkillsRequired = fromSkill.numSkillsRequired
                         skillRequest.numSkillsRequired = -1
                     }
-                    skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
+                    SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes = skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId, false)
                     if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
                         createSkills(originalProjectId, desProjectId, subjectId, allCollectedSkills, fromSkill.skillId)
                     }
@@ -403,7 +411,17 @@ class ProjectCopyService {
                         skillRequest.numSkillsRequired = groupNumSkillsRequired
                         skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
                     }
+
+                    handleVideoAttributes(fromSkill, saveSkillTmpRes)
                 }
+    }
+
+    @Profile
+    private void handleVideoAttributes(SkillDefWithExtra fromSkill, SkillsAdminService.SaveSkillTmpRes toSkill) {
+        SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(fromSkill.projectId, fromSkill.skillId)
+        if (StringUtils.isNotBlank(videoAttrs?.videoUrl)) {
+            skillAttributeService.saveVideoAttrs(toSkill.projectId, toSkill.skillId, videoAttrs)
+        }
     }
 
     @Profile

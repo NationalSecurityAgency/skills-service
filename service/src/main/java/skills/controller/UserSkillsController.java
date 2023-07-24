@@ -47,6 +47,7 @@ import skills.icons.CustomIconFacade;
 import skills.services.AttachmentService;
 import skills.services.SelfReportingService;
 import skills.services.VersionService;
+import skills.services.VideoCaptionsService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -115,6 +116,9 @@ class UserSkillsController {
 
     @Autowired
     AttachmentService attachmentService;
+
+    @Autowired
+    VideoCaptionsService videoCaptionsService;
 
     @Value("${skills.config.allowedAttachmentMimeTypes}")
     List<MediaType> allowedAttachmentMimeTypes;
@@ -503,6 +507,19 @@ class UserSkillsController {
         return attachmentService.saveAttachment(file, projectId, quizId, skillId);
     }
 
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    public String getVideoCaptions(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        return videoCaptionsService.getVideoCaptions(projectId, skillId);
+    }
+
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/videoTranscript", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    public String getVideoTranscript(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+        return videoCaptionsService.getVideoTranscript(projectId, skillId);
+    }
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,

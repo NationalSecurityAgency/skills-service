@@ -20,6 +20,7 @@ import groovy.time.TimeCategory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -152,6 +153,9 @@ class SkillsLoader {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
 
     @Autowired
     SkillAttributeService skillAttributeService
@@ -576,7 +580,24 @@ class SkillsLoader {
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
+                videoSummary: getVideoSummary(skillDef)
         )
+    }
+
+    @Profile
+    private VideoSummary getVideoSummary(SkillDefWithExtra skillDef) {
+        Integer skillDefId = skillDef.copiedFrom ?: skillDef.id
+        VideoSummary res = null
+        SkillAttributesDefRepo.VideoSummaryAttributes videoSummaryAttributes = skillAttributesDefRepo.getVideoSummary(skillDefId)
+        if (videoSummaryAttributes) {
+            res = new VideoSummary(
+                    videoUrl: videoSummaryAttributes.url,
+                    videoType: videoSummaryAttributes.type,
+                    hasCaptions: videoSummaryAttributes.hasCaptions,
+                    hasTranscript: videoSummaryAttributes.hasTranscript
+            )
+        }
+        return res
     }
 
     void documentLastViewedSkillId(String projectId, String skillId) {
@@ -660,7 +681,7 @@ class SkillsLoader {
         List<SkillDefWithExtraRepo.SkillDescDBRes> dbRes
         Map<String, List<SkillApprovalRepo.SkillApprovalPlusSkillId>> approvalLookup
         if (projectId) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptions(projectId, subjectId, relationshipType.toString(), version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdForSkillsDisplay(userId, projectId, subjectId, relationshipType)
             approvalLookup = approvals.groupBy { it.getSkillId() }
         } else {
@@ -680,7 +701,7 @@ class SkillsLoader {
             }
         }
         if (skillGroupIds) {
-            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptionsForSkillsGroups(projectId, skillGroupIds, SkillRelDef.RelationshipType.SkillsGroupRequirement, version, userId)
+            dbRes = skillDefWithExtraRepo.findAllChildSkillsDescriptionsForSkillsGroups(projectId, skillGroupIds, SkillRelDef.RelationshipType.SkillsGroupRequirement.toString(), version, userId)
             List<SkillApprovalRepo.SkillApprovalPlusSkillId> approvals = skillApprovalRepo.findsApprovalWithSkillIdInForSkillsDisplay(userId, projectId, skillGroupIds)
             approvalLookup = approvals.groupBy { it.getSkillId() }
             dbRes.each {
@@ -693,12 +714,23 @@ class SkillsLoader {
     }
 
     private SkillDescription createSkillDescription(SkillDefWithExtraRepo.SkillDescDBRes it, SettingsResult helpUrlRootSetting, SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval) {
+        VideoSummary videoSummary = null
+        if (StringUtils.isNotBlank(it.videoUrl)) {
+            videoSummary = new VideoSummary(
+                    videoUrl: it.videoUrl,
+                    videoType: it.videoType,
+                    hasCaptions: it.videoHasCaptions,
+                    hasTranscript: it.videoHasTranscript
+            )
+        }
+
         SkillDescription skillDescription = new SkillDescription(
                 skillId: it.getSkillId(),
                 description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                 href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                 achievedOn: it.getAchievedOn(),
                 type: it.getType(),
+                videoSummary: videoSummary
         )
         skillDescription
     }
@@ -926,7 +958,7 @@ class SkillsLoader {
             achievementPosition = achievementList.indexOf(userId) + 1
         }
 
-        BonusAwardAttrs attributes = skillAttributeService.getBadgeBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
+        BonusAwardAttrs attributes = skillAttributeService.getBonusAwardAttrs(projDef.projectId, badgeDefinition.skillId)
         Date firstPerformedSkill = null
         Date expirationDate = null
         boolean achievedWithinExpiration = false

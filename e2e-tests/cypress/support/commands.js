@@ -123,6 +123,11 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
+
+Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`, videoAttrs);
+});
+
 Cypress.Commands.add("addToMyProjects", (projNum) => {
     cy.request('POST', `/api/myprojects/proj${projNum}`, {});
 });

@@ -382,7 +382,7 @@ class WSHelper {
         assert responseEntity.headers.get("skills-client-lib-version")
 
         String resBody = responseEntity.body
-        if(!resBody || responseEntity.statusCode != HttpStatus.OK){
+        if((!resBody && isResJson) || responseEntity.statusCode != HttpStatus.OK){
             String msg = "Bad request for [$url] code=${responseEntity.statusCode}"
             log.error(msg)
             SkillsClientException e = new SkillsClientException(msg, url, responseEntity.statusCode)

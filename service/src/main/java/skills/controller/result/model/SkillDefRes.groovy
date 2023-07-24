@@ -28,4 +28,6 @@ class SkillDefRes extends SkillDefPartialRes {
     SkillDef.SelfReportingType selfReportingType
 
     Boolean thisSkillWasReusedElsewhere
+
+    Boolean hasVideoConfigured
 }

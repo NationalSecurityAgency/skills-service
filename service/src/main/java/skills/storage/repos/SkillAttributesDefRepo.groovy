@@ -15,7 +15,7 @@
  */
 package skills.storage.repos
 
-
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.SkillAttributesDef
@@ -24,4 +24,59 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
 
     @Nullable
     SkillAttributesDef findBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
+
+    int deleteBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
+
+    static interface VideoSummaryAttributes {
+        String getUrl()
+        String getType()
+        Boolean getHasCaptions()
+        Boolean getHasTranscript()
+    }
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'videoUrl' as url,
+           attributes ->> 'videoType' as type,
+           case when attributes ->> 'captions' is not null then true else false end   as hasCaptions,
+           case when attributes ->> 'transcript' is not null then true else false end as hasTranscript
+        from skill_attributes_definition
+        where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
+    VideoSummaryAttributes getVideoSummary(Integer skillRefId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'videoUrl' as url
+        from skill_attributes_definition
+        where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
+    String getVideoUrlBySkillRefId(Integer skillRefId)
+
+    @Nullable
+    @Query(value = '''select sa.attributes ->> 'captions' as captions
+        from skill_attributes_definition sa, skill_definition sd
+        where sa.type= 'Video'
+            and (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id  
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+    ''', nativeQuery = true)
+    String getVideoCaptionsByProjectAndSkillId(String projectId, String skillId)
+
+    @Nullable
+    @Query(value = '''select sa.attributes ->> 'transcript' as captions
+        from skill_attributes_definition sa, skill_definition sd
+        where sa.type= 'Video'
+            and (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id  
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+    ''', nativeQuery = true)
+    String getVideoTranscriptsByProjectAndSkillId(String projectId, String skillId)
+
+
+    @Nullable
+    @Query(value = '''select sa.*
+        from skill_attributes_definition sa, skill_definition sd
+        where (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end) = sa.skill_ref_id 
+            and sd.project_id = ?1
+            and sd.skill_id = ?2
+            and sa.type= ?3    
+    ''', nativeQuery = true)
+    SkillAttributesDef findByProjectIdAndSkillIdAndType(String projectId, String skillId, String type)
 }

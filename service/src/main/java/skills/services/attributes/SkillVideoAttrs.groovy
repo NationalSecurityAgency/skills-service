@@ -21,4 +21,6 @@ import groovy.transform.Canonical
 class SkillVideoAttrs {
     String videoUrl
     String videoType
+    String captions
+    String transcript
 }

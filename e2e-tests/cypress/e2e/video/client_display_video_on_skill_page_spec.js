@@ -1,0 +1,201 @@
+/*
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+describe('Display Video on Skill Page Tests', () => {
+
+    const testVideo = '/static/videos/create-quiz.mp4'
+    beforeEach(() => {
+    });
+
+    it('display video on skill page', () => {
+        cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions')
+            .as('getVideoCaptions');
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1, description: 'blah blah'})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, description: 'blah blah', selfReportingType: 'Video' });
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.wait('@getVideoCaptions').its('response.body').should('include', 'some')
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="markdownViewer"]').contains('blah blah')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+    });
+
+    it('captions are only loaded if they were configured for that skill', () => {
+        cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions')
+            .as('getSkill1VideoCaptions');
+        cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions', cy.spy().as('getSkill1VideoCaptionsWithSpy'))
+        cy.intercept('GET', '/api/projects/proj1/skills/skill2/videoCaptions', cy.spy().as('getSkill2VideoCaptionsWithSpy'))
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.wait('@getSkill1VideoCaptions').its('response.body').should('include', 'some')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+
+        cy.get('@getSkill1VideoCaptionsWithSpy').should('have.been.called');
+        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.cdClickSkill(1)
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.wait(5000)
+        cy.get('@getSkill2VideoCaptionsWithSpy').should('not.have.been.called');
+    });
+
+    it('transcript is only loaded if it was configured ', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.cdClickSkill(1)
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
+    });
+
+    it('ability to view transcript', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').should('not.exist')
+        cy.get('[data-cy="viewTranscriptBtn"]').click()
+        cy.get('[data-cy="videoTranscript"]').contains('another')
+    });
+
+    it('points messages and progress is only shown when skill is selfReport=Video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.cdClickSkill(1)
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
+    });
+
+    it('achieve skill by watching the video', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(15000)
+        cy.get('[data-cy="successAlert"]').contains('You just earned 100 points')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.wait('@reportSkill1')
+    });
+
+    it('skill with unmet prerequisites will not allow to play the video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+
+        cy.addLearningPathItem(1, 2, 1)
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="videoIsLockedMsg"]').contains('Complete this skill\'s prerequisites to unlock the video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"]').should('not.exist')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
+    });
+
+    it('skill with met prerequisites will allow to play the video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+
+        cy.addLearningPathItem(1, 2, 1)
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser') })
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="videoIsLockedMsg"]').should('not.exist')
+    });
+
+    it('watch video when subject has insufficient points', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, pointIncrement: 33, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(15000)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 100)
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
+        cy.get('[data-cy="successAlert"]').should('not.exist')
+        cy.get('[data-cy="videoError"]').contains('Insufficient project points')
+    });
+
+
+});

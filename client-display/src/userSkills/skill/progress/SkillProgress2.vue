@@ -74,6 +74,7 @@ limitations under the License.
                 <span v-if="skill.selfReporting.type === 'Survey'" data-cy="selfReportSurveyTag"><span class="sr-spelled-out mr-1">Complete </span>Survey</span>
                 <span v-if="skill.selfReporting.type === 'HonorSystem'" data-cy="selfReportHonorSystemTag">Honor<span class="sr-spelled-out ml-1">System</span></span>
                 <span v-if="skill.selfReporting.type === 'Approval'" data-cy="selfReportApprovalTag"><span class="sr-spelled-out mr-1">Request</span>Approval</span>
+                <span v-if="skill.selfReporting.type === 'Video'" data-cy="selfReportApprovalTag"><span class="sr-spelled-out mr-1">Watch</span>Video</span>
               </b-badge>
               <b-badge v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" variant="info" style="font-size: 0.9rem"
                        class="ml-2 overflow-hidden">
@@ -149,6 +150,10 @@ limitations under the License.
         <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
         <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
         <catalog-import-status :skill="skill" />
+        <skill-video :skill="skillInternal"
+                     :video-collapsed-by-default="videoCollapsedByDefault"
+                     @points-earned="pointsEarned"
+                     class="mt-2" />
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
           <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>
         </p>
@@ -199,11 +204,14 @@ limitations under the License.
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillVideo from '@/userSkills/skill/progress/SkillVideo';
 
   export default {
     name: 'SkillProgress2',
     mixins: [NavigationErrorMixin],
     components: {
+      SkillVideo,
       CatalogImportStatus,
       AnimatedNumber,
       SkillOverviewFooter,
@@ -248,25 +256,27 @@ limitations under the License.
         default: false,
         required: false,
       },
+      videoCollapsedByDefault: {
+        type: Boolean,
+        default: false,
+        required: false,
+      },
     },
     data() {
       return {
         childSkillsInternal: [],
+        videoCollapsed: this.videoCollapsedByDefault,
+        skillInternal: {},
       };
     },
     mounted() {
       this.initChildSkills();
       this.highlightChildSkillName();
+      this.skillInternal = { ...this.skill, isLocked: this.isSkillLocked(this.skill) };
     },
     computed: {
       locked() {
-        let hasBadgeDependency = false;
-        if (this.skill.badgeDependencyInfo && this.skill.badgeDependencyInfo.length > 0) {
-          if (this.skill.badgeDependencyInfo.find((item) => !item.achieved)) {
-            hasBadgeDependency = true;
-          }
-        }
-        return (this.skill.dependencyInfo && !this.skill.dependencyInfo.achieved) || this.badgeIsLocked || hasBadgeDependency;
+        return this.skillInternal.isLocked || this.badgeIsLocked;
       },
       isSkillComplete() {
         return this.skill && this.skill.meta && this.skill.meta.complete;
@@ -300,6 +310,15 @@ limitations under the License.
       },
     },
     methods: {
+      isSkillLocked(sk) {
+        let hasBadgeDependency = false;
+        if (sk.badgeDependencyInfo && sk.badgeDependencyInfo.length > 0) {
+          if (sk.badgeDependencyInfo.find((item) => !item.achieved)) {
+            hasBadgeDependency = true;
+          }
+        }
+        return (sk.dependencyInfo && !sk.dependencyInfo.achieved) || hasBadgeDependency;
+      },
       addTagFilter(tag) {
         this.$emit('add-tag-filter', tag);
       },
@@ -360,6 +379,13 @@ limitations under the License.
       },
       genLink(b) {
         return { name: b.skillType === 'GlobalBadge' ? 'globalBadgeDetails' : 'badgeDetails', params: { badgeId: b.badgeId } };
+      },
+      updateVideoProgress(watchProgress) {
+        // eslint-disable-next-line no-console
+        console.log(watchProgress);
+        if (watchProgress.percentWatched > 10) {
+          UserSkillsService.reportSkill(this.skill.skillId);
+        }
       },
     },
   };

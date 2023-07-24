@@ -17,12 +17,17 @@ package skills.services.attributes
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillsValidator
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillAttributesDefRepo
+import skills.storage.repos.SkillDefRepo
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -32,24 +37,43 @@ class SkillAttributeService {
     SkillDefAccessor skillDefAccessor
 
     @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
 
     static final ObjectMapper mapper = new ObjectMapper()
 
     void saveVideoAttrs(String projectId, String skillId, SkillVideoAttrs videoAttrs) {
+        SkillsValidator.isNotBlank(videoAttrs.videoUrl, "videoUrl", projectId, skillId)
+        if (StringUtils.isNotBlank(videoAttrs.captions)){
+            videoAttrs.captions = InputSanitizer.sanitize(videoAttrs.captions)?.trim()
+        }
+        if (StringUtils.isNotBlank(videoAttrs.transcript)){
+            videoAttrs.transcript = InputSanitizer.sanitize(videoAttrs.transcript)?.trim()
+        }
+        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
+        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
 
+    @Transactional
+    boolean deleteVideoAttrs(String projectId, String skillId) {
+        int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video)
+        if (numRemoved > 1) {
+            throw new IllegalStateException("There is more than 1 Video attributes for [${projectId}-${skillId}]")
+        }
+        return numRemoved > 0
+    }
+
     SkillVideoAttrs getVideoAttrs(String projectId, String skillId) {
-        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        skillVideoAttrs.captions = InputSanitizer.unSanitizeCaption(skillVideoAttrs.captions)
+        return skillVideoAttrs
     }
 
     void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs, SkillDef.ContainerType.Badge)
-    }
-
-    BonusAwardAttrs getBadgeBonusAwardAttrs(String projectId, String skillId) {
-        return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class, SkillDef.ContainerType.Badge)
     }
 
     void saveBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
@@ -70,13 +94,17 @@ class SkillAttributeService {
         skillAttributesDefRepo.save(skillAttributesDef)
     }
 
-    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
-        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
-        SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
+    private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz) {
+        SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, type.toString())
         if (!skillAttributesDef) {
             return clazz.getDeclaredConstructor().newInstance()
         }
         T res = mapper.readValue(skillAttributesDef.attributes, clazz)
         return  res
+    }
+
+    private int deleteAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type) {
+        Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, SkillDef.ContainerType.Skill)
+        return skillAttributesDefRepo.deleteBySkillRefIdAndType(skillDefId, type)
     }
 }

@@ -66,6 +66,15 @@ limitations under the License.
               </div>
             </div>
           </template>
+          <template>
+            <div class="row m-0 no-gutters">
+                <b-form-radio class="d-inline-block" value="Video" :disabled="isVideoChoiceDisabled" data-cy="videoRadio">Video</b-form-radio>
+                <span v-if="isVideoChoiceDisabled" class="font-italic text-secondary ml-2" data-cy="videoSelectionMsg">
+                  <span v-if="!isEdit">(Please create skill and configure video settings first)</span>
+                  <span v-else>(Please configure video settings first)</span>
+                </span>
+            </div>
+          </template>
         </b-form-radio-group>
       </b-form-group>
     </div>
@@ -209,6 +218,9 @@ limitations under the License.
       },
     },
     computed: {
+      isVideoChoiceDisabled() {
+        return !this.selfReport.enabled || !this.isEdit || (this.isEdit && !this.skill.hasVideoConfigured);
+      },
       approvalSelected() {
         return this.selfReport.selected === 'Approval';
       },
