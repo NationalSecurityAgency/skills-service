@@ -33,7 +33,7 @@ limitations under the License.
               <div class="form-group">
                 <label for="badgeName">* Badge Name</label>
                 <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator"
-                                    v-slot="{errors}" name="Badge Name">
+                                    v-slot="{errors}" name="Badge Name" :debounce="250">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                          @input="updateBadgeId" aria-required="true" data-cy="badgeName"
                          v-on:keydown.enter="handleSubmit(updateBadge)"
@@ -79,8 +79,8 @@ limitations under the License.
                     <div class="media-body">
                       <div class="form-group">
                         <label for="awardName">Award Name</label>
-                        <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator"
-                                            v-slot="{errors}" name="Award Name">
+                        <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|customNameValidator"
+                                            v-slot="{errors}" name="Award Name" :debounce="250">
                           <input v-focus class="form-control" id="awardName" type="text" v-model="badgeInternal.awardAttrs.name"
                                  aria-required="true" data-cy="awardName"
                                  v-on:keydown.enter="handleSubmit(updateBadge)"
