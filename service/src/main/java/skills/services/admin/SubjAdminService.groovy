@@ -83,6 +83,9 @@ class SubjAdminService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Autowired
+    AttachmentService attachmentService
+
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
         lockingService.lockProject(projectId)
@@ -142,6 +145,8 @@ class SubjAdminService {
                 res = skillDefWithExtraRepo.save(skillDef)
             }
             levelDefService.createDefault(projectId, null, skillDef)
+
+            attachmentService.updateAttachmentsFoundInMarkdown(subjectRequest?.description, projectId, null, subjectRequest.subjectId)
 
             log.debug("Created [{}]", res)
         }

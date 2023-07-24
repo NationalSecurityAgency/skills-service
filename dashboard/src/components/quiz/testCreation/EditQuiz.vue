@@ -81,6 +81,7 @@ limitations under the License.
                                 v-slot="{errors}"
                                 name="Quiz/Survey Description">
               <markdown-editor id="quizDescription"
+                               :quiz-id="isEdit ? quizInternal.quizId : null"
                                v-model="quizInternal.description" data-cy="quizDescription"></markdown-editor>
               <small role="alert" class="form-text text-danger mb-3"
                      data-cy="quizDescriptionError">{{ errors[0] }}</small>

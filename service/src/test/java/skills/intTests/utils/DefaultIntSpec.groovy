@@ -16,38 +16,25 @@
 package skills.intTests.utils
 
 import com.icegreen.greenmail.util.GreenMail
-import com.icegreen.greenmail.util.ServerSetup
 import com.icegreen.greenmail.util.ServerSetupTest
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.support.TransactionTemplate
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
-import skills.storage.model.SkillsDBLock
 import skills.storage.model.UserAttrs
-import skills.storage.repos.ClientPrefRepo
-import skills.storage.repos.NotificationsRepo
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.QuizDefRepo
-import skills.storage.repos.SettingRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserAttrsRepo
-import skills.storage.repos.UserEventsRepo
-import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.*
 import skills.utils.RetryUtil
 import spock.lang.Specification
-
-import jakarta.annotation.PostConstruct
 
 @Slf4j
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
@@ -119,6 +106,12 @@ class DefaultIntSpec extends Specification {
     @Autowired
     QuizDefRepo quizDefRepo
 
+    @PersistenceContext
+    EntityManager entityManager
+
+    @Autowired
+    TransactionHelper transactionHelper
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -154,6 +147,8 @@ class DefaultIntSpec extends Specification {
                 settingRepo.delete(it)
             }
         }
+
+        deleteAllAttachments()
 
         waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()
@@ -199,7 +194,7 @@ class DefaultIntSpec extends Specification {
 
     SkillsService createService(
             String username = "skills@skills.org",
-            String password = "p@ssw0rd",
+            String password = "password",
             String firstName = "Skills",
             String lastName = "Test",
             String url = "http://localhost:${localPort}".toString()){
@@ -285,6 +280,12 @@ class DefaultIntSpec extends Specification {
         }
 
         return userIds
+    }
+
+    int deleteAllAttachments() {
+        return transactionHelper.doInTransaction {
+            entityManager.createQuery("DELETE from Attachment").executeUpdate()
+        }
     }
 
     protected <T> T runInTransaction(Closure<T> inTransactionLogic) {

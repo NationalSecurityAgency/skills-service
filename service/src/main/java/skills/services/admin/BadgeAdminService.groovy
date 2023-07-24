@@ -93,6 +93,9 @@ class BadgeAdminService {
     SkillRelDefRepo skillRelDefRepo
 
     @Autowired
+    AttachmentService attachmentService
+
+    @Autowired
     SkillAttributeService skillAttributeService
 
     @Transactional()
@@ -126,6 +129,7 @@ class BadgeAdminService {
         }
 
         boolean identifyEligibleUsers = false
+        boolean isEdit = true
 
         if (skillDefinition) {
             String existingEnabled = skillDefinition.enabled;
@@ -142,6 +146,7 @@ class BadgeAdminService {
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
+            isEdit = false
             ProjDef projDef
             if (type == SkillDef.ContainerType.Badge) {
                 projDef = projDefAccessor.getProjDef(projectId)
@@ -173,6 +178,10 @@ class BadgeAdminService {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
 
+        if (!isEdit) {
+            attachmentService.updateAttachmentsFoundInMarkdown(badgeRequest?.description, projectId, null, badgeRequest.badgeId)
+        }
+      
         if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {
             skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
         }
@@ -221,6 +230,10 @@ class BadgeAdminService {
         assert badgeDefinition.type == type
 
         ruleSetDefGraphService.deleteSkillWithItsDescendants(badgeDefinition)
+
+        if (projectId == null) {
+            attachmentService.deleteGlobalBadgeAttachments(badgeId)
+        }
 
         // reset display order attribute - make sure the order is continuous - 0...N
         ProjDef projDef

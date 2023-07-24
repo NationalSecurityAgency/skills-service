@@ -116,6 +116,9 @@ class SkillsAdminService {
     @Autowired
     ProjDefRepo projDefRepo
 
+    @Autowired
+    AttachmentService attachmentService
+
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
         boolean isImportedByOtherProjects = false
@@ -316,6 +319,7 @@ class SkillsAdminService {
             } else {
                 assignToParent(skillRequest, savedSkill, subject)
             }
+            attachmentService.updateAttachmentsFoundInMarkdown(skillRequest.description, savedSkill.projectId, null, savedSkill.skillId)
         }
 
         if (isSkillsGroupChild) {

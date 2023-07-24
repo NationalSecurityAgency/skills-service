@@ -124,6 +124,9 @@ class ProjAdminService {
     @Autowired
     CustomIconRepo customIconRepo
 
+    @Autowired
+    AttachmentService attachmentService
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -173,6 +176,8 @@ class ProjAdminService {
             String userId = userIdParam ?: userInfoService.getCurrentUserId()
             accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.debug("Added user role [{}] to [{}]", RoleName.ROLE_PROJECT_ADMIN, userId)
+
+            attachmentService.updateAttachmentsFoundInMarkdown(projectRequest.description, projectRequest.projectId, null, null)
 
             savedProjDef = projDef
         }

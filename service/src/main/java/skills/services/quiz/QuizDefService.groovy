@@ -114,6 +114,9 @@ class QuizDefService {
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
+    @Autowired
+    AttachmentService attachmentService
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         UserInfo userInfo = userInfoService.currentUser
@@ -200,6 +203,8 @@ class QuizDefService {
             }
 
             log.debug("Saved [{}]", quizDefWithDescription)
+
+            attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
 
             accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }

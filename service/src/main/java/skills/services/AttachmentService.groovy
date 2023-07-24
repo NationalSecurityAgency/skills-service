@@ -16,6 +16,7 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.hibernate.engine.jdbc.BlobProxy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,9 +26,13 @@ import skills.controller.result.model.UploadAttachmentResult
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
 
+import java.util.regex.Pattern
+
 @Slf4j
 @Service
 class AttachmentService {
+
+    private static final Pattern UUID_PATTERN = ~/\[.+\]\(\/api\/download\/([^\)]*)/
 
     @Autowired
     AttachmentRepo attachmentRepo
@@ -36,22 +41,57 @@ class AttachmentService {
     UserInfoService userInfoService
 
     @Transactional
-    UploadAttachmentResult saveAttachment(MultipartFile file) {
+    UploadAttachmentResult saveAttachment(MultipartFile file,
+                                          String projectId,
+                                          String quizId,
+                                          String skillId) {
         String userId = userInfoService.getCurrentUserId();
         String uuid = UUID.randomUUID().toString()
-        attachmentRepo.saveAttachment(file.originalFilename, file.contentType, uuid, file.size, file.inputStream, userId);
+
+        Attachment attachment = new Attachment(
+                filename: file.originalFilename,
+                contentType: file.contentType,
+                uuid: uuid,
+                size: file.size,
+                userId: userId,
+                projectId: projectId,
+                quizId: quizId,
+                skillId: skillId)
+        attachment.setContent(BlobProxy.generateProxy(file.inputStream, file.size))
+        attachmentRepo.saveAttachment(attachment);
         return new UploadAttachmentResult(
                 filename: file.originalFilename,
                 contentType: file.contentType,
                 href: "/api/download/${uuid}",
+                uuid: uuid,
                 size: file.size,
                 userId: userId,
+                projectId: projectId,
+                quizId: quizId,
+                skillId: skillId,
         )
     }
 
     @Transactional(readOnly = true)
     Attachment getAttachment(String uuid) {
-        return attachmentRepo.getAttachmentByUuidAndFilename(uuid)
+        return attachmentRepo.getAttachmentByUuid(uuid)
     }
 
+    @Transactional
+    Integer deleteGlobalBadgeAttachments(String globalBadgeId) {
+        return attachmentRepo.deleteBySkillIdAndProjectIdIsNull(globalBadgeId)
+    }
+
+    @Transactional
+    void updateAttachmentsFoundInMarkdown(String description, String projectId, String quizId, String skillId) {
+        if (description) {
+            UUID_PATTERN.matcher(description).findAll().collect { it[1] }.each { uuid ->
+                Attachment attachment = attachmentRepo.getAttachmentByUuid(uuid)
+                attachment.setProjectId(projectId)
+                attachment.setQuizId(quizId)
+                attachment.setSkillId(skillId)
+                attachmentRepo.saveAttachment(attachment)
+            }
+        }
+    }
 }
