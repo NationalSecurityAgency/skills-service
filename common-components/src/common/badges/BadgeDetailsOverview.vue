@@ -131,10 +131,7 @@ limitations under the License.
       },
     },
     mounted() {
-      if (this.badge.expirationDate > 0) {
-        this.deadline = this.timeToFinish();
-        this.createDeadlineTimer();
-      }
+      this.initializeDeadlineTimer();
     },
     beforeDestroy() {
       if (this.badge.expirationDate > 0) {
@@ -143,10 +140,7 @@ limitations under the License.
     },
     watch: {
       userHasPerformedSkill() {
-        if (this.badge.expirationDate > 0) {
-          this.deadline = this.timeToFinish();
-          this.createDeadlineTimer();
-        }
+        this.initializeDeadlineTimer();
       },
     },
     data() {
@@ -159,6 +153,12 @@ limitations under the License.
       };
     },
     methods: {
+      initializeDeadlineTimer() {
+        if (this.badge.expirationDate > 0) {
+          this.deadline = this.timeToFinish();
+          this.createDeadlineTimer();
+        }
+      },
       createDeadlineTimer() {
         this.deadlineInterval = setInterval(() => {
           this.deadline = this.timeToFinish();
