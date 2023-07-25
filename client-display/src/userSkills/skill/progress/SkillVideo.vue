@@ -60,6 +60,7 @@ limitations under the License.
               <b-spinner v-if="transcript.loading" small />
               <b-button style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
                         variant="link"
+                        class="skills-theme-primary-color"
                         data-cy="viewTranscriptBtn"
                         @click="loadTranscript">View Transcript</b-button>
               <span aria-hidden="true" class="mr-1">|</span>
@@ -71,12 +72,14 @@ limitations under the License.
       <div v-if="skill.videoSummary.hasTranscript && (!isSelfReportTypeVideo || (isAlreadyAchieved && !justAchieved))" class="text-right">
         <b-spinner v-if="transcript.loading" small />
         <b-button style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
+                  class="skills-theme-primary-color"
                   variant="link"
                   data-cy="viewTranscriptBtn"
                   @click="loadTranscript">View Transcript</b-button>
       </div>
-      <b-card v-if="transcript.show" header="Video Transcript" class="mt-1 skills-card-theme-border" data-cy="videoTranscript">
-        {{ transcript.transcript }}
+      <b-card v-if="transcript.show" class="mt-1 skills-card-theme-border">
+        <label for="transcriptDisplay" class="h4">Video Transcript:</label>
+        <b-textarea id="transcriptDisplay" v-model="transcript.transcript" :readonly="true" rows="5" data-cy="videoTranscript"></b-textarea>
       </b-card>
     </div>
 
@@ -122,6 +125,12 @@ limitations under the License.
       },
       isSelfReportTypeVideo() {
         return this.skill.selfReporting.enabled && this.skill.selfReporting.type === 'Video';
+      },
+      transcriptWithNewLines() {
+        if (this.transcript.transcript) {
+          return this.transcript.transcript.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        }
+        return this.transcript.transcript;
       },
     },
     data() {

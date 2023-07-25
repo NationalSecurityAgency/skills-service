@@ -26,7 +26,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1, description: 'blah blah'})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, description: 'blah blah', selfReportingType: 'Video' });
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -48,7 +48,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -68,7 +68,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -85,7 +85,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
@@ -93,14 +93,14 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').contains('another')
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
     });
 
     it('ability to view transcript on an achieved skill', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser') })
 
@@ -111,7 +111,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').contains('another')
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
     });
 
     it('points messages and progress is only shown when skill is selfReport=Video', () => {
@@ -119,7 +119,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.saveVideoAttrs(1, 2, {  videoUrl: testVideo })
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
@@ -142,7 +142,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
 
@@ -165,7 +165,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -184,7 +184,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
 
@@ -202,7 +202,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
 
@@ -221,7 +221,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, pointIncrement: 33, selfReportingType: 'Video' });
 

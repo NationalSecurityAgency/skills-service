@@ -24,24 +24,12 @@ limitations under the License.
         skills are read-only.
       </div>
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-      <div class="row">
-        <div class="col-md">
-          <b-form-group label="* Video URL:" label-for="videoUrlInput">
-            <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
-              <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate" :disabled="isReadOnly"/>
-              <small role="alert" class="form-text text-danger" id="videoUrlError" data-cy="videoUrlErr">{{errors[0]}}</small>
-            </ValidationProvider>
-          </b-form-group>
-        </div>
-        <div class="col-md-3">
-          <b-form-group label="Video Type:" label-for="videoTypeInput">
-            <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Type">
-               <b-form-input id="videoTypeInput" v-model="videoConf.videoType" data-cy="videoType" :disabled="isReadOnly"/>
-               <small role="alert" class="form-text text-danger" id="videoTypeError" data-cy="videoTypeErr">{{errors[0]}}</small>
-            </ValidationProvider>
-          </b-form-group>
-        </div>
-      </div>
+      <b-form-group label="* Video URL:" label-for="videoUrlInput">
+        <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
+          <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate" :disabled="isReadOnly"/>
+          <small role="alert" class="form-text text-danger" id="videoUrlError" data-cy="videoUrlErr">{{errors[0]}}</small>
+        </ValidationProvider>
+      </b-form-group>
 
       <b-form-group label="Captions:" label-for="videoCaptionsInput">
         <div slot="label">

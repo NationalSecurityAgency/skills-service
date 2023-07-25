@@ -91,7 +91,6 @@ describe('Configure Video Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="videoUrl"]').type('http://some.vid')
-        cy.get('[data-cy="videoType"]').type('video/webm')
         cy.get('[data-cy="videoCaptions"]').type('captions')
         cy.get('[data-cy="videoTranscript"]').type('transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
@@ -99,7 +98,6 @@ describe('Configure Video Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
         cy.get('[data-cy="videoUrl"]').should('have.value', 'http://some.vid')
-        cy.get('[data-cy="videoType"]').should('have.value','video/webm')
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
@@ -113,12 +111,6 @@ describe('Configure Video Tests', () => {
         cy.createSkill(1, 1, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-
-        cy.get('[data-cy="videoType"]').type('video/webm', { delay: 0 })
-        cy.get('[data-cy="videoTypeErr"]').contains('Video Type is not valid without Video URL field')
-        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
         cy.get('[data-cy="videoCaptions"]').type('captions', { delay: 0 })
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions is not valid without Video URL field')
@@ -134,7 +126,6 @@ describe('Configure Video Tests', () => {
 
         cy.get('[data-cy="videoUrl"]').type(testVideo, { delay: 0 })
 
-        cy.get('[data-cy="videoTypeErr"]').should('not.be.visible')
         cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
         cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
 
@@ -146,30 +137,22 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="clearVideoSettingsBtn"]').click()
         cy.get('footer .btn-danger').contains('Yes, Do clear').click()
         cy.get('[data-cy="videoUrl"]').should('be.empty')
-        cy.get('[data-cy="videoType"]').should('be.empty')
         cy.get('[data-cy="videoCaptions"]').should('be.empty')
         cy.get('[data-cy="videoTranscript"]').should('be.empty')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.disabled')
-
-        cy.get('[data-cy="videoType"]').type('video/webm', { delay: 0 })
-        cy.get('[data-cy="videoTypeErr"]').contains('Video Type is not valid without Video URL field')
-        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
     });
 
     it('clear attributes', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vidAttr = { videoUrl: 'http://someurl.mp4', videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        const vidAttr = { videoUrl: 'http://someurl.mp4', captions: 'some', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
 
         cy.get('[data-cy="videoUrl"]').should('have.value', vidAttr.videoUrl)
-        cy.get('[data-cy="videoType"]').should('have.value', vidAttr.videoType)
         cy.get('[data-cy="videoCaptions"]').should('have.value', vidAttr.captions)
         cy.get('[data-cy="videoTranscript"]').should('have.value', vidAttr.transcript)
 
@@ -181,7 +164,6 @@ describe('Configure Video Tests', () => {
         cy.get('footer .btn-danger').contains('Yes, Do clear').click()
 
         cy.get('[data-cy="videoUrl"]').should('be.empty')
-        cy.get('[data-cy="videoType"]').should('be.empty')
         cy.get('[data-cy="videoCaptions"]').should('be.empty')
         cy.get('[data-cy="videoTranscript"]').should('be.empty')
 
@@ -191,7 +173,6 @@ describe('Configure Video Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
         cy.get('[data-cy="videoUrl"]').should('be.empty')
-        cy.get('[data-cy="videoType"]').should('be.empty')
         cy.get('[data-cy="videoCaptions"]').should('be.empty')
         cy.get('[data-cy="videoTranscript"]').should('be.empty')
 
@@ -250,7 +231,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
 
         cy.createSubject(1, 2);
@@ -258,7 +239,6 @@ describe('Configure Video Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj2/skills/skill1STREUSESKILLST0/configVideo');
         cy.get('[data-cy="readOnlyAlert"]').contains('Reused')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
-        cy.get('[data-cy="videoType"]').should('be.disabled')
         cy.get('[data-cy="videoCaptions"]').should('be.disabled')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('not.exist')
@@ -270,7 +250,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.exportSkillToCatalog(1, 1, 1);
 
@@ -282,7 +262,6 @@ describe('Configure Video Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1/configVideo');
         cy.get('[data-cy="readOnlyAlert"]').contains('Imported')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
-        cy.get('[data-cy="videoType"]').should('be.disabled')
         cy.get('[data-cy="videoCaptions"]').should('be.disabled')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('not.exist')
@@ -294,7 +273,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some\nok\nglad\n\nok\nmore\nlines\nshould\nrender\nok', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
 
