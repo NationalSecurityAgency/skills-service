@@ -138,7 +138,7 @@ describe('Display Video on Subject Page Tests', () => {
         // play 3rd video
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
-        cy.get('[data-cy="skillVideo-skill3"] [data-cy="successAlert"]').contains('You just earned 33 points')
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"]').contains('You just earned 33 points')
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('33 / 33 Points')

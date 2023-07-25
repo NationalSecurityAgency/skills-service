@@ -705,7 +705,9 @@ limitations under the License.
               copy.skillId = `copy_of_${loadedSkill.skillId}`;
               copy.subjectId = this.subjectId;
               copy.originalSkillId = `copy_of_${loadedSkill.skillId}`;
-              copy.selfReportingType = null;
+              if (loadedSkill.selfReportingType === 'Video') {
+                copy.selfReportingType = null;
+              }
               this.originalSkill = { isEdit: false, ...copy };
             }
             this.initial.skillId = this.originalSkill.skillId;

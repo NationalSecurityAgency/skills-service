@@ -40,11 +40,20 @@ limitations under the License.
     </b-overlay>
     <div v-if="!videoCollapsed && !skill.isLocked">
       <video-player :options="videoConf" @watched-progress="updateVideoProgress" />
-      <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="alert alert-info mt-2" data-cy="watchVideoAlert">
+      <div v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved)"
+           class="alert mt-2"
+           :class="{'alert-success' : justAchieved, 'alert-info': !justAchieved}"
+           data-cy="watchVideoAlert">
         <div class="row">
           <div class="col-md my-auto" data-cy="watchVideoMsg">
-            <i class="fas fa-video font-size-2 mr-1" aria-hidden="true"></i>
-            Earn <b>{{ skill.totalPoints }}</b> for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
+            <div v-if="!justAchieved">
+              <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
+              Earn <b>{{ skill.totalPoints }}</b> for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
+            </div>
+            <div v-if="justAchieved">
+              <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
+                class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
+            </div>
           </div>
           <div class="col-md-auto text-right my-auto">
             <span v-if="skill.videoSummary.hasTranscript">
@@ -59,7 +68,7 @@ limitations under the License.
           </div>
         </div>
       </div>
-      <div v-if="!isSelfReportTypeVideo && skill.videoSummary.hasTranscript" class="text-right">
+      <div v-if="skill.videoSummary.hasTranscript && (!isSelfReportTypeVideo || (isAlreadyAchieved && !justAchieved))" class="text-right">
         <b-spinner v-if="transcript.loading" small />
         <b-button style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
                   variant="link"
@@ -69,10 +78,6 @@ limitations under the License.
       <b-card v-if="transcript.show" header="Video Transcript" class="mt-1 skills-card-theme-border" data-cy="videoTranscript">
         {{ transcript.transcript }}
       </b-card>
-      <div v-if="justAchieved" class="alert alert-success mt-2" data-cy="successAlert">
-        <i class="fas fa-birthday-cake text-success mr-1" style="font-size: 1.2rem"></i> Congrats! You just earned <span
-          class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
-      </div>
     </div>
 
     <div v-if="errNotification.enable" class="alert alert-danger mt-2" role="alert" data-cy="videoError">
@@ -97,6 +102,9 @@ limitations under the License.
         default: false,
         required: false,
       },
+    },
+    mounted() {
+      this.trackAchievement = this.skill.selfReporting.enabled && this.skill.selfReporting.type && this.skill.selfReporting.type === 'Video';
     },
     computed: {
       isAlreadyAchieved() {
@@ -124,6 +132,7 @@ limitations under the License.
           enable: false,
           msg: '',
         },
+        trackAchievement: true,
         justAchieved: false,
         transcript: {
           show: false,
@@ -135,7 +144,7 @@ limitations under the License.
     methods: {
       updateVideoProgress(watchProgress) {
         this.percentWatched = watchProgress.percentWatched;
-        if (watchProgress.percentWatched > 96 && !this.justAchieved) {
+        if (this.trackAchievement && watchProgress.percentWatched > 96 && !this.justAchieved) {
           UserSkillsService.reportSkill(this.skill.skillId)
             .then((res) => {
               if (res.pointsEarned > 0) {
