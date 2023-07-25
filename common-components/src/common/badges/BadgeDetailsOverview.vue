@@ -80,10 +80,10 @@ limitations under the License.
 
               <div v-if="badge.firstPerformedSkill && !badge.badgeAchieved">
                 <i class="fas fa-clock award-info-icon"></i>You started working on this badge <span :title="badge.firstPerformedSkill" class="time-style">{{ badge.firstPerformedSkill | relativeTime() }}</span>.
-                <span v-if="!badge.hasExpired && badge.expirationDate && deadline !== ''">
+                <span v-if="!badge.hasExpired && badge.expirationDate && currentTime">
                    Achieve it in
                   <span class="time-style">
-                    {{ deadline }}
+                    {{ currentTime | duration(badge.expirationDate) }}
                   </span>
                   for the <i :class="badge.awardAttrs.iconClass"></i> <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
                 </span>
@@ -130,6 +130,15 @@ limitations under the License.
         default: false,
       },
     },
+    data() {
+      return {
+        positionNames: ['first', 'second', 'third'],
+        positionNameShort: ['1st', '2nd', '3rd'],
+        classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
+        currentTime: null,
+        timer: null,
+      };
+    },
     mounted() {
       this.initializeDeadlineTimer();
     },
@@ -143,55 +152,25 @@ limitations under the License.
         this.initializeDeadlineTimer();
       },
     },
-    data() {
-      return {
-        positionNames: ['first', 'second', 'third'],
-        positionNameShort: ['1st', '2nd', '3rd'],
-        classNames: ['skills-color-gold', 'skills-color-silver', 'skills-color-bronze'],
-        deadline: null,
-        deadlineInterval: null,
-      };
-    },
     methods: {
       initializeDeadlineTimer() {
         if (this.badge.expirationDate > 0) {
-          this.deadline = this.timeToFinish();
+          this.currentTime = dayjs().utc().valueOf();
           this.createDeadlineTimer();
         }
       },
       createDeadlineTimer() {
-        this.deadlineInterval = setInterval(() => {
-          this.deadline = this.timeToFinish();
-          if (this.deadline === '') {
+        this.timer = setInterval(() => {
+          this.currentTime = dayjs().utc().valueOf();
+          if (this.currentTime >= this.badge.expirationDate) {
             this.destroyDeadlineTimer();
           }
         }, 1000);
       },
       destroyDeadlineTimer() {
-        clearInterval(this.deadlineInterval);
-        this.deadlineInterval = null;
-      },
-      timeToFinish() {
-        const durationObject = dayjs.duration(dayjs(this.badge.expirationDate).diff(dayjs()));
-        const duration = durationObject.$d;
-        let days = '';
-        let hours = '';
-        let minutes = '';
-        let seconds = '';
-        if (duration.days > 0) {
-          days = duration.days + (duration.days > 1 ? ' days' : ' day');
-        }
-        if (duration.hours > 0) {
-          hours = duration.hours + (duration.hours > 1 ? ' hours' : ' hour');
-        }
-        if (duration.minutes > 0) {
-          minutes = duration.minutes + (duration.minutes > 1 ? ' minutes' : ' minute');
-        }
-        if (duration.days === 0 && duration.hours === 0 && duration.minutes >= 0 && duration.seconds > 0) {
-          seconds = duration.seconds + (duration.seconds > 1 ? ' seconds' : ' second');
-        }
-        const string = `${days}${days ? ', ' : ''}${hours}${hours && minutes ? ', ' : ''}${minutes}${minutes && seconds ? ', ' : ''}${seconds}`;
-        return string;
+        clearInterval(this.timer);
+        this.currentTime = null;
+        this.timer = null;
       },
     },
     computed: {

@@ -50,7 +50,13 @@ export default {
   },
   getBadges(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges`)
-      .then((response) => response.data);
+      .then((response) => {
+        const badges = [];
+        response.data.forEach((badge) => {
+          badges.push(this.enhanceWithTimeWindow(badge));
+        });
+        return badges;
+      });
   },
   getBadge(projectId, badgeId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
