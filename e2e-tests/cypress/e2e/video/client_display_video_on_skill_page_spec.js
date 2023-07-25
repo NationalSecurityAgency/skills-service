@@ -155,8 +155,8 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
-        cy.get('[data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="watchVideoMsg"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
         cy.wait('@reportSkill1')
     });
