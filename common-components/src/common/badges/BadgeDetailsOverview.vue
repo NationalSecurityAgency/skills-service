@@ -190,7 +190,7 @@ limitations under the License.
         if (duration.days === 0 && duration.hours === 0 && duration.minutes > 0) {
           seconds = duration.seconds + (duration.seconds > 1 ? ' seconds' : 'second');
         }
-        const string = `${days}${days ? ', ' : ''}${hours}${hours ? ', ' : ''}${minutes}${seconds ? ', ' : ''}${seconds}`;
+        const string = `${days}${days ? ', ' : ''}${hours}${hours && minutes ? ', ' : ''}${minutes}${seconds ? ', ' : ''}${seconds}`;
         return string;
       },
     },
