@@ -19,7 +19,7 @@ limitations under the License.
             <div class="card mb-2 skills-badge-icon">
                 <div class="card-body">
                     <i :class="iconCss" style="font-size: 4em; min-width: 3rem;, max-width: 4rem;"/>
-                    <i v-if="badge.gem" class="fas fa-gem position-absolute" style="top: 5px; right: 5px; color: purple"></i>
+                    <i v-if="badge.gem" class="fas fa-gem position-absolute" style="bottom: 5px; right: 5px; color: purple"></i>
                     <i v-if="badge.global" class="fas fa-globe position-absolute" style="top: 5px; right: 5px; color: blue"></i>
 
                     <span v-if="badge.achievementPosition > 0 && badge.achievementPosition <= 3" class="position-absolute user-trophy">
@@ -141,6 +141,14 @@ limitations under the License.
         this.destroyDeadlineTimer();
       }
     },
+    watch: {
+      userHasPerformedSkill() {
+        if (this.badge.expirationDate > 0) {
+          this.deadline = this.timeToFinish();
+          this.createDeadlineTimer();
+        }
+      },
+    },
     data() {
       return {
         positionNames: ['first', 'second', 'third'],
@@ -169,6 +177,7 @@ limitations under the License.
         let days = '';
         let hours = '';
         let minutes = '';
+        let seconds = '';
         if (duration.days > 0) {
           days = duration.days + (duration.days > 1 ? ' days' : ' day');
         }
@@ -178,7 +187,10 @@ limitations under the License.
         if (duration.minutes > 0) {
           minutes = duration.minutes + (duration.minutes > 1 ? ' minutes' : ' minute');
         }
-        const string = `${days}${days ? ', ' : ''}${hours}${hours ? ', ' : ''}${minutes}`;
+        if (duration.days === 0 && duration.hours === 0 && duration.minutes > 0) {
+          seconds = duration.seconds + (duration.seconds > 1 ? ' seconds' : 'second');
+        }
+        const string = `${days}${days ? ', ' : ''}${hours}${hours ? ', ' : ''}${minutes}${seconds ? ', ' : ''}${seconds}`;
         return string;
       },
     },
@@ -200,6 +212,9 @@ limitations under the License.
       },
       otherUsersAchieved() {
         return (this.badge.numberOfUsersAchieved - 1) === 1 ? 'person has' : 'people have';
+      },
+      userHasPerformedSkill() {
+        return this.badge.firstPerformedSkill;
       },
     },
   };
