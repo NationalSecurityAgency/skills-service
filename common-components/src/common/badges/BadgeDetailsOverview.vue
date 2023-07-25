@@ -187,10 +187,10 @@ limitations under the License.
         if (duration.minutes > 0) {
           minutes = duration.minutes + (duration.minutes > 1 ? ' minutes' : ' minute');
         }
-        if (duration.days === 0 && duration.hours === 0 && duration.minutes > 0) {
-          seconds = duration.seconds + (duration.seconds > 1 ? ' seconds' : 'second');
+        if (duration.days === 0 && duration.hours === 0 && duration.minutes >= 0 && duration.seconds > 0) {
+          seconds = duration.seconds + (duration.seconds > 1 ? ' seconds' : ' second');
         }
-        const string = `${days}${days ? ', ' : ''}${hours}${hours && minutes ? ', ' : ''}${minutes}${seconds ? ', ' : ''}${seconds}`;
+        const string = `${days}${days ? ', ' : ''}${hours}${hours && minutes ? ', ' : ''}${minutes}${minutes && seconds ? ', ' : ''}${seconds}`;
         return string;
       },
     },
