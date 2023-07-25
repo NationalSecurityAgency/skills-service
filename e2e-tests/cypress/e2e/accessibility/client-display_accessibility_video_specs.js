@@ -23,7 +23,7 @@ describe('Client Display Accessibility Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1, description: 'blah blah'})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', captions: 'some', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, captions: 'some', transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, description: 'blah blah', selfReportingType: 'Video' });
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -46,7 +46,7 @@ describe('Client Display Accessibility Video Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
         cy.createSkill(1, 1, 2, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, videoType: 'video/webm', transcript: 'another' }
+        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
         cy.saveVideoAttrs(1, 1, vidAttr)
         cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
 
