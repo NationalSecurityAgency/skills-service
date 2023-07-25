@@ -35,6 +35,7 @@ limitations under the License.
               <label for="projectIdInput">* {{ nameLabelTxt }}</label>
               <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
                                   v-slot="{errors}"
+                                  :debounce="250"
                                   name="Project Name">
                 <input class="form-control" type="text" v-model="internalProject.name"
                        v-on:input="updateProjectId"

@@ -93,7 +93,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').contains('another')
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
     });
 
     it('ability to view transcript on an achieved skill', () => {
@@ -111,7 +111,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').contains('another')
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
     });
 
     it('points messages and progress is only shown when skill is selfReport=Video', () => {

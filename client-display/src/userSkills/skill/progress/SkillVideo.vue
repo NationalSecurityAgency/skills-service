@@ -77,9 +77,9 @@ limitations under the License.
                   data-cy="viewTranscriptBtn"
                   @click="loadTranscript">View Transcript</b-button>
       </div>
-      <b-card v-if="transcript.show" class="mt-1 skills-card-theme-border" data-cy="videoTranscript">
+      <b-card v-if="transcript.show" class="mt-1 skills-card-theme-border">
         <label for="transcriptDisplay" class="h4">Video Transcript:</label>
-        <b-textarea id="transcriptDisplay" v-model="transcript.transcript" :readonly="true" rows="5"></b-textarea>
+        <b-textarea id="transcriptDisplay" v-model="transcript.transcript" :readonly="true" rows="5" data-cy="videoTranscript"></b-textarea>
       </b-card>
     </div>
 
