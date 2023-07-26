@@ -83,7 +83,7 @@ limitations under the License.
                 <span v-if="!badge.hasExpired && badge.expirationDate && currentTime">
                    Achieve it in
                   <span class="time-style">
-                    {{ currentTime | duration(badge.expirationDate) }}
+                    {{ currentTime | duration(badge.expirationDate, true) }}
                   </span>
                   for the <i :class="badge.awardAttrs.iconClass"></i> <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
                 </span>
