@@ -153,15 +153,18 @@ limitations under the License.
       },
     },
     methods: {
+      setCurrentTime() {
+        this.currentTime = dayjs().utc().valueOf();
+      },
       initializeDeadlineTimer() {
-        if (this.badge.expirationDate > 0) {
-          this.currentTime = dayjs().utc().valueOf();
+        if (this.badge.expirationDate > 0 && !this.badge.hasExpired) {
+          this.setCurrentTime();
           this.createDeadlineTimer();
         }
       },
       createDeadlineTimer() {
         this.timer = setInterval(() => {
-          this.currentTime = dayjs().utc().valueOf();
+          this.setCurrentTime();
           if (this.currentTime >= this.badge.expirationDate) {
             this.destroyDeadlineTimer();
           }
