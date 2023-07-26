@@ -936,11 +936,11 @@ class SkillsLoader {
     }
 
     @Profile
-    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadSkills = false, boolean loadProjectName = false) {
+    private SkillBadgeSummary loadBadgeSummary(ProjDef projDef, String userId, SkillDefWithExtra badgeDefinition, Integer version = Integer.MAX_VALUE, boolean loadBadgeDetails = false, boolean loadProjectName = false) {
         List<SkillSummaryParent> skillsRes = []
         SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef?.projectId, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
 
-        if (loadSkills) {
+        if (loadBadgeDetails) {
             skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
         }
 
@@ -949,8 +949,8 @@ class SkillsLoader {
             projectName = projDefRepo.findByProjectId(badgeDefinition.projectId)?.name
         }
 
-        List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
         int achievementPosition = -1;
+        List<UserAchievement> achievements = achievedLevelRepository.findAllByUserIdAndProjectIdAndSkillId(userId, projDef?.projectId, badgeDefinition.skillId)
         if (achievements) {
             // for badges, there should only be one UserAchievement
             assert achievements.size() == 1
@@ -986,7 +986,10 @@ class SkillsLoader {
         String helpUrl = getHelpUrl(helpUrlRootSetting, badgeDefinition.helpUrl)
 
         def badgeDependencySummary = dependencySummaryLoader.loadDependencySummary(userId, projDef.projectId, badgeDefinition.skillId)
-        def numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
+        def numberOfUsersAchieved = -1
+        if(loadBadgeDetails) {
+            numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
+        }
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),

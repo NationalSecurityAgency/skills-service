@@ -64,10 +64,10 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
-          <b-card class="mt-1" v-if="!global" data-cy="bonusAwardCard">
-            <div class="form-group">
+          <b-card class="mt-1" v-if="!global" data-cy="bonusAwardCard">>
+            <div :class="{'form-group': badgeInternal.timeLimitEnabled}">
               <label>
-                <b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Bonus Award
+                <b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Enable Bonus Award
                 <inline-help
                   target-id="timeLimitHelp"
                   :next-focus-el="previousFocus"
@@ -75,7 +75,7 @@ limitations under the License.
                   @hidden="tooltipShowing=false"
                   :msg="badgeInternal.timeLimitEnabled ? 'Uncheck to disable. When disabled, there is no reward for completing a badge within the time limit.' : 'Check to enable. When enabled, users will be rewarded for completing the badge within the time limit.'"/>
               </label>
-              <div class="row" style="padding-bottom: 10px;">
+              <div class="row" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
                 <div class="text-left col">
                   <div class="media">
                     <icon-picker :startIcon="badgeInternal.awardAttrs.iconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>
@@ -99,7 +99,7 @@ limitations under the License.
                   </div>
                 </div>
               </div>
-              <div class="row">
+              <div class="row" v-if="badgeInternal.timeLimitEnabled">
                 <div class="col-12 col-sm">
                   <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
                     <div class="input-group">

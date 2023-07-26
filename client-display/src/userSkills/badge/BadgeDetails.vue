@@ -134,7 +134,7 @@ limitations under the License.
       },
       refreshHeader(event) {
         if (event.badgeId && event.badgeId === this.badge.badgeId) {
-          UserSkillsService.getBadgeSkills(this.$route.params.badgeId, false, false)
+          UserSkillsService.getBadgeSkills(this.$route.params.badgeId, false, true)
             .then((badgeSummary) => {
               this.badgeOverview = badgeSummary;
             });
