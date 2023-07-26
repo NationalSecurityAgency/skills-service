@@ -1023,7 +1023,7 @@ describe('Client Display Tests', () => {
             .contains('Badge 1');
 
         cy.get('[data-cy=badgeDetailsLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("You started working on this badge a day ago. Achieve it in 23 hours, 59 minutes for the Test Badge Award bonus!")
+        cy.get('[data-cy=badge_badge2]').contains("You started working on this badge a day ago. Achieve it in 23 hours and 59 minutes for the Test Badge Award bonus!")
     });
 
     it('badge with a bonus award in progress as of 2 weeks ago', () => {
