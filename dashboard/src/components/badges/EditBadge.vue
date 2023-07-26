@@ -64,7 +64,7 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
-          <b-card class="mt-1" v-if="!global">
+          <b-card class="mt-1" v-if="!global" data-cy="bonusAwardCard">
             <div class="form-group">
               <label>
                 <b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Bonus Award

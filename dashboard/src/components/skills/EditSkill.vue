@@ -518,6 +518,8 @@ limitations under the License.
       selfReportTypeChanged(newType) {
         if (newType === 'Quiz' || newType === 'Video') {
           this.skillInternal.numPerformToCompletion = 1;
+          this.skillInternal.timeWindowEnabled = false;
+          this.skillInternal.numPointIncrementMaxOccurrences = 1;
         }
       },
       setupValidation() {

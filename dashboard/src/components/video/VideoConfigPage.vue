@@ -109,11 +109,11 @@ limitations under the License.
         <div v-if="watchedProgress" class="p-3 pt-4">
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Total Duration:</div>
-            <div class="col"><span class="text-primary">{{ watchedProgress.videoDuration.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.videoDuration * 1000) | formatDuration(true) }}</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Time Watched:</div>
-            <div class="col"><span class="text-primary">{{ watchedProgress.totalWatchTime.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.totalWatchTime * 1000) | formatDuration(true) }}</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">% Watched:</div>
