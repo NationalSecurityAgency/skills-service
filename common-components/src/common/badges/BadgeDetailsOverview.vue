@@ -68,7 +68,7 @@ limitations under the License.
                 <progress-bar bar-color="lightgreen" :val="percent"></progress-bar>
             </div>
 
-            <div class="alert alert-success" v-if="badge && !badge.global" style="font-size: 1.2em;">
+            <div class="alert alert-success" v-if="showBadgeBonusDetails" style="font-size: 1.2em;">
               <div v-if="badge.numberOfUsersAchieved > 0">
                 <i class="fas fa-trophy award-info-icon"></i>
                 <span v-if="!badge.badgeAchieved">{{badge.numberOfUsersAchieved}} {{usersAchieved}} achieved this badge so far - <span class="time-style">you could be next!</span></span>
@@ -76,20 +76,17 @@ limitations under the License.
                 <span v-else>You've achieved this badge</span>
                 <span v-if="achievementOrder !== ''"> - <span class="time-style">and you were the {{achievementOrder}}!</span></span>
               </div>
-              <div v-else><i class="fas fa-car-side award-info-icon"></i>No one has achieved this badge yet - <span class="time-style">you could be the first!</span></div>
+              <div v-else-if="badge.numberOfUsersAchieved === 0"><i class="fas fa-car-side award-info-icon"></i>No one has achieved this badge yet - <span class="time-style">you could be the first!</span></div>
 
-              <div v-if="badge.firstPerformedSkill && !badge.badgeAchieved">
-                <i class="fas fa-clock award-info-icon"></i>You started working on this badge <span :title="badge.firstPerformedSkill" class="time-style">{{ badge.firstPerformedSkill | relativeTime() }}</span>.
-                <span v-if="!badge.hasExpired && badge.expirationDate && currentTime">
-                   Achieve it in
-                  <span class="time-style">
-                    {{ currentTime | duration(badge.expirationDate, true) }}
-                  </span>
-                  for the <i :class="badge.awardAttrs.iconClass"></i> <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
+              <div v-if="bonusAwardTimerActive">
+                <i class="fas fa-clock award-info-icon"></i>Achieve this badge in
+                <span class="time-style">
+                  {{ currentTime | duration(badge.expirationDate, true) }}
                 </span>
+                for the <i :class="badge.awardAttrs.iconClass"></i> <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
               </div>
 
-              <div v-if="badge.badgeAchieved && badge.achievedWithinExpiration">
+              <div v-if="bonusAwardAchieved">
                 <i :class="badge.awardAttrs.iconClass" class="award-info-icon"></i>You've earned the <span class="time-style">{{ badge.awardAttrs.name }}</span> bonus!
               </div>
             </div>
@@ -197,6 +194,15 @@ limitations under the License.
       },
       userHasPerformedSkill() {
         return this.badge.firstPerformedSkill;
+      },
+      showBadgeBonusDetails() {
+        return (this.badge && !this.badge.global) && (this.bonusAwardAchieved || this.bonusAwardTimerActive || this.badge.numberOfUsersAchieved >= 0);
+      },
+      bonusAwardAchieved() {
+        return this.badge.badgeAchieved && this.badge.achievedWithinExpiration;
+      },
+      bonusAwardTimerActive() {
+        return this.badge.firstPerformedSkill && !this.badge.badgeAchieved && !this.badge.hasExpired && this.badge.expirationDate && this.currentTime;
       },
     },
   };
