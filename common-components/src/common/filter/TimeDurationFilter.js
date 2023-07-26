@@ -17,11 +17,11 @@ import Vue from 'vue';
 import dayjs from '@/common-components/DayJsCustomizer';
 import formatDurationFilter from '@/common-components/filter/FormatDurationFilter';
 
-const timeDurationFormatter = (startDate, completedDate) => {
+const timeDurationFormatter = (startDate, completedDate, detailedDays) => {
   const start = dayjs(startDate);
   const end = completedDate ? dayjs(completedDate) : dayjs();
   const valueInMs = end.diff(start);
-  return formatDurationFilter(valueInMs);
+  return formatDurationFilter(valueInMs, detailedDays);
 };
 Vue.filter('duration', timeDurationFormatter);
 
