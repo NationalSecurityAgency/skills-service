@@ -281,8 +281,9 @@ limitations under the License.
           numMinutes: 0,
         };
       }
-      const expirationDays = awardAttrs.numMinutes ? Math.floor(((awardAttrs.numMinutes / 60) / 24)) : 0;
-      const remainingHrs = awardAttrs.numMinutes - (expirationDays * 24);
+      const minutesPerDay = 24 * 60;
+      const expirationDays = awardAttrs.numMinutes ? Math.floor((awardAttrs.numMinutes / minutesPerDay)) : 0;
+      const remainingHrs = awardAttrs.numMinutes - (expirationDays * minutesPerDay);
       const expirationHrs = remainingHrs ? Math.floor((remainingHrs / 60)) : 8;
       const expirationMins = remainingHrs ? remainingHrs % 60 : 0;
       const timeLimitEnabled = awardAttrs.numMinutes > 0;
