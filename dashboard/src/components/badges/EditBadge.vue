@@ -101,7 +101,25 @@ limitations under the License.
               </div>
               <div class="row" v-if="badgeInternal.timeLimitEnabled">
                 <div class="col-12 col-sm">
-                  <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeLimit:@timeLimitMinutes|cantBe0IfMins0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
+                  <ValidationProvider rules="optionalNumeric|required|min_value:0|daysMaxTimeLimit:@timeLimitHours,@timeLimitMinutes|cantBe0IfHours0Minutes0" vid="timeLimitDays" v-slot="{errors}" name="Days">
+                    <div class="input-group">
+                      <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationDays"
+                             value="8" :disabled="!badgeInternal.timeLimitEnabled"
+                             :aria-required="badgeInternal.timeLimitEnabled"
+                             ref="timeLimitDays" data-cy="timeLimitDays"
+                             v-on:keydown.enter="handleSubmit(updateBadge)"
+                             id="timeLimitDays" :aria-label="`time window days ${maxTimeLimitMessage}`"
+                             aria-describedby="badgeDaysError" :aria-invalid="errors && errors.length > 0"
+                             aria-errormessage="badgeDaysError"/>
+                      <div class="input-group-append">
+                        <span class="input-group-text" id="days-append">Days</span>
+                      </div>
+                    </div>
+                    <small role="alert" class="form-text text-danger" data-cy="badgeDaysError" id="badgeDaysError">{{ errors[0] }}</small>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 col-sm">
+                  <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:23|hoursMaxTimeLimit:@timeLimitDays,@timeLimitMinutes|cantBe0IfMins0Days0" vid="timeLimitHours" v-slot="{errors}" name="Hours">
                     <div class="input-group">
                       <input class="form-control d-inline" type="text" v-model="badgeInternal.expirationHrs"
                              value="8" :disabled="!badgeInternal.timeLimitEnabled"
@@ -119,7 +137,7 @@ limitations under the License.
                   </ValidationProvider>
                 </div>
                 <div class="col-12 col-sm">
-                  <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitHours|cantBe0IfHours0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
+                  <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitDays,@timeLimitHours|cantBe0IfHours0Days0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">
                     <div class="input-group">
                       <input class="form-control d-inline"  type="text" v-model="badgeInternal.expirationMins"
                              value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
@@ -263,8 +281,10 @@ limitations under the License.
           numMinutes: 0,
         };
       }
-      const expirationHrs = awardAttrs.numMinutes ? Math.floor((awardAttrs.numMinutes / 60)) : 8;
-      const expirationMins = awardAttrs.numMinutes ? awardAttrs.numMinutes % 60 : 0;
+      const expirationDays = awardAttrs.numMinutes ? Math.floor(((awardAttrs.numMinutes / 60) / 24)) : 0;
+      const remainingHrs = awardAttrs.numMinutes - (expirationDays * 24);
+      const expirationHrs = remainingHrs ? Math.floor((remainingHrs / 60)) : 8;
+      const expirationMins = remainingHrs ? remainingHrs % 60 : 0;
       const timeLimitEnabled = awardAttrs.numMinutes > 0;
       const badgeInternal = {
         originalBadgeId: this.badge.badgeId,
@@ -273,6 +293,7 @@ limitations under the License.
         startDate: null,
         endDate: null,
         badgeId: this.badge.badgeId,
+        expirationDays,
         expirationHrs,
         expirationMins,
         timeLimitEnabled,
@@ -294,6 +315,7 @@ limitations under the License.
           helpUrl: this.badge.helpUrl,
           startDate: this.toDate(this.badge.startDate),
           endDate: this.toDate(this.badge.endDate),
+          expirationDays,
           expirationHrs,
           expirationMins,
           timeLimitEnabled,
@@ -310,7 +332,7 @@ limitations under the License.
         previousFocus: null,
         tooltipShowing: false,
         loadingComponent: true,
-        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate', 'expirationMins', 'expirationHrs'],
+        keysToWatch: ['name', 'description', 'badgeId', 'helpUrl', 'startDate', 'endDate', 'expirationMins', 'expirationHrs', 'expirationDays'],
         restoredFromStorage: false,
         isAwardIcon: false,
       };
@@ -475,6 +497,7 @@ limitations under the License.
       },
       resetTimeLimit(checked) {
         if (!checked) {
+          this.badgeInternal.expirationDays = 0;
           this.badgeInternal.expirationHrs = 8;
           this.badgeInternal.expirationMins = 0;
         }
@@ -578,7 +601,8 @@ limitations under the License.
           },
         });
 
-        const validateLimit = (windowHours, windowMinutes, validator) => {
+        const validateLimit = (windowDays, windowHours, windowMinutes, validator) => {
+          let days = 0;
           let hours = 0;
           let minutes = 0;
           if (windowHours) {
@@ -589,6 +613,13 @@ limitations under the License.
             minutes = parseInt(windowMinutes, 10);
           }
 
+          if (windowDays) {
+            days = parseInt(windowDays, 10);
+          }
+
+          if (validator === 'daysMaxTimeLimit' && days === 0) {
+            return true;
+          }
           if (validator === 'hoursMaxTimeLimit' && hours === 0) {
             return true;
           }
@@ -596,36 +627,52 @@ limitations under the License.
             return true;
           }
 
-          return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
+          return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
         };
 
+        extend('daysMaxTimeLimit', {
+          message: () => this.maxTimeLimitMessage,
+          params: ['hours', 'minutes'],
+          validate(value, { hours, minutes }) {
+            return validateLimit(value, hours, minutes, 'daysMaxTimeLimit');
+          },
+        });
         extend('hoursMaxTimeLimit', {
           message: () => this.maxTimeLimitMessage,
-          params: ['target'],
-          validate(value, { target }) {
-            return validateLimit(value, target, 'hoursMaxTimeLimit');
+          params: ['days', 'minutes'],
+          validate(value, { days, minutes }) {
+            return validateLimit(days, value, minutes, 'hoursMaxTimeLimit');
           },
         });
         extend('minutesMaxTimeLimit', {
           message: () => this.maxTimeLimitMessage,
-          params: ['target'],
-          validate(value, { target }) {
-            return validateLimit(target, value, 'minutesMaxTimeLimit');
+          params: ['days', 'hours'],
+          validate(value, { days, hours }) {
+            return validateLimit(days, hours, value, 'minutesMaxTimeLimit');
           },
         });
-        extend('cantBe0IfHours0', {
-          message: (field) => `${field} must be > 0 if Hours = 0`,
+        extend('cantBe0IfHours0Minutes0', {
+          message: (field) => `${field} must be > 0 if Hours = 0 and Minutes = 0`,
           validate(value) {
-            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationHrs, 10) > 0) {
+            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationHrs, 10) > 0 || parseInt(self.badgeInternal.expirationMins, 10) > 0) {
               return true;
             }
             return false;
           },
         });
-        extend('cantBe0IfMins0', {
-          message: (field) => `${field} must be > 0 if Minutes = 0`,
+        extend('cantBe0IfHours0Days0', {
+          message: (field) => `${field} must be > 0 if Hours = 0 and Days = 0`,
           validate(value) {
-            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationMins, 10) > 0) {
+            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationHrs, 10) > 0 || parseInt(self.badgeInternal.expirationDays, 10) > 0) {
+              return true;
+            }
+            return false;
+          },
+        });
+        extend('cantBe0IfMins0Days0', {
+          message: (field) => `${field} must be > 0 if Minutes = 0 and Days = 0`,
+          validate(value) {
+            if (parseInt(value, 10) > 0 || parseInt(self.badgeInternal.expirationMins, 10) > 0 || parseInt(self.badgeInternal.expirationDays, 10) > 0) {
               return true;
             }
             return false;
