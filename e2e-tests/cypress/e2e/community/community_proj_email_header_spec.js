@@ -398,7 +398,6 @@ describe('Community Project Email Header/Footer Tests', () => {
     it('UC protected project has UC communityHeaderDescriptor value replaced in header/footer for contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
-        cy.loginAsAdminUser();
         cy.createProject(3, {enableProtectedUserCommunity: true})
         cy.enableProdMode(3);
         cy.visit('/progress-and-rankings/manage-my-projects');
@@ -427,7 +426,6 @@ describe('Community Project Email Header/Footer Tests', () => {
     it('Non-UC protected project has default communityHeaderDescriptor value replaced in header/footer for contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
-        cy.loginAsAdminUser();
         cy.createProject(3, {enableProtectedUserCommunity: false})
         cy.enableProdMode(3);
         cy.visit('/progress-and-rankings/manage-my-projects');
