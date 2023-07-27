@@ -2335,14 +2335,14 @@ describe('Badges Tests', () => {
             .type('{selectall}800');
         cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');
         cy.get('input[data-cy=timeLimitDays]')
-            .type('{selectall}0');
+            .type('{selectall}1');
         cy.get('button[data-cy=saveBadgeButton]').should('be.enabled');
 
         cy.get('input[data-cy=timeLimitHours]')
             .type('{selectall}800');
         cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');
         cy.get('input[data-cy=timeLimitHours]')
-            .type('{selectall}0');
+            .type('{selectall}1');
         cy.get('button[data-cy=saveBadgeButton]').should('be.enabled');
 
         cy.get('input[data-cy=timeLimitMinutes]')
