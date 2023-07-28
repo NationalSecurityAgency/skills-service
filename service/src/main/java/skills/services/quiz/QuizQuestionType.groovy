@@ -19,4 +19,5 @@ enum QuizQuestionType {
     MultipleChoice,
     SingleChoice,
     TextInput,
+    Rating,
 }

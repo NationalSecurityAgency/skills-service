@@ -58,17 +58,17 @@ limitations under the License.
           </div>
         </div>
 
-        <div v-if="isQuestionTypeTextInput" class="pl-3">
+        <div v-if="isQuestionTypeTextInput || isQuestionTypeRatingInput" class="pl-3">
           <label for="textInputPlaceholder" hidden>Text Input Answer Placeholder:</label>
           <b-form-textarea
             id="textInputPlaceholder"
-            placeholder="Users will be required to enter text."
+            :placeholder="isQuestionTypeRatingInput ? 'Users will be required to select a rating.' : 'Users will be required to enter text.'"
             data-cy="textAreaPlaceHolder"
             :disabled="true"
             rows="3"
             max-rows="6"/>
         </div>
-        <div v-if="!isQuestionTypeTextInput" class="pl-3">
+        <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-3">
           <div class="mb-1" v-if="isQuizType">
             <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
           </div>
@@ -170,6 +170,10 @@ limitations under the License.
               label: 'Input Text',
               id: QuestionType.TextInput,
               icon: 'far fa-keyboard',
+            }, {
+              label: 'Rating',
+              id: QuestionType.Rating,
+              icon: 'fa fa-star',
             }],
             selectedType: {
               label: 'Multiple Choice',
@@ -191,6 +195,10 @@ limitations under the License.
             label: 'Input Text',
             id: QuestionType.TextInput,
             icon: 'far fa-keyboard',
+          }, {
+            label: 'Rating',
+            id: QuestionType.Rating,
+            icon: 'fa fa-star',
           }],
           selectedType: {
             label: 'Multiple Choice',
@@ -230,6 +238,9 @@ limitations under the License.
       },
       isQuestionTypeTextInput() {
         return this.questionType.selectedType && this.questionType.selectedType.id === QuestionType.TextInput;
+      },
+      isQuestionTypeRatingInput() {
+        return this.questionType.selectedType && this.questionType.selectedType.id === QuestionType.Rating;
       },
       quizType() {
         return this.questionDef.quizType;

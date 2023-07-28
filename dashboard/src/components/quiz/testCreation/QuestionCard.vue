@@ -44,6 +44,9 @@ limitations under the License.
                   </div>
                 </div>
               </div>
+              <div v-if="isRatingType">
+                Rating
+              </div>
               <div v-if="isTextInputType">
                 <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
                 <b-form-textarea
@@ -122,6 +125,9 @@ limitations under the License.
       },
       isTextInputType() {
         return this.question.questionType === QuestionType.TextInput;
+      },
+      isRatingType() {
+        return this.question.questionType === QuestionType.Rating;
       },
       isDragAndDropControlsVisible() {
         return !this.isReadOnlyQuiz && this.showDragAndDropControls;

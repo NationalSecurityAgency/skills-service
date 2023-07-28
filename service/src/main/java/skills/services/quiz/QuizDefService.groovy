@@ -676,7 +676,7 @@ class QuizDefService {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
 
-        if (questionDefRequest.questionType != QuizQuestionType.TextInput) {
+        if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {

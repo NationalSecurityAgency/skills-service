@@ -120,7 +120,7 @@ class QuizRunService {
                     id: it.id,
                     question: InputSanitizer.unsanitizeForMarkdown(it.question),
                     questionType: it.type.toString(),
-                    canSelectMoreThanOne: quizAnswerDefs.count({ Boolean.valueOf(it.isCorrectAnswer) }) > 1,
+                    canSelectMoreThanOne: quizAnswerDefs?.count({ Boolean.valueOf(it.isCorrectAnswer) }) > 1,
                     answerOptions: quizAnswerDefs.collect {
                         new QuizAnswerOptionsInfo(
                                 id: it.id,

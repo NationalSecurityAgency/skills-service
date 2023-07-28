@@ -45,6 +45,9 @@ limitations under the License.
                  data-cy="textInputAnswerErr">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
+      <div v-else-if="isRating">
+        Rating
+      </div>
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
           <ValidationProvider rules="atLeastOneSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
@@ -111,6 +114,9 @@ limitations under the License.
       },
       isTextInput() {
         return this.q.questionType === QuestionType.TextInput;
+      },
+      isRating() {
+        return this.q.questionType === QuestionType.Rating;
       },
       isMissingAnswer() {
         if (this.isTextInput) {
