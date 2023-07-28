@@ -548,6 +548,14 @@ class AdminController {
     RequestResult saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
                             @PathVariable("skillId") String skillId,
                             @RequestBody SkillVideoAttrs skillVideoAttrsRequest) {
+
+        if (skillVideoAttrsRequest.captions) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", skillVideoAttrsRequest.captions)
+        }
+        if (skillVideoAttrsRequest.transcript) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", skillVideoAttrsRequest.transcript)
+        }
+
         skillAttributeService.saveVideoAttrs(projectId, skillId, skillVideoAttrsRequest)
         return new RequestResult(success: true)
     }

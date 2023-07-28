@@ -42,7 +42,7 @@ limitations under the License.
             </div>
           </div>
         </div>
-        <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
+        <ValidationProvider rules="maxVideoCaptionsLength|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
           <b-form-textarea
             id="videoCaptionsInput"
             v-model="videoConf.captions"
@@ -57,7 +57,7 @@ limitations under the License.
       </b-form-group>
 
       <b-form-group label="Transcript:" label-for="videoTranscriptInput">
-        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Transcript">
+        <ValidationProvider rules="maxVideoTranscriptLength|customDescriptionValidator|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Transcript">
         <b-form-textarea
           id="videoTranscriptInput"
           v-model="videoConf.transcript"

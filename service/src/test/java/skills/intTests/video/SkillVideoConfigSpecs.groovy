@@ -93,7 +93,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attributes.transcript == "transcript"
     }
 
-    def "delete video attributs" () {
+    def "delete video attributes" () {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(2, 1, 1, 100)
@@ -136,6 +136,43 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         skill1AttributesAfter.transcript == "transcript1"
 
         !skill2AttributesAfter.videoUrl
+    }
+
+    def "delete video attributes unsets self-report=video" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
+        p1Skills[2].selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        p1Skills.each {
+            skillsService.saveSkillVideoAttributes(p1.projectId, it.skillId, [
+                    videoUrl: "http://some1.url",
+            ])
+        }
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Video.toString()
+        skillsService.createSkill(p1Skills[0])
+
+        when:
+        def skill = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def skill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+        def skill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[2].skillId])
+        skillsService.deleteSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        skillsService.deleteSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+        skillsService.deleteSkillVideoAttributes(p1.projectId, p1Skills[2].skillId)
+        def skillAfter = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def skill1After = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+        def skill2After = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[2].skillId])
+        then:
+        skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
+        !skillAfter.selfReportingType
+
+        skill1.selfReportingType == SkillDef.SelfReportingType.HonorSystem.toString()
+        skill1After.selfReportingType == SkillDef.SelfReportingType.HonorSystem.toString()
+
+        skill2.selfReportingType == SkillDef.SelfReportingType.Approval.toString()
+        skill2After.selfReportingType == SkillDef.SelfReportingType.Approval.toString()
     }
 
     def "sanitize captions and transcript"() {
@@ -267,5 +304,45 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Failed to find skillId")
+    }
+
+    def "captions max length"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        String captionsJustRight = (1..5000).collect { "0" }.join("")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                captions: captionsJustRight.toString(),
+        ])
+        when:
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                captions: captionsJustRight.toString() + "1",
+        ])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Captions] must not exceed [5000]")
+    }
+
+    def "transcript max length"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        String transcriptJustRight = (1..20000).collect { "0" }.join("")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                transcript: transcriptJustRight.toString(),
+        ])
+        when:
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                transcript: transcriptJustRight.toString() + "1",
+        ])
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Transcript] must not exceed [20000]")
     }
 }

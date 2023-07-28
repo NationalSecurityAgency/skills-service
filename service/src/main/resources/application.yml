@@ -163,6 +163,8 @@ skills:
       maxContactOwnersMessageLength: 2500
       maxTagKeyLengthInApprovalWorkloadConfig: 15
       maxTagValueLengthInApprovalWorkloadConfig: 10
+      maxVideoCaptionsLength: 5000
+      maxVideoTranscriptLength: 20000
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

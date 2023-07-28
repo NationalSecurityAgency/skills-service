@@ -64,6 +64,8 @@ class PublicProps {
         maxQuizDefsPerAdmin,
         maxQuestionsPerQuiz,
         maxQuizTextAnswerLength,
+        maxVideoCaptionsLength,
+        maxVideoTranscriptLength
     }
 
     @Autowired

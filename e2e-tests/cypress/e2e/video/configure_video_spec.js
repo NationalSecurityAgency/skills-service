@@ -237,6 +237,34 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
     });
 
+    it('transcript max chars validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
+        const invalidValue = Array(51).fill('a').join('');
+        cy.get('[data-cy="videoTranscript"]').type(invalidValue, { delay: 0 })
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript cannot exceed 50 characters.')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoTranscript"]').type('{backspace}');
+        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+    });
+
+    it('captions max chars validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
+        const invalidValue = Array(50).fill('a').join('');
+        cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions cannot exceed 49 characters.')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoCaptions"]').type('{backspace}');
+        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+    });
+
     it('cannot configure video settings on reused skills', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
