@@ -108,13 +108,13 @@ limitations under the License.
 
 <script>
   import VueSelect from 'vue-select';
+  import { extend } from 'vee-validate';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import QuestionType from '@/common-components/quiz/QuestionType';
   import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers';
-  import { extend } from 'vee-validate';
   import SaveComponentStateLocallyMixin from '../../utils/SaveComponentStateLocallyMixin';
   import ReloadMessage from '../../utils/ReloadMessage';
 
