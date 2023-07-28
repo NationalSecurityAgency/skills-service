@@ -64,6 +64,42 @@ limitations under the License.
         </div>
       </div>
 
+      <div class="row mt-3">
+        <div id="randomizeQuestions" class="col col-md-3 text-secondary" >
+          Randomize Question Order:
+        </div>
+        <div class="col">
+          <div class="row">
+            <div class="col-auto">
+              <b-form-checkbox v-model="settings.randomizeQuestions.value"
+                               aria-label="Randomize order of the questions"
+                               name="Randomize Question Order"
+                               data-cy="randomizeQuestionSwitch" switch>
+                Randomize
+              </b-form-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div id="randomizeAnswers" class="col col-md-3 text-secondary" >
+          Randomize Answer Order:
+        </div>
+        <div class="col">
+          <div class="row">
+            <div class="col-auto">
+              <b-form-checkbox v-model="settings.randomizeAnswers.value"
+                               aria-label="Randomize order of the answers"
+                               name="Randomize Answer Order"
+                               data-cy="randomizeAnswerSwitch" switch>
+                Randomize
+              </b-form-checkbox>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-if="errMsg" class="alert alert-danger">
         {{ errMsg }}
       </div>
@@ -135,6 +171,16 @@ limitations under the License.
             lastLoadedValue: 3,
             lastLoadedUnlimited: true,
           },
+          randomizeQuestions: {
+            value: false,
+            setting: 'quizRandomizeQuestions',
+            lastLoadedValue: false,
+          },
+          randomizeAnswers: {
+            value: false,
+            setting: 'quizRandomizeAnswers',
+            lastLoadedValue: false,
+          },
         },
         errMsg: null,
       };
@@ -155,7 +201,9 @@ limitations under the License.
       hasChanged() {
         return this.settings.passingReq.value !== this.settings.passingReq.lastLoadedValue
           || this.settings.numAttempts.unlimited !== this.settings.numAttempts.lastLoadedUnlimited
-          || (!this.settings.numAttempts.unlimited && this.settings.numAttempts.value !== this.settings.numAttempts.lastLoadedValue);
+          || (!this.settings.numAttempts.unlimited && this.settings.numAttempts.value !== this.settings.numAttempts.lastLoadedValue)
+          || (this.settings.randomizeAnswers.value !== this.settings.randomizeAnswers.lastLoadedValue)
+          || (this.settings.randomizeQuestions.value !== this.settings.randomizeQuestions.lastLoadedValue);
       },
       isSurveyType() {
         return this.quizSummary.type === 'Survey';

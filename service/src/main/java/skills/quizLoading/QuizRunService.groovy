@@ -86,13 +86,15 @@ class QuizRunService {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
 
-        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId)
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
+        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
 
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
                 quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
-        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         return new QuizInfo(
@@ -109,13 +111,21 @@ class QuizRunService {
         )
     }
 
-    private List<QuizQuestionInfo> loadQuizQuestionInfo(String quizId) {
+    private List<QuizQuestionInfo> loadQuizQuestionInfo(String quizId, boolean randomizeQuestions = false, boolean randomizeAnswers = false) {
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
-        List<QuizQuestionInfo> questions = dbQuestionDefs?.sort {it.getDisplayOrder() }?.collect {
+        if(randomizeQuestions) {
+            dbQuestionDefs?.shuffle()
+        } else {
+            dbQuestionDefs?.sort{it.getDisplayOrder()}
+        }
+        List<QuizQuestionInfo> questions = dbQuestionDefs?.collect {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[it.id]
+            if(randomizeAnswers) {
+                quizAnswerDefs?.shuffle()
+            }
             new QuizQuestionInfo(
                     id: it.id,
                     question: InputSanitizer.unsanitizeForMarkdown(it.question),
@@ -195,7 +205,7 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting])
     }
 
     @Profile
