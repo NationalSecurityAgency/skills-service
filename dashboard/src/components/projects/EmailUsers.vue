@@ -135,8 +135,8 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex';
-  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import vSelect from 'vue-select';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SubPageHeader from '../utils/pages/SubPageHeader';
   import SkillsService from '../skills/SkillsService';
   import LevelService from '../levels/LevelService';
