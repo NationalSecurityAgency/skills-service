@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable
 import org.springframework.transaction.annotation.Transactional
 import skills.storage.model.*
 import skills.storage.model.SkillDef.ContainerType
+import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSortingRepository<SkillDef, Integer> {
@@ -852,4 +853,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                 sdChild.skillId = ?2''')
     SkillNameAndSubjectId getSkillNameByProjectIdAndSkillId(String projectId, String skillId)
 
+    @Modifying
+    @Transactional
+    @Query('''update SkillDef set selfReportingType=null where projectId=?1 and skillId=?2 and selfReportingType=?3''')
+    int unsetSelfReportTypeByProjectIdSkillIdAndSelfReportType(String projectId, String skillId, SelfReportingType selfReportingType)
 }
