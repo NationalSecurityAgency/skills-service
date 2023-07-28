@@ -42,7 +42,7 @@ limitations under the License.
             </div>
           </div>
         </div>
-        <ValidationProvider rules="videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
+        <ValidationProvider rules="maxVideoCaptionsLength|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Captions">
           <b-form-textarea
             id="videoCaptionsInput"
             v-model="videoConf.captions"
@@ -57,7 +57,7 @@ limitations under the License.
       </b-form-group>
 
       <b-form-group label="Transcript:" label-for="videoTranscriptInput">
-        <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Transcript">
+        <ValidationProvider rules="maxVideoTranscriptLength|customDescriptionValidator|videoUrlMustBePresent" :debounce="250" v-slot="{ errors }" name="Video Transcript">
         <b-form-textarea
           id="videoTranscriptInput"
           v-model="videoConf.transcript"
@@ -109,11 +109,11 @@ limitations under the License.
         <div v-if="watchedProgress" class="p-3 pt-4">
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Total Duration:</div>
-            <div class="col"><span class="text-primary">{{ watchedProgress.videoDuration.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.videoDuration * 1000) | formatDuration(true) }}</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Time Watched:</div>
-            <div class="col"><span class="text-primary">{{ watchedProgress.totalWatchTime.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.totalWatchTime * 1000) | formatDuration(true) }}</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">% Watched:</div>
