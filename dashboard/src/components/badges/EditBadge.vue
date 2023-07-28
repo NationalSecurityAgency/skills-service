@@ -143,7 +143,7 @@ limitations under the License.
                              value="0" :disabled="!badgeInternal.timeLimitEnabled" ref="timeLimitMinutes" data-cy="timeLimitMinutes"
                              v-on:keydown.enter="handleSubmit(updateBadge)"
                              :aria-required="badgeInternal.timeLimitEnabled"
-                             aria-label="time window minutes"
+                             :aria-label="`time window minutes ${maxTimeLimitMessage}`"
                              aria-describedby="badgeMinutesError"
                              aria-errormessage="badgeMinutesError"
                              :aria-invalid="errors && errors.length > 0"/>
@@ -354,7 +354,7 @@ limitations under the License.
         return `${badgeScope}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
       maxTimeLimitMessage() {
-        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / 60} hours`;
+        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / (60 * 24)} days`;
       },
     },
     watch: {
