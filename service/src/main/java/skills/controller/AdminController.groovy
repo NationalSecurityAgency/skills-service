@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
@@ -48,6 +49,7 @@ import skills.services.settings.ProjectSettingsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.video.AdminVideoService
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
@@ -160,6 +162,9 @@ class AdminController {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    AdminVideoService adminVideoService
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -552,19 +557,23 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    RequestResult saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
+    SkillVideoAttrs saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
                             @PathVariable("skillId") String skillId,
-                            @RequestBody SkillVideoAttrs skillVideoAttrsRequest) {
+                            @RequestParam(name = "file", required = false) MultipartFile file,
+                            @RequestParam(name = "videoUrl", required = false) String videoUrl,
+                            @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
+                            @RequestParam(name = "captions", required = false) String captions,
+                            @RequestParam(name = "transcript", required = false) String transcript) {
 
-        if (skillVideoAttrsRequest.captions) {
-            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", skillVideoAttrsRequest.captions)
+        if (captions) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", captions)
         }
-        if (skillVideoAttrsRequest.transcript) {
-            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", skillVideoAttrsRequest.transcript)
+        if (transcript) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", transcript)
         }
 
-        skillAttributeService.saveVideoAttrs(projectId, skillId, skillVideoAttrsRequest)
-        return new RequestResult(success: true)
+        SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript)
+        return res
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

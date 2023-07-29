@@ -58,7 +58,7 @@ class AttachmentService {
                 quizId: quizId,
                 skillId: skillId)
         attachment.setContent(BlobProxy.generateProxy(file.inputStream, file.size))
-        attachmentRepo.saveAttachment(attachment);
+        attachmentRepo.save(attachment);
         return new UploadAttachmentResult(
                 filename: file.originalFilename,
                 contentType: file.contentType,
@@ -74,7 +74,7 @@ class AttachmentService {
 
     @Transactional(readOnly = true)
     Attachment getAttachment(String uuid) {
-        return attachmentRepo.getAttachmentByUuid(uuid)
+        return attachmentRepo.findByUuid(uuid)
     }
 
     @Transactional
@@ -86,11 +86,11 @@ class AttachmentService {
     void updateAttachmentsFoundInMarkdown(String description, String projectId, String quizId, String skillId) {
         if (description) {
             UUID_PATTERN.matcher(description).findAll().collect { it[1] }.each { uuid ->
-                Attachment attachment = attachmentRepo.getAttachmentByUuid(uuid)
+                Attachment attachment = attachmentRepo.findByUuid(uuid)
                 attachment.setProjectId(projectId)
                 attachment.setQuizId(quizId)
                 attachment.setSkillId(skillId)
-                attachmentRepo.saveAttachment(attachment)
+                attachmentRepo.save(attachment)
             }
         }
     }

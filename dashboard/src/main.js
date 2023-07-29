@@ -48,6 +48,7 @@ import {
   ProgressPlugin,
   BIcon,
   BIconQuestion, ListGroupPlugin,
+  FormFilePlugin,
 } from 'bootstrap-vue';
 
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
@@ -116,6 +117,7 @@ Vue.use(FormDatepickerPlugin);
 Vue.use(ProgressPlugin);
 Vue.use(ListGroupPlugin);
 Vue.use(TimeDurationFilter);
+Vue.use(FormFilePlugin);
 Vue.component('BIcon', BIcon);
 Vue.component('BIconQuestion', BIconQuestion);
 

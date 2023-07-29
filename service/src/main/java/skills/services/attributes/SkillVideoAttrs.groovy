@@ -23,4 +23,7 @@ class SkillVideoAttrs {
     String videoType
     String captions
     String transcript
+    Boolean isInternallyHosted
+    String internallyHostedFileName
+    String internallyHostedAttachmentUuid
 }

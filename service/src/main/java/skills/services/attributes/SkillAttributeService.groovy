@@ -17,11 +17,9 @@ package skills.services.attributes
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import skills.controller.exceptions.SkillsValidator
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillDef
@@ -45,17 +43,10 @@ class SkillAttributeService {
     static final ObjectMapper mapper = new ObjectMapper()
 
     void saveVideoAttrs(String projectId, String skillId, SkillVideoAttrs videoAttrs) {
-        SkillsValidator.isNotBlank(videoAttrs.videoUrl, "videoUrl", projectId, skillId)
-        if (StringUtils.isNotBlank(videoAttrs.captions)){
-            videoAttrs.captions = InputSanitizer.sanitize(videoAttrs.captions)?.trim()
-        }
-        if (StringUtils.isNotBlank(videoAttrs.transcript)){
-            videoAttrs.transcript = InputSanitizer.sanitize(videoAttrs.transcript)?.trim()
-        }
-        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
-        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
+
+
 
     @Transactional
     boolean deleteVideoAttrs(String projectId, String skillId) {

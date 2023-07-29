@@ -24,14 +24,57 @@ limitations under the License.
         skills are read-only.
       </div>
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-      <b-form-group label="* Video URL:" label-for="videoUrlInput">
-        <ValidationProvider rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
-          <b-form-input id="videoUrlInput" v-model="videoConf.url" data-cy="videoUrl" @input="validate" :disabled="isReadOnly"/>
+      <b-form-group label-for="videoUrlInput">
+        <div slot="label">
+          <div class="row">
+            <div class="col my-auto">* Video:</div>
+            <div class="col-auto">
+              <b-button v-if="!showFileUpload" variant="outline-info" size="sm"
+                        aria-label="Switch to Video Upload input option"
+                        @click="switchToFileUploadOption" data-cy="showFileUploadBtn"><i class="fas fa-arrow-circle-up" aria-hidden="true" /> Switch to Upload</b-button>
+              <b-button v-if="showFileUpload" variant="outline-info" size="sm"
+                        aria-label="Clear uploaded video"
+                        @click="switchToExternalUrlOption" data-cy="showFileUploadBtn"><i class="fas fa-globe"></i> Switch to External Link</b-button>
+            </div>
+          </div>
+        </div>
+
+        <b-form-file id="videoUrlInput"
+                     v-if="showFileUpload && !videoConf.isInternallyHosted"
+                     v-model="videoConf.file"
+                     @input="onFileUploadInput"
+                     placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."
+                     drop-placeholder="Drop file here..." />
+
+        <b-input-group v-if="videoConf.isInternallyHosted">
+          <template #prepend>
+            <b-input-group-text><i class="fas fa-server mr-1"></i>
+              SkillTree Hosted
+            </b-input-group-text>
+          </template>
+          <b-form-input id="videoUrlInput"
+                        v-model="videoConf.hostedFileName"
+                        data-cy="videoUrl"
+                        @input="validate"
+                        placeholder="Please enter external URL or upload a video"
+                        :disabled="isReadOnly" />
+          <b-input-group-append>
+            <b-button @click="switchToFileUploadOption"><i class="fa fa-broom" aria-hidden="true"/> Reset</b-button>
+          </b-input-group-append>
+        </b-input-group>
+
+        <ValidationProvider v-if="!showFileUpload && !videoConf.isInternallyHosted" rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
+            <b-form-input id="videoUrlInput"
+                          v-model="videoConf.url"
+                          data-cy="videoUrl"
+                          @input="validate"
+                          placeholder="Please enter external URL"
+                          :disabled="isReadOnly" />
           <small role="alert" class="form-text text-danger" id="videoUrlError" data-cy="videoUrlErr">{{errors[0]}}</small>
         </ValidationProvider>
       </b-form-group>
 
-      <b-form-group label="Captions:" label-for="videoCaptionsInput">
+      <b-form-group label-for="videoCaptionsInput">
         <div slot="label">
           <div class="row">
             <div class="col my-auto">Captions:</div>
@@ -77,28 +120,29 @@ limitations under the License.
 
         <div class="row" v-if="!isReadOnly">
           <div class="col-sm mt-2">
-            <b-button variant="outline-info"
-                      :disabled="!hasVideoUrl"
-                      data-cy="previewVideoSettingsBtn"
-                      aria-label="Preview video"
-                      @click="setupPreview">Preview <i class="fas fa-eye" aria-hidden="true"/></b-button>
             <b-button variant="outline-success"
                       class="ml-2"
                       :disabled="!hasVideoUrl || invalid"
                       data-cy="saveVideoSettingsBtn"
                       aria-label="Save video settings"
-                      @click="handleSubmit(submitSaveSettingsForm)">Save <i class="fas fa-save" aria-hidden="true"/></b-button>
+                      @click="handleSubmit(submitSaveSettingsForm)">Save and Preview <i class="fas fa-save" aria-hidden="true"/></b-button>
             <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
           </div>
           <div class="col-auto mt-2">
+            <b-button variant="outline-secondary"
+                      class="mr-2"
+                      data-cy="previewVideoSettingsBtn"
+                      aria-label="Discard Unsaved"
+                      @click="loadSettings">Discard Changes <i class="fas fa-sync" aria-hidden="true"/></b-button>
             <b-button variant="outline-danger"
                       :disabled="!formHasAnyData"
                       data-cy="clearVideoSettingsBtn"
                       aria-label="Clear video settings"
-                      @click="confirmClearSettings">Clear <i class="fas fa-ban" aria-hidden="true"/></b-button>
+                      @click="confirmClearSettings">Clear <i class="fas fa-trash-alt" aria-hidden="true"/></b-button>
           </div>
         </div>
       </ValidationObserver>
+
       <b-card v-if="preview" class="mt-3" header="Video Preview" body-class="p-0" data-cy="videoPreviewCard">
         <video-player v-if="!refreshingPreview"
                       :options="computedVideoConf"
@@ -148,7 +192,8 @@ limitations under the License.
   import VideoService from '@/components/video/VideoService';
   import VideoPlayer from '@/common-components/video/VideoPlayer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import SkillsService from '../skills/SkillsService';
+  import SkillsService from '@/components/skills/SkillsService';
+  import FileUploadService from '@/common-components/utilities/FileUploadService';
 
   export default {
     name: 'VideoConfigPage',
@@ -157,10 +202,12 @@ limitations under the License.
     data() {
       return {
         videoConf: {
+          file: null,
           url: '',
-          videoType: '',
           captions: '',
           transcript: '',
+          isInternallyHosted: false,
+          hostedFileName: '',
         },
         skillInfo: {},
         watchedProgress: null,
@@ -172,6 +219,7 @@ limitations under the License.
         },
         showSavedMsg: false,
         overallErrMsg: null,
+        showFileUpload: true,
       };
     },
     created() {
@@ -196,7 +244,7 @@ limitations under the License.
         return this.videoConf.url && this.videoConf.url.trim().length > 0;
       },
       formHasAnyData() {
-        return this.videoConf.url || this.videoConf.videoType || this.videoConf.captions || this.videoConf.transcript;
+        return this.videoConf.url || this.videoConf.captions || this.videoConf.transcript;
       },
       isImported() {
         return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0 && !this.skillInfo.reusedSkill;
@@ -230,26 +278,58 @@ limitations under the License.
             }
           });
       },
+      onFileUploadInput(newFile) {
+        this.showFileUpload = false;
+        this.videoConf.isInternallyHosted = true;
+        this.videoConf.hostedFileName = newFile.name;
+        // basically a placeholder
+        this.videoConf.url = `/${newFile.name}`;
+        this.validate();
+      },
+      switchToFileUploadOption() {
+        this.showFileUpload = true;
+        this.clearVideoOptions();
+      },
+      switchToExternalUrlOption() {
+        this.showFileUpload = false;
+        this.clearVideoOptions();
+      },
+      clearVideoOptions() {
+        this.videoConf.isInternallyHosted = false;
+        this.videoConf.hostedFileName = '';
+        this.videoConf.url = '';
+        this.videoConf.file = null;
+      },
       saveSettings() {
         this.preview = false;
         this.loading.video = true;
-        const settings = {
-          videoUrl: this.videoConf.url,
-          videoType: this.videoConf.videoType,
-          captions: this.videoConf.captions,
-          transcript: this.videoConf.transcript,
-        };
-        VideoService.saveVideoSettings(this.$route.params.projectId, this.$route.params.skillId, settings)
-          .then(() => {
-            this.showSavedMsg = true;
-            setTimeout(() => {
-              this.showSavedMsg = false;
-            }, 3500);
-            this.$nextTick(() => this.$announcer.polite('Video settings were saved'));
-          })
-          .finally(() => {
-            this.loading.video = false;
-          });
+        const data = new FormData();
+        if (this.videoConf.file) {
+          data.append('file', this.videoConf.file);
+        } else if (this.videoConf.url) {
+          data.append('videoUrl', this.videoConf.url);
+        }
+        if (this.videoConf.captions) {
+          data.append('captions', this.videoConf.captions);
+        }
+        if (this.videoConf.transcript) {
+          data.append('transcript', this.videoConf.transcript);
+        }
+
+        const endpoint = `/admin/projects/${this.$route.params.projectId}/skills/${this.$route.params.skillId}/video`;
+        FileUploadService.upload(endpoint, data, (response) => {
+          this.updateVideoSettings(response.data);
+          this.showSavedMsg = true;
+          this.loading.video = false;
+          setTimeout(() => {
+            this.showSavedMsg = false;
+          }, 3500);
+          this.$nextTick(() => this.$announcer.polite('Video settings were saved'));
+          this.setupPreview();
+        }, (err) => {
+          console.log(err);
+          this.loading.video = false;
+        });
       },
       confirmClearSettings() {
         this.msgConfirm('Video settings will be permanently cleared. Are you sure you want to proceed?', 'Please Confirm!', 'Yes, Do clear')
@@ -266,7 +346,7 @@ limitations under the License.
         this.videoConf.captions = '';
         this.videoConf.transcript = '';
         this.preview = false;
-        // this.$refs.observer.reset();
+        this.switchToFileUploadOption();
         VideoService.deleteVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .finally(() => {
             this.loading.video = false;
@@ -277,14 +357,24 @@ limitations under the License.
       loadSettings() {
         this.loading.video = true;
         VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
-          .then((videoSettings) => {
-            this.videoConf.url = videoSettings.videoUrl;
-            this.videoConf.videoType = videoSettings.videoType;
-            this.videoConf.captions = videoSettings.captions;
-            this.videoConf.transcript = videoSettings.transcript;
+          .then((settingRes) => {
+            this.updateVideoSettings(settingRes);
           }).finally(() => {
             this.loading.video = false;
           });
+      },
+      updateVideoSettings(settingRes) {
+        this.videoConf.url = settingRes.videoUrl;
+        this.videoConf.videoType = settingRes.videoType;
+        this.videoConf.captions = settingRes.captions;
+        this.videoConf.transcript = settingRes.transcript;
+        this.videoConf.isInternallyHosted = settingRes.isInternallyHosted;
+        this.videoConf.hostedFileName = settingRes.internallyHostedFileName;
+        if (this.videoConf.url) {
+          this.showFileUpload = this.videoConf.isInternallyHosted;
+        } else {
+          this.showFileUpload = true;
+        }
       },
       loadSkillInfo() {
         this.loading.skill = true;
