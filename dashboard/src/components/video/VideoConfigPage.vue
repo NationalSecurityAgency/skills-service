@@ -326,8 +326,8 @@ limitations under the License.
           }, 3500);
           this.$nextTick(() => this.$announcer.polite('Video settings were saved'));
           this.setupPreview();
-        }, (err) => {
-          console.log(err);
+        }, () => {
+          // console.log(err);
           this.loading.video = false;
         });
       },
