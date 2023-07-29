@@ -21,7 +21,7 @@ const timeDurationFormatter = (startDate, completedDate, detailedDays) => {
   const start = dayjs(startDate);
   const end = completedDate ? dayjs(completedDate) : dayjs();
   const valueInMs = end.diff(start);
-  return formatDurationFilter(valueInMs, detailedDays);
+  return formatDurationFilter(valueInMs, false, detailedDays);
 };
 Vue.filter('duration', timeDurationFormatter);
 
