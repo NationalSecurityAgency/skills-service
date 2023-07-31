@@ -1251,6 +1251,7 @@ describe('Skills Tests', () => {
         maxSubjectNameLength: "50",
         maxSubjectsPerProject: "25",
         maxTimeWindowInMinutes: "43200",
+        maxBadgeBonusInMinutes: "525600",
         minIdLength: "3",
         minNameLength: "3",
         minPasswordLength: "8",

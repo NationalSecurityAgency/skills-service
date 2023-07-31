@@ -55,7 +55,12 @@ const timeDurationFormatter = (valueInMs, alwaysIncludeSecondsWithMinutes = fals
   if (valueInMs < year) {
     const totalHours = Math.trunc(valueInMs / hour);
     const days = Math.trunc(totalHours / 24);
-    return `${days} day${days > 1 ? 's' : ''}`;
+    const hours = totalHours - (days * 24);
+    let res = `${days} day${days > 1 ? 's' : ''}`;
+    if (detailedDays && days <= 7 && hours > 0) {
+      res = `${res} and ${hours} hour${hours === 1 ? '' : 's'}`;
+    }
+    return res;
   }
 
   const totalDays = Math.trunc(valueInMs / day);

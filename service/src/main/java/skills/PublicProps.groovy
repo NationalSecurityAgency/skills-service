@@ -25,6 +25,7 @@ class PublicProps {
     enum UiProp {
         descriptionMaxLength,
         maxTimeWindowInMinutes,
+        maxBadgeBonusInMinutes,
         docsHost,
         maxProjectsPerAdmin,
         maxSubjectsPerProject,

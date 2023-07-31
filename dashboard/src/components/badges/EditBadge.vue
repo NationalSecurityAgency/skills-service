@@ -64,7 +64,7 @@ limitations under the License.
             </ValidationProvider>
           </div>
 
-          <b-card class="mt-1" v-if="!global" data-cy="bonusAwardCard">>
+          <b-card class="mt-1" v-if="!global" data-cy="bonusAwardCard">
             <div :class="{'form-group': badgeInternal.timeLimitEnabled}">
               <label>
                 <b-form-checkbox data-cy="timeLimitCheckbox" id="checkbox-1" class="d-inline" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>Enable Bonus Award
@@ -354,7 +354,7 @@ limitations under the License.
         return `${badgeScope}-${this.$options.name}${this.isEdit ? 'Edit' : ''}`;
       },
       maxTimeLimitMessage() {
-        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / (60 * 24)} days`;
+        return `Time Window must be less then ${this.$store.getters.config.maxBadgeBonusInMinutes / (60 * 24)} days`;
       },
     },
     watch: {
@@ -628,7 +628,7 @@ limitations under the License.
             return true;
           }
 
-          return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
+          return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxBadgeBonusInMinutes;
         };
 
         extend('daysMaxTimeLimit', {
