@@ -19,11 +19,15 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.hibernate.engine.jdbc.BlobProxy
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.unit.DataSize
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
+import skills.controller.exceptions.AttachmentValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.services.attributes.SkillAttributeService
@@ -49,6 +53,12 @@ class AdminVideoService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
+    DataSize maxAttachmentSize;
+
+    @Value('#{"${skills.config.ui.allowedVideoUploadMimeTypes}"}')
+    List<MediaType> allowedAttachmentMimeTypes;
+
     @Transactional
     SkillVideoAttrs saveVideo(String projectId, String skillId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript) {
@@ -59,6 +69,7 @@ class AdminVideoService {
         if (isAlreadyHosted) {
             SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", projectId, skillId)
             videoAttrs.videoUrl = existingVideoAttributes.videoUrl
+            videoAttrs.videoType = existingVideoAttributes.videoType
             videoAttrs.isInternallyHosted = existingVideoAttributes.isInternallyHosted
             videoAttrs.internallyHostedFileName = existingVideoAttributes.internallyHostedFileName
             videoAttrs.internallyHostedAttachmentUuid = existingVideoAttributes.internallyHostedAttachmentUuid
@@ -73,8 +84,8 @@ class AdminVideoService {
 
             if (file) {
                 SkillsValidator.isTrue(StringUtils.isBlank(videoUrl), "If file param is provided then videoUrl must be null/blank. Provided url=[${videoUrl}]", projectId, skillId)
-//            AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
-//            AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
+                AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
+                AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
                 saveVideoFileAndUpdateAttributes(projectId, skillId, file, videoAttrs)
             } else {
                 videoAttrs.isInternallyHosted = false
@@ -116,5 +127,16 @@ class AdminVideoService {
         videoAttrs.isInternallyHosted = true
         videoAttrs.internallyHostedFileName = attachment.filename
         videoAttrs.internallyHostedAttachmentUuid = attachment.uuid
+    }
+
+    @Transactional
+    boolean deleteVideoAttrs(String projectId, String skillId) {
+        SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
+
+        if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
+            attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
+        }
+
+        skillAttributeService.deleteVideoAttrs(projectId, skillId)
     }
 }

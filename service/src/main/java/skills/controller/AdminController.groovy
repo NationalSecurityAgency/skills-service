@@ -580,7 +580,7 @@ class AdminController {
     @ResponseBody
     RequestResult deleteSkillVideoAttrs(@PathVariable("projectId") String projectId,
                                       @PathVariable("skillId") String skillId) {
-        skillAttributeService.deleteVideoAttrs(projectId, skillId)
+        adminVideoService.deleteVideoAttrs(projectId, skillId)
         return new RequestResult(success: true)
     }
 

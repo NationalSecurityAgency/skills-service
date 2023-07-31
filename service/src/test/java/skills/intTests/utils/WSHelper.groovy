@@ -158,10 +158,10 @@ class WSHelper {
         return get(endpoint, "admin", params)
     }
 
-    def adminUpload(String endpoint, Map params = null) {
+    def adminUpload(String endpoint, Map params = null, boolean throwException = false) {
         String url = "${skillsService}/admin${endpoint}"
         log.info("MULTIPART POST: {}", url)
-        return multipartPost(url, params)
+        return multipartPost(url, params, throwException)
     }
 
     def apiUpload(String endpoint, Map params = null) {
@@ -397,7 +397,7 @@ class WSHelper {
         return res
     }
 
-    private def multipartPost(String endpoint, Map params){
+    private def multipartPost(String endpoint, Map params, boolean throwException = false){
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
 
@@ -426,6 +426,7 @@ class WSHelper {
             res['success' ] = true
         } else {
             res['success' ] = false
+            throw new SkillsClientException(resBody, endpoint, responseEntity.statusCode)
         }
 
         return res

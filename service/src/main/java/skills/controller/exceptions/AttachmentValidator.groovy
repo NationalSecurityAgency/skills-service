@@ -23,7 +23,7 @@ class AttachmentValidator {
 
     static void isWithinMaxAttachmentSize(Long fileSize, DataSize maxAttachmentSize) {
         if (fileSize > maxAttachmentSize.toBytes()) {
-            throw new SkillException("File size [${FileUtils.byteCountToDisplaySize(fileSize)}] exceeds maximum file size [${FileUtils.byteCountToDisplaySize(maxAttachmentSize)}]", ErrorCode.BadParam)
+            throw new SkillException("File size [${FileUtils.byteCountToDisplaySize(fileSize)}] exceeds maximum file size [${FileUtils.byteCountToDisplaySize(maxAttachmentSize.toBytes())}]", ErrorCode.BadParam)
         }
     }
 

@@ -169,6 +169,8 @@ skills:
       maxTagValueLengthInApprovalWorkloadConfig: 10
       maxVideoCaptionsLength: 5000
       maxVideoTranscriptLength: 20000
+      maxVideoUploadSize: 512MB
+      allowedVideoUploadMimeTypes: "video/webm, video/mp4"
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

@@ -81,7 +81,8 @@ class AttachmentSpecs extends DefaultIntSpec {
 
         when:
         def uploadResult = skillsService.uploadAttachment(resource, proj.projectId)
-        File file = skillsService.downloadAttachment(uploadResult.href)
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment(uploadResult.href)
+        File file = fileAndHeaders.file
 
         then:
         uploadResult
