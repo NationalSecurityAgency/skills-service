@@ -2299,8 +2299,10 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="timeLimitCheckbox"').click({force: true});
         cy.get('input[data-cy=awardName]')
             .type('{selectall}Bonus Award Name');
+        cy.get('input[data-cy=timeLimitDays]')
+            .type('{selectall}25');
         cy.get('input[data-cy=timeLimitHours]')
-            .type('{selectall}150');
+            .type('{selectall}22');
         cy.get('input[data-cy=timeLimitMinutes]')
             .type('{selectall}30');
         cy.get('button[data-cy=saveBadgeButton]')
@@ -2312,7 +2314,8 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="btn_edit-badge"]').click();
 
         cy.get('input[data-cy=awardName]').should('have.value', 'Bonus Award Name');
-        cy.get('input[data-cy=timeLimitHours]').should('have.value', '150');
+        cy.get('input[data-cy=timeLimitDays]').should('have.value', '25');
+        cy.get('input[data-cy=timeLimitHours]').should('have.value', '22');
         cy.get('input[data-cy=timeLimitMinutes]').should('have.value', '30');
     });
 
@@ -2327,8 +2330,21 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy="btn_edit-badge"]').click();
         cy.get('[data-cy="timeLimitCheckbox"').click({force: true});
+
+        cy.get('input[data-cy=timeLimitDays]')
+            .type('{selectall}800');
+        cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');
+        cy.get('input[data-cy=timeLimitDays]')
+            .type('{selectall}1');
+        cy.get('button[data-cy=saveBadgeButton]').should('be.enabled');
+
         cy.get('input[data-cy=timeLimitHours]')
             .type('{selectall}800');
+        cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');
+        cy.get('input[data-cy=timeLimitHours]')
+            .type('{selectall}1');
+        cy.get('button[data-cy=saveBadgeButton]').should('be.enabled');
+
         cy.get('input[data-cy=timeLimitMinutes]')
             .type('{selectall}900');
         cy.get('button[data-cy=saveBadgeButton]').should('not.be.enabled');

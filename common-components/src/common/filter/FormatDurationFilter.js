@@ -21,7 +21,7 @@ const hour = minute * 60;
 const day = hour * 24;
 const year = day * 365;
 
-const timeDurationFormatter = (valueInMs, alwaysIncludeSecondsWithMinutes = false) => {
+const timeDurationFormatter = (valueInMs, alwaysIncludeSecondsWithMinutes = false, detailedDays = false) => {
   if (valueInMs === null || valueInMs === undefined) {
     return 'N/A';
   }
@@ -47,7 +47,7 @@ const timeDurationFormatter = (valueInMs, alwaysIncludeSecondsWithMinutes = fals
     const hours = Math.trunc(totalMinutes / 60);
     const minutes = totalMinutes - (hours * 60);
     let res = `${hours} hour${hours > 1 ? 's' : ''}`;
-    if (hours < 10) {
+    if (detailedDays || hours < 10) {
       res = `${res} and ${minutes} minute${minutes === 1 ? '' : 's'}`;
     }
     return res;

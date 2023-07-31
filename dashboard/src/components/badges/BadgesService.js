@@ -21,7 +21,7 @@ const enrichBadgeObjWithRequiredAtts = (badge) => {
     copy.awardAttrs.numMinutes = 0;
   } else {
     // convert to minutes
-    copy.awardAttrs.numMinutes = ((parseInt(badge.expirationHrs, 10) * 60) + parseInt(badge.expirationMins, 10));
+    copy.awardAttrs.numMinutes = ((parseInt(badge.expirationDays, 10) * 60 * 24) + (parseInt(badge.expirationHrs, 10) * 60) + parseInt(badge.expirationMins, 10));
   }
 
   return copy;
@@ -34,14 +34,18 @@ export default {
       copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0;
       if (!copy.timeLimitEnabled) {
         // set to default if window is disabled
+        copy.expirationDays = 0;
         copy.expirationHrs = 8;
         copy.expirationMins = 0;
       } else {
-        copy.expirationHrs = Math.floor(badge.awardAttrs.numMinutes / 60);
-        copy.expirationMins = badge.awardAttrs.numMinutes % 60;
+        copy.expirationDays = Math.floor(badge.awardAttrs.numMinutes / (60 * 24));
+        const remainingMinutes = badge.awardAttrs.numMinutes - (copy.expirationDays * 24 * 60);
+        copy.expirationHrs = Math.floor(remainingMinutes / 60);
+        copy.expirationMins = remainingMinutes % 60;
       }
     } else {
       copy.timeLimitEnabled = false;
+      copy.expirationDays = 0;
       copy.expirationHrs = 8;
       copy.expirationMins = 0;
     }
@@ -50,7 +54,13 @@ export default {
   },
   getBadges(projectId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges`)
-      .then((response) => response.data);
+      .then((response) => {
+        const badges = [];
+        response.data.forEach((badge) => {
+          badges.push(this.enhanceWithTimeWindow(badge));
+        });
+        return badges;
+      });
   },
   getBadge(projectId, badgeId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
