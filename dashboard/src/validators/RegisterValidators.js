@@ -63,6 +63,9 @@ export default {
     extend('maxCustomLabelLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxCustomLabelLength));
     extend('maxSkillTagLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxSkillTagLength));
 
+    extend('maxVideoCaptionsLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxVideoCaptionsLength));
+    extend('maxVideoTranscriptLength', ValidatorFactory.newCharLengthValidator(store.getters.config.maxVideoTranscriptLength));
+
     localize({
       en: {
         messages: {

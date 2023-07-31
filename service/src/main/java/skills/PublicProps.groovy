@@ -25,6 +25,7 @@ class PublicProps {
     enum UiProp {
         descriptionMaxLength,
         maxTimeWindowInMinutes,
+        maxBadgeBonusInMinutes,
         docsHost,
         maxProjectsPerAdmin,
         maxSubjectsPerProject,
@@ -64,6 +65,8 @@ class PublicProps {
         maxQuizDefsPerAdmin,
         maxQuestionsPerQuiz,
         maxQuizTextAnswerLength,
+        maxVideoCaptionsLength,
+        maxVideoTranscriptLength
     }
 
     @Autowired

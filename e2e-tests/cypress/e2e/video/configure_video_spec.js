@@ -27,6 +27,7 @@ describe('Configure Video Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="videoSelectionMsg"]').contains('Please create skill and configure video settings first')
         cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
@@ -35,13 +36,14 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoSelectionMsg"]').contains('Please create skill and configure video settings first')
     });
 
-    it('configure video', () => {
+    it('existing skill has video self-report type disabled if video settings are not defined', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="videoSelectionMsg"]').contains('Please configure video settings first')
         cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
@@ -54,13 +56,18 @@ describe('Configure Video Tests', () => {
         cy.intercept('/admin/projects/proj1/subjects/subj1').as('getSubjectSkills')
         cy.createProject(1)
         cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 1, {numPerformToCompletion: 4, numMaxOccurrencesIncrementInterval: 2})
         cy.saveVideoAttrs(1, 1, { videoUrl: 'http://someurl.mp4' })
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 2)
+        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 4)
         cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
+        cy.get('[data-cy="maxOccurrences"]').should('have.value', 2)
+        cy.get('[data-cy="maxOccurrences"]').should('be.enabled')
+        cy.get('[data-cy=timeWindowCheckbox').should('be.checked')
+
+        cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
         cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
@@ -72,6 +79,9 @@ describe('Configure Video Tests', () => {
             .click({ force: true });
         cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
         cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
+        cy.get('[data-cy=timeWindowCheckbox').should('not.be.checked')
+        cy.get('[data-cy="maxOccurrences"]').should('have.value', 1)
+        cy.get('[data-cy="maxOccurrences"]').should('be.disabled')
 
         cy.get('[data-cy="saveSkillButton"]').click()
         cy.get('[data-cy="saveSkillButton"]').should('not.exist')
@@ -225,6 +235,34 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+    });
+
+    it('transcript max chars validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
+        const invalidValue = Array(51).fill('a').join('');
+        cy.get('[data-cy="videoTranscript"]').type(invalidValue, { delay: 0 })
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript cannot exceed 50 characters.')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoTranscript"]').type('{backspace}');
+        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+    });
+
+    it('captions max chars validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
+        const invalidValue = Array(50).fill('a').join('');
+        cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions cannot exceed 49 characters.')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoCaptions"]').type('{backspace}');
+        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
     });
 
     it('cannot configure video settings on reused skills', () => {

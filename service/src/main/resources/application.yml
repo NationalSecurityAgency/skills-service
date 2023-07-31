@@ -112,6 +112,7 @@ skills:
       minimumProjectPoints: 100
       descriptionMaxLength: 2000000
       maxTimeWindowInMinutes: 43200
+      maxBadgeBonusInMinutes: 525600
       docsHost: https://code.nsa.gov/skills-docs
       maxProjectsPerAdmin: 25
       maxQuizDefsPerAdmin: 1000
@@ -163,6 +164,8 @@ skills:
       maxContactOwnersMessageLength: 2500
       maxTagKeyLengthInApprovalWorkloadConfig: 15
       maxTagValueLengthInApprovalWorkloadConfig: 10
+      maxVideoCaptionsLength: 5000
+      maxVideoTranscriptLength: 20000
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

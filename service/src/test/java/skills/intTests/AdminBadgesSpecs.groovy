@@ -513,4 +513,22 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         updatedBadgeResult.awardAttrs.iconClass == "def"
         updatedBadgeResult.awardAttrs.numMinutes == 600
     }
+
+    def "can not exceed maximum minutes for badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        badge1.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 1000000]
+
+        when:
+        skillsService.createBadge(badge1)
+
+        then:
+        def ex = thrown(Exception)
+        ex.message.contains("numMinutes must be <= 525600")
+
+    }
 }

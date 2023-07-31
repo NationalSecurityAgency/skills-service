@@ -63,6 +63,7 @@ class SkillAttributeService {
         if (numRemoved > 1) {
             throw new IllegalStateException("There is more than 1 Video attributes for [${projectId}-${skillId}]")
         }
+        skillDefRepo.unsetSelfReportTypeByProjectIdSkillIdAndSelfReportType(projectId, skillId, SkillDef.SelfReportingType.Video)
         return numRemoved > 0
     }
 

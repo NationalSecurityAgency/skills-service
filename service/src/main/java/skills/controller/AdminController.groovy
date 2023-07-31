@@ -125,6 +125,9 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
+    @Value('#{"${skills.config.ui.maxBadgeBonusInMinutes}"}')
+    int maxBadgeBonusInMinutes
+
     @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
     int maxUserIdsForBulkSkillReporting
 
@@ -410,6 +413,10 @@ class AdminController {
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
 
+        if(badgeRequest.awardAttrs?.numMinutes) {
+            SkillsValidator.isTrue(badgeRequest.awardAttrs?.numMinutes <= maxBadgeBonusInMinutes, "numMinutes must be <= $maxBadgeBonusInMinutes", projectId, badgeRequest.badgeId)
+        }
+
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
         badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
@@ -548,6 +555,14 @@ class AdminController {
     RequestResult saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
                             @PathVariable("skillId") String skillId,
                             @RequestBody SkillVideoAttrs skillVideoAttrsRequest) {
+
+        if (skillVideoAttrsRequest.captions) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", skillVideoAttrsRequest.captions)
+        }
+        if (skillVideoAttrsRequest.transcript) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", skillVideoAttrsRequest.transcript)
+        }
+
         skillAttributeService.saveVideoAttrs(projectId, skillId, skillVideoAttrsRequest)
         return new RequestResult(success: true)
     }
