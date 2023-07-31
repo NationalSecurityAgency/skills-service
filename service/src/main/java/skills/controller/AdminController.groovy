@@ -125,6 +125,9 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
     int maxTimeWindowInMinutes
 
+    @Value('#{"${skills.config.ui.maxBadgeBonusInMinutes}"}')
+    int maxBadgeBonusInMinutes
+
     @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
     int maxUserIdsForBulkSkillReporting
 
@@ -409,6 +412,10 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxBadgeNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
+
+        if(badgeRequest.awardAttrs?.numMinutes) {
+            SkillsValidator.isTrue(badgeRequest.awardAttrs?.numMinutes <= maxBadgeBonusInMinutes, "numMinutes must be <= $maxBadgeBonusInMinutes", projectId, badgeRequest.badgeId)
+        }
 
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
