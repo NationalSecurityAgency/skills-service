@@ -426,7 +426,9 @@ class WSHelper {
             res['success' ] = true
         } else {
             res['success' ] = false
-            throw new SkillsClientException(resBody, endpoint, responseEntity.statusCode)
+            if (throwException) {
+                throw new SkillsClientException(resBody, endpoint, responseEntity.statusCode)
+            }
         }
 
         return res
