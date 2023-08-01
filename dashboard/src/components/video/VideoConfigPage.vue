@@ -34,7 +34,7 @@ limitations under the License.
                         @click="switchToFileUploadOption" data-cy="showFileUploadBtn"><i class="fas fa-arrow-circle-up" aria-hidden="true" /> Switch to Upload</b-button>
               <b-button v-if="showFileUpload" variant="outline-info" size="sm"
                         aria-label="Clear uploaded video"
-                        @click="switchToExternalUrlOption" data-cy="showFileUploadBtn"><i class="fas fa-globe"></i> Switch to External Link</b-button>
+                        @click="switchToExternalUrlOption" data-cy="showExternalUrlBtn"><i class="fas fa-globe"></i> Switch to External Link</b-button>
             </div>
           </div>
         </div>
@@ -43,6 +43,7 @@ limitations under the License.
                      v-if="showFileUpload && !videoConf.isInternallyHosted"
                      v-model="videoConf.file"
                      @input="onFileUploadInput"
+                     data-cy="videoFileUpload"
                      placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."
                      drop-placeholder="Drop file here..." />
 
@@ -392,11 +393,12 @@ limitations under the License.
       assignCustomValidation() {
         const self = this;
         extend('videoUrlMustBePresent', {
-          message: (field) => `${field} is not valid without Video URL field`,
+          message: (field) => `${field} is not valid without Video field`,
           validate() {
             const toValidate = self.videoConf.url ? self.videoConf.url.trim() : null;
-            const res = toValidate !== null && toValidate.length > 0;
-            return res;
+            const hasUrl = toValidate !== null && toValidate.length > 0;
+            const hasFile = self.videoConf.file;
+            return hasUrl || hasFile;
           },
         });
       },
