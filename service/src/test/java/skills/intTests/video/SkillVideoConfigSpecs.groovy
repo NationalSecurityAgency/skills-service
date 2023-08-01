@@ -120,7 +120,6 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attributes.transcript == "transcript"
     }
 
-    def "delete video attributes" () {
     @Autowired
     AttachmentRepo attachmentRepo
 
