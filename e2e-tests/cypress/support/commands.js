@@ -125,7 +125,21 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
 
 
 Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
-    cy.request('POST', `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`, videoAttrs);
+    const url = `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`;
+    const formData = new FormData();
+    if (videoAttrs.videoUrl) {
+        formData.set('videoUrl', videoAttrs.videoUrl);
+    }
+    if (videoAttrs.captions) {
+        formData.set('captions', videoAttrs.captions);
+    }
+    if (videoAttrs.transcript) {
+        formData.set('transcript', videoAttrs.transcript);
+    }
+    if (videoAttrs.isAlreadyHosted !== null && videoAttrs.isAlreadyHosted !== undefined) {
+        formData.set('isAlreadyHosted', videoAttrs.isAlreadyHosted);
+    }
+    cy.request('POST', url, formData);
 });
 
 Cypress.Commands.add("addToMyProjects", (projNum) => {

@@ -332,7 +332,7 @@ describe('Accessibility Tests', () => {
         cy.injectAxe();
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoUrl"]').type('http://some.vid', {delay: 0})
+        cy.get('[data-cy="showFileUploadBtn"]')
         cy.customLighthouse();
         cy.customA11y();
     });
