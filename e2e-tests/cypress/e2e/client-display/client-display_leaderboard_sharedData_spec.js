@@ -109,6 +109,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .should('contain.text', `${date}`);
         }
 
+        cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard', snapshotOptions);
     });
 
@@ -142,6 +143,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.get('[data-cy="leaderboard"]')
             .contains('You selected to opt-out');
 
+        cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-opted-out', snapshotOptions);
         cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-leaderboard-opted-out', snapshotOptions);
     });
@@ -183,6 +185,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                     .should('contain.text', `${date}`);
             }
 
+            cy.wait(2000)
             cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard-10AroundMe', snapshotOptions);
         });
 
