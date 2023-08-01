@@ -40,8 +40,47 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+    });
+
+    it('upload a video, set transcript and captions, preview the video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
+        cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play Video"]').click()
+
+        // video is 7 seconds
+        cy.wait(7000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '7 seconds')
+
+        // refresh and re-validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play Video"]').click()
+        cy.wait(7000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '7 seconds')
     });
 
     it('clear attributes', () => {

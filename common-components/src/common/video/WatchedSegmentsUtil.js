@@ -86,10 +86,13 @@ export default {
       const sum = watchProgress.watchSegments.map((segment) => segment.stop - segment.start)
         .reduce((acc, cur) => acc + cur, 0);
       watchProgress.totalWatchTime = sum + (watchProgress.lastKnownStopPosition - watchProgress.currentStart);
-      if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
-        watchProgress.totalWatchTime = watchProgress.videoDuration;
+
+      if (watchProgress.videoDuration !== Infinity) {
+        if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
+          watchProgress.totalWatchTime = watchProgress.videoDuration;
+        }
+        watchProgress.percentWatched = Math.trunc((watchProgress.totalWatchTime / watchProgress.videoDuration) * 100);
       }
-      watchProgress.percentWatched = Math.trunc((watchProgress.totalWatchTime / watchProgress.videoDuration) * 100);
     }
     /* eslint-enable no-param-reassign */
   },

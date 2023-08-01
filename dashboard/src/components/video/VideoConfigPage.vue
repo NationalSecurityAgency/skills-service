@@ -152,17 +152,26 @@ limitations under the License.
         />
 
         <div v-if="watchedProgress" class="p-3 pt-4">
+          <div v-if="!isDurationAvailable" class="alert alert-danger" data-cy="noDurationWarning">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
+          </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Total Duration:</div>
-            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.videoDuration * 1000) | formatDuration(true) }}</span></div>
+            <div class="col">
+              <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
+              <span v-else class="text-primary" data-cy="videoTotalDuration">{{ Math.trunc(watchedProgress.videoDuration * 1000) | formatDuration(true) }}</span>
+            </div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Time Watched:</div>
-            <div class="col"><span class="text-primary">{{ Math.trunc(watchedProgress.totalWatchTime * 1000) | formatDuration(true) }}</span></div>
+            <div class="col"><span class="text-primary" data-cy="videoTimeWatched">{{ Math.trunc(watchedProgress.totalWatchTime * 1000) | formatDuration(true) }}</span></div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">% Watched:</div>
-            <div class="col"><span class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span></div>
+            <div class="col">
+              <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
+              <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
+            </div>
           </div>
           <div class="row">
             <div class="col-6 col-lg-3 col-xl-2">Current Position:</div>
@@ -212,6 +221,7 @@ limitations under the License.
         },
         skillInfo: {},
         watchedProgress: null,
+        isDurationAvailable: true,
         preview: false,
         refreshingPreview: false,
         loading: {
@@ -302,13 +312,18 @@ limitations under the License.
         this.videoConf.file = null;
       },
       saveSettings() {
+        this.isDurationAvailable = true;
         this.preview = false;
         this.loading.video = true;
         const data = new FormData();
         if (this.videoConf.file) {
           data.append('file', this.videoConf.file);
         } else if (this.videoConf.url) {
-          data.append('videoUrl', this.videoConf.url);
+          if (this.videoConf.isInternallyHosted) {
+            data.append('isAlreadyHosted', this.videoConf.isInternallyHosted);
+          } else {
+            data.append('videoUrl', this.videoConf.url);
+          }
         }
         if (this.videoConf.captions) {
           data.append('captions', this.videoConf.captions);
@@ -347,6 +362,7 @@ limitations under the License.
         this.videoConf.captions = '';
         this.videoConf.transcript = '';
         this.preview = false;
+        this.isDurationAvailable = true;
         this.switchToFileUploadOption();
         VideoService.deleteVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .finally(() => {
@@ -389,6 +405,9 @@ limitations under the License.
       },
       updatedWatchProgress(progress) {
         this.watchedProgress = progress;
+        if (this.watchedProgress.videoDuration === Infinity) {
+          this.isDurationAvailable = false;
+        }
       },
       assignCustomValidation() {
         const self = this;
