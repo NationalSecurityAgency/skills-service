@@ -47,7 +47,8 @@ limitations under the License.
                      placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."
                      drop-placeholder="Drop file here..." />
 
-        <b-input-group v-if="videoConf.isInternallyHosted">
+        <ValidationProvider v-if="videoConf.isInternallyHosted" rules="videoMimeTypesValidation|videoMaxSizeValidation" v-slot="{ errors }" name="Video File" :immediate="true">
+        <b-input-group>
           <template #prepend>
             <b-input-group-text><i class="fas fa-server mr-1"></i>
               SkillTree Hosted
@@ -56,13 +57,13 @@ limitations under the License.
           <b-form-input id="videoUrlInput"
                         v-model="videoConf.hostedFileName"
                         data-cy="videoUrl"
-                        @input="validate"
-                        placeholder="Please enter external URL or upload a video"
                         :disabled="isReadOnly" />
           <b-input-group-append>
             <b-button @click="switchToFileUploadOption"><i class="fa fa-broom" aria-hidden="true"/> Reset</b-button>
           </b-input-group-append>
         </b-input-group>
+        <small role="alert" class="form-text text-danger" id="videoFileError" data-cy="videoFileError">{{errors[0]}}</small>
+        </ValidationProvider>
 
         <ValidationProvider v-if="!showFileUpload && !videoConf.isInternallyHosted" rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
             <b-form-input id="videoUrlInput"
@@ -132,9 +133,9 @@ limitations under the License.
           <div class="col-auto mt-2">
             <b-button variant="outline-secondary"
                       class="mr-2"
-                      data-cy="previewVideoSettingsBtn"
+                      data-cy="discardChangesBtn"
                       aria-label="Discard Unsaved"
-                      @click="loadSettings">Discard Changes <i class="fas fa-sync" aria-hidden="true"/></b-button>
+                      @click="discardChanges">Discard Changes <i class="fas fa-sync" aria-hidden="true"/></b-button>
             <b-button variant="outline-danger"
                       :disabled="!formHasAnyData"
                       data-cy="clearVideoSettingsBtn"
@@ -310,6 +311,7 @@ limitations under the License.
         this.videoConf.hostedFileName = '';
         this.videoConf.url = '';
         this.videoConf.file = null;
+        this.validate();
       },
       saveSettings() {
         this.isDurationAvailable = true;
@@ -371,9 +373,16 @@ limitations under the License.
             this.$nextTick(() => this.$announcer.polite('Video settings were cleared'));
           });
       },
+      discardChanges() {
+        this.videoConf.file = null;
+        this.loadSettings()
+          .then(() => {
+            this.validate();
+          });
+      },
       loadSettings() {
         this.loading.video = true;
-        VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
+        return VideoService.getVideoSettings(this.$route.params.projectId, this.$route.params.skillId)
           .then((settingRes) => {
             this.updateVideoSettings(settingRes);
           }).finally(() => {
@@ -418,6 +427,36 @@ limitations under the License.
             const hasUrl = toValidate !== null && toValidate.length > 0;
             const hasFile = self.videoConf.file;
             return hasUrl || hasFile;
+          },
+        });
+        extend('videoMimeTypesValidation', {
+          validate() {
+            const supportedFileTypes = self.$store.getters.config.allowedVideoUploadMimeTypes;
+            const { file } = self.videoConf;
+            if (!file) {
+              return true;
+            }
+            const res = supportedFileTypes.includes(file.type);
+            if (res) {
+              return true;
+            }
+
+            return `Unsupported [${file.type}] file type, supported types: [${supportedFileTypes}]`;
+          },
+        });
+        extend('videoMaxSizeValidation', {
+          validate() {
+            const maxSize = self.$store.getters.config.maxAttachmentSize ? Number(self.$store.getters.config.maxAttachmentSize) : 0;
+            const { file } = self.videoConf;
+            if (!file) {
+              return true;
+            }
+            const res = maxSize > file.size;
+            if (res) {
+              return true;
+            }
+
+            return `File exceeds maximum size of ${self.$options.filters.prettyBytes(maxSize)}`;
           },
         });
       },

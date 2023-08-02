@@ -96,4 +96,56 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoCaptions"]').type('{backspace}');
         cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
     });
+
+    it('only allow upload of valid video mime types', () => {
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.wait('@getVideoProps')
+        cy.wait('@getSkillInfo')
+        cy.get('.spinner-border').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoFileError"]').should('not.exist')
+
+        const videoFile = 'valid_icon.png';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile });
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoFileError"]').contains('Unsupported [image/png] file type, supported types: [video/webm, video/mp4]')
+    });
+
+    it('validate maximum size of the video', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxAttachmentSize = 1024*300;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.wait('@loadConfig')
+        cy.wait('@getVideoProps')
+        cy.wait('@getSkillInfo')
+        cy.get('.spinner-border').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoFileError"]').should('not.exist')
+
+        const videoFile = 'create-project.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile });
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="videoFileError"]').contains('File exceeds maximum size of 300 KB')
+    });
+
 });

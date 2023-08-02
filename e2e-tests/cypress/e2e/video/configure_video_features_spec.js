@@ -35,7 +35,6 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoCaptions"]').should('be.disabled')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('not.exist')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('not.exist')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('not.exist')
     });
 
@@ -58,7 +57,6 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoCaptions"]').should('be.disabled')
         cy.get('[data-cy="videoTranscript"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('not.exist')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('not.exist')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('not.exist')
     });
 

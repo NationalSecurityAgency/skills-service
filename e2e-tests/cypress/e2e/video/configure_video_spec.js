@@ -96,7 +96,6 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('have.value', vidAttr.transcript)
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
-        cy.get('[data-cy="previewVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').click()
@@ -155,6 +154,70 @@ describe('Configure Video Tests', () => {
         // video is 15 seconds
         cy.wait(15000)
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+    });
+
+    it('discard changes - Video URL is configured', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveVideoAttrs(1, 1, { videoUrl: testVideo })
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', testVideo)
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+
+        // modify
+        cy.get('[data-cy="showFileUploadBtn"]').click();
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
+        cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+
+        // discard changes
+        cy.get('[data-cy="discardChangesBtn"]').click()
+        cy.get('[data-cy="videoUrl"]').should('have.value', testVideo)
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.get('[data-cy="showFileUploadBtn"]').should('exist')
+    });
+
+    it('discard changes - Video uploaded, captions and transcript are configured', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        cy.saveVideoAttrs(1, 1, vid)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', vid.file)
+        cy.get('[data-cy="videoCaptions"]').should('have.value', vid.captions)
+        cy.get('[data-cy="videoTranscript"]').should('have.value', vid.transcript)
+
+        // modify all fields
+        cy.get('[data-cy="showExternalUrlBtn"]').click()
+        cy.get('[data-cy="videoUrl"]').type(testVideo, {delay: 0})
+        cy.get('[data-cy="videoCaptions"]').clear()
+        cy.get('[data-cy="videoTranscript"]').clear()
+
+        cy.get('[data-cy="videoUrl"]').should('have.value', testVideo)
+        cy.get('[data-cy="videoCaptions"]').should('be.empty')
+        cy.get('[data-cy="videoTranscript"]').should('be.empty')
+
+        // discard changes
+        cy.get('[data-cy="discardChangesBtn"]').click()
+        cy.get('[data-cy="videoUrl"]').should('have.value', vid.file)
+        cy.get('[data-cy="videoCaptions"]').should('have.value', vid.captions)
+        cy.get('[data-cy="videoTranscript"]').should('have.value', vid.transcript)
+        cy.get('[data-cy="showExternalUrlBtn"]').should('exist')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
     });
 
 });
