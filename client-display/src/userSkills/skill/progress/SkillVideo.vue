@@ -48,7 +48,7 @@ limitations under the License.
           <div class="col-md my-auto" data-cy="watchVideoMsg">
             <div v-if="!justAchieved">
               <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
-              Earn <b>{{ skill.totalPoints }}</b> for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
+              Earn <b>{{ skill.totalPoints }}</b> points for the  {{ skillDisplayName.toLowerCase() }} by watching this Video.
             </div>
             <div v-if="justAchieved">
               <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
@@ -63,9 +63,9 @@ limitations under the License.
                         class="skills-theme-primary-color"
                         data-cy="viewTranscriptBtn"
                         @click="loadTranscript">View Transcript</b-button>
-              <span aria-hidden="true" class="mr-1">|</span>
+              <span aria-hidden="true" class="mr-1" v-if="showPercent">|</span>
             </span>
-            <span class="font-italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%
+            <span v-if="showPercent"><span class="font-italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
           </div>
         </div>
       </div>
@@ -148,10 +148,16 @@ limitations under the License.
           loading: false,
           transcript: '',
         },
+        showPercent: true,
+        isFirstTime: true,
       };
     },
     methods: {
       updateVideoProgress(watchProgress) {
+        if (this.isFirstTime && watchProgress.videoDuration === Infinity) {
+          this.showPercent = false;
+        }
+        this.isFirstTime = false;
         this.percentWatched = watchProgress.percentWatched;
         if (this.trackAchievement && watchProgress.percentWatched > 96 && !this.justAchieved) {
           UserSkillsService.reportSkill(this.skill.skillId)

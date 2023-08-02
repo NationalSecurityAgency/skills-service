@@ -41,4 +41,27 @@ describe('Handle Video without duration Tests', () => {
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '9 seconds')
         cy.get('[data-cy="noDurationWarning"]')
     });
+
+    it('Skills Display - do not display % for videos without duration', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1 });
+        cy.saveVideoAttrs(1, 1, { file: 'create-project-noDuration.webm', transcript: 'another' })
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('not.exist')
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000) // video is 8 seconds
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('not.exist')
+        cy.wait('@reportSkill1')
+    });
 });
