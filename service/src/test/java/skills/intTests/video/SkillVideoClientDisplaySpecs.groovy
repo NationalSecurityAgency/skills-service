@@ -20,7 +20,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
 
@@ -339,5 +341,54 @@ class SkillVideoClientDisplaySpecs extends DefaultIntSpec {
         then:
         fileAndHeaders.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
         fileAndHeaders.file.bytes == expectedContentAsBytes
+    }
+
+    def "UC protection applies for video download" () {
+        SkillsService rootSkillsService = createRootSkillService()
+        skillsService.getCurrentUser() // initialize skillsService user_attrs
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
+
+        List<String> userNames = getRandomUsers(2)
+        SkillsService nonUcUser = createService(userNames[0])
+
+        SkillsService otherUcUser = createService(userNames[1])
+        rootSkillsService.saveUserTag(otherUcUser.userName, 'dragons', ['DivineDragon']);
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                file: video,
+                transcript: "transcript",
+                captions: "captions",
+        ])
+
+        def user = getRandomUsers(1).first()
+        def skill = skillsService.getSingleSkillSummary(user, p1.projectId, p1Skills[0].skillId)
+        def videoUrl = skill.videoSummary.videoUrl
+
+        File resource = video.getFile();
+        byte[] expectedContentAsBytes = Files.readAllBytes(resource.toPath())
+
+        when:
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment(videoUrl)
+        SkillsService.FileAndHeaders fileAndHeaders1 = otherUcUser.downloadAttachment(videoUrl)
+
+        nonUcUser.downloadAttachment(videoUrl)
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.httpStatus == HttpStatus.FORBIDDEN
+
+        fileAndHeaders.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        fileAndHeaders.file.bytes == expectedContentAsBytes
+
+        fileAndHeaders1.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        fileAndHeaders1.file.bytes == expectedContentAsBytes
     }
 }

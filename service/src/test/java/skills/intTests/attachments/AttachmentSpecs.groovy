@@ -150,7 +150,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         result
         !result.success
         result.errorCode == 'BadParam'
-        result.explanation.contains('File size [10 MB] exceeds maximum file size [10 MB]')
+        result.explanation.contains('File size [1 MB] exceeds maximum file size [1 MB]')
     }
 
     def "attempt to upload attachment that is a associated to both a projectId and a quizId"() {

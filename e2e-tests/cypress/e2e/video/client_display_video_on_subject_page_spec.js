@@ -97,7 +97,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
     });
 
-    it('play video on subject page', () => {
+    it('play external video on subject page', () => {
         cy.intercept('POST', '/api/projects/proj1/skills/skill3').as('reportSkill3')
         const extraCommonAttr = {numPerformToCompletion : 1, description: 'blah blah', pointIncrement: 33}
         cy.createProject(1)
@@ -138,6 +138,61 @@ describe('Display Video on Subject Page Tests', () => {
         // play 3rd video
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"]').contains('You just earned 33 points')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('33 / 33 Points')
+        cy.get('[data-cy="overallPointsEarnedToday"]').contains('33')
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
+        cy.wait('@reportSkill3')
+
+        // 1st is still collapsed
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
+    });
+
+    it('play skilltree hosted video on subject page', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill3').as('reportSkill3')
+        const extraCommonAttr = {numPerformToCompletion : 1, description: 'blah blah', pointIncrement: 33}
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, extraCommonAttr)
+        cy.createSkill(1, 1, 2, extraCommonAttr)
+        cy.createSkill(1, 1, 3, extraCommonAttr)
+        cy.createSkill(1, 1, 4, extraCommonAttr)
+        cy.saveVideoAttrs(1, 1, { file: 'create-project.webm', captions: 'some1', transcript: 'blah blah' })
+        cy.saveVideoAttrs(1, 2, { file: 'create-quiz.mp4', captions: 'some2', transcript: 'blah blah' })
+        cy.saveVideoAttrs(1, 3, { file: 'create-subject.webm' })
+        cy.createSkill(1, 1, 1, { ...extraCommonAttr, selfReportingType: 'Video' });
+        cy.createSkill(1, 1, 2, { ...extraCommonAttr, selfReportingType: 'Video' });
+        cy.createSkill(1, 1, 3, { ...extraCommonAttr, selfReportingType: 'Video' });
+        cy.cdVisit('/subjects/subj1/');
+        cy.get('[data-cy=toggleSkillDetails]').click();
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"]').should('not.exist')
+
+        // expand 2nd video
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="skillVideo-skill2"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
+
+        // expand 3rd skill
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="viewTranscriptBtn"]').should('not.exist')
+
+        // play 3rd video
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"]').contains('You just earned 33 points')
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
