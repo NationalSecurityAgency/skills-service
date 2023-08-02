@@ -17,13 +17,21 @@
 describe('Handle Video without duration Tests', () => {
 
     beforeEach(() => {
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        Cypress.Commands.add("visitVideoConfPage", (projNum) => {
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.wait('@getVideoProps')
+            cy.wait('@getSkillInfo')
+            cy.get('.spinner-border').should('not.exist')
+        });
     });
 
     it('upload video without duration', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         const videoFile = 'create-project-noDuration.webm';
         cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()

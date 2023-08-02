@@ -18,13 +18,21 @@ describe('Configure Video Validation Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        Cypress.Commands.add("visitVideoConfPage", (projNum) => {
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.wait('@getVideoProps')
+            cy.wait('@getSkillInfo')
+            cy.get('.spinner-border').should('not.exist')
+        });
     });
 
     it('video is required - resolve error by providing a Video Url', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
         cy.get('[data-cy="videoCaptions"]').type('captions', { delay: 0 })
@@ -60,7 +68,7 @@ describe('Configure Video Validation Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         cy.get('[data-cy="videoTranscript"]').type('jabberwocky', { delay: 0 })
         cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - paragraphs may not contain jabberwocky')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
@@ -71,7 +79,7 @@ describe('Configure Video Validation Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(51).fill('a').join('');
@@ -86,7 +94,7 @@ describe('Configure Video Validation Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(50).fill('a').join('');
@@ -103,7 +111,7 @@ describe('Configure Video Validation Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visitVideoConfPage();
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
         cy.get('.spinner-border').should('not.exist')

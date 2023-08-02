@@ -139,17 +139,26 @@ Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     if (videoAttrs.isAlreadyHosted !== null && videoAttrs.isAlreadyHosted !== undefined) {
         formData.set('isAlreadyHosted', videoAttrs.isAlreadyHosted);
     }
+    let requestDone = false;
     if (videoAttrs.file) {
         const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
         cy.fixture(videoAttrs.file, 'binary')
             .then((binaryFile) => {
                 const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
                 formData.set('file', blob, videoAttrs.file);
-                cy.request('POST', url, formData);
+                cy.request('POST', url, formData).then(() => {
+                    requestDone = true;
+                });
             });
     } else {
-        cy.request('POST', url, formData);
+        cy.request('POST', url, formData).then(() => {
+            requestDone = true;
+        });
     }
+
+    cy.waitUntil(() => requestDone, {
+        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+    });
 });
 
 Cypress.Commands.add("addToMyProjects", (projNum) => {
