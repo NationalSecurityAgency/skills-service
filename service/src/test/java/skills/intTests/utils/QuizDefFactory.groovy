@@ -77,4 +77,8 @@ class QuizDefFactory {
     static createTextInputSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
         return this.createChoiceQuestion(quizNumber, questionsNumber, 0, QuizQuestionType.TextInput, QuizType.Survey)
     }
+
+    static createRatingSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
+        return this.createChoiceQuestion(quizNumber, questionsNumber, 0, QuizQuestionType.Rating, QuizType.Survey)
+    }
 }
