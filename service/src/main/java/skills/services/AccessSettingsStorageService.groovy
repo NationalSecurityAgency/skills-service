@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
@@ -62,9 +61,6 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserInfoService userInfoService
-
-    @Autowired
-    UserDetailsService userDetailsService
 
     @Autowired
     InceptionProjectService inceptionProjectService
