@@ -127,6 +127,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             .contains('Opted-Out');
         cy.get('[data-cy="myRank"]')
             .contains('Your position would be 13 if you opt-in');
+        cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'my-rank-opted-out', snapshotOptions);
 
         cy.cdClickRank();
@@ -144,15 +145,13 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             .contains('You selected to opt-out');
 
         cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'rank-overview-my-rank-opted-out', snapshotOptions);
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'rank-overview-leaderboard-opted-out', snapshotOptions);
+        cy.matchSnapshotImage('rank-overview-leaderboard-opted-out', snapshotOptions);
     });
 
     if (!Cypress.env('oauthMode')) {
         it('leaderboard 10 Around Me', () => {
-            cy.cdVisit('/');
-            cy.cdClickRank();
-
+            cy.cdVisit('/rank');
+            cy.get('[data-cy="myRankPositionStatCard"]').contains('13')
             cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
                 .contains('10 Around Me')
                 .click();
@@ -186,7 +185,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             }
 
             cy.wait(2000)
-            cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard-10AroundMe', snapshotOptions);
+            cy.matchSnapshotImage('leaderboard-10AroundMe', snapshotOptions);
         });
 
         it('switch between "top 10" and "10 around me" ', () => {
