@@ -162,7 +162,9 @@ describe('Display Video on Subject Page Tests', () => {
         cy.createSkill(1, 1, 3, extraCommonAttr)
         cy.createSkill(1, 1, 4, extraCommonAttr)
         cy.saveVideoAttrs(1, 1, { file: 'create-project.webm', captions: 'some1', transcript: 'blah blah' })
+        cy.wait(4000)
         cy.saveVideoAttrs(1, 2, { file: 'create-quiz.mp4', captions: 'some2', transcript: 'blah blah' })
+        cy.wait(4000)
         cy.saveVideoAttrs(1, 3, { file: 'create-subject.webm' })
         cy.createSkill(1, 1, 1, { ...extraCommonAttr, selfReportingType: 'Video' });
         cy.createSkill(1, 1, 2, { ...extraCommonAttr, selfReportingType: 'Video' });
