@@ -45,7 +45,7 @@ limitations under the License.
                 </div>
               </div>
               <div v-if="isRatingType">
-                <b-form-rating disabled no-border inline />
+                <b-form-rating disabled no-border inline size="lg" />
               </div>
               <div v-if="isTextInputType">
                 <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>

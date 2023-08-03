@@ -46,7 +46,13 @@ limitations under the License.
         </ValidationProvider>
       </div>
       <div v-else-if="isRating">
-        <b-form-rating v-model="answerRating" no-border inline @change="ratingChanged" :id="`question-${num}`" />
+        <ValidationProvider rules="ratingSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
+          <b-form-rating v-model="answerRating" no-border inline :id="`question-${num}`"
+                         size="lg" variant="warning" />
+          <small :id="`question${num}_ratingError`"
+                 role="alert" class="form-text text-danger"
+                 data-cy="choiceAnswerErr">{{ errors[0] }}</small>
+        </ValidationProvider>
       </div>
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
@@ -111,6 +117,9 @@ limitations under the License.
       answerText() {
         this.textAnswerChanged();
       },
+      answerRating(value) {
+        this.ratingChanged(value);
+      },
     },
     computed: {
       isMultipleChoice() {
@@ -154,6 +163,18 @@ limitations under the License.
         }, {
           immediate: false,
         });
+
+        extend('ratingSelected', {
+          message: () => 'A rating must be selected',
+          validate(value) {
+            if (value > 0) {
+              return true;
+            }
+            return false;
+          },
+        }, {
+          immediate: false,
+        });
       },
       textAnswerChanged() {
         const selectedAnswerIds = this.answerOptions.map((a) => a.id);
@@ -193,8 +214,7 @@ limitations under the License.
           changedAnswerIdSelected: true,
         };
         this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-          // only 1 answer in case of TextInput
-          this.$emit('answer-text-changed', {
+          this.$emit('selected-answer', {
             ...currentAnswer,
             reportAnswerPromise,
           });

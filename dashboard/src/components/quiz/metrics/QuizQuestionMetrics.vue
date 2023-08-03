@@ -28,6 +28,13 @@ limitations under the License.
         </div>
       </div>
     </div>
+
+    <div v-if="isRating && averageScore" class="pl-3">
+      Average Score:
+      <b-form-rating no-border readonly inline :value="averageScore" size="lg"
+                     variant="warning" show-value precision="2" />
+    </div>
+
     <skills-b-table v-if="!isTextInput && answers"
                     :options="tableOptions"
                     :items="answers">
@@ -97,6 +104,7 @@ limitations under the License.
     data() {
       return {
         series: [this.q.numAnsweredCorrect, this.q.numAnsweredWrong],
+        averageScore: null,
         chartOptions: {
           labels: ['Correct', 'Wrong'],
           colors: ['#007c49', '#ffc42b'],
@@ -179,6 +187,15 @@ limitations under the License.
     mounted() {
       const totalNumUsers = this.q.numAnsweredCorrect + this.q.numAnsweredWrong;
       this.answers = this.q.answers.map((a) => ({ ...a, selected: a.selected ? a.selected : false, percent: Math.trunc((a.numAnswered / totalNumUsers) * 100) }));
+      if (this.isRating) {
+        let totalScore = 0;
+        let totalAnswers = 0;
+        this.answers.forEach((answer) => {
+          totalAnswers += answer.numAnswered;
+          totalScore += (answer.answer * answer.numAnswered);
+        });
+        this.averageScore = totalScore / totalAnswers;
+      }
     },
     computed: {
       questionTypeLabel() {

@@ -48,7 +48,8 @@ limitations under the License.
           <pre>{{ answerText }}</pre>
         </div>
         <div v-if="isRating">
-          <b-form-rating no-border readonly inline :value="surveyScore" />
+          <b-form-rating no-border readonly inline :value="surveyScore" size="lg"
+                         variant="warning" />
         </div>
       </div>
     </div>
