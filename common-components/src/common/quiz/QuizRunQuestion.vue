@@ -51,7 +51,7 @@ limitations under the License.
                          size="lg" variant="warning" />
           <small :id="`question${num}_ratingError`"
                  role="alert" class="form-text text-danger"
-                 data-cy="choiceAnswerErr">{{ errors[0] }}</small>
+                 data-cy="ratingError">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
       <div v-else>

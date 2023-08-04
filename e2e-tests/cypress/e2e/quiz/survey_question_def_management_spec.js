@@ -125,9 +125,19 @@ describe('Survey Question CRUD Tests', () => {
         cy.validateChoiceAnswer(1, 2, '3', true)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('not.exist')
 
-        // q4 doesn't exist
-        cy.get('[data-cy="questionDisplayCard-4"]').should('not.exist')
 
+        // rating choice question
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Rating"]').click()
+
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+
+        // q5 doesn't exist
+        cy.get('[data-cy="questionDisplayCard-5"]').should('not.exist')
 
         cy.visit('/administrator/quizzes/quiz1');
         // q3
@@ -149,8 +159,11 @@ describe('Survey Question CRUD Tests', () => {
         cy.validateChoiceAnswer(1, 2, '3', true)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('not.exist')
 
-        // q4 doesn't exist
-        cy.get('[data-cy="questionDisplayCard-4"]').should('not.exist')
+        // q3
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+
+        // q5 doesn't exist
+        cy.get('[data-cy="questionDisplayCard-5"]').should('not.exist')
     });
 
     it('modal validation: at least 2 answers are required', function () {
