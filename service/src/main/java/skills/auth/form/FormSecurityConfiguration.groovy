@@ -25,10 +25,13 @@ import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
@@ -81,6 +84,12 @@ class FormSecurityConfiguration {
     private RestLogoutSuccessHandler restLogoutSuccessHandler
 
     @Autowired
+    PasswordEncoder passwordEncoder
+
+    @Autowired
+    UserDetailsService userDetailsService
+
+    @Autowired
     @Lazy
     SecurityContextRepository securityContextRepository
 
@@ -131,6 +140,15 @@ class FormSecurityConfiguration {
     UserDetailsService localUserDetailsService() {
         LocalUserDetailsService localUserDetailsService = new LocalUserDetailsService()
         return localUserDetailsService;
+    }
+
+    @Bean
+    @Conditional(SecurityMode.FormAuth)
+    AuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
     }
 
     @Bean

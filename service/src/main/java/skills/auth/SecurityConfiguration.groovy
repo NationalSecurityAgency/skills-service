@@ -91,9 +91,6 @@ class SecurityConfiguration {
         SecurityContextRepository securityContextRepository
 
         @Autowired
-        PasswordEncoder passwordEncoder
-
-        @Autowired
         AccessDeniedHandler accessDeniedHandler
 
         @Bean('corsSecurityFilterChain')
