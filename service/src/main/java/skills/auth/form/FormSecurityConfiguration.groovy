@@ -25,12 +25,10 @@ import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository
 import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
@@ -83,16 +81,6 @@ class FormSecurityConfiguration {
     private RestLogoutSuccessHandler restLogoutSuccessHandler
 
     @Autowired
-    PasswordEncoder passwordEncoder
-
-//    @Autowired
-//    void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth
-//                .userDetailsService(localUserDetailsService())
-//                .passwordEncoder(passwordEncoder)
-//    }
-
-    @Autowired
     @Lazy
     SecurityContextRepository securityContextRepository
 
@@ -141,12 +129,8 @@ class FormSecurityConfiguration {
     @Bean
     @Conditional(SecurityMode.FormAuth)
     UserDetailsService localUserDetailsService() {
-        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        List<String> toPrint = elements.collect { StackTraceElement s ->
-            "\tat " + s.getClassName() + "." + s.getMethodName() + "(" + s.getFileName() + ":" + s.getLineNumber() + ")"
-        }
-        log.error( "Called FormSecurityConfiguration.localUserDetailsService stack trace:\n${toPrint.join("\n")}")
-        new LocalUserDetailsService()
+        LocalUserDetailsService localUserDetailsService = new LocalUserDetailsService()
+        return localUserDetailsService;
     }
 
     @Bean

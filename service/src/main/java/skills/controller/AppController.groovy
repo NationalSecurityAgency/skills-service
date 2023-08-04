@@ -19,24 +19,17 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.QuizDefExistsRequest
 import skills.controller.request.model.QuizDefRequest
-import skills.controller.result.model.CustomIconResult
-import skills.controller.result.model.InviteTokenValidationResponse
-import skills.controller.result.model.ProjectDescription
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.RequestResult
-import skills.controller.result.model.QuizDefResult
+import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
@@ -45,11 +38,8 @@ import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
-import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
-
-import jakarta.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/app")
@@ -65,9 +55,6 @@ class AppController {
 
     @Autowired
     CustomIconFacade customIconFacade
-
-    @Autowired
-    PasswordEncoder passwordEncoder
 
     @Autowired
     UserInfoService userInfoService
