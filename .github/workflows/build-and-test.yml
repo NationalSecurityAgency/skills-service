@@ -65,7 +65,7 @@ jobs:
           MAVEN_OPTS: -Xmx2048m
         run: |
           mvn --batch-mode install -DskipTests
-          java -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -jar target/skills-service-2.9.0-SNAPSHOT.jar
+          java -Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -jar service/target/skills-service-2.9.0-SNAPSHOT.jar
 
       - name: upload service jar
         uses: actions/upload-artifact@v3
