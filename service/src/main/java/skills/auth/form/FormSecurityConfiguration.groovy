@@ -86,7 +86,7 @@ class FormSecurityConfiguration {
     PasswordEncoder passwordEncoder
 
     @Autowired
-    void configure(AuthenticationManagerBuilder auth) throws Exception {
+    void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .userDetailsService(localUserDetailsService())
                 .passwordEncoder(passwordEncoder)
@@ -141,6 +141,11 @@ class FormSecurityConfiguration {
     @Bean
     @Conditional(SecurityMode.FormAuth)
     UserDetailsService localUserDetailsService() {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        List<String> toPrint = elements.collect { StackTraceElement s ->
+            "\tat " + s.getClassName() + "." + s.getMethodName() + "(" + s.getFileName() + ":" + s.getLineNumber() + ")"
+        }
+        log.error( "Called FormSecurityConfiguration.localUserDetailsService stack trace:\n${toPrint.join("\n")}")
         new LocalUserDetailsService()
     }
 
