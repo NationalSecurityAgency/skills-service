@@ -19,11 +19,6 @@
         <main.basedir>${project.basedir}</main.basedir>
         <java.version>19</java.version>
 
-        <!-- can NOT name it groovy.version as spock's dependency picks it up-->
-        <groovy.version>4.0.7</groovy.version>
-        <groovy.eclipse.compiler.version>3.8.0</groovy.eclipse.compiler.version>
-        <groovy.eclipse.batch.version>4.0.7-02</groovy.eclipse.batch.version>
-
         <spock.myVersion>2.4-M1-groovy-4.0</spock.myVersion>
 
         <flywaydb.version>6.5.5</flywaydb.version>
