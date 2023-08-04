@@ -90,10 +90,6 @@ class UserAuthService {
     @Autowired
     ApproverRoleDecider approverRoleDecider
 
-//    @Autowired(required = false)  // only for SecurityMode.FormAuth
-//    @Qualifier('formSecurityFilterChain')
-//    SecurityFilterChain formSecurityFilterChain
-
     @Autowired(required = false)  // only for SecurityMode.FormAuth
     SecurityContextRepository securityContextRepository
 
@@ -105,15 +101,6 @@ class UserAuthService {
 
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
-
-//    private AutoLoginProcessor autoLoginProcessor
-
-//    @PostConstruct
-//    void init() {
-//        if (formSecurityFilterChain) {
-//            autoLoginProcessor = new AutoLoginProcessor(formSecurityFilterChain.getFilters().find { it.class == UsernamePasswordAuthenticationFilter }, securityContextRepository)
-//        }
-//    }
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
@@ -195,11 +182,6 @@ class UserAuthService {
         }
         return null
     }
-
-//    void autologin(UserInfo userInfo, String password, HttpServletRequest request, HttpServletResponse response) {
-//        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userInfo, password, userInfo.getAuthorities())
-//        autoLoginProcessor.autoLogin(usernamePasswordAuthenticationToken, request, response)
-//    }
 
     private Collection<GrantedAuthority> convertRoles(List<UserRole> roles) {
         Collection<GrantedAuthority> grantedAuthorities = EMPTY_ROLES
@@ -324,32 +306,4 @@ class UserAuthService {
     boolean userExists(String userId) {
         return userRepository.existsByUserIdIgnoreCase(userId)
     }
-
-//    static class AutoLoginProcessor extends UsernamePasswordAuthenticationFilter {
-//        private UsernamePasswordAuthenticationFilter delegate
-//        private UsernamePasswordAuthenticationToken currentAuthRequest = null
-//
-//        AutoLoginProcessor(UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter, SecurityContextRepository securityContextRepository) {
-//            this.delegate = usernamePasswordAuthenticationFilter
-//            this.setSecurityContextRepository(securityContextRepository)
-//            this.setAuthenticationSuccessHandler(this.delegate.getSuccessHandler())
-//            this.setSessionAuthenticationStrategy(new ChangeSessionIdAuthenticationStrategy())
-//        }
-//
-//        void autoLogin(UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToke, HttpServletRequest request, HttpServletResponse response) {
-//            this.currentAuthRequest = usernamePasswordAuthenticationToke
-//            super.doFilter(request, response, () -> {})
-//            this.currentAuthRequest = null
-//        }
-//
-//        @Override
-//        Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-//            return this.delegate.getAuthenticationManager().authenticate(this.currentAuthRequest);
-//        }
-//
-//        @Override
-//        protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-//            return true
-//        }
-//    }
 }

@@ -62,7 +62,7 @@ class InceptionSkills {
                     throw new IllegalStateException("The following file must exist in src/main/resources/inception/${fileToLookup}")
                 }
                 it.description = desc
-                log.info("Assigned description for skill [{}] from file [{}]", it.skillId, fileToLookup)
+                log.debug("Assigned description for skill [{}] from file [{}]", it.skillId, fileToLookup)
                 mappedDescriptions.add(fileToLookup)
             }
         }
