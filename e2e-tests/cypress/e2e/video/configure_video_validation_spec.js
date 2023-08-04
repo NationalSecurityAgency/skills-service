@@ -123,7 +123,7 @@ describe('Configure Video Validation Tests', () => {
         const videoFile = 'valid_icon.png';
         cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile });
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileError"]').contains('Unsupported [image/png] file type, supported types: [video/webm, video/mp4]')
+        cy.get('[data-cy="videoFileError"]').contains('Unsupported [image/png] file type, supported types: [video/webm,video/mp4]')
     });
 
     it('validate maximum size of the video', () => {

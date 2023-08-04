@@ -56,7 +56,7 @@ class AdminVideoService {
     @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
     DataSize maxAttachmentSize;
 
-    @Value('#{"${skills.config.ui.allowedVideoUploadMimeTypes}"}')
+    @Value('#{"${skills.config.allowedVideoUploadMimeTypes}"}')
     List<MediaType> allowedAttachmentMimeTypes;
 
     @Transactional

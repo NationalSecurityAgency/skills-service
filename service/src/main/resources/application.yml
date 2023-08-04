@@ -107,6 +107,7 @@ skills:
     maxAttachmentSize: 128MB
     allowedAttachmentMimeTypes: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, application/msword, application/vnd.oasis.opendocument.presentation, application/vnd.oasis.opendocument.spreadsheet, application/vnd.oasis.opendocument.text, application/pdf, application/vnd.ms-powerpoint, application/vnd.ms-excel"
     allowedAttachmentFileTypes: ".xlsx, .docx, .pptx, .doc, .odp, .ods, .odt, .pdf, .ppt, .xls"
+    allowedVideoUploadMimeTypes: "video/webm, video/mp4"
     attachmentWarningMessage:
     ui:
       dashboardVersion: @pom.version@
@@ -169,7 +170,6 @@ skills:
       maxTagValueLengthInApprovalWorkloadConfig: 10
       maxVideoCaptionsLength: 5000
       maxVideoTranscriptLength: 20000
-      allowedVideoUploadMimeTypes: "video/webm, video/mp4"
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
