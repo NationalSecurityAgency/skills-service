@@ -85,12 +85,12 @@ class FormSecurityConfiguration {
     @Autowired
     PasswordEncoder passwordEncoder
 
-    @Autowired
-    void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(localUserDetailsService())
-                .passwordEncoder(passwordEncoder)
-    }
+//    @Autowired
+//    void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        auth
+//                .userDetailsService(localUserDetailsService())
+//                .passwordEncoder(passwordEncoder)
+//    }
 
     @Autowired
     @Lazy
