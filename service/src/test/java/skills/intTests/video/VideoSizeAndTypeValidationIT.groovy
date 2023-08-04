@@ -29,7 +29,7 @@ import static skills.intTests.utils.SkillsFactory.createSubject
 
 
 @Slf4j
-@SpringBootTest(properties = ['skills.config.ui.allowedVideoUploadMimeTypes:video/webm',
+@SpringBootTest(properties = ['skills.config.allowedVideoUploadMimeTypes:video/webm',
         'skills.config.ui.maxVideoUploadSize:500KB'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class VideoSizeAndTypeValidationIT  extends DefaultIntSpec {
