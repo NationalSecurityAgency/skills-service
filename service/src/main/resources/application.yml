@@ -34,10 +34,13 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
   shutdown: graceful
 
+logging:
+  level:
+    org.springframework.core.LocalVariableTableParameterNameDiscoverer: ERROR
+
 spring:
   lifecycle:
     timeout-per-shutdown-phase: 1m
-  #logging:
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
@@ -171,9 +174,6 @@ skills:
       loggingLevel: DEBUG
   profiles:
     active: default
-#  level:
-#    org.hibernate: INFO
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 db-scheduler:
   threads: 3
 ---
