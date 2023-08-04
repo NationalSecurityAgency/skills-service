@@ -25,7 +25,8 @@ import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
@@ -86,11 +87,7 @@ class FormSecurityConfiguration {
     PasswordEncoder passwordEncoder
 
     @Autowired
-    void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(localUserDetailsService())
-                .passwordEncoder(passwordEncoder)
-    }
+    UserDetailsService userDetailsService
 
     @Autowired
     @Lazy
@@ -141,7 +138,17 @@ class FormSecurityConfiguration {
     @Bean
     @Conditional(SecurityMode.FormAuth)
     UserDetailsService localUserDetailsService() {
-        new LocalUserDetailsService()
+        LocalUserDetailsService localUserDetailsService = new LocalUserDetailsService()
+        return localUserDetailsService;
+    }
+
+    @Bean
+    @Conditional(SecurityMode.FormAuth)
+    AuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
     }
 
     @Bean

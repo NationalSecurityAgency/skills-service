@@ -32,7 +32,6 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
@@ -90,12 +89,6 @@ class SecurityConfiguration {
 
         @Autowired(required = false)  // not required for PKI_AUTH
         SecurityContextRepository securityContextRepository
-
-        @Autowired
-        PasswordEncoder passwordEncoder
-
-        @Autowired
-        UserDetailsService userDetailsService
 
         @Autowired
         AccessDeniedHandler accessDeniedHandler

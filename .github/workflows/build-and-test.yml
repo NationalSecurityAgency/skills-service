@@ -63,7 +63,8 @@ jobs:
       - name: Build skills-service
         env:
           MAVEN_OPTS: -Xmx2048m
-        run: mvn --batch-mode install -DskipTests
+        run: |
+          mvn --batch-mode install -DskipTests
 
       - name: upload service jar
         uses: actions/upload-artifact@v3

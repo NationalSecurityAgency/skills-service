@@ -18,7 +18,6 @@ package skills.auth.form
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
 import skills.auth.SecurityMode
 import skills.auth.UserAuthService
@@ -48,12 +47,6 @@ class EmailVerificationController {
 
     @Autowired
     UserAttrsService userAttrsService
-
-    @Autowired
-    PublicPropsBasedValidator propsBasedValidator
-
-    @Autowired
-    PasswordEncoder passwordEncoder
 
     @GetMapping('userEmailIsVerified/{email}')
     boolean userEmailIsVerified(@PathVariable('email') String email) {

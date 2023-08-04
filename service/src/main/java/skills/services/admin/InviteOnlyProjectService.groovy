@@ -331,7 +331,10 @@ class InviteOnlyProjectService {
      */
     @Transactional(readOnly = true)
     boolean isInviteOnlyProject(String projectId) {
-        SkillsValidator.isNotBlank(projectId, "projectId")
+        SkillsValidator.isNotNull(projectId, "projectId")
+        if (StringUtils.EMPTY == projectId) {
+            return false
+        }
         return settingsDataAccessor.getProjectSetting(projectId, Settings.INVITE_ONLY_PROJECT.settingName)?.isEnabled()
     }
 
