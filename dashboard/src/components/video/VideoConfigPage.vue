@@ -16,12 +16,22 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Configure Video"/>
-    <b-overlay :show="loading.video || loading.skill">
+    <b-overlay :show="loading.video || loadingSkill">
     <b-card>
       <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
         <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Video attributes of <span
         v-if="isImported"><b-badge variant="success"><i class="fas fa-book" aria-hidden="true"/> Imported</b-badge></span><span v-if="isReused"><b-badge variant="success"><i class="fas fa-recycle" aria-hidden="true"/> Reused</b-badge></span>
         skills are read-only.
+      </div>
+      <div v-if="!isReadOnly && savedAtLeastOnce && skill && hasVideoUrl" data-cy="videoSelfReportAlert">
+        <div v-if="skill.selfReportingType === 'Video'" class="alert alert-success">
+          <i class="fas fa-file-video" style="font-size: 1.4rem;" aria-hidden="true"/>
+          Users are required to watch this video in order to earn the skill and its points.
+        </div>
+        <div v-else class="alert alert-info">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"/>
+          Optionally set <i>Self Reporting</i> type to <b-badge>Video</b-badge> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
+        </div>
       </div>
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
       <b-form-group label-for="videoUrlInput">
@@ -199,12 +209,14 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import { createNamespacedHelpers } from 'vuex';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import VideoService from '@/components/video/VideoService';
   import VideoPlayer from '@/common-components/video/VideoPlayer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import SkillsService from '@/components/skills/SkillsService';
   import FileUploadService from '@/common-components/utilities/FileUploadService';
+
+  const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'VideoConfigPage',
@@ -220,7 +232,6 @@ limitations under the License.
           isInternallyHosted: false,
           hostedFileName: '',
         },
-        skillInfo: {},
         watchedProgress: null,
         isDurationAvailable: true,
         preview: false,
@@ -232,6 +243,7 @@ limitations under the License.
         showSavedMsg: false,
         overallErrMsg: null,
         showFileUpload: true,
+        savedAtLeastOnce: false,
       };
     },
     created() {
@@ -242,6 +254,12 @@ limitations under the License.
       this.loadSkillInfo();
     },
     computed: {
+      ...skills.mapGetters([
+        'skill',
+      ]),
+      ...skills.mapGetters([
+        'loadingSkill',
+      ]),
       computedVideoConf() {
         const captionsUrl = this.videoConf.captions && this.videoConf.captions.trim().length > 0
           ? `/api/projects/${this.$route.params.projectId}/skills/${this.$route.params.skillId}/videoCaptions`
@@ -259,16 +277,19 @@ limitations under the License.
         return this.videoConf.url || this.videoConf.captions || this.videoConf.transcript;
       },
       isImported() {
-        return this.skillInfo && this.skillInfo.copiedFromProjectId && this.skillInfo.copiedFromProjectId.length > 0 && !this.skillInfo.reusedSkill;
+        return this.skill && this.skill.copiedFromProjectId && this.skill.copiedFromProjectId.length > 0 && !this.skill.reusedSkill;
       },
       isReused() {
-        return this.skillInfo && this.skillInfo.reusedSkill;
+        return this.skill && this.skill.reusedSkill;
       },
       isReadOnly() {
         return this.isReused || this.isImported;
       },
     },
     methods: {
+      ...skills.mapActions([
+        'loadSkill',
+      ]),
       setupPreview() {
         if (this.preview) {
           this.refreshingPreview = true;
@@ -336,6 +357,7 @@ limitations under the License.
 
         const endpoint = `/admin/projects/${this.$route.params.projectId}/skills/${this.$route.params.skillId}/video`;
         FileUploadService.upload(endpoint, data, (response) => {
+          this.savedAtLeastOnce = true;
           this.updateVideoSettings(response.data);
           this.showSavedMsg = true;
           this.loading.video = false;
@@ -398,19 +420,17 @@ limitations under the License.
         this.videoConf.hostedFileName = settingRes.internallyHostedFileName;
         if (this.videoConf.url) {
           this.showFileUpload = this.videoConf.isInternallyHosted;
+          this.savedAtLeastOnce = true;
         } else {
           this.showFileUpload = true;
         }
       },
       loadSkillInfo() {
-        this.loading.skill = true;
-        SkillsService.getSkillDetails(this.$route.params.projectId, this.$route.params.subjectId, this.$route.params.skillId)
-          .then((response) => {
-            this.skillInfo = response;
-          })
-          .finally(() => {
-            this.loading.skill = false;
-          });
+        this.loadSkill({
+          projectId: this.$route.params.projectId,
+          subjectId: this.$route.params.subjectId,
+          skillId: this.$route.params.skillId,
+        });
       },
       updatedWatchProgress(progress) {
         this.watchedProgress = progress;
