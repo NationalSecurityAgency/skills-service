@@ -32,6 +32,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
 import skills.controller.result.model.SettingsResult
 import skills.services.LockingService
+import skills.services.admin.UserCommunityService
 import skills.services.settings.listeners.ValidationRes
 import skills.storage.model.Setting
 import skills.storage.model.auth.RoleName
@@ -63,6 +64,9 @@ class SettingsService {
 
     @Autowired
     PublicPropsBasedValidator propsBasedValidator
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Transactional
     void saveSettings(List<SettingsRequest> request, User user=null) {
@@ -207,6 +211,15 @@ class SettingsService {
                 value: usersRole.toString(),
                 userId: currentUser.username?.toLowerCase()
         ))
+        if (userCommunityService.isUserCommunityConfigured()) {
+            boolean isUserCommunityProtectedProject = settings.find { it.setting == Settings.USER_COMMUNITY_ONLY_PROJECT.settingName}?.isEnabled()
+            res.add(new SettingsResult(
+                    setting: "project_community_value",
+                    projectId: projectId,
+                    value: userCommunityService.getCommunityNameBasedProjConfStatus(isUserCommunityProtectedProject),
+                    userId: currentUser.username?.toLowerCase()
+            ))
+        }
         return res
     }
 

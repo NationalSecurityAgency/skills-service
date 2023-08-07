@@ -28,7 +28,7 @@ limitations under the License.
     },
     computed: {
       isLoadingProjConfig() {
-        return this.$store.getters.loadingProjConfig;
+        return this.$store.getters.loadingProjConfig === undefined || this.$store.getters.loadingProjConfig === null || this.$store.getters.loadingProjConfig;
       },
       projConfig() {
         return this.$store.getters.projConfig;

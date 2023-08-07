@@ -16,7 +16,7 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Configure Video"/>
-    <b-overlay :show="loading.video || loadingSkill">
+    <b-overlay :show="loading.video || loadingSkill || isLoadingProjConfig">
     <b-card>
       <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
         <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Video attributes of <span
@@ -218,13 +218,16 @@ limitations under the License.
   import VideoPlayer from '@/common-components/video/VideoPlayer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import FileUploadService from '@/common-components/utilities/FileUploadService';
+  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
+  import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
+  import MsgLogService from '@/common-components/utilities/MsgLogService';
 
   const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'VideoConfigPage',
     components: { VideoPlayer, SubPageHeader },
-    mixins: [MsgBoxMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin, NavigationErrorMixin],
     data() {
       return {
         videoConf: {
@@ -289,7 +292,20 @@ limitations under the License.
         return this.isReused || this.isImported;
       },
       videoUploadWarningMessage() {
-        return this.$store.getters.config.videoUploadWarningMessage;
+        const communityProjDescriptor = /\{\{\s?community.project.descriptor\s?\}\}/gi;
+        const projCommunityValue = this.$store.getters.projConfig?.project_community_value;
+        const warningMessageValue = this.$store.getters.config?.videoUploadWarningMessage;
+        let result = warningMessageValue;
+        if (warningMessageValue) {
+          const found = warningMessageValue.match(communityProjDescriptor);
+          if (found && !projCommunityValue) {
+            const errorMessage = `projId=[${this.$route.params.projectId}], skillId=[${this.$route.params.skillId}] config.videoUploadWarningMessage contained {{community.project.descriptor}} property but failed to load [project_community_value] configuration for the replacement.`;
+            MsgLogService.log('ERROR', errorMessage);
+            this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
+          }
+          result = result.replace(communityProjDescriptor, projCommunityValue);
+        }
+        return result;
       },
     },
     methods: {
