@@ -58,7 +58,7 @@ class CreateAccountController {
     @Autowired
     PasswordEncoder passwordEncoder
 
-    @Autowired
+    @Autowired(required = false)  // only for SecurityMode.FormAuth
     AutoLoginService autoLoginService
 
     @Autowired
