@@ -33,7 +33,6 @@ limitations under the License.
           Optionally set <i>Self Reporting</i> type to <b-badge>Video</b-badge> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
         </div>
       </div>
-      <b-alert>hi</b-alert>
       <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
       <b-form-group label-for="videoUrlInput">
         <div slot="label">
