@@ -43,6 +43,8 @@ limitations under the License.
       <div v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved)"
            class="alert mt-2"
            :class="{'alert-success' : justAchieved, 'alert-info': !justAchieved}"
+           ref="watchVideoAlert"
+           id="watchVideoAlert"
            data-cy="watchVideoAlert">
         <div class="row">
           <div class="col-md my-auto" data-cy="watchVideoMsg">
@@ -80,6 +82,25 @@ limitations under the License.
       <b-card v-if="transcript.show" class="mt-1 skills-card-theme-border">
         <label for="transcriptDisplay" class="h4">Video Transcript:</label>
         <b-textarea id="transcriptDisplay" v-model="transcript.transcript" :readonly="true" rows="5" data-cy="videoTranscript"></b-textarea>
+        <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="mt-2 row">
+          <div class="col">
+            <b-form-checkbox
+                id="readTranscript"
+                name="Transcript Certification"
+                v-model="transcriptReadCert"
+                value="accepted"
+                unchecked-value="not_accepted"
+                data-cy="certifyTranscriptReadCheckbox"
+            >
+              I <b>certify</b> that I fully read the transcript. Please award the skill and its <b-badge>{{skill.totalPoints}}</b-badge> points.
+            </b-form-checkbox>
+          </div>
+          <div class="col-auto">
+            <b-button variant="outline-info" :disabled="!transcriptReadCert"
+                      data-cy="claimPtsByReadingTranscriptBtn"
+                      @click="achieveSkillByReadingTranscript">Claim Points <i class="fas fa-check-double" aria-hidden="true" /></b-button>
+          </div>
+        </div>
       </b-card>
     </div>
 
@@ -150,6 +171,7 @@ limitations under the License.
         },
         showPercent: true,
         isFirstTime: true,
+        transcriptReadCert: false,
       };
     },
     methods: {
@@ -160,28 +182,43 @@ limitations under the License.
         this.isFirstTime = false;
         this.percentWatched = watchProgress.percentWatched;
         if (this.trackAchievement && watchProgress.percentWatched > 96 && !this.justAchieved) {
-          UserSkillsService.reportSkill(this.skill.skillId)
-            .then((res) => {
-              if (res.pointsEarned > 0) {
-                this.justAchieved = true;
-                this.$emit('points-earned', res.pointsEarned);
-              }
-            }).catch((e) => {
-              if (e.response.data && e.response.data.errorCode
-                && (e.response.data.errorCode === 'InsufficientProjectPoints' || e.response.data.errorCode === 'InsufficientSubjectPoints')) {
-                this.errNotification.msg = e.response.data.explanation;
-                this.errNotification.enable = true;
-              } else {
-                const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
-                this.$router.push({
-                  name: 'error',
-                  params: {
-                    errorMessage,
-                  },
-                });
+          this.doReportSkill();
+        }
+      },
+      achieveSkillByReadingTranscript() {
+        this.doReportSkill()
+          .then(() => {
+            this.$nextTick(() => {
+              const element = document.getElementById('watchVideoAlert');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
               }
             });
-        }
+          });
+      },
+      doReportSkill() {
+        return UserSkillsService.reportSkill(this.skill.skillId)
+          .then((res) => {
+            if (res.pointsEarned > 0) {
+              this.justAchieved = true;
+              this.$emit('points-earned', res.pointsEarned);
+              this.$nextTick(() => this.$announcer.polite(`Congratulations! You just earned ${res.pointsEarned} points and completed ${this.skill.skill} skill`));
+            }
+          }).catch((e) => {
+            if (e.response.data && e.response.data.errorCode
+              && (e.response.data.errorCode === 'InsufficientProjectPoints' || e.response.data.errorCode === 'InsufficientSubjectPoints')) {
+              this.errNotification.msg = e.response.data.explanation;
+              this.errNotification.enable = true;
+            } else {
+              const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
+              this.$router.push({
+                name: 'error',
+                params: {
+                  errorMessage,
+                },
+              });
+            }
+          });
       },
       loadTranscript() {
         this.transcript.loading = true;

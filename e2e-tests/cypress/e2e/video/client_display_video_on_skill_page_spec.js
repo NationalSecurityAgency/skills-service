@@ -94,6 +94,8 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
         cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
     });
 
     it('ability to view transcript on an achieved skill', () => {
@@ -112,6 +114,47 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
         cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
+    });
+
+    it('ability to achieve skill by reading the transcript', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, transcript: 'read me' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1, selfReportingType: 'Video'})
+        // cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser') })
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        // cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').should('not.exist')
+        cy.get('[data-cy="viewTranscriptBtn"]').click()
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'read me')
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.be.checked')
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('be.disabled')
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').click({force: true})
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').click()
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.wait('@reportSkill1')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="viewTranscriptBtn"]').click()
+        cy.get('[data-cy="videoTranscript"]').should('have.value', 'read me')
+        cy.get('[data-cy="watchVideoAlert"]').should('not.exist')
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
+        cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
     });
 
     it('points messages and progress is only shown when skill is selfReport=Video', () => {
