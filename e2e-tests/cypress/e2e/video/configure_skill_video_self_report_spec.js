@@ -18,6 +18,14 @@ describe('Configure Self Report Video Type Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        Cypress.Commands.add("visitVideoConfPage", (projNum) => {
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.wait('@getVideoProps')
+            cy.wait('@getSkillInfo')
+            cy.get('.spinner-border').should('not.exist')
+        });
     });
 
     it('self report type of video is disabled for a new skill', () => {
@@ -92,5 +100,36 @@ describe('Configure Self Report Video Type Tests', () => {
                 .click({ force: true });
             cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
         })
+    });
+
+    it('set skill self-report type to video', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion: 4, numMaxOccurrencesIncrementInterval: 2})
+        cy.visitVideoConfPage()
+
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoSelfReportAlert"]').should('not.exist')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Video in order to award the skill for watching this video')
+
+        // refresh and re-validate
+        cy.visitVideoConfPage()
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Video in order to award the skill for watching this video')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
+            .click({ force: true });
+        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="saveSkillButton"]').should('not.exist')
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Users are required to watch this video in order to earn the skill and its points')
+
+        // refresh and re-validate
+        cy.visitVideoConfPage()
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Users are required to watch this video in order to earn the skill and its points')
     });
 });
