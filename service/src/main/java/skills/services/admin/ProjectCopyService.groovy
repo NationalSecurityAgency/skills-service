@@ -172,7 +172,8 @@ class ProjectCopyService {
             boolean discoverableProject = fromSetting.setting == Settings.PRODUCTION_MODE.settingName && fromSetting.value == Boolean.TRUE.toString()
             boolean isLevelsAsPtsSetting = fromSetting.setting == Settings.LEVEL_AS_POINTS.settingName && fromSetting.value == Boolean.TRUE.toString()
             boolean isProjectRoleSetting = fromSetting.setting == Settings.USER_PROJECT_ROLE.settingName;
-            if (!discoverableProject && !isLevelsAsPtsSetting && !isProjectRoleSetting) {
+            boolean isProjectUcSetting = fromSetting.setting == Settings.PROJECT_COMMUNITY_VALUE.settingName;
+            if (!discoverableProject && !isLevelsAsPtsSetting && !isProjectRoleSetting && !isProjectUcSetting) {
                 ProjectSettingsRequest projectSettingsRequest = new ProjectSettingsRequest(
                         projectId: toProj.projectId,
                         settingGroup: fromSetting.settingGroup,

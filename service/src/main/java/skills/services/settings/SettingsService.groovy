@@ -214,7 +214,7 @@ class SettingsService {
         if (userCommunityService.isUserCommunityConfigured()) {
             boolean isUserCommunityProtectedProject = settings.find { it.setting == Settings.USER_COMMUNITY_ONLY_PROJECT.settingName}?.isEnabled()
             res.add(new SettingsResult(
-                    setting: "project_community_value",
+                    setting: Settings.PROJECT_COMMUNITY_VALUE.settingName,
                     projectId: projectId,
                     value: userCommunityService.getCommunityNameBasedProjConfStatus(isUserCommunityProtectedProject),
                     userId: currentUser.username?.toLowerCase()
