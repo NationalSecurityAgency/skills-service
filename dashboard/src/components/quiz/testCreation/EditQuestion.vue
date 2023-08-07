@@ -225,6 +225,9 @@ limitations under the License.
     mounted() {
       this.loadComponent();
       this.registerValidators();
+      if (this.questionDef.questionType === QuestionType.Rating && this.isEdit) {
+        this.currentScaleValue = this.questionDef.answers.length;
+      }
     },
     watch: {
       show(newValue) {
