@@ -90,7 +90,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
-        const msg = 'Friendly Reminder: Only safe videos please for {{community.descriptor}}'
+        const msg = 'Friendly Reminder: Only safe videos please'
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -102,7 +102,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.wait('@loadConfig')
         const videoFile = 'create-subject.webm';
         cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
-        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains(msg)
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
