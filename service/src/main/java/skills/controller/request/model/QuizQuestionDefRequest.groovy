@@ -24,4 +24,5 @@ class QuizQuestionDefRequest {
     QuizQuestionType questionType
 
     List<QuizAnswerDefRequest> answers
+    Integer questionScale = 5
 }

@@ -49,7 +49,7 @@ limitations under the License.
         </div>
         <div v-if="isRating">
           <b-form-rating no-border readonly inline :value="surveyScore" size="lg"
-                         variant="warning" />
+                         variant="warning" :stars="numberOfStars" />
         </div>
       </div>
     </div>
@@ -97,7 +97,10 @@ limitations under the License.
       },
       surveyScore() {
         const answer = this.question.answers.find((a) => a.isSelected === true);
-        return answer.answer;
+        return answer?.answer;
+      },
+      numberOfStars() {
+        return this.question.answers.length;
       },
     },
     methods: {

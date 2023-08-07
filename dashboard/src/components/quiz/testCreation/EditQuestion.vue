@@ -58,15 +58,24 @@ limitations under the License.
           </div>
         </div>
 
-        <div v-if="isQuestionTypeTextInput || isQuestionTypeRatingInput" class="pl-3">
+        <div v-if="isQuestionTypeTextInput" class="pl-3">
           <label for="textInputPlaceholder" hidden>Text Input Answer Placeholder:</label>
           <b-form-textarea
             id="textInputPlaceholder"
-            :placeholder="isQuestionTypeRatingInput ? 'Users will be required to select a rating.' : 'Users will be required to enter text.'"
+            placeholder="Users will be required to enter text."
             data-cy="textAreaPlaceHolder"
             :disabled="true"
             rows="3"
             max-rows="6"/>
+        </div>
+        <div v-if="isQuestionTypeRatingInput">
+          <label for="ratingScaleSelect">Scale:</label>
+          <b-form-select v-model="currentScaleValue"
+                         :options="currentScaleOptions"
+                         id="ratingScaleSelect"
+                         aria-label="Please select the rating's scale"
+                         data-cy="ratingScaleSelect">
+          </b-form-select>
         </div>
         <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-3">
           <div class="mb-1" v-if="isQuizType">
@@ -209,6 +218,8 @@ limitations under the License.
         submitButtonClicked: false,
         keysToWatch: ['question', 'questionType', 'answers'],
         restoredFromStorage: false,
+        currentScaleValue: 5,
+        currentScaleOptions: [3, 4, 5, 6, 7, 8, 9, 10],
       };
     },
     mounted() {
@@ -363,7 +374,9 @@ limitations under the License.
                 questionType,
                 answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
               };
-
+              if (questionType === QuestionType.Rating) {
+                questionDefRes.questionScale = this.currentScaleValue;
+              }
               this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
             } else {

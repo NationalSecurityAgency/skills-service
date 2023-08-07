@@ -45,7 +45,7 @@ limitations under the License.
                 </div>
               </div>
               <div v-if="isRatingType">
-                <b-form-rating disabled no-border inline size="lg" />
+                <b-form-rating disabled no-border inline size="lg" :stars="numberOfStars"/>
               </div>
               <div v-if="isTextInputType">
                 <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
@@ -131,6 +131,9 @@ limitations under the License.
       },
       isDragAndDropControlsVisible() {
         return !this.isReadOnlyQuiz && this.showDragAndDropControls;
+      },
+      numberOfStars() {
+        return this.question?.answers?.length ? this.question?.answers?.length : 3;
       },
     },
     methods: {

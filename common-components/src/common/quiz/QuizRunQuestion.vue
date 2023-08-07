@@ -48,7 +48,7 @@ limitations under the License.
       <div v-else-if="isRating">
         <ValidationProvider rules="ratingSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
           <b-form-rating v-model="answerRating" no-border inline :id="`question-${num}`"
-                         size="lg" variant="warning" />
+                         size="lg" variant="warning" :stars="numberOfStars"/>
           <small :id="`question${num}_ratingError`"
                  role="alert" class="form-text text-danger"
                  data-cy="ratingError">{{ errors[0] }}</small>
@@ -150,6 +150,9 @@ limitations under the License.
           }
         }
         return res;
+      },
+      numberOfStars() {
+        return this.q?.answerOptions?.length;
       },
     },
     methods: {

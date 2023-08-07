@@ -278,7 +278,7 @@ class QuizDefService {
                     )
             ]
         } else if (isRatingsQuestion) {
-            answerDefs = (1..5).collect { it ->
+            answerDefs = (1..questionDefRequest.questionScale).collect { it ->
                 new QuizAnswerDef(
                         quizId: savedQuestion.quizId,
                         questionRefId: savedQuestion.id,
@@ -305,7 +305,7 @@ class QuizDefService {
     @Profile
     private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
-        boolean isRating = questionDefRequest.questionType = QuizQuestionType.Rating
+        boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
@@ -317,6 +317,21 @@ class QuizDefService {
                 List<Integer> idsToRemove = existingAnswerDefs.subList(1, existingAnswerDefs.size()).collect { it.id }
                 quizAnswerRepo.deleteAllById(idsToRemove)
             }
+        } else if (isRating) {
+            if (existingAnswerDefs.size() > 0) {
+                List<Integer> idsToRemove = existingAnswerDefs.collect { it.id }
+                quizAnswerRepo.deleteAllById(idsToRemove)
+            }
+            List<QuizAnswerDef> answerDefs = (1..questionDefRequest.questionScale).collect { it ->
+                new QuizAnswerDef(
+                        quizId: savedQuestion.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: it,
+                        isCorrectAnswer: false,
+                        displayOrder: it
+                )
+            }
+            savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
         } else {
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, Integer index ->
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }

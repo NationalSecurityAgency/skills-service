@@ -32,7 +32,7 @@ limitations under the License.
     <div v-if="isRating && averageScore" class="pl-3">
       Average Score:
       <b-form-rating no-border readonly inline :value="averageScore" size="lg"
-                     variant="warning" show-value precision="2" />
+                     variant="warning" show-value precision="2" :stars="numberOfStars" />
     </div>
 
     <skills-b-table v-if="!isTextInput && answers"
@@ -212,6 +212,9 @@ limitations under the License.
       },
       qNum() {
         return this.num + 1;
+      },
+      numberOfStars() {
+        return this.q.answers.length;
       },
     },
   };
