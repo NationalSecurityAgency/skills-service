@@ -30,7 +30,7 @@ describe('Client Display Accessibility Video Tests', () => {
         cy.wait('@getVideoCaptions').its('response.body').should('include', 'some')
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="markdownViewer"]').contains('blah blah')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')

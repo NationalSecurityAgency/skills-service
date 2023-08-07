@@ -81,7 +81,8 @@ class AttachmentSpecs extends DefaultIntSpec {
 
         when:
         def uploadResult = skillsService.uploadAttachment(resource, proj.projectId)
-        File file = skillsService.downloadAttachment(uploadResult.href)
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment(uploadResult.href)
+        File file = fileAndHeaders.file
 
         then:
         uploadResult
@@ -148,8 +149,8 @@ class AttachmentSpecs extends DefaultIntSpec {
 
         result
         !result.success
-        result.errorCode == 'InternalError'
-        result.explanation.contains('Unexpected Error')
+        result.errorCode == 'BadParam'
+        result.explanation.contains('File size [1 MB] exceeds maximum file size [1 MB]')
     }
 
     def "attempt to upload attachment that is a associated to both a projectId and a quizId"() {

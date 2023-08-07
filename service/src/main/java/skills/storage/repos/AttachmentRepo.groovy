@@ -15,37 +15,21 @@
  */
 package skills.storage.repos
 
-import groovy.util.logging.Slf4j
-import org.hibernate.engine.jdbc.BlobProxy
-import org.springframework.stereotype.Service
+
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import skills.storage.model.Attachment
 
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
-import jakarta.persistence.Query
+interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
 
-@Service
-@Slf4j
-class AttachmentRepo {
+    @Nullable
+    Attachment findByUuid(String uuid)
 
-    @PersistenceContext
-    EntityManager entityManager;
+    @Modifying
+    int deleteByUuid(String uuid)
 
-    void saveAttachment(Attachment attachment) {
-        entityManager.persist(attachment)
-    }
+    @Modifying
+    int deleteBySkillIdAndProjectIdIsNull(String skillId)
 
-    Attachment getAttachmentByUuid(String uuid) {
-        String query = "SELECT a from Attachment a where a.uuid = :uuid"
-        Query getAttachment = entityManager.createQuery(query, Attachment)
-        getAttachment.setParameter('uuid', uuid)
-        return getAttachment.getSingleResult()
-    }
-
-    Integer deleteBySkillIdAndProjectIdIsNull(String skillId) {
-        String query = "DELETE from Attachment a where a.skillId = :skillId and projectId is null"
-        Query deleteAttachment = entityManager.createQuery(query)
-        deleteAttachment.setParameter('skillId', skillId)
-        return deleteAttachment.executeUpdate()
-    }
 }

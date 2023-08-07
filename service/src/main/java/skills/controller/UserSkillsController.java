@@ -525,6 +525,9 @@ class UserSkillsController {
     public void download(@PathVariable("uuid") String uuid,
                          HttpServletResponse response) {
         Attachment attachment = attachmentService.getAttachment(uuid);
+        if (attachment == null) {
+            throw new SkillException("Attachment for uuid [" + uuid + "] does not exist");
+        }
         try (InputStream inputStream = attachment.getContent().getBinaryStream();
              OutputStream outputStream = response.getOutputStream()) {
             response.setContentType(attachment.getContentType());

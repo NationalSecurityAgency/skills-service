@@ -610,6 +610,8 @@
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.jks</exclude>
                         <exclude>**/*.ftl</exclude>
+                        <exclude>**/*.mp4</exclude>
+                        <exclude>**/*.webm</exclude>
                         <exclude>src/test/resources/certs/*.*</exclude>
                         <exclude>src/main/resources/public/**</exclude>
                         <exclude>src/main/resources/templates/**</exclude>

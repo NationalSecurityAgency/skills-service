@@ -19,13 +19,13 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
 
-import javax.management.relation.Role
 
 @Slf4j
 class SkillsService {
@@ -930,11 +930,16 @@ class SkillsService {
         wsHelper.apiUpload("/upload", body)
     }
 
-    File downloadAttachment(String downloadUrl) {
+    static class FileAndHeaders {
+        File file
+        HttpHeaders headers
+    }
+
+    FileAndHeaders downloadAttachment(String downloadUrl) {
         ResponseEntity<Resource> responseEntity = wsHelper.getResource(downloadUrl)
         File file = File.createTempFile('download', 'tmp')
         StreamUtils.copy(responseEntity.getBody().getInputStream(), new FileOutputStream(file))
-        return file
+        return new FileAndHeaders(file: file, headers: responseEntity.headers)
     }
 
     def deleteIcon(Map props){
@@ -1797,8 +1802,15 @@ class SkillsService {
     }
 
     def saveSkillVideoAttributes(String projectId, String skillId, Map videoAttrs) {
+        Map body = [:]
+        if (videoAttrs.file) { body.put("file", videoAttrs.file) }
+        if (videoAttrs.videoUrl) { body.put("videoUrl", videoAttrs.videoUrl)}
+        if (videoAttrs.isAlreadyHosted != null) { body.put("isAlreadyHosted", videoAttrs.isAlreadyHosted)}
+        if (videoAttrs.captions) { body.put("captions", videoAttrs.captions)}
+        if (videoAttrs.transcript) { body.put("transcript", videoAttrs.transcript)}
+
         String url = "/projects/${projectId}/skills/${skillId}/video"
-        return wsHelper.adminPost(url, videoAttrs)
+        return wsHelper.adminUpload(url, body, true)
     }
     def getSkillVideoAttributes(String projectId, String skillId) {
         String url = "/projects/${projectId}/skills/${skillId}/video"

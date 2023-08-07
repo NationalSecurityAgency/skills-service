@@ -34,7 +34,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
-                videoType: "video",
                 transcript: "transcript",
                 captions: "captions",
         ])
@@ -48,7 +47,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
         def skill = skillsService.getSkill([projectId: copyProj.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
         then:
         attributes.videoUrl == "http://some.url"
-        attributes.videoType == "video"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
         skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
@@ -62,7 +60,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
-                videoType: "video",
                 transcript: "transcript",
                 captions: "captions",
         ])
@@ -81,7 +78,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
         def skill = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
         then:
         attributes.videoUrl == "http://some.url"
-        attributes.videoType == "video"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
         skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
@@ -95,7 +91,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
-                videoType: "video",
                 transcript: "transcript",
                 captions: "captions",
         ])
@@ -115,7 +110,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://updated.url",
-                videoType: "updatedvideo",
                 transcript: "updatedtranscript",
                 captions: "updatedcaptions",
         ])
@@ -124,13 +118,11 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
         def skillAfter = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
         then:
         attributes.videoUrl == "http://some.url"
-        attributes.videoType == "video"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
         skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()
 
         attributesAfter.videoUrl == "http://updated.url"
-        attributesAfter.videoType == "updatedvideo"
         attributesAfter.captions == "updatedcaptions"
         attributesAfter.transcript == "updatedtranscript"
         skillAfter.selfReportingType == SkillDef.SelfReportingType.Video.toString()
@@ -155,7 +147,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
-                videoType: "video",
                 transcript: "transcript",
                 captions: "captions",
         ])
@@ -170,7 +161,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
         !attributes.videoUrl
 
         attributesAfter.videoUrl == "http://some.url"
-        attributesAfter.videoType == "video"
         attributesAfter.captions == "captions"
         attributesAfter.transcript == "transcript"
         skillAfter.selfReportingType == SkillDef.SelfReportingType.Video.toString()
@@ -186,7 +176,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
                 videoUrl: "http://some.url",
-                videoType: "video",
                 transcript: "transcript",
                 captions: "captions",
         ])
@@ -199,7 +188,6 @@ class SkillVideoFeaturesSpecs extends DefaultIntSpec {
         def skill = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj2.subjectId, skillId: p1Skills[0].skillId])
         then:
         attributes.videoUrl == "http://some.url"
-        attributes.videoType == "video"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
         skill.selfReportingType == SkillDef.SelfReportingType.Video.toString()

@@ -37,6 +37,7 @@ class UIConfigProperties {
     DataSize maxAttachmentSize
     List<String> allowedAttachmentFileTypes
     List<MediaType> allowedAttachmentMimeTypes;
+    List<String> allowedVideoUploadMimeTypes;
 
     @PostConstruct
     void copyConfigToUi() {
@@ -45,6 +46,7 @@ class UIConfigProperties {
         ui.put("maxAttachmentSize", maxAttachmentSize.toBytes().toString())
         ui.put("allowedAttachmentFileTypes", allowedAttachmentFileTypes)
         ui.put("allowedAttachmentMimeTypes", allowedAttachmentMimeTypes.collect {it.toString()})
+        ui.put("allowedVideoUploadMimeTypes", allowedVideoUploadMimeTypes)
     }
 
     @PostConstruct
