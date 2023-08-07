@@ -18,6 +18,14 @@ describe('Configure Video and SkillTree Features Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
+        Cypress.Commands.add("visitVideoConfPage", (projNum) => {
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.wait('@getVideoProps')
+            cy.wait('@getSkillInfo')
+            cy.get('.spinner-border').should('not.exist')
+        });
     });
 
     it('cannot configure video settings on reused skills', () => {
@@ -73,4 +81,52 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.checked')
         cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked')
     });
+
+    it('video upload warning message is not present when configured', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        const msg = 'Friendly Reminder: Only safe videos please!'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.videoUploadWarningMessage = msg;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visitVideoConfPage();
+        cy.wait('@loadConfig')
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains(msg)
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+
+        // click away and return
+        cy.get('[data-cy="nav-Overview"]').click()
+        cy.get('[data-cy="skillOverviewTotalpoints"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Points')
+
+        cy.get('[data-cy="nav-Video"]').click()
+        cy.wait('@getVideoProps')
+        cy.wait('@getSkillInfo')
+        cy.get('.spinner-border').should('not.exist')
+        cy.wait(5000)
+        cy.get('[data-cy="videoUploadWarningMessage"]').should('not.exist')
+    });
+
+    it('video upload warning message is not present when NOT configured', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.visitVideoConfPage();
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.wait(5000)
+        cy.get('[data-cy="videoUploadWarningMessage"]').should('not.exist')
+    });
+
 });

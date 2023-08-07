@@ -75,6 +75,9 @@ limitations under the License.
         <small role="alert" class="form-text text-danger" id="videoFileError" data-cy="videoFileError">{{errors[0]}}</small>
         </ValidationProvider>
 
+        <div v-if="videoConf.file && videoUploadWarningMessage" data-cy="videoUploadWarningMessage"
+          class="alert alert-danger mt-1"><i class="fas fa-exclamation-circle" aria-hidden="true"/> {{ videoUploadWarningMessage }}</div>
+
         <ValidationProvider v-if="!showFileUpload && !videoConf.isInternallyHosted" rules="customUrlValidator" :debounce="250" v-slot="{ errors }" name="Video URL">
             <b-form-input id="videoUrlInput"
                           v-model="videoConf.url"
@@ -284,6 +287,9 @@ limitations under the License.
       },
       isReadOnly() {
         return this.isReused || this.isImported;
+      },
+      videoUploadWarningMessage() {
+        return this.$store.getters.config.videoUploadWarningMessage;
       },
     },
     methods: {
