@@ -33,6 +33,7 @@ import {
     OverlayPlugin,
     CollapsePlugin,
     LinkPlugin,
+    FormCheckboxPlugin,
 } from 'bootstrap-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -70,6 +71,7 @@ Vue.use(OverlayPlugin);
 Vue.use(FiltersPlugin);
 Vue.use(CollapsePlugin);
 Vue.use(LinkPlugin);
+Vue.use(FormCheckboxPlugin);
 Vue.use(TimeDurationFilter);
 Vue.use(VueAnnouncer);
 
