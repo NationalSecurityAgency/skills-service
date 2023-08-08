@@ -489,6 +489,12 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
             cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
+
+            cy.get('[data-cy="question_4"] .b-rating-star').first().click()
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
         });
 
         it('only up to 5 validation warnings are shown on the bottom', () => {
