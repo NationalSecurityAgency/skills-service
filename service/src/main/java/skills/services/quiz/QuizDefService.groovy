@@ -266,6 +266,7 @@ class QuizDefService {
     private List<QuizAnswerDef> createQuizQuestionAnswerDefs(QuizQuestionDefRequest questionDefRequest, QuizQuestionDef savedQuestion) {
         List<QuizAnswerDef> answerDefs
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
+        boolean isRatingsQuestion = questionDefRequest.questionType == QuizQuestionType.Rating
         if (isTextInputQuestion) {
             answerDefs = [
                     new QuizAnswerDef(
@@ -276,6 +277,16 @@ class QuizDefService {
                             displayOrder: 1,
                     )
             ]
+        } else if (isRatingsQuestion) {
+            answerDefs = (1..5).collect { it ->
+                new QuizAnswerDef(
+                        quizId: savedQuestion.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: it,
+                        isCorrectAnswer: false,
+                        displayOrder: it
+                )
+            }
         } else {
             answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
                 new QuizAnswerDef(
@@ -294,6 +305,7 @@ class QuizDefService {
     @Profile
     private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
+        boolean isRating = questionDefRequest.questionType = QuizQuestionType.Rating
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
@@ -444,7 +456,7 @@ class QuizDefService {
         }
         QuizAnswerDef quizAnswerDef = optionalQuizAnswerDef.get()
         if (quizAnswerDef.quizId != quizId) {
-            throw new SkillQuizException("Provided answer id [${answerDefId}] does not belonw to quiz [${quizId}]", ErrorCode.BadParam)
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not belong to quiz [${quizId}]", ErrorCode.BadParam)
         }
 
         List<UserQuizAnswer> answerAttempts = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
@@ -596,6 +608,7 @@ class QuizDefService {
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
+                    boolean isRating = questionDef.type == QuizQuestionType.Rating
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
                         return new UserGradedQuizAnswerResult(
@@ -696,7 +709,7 @@ class QuizDefService {
             }
         } else {
             QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) == null, "All answers for a survey questions must set to isCorrect=false", quizId)
-            if (questionDefRequest.questionType == QuizQuestionType.TextInput) {
+            if (questionDefRequest.questionType == QuizQuestionType.TextInput || questionDefRequest.questionType == QuizQuestionType.Rating) {
                 if (questionDefRequest.answers) {
                     throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
                 }

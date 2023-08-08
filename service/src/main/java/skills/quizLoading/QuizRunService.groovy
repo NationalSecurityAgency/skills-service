@@ -282,7 +282,7 @@ class QuizRunService {
 
             List<QuizAnswerDefRepo.AnswerIdAndCorrectness> questions = quizAnswerRepo.getAnswerIdsAndCorrectnessIndicator(answerDefPartialInfo.getQuestionRefId())
             assert questions
-            if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.SingleChoice) {
+            if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.SingleChoice || answerDefPartialInfo.getQuestionType() == QuizQuestionType.Rating) {
                 List<Integer> toRemove = questions.findAll { it.getAnswerRefId() != answerDefId }.collect { it.getAnswerRefId() }
                 toRemove.each {
                     quizAttemptAnswerRepo.deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, it)

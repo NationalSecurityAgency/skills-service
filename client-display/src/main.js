@@ -34,6 +34,7 @@ import {
     CollapsePlugin,
     LinkPlugin,
     FormCheckboxPlugin,
+    FormRatingPlugin,
 } from 'bootstrap-vue';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -74,6 +75,7 @@ Vue.use(LinkPlugin);
 Vue.use(FormCheckboxPlugin);
 Vue.use(TimeDurationFilter);
 Vue.use(VueAnnouncer);
+Vue.use(FormRatingPlugin);
 
 localize({
   en,

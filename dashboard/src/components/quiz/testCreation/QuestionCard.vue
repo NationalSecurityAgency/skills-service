@@ -34,7 +34,7 @@ limitations under the License.
             <div class="px-2 py-1">
               <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
-              <div v-if="!isTextInputType" class="mt-1 pl-1">
+              <div v-if="!isTextInputType && !isRatingType" class="mt-1 pl-1">
                 <div v-for="(a, index) in question.answers" :key="a.id" class="row no-gutters">
                   <div class="col-auto pb-1" :data-cy="`answerDisplay-${index}`">
                     <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
@@ -45,7 +45,7 @@ limitations under the License.
                 </div>
               </div>
               <div v-if="isRatingType">
-                Rating
+                <b-form-rating disabled no-border inline />
               </div>
               <div v-if="isTextInputType">
                 <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>

@@ -46,7 +46,7 @@ limitations under the License.
         </ValidationProvider>
       </div>
       <div v-else-if="isRating">
-        Rating
+        <b-form-rating v-model="answerRating" no-border inline @change="ratingChanged" :id="`question-${num}`" />
       </div>
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
@@ -86,14 +86,21 @@ limitations under the License.
     data() {
       return {
         answerOptions: [],
+        answerRating: 0,
         // since b-form-textarea uses :debounce attribute it cannot utilize @input event but
         // rather has to watch answerText value that bound to  b-form-text-area's v-model
         // it's better to set the value in-line so the watcher is not invoked
-        answerText: (this.q.questionType === QuestionType.TextInput) ? (this.q.answerOptions[0].answerText || '') : '',
+        answerText: this.q.questionType === QuestionType.TextInput ? (this.q.answerOptions[0]?.answerText || '') : '',
       };
     },
     mounted() {
       this.answerOptions = this.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
+      if (this.isRating) {
+        const selectedAnswer = this.answerOptions.find((a) => a.selected);
+        if (selectedAnswer) {
+          this.answerRating = selectedAnswer.answerOption;
+        }
+      }
       this.setupValidation();
     },
     watch: {
@@ -170,6 +177,24 @@ limitations under the License.
       selectionChanged(currentAnswer) {
         this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
           this.$emit('selected-answer', {
+            ...currentAnswer,
+            reportAnswerPromise,
+          });
+        });
+      },
+      ratingChanged(value) {
+        const selectedAnswerIds = this.answerOptions.map((a) => a.id);
+        const answerId = selectedAnswerIds[value - 1];
+        const currentAnswer = {
+          questionId: this.q.id,
+          questionType: this.q.questionType,
+          selectedAnswerIds: [answerId],
+          changedAnswerId: answerId,
+          changedAnswerIdSelected: true,
+        };
+        this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+          // only 1 answer in case of TextInput
+          this.$emit('answer-text-changed', {
             ...currentAnswer,
             reportAnswerPromise,
           });

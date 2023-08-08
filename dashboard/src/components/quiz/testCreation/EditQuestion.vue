@@ -331,7 +331,7 @@ limitations under the License.
       },
       questionTypeChanged(inputItem) {
         if (this.isSurveyType
-          && inputItem.id !== QuestionType.TextInput
+          && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
           && (!this.questionDefInternal.answers || this.questionDefInternal.answers.length < 2)) {
           this.questionDefInternal.answers = [{
             id: null,
@@ -361,8 +361,9 @@ limitations under the License.
                 id: this.questionDefInternal.id,
                 question: this.questionDefInternal.question,
                 questionType,
-                answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
+                answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
               };
+
               this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
             } else {

@@ -190,6 +190,9 @@ limitations under the License.
       isTextInput() {
         return this.q.questionType === 'TextInput';
       },
+      isRating() {
+        return this.q.questionType === 'Rating';
+      },
       qNum() {
         return this.num + 1;
       },
