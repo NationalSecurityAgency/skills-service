@@ -68,7 +68,16 @@ limitations under the License.
             rows="3"
             max-rows="6"/>
         </div>
-        <div v-if="!isQuestionTypeTextInput" class="pl-3">
+        <div v-if="isQuestionTypeRatingInput">
+          <label for="ratingScaleSelect">Scale:</label>
+          <b-form-select v-model="currentScaleValue"
+                         :options="currentScaleOptions"
+                         id="ratingScaleSelect"
+                         aria-label="Please select the rating's scale"
+                         data-cy="ratingScaleSelect">
+          </b-form-select>
+        </div>
+        <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-3">
           <div class="mb-1" v-if="isQuizType">
             <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
           </div>
@@ -170,6 +179,10 @@ limitations under the License.
               label: 'Input Text',
               id: QuestionType.TextInput,
               icon: 'far fa-keyboard',
+            }, {
+              label: 'Rating',
+              id: QuestionType.Rating,
+              icon: 'fa fa-star',
             }],
             selectedType: {
               label: 'Multiple Choice',
@@ -191,6 +204,10 @@ limitations under the License.
             label: 'Input Text',
             id: QuestionType.TextInput,
             icon: 'far fa-keyboard',
+          }, {
+            label: 'Rating',
+            id: QuestionType.Rating,
+            icon: 'fa fa-star',
           }],
           selectedType: {
             label: 'Multiple Choice',
@@ -201,11 +218,16 @@ limitations under the License.
         submitButtonClicked: false,
         keysToWatch: ['question', 'questionType', 'answers'],
         restoredFromStorage: false,
+        currentScaleValue: 5,
+        currentScaleOptions: [3, 4, 5, 6, 7, 8, 9, 10],
       };
     },
     mounted() {
       this.loadComponent();
       this.registerValidators();
+      if (this.questionDef.questionType === QuestionType.Rating && this.isEdit) {
+        this.currentScaleValue = this.questionDef.answers.length;
+      }
     },
     watch: {
       show(newValue) {
@@ -230,6 +252,9 @@ limitations under the License.
       },
       isQuestionTypeTextInput() {
         return this.questionType.selectedType && this.questionType.selectedType.id === QuestionType.TextInput;
+      },
+      isQuestionTypeRatingInput() {
+        return this.questionType.selectedType && this.questionType.selectedType.id === QuestionType.Rating;
       },
       quizType() {
         return this.questionDef.quizType;
@@ -320,7 +345,7 @@ limitations under the License.
       },
       questionTypeChanged(inputItem) {
         if (this.isSurveyType
-          && inputItem.id !== QuestionType.TextInput
+          && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
           && (!this.questionDefInternal.answers || this.questionDefInternal.answers.length < 2)) {
           this.questionDefInternal.answers = [{
             id: null,
@@ -350,8 +375,11 @@ limitations under the License.
                 id: this.questionDefInternal.id,
                 question: this.questionDefInternal.question,
                 questionType,
-                answers: questionType === QuestionType.TextInput ? [] : removeEmptyQuestions,
+                answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
               };
+              if (questionType === QuestionType.Rating) {
+                questionDefRes.questionScale = this.currentScaleValue;
+              }
               this.publishHidden({ update: true });
               this.$emit('question-saved', questionDefRes);
             } else {

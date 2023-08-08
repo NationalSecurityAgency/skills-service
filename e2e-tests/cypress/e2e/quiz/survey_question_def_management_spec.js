@@ -125,9 +125,19 @@ describe('Survey Question CRUD Tests', () => {
         cy.validateChoiceAnswer(1, 2, '3', true)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('not.exist')
 
-        // q4 doesn't exist
-        cy.get('[data-cy="questionDisplayCard-4"]').should('not.exist')
 
+        // rating choice question
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Rating"]').click()
+
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+
+        // q5 doesn't exist
+        cy.get('[data-cy="questionDisplayCard-5"]').should('not.exist')
 
         cy.visit('/administrator/quizzes/quiz1');
         // q3
@@ -149,8 +159,11 @@ describe('Survey Question CRUD Tests', () => {
         cy.validateChoiceAnswer(1, 2, '3', true)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('not.exist')
 
-        // q4 doesn't exist
-        cy.get('[data-cy="questionDisplayCard-4"]').should('not.exist')
+        // q3
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+
+        // q5 doesn't exist
+        cy.get('[data-cy="questionDisplayCard-5"]').should('not.exist')
     });
 
     it('modal validation: at least 2 answers are required', function () {
@@ -270,6 +283,37 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'b')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'c')
+    });
+
+    it('edit a question - change the scale of a rating', function () {
+        cy.createSurveyDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="noQuestionsYet"]')
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
+
+        // multiple choice question
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Rating"]').click()
+
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 5)
+
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="questionText"]').type(' With more description')
+        cy.get('[data-cy="ratingScaleSelect"]').select(5);
+        cy.get('[data-cy="saveQuestionBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
+        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 8)
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
+        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 8)
     });
 
     it('edit a question - will change question type from MultipleChoice to SingleChoice', function () {

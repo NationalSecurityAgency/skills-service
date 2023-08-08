@@ -45,6 +45,15 @@ limitations under the License.
                  data-cy="textInputAnswerErr">{{ errors[0] }}</small>
         </ValidationProvider>
       </div>
+      <div v-else-if="isRating">
+        <ValidationProvider rules="ratingSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
+          <b-form-rating v-model="answerRating" no-border inline :id="`question-${num}`"
+                         size="lg" variant="warning" :stars="numberOfStars"/>
+          <small :id="`question${num}_ratingError`"
+                 role="alert" class="form-text text-danger"
+                 data-cy="ratingError">{{ errors[0] }}</small>
+        </ValidationProvider>
+      </div>
       <div v-else>
         <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
           <ValidationProvider rules="atLeastOneSelected" v-slot="{errors}" :name="`Question ${num}`" :immediate="false">
@@ -83,14 +92,21 @@ limitations under the License.
     data() {
       return {
         answerOptions: [],
+        answerRating: 0,
         // since b-form-textarea uses :debounce attribute it cannot utilize @input event but
         // rather has to watch answerText value that bound to  b-form-text-area's v-model
         // it's better to set the value in-line so the watcher is not invoked
-        answerText: (this.q.questionType === QuestionType.TextInput) ? (this.q.answerOptions[0].answerText || '') : '',
+        answerText: this.q.questionType === QuestionType.TextInput ? (this.q.answerOptions[0]?.answerText || '') : '',
       };
     },
     mounted() {
       this.answerOptions = this.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
+      if (this.isRating) {
+        const selectedAnswer = this.answerOptions.find((a) => a.selected);
+        if (selectedAnswer) {
+          this.answerRating = selectedAnswer.answerOption;
+        }
+      }
       this.setupValidation();
     },
     watch: {
@@ -100,6 +116,9 @@ limitations under the License.
        */
       answerText() {
         this.textAnswerChanged();
+      },
+      answerRating(value) {
+        this.ratingChanged(value);
       },
     },
     computed: {
@@ -111,6 +130,9 @@ limitations under the License.
       },
       isTextInput() {
         return this.q.questionType === QuestionType.TextInput;
+      },
+      isRating() {
+        return this.q.questionType === QuestionType.Rating;
       },
       isMissingAnswer() {
         if (this.isTextInput) {
@@ -129,6 +151,9 @@ limitations under the License.
         }
         return res;
       },
+      numberOfStars() {
+        return this.q?.answerOptions?.length;
+      },
     },
     methods: {
       setupValidation() {
@@ -137,6 +162,18 @@ limitations under the License.
           validate(value) {
             const foundSelected = value && (value.findIndex((a) => a.selected) >= 0);
             return foundSelected;
+          },
+        }, {
+          immediate: false,
+        });
+
+        extend('ratingSelected', {
+          message: () => 'A rating must be selected',
+          validate(value) {
+            if (value > 0) {
+              return true;
+            }
+            return false;
           },
         }, {
           immediate: false,
@@ -162,6 +199,23 @@ limitations under the License.
         });
       },
       selectionChanged(currentAnswer) {
+        this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+          this.$emit('selected-answer', {
+            ...currentAnswer,
+            reportAnswerPromise,
+          });
+        });
+      },
+      ratingChanged(value) {
+        const selectedAnswerIds = this.answerOptions.map((a) => a.id);
+        const answerId = selectedAnswerIds[value - 1];
+        const currentAnswer = {
+          questionId: this.q.id,
+          questionType: this.q.questionType,
+          selectedAnswerIds: [answerId],
+          changedAnswerId: answerId,
+          changedAnswerIdSelected: true,
+        };
         this.reportAnswer(currentAnswer).then((reportAnswerPromise) => {
           this.$emit('selected-answer', {
             ...currentAnswer,

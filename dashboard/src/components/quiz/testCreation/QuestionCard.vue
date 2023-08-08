@@ -34,7 +34,7 @@ limitations under the License.
             <div class="px-2 py-1">
               <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
-              <div v-if="!isTextInputType" class="mt-1 pl-1">
+              <div v-if="!isTextInputType && !isRatingType" class="mt-1 pl-1">
                 <div v-for="(a, index) in question.answers" :key="a.id" class="row no-gutters">
                   <div class="col-auto pb-1" :data-cy="`answerDisplay-${index}`">
                     <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
@@ -43,6 +43,9 @@ limitations under the License.
                   <div class="col ml-2 pb-1"><div class="answerText align-middle" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
                   </div>
                 </div>
+              </div>
+              <div v-if="isRatingType">
+                <b-form-rating disabled no-border inline size="lg" :stars="numberOfStars"/>
               </div>
               <div v-if="isTextInputType">
                 <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
@@ -123,8 +126,14 @@ limitations under the License.
       isTextInputType() {
         return this.question.questionType === QuestionType.TextInput;
       },
+      isRatingType() {
+        return this.question.questionType === QuestionType.Rating;
+      },
       isDragAndDropControlsVisible() {
         return !this.isReadOnlyQuiz && this.showDragAndDropControls;
+      },
+      numberOfStars() {
+        return this.question?.answers?.length ? this.question?.answers?.length : 3;
       },
     },
     methods: {

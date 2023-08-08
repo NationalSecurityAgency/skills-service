@@ -72,6 +72,7 @@ describe('Client Display Survey Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2);
         cy.createSurveyMultipleChoiceQuestionDef(1, 3);
+        cy.createRatingQuestionDef(1, 4, 5);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -85,7 +86,7 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="title"]').contains('Survey')
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by completing this survey')
 
-        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '4')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('not.exist')
 
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool survey #1! Thank you for taking it!')
@@ -98,6 +99,7 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+        cy.get('[data-cy="question_4"] .b-rating-star').first().click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey')
@@ -151,6 +153,7 @@ describe('Client Display Survey Tests', () => {
         cy.createTextInputQuestionDef(1, 1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
+        cy.createRatingQuestionDef(1, 4, 5);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -172,6 +175,8 @@ describe('Client Display Survey Tests', () => {
 
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
+        cy.get('[data-cy="question_4"] .b-rating-star').first().click()
+
         cy.get('[data-cy="saveAndCloseQuizAttemptBtn"]').click()
 
         cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
@@ -192,6 +197,8 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="question_3"] [data-cy="answer_2"] [data-cy="selected_false"]').should('exist')
         cy.get('[data-cy="question_3"] [data-cy="answer_3"] [data-cy="selected_true"]').should('exist')
         cy.get('[data-cy="question_3"] [data-cy="answer_3"] [data-cy="selected_false"]').should('not.exist')
+
+        cy.get('[data-cy="question_4"] .b-rating-star-full').should('exist');
 
         cy.wait('@reportAnswer')
         cy.wait('@reportAnswer')
@@ -288,6 +295,7 @@ describe('Client Display Survey Tests', () => {
             cy.createTextInputQuestionDef(1, 1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
+            cy.createRatingQuestionDef(1, 4, 5);
 
             cy.createProject(1)
             cy.createSubject(1,1)
@@ -304,6 +312,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
 
             cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+            cy.get('[data-cy="question_4"] .b-rating-star').first().click()
 
             cy.wait('@reportAnswer')
             cy.wait('@reportAnswer')
@@ -328,6 +337,8 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_3"] [data-cy="answer_2"] [data-cy="selected_false"]').should('exist')
             cy.get('[data-cy="question_3"] [data-cy="answer_3"] [data-cy="selected_true"]').should('exist')
             cy.get('[data-cy="question_3"] [data-cy="answer_3"] [data-cy="selected_false"]').should('not.exist')
+
+            cy.get('[data-cy="question_4"] .b-rating-star-full').should('exist');
         });
 
         it(`input text validation in [${env}]`, () => {
@@ -431,6 +442,7 @@ describe('Client Display Survey Tests', () => {
             cy.createTextInputQuestionDef(1, 1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2);
             cy.createSurveyMultipleChoiceQuestionDef(1, 3);
+            cy.createRatingQuestionDef(1, 4, 5);
 
             cy.createProject(1)
             cy.createSubject(1,1)
@@ -446,11 +458,13 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
 
             cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
 
             cy.get('[data-cy="completeQuizBtn"]').click()
             cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required')
@@ -458,6 +472,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').contains('Answer to question #1 is required')
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
 
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').type('y')
             cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
@@ -465,6 +480,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
 
             cy.get('[data-cy="completeQuizBtn"]').click()
             cy.get('[data-cy="questionErrors"]').contains('Answer to question #1 is required').should('not.exist')
@@ -472,6 +488,13 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
             cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').contains('A rating must be selected')
+
+            cy.get('[data-cy="question_4"] .b-rating-star').first().click()
+            cy.get('[data-cy="question_4"] [data-cy="ratingError"]').should('not.be.visible')
+            cy.get('[data-cy="question_3"] [data-cy="choiceAnswerErr"]').contains('At least 1 choice must be selected')
+            cy.get('[data-cy="question_1"] [data-cy="textInputAnswerErr"]').should('not.be.visible')
+            cy.get('[data-cy="question_2"] [data-cy="choiceAnswerErr"]').should('not.be.visible')
         });
 
         it('only up to 5 validation warnings are shown on the bottom', () => {

@@ -31,7 +31,7 @@ limitations under the License.
       <div class="col">
         <markdown-text :text="question.question" data-cy="questionDisplayText"/>
 
-        <div v-if="!isTextInputType" class="mt-1 pl-1">
+        <div v-if="!isTextInputType && !isRating" class="mt-1 pl-1">
           <div v-for="(a, index) in question.answers" :key="a.id" class="row no-gutters">
             <div class="col-auto pb-1" :data-cy="`answerDisplay-${index}`">
               <select-correct-answer :value="a.isSelected"
@@ -46,6 +46,10 @@ limitations under the License.
         </div>
         <div v-if="isTextInputType" class="border rounded p-3" data-cy="TextInputAnswer">
           <pre>{{ answerText }}</pre>
+        </div>
+        <div v-if="isRating">
+          <b-form-rating no-border readonly inline :value="surveyScore" size="lg"
+                         variant="warning" :stars="numberOfStars" />
         </div>
       </div>
     </div>
@@ -79,6 +83,9 @@ limitations under the License.
       isTextInputType() {
         return this.question.questionType === QuestionType.TextInput;
       },
+      isRating() {
+        return this.question.questionType === QuestionType.Rating;
+      },
       hasAnswer() {
         return this.question.answers.find((a) => a.isSelected === true) !== undefined;
       },
@@ -87,6 +94,13 @@ limitations under the License.
       },
       isSurvey() {
         return this.quizType === 'Survey';
+      },
+      surveyScore() {
+        const answer = this.question.answers.find((a) => a.isSelected === true);
+        return answer?.answer;
+      },
+      numberOfStars() {
+        return this.question.answers.length;
       },
     },
     methods: {
