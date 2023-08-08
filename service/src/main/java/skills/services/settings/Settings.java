@@ -29,7 +29,9 @@ public enum Settings {
     GROUP_DESCRIPTIONS("group-descriptions"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
     USER_PROJECT_ROLE("user_project_role"),
-    USER_COMMUNITY_ONLY_PROJECT("user_community");
+    USER_COMMUNITY_ONLY_PROJECT("user_community"),
+    PROJECT_COMMUNITY_VALUE("project_community_value");
+
 
     private String settingName;
 

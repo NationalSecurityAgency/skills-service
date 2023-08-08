@@ -71,7 +71,7 @@ class SettingsSpecs extends DefaultIntSpec {
         def res = skillsService.getSettings(proj1.projectId)
         then:
         // user role is always returned
-        res.setting == [Settings.USER_PROJECT_ROLE.settingName]
+        res.setting == [Settings.USER_PROJECT_ROLE.settingName, Settings.PROJECT_COMMUNITY_VALUE.settingName]
     }
 
     def "get settings for a project - one setting was defined"() {
@@ -83,9 +83,9 @@ class SettingsSpecs extends DefaultIntSpec {
         skillsService.changeSetting(proj1.projectId, name, [projectId: proj1.projectId, setting: name, value: "true"])
         def res = skillsService.getSettings(proj1.projectId).sort { it.setting }
         then:
-        res.projectId == [proj1.projectId, proj1.projectId]
-        res.setting == [name, Settings.USER_PROJECT_ROLE.settingName]
-        res.value == ["true", RoleName.ROLE_PROJECT_ADMIN.toString()]
+        res.projectId == [proj1.projectId, proj1.projectId, proj1.projectId]
+        res.setting == [Settings.PROJECT_COMMUNITY_VALUE.settingName, name, Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["All Dragons", "true", RoleName.ROLE_PROJECT_ADMIN.toString()]
     }
 
     def "get settings for a project - several settings"() {
@@ -101,9 +101,9 @@ class SettingsSpecs extends DefaultIntSpec {
         def res = skillsService.getSettings(proj1.projectId)
         res = res.sort { it.setting}
         then:
-        res.projectId == (1..4).collect { proj1.projectId }
-        res.setting == ["set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
-        res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_ADMIN.toString()]
+        res.projectId == (1..5).collect { proj1.projectId }
+        res.setting == [Settings.PROJECT_COMMUNITY_VALUE.settingName, "set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["All Dragons", "true", "val2", "val3", RoleName.ROLE_PROJECT_ADMIN.toString()]
     }
 
     def "get settings for a project - several settings - approver role"() {
@@ -122,9 +122,9 @@ class SettingsSpecs extends DefaultIntSpec {
         def res = user1Service.getSettings(proj1.projectId)
         res = res.sort { it.setting}
         then:
-        res.projectId == (1..4).collect { proj1.projectId }
-        res.setting == ["set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
-        res.value == ["true", "val2", "val3", RoleName.ROLE_PROJECT_APPROVER.toString()]
+        res.projectId == (1..5).collect { proj1.projectId }
+        res.setting == [Settings.PROJECT_COMMUNITY_VALUE.settingName, "set1", "set2", "set3", Settings.USER_PROJECT_ROLE.settingName]
+        res.value == ["All Dragons", "true", "val2", "val3", RoleName.ROLE_PROJECT_APPROVER.toString()]
     }
 
     def "check validity of settings requests"(){

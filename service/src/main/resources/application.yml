@@ -170,6 +170,7 @@ skills:
       maxTagValueLengthInApprovalWorkloadConfig: 10
       maxVideoCaptionsLength: 5000
       maxVideoTranscriptLength: 20000
+      videoUploadWarningMessage:
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

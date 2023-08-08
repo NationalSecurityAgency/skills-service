@@ -18,6 +18,9 @@ package skills.intTests
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+
+import static skills.intTests.utils.SkillsFactory.createProject
 
 class ProjectSettingsSpecs extends DefaultIntSpec {
 
@@ -113,4 +116,38 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         def ex = thrown(SkillsClientException)
         ex.message.contains("[Level Display Text] must not exceed [50]")
     }
+
+    def "return user community if configured"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(p1)
+
+        def p2 = createProject(2)
+        allDragonsUser.createProject(p2)
+        allDragonsUser.addProjectAdmin(p2.projectId, pristineDragonsUser.userName)
+
+        when:
+        def p1Settings = pristineDragonsUser.getProjectSettings(p1.projectId)
+        def p2Settings = pristineDragonsUser.getProjectSettings(p2.projectId)
+
+        def p2SettingsAllDragons = allDragonsUser.getProjectSettings(p2.projectId)
+
+        allDragonsUser.getProjectSettings(p1.projectId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
+        p1Settings.find { it.setting == "project_community_value"}?.value == 'Divine Dragon'
+        p2Settings.find { it.setting == "project_community_value"}?.value == 'All Dragons'
+
+        p2SettingsAllDragons.find { it.setting == "project_community_value"}?.value == 'All Dragons'
+    }
+
+
 }

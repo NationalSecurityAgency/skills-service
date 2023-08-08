@@ -235,9 +235,9 @@ class CopyProjectSpecs extends DefaultIntSpec {
 
         def copiedSettings = skillsService.getProjectSettings(projToCopy.projectId).sort { it.setting }
         then:
-        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName", Settings.USER_PROJECT_ROLE.settingName]
-        copiedSettings.value == ["true", "blah", RoleName.ROLE_PROJECT_ADMIN.toString()]
-        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId, projToCopy.projectId]
+        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName", Settings.PROJECT_COMMUNITY_VALUE.settingName, Settings.USER_PROJECT_ROLE.settingName]
+        copiedSettings.value == ["true", "blah", "All Dragons", RoleName.ROLE_PROJECT_ADMIN.toString()]
+        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId, projToCopy.projectId, projToCopy.projectId]
     }
 
     def "copied project should not be discoverable by default"() {
@@ -255,9 +255,9 @@ class CopyProjectSpecs extends DefaultIntSpec {
 
         def copiedSettings = skillsService.getProjectSettings(projToCopy.projectId).sort { it.setting }
         then:
-        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId, projToCopy.projectId]
-        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName", Settings.USER_PROJECT_ROLE.settingName]
-        copiedSettings.value == ["true", "blah", RoleName.ROLE_PROJECT_ADMIN.toString()]
+        copiedSettings.projectId == [projToCopy.projectId, projToCopy.projectId, projToCopy.projectId, projToCopy.projectId]
+        copiedSettings.setting == [RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, "project.displayName", Settings.PROJECT_COMMUNITY_VALUE.settingName, Settings.USER_PROJECT_ROLE.settingName]
+        copiedSettings.value == ["true", "blah", "All Dragons", RoleName.ROLE_PROJECT_ADMIN.toString()]
     }
 
     def "group attributes are properly copied"() {
