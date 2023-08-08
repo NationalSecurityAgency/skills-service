@@ -72,7 +72,7 @@ describe('Client Display Survey Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2);
         cy.createSurveyMultipleChoiceQuestionDef(1, 3);
-        cy.createRatingQuestionDef(1, 4);
+        cy.createRatingQuestionDef(1, 4, 5);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -153,7 +153,7 @@ describe('Client Display Survey Tests', () => {
         cy.createTextInputQuestionDef(1, 1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
-        cy.createRatingQuestionDef(1, 4);
+        cy.createRatingQuestionDef(1, 4, 5);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -295,7 +295,7 @@ describe('Client Display Survey Tests', () => {
             cy.createTextInputQuestionDef(1, 1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
-            cy.createRatingQuestionDef(1, 4);
+            cy.createRatingQuestionDef(1, 4, 5);
 
             cy.createProject(1)
             cy.createSubject(1,1)
@@ -442,7 +442,7 @@ describe('Client Display Survey Tests', () => {
             cy.createTextInputQuestionDef(1, 1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2);
             cy.createSurveyMultipleChoiceQuestionDef(1, 3);
-            cy.createRatingQuestionDef(1, 4);
+            cy.createRatingQuestionDef(1, 4, 5);
 
             cy.createProject(1)
             cy.createSubject(1,1)
