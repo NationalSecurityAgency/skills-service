@@ -35,7 +35,7 @@ limitations under the License.
                   <div class="form-group">
                     <label for="subjName">Subject Name</label>
                     <ValidationProvider
-                      rules="required|minNameLength|maxSubjectNameLength|uniqueName|customNameValidator"
+                      rules="required|minNameLength|maxSubjectNameLength|uniqueName|customNameValidator" :debounce="250"
                       v-slot="{ errors }" name="Subject Name">
                       <input type="text" class="form-control" id="subjName" @input="updateSubjectId"
                              v-model="subjectInternal.name" v-on:input="updateSubjectId"
