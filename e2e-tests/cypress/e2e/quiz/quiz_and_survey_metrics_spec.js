@@ -107,4 +107,19 @@ describe('Quiz and Survey Metrics', () => {
 
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Survey runtime for 2 users')
     });
+
+    it('quiz metrics does not produce NaN results', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+        cy.createQuizMultipleChoiceQuestionDef(1, 3);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q3"] [data-cy="row0-colNumAnswered"] [data-cy="percent"]').contains('0%')
+        cy.get('[data-cy="metrics-q3"] [data-cy="row1-colNumAnswered"] [data-cy="percent"]').contains('0%')
+        cy.get('[data-cy="metrics-q3"] [data-cy="row2-colNumAnswered"] [data-cy="percent"]').contains('0%')
+        cy.get('[data-cy="metrics-q3"] [data-cy="row3-colNumAnswered"] [data-cy="percent"]').contains('0%')
+
+    });
 });

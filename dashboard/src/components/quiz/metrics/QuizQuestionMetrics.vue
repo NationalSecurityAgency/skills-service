@@ -186,7 +186,7 @@ limitations under the License.
     },
     mounted() {
       const totalNumUsers = this.q.numAnsweredCorrect + this.q.numAnsweredWrong;
-      this.answers = this.q.answers.map((a) => ({ ...a, selected: a.selected ? a.selected : false, percent: Math.trunc((a.numAnswered / totalNumUsers) * 100) }));
+      this.answers = this.q.answers.map((a) => ({ ...a, selected: a.selected ? a.selected : false, percent: (totalNumUsers > 0 ? Math.trunc((a.numAnswered / totalNumUsers) * 100) : 0) }));
       if (this.isRating) {
         let totalScore = 0;
         let totalAnswers = 0;
