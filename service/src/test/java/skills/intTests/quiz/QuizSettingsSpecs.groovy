@@ -382,6 +382,64 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
+    def "Answers for a question can be randomized"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 100)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def firstSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def secondSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def thirdSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        assert firstSortedQuizInfo.questions[0].answerOptions == secondSortedQuizInfo.questions[0].answerOptions
+        assert secondSortedQuizInfo.questions[0].answerOptions == thirdSortedQuizInfo.questions[0].answerOptions
+        assert thirdSortedQuizInfo.questions[0].answerOptions == firstSortedQuizInfo.questions[0].answerOptions
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeAnswers.setting, value: 'true'],
+        ])
+
+        when:
+        def firstQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def secondQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def thirdQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        firstQuizInfo.questions[0].answerOptions != secondQuizInfo.questions[0].answerOptions
+        secondQuizInfo.questions[0].answerOptions != thirdQuizInfo.questions[0].answerOptions
+        thirdQuizInfo.questions[0].answerOptions != firstQuizInfo.questions[0].answerOptions
+    }
+
+    def "Question order can be randomized"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def firstSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def secondSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def thirdSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        assert firstSortedQuizInfo.questions == secondSortedQuizInfo.questions
+        assert secondSortedQuizInfo.questions == thirdSortedQuizInfo.questions
+        assert thirdSortedQuizInfo.questions == firstSortedQuizInfo.questions
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+        ])
+
+        when:
+        def firstQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def secondQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def thirdQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        firstQuizInfo.questions != secondQuizInfo.questions
+        secondQuizInfo.questions != thirdQuizInfo.questions
+        thirdQuizInfo.questions != firstQuizInfo.questions
+    }
+
     def "get user admin role"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
