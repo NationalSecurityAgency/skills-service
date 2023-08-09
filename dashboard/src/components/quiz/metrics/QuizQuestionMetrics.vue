@@ -177,7 +177,7 @@ limitations under the License.
             hideUnnecessary: true,
             server: false,
             currentPage: 1,
-            totalRows: 1,
+            totalRows: this.q.answers.length,
             pageSize: 5,
             possiblePageSizes: [5, 10, 15, 20],
           },
