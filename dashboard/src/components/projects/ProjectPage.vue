@@ -304,6 +304,7 @@ limitations under the License.
             this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, projectId: resp.projectId } });
             this.projectId = resp.projectId;
           }
+          this.$store.dispatch('loadProjConfigState', { projectId: resp.projectId, updateLoadingVar: false });
           this.$nextTick(() => {
             this.$announcer.polite(`Project ${updatedProject.name} has been edited`);
           });
