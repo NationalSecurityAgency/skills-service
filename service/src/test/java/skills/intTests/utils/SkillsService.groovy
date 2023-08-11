@@ -1539,6 +1539,14 @@ class SkillsService {
         return wsHelper.rootPost("/rebuildUserAndProjectPoints/${projectId}")
     }
 
+    def getUserActionsForEverything(int limit = 10, int page = 1, String orderBy = "created", Boolean ascending = false) {
+        return wsHelper.rootGet("/dashboardActions?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}".toString())
+    }
+
+    def getUserActionAttributes(Long actionId) {
+        return wsHelper.rootGet("/dashboardActions/${actionId}/attributes".toString())
+    }
+
     def unsubscribeFromSelfApprovalRequestEmails(String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/approvalEmails/unsubscribe", [:])
     }

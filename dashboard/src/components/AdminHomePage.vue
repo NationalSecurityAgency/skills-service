@@ -82,6 +82,12 @@ limitations under the License.
             iconClass: 'fas fa-mail-bulk',
             page: 'ContactAdmins',
           });
+
+          items.push({
+            name: 'User Actions',
+            iconClass: 'fas fa-users-cog text-success',
+            page: 'UserActions',
+          });
         }
 
         return items;

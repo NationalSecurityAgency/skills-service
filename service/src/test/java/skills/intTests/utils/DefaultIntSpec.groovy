@@ -112,6 +112,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     TransactionHelper transactionHelper
 
+    @Autowired
+    UserActionsHistoryRepo userActionsHistoryRepo
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -149,6 +152,8 @@ class DefaultIntSpec extends Specification {
         }
 
         deleteAllAttachments()
+
+        userActionsHistoryRepo.deleteAll()
 
         waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()

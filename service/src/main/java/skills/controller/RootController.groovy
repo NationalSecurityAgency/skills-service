@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,12 +35,7 @@ import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.request.model.UserTagRequest
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.RequestResult
-import skills.controller.result.model.SettingsResult
-import skills.controller.result.model.TableResult
-import skills.controller.result.model.UserInfoRes
-import skills.controller.result.model.UserRoleRes
+import skills.controller.result.model.*
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
@@ -47,11 +43,11 @@ import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
+import skills.services.userActions.UserActionsHistoryService
 import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
 import skills.settings.SystemSettings
-import skills.storage.model.ProjDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
@@ -107,6 +103,9 @@ class RootController {
 
     @Autowired
     UIConfigProperties uiConfigProperties
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -351,6 +350,25 @@ class RootController {
     RequestResult rebuildUserAndProjectPoints(@PathVariable("projectId") String projectId) {
         projAdminService.rebuildUserAndProjectPoints(projectId)
         return RequestResult.success()
+    }
+
+
+    @RequestMapping(value = "/dashboardActions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    TableResult getDashboardActions(@RequestParam int limit,
+                                       @RequestParam int page,
+                                       @RequestParam String orderBy,
+                                       @RequestParam Boolean ascending) {
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return userActionsHistoryService.getUsersActions(pageRequest)
+    }
+
+    @RequestMapping(value = "/dashboardActions/{actionId}/attributes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    Map getDashboardActionAttributes(@PathVariable("actionId") Long actionId) {
+        return userActionsHistoryService.getActionAttributes(actionId)
     }
 
     private String getUserId(String userKey) {

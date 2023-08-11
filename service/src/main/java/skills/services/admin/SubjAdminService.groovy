@@ -27,6 +27,10 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.SubjectRequest
 import skills.controller.result.model.SubjectResult
 import skills.services.*
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
@@ -85,6 +89,9 @@ class SubjAdminService {
 
     @Autowired
     AttachmentService attachmentService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Transactional()
     void saveSubject(String projectId, String origSubjectId, SubjectRequest subjectRequest, boolean performCustomValidation = true) {
@@ -147,9 +154,17 @@ class SubjAdminService {
             levelDefService.createDefault(projectId, null, skillDef)
 
             attachmentService.updateAttachmentsFoundInMarkdown(subjectRequest?.description, projectId, null, subjectRequest.subjectId)
-
             log.debug("Created [{}]", res)
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: existing ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Subject,
+                actionAttributes: res,
+                itemId: res.skillId,
+                itemRefId: res.id,
+                projectId: res.projectId,
+        ))
     }
 
     @Transactional
@@ -184,6 +199,12 @@ class SubjAdminService {
         projDefRepo.save(projDef)
         userPointsManagement.handleSubjectRemoval(subjectDefinition)
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Subject,
+                itemId: subjectDefinition.skillId,
+                projectId: subjectDefinition.projectId,
+        ))
         log.debug("Deleted subject with id [{}]", subjectDefinition.skillId)
     }
 

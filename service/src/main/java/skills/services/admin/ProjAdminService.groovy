@@ -37,6 +37,10 @@ import skills.services.*
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
+import skills.services.userActions.DashboardAction
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
@@ -127,6 +131,9 @@ class ProjAdminService {
     @Autowired
     AttachmentService attachmentService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
         assert projectRequest?.projectId
@@ -142,8 +149,10 @@ class ProjAdminService {
         if (!projectDefinition || !projectRequest.name.equalsIgnoreCase(projectDefinition.name)) {
             serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
         }
+        final boolean isEdit = projectDefinition
+
         ProjDefParent savedProjDef
-        if (projectDefinition) {
+        if (isEdit) {
             Props.copy(projectRequest, projectDefinition)
             log.debug("Updating [{}]", projectDefinition)
 
@@ -181,6 +190,14 @@ class ProjAdminService {
 
             savedProjDef = projDef
         }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Project,
+                actionAttributes: projectDefinition,
+                itemId: savedProjDef.projectId,
+                itemRefId: savedProjDef.id,
+                projectId: savedProjDef.projectId,
+        ))
 
         if (projectRequest.enableProtectedUserCommunity) {
             settingsService.saveSetting(new ProjectSettingsRequest(projectId: savedProjDef.projectId, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
@@ -231,6 +248,13 @@ class ProjAdminService {
 
         projDefRepo.deleteByProjectIdIgnoreCase(projectId)
         log.debug("Deleted project with id [{}]", projectId)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Project,
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional()
