@@ -24,16 +24,15 @@ limitations under the License.
     <div v-if="!isSurveyType">
       <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
         <div class="row">
-          <div id="quizNumQuestionsLabel" class="col col-md-3 text-secondary" >
+          <div id="quizNumQuestions" class="col col-md-3 text-secondary" >
             Quiz Length:
           </div>
           <div class="col">
             <ValidationProvider name="Quiz Length" vid="quizNumQuestions" rules="required|greaterThanOrEqualToPassing:@quizPassingQuestions" v-slot="{errors}">
               <b-form-select v-model="settings.quizLength.value"
                              :options="quizLengthOptions"
-                             aria-labelledby="quizLength"
+                             aria-labelledby="quizNumQuestions"
                              ref="quizNumQuestions"
-                             id="quizNumQuestions"
                              data-cy="quizNumQuestions" />
               <small role="alert" class="form-text text-danger" v-show="errors[0]">{{
                   errors[0]}}
