@@ -20,7 +20,8 @@ enum QuizSettings {
     MinNumQuestionsToPass('quizPassingReq'),
     QuizUserRole('quizUserRole'),
     RandomizeQuestions('quizRandomizeQuestions'),
-    RandomizeAnswers('quizRandomizeAnswers');
+    RandomizeAnswers('quizRandomizeAnswers'),
+    QuizLength('quizLength');
 
     String setting;
 

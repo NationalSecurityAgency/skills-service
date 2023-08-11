@@ -30,4 +30,5 @@ class QuizInfo {
     Integer maxAttemptsAllowed
     Boolean userQuizPassed
     Date userLastQuizAttemptDate
+    Integer quizLength
 }
