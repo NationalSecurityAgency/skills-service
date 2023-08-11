@@ -24,7 +24,7 @@ limitations under the License.
     <div v-if="!isSurveyType">
       <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
         <div class="row">
-          <div id="quizNumQuestions" class="col col-md-3 text-secondary" >
+          <div id="quizNumQuestionsLabel" class="col col-md-3 text-secondary" >
             Quiz Length:
           </div>
           <div class="col">
