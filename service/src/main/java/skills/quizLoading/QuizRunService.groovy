@@ -328,8 +328,6 @@ class QuizRunService {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
         }
 
-        Integer quizLength = getQuizLength(quizDef.id)
-
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)?.sort { it.displayOrder }
         List<QuizAnswerDef> dbAnswersDefs = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
@@ -361,9 +359,13 @@ class QuizRunService {
 
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
+        Integer quizLength = getQuizLength(quizDef.id)
+        if(quizLength == -1) {
+            quizLength = gradedQuestions.size()
+        }
         int numCorrect = gradedQuestions.count { it.isCorrect }
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
-        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : gradedQuestions.size();
+        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : quizLength;
         boolean quizPassed = numCorrect >= minNumQuestionsToPass
 
         boolean shouldReturnGradedRes = quizPassed && quizDef.type == QuizDefParent.QuizType.Quiz;
