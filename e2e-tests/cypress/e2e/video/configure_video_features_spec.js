@@ -185,6 +185,111 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
     });
 
+    it('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {
+        cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.logout();
+                cy.login(vars.rootUser, vars.defaultPass, true);
+                cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.logout();
+                cy.login(vars.defaultUser, vars.defaultPass);
+            });
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        const msg = 'Friendly Reminder: Only safe videos please for {{community.project.descriptor}}'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.videoUploadWarningMessage = msg;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visitVideoConfPage();
+        cy.wait('@loadConfig')
+
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
+
+        // change UC
+        cy.get('[data-cy="breadcrumb-proj1"]').click()
+        cy.get('[data-cy="btn_edit-project"]').click()
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
+        cy.get('[data-cy="saveProjectButton"]').click()
+        cy.get('[data-cy="saveProjectButton"]').should('not.exist')
+        cy.wait('@getProj1Settings')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+
+        cy.get('[data-cy="manageBtn_subj1"]').click()
+        cy.get('[data-cy="manageSkillBtn_skill1"]').click()
+        cy.get('[data-cy="nav-Video"]').click()
+        cy.wait('@getVideoProps')
+        cy.wait('@getSkillInfo')
+        cy.get('.spinner-border').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+    });
+
+    it('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
+        cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
+        cy.intercept('GET', '/admin/projects/proj1/skills/skill1Skill/video').as('getVideoProps1')
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1Subject/skills/skill1Skill').as('getSkillInfo1')
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.logout();
+                cy.login(vars.rootUser, vars.defaultPass, true);
+                cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.logout();
+                cy.login(vars.defaultUser, vars.defaultPass);
+            });
+
+
+        const msg = 'Friendly Reminder: Only safe videos please for {{community.project.descriptor}}'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.videoUploadWarningMessage = msg;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visit('/administrator');
+        cy.wait('@loadConfig')
+
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]').type('proj1')
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
+        cy.get('[data-cy="saveProjectButton"]').should('be.enabled').click()
+        cy.get('[data-cy="saveProjectButton"]').should('not.exist')
+
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.wait('@getProj1Settings')
+        cy.get('[data-cy="btn_Subjects"]').click()
+        cy.get('[data-cy="subjectNameInput"]').type('subj1')
+        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled').click()
+        cy.get('[data-cy="manageBtn_subj1Subject"]').click()
+
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('skill1')
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled').click()
+        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click()
+        cy.get('[data-cy="nav-Video"]').click()
+        cy.wait('@getVideoProps1')
+        cy.wait('@getSkillInfo1')
+        cy.get('.spinner-border').should('not.exist')
+        const videoFile = 'create-subject.webm';
+        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+    });
+
     it('video upload warning message is not present when NOT configured', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
@@ -225,7 +330,5 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.wait('@reportError')
         cy.get('[data-cy="errorPage"]').contains('something went wrong')
     });
-
-
 
 });

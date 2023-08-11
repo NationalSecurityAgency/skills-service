@@ -221,13 +221,14 @@ limitations under the License.
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
   import MsgLogService from '@/common-components/utilities/MsgLogService';
+  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
 
   const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'VideoConfigPage',
     components: { VideoPlayer, SubPageHeader },
-    mixins: [MsgBoxMixin, ProjConfigMixin, NavigationErrorMixin],
+    mixins: [MsgBoxMixin, ProjConfigMixin, NavigationErrorMixin, CommunityLabelsMixin],
     data() {
       return {
         videoConf: {
@@ -293,7 +294,7 @@ limitations under the License.
       },
       videoUploadWarningMessage() {
         const communityProjDescriptor = /\{\{\s?community.project.descriptor\s?\}\}/gi;
-        const projCommunityValue = this.$store.getters.projConfig?.project_community_value;
+        const projCommunityValue = this.projectConfiguredUserCommunity;
         const warningMessageValue = this.$store.getters.config?.videoUploadWarningMessage;
         let result = warningMessageValue;
         if (warningMessageValue) {

@@ -38,6 +38,9 @@ limitations under the License.
       userCommunityDocsLink() {
         return (this.$store.getters.config && this.$store.getters.config.userCommunityDocsLink) || null;
       },
+      projectConfiguredUserCommunity() {
+        return this.$store.getters.projConfig?.project_community_value;
+      },
     },
     methods: {
       isRestrictedUserCommunity(communityName) {
