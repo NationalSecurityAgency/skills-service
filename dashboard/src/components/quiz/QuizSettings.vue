@@ -31,7 +31,7 @@ limitations under the License.
             <ValidationProvider name="Quiz Length" vid="quizNumQuestions" rules="required|greaterThanOrEqualToPassing:@quizPassingQuestions" v-slot="{errors}">
               <b-form-select v-model="settings.quizLength.value"
                              :options="quizLengthOptions"
-                             aria-labelledby="quizNumQuestions"
+                             aria-labelledby="quizLength"
                              ref="quizNumQuestions"
                              id="quizNumQuestions"
                              data-cy="quizNumQuestions" />
