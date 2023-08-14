@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -78,10 +79,17 @@ class UserActionsHistoryService {
     }
 
     @Transactional
-    TableResult getUsersActions(PageRequest pageRequest) {
-        Long totalRows = userActionsHistoryRepo.count()
-        List<UserActionsHistoryRepo.UserActionsPreview> userActionsPreviewFromDB = userActionsHistoryRepo.getActions(pageRequest)
-        List<DashboardUserActionRes> actionResList = userActionsPreviewFromDB?.collect {
+    TableResult getUsersActions(PageRequest pageRequest,
+                                String projectIdFilter,
+                                DashboardItem itemFilter,
+                                String userFilter,
+                                String quizFilter,
+                                String itemIdFilter,
+                                DashboardAction actionFilter) {
+        Page<UserActionsHistoryRepo.UserActionsPreview> userActionsPreviewFromDB = userActionsHistoryRepo.getActions(
+                projectIdFilter, itemFilter, userFilter, quizFilter, itemIdFilter, actionFilter, pageRequest)
+        Long totalRows = userActionsPreviewFromDB.getTotalElements()
+        List<DashboardUserActionRes> actionResList = userActionsPreviewFromDB.getContent().collect {
             new DashboardUserActionRes(
                     id: it.id,
                     action: it.action,

@@ -17,7 +17,8 @@ limitations under the License.
   <div>
     <sub-page-header title="User Actions History" />
     <b-card body-class="p-0">
-      <div class="p-2 py-3">
+      <b-overlay :show="table.options.busy || this.options.loading">
+        <div class="p-2 py-3">
         <div class="row px-3 pt-1">
           <div class="col-md border-right">
             <b-form-group label="User:" label-for="user-filter" label-class="text-muted">
@@ -29,25 +30,27 @@ limitations under the License.
           </div>
           <div class="col-md border-right">
             <b-form-group label="Action:" label-for="action-filter" label-class="text-muted">
-              <b-form-input id="action-filter" v-model="filters.action"
-                            v-on:keydown.enter="loadData"
-                            maxlength="50"
-                            data-cy="actionFilter"/>
+              <b-form-select id="action-filter"
+                             v-model="filters.action"
+                             @input="loadData"
+                             :options="options.actions"
+                             data-cy="actionFilter"/>
             </b-form-group>
           </div>
           <div class="col-md">
             <b-form-group label="Item:" label-for="item-filter" label-class="text-muted">
-              <b-form-input id="item-filter" v-model="filters.item"
-                            v-on:keydown.enter="loadData"
-                            maxlength="50"
-                            data-cy="itemFilter"/>
+              <b-form-select id="item-filter"
+                             v-model="filters.item"
+                             @input="loadData"
+                             :options="options.items"
+                             data-cy="itemFilter"/>
             </b-form-group>
           </div>
         </div>
         <div class="row px-3 pt-1">
           <div class="col-md border-right">
             <b-form-group label="Item ID:" label-for="item-id-filter" label-class="text-muted">
-              <b-form-input id="item-id-filter" v-model="filters.user"
+              <b-form-input id="item-id-filter" v-model="filters.itemId"
                             v-on:keydown.enter="loadData"
                             maxlength="50"
                             data-cy="itemIdFilter"/>
@@ -55,7 +58,7 @@ limitations under the License.
           </div>
           <div class="col-md border-right">
             <b-form-group label="Project ID:" label-for="project-id-filter" label-class="text-muted">
-              <b-form-input id="project-id-filter" v-model="filters.action"
+              <b-form-input id="project-id-filter" v-model="filters.projectId"
                             v-on:keydown.enter="loadData"
                             maxlength="50"
                             data-cy="projectIdFilter"/>
@@ -63,7 +66,7 @@ limitations under the License.
           </div>
           <div class="col-md">
             <b-form-group label="Quiz ID:" label-for="quiz-id-filter" label-class="text-muted">
-              <b-form-input id="quiz-id-filter" v-model="filters.item"
+              <b-form-input id="quiz-id-filter" v-model="filters.quizId"
                             v-on:keydown.enter="loadData"
                             maxlength="50"
                             data-cy="quizIdFilter"/>
@@ -82,8 +85,8 @@ limitations under the License.
             </div>
           </div>
         </div>
-
       </div>
+      </b-overlay>
       <skills-b-table :options="table.options" :items="table.items"
                       @page-size-changed="pageSizeChanged"
                       @page-changed="pageChanged"
@@ -133,6 +136,14 @@ limitations under the License.
           <span>{{ data.value }}</span>
         </template>
 
+        <template v-slot:cell(action)="data">
+          <span>{{ formatLabel(data.value) }}</span>
+        </template>
+
+        <template v-slot:cell(item)="data">
+          <span>{{ formatLabel(data.value) }}</span>
+        </template>
+
         <template v-slot:cell(created)="data">
           <date-cell :value="data.value"/>
         </template>
@@ -159,6 +170,11 @@ limitations under the License.
     },
     data() {
       return {
+        options: {
+          loading: true,
+          actions: [],
+          items: [],
+        },
         filters: {
           user: '',
           action: '',
@@ -233,6 +249,7 @@ limitations under the License.
     },
     mounted() {
       this.loadData();
+      this.loadFilterOptions();
     },
     methods: {
       reset() {
@@ -244,6 +261,16 @@ limitations under the License.
         this.filters.quizId = '';
         this.loadData();
       },
+      loadFilterOptions() {
+        this.options.loading = true;
+        UserActionsService.getDashboardActionsFilterOptions()
+          .then((res) => {
+            this.options.actions = res.actionFilterOptions.map((val) => ({ text: this.formatLabel(val), value: val }));
+            this.options.items = res.itemFilterOptions.map((val) => ({ text: this.formatLabel(val), value: val }));
+          }).finally(() => {
+            this.options.loading = false;
+          });
+      },
       loadData() {
         this.table.options.busy = true;
         const params = {
@@ -251,6 +278,12 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
           ascending: !this.table.options.sortDesc,
+          projectIdFilter: encodeURIComponent(this.filters.projectId.trim()),
+          itemFilter: encodeURIComponent(this.filters.item.trim()),
+          userFilter: encodeURIComponent(this.filters.user.trim()),
+          quizFilter: encodeURIComponent(this.filters.quizId.trim()),
+          itemIdFilter: encodeURIComponent(this.filters.itemId.trim()),
+          actionFilter: encodeURIComponent(this.filters.action.trim()),
         };
         UserActionsService.getDashboardActionsForEverything(params)
           .then((res) => {
@@ -275,6 +308,11 @@ limitations under the License.
       pageSizeChanged(newSize) {
         this.table.options.pagination.pageSize = newSize;
         this.loadData();
+      },
+      formatLabel(originalLabel) {
+        return originalLabel
+          .replace(/([A-Z])/g, (match) => ` ${match}`)
+          .replace(/^./, (match) => match.toUpperCase());
       },
     },
   };

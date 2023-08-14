@@ -39,6 +39,10 @@ import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
@@ -117,6 +121,9 @@ class QuizDefService {
     @Autowired
     AttachmentService attachmentService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         UserInfo userInfo = userInfoService.currentUser
@@ -177,6 +184,7 @@ class QuizDefService {
         if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
             serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
         }
+        final boolean isEdit = quizDefWithDescription
         if (quizDefWithDescription) {
             QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
             QuizValidator.isTrue(quizDefWithDescription.type == incomingType, "Existing quiz type cannot be changed", quizDefWithDescription.quizId)
@@ -208,6 +216,14 @@ class QuizDefService {
 
             accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Quiz,
+                actionAttributes: quizDefWithDescription,
+                itemId: quizDefWithDescription.quizId,
+                itemRefId: quizDefWithDescription.id,
+                quizId: quizDefWithDescription.quizId,
+        ))
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)

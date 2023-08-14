@@ -15,9 +15,12 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.storage.model.UserActionsHistory
@@ -51,7 +54,19 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                     action.created as created
                 from UserActionsHistory action, UserAttrs userAttrs
                 where action.userId = userAttrs.userId
+                    and (:projectIdFilter is null OR lower(action.projectId) like lower(concat('%', :projectIdFilter, '%')))
+                    and (:itemFilter is null OR action.item = :itemFilter)
+                    and (:userFilter is null OR lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%')))
+                    and (:quizFilter is null OR lower(action.quizId) like lower(concat('%', :quizFilter, '%')))
+                    and (:itemIdFilter is null OR lower(action.itemId) like lower(concat('%', :itemIdFilter, '%')))
+                    and (:actionFilter is null OR action.action = :actionFilter)
     ''')
-    List<UserActionsPreview> getActions(Pageable pageable)
+    Page<UserActionsPreview> getActions(@Nullable @Param("projectIdFilter") String projectIdFilter,
+                                        @Nullable @Param("itemFilter") DashboardItem itemFilter,
+                                        @Nullable @Param("userFilter") String userFilter,
+                                        @Nullable @Param("quizFilter") String quizFilter,
+                                        @Nullable @Param("itemIdFilter") String itemIdFilter,
+                                        @Nullable @Param("actionFilter") DashboardAction actionFilter,
+                                        Pageable pageable)
 
 }

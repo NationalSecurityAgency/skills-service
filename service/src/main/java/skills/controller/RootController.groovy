@@ -43,6 +43,8 @@ import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
@@ -53,6 +55,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
 
 import javax.xml.bind.DatatypeConverter
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.Principal
 
@@ -357,11 +360,35 @@ class RootController {
     @ResponseBody
     @CompileStatic
     TableResult getDashboardActions(@RequestParam int limit,
-                                       @RequestParam int page,
-                                       @RequestParam String orderBy,
-                                       @RequestParam Boolean ascending) {
+                                    @RequestParam int page,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending,
+                                    @RequestParam(required=false) String projectIdFilter,
+                                    @RequestParam(required=false) String itemFilter,
+                                    @RequestParam(required=false) String userFilter,
+                                    @RequestParam(required=false) String quizFilter,
+                                    @RequestParam(required=false) String itemIdFilter,
+                                    @RequestParam(required=false) String actionFilter) {
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return userActionsHistoryService.getUsersActions(pageRequest)
+        return userActionsHistoryService.getUsersActions(pageRequest,
+                projectIdFilter ? URLDecoder.decode(projectIdFilter, StandardCharsets.UTF_8) : null,
+                itemFilter? DashboardItem.valueOf(itemFilter) : null,
+                userFilter ? URLDecoder.decode(userFilter, StandardCharsets.UTF_8) : null,
+                quizFilter ? URLDecoder.decode(quizFilter, StandardCharsets.UTF_8) : null,
+                itemIdFilter ? URLDecoder.decode(itemIdFilter, StandardCharsets.UTF_8) : null,
+                actionFilter ? DashboardAction.valueOf(actionFilter) : null)
+    }
+
+    private final static DashboardUserActionsFilterOptions dashboardUserActionsFilterOptions =
+            new DashboardUserActionsFilterOptions(
+                    actionFilterOptions: DashboardAction.values().collect( { it.toString() }),
+                    itemFilterOptions: DashboardItem.values().collect( { it.toString() })
+            );
+    @RequestMapping(value = "/dashboardActions/filterOptions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    DashboardUserActionsFilterOptions getActionFilterOptions() {
+        return dashboardUserActionsFilterOptions
     }
 
     @RequestMapping(value = "/dashboardActions/{actionId}/attributes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

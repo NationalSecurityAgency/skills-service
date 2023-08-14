@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+package skills.controller.result.model
 
-export default {
-  getDashboardActionsForEverything(params) {
-    const url = '/root/dashboardActions';
-    return axios.get(url, { params })
-      .then((response) => response.data);
-  },
-  getDashboardActionsFilterOptions() {
-    const url = '/root/dashboardActions/filterOptions';
-    return axios.get(url)
-      .then((response) => response.data);
-  },
-  getDashboardSingleAction(actionId) {
-    const url = `/root/dashboardActions/${actionId}/attributes`;
-    return axios.get(url)
-      .then((response) => response.data);
-  },
-};
+import groovy.transform.Canonical
+
+@Canonical
+class DashboardUserActionsFilterOptions {
+    List<String> actionFilterOptions
+    List<String> itemFilterOptions
+}
