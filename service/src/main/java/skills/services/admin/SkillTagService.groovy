@@ -24,6 +24,10 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsTagRequest
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.SkillDefRepo
@@ -51,6 +55,9 @@ class SkillTagService {
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Transactional()
     void addTag(String projectId, SkillsTagRequest skillsTagRequest) {
@@ -82,7 +89,19 @@ class SkillTagService {
             if (!existingTaggedSkillIds.find { it == skillId}) {
                 ruleSetDefGraphService.assignGraphRelationship(projectId, skillDefinition.skillId, SkillDef.ContainerType.Tag, skillId, SkillRelDef.RelationshipType.Tag)
             }
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Create,
+                    item: DashboardItem.Tag,
+                    actionAttributes: [
+                            tagId: skillsTagRequest.tagId,
+                            tagValue: skillsTagRequest.tagValue,
+                    ],
+                    itemId: skillId,
+                    projectId: projectId,
+            ))
         }
+
         log.debug("Added [{}] tag to skills [{}]", skillsTagRequest.tagValue, skillsTagRequest.skillIds)
     }
 
@@ -123,6 +142,17 @@ class SkillTagService {
         skillsTagRequest.skillIds.each {skillId ->
             ruleSetDefGraphService.removeGraphRelationship(projectId, tagId, SkillDef.ContainerType.Tag,
                     projectId, skillId, SkillRelDef.RelationshipType.Tag, false)
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Delete,
+                    item: DashboardItem.Tag,
+                    actionAttributes: [
+                            tagId: tag.skillId,
+                            tagValue: tag.name,
+                    ],
+                    itemId: skillId,
+                    projectId: projectId,
+            ))
         }
 
         Integer skillsWithTag = skillRelDefRepo.getSkillWithTagCount(tagId)

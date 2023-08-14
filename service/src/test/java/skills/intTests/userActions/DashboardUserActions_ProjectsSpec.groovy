@@ -17,6 +17,7 @@ package skills.intTests.userActions
 
 import groovy.json.JsonOutput
 import skills.intTests.catalog.CatalogIntSpec
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.userActions.DashboardAction
@@ -517,7 +518,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         when:
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         then:
@@ -529,5 +529,61 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         res.data[0].userIdForDisplay == displayName
         res.data[0].projectId == project1.projectId
         !res.data[0].quizId
+    }
+
+    def "track skill tags CRUD"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> taggedSkillIds = skills.skillId
+        String tagValue = "New Tag"
+        String tagId = 'newtag'
+
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        def displayName = userAttrs.getUserIdForDisplay()
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.addTagToSkills(proj.projectId, taggedSkillIds, tagValue)
+        Thread.sleep(100)
+        skillsService.deleteTagForSkills(proj.projectId, taggedSkillIds, tagId)
+        def res = rootService.getUserActionsForEverything()
+
+        def addTag = rootService.getUserActionAttributes(res.data[1].id)
+        def removeTag = rootService.getUserActionAttributes(res.data[0].id)
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(removeTag))
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.Tag.toString()
+        res.data[0].itemId == skills[0].skillId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.Tag.toString()
+        res.data[1].itemId == skills[0].skillId
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        addTag.tagId == tagId
+        addTag.tagValue == tagValue
+
+        removeTag.tagId == tagId
+        removeTag.tagValue == tagValue
     }
 }
