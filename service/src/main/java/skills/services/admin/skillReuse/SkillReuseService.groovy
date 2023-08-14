@@ -30,6 +30,10 @@ import skills.controller.result.model.SkillReuseDestination
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
@@ -66,6 +70,9 @@ class SkillReuseService {
     @Autowired
     SkillCatalogFinalizationService skillCatalogFinalizationService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional
     @Profile
     void reuseSkill(String projectId, SkillsActionRequest skillReuseRequest) {
@@ -81,6 +88,24 @@ class SkillReuseService {
         skillCatalogService.importSkillsFromCatalog(projectId, skillReuseRequest.subjectId, listOfSkills, skillReuseRequest.groupId, true)
         // finalize
         finalizationService.finalizeCatalogSkillsImport(projectId)
+
+        handleTrackingUserActions(listOfSkills, skillReuseRequest)
+    }
+
+    @Profile
+    private void handleTrackingUserActions(List<CatalogSkill> listOfSkills, SkillsActionRequest skillReuseRequest) {
+        Map additionalAttributes = [toSubjectId: skillReuseRequest.subjectId]
+        if (skillReuseRequest.groupId) {
+            additionalAttributes.toGroupId = skillReuseRequest.groupId
+        }
+        listOfSkills.each {CatalogSkill catalogSkill ->
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.ReuseInProject,
+                    item: DashboardItem.Skill,
+                    actionAttributes: additionalAttributes,
+                    itemId: catalogSkill.skillId,
+                    projectId: catalogSkill.projectId))
+        }
     }
 
     @Profile

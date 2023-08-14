@@ -29,46 +29,6 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class DashboardUserActionsSpec extends CatalogIntSpec {
 
-    @Autowired
-    UserActionsHistoryRepo userActionsHistoryRepo
-
-    def "track project, subject and skills CRUD"() {
-        SkillsService rootService = createRootSkillService()
-
-        def p1 = createProject(1)
-        p1.description = "this is a description allright"
-        def p1subj1 = createSubject(1, 1)
-        p1subj1.description = "this is a description allright"
-        def p1Skills = createSkills(3, 1, 1, 100)
-        p1Skills.each {
-            it.description = "this is a description all right"
-        }
-
-        when:
-        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-        skillsService.updateProject(p1)
-        skillsService.updateSubject(p1subj1)
-        skillsService.updateSkill(p1Skills[0])
-        p1Skills.each {
-            skillsService.deleteSkill(it)
-        }
-        skillsService.deleteSubject(p1subj1)
-        skillsService.deleteProject(p1.projectId)
-
-        def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
-
-        Long idToLoad = res.data.find { it.action == "Edit" }.id
-        def singleActionAttributes = rootService.getUserActionAttributes(idToLoad)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(singleActionAttributes))
-
-//        List<UserActionsHistory> history = userActionsHistoryRepo.findAll()
-//        println JsonOutput.prettyPrint(JsonOutput.toJson(history))
-
-        then:
-        true
-    }
-
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get actions filters - userId filter"() {
         SkillsService rootService = createRootSkillService()

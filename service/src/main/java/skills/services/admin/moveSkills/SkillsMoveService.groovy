@@ -25,9 +25,13 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsActionRequest
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
+import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.DisplayOrderService
 import skills.services.admin.SkillCatalogFinalizationService
-import skills.services.admin.BatchOperationsTransactionalAccessor
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -70,15 +74,18 @@ class SkillsMoveService {
     @Autowired
     DisplayOrderService displayOrderService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional
     @Profile
-    void moveSkills(String projectId, SkillsActionRequest skillReuseRequest) {
+    void moveSkills(String projectId, SkillsActionRequest skillMoveRequest) {
         skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot move skills while finalization is running")
         skillCatalogFinalizationService.validateFinalizationIsNotPending(projectId, "Cannot move skills while finalization is pending")
 
         // Please note that order is important as achievements calculations relied on points being updated first
-        SkillDef origParentSkill = moveDefinitionToDestParent(projectId, skillReuseRequest)
-        SkillDef destSubj = updateDestDefinitionPoints(projectId, skillReuseRequest)
+        SkillDef origParentSkill = moveDefinitionToDestParent(projectId, skillMoveRequest)
+        SkillDef destSubj = updateDestDefinitionPoints(projectId, skillMoveRequest)
         updateOrigDefinitionPoints(projectId, origParentSkill, destSubj)
 
         SkillDef origSubj = origParentSkill.type == SkillDef.ContainerType.SkillsGroup ? ruleSetDefGraphService.getParentSkill(origParentSkill.id) : origParentSkill
@@ -93,7 +100,26 @@ class SkillsMoveService {
         }
 
         handleEmptyOrigGroup(origParentSkill)
-        handleDestGroupAchievements(projectId, skillReuseRequest)
+        handleDestGroupAchievements(projectId, skillMoveRequest)
+
+        handleTrackingUserActions(projectId, skillMoveRequest)
+    }
+
+    @Profile
+    private void handleTrackingUserActions(String projectId, SkillsActionRequest skillMoveRequest) {
+        Map additionalAttributes = [toSubjectId: skillMoveRequest.subjectId]
+        if (skillMoveRequest.groupId) {
+            additionalAttributes.toGroupId = skillMoveRequest.groupId
+        }
+
+        skillMoveRequest.skillIds.each { String skillIdToMove ->
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Move,
+                    item: DashboardItem.Skill,
+                    actionAttributes: additionalAttributes,
+                    itemId: skillIdToMove,
+                    projectId: projectId))
+        }
     }
 
     @Profile

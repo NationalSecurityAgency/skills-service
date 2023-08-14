@@ -20,5 +20,10 @@ enum DashboardAction {
     Edit,
     Delete,
     ImportFromCatalog,
-    ExportToCatalog
+    ExportToCatalog,
+    FinalizeCatalogImport,
+    RemoveFromCatalog,
+    ReuseInProject,
+    StopProjectReuse,
+    Move,
 }

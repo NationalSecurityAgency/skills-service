@@ -117,7 +117,10 @@ class UserActionsHistoryService {
             throw new SkillException("Failed to locate UserActionsHistory by id [${id}]");
         }
         UserActionsHistory userActionsHistory = optional.get()
-        userActionsHistory.actionAttributes
+
+        if (!userActionsHistory.actionAttributes) {
+            return new HashMap<>()
+        }
 
         Map result = mapper.readValue(userActionsHistory.actionAttributes, Map.class)
         return result

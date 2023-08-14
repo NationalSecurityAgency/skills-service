@@ -367,11 +367,8 @@ class SkillsAdminService {
             quizToSkillService.handleQuizToSkillRelationship(savedSkill, skillRequest)
         }
 
-        if (!isReplicationRequest) {
+        if (!isReplicationRequest && !isSkillCatalogImport) {
             DashboardAction dashboardAction = isEdit ? DashboardAction.Edit : DashboardAction.Create
-            if (isSkillCatalogImport) {
-                dashboardAction = DashboardAction.ImportFromCatalog
-            }
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: dashboardAction,
                     item: isSkillsGroup ? DashboardItem.SkillsGroup : DashboardItem.Skill,
@@ -466,7 +463,7 @@ class SkillsAdminService {
     }
 
     @Transactional
-    void deleteSkill(String projectId, String skillId) {
+    void deleteSkill(String projectId, String skillId, boolean trackUserActionHistory = true) {
         log.debug("Deleting skill with project id [{}] and skill id [{}]", projectId, skillId)
         SkillDef skillDefinition = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         assert skillDefinition, "DELETE FAILED -> no skill with project find with projectId=[$projectId], skillId=[$skillId]"
@@ -524,12 +521,15 @@ class SkillsAdminService {
         List<SkillDef> siblings = ruleSetDefGraphService.getChildrenSkills(parentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblings)
 
-        userActionsHistoryService.saveUserAction(new UserActionInfo(
-                action: DashboardAction.Delete,
-                item: skillDefinition.type == SkillDef.ContainerType.SkillsGroup ? DashboardItem.SkillsGroup : DashboardItem.Skill,
-                itemId: skillDefinition.skillId,
-                projectId: skillDefinition.projectId,
-        ))
+        if (trackUserActionHistory) {
+            boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDefinition.skillId)
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: isReusedSkill ? DashboardAction.StopProjectReuse : DashboardAction.Delete,
+                    item: skillDefinition.type == SkillDef.ContainerType.SkillsGroup ? DashboardItem.SkillsGroup : DashboardItem.Skill,
+                    itemId: skillDefinition.skillId,
+                    projectId: skillDefinition.projectId,
+            ))
+        }
     }
 
     @Profile
@@ -537,7 +537,7 @@ class SkillsAdminService {
         List<SkillDefWithExtra> related = skillDefWithExtraRepo.findSkillsCopiedFrom(skillDefinition.id)
         log.info("catalog skill is being deleted, deleting [{}] copies imported into other projects", related?.size())
         related?.each {
-            deleteSkill(it.projectId, it.skillId)
+            deleteSkill(it.projectId, it.skillId, false)
         }
     }
 
