@@ -274,4 +274,55 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         quizInfo1.questions.id == [qRes.questions[0].id, qRes.questions[1].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
         quizInfo2.questions.id == [qRes.questions[1].id, qRes.questions[0].id, qRes.questions[3].id, qRes.questions[4].id, qRes.questions[2].id]
     }
+
+    def "Quiz using a subset of the questions in random order persists order"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+                [setting: QuizSettings.QuizLength.setting, value: 10],
+        ])
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        assert quizInfo.questions.size() == 10
+
+        when:
+        skillsService.startQuizAttempt(quiz.quizId, null, quizInfo.questions)
+        def quizInfoAfterStart = skillsService.getQuizInfo(quiz.quizId)
+        skillsService.startQuizAttempt(quiz.quizId, null, quizInfo.questions)
+        def quizInfoSecondStart = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        quizInfo.questions == quizInfoAfterStart.questions
+        quizInfoAfterStart.questions == quizInfoSecondStart.questions
+    }
+
+    def "Users have different quiz run attempts"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+                [setting: QuizSettings.QuizLength.setting, value: 10],
+        ])
+
+        def quizInfoUser1 = skillsService.getQuizInfo(quiz.quizId, 'user1')
+        def quizInfoUser2 = skillsService.getQuizInfo(quiz.quizId, 'user2')
+        assert quizInfoUser1.questions.size() == 10
+        assert quizInfoUser2.questions.size() == 10
+
+        when:
+        skillsService.startQuizAttempt(quiz.quizId, 'user1', quizInfoUser1.questions)
+        def quizInfoAfterStartUser1 = skillsService.getQuizInfo(quiz.quizId, 'user1')
+        skillsService.startQuizAttempt(quiz.quizId, 'user2', quizInfoUser2.questions)
+        def quizInfoAfterStartUser2 = skillsService.getQuizInfo(quiz.quizId, 'user2')
+
+        then:
+        quizInfoAfterStartUser1.questions != quizInfoAfterStartUser2.questions
+    }
 }
