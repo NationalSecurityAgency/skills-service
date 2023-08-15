@@ -21,4 +21,5 @@ class StartQuizAttemptReq implements UserIdIsSupplied {
     // can only be supplied by an admin of the quiz or associated project
     String userId
     String idType
+    List<QuizQuestionInfo> questions
 }
