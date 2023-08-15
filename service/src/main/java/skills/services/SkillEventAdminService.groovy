@@ -74,9 +74,6 @@ class SkillEventAdminService {
     UserEventService userEventService
 
     @Autowired
-    private SkillEventsService skillsManagementFacade
-
-    @Autowired
     private UserInfoService userInfoService
 
     @Autowired
