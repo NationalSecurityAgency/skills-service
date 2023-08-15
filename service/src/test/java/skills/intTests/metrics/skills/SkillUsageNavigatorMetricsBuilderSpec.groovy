@@ -16,21 +16,13 @@
 package skills.intTests.metrics.skills
 
 import groovy.time.TimeCategory
-import org.springframework.beans.factory.annotation.Autowired
-import skills.PublicProps
-import skills.controller.request.model.SkillsTagRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
-import skills.services.admin.SkillTagService
-import skills.utils.InputSanitizer
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
-
-    @Autowired
-    SkillTagService skillTagService
 
     String metricsId = "skillUsageNavigatorChartBuilder"
 
@@ -164,17 +156,8 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
             }
         }
 
-        SkillsTagRequest skillsTagRequest = new SkillsTagRequest()
-        skillsTagRequest.tagId = "testtag"
-        skillsTagRequest.tagValue = "Test Tag"
-        skillsTagRequest.skillIds = skills.collect{ it -> it.skillId }
-        skillTagService.addTag(proj.projectId, skillsTagRequest)
-
-        SkillsTagRequest secondSkillsTagRequest = new SkillsTagRequest()
-        secondSkillsTagRequest.tagId = "newtag"
-        secondSkillsTagRequest.tagValue = "New Tag"
-        secondSkillsTagRequest.skillIds = skills[0..4].collect{ it -> it.skillId }
-        skillTagService.addTag(proj.projectId, secondSkillsTagRequest)
+        skillsService.addTagToSkills(proj.projectId, skills.collect{ it -> it.skillId }, "Test Tag", "testtag")
+        skillsService.addTagToSkills(proj.projectId, skills[0..4].collect{ it -> it.skillId }, "New Tag", "newtag")
 
         Map props = [:]
         props[MetricsParams.P_SKILL_ID] = skills[0].skillId
