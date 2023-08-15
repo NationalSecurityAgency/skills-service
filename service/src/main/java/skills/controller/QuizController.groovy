@@ -201,7 +201,7 @@ class QuizController {
     @ResponseBody
     QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
                                             @PathVariable("userId") String userId) {
-        return quizRunService.startQuizAttempt(userId, quizId);
+        return quizRunService.startQuizAttempt(userId, quizId, []);
     }
 
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
