@@ -19,21 +19,20 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.request.model.SkillDefForDependencyRes
 import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
-import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
-import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -77,6 +76,9 @@ class SkillsDepsService {
     @Autowired
     SkillCatalogService skillCatalogService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional(readOnly = true)
     List<SkillDepResult> checkIfSkillsHaveDeps(String projectId, List<String> skillIds) {
         List<SkillRelDefRepo.SkillIdAndCount> skillIdsAndCounts = skillRelDefRepo.countChildrenForMultipleSkillIds(projectId, skillIds, [SkillRelDef.RelationshipType.Dependence])
@@ -98,12 +100,38 @@ class SkillsDepsService {
 
         validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
         skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.LearningPathItem,
+                actionAttributes: [
+                        fromProjectId: prereqSkillDef.projectId,
+                        fromSkillId: prereqSkillDef.skillId,
+                        toProjectId: skillDef.projectId,
+                        toSkillId: skillDef.skillId,
+                ],
+                itemId: skillDef.projectId,
+                projectId: skillDef.projectId,
+        ))
     }
 
     @Transactional()
     void removeLearningPathItem(String projectId, String dependentSkillId, String dependencyProjectId, String dependencySkillId) {
         ruleSetDefGraphService.removeGraphRelationship(projectId, dependentSkillId, null,
                 dependencyProjectId, dependencySkillId, SkillRelDef.RelationshipType.Dependence)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.LearningPathItem,
+                actionAttributes: [
+                        fromProjectId: dependencyProjectId,
+                        fromSkillId: dependencySkillId,
+                        toProjectId: projectId,
+                        toSkillId: dependentSkillId,
+                ],
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional()

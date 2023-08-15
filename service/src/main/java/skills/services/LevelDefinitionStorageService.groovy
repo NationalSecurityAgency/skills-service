@@ -32,6 +32,10 @@ import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.*
 import skills.storage.repos.LevelDefRepo
 import skills.storage.repos.ProjDefRepo
@@ -63,6 +67,8 @@ class LevelDefinitionStorageService {
     @Autowired
     GlobalBadgesService globalBadgesService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     // this could also come from DB.. eventually
     Map<String,Integer> defaultPercentages = ["White Belt":10, "Blue Belt":25, "Purple Belt":45, "Brown Belt":67, "Black Belt":92]
@@ -319,6 +325,13 @@ class LevelDefinitionStorageService {
             }
         }
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Level,
+                actionAttributes: removed,
+                itemId: skillId ?: projectId,
+                projectId: projectId,
+        ))
         return removed
     }
 
@@ -374,6 +387,15 @@ class LevelDefinitionStorageService {
         toEdit.iconClass = editLevelRequest.iconClass
         toEdit = levelDefinitionRepository.save(toEdit)
 
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Edit,
+                item: DashboardItem.Level,
+                actionAttributes: toEdit,
+                itemId: skillId ?: projectId,
+                itemRefId: toEdit.id,
+                projectId: projectId,
+        ))
         return toEdit
     }
 
@@ -435,6 +457,15 @@ class LevelDefinitionStorageService {
             )
 
             created = levelDefinitionRepository.save(created)
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Create,
+                    item: DashboardItem.Level,
+                    actionAttributes: created,
+                    itemId: skillId ?: projectId,
+                    itemRefId: created.id,
+                    projectId: projectId,
+            ))
             log.debug("Added new level [{}]", created)
         }
 

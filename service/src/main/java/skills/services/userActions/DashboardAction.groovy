@@ -26,4 +26,8 @@ enum DashboardAction {
     ReuseInProject,
     StopProjectReuse,
     Move,
+    AssignSkill,
+    RemoveSkillAssignment,
+    Configure,
+    RemoveConfiguration,
 }

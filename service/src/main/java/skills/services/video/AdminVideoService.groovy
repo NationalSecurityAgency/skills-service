@@ -32,6 +32,10 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.SkillDefRepo
@@ -53,6 +57,9 @@ class AdminVideoService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
     DataSize maxAttachmentSize;
 
@@ -64,6 +71,7 @@ class AdminVideoService {
                               MultipartFile file, String videoUrl, String captions, String transcript) {
 
         SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
+        final boolean isEdit = existingVideoAttributes?.videoUrl
 
         SkillVideoAttrs videoAttrs = new SkillVideoAttrs()
         if (isAlreadyHosted) {
@@ -104,6 +112,14 @@ class AdminVideoService {
 
         skillAttributeService.saveVideoAttrs(projectId, skillId, videoAttrs)
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.VideoSettings,
+                itemId: skillId,
+                projectId: projectId,
+                actionAttributes: videoAttrs
+        ))
+
         return videoAttrs
     }
 
@@ -138,5 +154,12 @@ class AdminVideoService {
         }
 
         skillAttributeService.deleteVideoAttrs(projectId, skillId)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.VideoSettings,
+                itemId: skillId,
+                projectId: projectId,
+        ))
     }
 }

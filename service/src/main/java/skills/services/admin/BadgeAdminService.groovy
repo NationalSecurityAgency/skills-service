@@ -32,6 +32,10 @@ import skills.controller.result.model.SkillDefGraphRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.services.*
 import skills.services.attributes.SkillAttributeService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
@@ -97,6 +101,9 @@ class BadgeAdminService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
@@ -199,6 +206,14 @@ class BadgeAdminService {
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Badge,
+                actionAttributes: savedSkill,
+                itemId: savedSkill.skillId,
+                itemRefId: savedSkill.id,
+                projectId: savedSkill.projectId,
+        ))
         log.debug("Saved [{}]", savedSkill)
     }
 
@@ -243,6 +258,13 @@ class BadgeAdminService {
         List<SkillDef> badges = getBadgesInternal(projDef, type)
         badges = badges?.findAll({ it.id != badgeDefinition.id }) // need to remove because of JPA level caching?
         displayOrderService.resetDisplayOrder(badges)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Badge,
+                itemId: badgeDefinition.skillId,
+                projectId: badgeDefinition.projectId,
+        ))
         log.debug("Deleted badge with id [{}]", badgeDefinition)
     }
 
@@ -285,6 +307,17 @@ class BadgeAdminService {
         skillIds.each {skillid ->
             ruleSetDefGraphService.assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeRequirement, true)
             validateAgainstLearningPath(projectId, badgeId, skillid)
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.AssignSkill,
+                    item: DashboardItem.Badge,
+                    actionAttributes: [
+                        skillId: skillid,
+                        badgeId: badgeId,
+                    ],
+                    itemId: badgeId,
+                    projectId: projectId,
+            ))
         }
     }
 
@@ -331,6 +364,17 @@ class BadgeAdminService {
                 projectId, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
 
         awardBadgeToUsersMeetingRequirements(badge)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.RemoveSkillAssignment,
+                item: DashboardItem.Badge,
+                actionAttributes: [
+                        skillId: skillid,
+                        badgeId: badgeId,
+                ],
+                itemId: badgeId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional(readOnly = true)

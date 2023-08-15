@@ -23,5 +23,9 @@ enum DashboardItem {
     SkillsGroup,
     Quiz,
     Question,
-    Tag
+    Tag,
+    VideoSettings,
+    Level,
+    LearningPathItem,
+    Approver
 }
