@@ -440,6 +440,56 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         thirdQuizInfo.questions != firstQuizInfo.questions
     }
 
+    def "Can select a subset of questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def fullQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        assert fullQuizInfo.questions.size() == 100
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 30],
+        ])
+
+        when:
+        def subsetQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        subsetQuizInfo.questions.size() == 30
+    }
+
+    def "Can select a subset of randomized questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def fullQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        assert fullQuizInfo.questions.size() == 100
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 10],
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+        ])
+
+        when:
+        def firstSubsetQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def secondSubsetQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def thirdSubsetQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        firstSubsetQuizInfo.questions.size() == 10
+        secondSubsetQuizInfo.questions.size() == 10
+        thirdSubsetQuizInfo.questions.size() == 10
+        thirdSubsetQuizInfo.questions != secondSubsetQuizInfo.questions
+        thirdSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
+        secondSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
+    }
+
     def "get user admin role"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
