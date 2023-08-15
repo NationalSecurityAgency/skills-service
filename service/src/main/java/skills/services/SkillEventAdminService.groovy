@@ -31,6 +31,10 @@ import skills.controller.result.model.RequestResult
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
 import skills.services.events.*
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
@@ -102,6 +106,12 @@ class SkillEventAdminService {
 
     @Autowired
     TaskSchedulerService taskSchedulerService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
@@ -206,6 +216,18 @@ class SkillEventAdminService {
         handleImportedSkills(projectId, userId)
 
         propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
+
+        String userIdToDisplay = userAttrsRepo.findByUserId(userId)?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SkillEvents,
+                actionAttributes: [
+                        deletedAllForThisUser: true,
+                        userId: userIdToDisplay,
+                ],
+                itemId: userIdToDisplay,
+                projectId: projectId,
+        ))
 
         return RequestResult.success()
     }
@@ -318,6 +340,19 @@ class SkillEventAdminService {
 
         SkillEventResult skillEventResult = removePerformedSkillEvent(performedSkill)
         removeAssociatedQuizAttempts(performedSkill)
+
+        String userIdToDisplay = userAttrsRepo.findByUserId(userId)?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SkillEvents,
+                actionAttributes: [
+                        deletedAllForThisUser: false,
+                        timeOfSkillEvent: performedSkill.performedOn.time,
+                        userId: userIdToDisplay,
+                ],
+                itemId: userIdToDisplay,
+                projectId: projectId,
+        ))
 
         res.success = skillEventResult.skillApplied
         res.explanation = skillEventResult.explanation

@@ -27,5 +27,6 @@ enum DashboardItem {
     VideoSettings,
     Level,
     LearningPathItem,
-    Approver
+    Approver,
+    SkillEvents
 }

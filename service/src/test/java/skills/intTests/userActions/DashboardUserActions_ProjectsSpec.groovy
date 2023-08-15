@@ -16,6 +16,7 @@
 package skills.intTests.userActions
 
 import groovy.json.JsonOutput
+import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import skills.intTests.catalog.CatalogIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -563,7 +564,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def addTag = rootService.getUserActionAttributes(res.data[1].id)
         def removeTag = rootService.getUserActionAttributes(res.data[0].id)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(removeTag))
 
         then:
         res.count == 2
@@ -1166,5 +1166,61 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         confByTag.userTagValue ==  "AbC"
 
         confFallback.fallbackApprover == true
+    }
+
+    def "delete user skill events"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        def displayName = userAttrs.getUserIdForDisplay()
+
+        def user = getRandomUsers(1)[0]
+        Date skillDate = new Date()
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, skillDate)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], user, skillDate)
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.deleteSkillEvent([projectId: proj.projectId, skillId: skills[0].skillId, userId: user, timestamp: skillDate.time])
+        Thread.sleep(100)
+        skillsService.deleteAllSkillEvents([projectId: proj.projectId, userId: user])
+
+        def res = rootService.getUserActionsForEverything()
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
+
+        def deleteAllSkillEvents = rootService.getUserActionAttributes(res.data[0].id)
+        def deleteSingleEvent = rootService.getUserActionAttributes(res.data[1].id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAllSkillEvents))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteSingleEvent))
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.SkillEvents.toString()
+        res.data[0].itemId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Delete.toString()
+        res.data[1].item == DashboardItem.SkillEvents.toString()
+        res.data[1].itemId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        deleteAllSkillEvents.userId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        deleteAllSkillEvents.deletedAllForThisUser == true
+
+        deleteSingleEvent.userId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        deleteSingleEvent.deletedAllForThisUser == false
+        deleteSingleEvent.timeOfSkillEvent == skillDate.time
     }
 }
