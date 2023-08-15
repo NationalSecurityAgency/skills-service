@@ -2516,4 +2516,44 @@
             <column name="display_order" type="int"/>
         </addColumn>
     </changeSet>
+
+    <changeSet id="43" author="skills team">
+        <!-- ============================================================================
+        Table: Expired User Achievement
+        ============================================================================-->
+        <createTable tableName="expired_user_achievement">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- optional, can be null for 'global' badges -->
+            <column name="project_id" type="varchar(255)"/>
+
+            <column name="skill_id" type="varchar(255)"/>
+            <column name="skill_ref_id" type="int"/>
+
+            <column name="level" type="int"/>
+            <column name="points_when_achieved" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="notified" type="varchar(255)" defaultValueBoolean="true" />
+            <column name="achieved_on" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="expired_on" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

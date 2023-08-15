@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
+import skills.storage.model.SkillAttributesDef.SkillAttributesType
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.storage.repos.SkillDefRepo
@@ -64,6 +65,21 @@ class SkillAttributeService {
         return skillVideoAttrs
     }
 
+
+    void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, skillExpirationAttrs)
+    }
+
+    ExpirationAttrs getExpirationAttrs(String projectId, String skillId) {
+        ExpirationAttrs skillExpirationAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, ExpirationAttrs.class)
+        return skillExpirationAttrs
+    }
+
+    List<ExpirationAttrs> getAllExpirationAttrs() {
+        List<ExpirationAttrs> skillExpirationAttrs = getAttrsList(SkillAttributesDef.SkillAttributesType.AchievementExpiration, ExpirationAttrs.class)
+        return skillExpirationAttrs
+    }
+
     void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, bonusAwardAttrs, SkillDef.ContainerType.Badge)
     }
@@ -74,6 +90,14 @@ class SkillAttributeService {
 
     BonusAwardAttrs getBonusAwardAttrs(String projectId, String skillId) {
         return getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.BonusAward, BonusAwardAttrs.class)
+    }
+
+    <T> T convertAttrs(SkillAttributesDef skillAttributesDef, Class<T> clazz) {
+        if (!skillAttributesDef) {
+            return clazz.getDeclaredConstructor().newInstance()
+        }
+        T res = mapper.readValue(skillAttributesDef.attributes, clazz)
+        return  res
     }
 
     private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T videoAttrs, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
@@ -87,11 +111,15 @@ class SkillAttributeService {
     }
 
     private <T> T getAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, Class<T> clazz) {
-        SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, type.toString())
-        if (!skillAttributesDef) {
-            return clazz.getDeclaredConstructor().newInstance()
+        return convertAttrs(skillAttributesDefRepo.findByProjectIdAndSkillIdAndType(projectId, skillId, type.toString()), clazz)
+    }
+
+    private <T> List<T> getAttrsList(SkillAttributesDef.SkillAttributesType type, Class<T> clazz) {
+        List<SkillAttributesDef> skillAttributesDefs = skillAttributesDefRepo.findAllByType(type)
+        if (!skillAttributesDefs) {
+            return []
         }
-        T res = mapper.readValue(skillAttributesDef.attributes, clazz)
+        List<T> res = skillAttributesDefs.collect { mapper.readValue(it.attributes, clazz) }
         return  res
     }
 

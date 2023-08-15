@@ -911,4 +911,28 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     @Modifying
     @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
+
+    @Modifying
+    @Query(value = '''
+        WITH expired_rows AS (
+        DELETE FROM user_achievement
+        WHERE
+            skill_ref_id = :skillRefId
+        RETURNING *)
+        INSERT INTO expired_user_achievement SELECT * FROM expired_rows;
+    ''', nativeQuery = true)
+    void expireAchievementsForSkill(@Param("skillRefId") Integer skillRefId)
+
+    @Modifying
+    @Query(value = '''
+        WITH expired_rows AS (
+        DELETE FROM user_achievement
+        WHERE
+            achieved_on <= :expirationDate AND
+            skill_ref_id = :skillRefId
+        RETURNING *)
+        INSERT INTO expired_user_achievement SELECT * FROM expired_rows;
+    ''', nativeQuery = true)
+    void expireAchievementsForSkillAchievedBefore(@Param("skillRefId") Integer skillRefId,
+                                                  @Param("expirationDate") Date expirationDate)
 }

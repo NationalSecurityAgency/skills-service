@@ -40,6 +40,7 @@ import skills.services.admin.*
 import skills.services.admin.moveSkills.SkillsMoveService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.events.BulkSkillEventResult
@@ -165,6 +166,9 @@ class AdminController {
 
     @Autowired
     AdminVideoService adminVideoService
+
+    @Autowired
+    UserAchievementExpirationService userAchievementExpirationService
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -589,6 +593,23 @@ class AdminController {
     SkillVideoAttrs getSkillVideoAttrs(@PathVariable("projectId") String projectId,
                                       @PathVariable("skillId") String skillId) {
         return skillAttributeService.getVideoAttrs(projectId, skillId)
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/expiration", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult saveSkillExpirationAttrs(@PathVariable("projectId") String projectId,
+                                           @PathVariable("skillId") String skillId,
+                                           @RequestBody ExpirationAttrs skillExpirationAttrsRequest) {
+        skillAttributeService.saveExpirationAttrs(projectId, skillId, skillExpirationAttrsRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/expiration", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    ExpirationAttrs getSkillExpirationAttrs(@PathVariable("projectId") String projectId,
+                                            @PathVariable("skillId") String skillId) {
+        return skillAttributeService.getExpirationAttrs(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/groups/{groupId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)

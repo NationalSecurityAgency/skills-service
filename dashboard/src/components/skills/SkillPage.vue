@@ -108,6 +108,7 @@ limitations under the License.
         const items = [];
         items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
         items.push({ name: 'Video', iconClass: 'fa-video skills-color-video', page: 'ConfigureVideo' });
+        items.push({ name: 'Expiration', iconClass: 'fa-hourglass-end skills-color-expiration', page: 'ConfigureExpiration' });
         items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
         const isReadOnlyNonSr = (this.skill.readOnly === true && !this.skill.selfReportType);
         const addEventDisabled = this.subject.totalPoints < this.$store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;

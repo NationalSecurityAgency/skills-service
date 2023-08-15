@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
-import relativeTimePlugin from 'dayjs/plugin/relativeTime';
-import utcPlugin from 'dayjs/plugin/utc';
-import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
-import duration from 'dayjs/plugin/duration';
-import localeData from 'dayjs/plugin/localeData';
+package skills.tasks.data
 
-dayjs.extend(advancedFormatPlugin);
-dayjs.extend(localizedFormatPlugin);
-dayjs.extend(relativeTimePlugin);
-dayjs.extend(utcPlugin);
-dayjs.extend(duration);
-dayjs.extend(localeData);
-
-export default dayjs;
+class ExpireUserAchievements {
+    //placeholder
+}

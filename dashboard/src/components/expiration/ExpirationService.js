@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-import localizedFormatPlugin from 'dayjs/plugin/localizedFormat';
-import relativeTimePlugin from 'dayjs/plugin/relativeTime';
-import utcPlugin from 'dayjs/plugin/utc';
-import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
-import duration from 'dayjs/plugin/duration';
-import localeData from 'dayjs/plugin/localeData';
+import axios from 'axios';
 
-dayjs.extend(advancedFormatPlugin);
-dayjs.extend(localizedFormatPlugin);
-dayjs.extend(relativeTimePlugin);
-dayjs.extend(utcPlugin);
-dayjs.extend(duration);
-dayjs.extend(localeData);
-
-export default dayjs;
+export default {
+  saveExpirationSettings(projectId, skillId, expirationSettings) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
+    return axios.post(url, expirationSettings)
+      .then((response) => response.data);
+  },
+  getExpirationSettings(projectId, skillId) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
+};

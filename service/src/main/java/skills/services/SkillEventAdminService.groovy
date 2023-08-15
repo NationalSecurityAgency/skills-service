@@ -327,6 +327,34 @@ class SkillEventAdminService {
         return res
     }
 
+    @Transactional
+    @Profile
+    void deleteAllSkillEventsForSkill(Integer skillRefId) {
+        SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
+        String projectId = skillDef.projectId
+        String skillId = skillDef.skillId
+        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+        }
+
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefId(skillRefId)
+        expirePerformedSkillEvents(performedSkills)
+    }
+
+    @Transactional
+    @Profile
+    void deleteAllSkillEventsForSkillPerformedBefore(Integer skillRefId, Date expirationDate) {
+        SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
+        String projectId = skillDef.projectId
+        String skillId = skillDef.skillId
+        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+        }
+
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefIdAndPerformedOnBefore(skillRefId, expirationDate)
+        expirePerformedSkillEvents(performedSkills)
+    }
+
     @Profile
     void removeAssociatedQuizAttempts(UserPerformedSkill performedSkill) {
         List<Integer> quizRefIds = quizToSkillDefRepo.getQuizRefIdsBySkillRefId(performedSkill.skillRefId)
@@ -351,6 +379,26 @@ class SkillEventAdminService {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Profile
+    private void expirePerformedSkillEvents(List<UserPerformedSkill> performedSkills) {
+        if (performedSkills) {
+            log.info("Deleting [{}] performed skills [{}] for user [{}]", performedSkills.size(), performedSkills.first(), performedSkills.first().userId)
+            for (UserPerformedSkill performedSkill : performedSkills) {
+                String userId = performedSkill.userId
+                String projectId = performedSkill.projectId
+                String skillId = performedSkill.skillId
+                log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
+                List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
+                if (performedDependencies) {
+                    log.warn("Removing skill events when a parent skill dependency has already been performed. performed skills for the parent dependencies: ${performedDependencies.collect({ "${it.projectId} : ${it.skillId}" })}.")
+                }
+
+                removePerformedSkillEvent(performedSkill)
+                removeAssociatedQuizAttempts(performedSkill)
             }
         }
     }

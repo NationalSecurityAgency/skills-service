@@ -23,7 +23,6 @@ import com.github.kagkarlsson.scheduler.task.FailureHandler
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
 import com.github.kagkarlsson.scheduler.task.helper.Tasks
-import com.github.kagkarlsson.scheduler.task.schedule.FixedDelay
 import com.github.kagkarlsson.scheduler.task.schedule.Schedules
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
@@ -34,11 +33,13 @@ import org.springframework.context.annotation.Configuration
 import skills.tasks.JsonSerializer
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
+import skills.tasks.data.ExpireUserAchievements
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.ProjectInviteCleanup
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
+import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
 import skills.tasks.executors.ProjectInviteCleanupTaskExecutor
@@ -65,6 +66,9 @@ class TaskConfig {
 
     @Value('#{"${skills.config.unachievableLevelIdentificationSchedule:DAILY|23:45}"}')
     String unachievableLevelIdentificationSchedule
+
+    @Value('#{"${skills.config.expireUserAchievementsSchedule:DAILY|23:15}"}')
+    String expireUserAchievementsSchedule
 
     @Bean
     DbSchedulerCustomizer customizer() {
@@ -137,6 +141,15 @@ class TaskConfig {
                 )
                 .execute(finalizeCatalogSkillsImportExecutor)
     }
+    @Bean
+    OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser(RemoveSkillEventsForAUserExecutor removeSkillEventsForAUserExecutor) {
+        return Tasks.oneTime("remove-skill-events-for-user", RemoveSkillEventsForUserRequest.class)
+                .onFailure(
+                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
+                )
+                .execute(removeSkillEventsForAUserExecutor);
+    }
 
     @Bean
     RecurringTask<ProjectInviteCleanup> cleanupProjectInvitesTask(ProjectInviteCleanupTaskExecutor projectInviteCleanupTaskExecutor) {
@@ -151,13 +164,9 @@ class TaskConfig {
     }
 
     @Bean
-    OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser(RemoveSkillEventsForAUserExecutor removeSkillEventsForAUserExecutor) {
-        return Tasks.oneTime("remove-skill-events-for-user", RemoveSkillEventsForUserRequest.class)
-                .onFailure(
-                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
-                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
-                )
-                .execute(removeSkillEventsForAUserExecutor);
+    RecurringTask<ExpireUserAchievements> expireUserAchievements(ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor) {
+        //recurring tasks are automatically picked up by the scheduler
+        return Tasks.recurring("expire-user-achievements", Schedules.parseSchedule(expireUserAchievementsSchedule)).execute(expireUserAchievementsTaskExecutor)
     }
 
 }
