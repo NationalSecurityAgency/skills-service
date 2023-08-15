@@ -51,4 +51,6 @@ class UserQuizQuestionAttempt {
     @LastModifiedDate
     Date updated
 
+    Integer displayOrder
+
 }

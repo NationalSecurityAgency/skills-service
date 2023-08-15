@@ -198,7 +198,8 @@ limitations under the License.
       startQuizAttempt() {
         this.isLoading = true;
         this.splashScreen.show = false;
-        QuizRunService.startQuizAttempt(this.quizId)
+
+        QuizRunService.startQuizAttempt(this.quizId, this.quizInfo.questions)
           .then((startQuizAttemptRes) => {
             this.quizAttemptId = startQuizAttemptRes.id;
             const { selectedAnswerIds, enteredText } = startQuizAttemptRes;

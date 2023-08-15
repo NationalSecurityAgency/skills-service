@@ -2511,4 +2511,9 @@
 
     </changeSet>
 
+    <changeSet id="42" author="skills team">
+        <addColumn tableName="user_quiz_question_attempt">
+            <column name="display_order" type="int"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

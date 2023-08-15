@@ -100,10 +100,31 @@ class QuizRunService {
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
         Integer lengthSetting = quizLength ? Integer.valueOf(quizLength.value) : questions.size()
 
+        List<QuizQuestionInfo> questionsForQuiz
+        def quizAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+        if(quizAttempt) {
+            def attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttempt.id)
+            questionsForQuiz = []
+            attemptQuestion.each { attempt ->
+                def selectedQuestion = questions.find { it ->
+                    it.id == attempt.quizQuestionDefinitionRefId && attempt.userId == userId
+                }
+                if (selectedQuestion) {
+                    selectedQuestion.displayOrder = attempt.displayOrder
+                    questionsForQuiz.push(selectedQuestion)
+                }
+            }
+        } else {
+            questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
+                it.displayOrder = index + 1
+            }
+        }
+
+
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
-                questions: questions.take(lengthSetting),
+                questions: questionsForQuiz.sort{ it.displayOrder },
                 quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
@@ -147,7 +168,7 @@ class QuizRunService {
     }
 
     @Transactional
-    QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
+    QuizAttemptStartResult startQuizAttempt(String userId, String quizId, List<QuizQuestionInfo> quizQuestions) {
         log.info("Starting [{}] quiz attempt for [{}] user", quizId, userId)
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
         if (inProgressAttempt) {
@@ -182,6 +203,18 @@ class QuizRunService {
                 started: new Date())
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
+
+        quizQuestions.each{ question ->
+            UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
+                    userQuizAttemptRefId: savedAttempt.id,
+                    quizQuestionDefinitionRefId: question.id,
+                    userId: userId,
+                    status: UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE,
+                    displayOrder: question.displayOrder
+            )
+            quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+        }
+
         return new QuizAttemptStartResult(id: savedAttempt.id)
     }
 
