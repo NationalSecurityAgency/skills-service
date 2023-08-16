@@ -66,7 +66,9 @@ jobs:
         run: |
           cd dashboard
           ls -al src/
-          npm run setup:common
+          node -v
+          npm -v
+          npm run build
           ls -al src/
           cd ../
           mvn --batch-mode install -DskipTests
