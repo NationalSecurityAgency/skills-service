@@ -64,6 +64,10 @@ jobs:
         env:
           MAVEN_OPTS: -Xmx2048m
         run: |
+          cd dashboard
+          ll src/
+          npm run setup:common
+          ll src/
           mvn --batch-mode install -DskipTests
 
       - name: upload service jar
