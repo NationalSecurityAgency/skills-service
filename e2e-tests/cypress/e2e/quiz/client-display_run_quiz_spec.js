@@ -494,6 +494,137 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="closeQuizAttemptInAlert"]').contains('Close Quiz')
         cy.get('[data-cy="noMoreAttemptsAlert"]').should('not.exist')
     })
+
+    it('run quiz with subset of questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.createQuizQuestionDef(1, 5);
+
+        cy.setNumQuestionsForQuiz(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"]').should('exist');
+        cy.get('[data-cy="question_2"]').should('exist');
+        cy.get('[data-cy="question_3"]').should('not.exist');
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+    });
+
+    it('subset of randomized questions is consistent on refresh', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.createQuizQuestionDef(1, 5);
+
+        cy.setNumQuestionsForQuiz(1, 2);
+        cy.setRandomizedQuestions(1, true);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"]').should('exist');
+        cy.get('[data-cy="question_2"]').should('exist');
+        cy.get('[data-cy="question_3"]').should('not.exist');
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').should('have.class', 'selected-answer')
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').should('have.class', 'selected-answer')
+
+    });
+
 });
 
 
