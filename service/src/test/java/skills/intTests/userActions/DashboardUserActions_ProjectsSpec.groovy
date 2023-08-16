@@ -1197,6 +1197,51 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         createAction.userRole == RoleName.ROLE_PROJECT_ADMIN.toString()
     }
 
+    def "project approver CRUD"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.addUserRole(otherUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        Thread.sleep(100)
+        skillsService.deleteUserRole(otherUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        def res = rootService.getUserActionsForEverything()
+
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+        def createAction = rootService.getUserActionAttributes(res.data[1].id)
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.UserRole.toString()
+        res.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.UserRole.toString()
+        res.data[1].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        deleteAction.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        deleteAction.userRole == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        createAction.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        createAction.userRole == RoleName.ROLE_PROJECT_APPROVER.toString()
+    }
+
     def "project settings CRUD"() {
         SkillsService rootService = createRootSkillService()
 
