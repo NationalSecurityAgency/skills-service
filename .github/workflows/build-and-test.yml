@@ -68,6 +68,7 @@ jobs:
           ls -al src/
           node -v
           npm -v
+          npm install
           npm run build
           ls -al src/
           cd ../
