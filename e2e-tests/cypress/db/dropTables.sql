@@ -18,6 +18,8 @@ drop table IF EXISTS databasechangelog CASCADE;
 
 drop table IF EXISTS skills_db_locks CASCADE;
 
+drop table IF EXISTS user_actions_history CASCADE;
+
 drop table IF EXISTS skill_relationship_definition CASCADE;
 
 drop table IF EXISTS skill_share_definition CASCADE;
