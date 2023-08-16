@@ -1137,7 +1137,7 @@ class AdminController {
 
         projectSettingsValidator.validate(value)
         if (StringUtils.isBlank(value?.value)) {
-            settingsService.deleteProjectSetting(setting)
+            settingsService.deleteProjectSetting(projectId, setting)
         } else {
             settingsService.saveSetting(value)
         }
@@ -1177,7 +1177,7 @@ class AdminController {
 
         List<ProjectSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
         if (toDelete) {
-            settingsService.deleteProjectSettings(toDelete)
+            settingsService.deleteProjectSettings(projectId, toDelete)
         }
 
         List<ProjectSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}

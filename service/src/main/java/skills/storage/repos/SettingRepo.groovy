@@ -86,6 +86,10 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     void deleteBySettingAndType(String setting, Setting.SettingType type)
 
     @Modifying
+    @Query("delete from Setting  s where lower(s.projectId) = lower(?1) and lower(s.setting) = lower(?2) and s.type = 'Project' and s.userRefId is null")
+    void deleteProjectSetting(String projectId, String setting)
+
+    @Modifying
     void deleteBySettingAndTypeAndUserRefId(String setting, Setting.SettingType type, Integer userRefId)
 
     @Modifying

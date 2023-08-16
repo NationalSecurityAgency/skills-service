@@ -39,6 +39,138 @@ class SettingsSpecs extends DefaultIntSpec {
         res.value == "true"
     }
 
+    def "save and delete the same setting for multiple projects"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+
+        def proj3 = SkillsFactory.createProject(3)
+        skillsService.createProject(proj3)
+
+        String name = "set1"
+        when:
+        skillsService.changeSetting(proj1.projectId, name, [projectId: proj1.projectId, setting: name, value: "true"])
+        skillsService.changeSetting(proj2.projectId, name, [projectId: proj2.projectId, setting: name, value: "eca"])
+        skillsService.changeSetting(proj3.projectId, name, [projectId: proj3.projectId, setting: name, value: "blap"])
+        def resP1_t0 = skillsService.getSettings(proj1.projectId)
+        def resP2_t0 = skillsService.getSettings(proj2.projectId)
+        def resP3_t0 = skillsService.getSettings(proj3.projectId)
+
+        skillsService.changeSetting(proj1.projectId, name, [projectId: proj1.projectId, setting: name, value: "one"])
+        skillsService.changeSetting(proj2.projectId, name, [projectId: proj2.projectId, setting: name, value: ""]) // gone
+        skillsService.changeSetting(proj3.projectId, name, [projectId: proj3.projectId, setting: name, value: "two"])
+
+        def resP1_t1 = skillsService.getSettings(proj1.projectId)
+        def resP2_t1 = skillsService.getSettings(proj2.projectId)
+        def resP3_t1 = skillsService.getSettings(proj3.projectId)
+
+        then:
+        resP1_t0.find { it.setting == name }.projectId == proj1.projectId
+        resP1_t0.find { it.setting == name }.value == "true"
+
+        resP2_t0.find { it.setting == name }.projectId == proj2.projectId
+        resP2_t0.find { it.setting == name }.value == "eca"
+
+        resP3_t0.find { it.setting == name }.projectId == proj3.projectId
+        resP3_t0.find { it.setting == name }.value == "blap"
+
+        resP1_t1.find { it.setting == name }.projectId == proj1.projectId
+        resP1_t1.find { it.setting == name }.value == "one"
+
+        !resP2_t1.find { it.setting == name }
+
+        resP3_t1.find { it.setting == name }.projectId == proj3.projectId
+        resP3_t1.find { it.setting == name }.value == "two"
+    }
+
+    def "bulk save and delete the same setting for multiple projects"() {
+        def proj1 = SkillsFactory.createProject(1)
+        skillsService.createProject(proj1)
+
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj2)
+
+        def proj3 = SkillsFactory.createProject(3)
+        skillsService.createProject(proj3)
+
+        String name = "set1"
+        String name1 = "set2"
+        String name2 = "set3"
+        when:
+        skillsService.changeSettings(proj1.projectId, [
+                [projectId: proj1.projectId, setting: name, value: "a"],
+                [projectId: proj1.projectId, setting: name1, value: "b"],
+                [projectId: proj1.projectId, setting: name2, value: "c"],
+        ])
+        skillsService.changeSettings(proj2.projectId, [
+                [projectId: proj2.projectId, setting: name, value: "d"],
+                [projectId: proj2.projectId, setting: name1, value: "e"],
+                [projectId: proj2.projectId, setting: name2, value: "f"],
+        ])
+        skillsService.changeSettings(proj3.projectId, [
+                [projectId: proj3.projectId, setting: name, value: "g"],
+                [projectId: proj3.projectId, setting: name1, value: "h"],
+                [projectId: proj3.projectId, setting: name2, value: "i"],
+        ])
+        def resP1_t0 = skillsService.getSettings(proj1.projectId)
+        def resP2_t0 = skillsService.getSettings(proj2.projectId)
+        def resP3_t0 = skillsService.getSettings(proj3.projectId)
+
+        skillsService.changeSettings(proj2.projectId, [
+                [projectId: proj2.projectId, setting: name, value: "1"],
+                [projectId: proj2.projectId, setting: name1, value: ""],
+                [projectId: proj2.projectId, setting: name2, value: "2"],
+        ])
+
+        def resP1_t1 = skillsService.getSettings(proj1.projectId)
+        def resP2_t1 = skillsService.getSettings(proj2.projectId)
+        def resP3_t1 = skillsService.getSettings(proj3.projectId)
+
+        then:
+        resP1_t0.find { it.setting == name }.projectId == proj1.projectId
+        resP1_t0.find { it.setting == name }.value == "a"
+        resP1_t0.find { it.setting == name1 }.projectId == proj1.projectId
+        resP1_t0.find { it.setting == name1 }.value == "b"
+        resP1_t0.find { it.setting == name2 }.projectId == proj1.projectId
+        resP1_t0.find { it.setting == name2 }.value == "c"
+
+        resP2_t0.find { it.setting == name }.projectId == proj2.projectId
+        resP2_t0.find { it.setting == name }.value == "d"
+        resP2_t0.find { it.setting == name1 }.projectId == proj2.projectId
+        resP2_t0.find { it.setting == name1 }.value == "e"
+        resP2_t0.find { it.setting == name2 }.projectId == proj2.projectId
+        resP2_t0.find { it.setting == name2 }.value == "f"
+
+        resP3_t0.find { it.setting == name }.projectId == proj3.projectId
+        resP3_t0.find { it.setting == name }.value == "g"
+        resP3_t0.find { it.setting == name1 }.projectId == proj3.projectId
+        resP3_t0.find { it.setting == name1 }.value == "h"
+        resP3_t0.find { it.setting == name2 }.projectId == proj3.projectId
+        resP3_t0.find { it.setting == name2 }.value == "i"
+
+        resP1_t1.find { it.setting == name }.projectId == proj1.projectId
+        resP1_t1.find { it.setting == name }.value == "a"
+        resP1_t1.find { it.setting == name1 }.projectId == proj1.projectId
+        resP1_t1.find { it.setting == name1 }.value == "b"
+        resP1_t1.find { it.setting == name2 }.projectId == proj1.projectId
+        resP1_t1.find { it.setting == name2 }.value == "c"
+
+        resP2_t1.find { it.setting == name }.projectId == proj2.projectId
+        resP2_t1.find { it.setting == name }.value == "1"
+        !resP2_t1.find { it.setting == name1 }
+        resP2_t1.find { it.setting == name2 }.projectId == proj2.projectId
+        resP2_t1.find { it.setting == name2 }.value == "2"
+
+        resP3_t1.find { it.setting == name }.projectId == proj3.projectId
+        resP3_t1.find { it.setting == name }.value == "g"
+        resP3_t1.find { it.setting == name1 }.projectId == proj3.projectId
+        resP3_t1.find { it.setting == name1 }.value == "h"
+        resP3_t1.find { it.setting == name2 }.projectId == proj3.projectId
+        resP3_t1.find { it.setting == name2 }.value == "i"
+    }
+
     def "fail to save setting for a project that doesn't exist"() {
         String proj = "dontexist"
         String name = "set1"

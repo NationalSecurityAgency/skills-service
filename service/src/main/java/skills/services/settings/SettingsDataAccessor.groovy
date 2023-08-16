@@ -122,8 +122,8 @@ class SettingsDataAccessor {
         settingRepo.saveAll(settings)
     }
 
-    void deleteSetting(String setting, SettingType type) {
-        settingRepo.deleteBySettingAndType(setting, type)
+    void deleteProjectSetting(String project, String setting) {
+        settingRepo.deleteProjectSetting(project, setting)
     }
 
     void deleteUserProjectSetting(String setting, Integer userRefId) {

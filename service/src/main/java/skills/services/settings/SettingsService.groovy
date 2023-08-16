@@ -76,9 +76,9 @@ class SettingsService {
     }
 
     @Transactional
-    void deleteProjectSettings(List<SettingsRequest> request) {
+    void deleteProjectSettings(String projectId, List<SettingsRequest> request) {
         request.each {
-            deleteProjectSetting(it.setting)
+            deleteProjectSetting(projectId, it.setting)
         }
     }
 
@@ -332,8 +332,8 @@ class SettingsService {
     }
 
     @Transactional()
-    void deleteProjectSetting(String setting) {
-        settingsDataAccessor.deleteSetting(setting, Setting.SettingType.Project)
+    void deleteProjectSetting(String projectId, String setting) {
+        settingsDataAccessor.deleteProjectSetting(projectId, setting)
     }
 
     @Transactional()
