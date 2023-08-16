@@ -524,7 +524,7 @@ class SkillsAdminService {
         if (trackUserActionHistory) {
             boolean isReusedSkill = SkillReuseIdUtil.isTagged(skillDefinition.skillId)
             userActionsHistoryService.saveUserAction(new UserActionInfo(
-                    action: isReusedSkill ? DashboardAction.StopProjectReuse : DashboardAction.Delete,
+                    action: isReusedSkill ? DashboardAction.StopInProjectReuse : DashboardAction.Delete,
                     item: skillDefinition.type == SkillDef.ContainerType.SkillsGroup ? DashboardItem.SkillsGroup : DashboardItem.Skill,
                     itemId: skillDefinition.skillId,
                     projectId: skillDefinition.projectId,

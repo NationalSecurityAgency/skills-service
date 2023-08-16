@@ -18,6 +18,7 @@ package skills.intTests.userActions
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.catalog.CatalogIntSpec
+import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.services.userActions.DashboardAction
@@ -27,7 +28,7 @@ import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class DashboardUserActionsSpec extends CatalogIntSpec {
+class DashboardUserActionsSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get actions filters - userId filter"() {

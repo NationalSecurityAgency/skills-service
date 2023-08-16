@@ -21,7 +21,6 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class UserRoleSpecs extends DefaultIntSpec {
 
@@ -115,7 +114,7 @@ class UserRoleSpecs extends DefaultIntSpec {
         when:
         def res = user1Service.getUserRolesForProjectAndUser(proj.projectId, user)
 
-        UserAttrs expectedAttrs = userAttrsRepo.findByUserId(user)
+        UserAttrs expectedAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
         then:
         expectedAttrs.dn
         res.size() == 1

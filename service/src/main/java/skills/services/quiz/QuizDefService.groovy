@@ -630,7 +630,7 @@ class QuizDefService {
         if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
         }
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(userQuizAttempt.userId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)

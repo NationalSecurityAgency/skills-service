@@ -16,32 +16,17 @@
 package skills.notify
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
-import org.thymeleaf.context.Context
-import skills.controller.request.model.GlobalSettingsRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
-import skills.services.settings.SettingsService
 import skills.settings.EmailSettingsService
-import skills.storage.model.Notification
 import skills.storage.model.Setting
 import skills.storage.repos.NotificationsRepo
-import skills.storage.repos.SettingRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender
-import spock.mock.AutoAttach
-
-import java.util.concurrent.TimeUnit;
+import ch.qos.logback.classic.spi.ILoggingEvent
 
 @Slf4j
 class EmailNotifierSpecs extends DefaultIntSpec {
@@ -62,7 +47,7 @@ class EmailNotifierSpecs extends DefaultIntSpec {
 
         // little trick to force PKI-based runs to create UserAttrs record
         skillsService.isRoot()
-        email = userAttrsRepo.findByUserId(skillsService.userName).email
+        email = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName).email
         assert email
     }
 

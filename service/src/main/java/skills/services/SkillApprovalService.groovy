@@ -318,7 +318,7 @@ class SkillApprovalService {
             return
         }
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillApproval.userId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillApproval.userId)
         if (!userAttrs.email) {
             return
         }
@@ -357,7 +357,7 @@ class SkillApprovalService {
         SkillApprovalConf saved
         if (skillApproverConfRequest.userId) {
             String userId = userInfoService.lookupUserId(skillApproverConfRequest.userId);
-            if(!userAttrsRepo.findByUserId(userId)) {
+            if(!userAttrsRepo.findByUserIdIgnoreCase(userId)) {
                 throw new SkillException("Provided user id [${userId}] does not exist", projectId)
             }
 
@@ -397,7 +397,7 @@ class SkillApprovalService {
         log.info("Saved {}", saved)
         SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(approverId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(approverId)
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Configure,
                 item: DashboardItem.Approver,
@@ -483,7 +483,7 @@ class SkillApprovalService {
             }
             skillApprovalConfRepo.delete(approvalConf)
 
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(approvalConf.approverUserId)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(approvalConf.approverUserId)
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: DashboardAction.RemoveConfiguration,
                     item: DashboardItem.Approver,
@@ -519,7 +519,7 @@ class SkillApprovalService {
 
         log.info("Saved {}", saved)
         SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
-        UserAttrs approverUserAttrs = userAttrsRepo.findByUserId(dbRes.approverUserId)
+        UserAttrs approverUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(dbRes.approverUserId)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Configure,

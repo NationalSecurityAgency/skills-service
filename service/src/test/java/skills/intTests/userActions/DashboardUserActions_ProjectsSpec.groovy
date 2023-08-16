@@ -18,7 +18,7 @@ package skills.intTests.userActions
 import groovy.json.JsonOutput
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
-import skills.intTests.catalog.CatalogIntSpec
+import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
@@ -30,8 +30,13 @@ import skills.storage.model.auth.RoleName
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
+class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
+    String  displayName
+    def setup() {
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        displayName = userAttrs.getUserIdForDisplay()
+    }
     def "track project CRUD actions"() {
         SkillsService rootService = createRootSkillService()
         def p1 = createProject(1)
@@ -41,9 +46,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.updateProject(p1)
         Thread.sleep(100)
         skillsService.deleteProject(p1.projectId)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         when:
         def res = rootService.getUserActionsForEverything()
@@ -103,9 +105,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.updateSubject(subj)
         Thread.sleep(100)
         skillsService.deleteSubject(subj)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Subject)
@@ -168,9 +167,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.deleteSkill(skill)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Skill)
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
@@ -230,9 +226,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.updateSkill(skill)
         Thread.sleep(100)
         skillsService.deleteSkill(skill)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.SkillsGroup)
@@ -300,9 +293,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.deleteSkill(skill)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything()
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
@@ -368,17 +358,15 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.deleteSkill([projectId: p1.projectId, subjectId: subj2.subjectId, skillId: SkillReuseIdUtil.addTag(skill.skillId, 0)])
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything()
+        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         def reuseAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[1].id)
 
         then:
         res.count == 2
-        res.data[0].action == DashboardAction.StopProjectReuse.toString()
+        res.data[0].action == DashboardAction.StopInProjectReuse.toString()
         res.data[0].item == DashboardItem.Skill.toString()
         res.data[0].itemId == SkillReuseIdUtil.addTag(skill.skillId, 0)
         res.data[0].userId == skillsService.userName
@@ -412,9 +400,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         userActionsHistoryRepo.deleteAll()
         skillsService.moveSkills(p1.projectId, [skill.skillId], subj2.subjectId)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         when:
         def res = rootService.getUserActionsForEverything()
@@ -453,9 +438,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
         Thread.sleep(100)
         skillsService.removeSkillFromCatalog(project1.projectId, skill.skillId)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         when:
         def res = rootService.getUserActionsForEverything()
@@ -517,9 +499,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         userActionsHistoryRepo.deleteAll()
         skillsService.deleteSkill(skill)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything()
 
@@ -549,10 +528,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         List<String> taggedSkillIds = skills.skillId
         String tagValue = "New Tag"
         String tagId = 'newtag'
-
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         userActionsHistoryRepo.deleteAll()
         when:
@@ -598,9 +573,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def p1Skills = createSkills(1, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         userActionsHistoryRepo.deleteAll()
         when:
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
@@ -618,15 +590,10 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.deleteSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
 
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def create = rootService.getUserActionAttributes(res.data[2].id)
         def edit = rootService.getUserActionAttributes(res.data[1].id)
         def delete = rootService.getUserActionAttributes(res.data[0].id)
-
-        println JsonOutput.prettyPrint(JsonOutput.toJson(create))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(edit))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(delete))
 
         then:
         res.count == 3
@@ -676,9 +643,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(1, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
 
         userActionsHistoryRepo.deleteAll()
         when:
@@ -757,12 +721,8 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.removeBadge(badge)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Badge)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
@@ -819,9 +779,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def badge = createBadge(1, 1)
         skillsService.createBadge(badge)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         userActionsHistoryRepo.deleteAll()
 
         when:
@@ -830,7 +787,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
 
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
@@ -877,20 +833,12 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.deleteLevel(p1.projectId)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Level)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
-        println JsonOutput.prettyPrint(JsonOutput.toJson(createAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(editAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
 
         then:
         res.count == 3
@@ -950,9 +898,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         Thread.sleep(100)
         skillsService.deleteLevel(p1.projectId, subj.subjectId)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Level)
 
@@ -1009,9 +954,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def p1Skills = createSkills(5, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         userActionsHistoryRepo.deleteAll()
         when:
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(1).skillId)
@@ -1019,13 +961,9 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.deleteLearningPathPrerequisite(p1.projectId, p1Skills.get(0).skillId, p1Skills.get(1).skillId)
 
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.LearningPathItem)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
-        println JsonOutput.prettyPrint(JsonOutput.toJson(createAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
 
         then:
         res.count == 2
@@ -1080,14 +1018,11 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         rootService.saveUserTag(users[2], userTagKey, ["aBcD"])
         rootService.saveUserTag(users[3], userTagKey, ["EfGh"])
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         userActionsHistoryRepo.deleteAll()
         when:
 
         // should be DN in case of pki
-        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
         Thread.sleep(100)
         skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId)
@@ -1097,7 +1032,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.configureFallbackApprover(proj.projectId, user4Service.userName)
         Thread.sleep(100)
         def approverConf = skillsService.getApproverConf(proj.projectId).find { it.approverUserId == user1Service.userName}
-        println JsonOutput.prettyPrint(JsonOutput.toJson(approverConf))
 
         skillsService.deleteApproverConf(proj.projectId, approverConf.id)
 
@@ -1112,7 +1046,7 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         res.count == 5
         res.data[0].action == DashboardAction.RemoveConfiguration.toString()
         res.data[0].item == DashboardItem.Approver.toString()
-        res.data[0].itemId == userAttrsRepo.findByUserId(user1Service.userName).userIdForDisplay
+        res.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(user1Service.userName).userIdForDisplay
         res.data[0].userId == skillsService.userName
         res.data[0].userIdForDisplay == displayName
         res.data[0].projectId == proj.projectId
@@ -1120,7 +1054,7 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         res.data[1].action == DashboardAction.Configure.toString()
         res.data[1].item == DashboardItem.Approver.toString()
-        res.data[1].itemId == userAttrsRepo.findByUserId(user4Service.userName).userIdForDisplay
+        res.data[1].itemId == userAttrsRepo.findByUserIdIgnoreCase(user4Service.userName).userIdForDisplay
         res.data[1].userId == skillsService.userName
         res.data[1].userIdForDisplay == displayName
         res.data[1].projectId == proj.projectId
@@ -1128,7 +1062,7 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         res.data[2].action == DashboardAction.Configure.toString()
         res.data[2].item == DashboardItem.Approver.toString()
-        res.data[2].itemId == userAttrsRepo.findByUserId(user3Service.userName).userIdForDisplay
+        res.data[2].itemId == userAttrsRepo.findByUserIdIgnoreCase(user3Service.userName).userIdForDisplay
         res.data[2].userId == skillsService.userName
         res.data[2].userIdForDisplay == displayName
         res.data[2].projectId == proj.projectId
@@ -1136,7 +1070,7 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         res.data[3].action == DashboardAction.Configure.toString()
         res.data[3].item == DashboardItem.Approver.toString()
-        res.data[3].itemId == userAttrsRepo.findByUserId(user2Service.userName).userIdForDisplay
+        res.data[3].itemId == userAttrsRepo.findByUserIdIgnoreCase(user2Service.userName).userIdForDisplay
         res.data[3].userId == skillsService.userName
         res.data[3].userIdForDisplay == displayName
         res.data[3].projectId == proj.projectId
@@ -1144,7 +1078,7 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         res.data[4].action == DashboardAction.Configure.toString()
         res.data[4].item == DashboardItem.Approver.toString()
-        res.data[4].itemId == userAttrsRepo.findByUserId(user1Service.userName).userIdForDisplay
+        res.data[4].itemId == userAttrsRepo.findByUserIdIgnoreCase(user1Service.userName).userIdForDisplay
         res.data[4].userId == skillsService.userName
         res.data[4].userIdForDisplay == displayName
         res.data[4].projectId == proj.projectId
@@ -1176,9 +1110,6 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         def skills = SkillsFactory.createSkills(2, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        def displayName = userAttrs.getUserIdForDisplay()
-
         def user = getRandomUsers(1)[0]
         Date skillDate = new Date()
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, skillDate)
@@ -1191,18 +1122,15 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
         skillsService.deleteAllSkillEvents([projectId: proj.projectId, userId: user])
 
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
 
         def deleteAllSkillEvents = rootService.getUserActionAttributes(res.data[0].id)
         def deleteSingleEvent = rootService.getUserActionAttributes(res.data[1].id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAllSkillEvents))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteSingleEvent))
 
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
         res.data[0].item == DashboardItem.SkillEvents.toString()
-        res.data[0].itemId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        res.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
         res.data[0].userId == skillsService.userName
         res.data[0].userIdForDisplay == displayName
         res.data[0].projectId == proj.projectId
@@ -1210,17 +1138,135 @@ class DashboardUserActions_ProjectsSpec extends CatalogIntSpec {
 
         res.data[1].action == DashboardAction.Delete.toString()
         res.data[1].item == DashboardItem.SkillEvents.toString()
-        res.data[1].itemId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        res.data[1].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
         res.data[1].userId == skillsService.userName
         res.data[1].userIdForDisplay == displayName
         res.data[1].projectId == proj.projectId
         !res.data[1].quizId
 
-        deleteAllSkillEvents.userId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        deleteAllSkillEvents.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
         deleteAllSkillEvents.deletedAllForThisUser == true
 
-        deleteSingleEvent.userId == userAttrsRepo.findByUserId(user).userIdForDisplay
+        deleteSingleEvent.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
         deleteSingleEvent.deletedAllForThisUser == false
         deleteSingleEvent.timeOfSkillEvent == skillDate.time
     }
+
+    def "project admin CRUD"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        def user = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(user)
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.addProjectAdmin(proj.projectId, otherUser.userName)
+        Thread.sleep(100)
+        skillsService.deleteUserRole(otherUser.userName, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        def res = rootService.getUserActionsForEverything()
+
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+        def createAction = rootService.getUserActionAttributes(res.data[1].id)
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.UserRole.toString()
+        res.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.UserRole.toString()
+        res.data[1].itemId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        deleteAction.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        deleteAction.userRole == RoleName.ROLE_PROJECT_ADMIN.toString()
+
+        createAction.userId == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        createAction.userRole == RoleName.ROLE_PROJECT_ADMIN.toString()
+    }
+
+    def "project settings CRUD"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.changeSettings(proj.projectId, [
+                [projectId: proj.projectId, setting: "set1", value: "true"],
+                [projectId: proj.projectId, setting: "set2", value: "val2"],
+        ])
+        Thread.sleep(100)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'set3', 'val3') // single setting
+        Thread.sleep(100)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'set1', '') // delete setting
+
+        def res = rootService.getUserActionsForEverything()
+
+        def createAction1 = rootService.getUserActionAttributes(res.data[3].id)
+        def createAction2 = rootService.getUserActionAttributes(res.data[2].id)
+        def createAction3 = rootService.getUserActionAttributes(res.data[1].id)
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
+
+        then:
+        res.count == 4
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.Settings.toString()
+        res.data[0].itemId == "Project"
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.Settings.toString()
+        res.data[1].itemId == "Project"
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        res.data[2].action == DashboardAction.Create.toString()
+        res.data[2].item == DashboardItem.Settings.toString()
+        res.data[2].itemId == "Project"
+        res.data[2].userId == skillsService.userName
+        res.data[2].userIdForDisplay == displayName
+        res.data[2].projectId == proj.projectId
+        !res.data[2].quizId
+
+        res.data[3].action == DashboardAction.Create.toString()
+        res.data[3].item == DashboardItem.Settings.toString()
+        res.data[3].itemId == "Project"
+        res.data[3].userId == skillsService.userName
+        res.data[3].userIdForDisplay == displayName
+        res.data[3].projectId == proj.projectId
+        !res.data[3].quizId
+
+        createAction1.setting == "set1"
+        createAction1.value == "true"
+
+        createAction2.setting == "set2"
+        createAction2.value == "val2"
+
+        createAction3.setting == "set3"
+        createAction3.value == "val3"
+
+        deleteAction.setting == "set1"
+    }
 }
+

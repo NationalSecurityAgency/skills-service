@@ -266,7 +266,7 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                if (!(userAttrsRepo.findByUserId(it))) {
+                if (!(userAttrsRepo.findByUserIdIgnoreCase(it))) {
                     try {
                         UserAttrs userAttrs = new UserAttrs()
                         userAttrs.userId = it.toLowerCase()

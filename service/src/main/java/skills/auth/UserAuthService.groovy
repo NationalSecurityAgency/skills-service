@@ -18,26 +18,20 @@ package skills.auth
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -114,7 +108,7 @@ class UserAuthService {
         UserInfo userInfo
         User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(userId?.toLowerCase())
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId?.toLowerCase())
             userInfo = createUserInfo(user, userAttrs)
             if (verifyEmailAddresses) {
                 userInfo.accountNonLocked = userInfo.emailVerified

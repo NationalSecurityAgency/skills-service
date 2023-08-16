@@ -217,7 +217,7 @@ class SkillEventAdminService {
 
         propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
 
-        String userIdToDisplay = userAttrsRepo.findByUserId(userId)?.userIdForDisplay ?: userId
+        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Delete,
                 item: DashboardItem.SkillEvents,
@@ -341,7 +341,7 @@ class SkillEventAdminService {
         SkillEventResult skillEventResult = removePerformedSkillEvent(performedSkill)
         removeAssociatedQuizAttempts(performedSkill)
 
-        String userIdToDisplay = userAttrsRepo.findByUserId(userId)?.userIdForDisplay ?: userId
+        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Delete,
                 item: DashboardItem.SkillEvents,

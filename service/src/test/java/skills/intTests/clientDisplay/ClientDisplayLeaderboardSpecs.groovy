@@ -27,7 +27,6 @@ import skills.skillLoading.RankingLoader
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
@@ -56,7 +55,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
             }
         }
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }.reverse()
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId)
@@ -89,7 +88,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.rankedUsers.size() == 3
@@ -121,7 +120,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(1).skillId], users[0], days.get(0))
         skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], users[1], days.get(0))
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(1), proj.projectId)
@@ -168,7 +167,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj2.projectId, skillId: proj2_skills.get(3).skillId], users[2], days.get(0))
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(0), proj.projectId)
@@ -287,7 +286,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def leaderboard = skillsService.getLeaderboard(users[3], proj.projectId)
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.availablePoints == 200
@@ -330,7 +329,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def subj2_leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId, subj2.subjectId)
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.rankedUsers.size() == 3
@@ -364,7 +363,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
 
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
-            String res = userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            String res = userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
             i++
             return res;
         }
@@ -409,7 +408,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills.get(3).skillId], users[2], days.get(0))
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(3), proj.projectId, subj.subjectId)
@@ -463,7 +462,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         users = users.reverse()
         int i = 1
         List<String> userIdsForDisplay = users.collect {
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(it)
             String userId = userAttrs.userIdForDisplay
             i++
             return userId
@@ -501,7 +500,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, null, "tenAroundMe")
@@ -537,7 +536,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def leaderboard = skillsService.getLeaderboard(users[25], proj.projectId, null, "tenAroundMe")
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.rankedUsers.size() == 6
@@ -625,7 +624,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(it)
             String userId = userAttrs.userIdForDisplay
             i++
             return userId
@@ -659,7 +658,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         int i = 1;
         List<String> userIdsForDisplay = users.collect {
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(it)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(it)
             String userId = userAttrs.userIdForDisplay
             i++
             return userId
@@ -696,7 +695,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, null, "tenAroundMe")
@@ -742,7 +741,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         when:
         def leaderboard = skillsService.getLeaderboard(users.get(15), proj.projectId, subj.subjectId, "tenAroundMe")
@@ -781,7 +780,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = numUsers -1
         when:
@@ -828,7 +827,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = numUsers -1
         when:
@@ -863,7 +862,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = 0
         when:
@@ -898,7 +897,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = 4
         when:
@@ -945,7 +944,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = 4
         when:
@@ -980,7 +979,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = 5
         when:
@@ -1027,7 +1026,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         int selectedUser = 5
         when:
@@ -1112,7 +1111,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         createService(users.reverse()[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }.reverse()
 
         when:
@@ -1149,7 +1148,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.rankedUsers.size() == 2
@@ -1186,7 +1185,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         createService(users.reverse()[2]).addOrUpdateUserSetting(UserInfoController.RANK_AND_LEADERBOARD_OPT_OUT_PREF, 'true')
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }.reverse()
 
         when:
@@ -1273,7 +1272,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }.reverse()
 
         when:
@@ -1312,7 +1311,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         def leaderboard1 = skillsService.getLeaderboard(users[0], proj.projectId)
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
         then:
         leaderboard.rankedUsers.size() == 2
@@ -1352,7 +1351,7 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         skillsService.addOrUpdateProjectSetting(proj.projectId, RankingLoader.PROJ_ADMINS_RANK_AND_LEADERBOARD_OPT_OUT_PREF, true.toString())
 
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }.reverse()
 
         when:
@@ -1437,10 +1436,10 @@ class ClientDisplayLeaderboardSpecs extends DefaultIntSpec {
         // sort users by rank
         users = users.reverse()
         List<String> userIdsForDisplay = users.collect {
-            userAttrsRepo.findByUserId(it)?.userIdForDisplay
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
         }
 
-        def shouldBeMe = userAttrsRepo.findByUserId(preCreateMe)?.userIdForDisplay
+        def shouldBeMe = userAttrsRepo.findByUserIdIgnoreCase(preCreateMe)?.userIdForDisplay
 
         when:
         def leaderboard = skillsService.getLeaderboard(preCreateMe, proj.projectId, subj.subjectId, "tenAroundMe")

@@ -55,7 +55,7 @@ class ApproverConfValidationSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
         // should be DN in case of pki
-        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
         when:
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)

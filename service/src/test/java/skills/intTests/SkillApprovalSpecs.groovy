@@ -16,7 +16,6 @@
 package skills.intTests
 
 import groovy.json.JsonOutput
-import groovy.lang.Closure
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -25,13 +24,11 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
-import skills.storage.model.UserAttrs
 import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.SkillApprovalRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 
 class SkillApprovalSpecs extends DefaultIntSpec {
 
@@ -45,7 +42,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
     UserAttrsRepo userAttrsRepo
 
     private getUserIdForDisplay(String userId) {
-        userAttrsRepo.findByUserId(userId).userIdForDisplay
+        userAttrsRepo.findByUserIdIgnoreCase(userId).userIdForDisplay
     }
 
     void "getApprovals paging"() {

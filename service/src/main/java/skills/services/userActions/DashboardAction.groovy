@@ -24,7 +24,7 @@ enum DashboardAction {
     FinalizeCatalogImport,
     RemoveFromCatalog,
     ReuseInProject,
-    StopProjectReuse,
+    StopInProjectReuse,
     Move,
     AssignSkill,
     RemoveSkillAssignment,

@@ -43,7 +43,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -84,7 +84,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -122,7 +122,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -159,7 +159,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -197,7 +197,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[3].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -233,7 +233,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -268,7 +268,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -302,7 +302,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -341,7 +341,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -383,7 +383,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -422,7 +422,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -460,7 +460,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
 
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -494,7 +494,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         regularUser.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(regularUser.userName)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(regularUser.userName)
         when:
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:

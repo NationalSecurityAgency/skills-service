@@ -28,5 +28,7 @@ enum DashboardItem {
     Level,
     LearningPathItem,
     Approver,
-    SkillEvents
+    SkillEvents,
+    UserRole,
+    Settings
 }

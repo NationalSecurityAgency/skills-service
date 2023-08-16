@@ -38,7 +38,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
     UserAttrsRepo userAttrsRepo
 
     private getUserIdForDisplay(String userId) {
-        userAttrsRepo.findByUserId(userId).userIdForDisplay
+        userAttrsRepo.findByUserIdIgnoreCase(userId).userIdForDisplay
     }
 
     void "get approvals history"() {

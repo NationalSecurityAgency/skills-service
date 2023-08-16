@@ -906,7 +906,7 @@ class ReportSkills_SelfReportApprovalWorkloadSpecs extends DefaultIntSpec {
 
     private List<String> getEmails(List<SkillsService> services, SkillsService ... additionalServices) {
         List<SkillsService> all = additionalServices ? [services, additionalServices].flatten() : services
-        return all.collect { userAttrsRepo.findByUserId(it.userName).email }
+        return all.collect { userAttrsRepo.findByUserIdIgnoreCase(it.userName).email }
     }
 
     static class TestUsers {

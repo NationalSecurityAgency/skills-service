@@ -26,6 +26,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 
 @Slf4j
