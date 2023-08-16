@@ -64,10 +64,11 @@ jobs:
         env:
           MAVEN_OPTS: -Xmx2048m
         run: |
+          apt-get install -y postgresql-client
           cd dashboard
-          ll src/
+          ls -al src/
           npm run setup:common
-          ll src/
+          ls -al src/
           mvn --batch-mode install -DskipTests
 
       - name: upload service jar
