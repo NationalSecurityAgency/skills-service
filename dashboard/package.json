@@ -11,7 +11,7 @@
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
-    "build": "npm run setup:common && npm run setup:common && npm run setup:common && npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build",
+    "build": "npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build",
     "deploy": "npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
@@ -83,7 +83,7 @@
     "moment-timezone": "0.5.37",
     "sass": "1.49.9",
     "sass-loader": "10.2.0",
-    "symlink-dir": "5.1.1",
+    "symlink-dir": "5.0.2",
     "vue-cli-plugin-webpack-bundle-analyzer": "4.0.0",
     "vue-template-compiler": "2.6.14"
   }
