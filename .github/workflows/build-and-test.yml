@@ -69,8 +69,11 @@ jobs:
           node -v
           npm -v
           npm install
-          npm run build
+          npm run setup:common
           ls -al src/
+          ls -al src/common-components
+          ls -al src/common-components/
+          npm run build
           cd ../
           mvn --batch-mode install -DskipTests
 
