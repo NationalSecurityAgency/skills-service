@@ -69,6 +69,7 @@ jobs:
           ls -al ./
           ls -alR ./common-components/
           cd ..
+          npm install
           npm run build
           cd ../
           mvn --batch-mode install -DskipTests
