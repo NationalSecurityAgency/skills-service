@@ -64,15 +64,11 @@ jobs:
         env:
           MAVEN_OPTS: -Xmx2048m
         run: |
-          cd dashboard
-          ls -al src/
-          node -v
-          npm -v
-          npm install
-          npm run setup:common
-          ls -al src/
-          ls -al src/common-components
-          ls -al src/common-components/
+          cd dashboard/src
+          ln -s ../../common-components/src/common common-components
+          ls -al ./
+          ls -alR ./common-components/
+          cd ..
           npm run build
           cd ../
           mvn --batch-mode install -DskipTests
