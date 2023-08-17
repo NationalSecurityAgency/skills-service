@@ -130,6 +130,7 @@ limitations under the License.
 </template>
 
 <script>
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import QuizService from '@/components/quiz/QuizService';
@@ -137,7 +138,6 @@ limitations under the License.
   import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'QuizDefinitions',

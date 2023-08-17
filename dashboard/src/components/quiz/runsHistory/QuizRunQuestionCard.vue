@@ -58,9 +58,9 @@ limitations under the License.
 </template>
 
 <script>
-  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import QuestionType from '@/common-components/quiz/QuestionType';
+  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
 
   export default {
     name: 'QuizRunQuestionCard',

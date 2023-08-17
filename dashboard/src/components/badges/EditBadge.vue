@@ -230,10 +230,10 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import Datepicker from 'vuejs-datepicker';
-  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import dayjs from '@/common-components/DayJsCustomizer';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
+  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
+  import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import IconPicker from '../utils/iconPicker/IconPicker';
   import IdInput from '../utils/inputForm/IdInput';
   import InlineHelp from '../utils/InlineHelp';

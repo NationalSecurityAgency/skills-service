@@ -89,13 +89,13 @@ limitations under the License.
 <script>
   import { createNamespacedHelpers } from 'vuex';
   import Sortable from 'sortablejs';
+  import QuestionType from '@/common-components/quiz/QuestionType';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
   import EditQuestion from '@/components/quiz/testCreation/EditQuestion';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import NoContent2 from '@/components/utils/NoContent2';
-  import QuestionType from '@/common-components/quiz/QuestionType';
   import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
 
   const { mapActions } = createNamespacedHelpers('quiz');

@@ -213,14 +213,14 @@ limitations under the License.
 <script>
   import { extend } from 'vee-validate';
   import { createNamespacedHelpers } from 'vuex';
+  import MsgLogService from '@/common-components/utilities/MsgLogService';
+  import VideoPlayer from '@/common-components/video/VideoPlayer';
+  import FileUploadService from '@/common-components/utilities/FileUploadService';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import VideoService from '@/components/video/VideoService';
-  import VideoPlayer from '@/common-components/video/VideoPlayer';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import FileUploadService from '@/common-components/utilities/FileUploadService';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
-  import MsgLogService from '@/common-components/utilities/MsgLogService';
   import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
 
   const skills = createNamespacedHelpers('skills');

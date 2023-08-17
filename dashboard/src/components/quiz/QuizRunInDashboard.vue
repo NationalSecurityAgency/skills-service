@@ -31,9 +31,9 @@ limitations under the License.
 </template>
 
 <script>
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import QuizRun from '@/common-components/quiz/QuizRun';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
 
   export default {
