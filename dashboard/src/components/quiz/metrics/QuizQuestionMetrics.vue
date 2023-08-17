@@ -87,8 +87,8 @@ limitations under the License.
 
 <script>
   import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import CheckSelector from '@/common-components/quiz/CheckSelector';
+  import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory';
 
   export default {
