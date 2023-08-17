@@ -132,8 +132,8 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';

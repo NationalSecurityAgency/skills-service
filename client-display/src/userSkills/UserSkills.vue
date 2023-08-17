@@ -28,9 +28,9 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex';
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import UserSkillsHeader from '@/userSkills/header/UserSkillsHeader';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SubjectsContainer from '@/userSkills/subject/SubjectsContainer';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillDisplayDataLoadingMixin from '@/userSkills/SkillDisplayDataLoadingMixin';

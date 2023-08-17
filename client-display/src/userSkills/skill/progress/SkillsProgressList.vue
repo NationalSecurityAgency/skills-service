@@ -126,10 +126,10 @@ limitations under the License.
 <script>
   import ToggleButton from 'vue-js-toggle-button/src/Button';
   import NoDataYet from '@/common-components/utilities/NoDataYet';
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
-  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillsFilter from '@/common-components/utilities/ListFilterMenu';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
+  import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import SkillProgress2 from './SkillProgress2';
   import SkillEnricherUtil from '../../utils/SkillEnricherUtil';
   import store from '../../../store/store';

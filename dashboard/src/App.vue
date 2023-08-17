@@ -40,8 +40,8 @@ limitations under the License.
 </template>
 
 <script>
-  import PkiAppBootstrap from '@//components/access/PkiAppBootstrap';
   import ScrollToTop from '@/common-components/utilities/ScrollToTop';
+  import PkiAppBootstrap from '@/components/access/PkiAppBootstrap';
   import HeaderView from './components/header/Header';
   import LoadingContainer from './components/utils/LoadingContainer';
   import CustomizableHeader from './components/customization/CustomizableHeader';

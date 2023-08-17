@@ -22,9 +22,9 @@ limitations under the License.
 </template>
 
 <script>
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import ProjectService from '@/components/projects/ProjectService';
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
 
   export default {
     name: 'ProjectDescriptionRow',

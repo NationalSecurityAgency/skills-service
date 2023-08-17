@@ -112,10 +112,10 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import InputSanitizer from '@/components/utils/InputSanitizer';
   import IdInput from '@/components/utils/inputForm/IdInput';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SaveComponentStateLocallyMixin from '../../utils/SaveComponentStateLocallyMixin';

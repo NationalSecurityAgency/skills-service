@@ -195,12 +195,12 @@ limitations under the License.
 
 <script>
   import MarkdownText from '@/common-components/utilities/MarkdownText';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
   import SkillSummaryCards from '@/userSkills/skill/progress/SkillSummaryCards';
   import PartialPointsAlert from '@/userSkills/skill/PartialPointsAlert';
   import AchievementDate from '@/userSkills/skill/AchievementDate';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import CatalogImportStatus from '@/userSkills/skill/progress/CatalogImportStatus';
   import SkillOverviewFooter from '@/userSkills/skill/SkillOverviewFooter';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';

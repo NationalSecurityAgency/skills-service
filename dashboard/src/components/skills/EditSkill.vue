@@ -260,9 +260,9 @@ limitations under the License.
   import { extend } from 'vee-validate';
   // eslint-disable-next-line camelcase
   import { max_value, min_value } from 'vee-validate/dist/rules';
+  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SkillsService from './SkillsService';
   import IdInput from '../utils/inputForm/IdInput';

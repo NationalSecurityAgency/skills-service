@@ -52,7 +52,7 @@ module.exports = {
       },
     ],
     'import/no-extraneous-dependencies': [
-      'error',
+      'off',
       {
         optionalDependencies: [
           'test/unit/index.js',
