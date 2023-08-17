@@ -50,9 +50,9 @@ limitations under the License.
 <script>
   import vSelect from 'vue-select';
   import debounce from 'lodash/debounce';
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
 
   export default {
     name: 'SearchAllProjectSkills',

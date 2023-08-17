@@ -37,8 +37,8 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import { required } from 'vee-validate/dist/rules';
   import ValidatorFactory from '@/common-components/validators/ValidatorFactory';
-  import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import QuizRunService from '@/common-components/quiz/QuizRunService';
+  import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import store from '@/store/store';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
   import NewSoftwareVersionComponent from '@/common/softwareVersion/NewSoftwareVersion';

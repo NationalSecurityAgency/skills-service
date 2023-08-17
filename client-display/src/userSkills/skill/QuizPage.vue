@@ -47,11 +47,11 @@ limitations under the License.
 
 <script>
   import QuizRun from '@/common-components/quiz/QuizRun';
+  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsTitle from '@/common/utilities/SkillsTitle';
   import UserSkillsService from '@/userSkills/service/UserSkillsService';
   import SkillsSpinner from '@/common/utilities/SkillsSpinner';
   import AnimatedNumber from '@/userSkills/skill/progress/AnimatedNumber';
-  import QuizRunService from '@/common-components/quiz/QuizRunService';
   import NavigationErrorMixin from '@/common/utilities/NavigationErrorMixin';
 
   export default {
