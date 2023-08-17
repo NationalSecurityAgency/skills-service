@@ -506,7 +506,7 @@ class SkillEventAdminService {
             if (it.parent.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(it.parent)) {
                 SkillDef badge = it.parent
                 List<SkillDef> nonAchievedChildren = achievedLevelRepo.findNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
-                if (!nonAchievedChildren) {
+                if (!nonAchievedChildren || (nonAchievedChildren.size() == 1 && nonAchievedChildren[0].skillId == currentSkillDef.skillId) ) {
                     achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
                 }
             }

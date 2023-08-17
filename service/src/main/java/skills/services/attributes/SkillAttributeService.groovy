@@ -47,8 +47,6 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
 
-
-
     @Transactional
     boolean deleteVideoAttrs(String projectId, String skillId) {
         int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video)
@@ -64,7 +62,6 @@ class SkillAttributeService {
         skillVideoAttrs.captions = InputSanitizer.unSanitizeCaption(skillVideoAttrs.captions)
         return skillVideoAttrs
     }
-
 
     void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, skillExpirationAttrs)
@@ -100,13 +97,13 @@ class SkillAttributeService {
         return  res
     }
 
-    private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T videoAttrs, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+    private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T attributes, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
         Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
         SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
         if (!skillAttributesDef) {
             skillAttributesDef = new SkillAttributesDef(skillRefId: skillDefId, type: type)
         }
-        skillAttributesDef.attributes = mapper.writeValueAsString(videoAttrs)
+        skillAttributesDef.attributes = mapper.writeValueAsString(attributes)
         skillAttributesDefRepo.save(skillAttributesDef)
     }
 

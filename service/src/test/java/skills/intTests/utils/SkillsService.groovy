@@ -1828,6 +1828,15 @@ class SkillsService {
         return wsHelper.get(url, "api", null, false)
     }
 
+    def saveSkillExpirationAttributes(String projectId, String skillId, Map expirationAttrs) {
+        String url = "/projects/${projectId}/skills/${skillId}/expiration"
+        return wsHelper.adminPost(url, expirationAttrs)
+    }
+    def getSkillExpirationAttributes(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/expiration"
+        return wsHelper.adminGet(url)
+    }
+
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()
     }

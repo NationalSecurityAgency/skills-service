@@ -601,6 +601,9 @@ class AdminController {
     RequestResult saveSkillExpirationAttrs(@PathVariable("projectId") String projectId,
                                            @PathVariable("skillId") String skillId,
                                            @RequestBody ExpirationAttrs skillExpirationAttrsRequest) {
+
+        SkillsValidator.isTrue(!skillCatalogService.isSkillImportedFromCatalog(projectId, skillId), "Cannot configure expiration attribute on skills imported from the catalog")
+        SkillsValidator.isTrue(!SkillReuseIdUtil.isTagged(skillId), "Cannot configure expiration attribute on skills that are reused")
         skillAttributeService.saveExpirationAttrs(projectId, skillId, skillExpirationAttrsRequest)
         return new RequestResult(success: true)
     }
@@ -609,6 +612,7 @@ class AdminController {
     @ResponseBody
     ExpirationAttrs getSkillExpirationAttrs(@PathVariable("projectId") String projectId,
                                             @PathVariable("skillId") String skillId) {
+
         return skillAttributeService.getExpirationAttrs(projectId, skillId)
     }
 

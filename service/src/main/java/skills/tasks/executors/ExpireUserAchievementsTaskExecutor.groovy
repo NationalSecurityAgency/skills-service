@@ -24,13 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.UserAchievementExpirationService
 import skills.services.attributes.SkillAttributeService
-import skills.tasks.data.UnachievableLevelIdentification
+import skills.storage.model.SkillAttributesDef
+import skills.storage.repos.SkillAttributesDefRepo
+import skills.tasks.data.ExpireUserAchievements
 
 import java.util.concurrent.TimeUnit
 
+import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
+
 @Slf4j
 @Component
-class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<UnachievableLevelIdentification> {
+class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<ExpireUserAchievements> {
 
     private static final long LOGGING_THRESHOLD = 5000
 
@@ -40,18 +44,32 @@ class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<Unachie
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
 
+    @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
+
     @Override
-    void execute(TaskInstance<UnachievableLevelIdentification> taskInstance, ExecutionContext executionContext) {
+    void execute(TaskInstance<ExpireUserAchievements> taskInstance, ExecutionContext executionContext) {
         StopWatch stopWatch = new StopWatch()
         stopWatch.start()
         try {
-            log.info("Checking for expiring user achievements.")
-            userAchievementExpirationService.removeExpiredUserAchievements()
+            removeExpiredUserAchievements()
         } finally {
             stopWatch.stop()
             long runTime = stopWatch.getTime(TimeUnit.MILLISECONDS)
             if (runTime > LOGGING_THRESHOLD) {
                 log.info("Expiring user achievements took [${runTime}]ms")
+            }
+        }
+    }
+
+    void removeExpiredUserAchievements() {
+        log.info("Checking for expiring user achievements.")
+        List<SkillAttributesDef> skillAttributesDefList = skillAttributesDefRepo.findAllByType(AchievementExpiration)
+        for (SkillAttributesDef skillAttributesDef: skillAttributesDefList) {
+            try {
+                userAchievementExpirationService.checkAndExpireIfNecessary(skillAttributesDef)
+            } catch (Exception ex) {
+                log.error("Unexpected error expiring skill - ${skillAttributesDef}", ex)
             }
         }
     }
