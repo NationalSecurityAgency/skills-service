@@ -55,6 +55,8 @@ module.exports = {
       'off',
       {
         devDependencies: true,
+        optionalDependencies: true,
+        peerDependencies: true,
         optionalDependencies: [
           'test/unit/index.js',
         ],
