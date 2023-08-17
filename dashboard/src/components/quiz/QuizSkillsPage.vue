@@ -86,11 +86,11 @@ limitations under the License.
 </template>
 
 <script>
+  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import QuizService from '@/components/quiz/QuizService';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import LoadingContainer from '@/components/utils/LoadingContainer';
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import NoContent2 from '@/components/utils/NoContent2';
 
   export default {
