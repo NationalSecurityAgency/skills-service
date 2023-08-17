@@ -15,10 +15,9 @@
  */
 package skills.intTests
 
+
 import org.springframework.http.HttpStatus
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.*
 import skills.services.settings.Settings
 import skills.storage.model.auth.RoleName
 import spock.lang.Timeout
@@ -39,7 +38,7 @@ class SettingsSpecs extends DefaultIntSpec {
         res.value == "true"
     }
 
-    def "save and delete the same setting for multiple projects"() {
+    def "save and delete the same project setting for multiple projects"() {
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
 
@@ -85,7 +84,7 @@ class SettingsSpecs extends DefaultIntSpec {
         resP3_t1.find { it.setting == name }.value == "two"
     }
 
-    def "bulk save and delete the same setting for multiple projects"() {
+    def "bulk save and delete the same project setting for multiple projects"() {
         def proj1 = SkillsFactory.createProject(1)
         skillsService.createProject(proj1)
 
@@ -169,6 +168,127 @@ class SettingsSpecs extends DefaultIntSpec {
         resP3_t1.find { it.setting == name1 }.value == "h"
         resP3_t1.find { it.setting == name2 }.projectId == proj3.projectId
         resP3_t1.find { it.setting == name2 }.value == "i"
+    }
+
+    def "save and delete the same user setting for multiple users"() {
+        List<String> users = getRandomUsers(3)
+        List<SkillsService> services = users.collect { createService(it) }
+        String setting = "mysetting1"
+        services[0].addOrUpdateUserSetting(setting, "one")
+        services[1].addOrUpdateUserSetting(setting, "two")
+        services[2].addOrUpdateUserSetting(setting, "three")
+
+        when:
+        def user1_t0 = services[0].getUserSettings()
+        def user2_t0 = services[1].getUserSettings()
+        def user3_t0 = services[2].getUserSettings()
+        services[0].addOrUpdateUserSetting(setting, "1")
+        services[1].addOrUpdateUserSetting(setting, "")
+        services[2].addOrUpdateUserSetting(setting, "3")
+        def user1_t1 = services[0].getUserSettings()
+        def user2_t1 = services[1].getUserSettings()
+        def user3_t1 = services[2].getUserSettings()
+        then:
+        user1_t0.find { it.setting == setting }.userId == users[0]
+        user1_t0.find { it.setting == setting }.projectId == null
+        user1_t0.find { it.setting == setting }.value == "one"
+
+        user2_t0.find { it.setting == setting }.userId == users[1]
+        user2_t0.find { it.setting == setting }.projectId == null
+        user2_t0.find { it.setting == setting }.value == "two"
+
+        user3_t0.find { it.setting == setting }.userId == users[2]
+        user3_t0.find { it.setting == setting }.projectId == null
+        user3_t0.find { it.setting == setting }.value == "three"
+
+        user1_t1.find { it.setting == setting }.userId == users[0]
+        user1_t1.find { it.setting == setting }.projectId == null
+        user1_t1.find { it.setting == setting }.value == "1"
+
+        !user2_t1.find { it.setting == setting }
+
+        user3_t1.find { it.setting == setting }.userId == users[2]
+        user3_t1.find { it.setting == setting }.projectId == null
+        user3_t1.find { it.setting == setting }.value == "3"
+    }
+
+    def "save the same quiz setting for multiple quizzes"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+
+        def quiz3 = QuizDefFactory.createQuiz(3)
+        skillsService.createQuizDef(quiz3)
+
+        String name1 = "set1"
+        String name2 = "set2"
+        String name3 = "set3"
+        when:
+        skillsService.saveQuizSettings(quiz1.quizId, [
+                [setting: name1, value: 'a-1'],
+                [setting: name2, value: 'a-2'],
+                [setting: name3, value: 'a-3'],
+        ])
+        skillsService.saveQuizSettings(quiz2.quizId, [
+                [setting: name1, value: 'b-1'],
+                [setting: name2, value: 'b-2'],
+                [setting: name3, value: 'b-3'],
+        ])
+        skillsService.saveQuizSettings(quiz3.quizId, [
+                [setting: name1, value: 'c-1'],
+                [setting: name2, value: 'c-2'],
+                [setting: name3, value: 'c-3'],
+        ])
+        def q1_t0 = skillsService.getQuizSettings(quiz1.quizId)
+        def q2_t0 = skillsService.getQuizSettings(quiz2.quizId)
+        def q3_t0 = skillsService.getQuizSettings(quiz3.quizId)
+
+        skillsService.saveQuizSettings(quiz1.quizId, [
+                [setting: name1, value: 'a-1'],
+                [setting: name2, value: 'a-2a'],
+                [setting: name3, value: 'a-3'],
+        ])
+        skillsService.saveQuizSettings(quiz2.quizId, [
+                [setting: name1, value: 'b-1'],
+                [setting: name2, value: 'b-2'],
+                [setting: name3, value: 'b-3'],
+        ])
+        skillsService.saveQuizSettings(quiz3.quizId, [
+                [setting: name1, value: 'c-1a'],
+                [setting: name2, value: 'c-2a'],
+                [setting: name3, value: 'c-3'],
+        ])
+
+        def q1_t1 = skillsService.getQuizSettings(quiz1.quizId)
+        def q2_t1 = skillsService.getQuizSettings(quiz2.quizId)
+        def q3_t1 = skillsService.getQuizSettings(quiz3.quizId)
+
+        then:
+        q1_t0.find { it.setting == name1 }.value == "a-1"
+        q1_t0.find { it.setting == name2 }.value == "a-2"
+        q1_t0.find { it.setting == name3 }.value == "a-3"
+
+        q2_t0.find { it.setting == name1 }.value == "b-1"
+        q2_t0.find { it.setting == name2 }.value == "b-2"
+        q2_t0.find { it.setting == name3 }.value == "b-3"
+
+        q3_t0.find { it.setting == name1 }.value == "c-1"
+        q3_t0.find { it.setting == name2 }.value == "c-2"
+        q3_t0.find { it.setting == name3 }.value == "c-3"
+
+        q1_t1.find { it.setting == name1 }.value == "a-1"
+        q1_t1.find { it.setting == name2 }.value == "a-2a"
+        q1_t1.find { it.setting == name3 }.value == "a-3"
+
+        q2_t1.find { it.setting == name1 }.value == "b-1"
+        q2_t1.find { it.setting == name2 }.value == "b-2"
+        q2_t1.find { it.setting == name3 }.value == "b-3"
+
+        q3_t1.find { it.setting == name1 }.value == "c-1a"
+        q3_t1.find { it.setting == name2 }.value == "c-2a"
+        q3_t1.find { it.setting == name3 }.value == "c-3"
     }
 
     def "fail to save setting for a project that doesn't exist"() {
@@ -545,3 +665,4 @@ class SettingsSpecs extends DefaultIntSpec {
         !systemSettingsAfterUpdate.resetTokenExpiration
     }
 }
+
