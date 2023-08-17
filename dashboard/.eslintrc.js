@@ -89,9 +89,8 @@ module.exports = {
       },
     ],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'vue/multi-word-component-names': ['off', {
-      'ignores': ['default']
-    }]
+    'vue/multi-word-component-names': 'off',
+    'camelcase': 'off',
   },
 
   extends: [
