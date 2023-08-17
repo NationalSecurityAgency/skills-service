@@ -64,11 +64,7 @@ jobs:
         env:
           MAVEN_OPTS: -Xmx2048m
         run: |
-          cd dashboard/src
-          ln -s ../../common-components/src/common common-components
-          ls -al ./
-          ls -alR ./common-components/
-          cd ..
+          cd dashboard
           npm install
           npm run build
           cd ../
