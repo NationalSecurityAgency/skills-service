@@ -162,11 +162,11 @@ limitations under the License.
         this.loadSubjectSkills({ projectId: this.projectId, subjectId: this.subjectId })
           .then((skills) => {
             this.skills = skills;
-        }).finally(() => {
-          if (focusOnImportBtnAfter) {
-            this.focusOnImportFromCatalogButton();
-          }
-        });
+          }).finally(() => {
+            if (focusOnImportBtnAfter) {
+              this.focusOnImportFromCatalogButton();
+            }
+          });
       },
       skillDeleted(skill) {
         this.skillsChanged(skill, true);

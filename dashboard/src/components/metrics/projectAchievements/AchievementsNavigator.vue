@@ -106,11 +106,13 @@ limitations under the License.
           <template v-slot:cell(type)="data">
             <achievement-type :type="data.value" />
           </template>
-          <template v-slot:cell(name)="data" data-cy="achievementsNavigator-table-skillName">
-            <span v-if="data.value == 'Overall'" class="small text-muted">
-              N/A
-            </span>
-            <span v-else>{{ data.value }}</span>
+          <template v-slot:cell(name)="data">
+            <div data-cy="achievementsNavigator-table-skillName">
+              <span v-if="data.value == 'Overall'" class="small text-muted">
+                N/A
+              </span>
+              <span v-else>{{ data.value }}</span>
+            </div>
           </template>
           <template v-slot:cell(level)="data">
             <span v-if="!data.value" class="small text-muted">

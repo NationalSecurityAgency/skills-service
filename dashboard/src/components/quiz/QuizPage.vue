@@ -139,21 +139,21 @@ limitations under the License.
       updateQuizDef(quizDef) {
         QuizService.updateQuizDef(quizDef)
           .then(() => {
-          const origId = this.quizId;
-          if (quizDef.quizId !== origId) {
-            this.quizId = quizDef.quizId;
-            this.editQuizInfo.quizDef.quizId = quizDef.quizId;
-            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, quizId: quizDef.quizId } })
-              .then(() => {
-                this.loadQuizSummary({ quizId: quizDef.quizId }).then(() => this.handleHideQuizEdit());
-              });
-          } else {
-            this.loadQuizSummary({ quizId: this.$route.params.quizId }).then(() => this.handleHideQuizEdit());
-          }
-          this.$nextTick(() => {
-            this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
+            const origId = this.quizId;
+            if (quizDef.quizId !== origId) {
+              this.quizId = quizDef.quizId;
+              this.editQuizInfo.quizDef.quizId = quizDef.quizId;
+              this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, quizId: quizDef.quizId } })
+                .then(() => {
+                  this.loadQuizSummary({ quizId: quizDef.quizId }).then(() => this.handleHideQuizEdit());
+                });
+            } else {
+              this.loadQuizSummary({ quizId: this.$route.params.quizId }).then(() => this.handleHideQuizEdit());
+            }
+            this.$nextTick(() => {
+              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
+            });
           });
-        });
       },
       handleHideQuizEdit() {
         this.editQuizInfo.showDialog = false;

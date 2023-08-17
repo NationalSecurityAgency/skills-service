@@ -150,7 +150,7 @@ limitations under the License.
               };
             }
             this.loadBadges(afterLoad).then(() => {
-              this.$nextTick(() => this.$nextTick(() => this.$announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`)));
+              this.$nextTick(() => this.$announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`));
             });
             this.$emit('global-badges-changed', badge.badgeId);
           });

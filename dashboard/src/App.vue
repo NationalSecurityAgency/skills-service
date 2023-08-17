@@ -42,7 +42,7 @@ limitations under the License.
 <script>
   import ScrollToTop from '@/common-components/utilities/ScrollToTop';
   import PkiAppBootstrap from '@/components/access/PkiAppBootstrap';
-  import HeaderView from '@/components/header/Header';
+  import HeaderView from '@/components/header/DashboardHeader';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import CustomizableHeader from '@/components/customization/CustomizableHeader';
   import CustomizableFooter from '@/components/customization/CustomizableFooter';
