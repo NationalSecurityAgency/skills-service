@@ -1775,7 +1775,7 @@ class SkillsService {
         return wsHelper.apiPost(url, quizAttemptReq)
     }
 
-    def startQuizAttempt(String quizId, String userId = null, def questions = []) {
+    def startQuizAttempt(String quizId, String userId = null, List questions = []) {
         String url = "/quizzes/${quizId}/attempt"
         return wsHelper.apiPost(url, userId ? [userId : userId, questions: questions] : [questions: questions])
     }
