@@ -101,9 +101,9 @@ class QuizRunService {
         Integer lengthSetting = quizLength ? Integer.valueOf(quizLength.value) : questions.size()
 
         List<QuizQuestionInfo> questionsForQuiz
-        def quizAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+        UserQuizAttempt quizAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
         if(quizAttempt) {
-            def attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttempt.id)
+            List<UserQuizQuestionAttempt> attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttempt.id)
             questionsForQuiz = []
             attemptQuestion.each { attempt ->
                 def selectedQuestion = questions.find { it ->
