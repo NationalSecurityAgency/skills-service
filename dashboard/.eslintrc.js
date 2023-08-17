@@ -54,9 +54,9 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'off',
       {
-        devDependencies: true,
-        optionalDependencies: true,
-        peerDependencies: true,
+        devDependencies: false,
+        optionalDependencies: false,
+        peerDependencies: false,
         optionalDependencies: [
           'test/unit/index.js',
         ],
