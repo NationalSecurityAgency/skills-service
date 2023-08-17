@@ -1,7 +1,11 @@
 const path = require('path');
 const fs = require('fs');
 
-const resolve = dir => path.join(__dirname, dir);
+const resolve = (dir) => {
+  console.log(dir);
+  console.log(path.join(__dirname, dir));
+  return path.join(__dirname, dir);
+}
 
 const getTarget = () => {
   let target = 'http://localhost:8080';
