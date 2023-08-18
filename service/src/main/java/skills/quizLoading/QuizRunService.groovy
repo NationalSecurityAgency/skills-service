@@ -191,10 +191,10 @@ class QuizRunService {
                     enteredText: enteredText,
                     questions: questionsForQuiz.sort{ it.displayOrder },
             )
-        } else {
-            questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
-                it.displayOrder = index + 1
-            }
+        }
+
+        questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
+            it.displayOrder = index + 1
         }
 
         QuizDef quizDef = getQuizDef(quizId)
@@ -390,15 +390,6 @@ class QuizRunService {
             boolean isCorrect = isSurvey ?: selectedIds.containsAll(correctIds) && correctIds.containsAll(selectedIds)
             if (status != UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE) {
                 status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
-            }
-
-            Integer numberOfAttempts = existingAttempt.findAll{ it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId}
-            if(numberOfAttempts > 1) {
-                UserQuizQuestionAttempt attemptedQuestion = existingAttempt.find { it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId }
-
-                if (attemptedQuestion && attemptedQuestion.status == UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE && isCorrect) {
-                    quizQuestionAttemptRepo.deleteById(attemptedQuestion.id)
-                }
             }
 
             UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
