@@ -1211,7 +1211,6 @@ class SkillsService {
     }
 
     def removeSupervisorRole(String userId) {
-        userId = getUserId(userId)
         return wsHelper.rootDelete("/users/${userId}/roles/ROLE_SUPERVISOR")
     }
 
