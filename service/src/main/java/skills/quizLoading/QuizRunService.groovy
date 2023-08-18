@@ -375,6 +375,7 @@ class QuizRunService {
         Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
 
         Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(quizAttemptId).toSet()
+        List<UserQuizQuestionAttempt> existingAttempt = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttemptId)
 
         List<QuizQuestionGradedResult> gradedQuestions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = answerDefByQuestionId[quizQuestionDef.id]
@@ -391,12 +392,22 @@ class QuizRunService {
                 status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
             }
 
+            Integer numberOfAttempts = existingAttempt.findAll{ it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId}
+            if(numberOfAttempts > 1) {
+                UserQuizQuestionAttempt attemptedQuestion = existingAttempt.find { it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId }
+
+                if (attemptedQuestion && attemptedQuestion.status == UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE && isCorrect) {
+                    quizQuestionAttemptRepo.deleteById(attemptedQuestion.id)
+                }
+            }
+
             UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
                     userQuizAttemptRefId: quizAttemptId,
                     quizQuestionDefinitionRefId: quizQuestionDef.id,
                     userId: userId,
                     status: status
             )
+
             quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
 
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
