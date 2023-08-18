@@ -218,7 +218,6 @@ class RootController {
             deleteRoot(userId)
             projAdminService.unpinAllProjectsForRootUser(userId)
         } else {
-            userId = getUserId(userId)
             accessSettingsStorageService.deleteUserRole(userId, null, roleName)
         }
     }
