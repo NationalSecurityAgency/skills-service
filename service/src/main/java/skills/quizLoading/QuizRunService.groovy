@@ -86,13 +86,17 @@ class QuizRunService {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
 
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
+        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
+
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
                 quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
         Integer numberOfQuestions = quizQuestionRepo.countByQuizId(quizId)
 
-        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
@@ -102,6 +106,7 @@ class QuizRunService {
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
+                questions: questions.take(lengthSetting),
                 quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
