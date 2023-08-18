@@ -20,7 +20,11 @@ class QuizInfo {
     String name
     String description
     String quizType
+
+    List<QuizQuestionInfo> questions
+
     Integer minNumQuestionsToPass
+
     Boolean isAttemptAlreadyInProgress
     Integer userNumPreviousQuizAttempts
     Integer maxAttemptsAllowed
