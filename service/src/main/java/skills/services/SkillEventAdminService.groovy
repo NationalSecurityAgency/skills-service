@@ -389,10 +389,6 @@ class SkillEventAdminService {
                 String projectId = performedSkill.projectId
                 String skillId = performedSkill.skillId
                 log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
-                List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
-                if (performedDependencies) {
-                    log.warn("Removing skill events when a parent skill dependency has already been performed. performed skills for the parent dependencies: ${performedDependencies.collect({ "${it.projectId} : ${it.skillId}" })}.")
-                }
 
                 removePerformedSkillEvent(performedSkill)
                 removeAssociatedQuizAttempts(performedSkill)
