@@ -1443,13 +1443,15 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         def subj1 = SkillsFactory.createSubject(1, 1)
         def subj2 = SkillsFactory.createSubject(2, 2)
 
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 2, 0, 100)
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 1, 0, 100)
+        def skill2 = SkillsFactory.createSkill(2, 2, 2, 1, 1, 0, 100)
 
         skillsService.createProject(proj1)
         skillsService.createProject(proj2)
         skillsService.createSubject(subj1)
         skillsService.createSubject(subj2)
         skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
 
         when:
         skillsService.exportSkillToCatalog(proj1.projectId, skill1.skillId)
@@ -1457,8 +1459,11 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
         Date date = new Date()
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], user, date)
+        skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], user, date)
 
-        // by pass endpoint validation for testing purposes, show never get in this state though
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        // bypass endpoint validation for testing purposes, show never get in this state though
         LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
         skillAttributeService.saveExpirationAttrs(proj2.projectId, skill1.skillId, new ExpirationAttrs(
                 expirationType    : ExpirationAttrs.YEARLY,
@@ -1466,6 +1471,12 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
                 monthlyDay        : expirationDate.dayOfMonth,
                 nextExpirationDate: expirationDate.toDate(),
         ))
+        skillsService.saveSkillExpirationAttributes(proj2.projectId, skill2.skillId, [
+                expirationType: ExpirationAttrs.YEARLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
 
         def userAchievements_t0 = userAchievedRepo.findAll()
         def expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
@@ -1477,11 +1488,69 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
         then:
         // instead of failing the batch, the executor will log the error and move on to the next
-        // no achievements removed, nothing expired
+        // imported skill achievements are not removed or moved to the expired table
+        // other skills continue to be processed/expired even though the exception occurred
         !expiredUserAchievements_t0
-        !expiredUserAchievements_t1
-        userAchievements_t0.collect { it.skillId}.sort() == userAchievements_t1.collect { it.skillId}.sort()
-        userAchievements_t1
+        expiredUserAchievements_t1.size() == 1 && expiredUserAchievements_t1.find { it.skillId == skill2.skillId }
+
+        userAchievements_t0.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
+
+                "${user}-${proj1.projectId}-1",
+                "${user}-${proj1.projectId}-2",
+                "${user}-${proj1.projectId}-3",
+                "${user}-${proj1.projectId}-4",
+                "${user}-${proj1.projectId}-5",
+
+                "${user}-${proj1.projectId}-${subj1.subjectId}-1",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-2",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-3",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-4",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-5",
+
+                "${user}-${proj1.projectId}-${skill1.skillId}",
+
+                "${user}-${proj2.projectId}-1",
+                "${user}-${proj2.projectId}-2",
+                "${user}-${proj2.projectId}-3",
+                "${user}-${proj2.projectId}-4",
+                "${user}-${proj2.projectId}-5",
+
+                "${user}-${proj2.projectId}-${subj2.subjectId}-1",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-2",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-3",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-4",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-5",
+
+                "${user}-${proj2.projectId}-${skill1.skillId}",
+                "${user}-${proj2.projectId}-${skill2.skillId}",
+        ].collect { it.toString() }.sort ()
+
+        userAchievements_t1.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
+
+                "${user}-${proj1.projectId}-1",
+                "${user}-${proj1.projectId}-2",
+                "${user}-${proj1.projectId}-3",
+                "${user}-${proj1.projectId}-4",
+                "${user}-${proj1.projectId}-5",
+
+                "${user}-${proj1.projectId}-${subj1.subjectId}-1",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-2",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-3",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-4",
+                "${user}-${proj1.projectId}-${subj1.subjectId}-5",
+
+                "${user}-${proj1.projectId}-${skill1.skillId}",
+
+                "${user}-${proj2.projectId}-1",
+                "${user}-${proj2.projectId}-2",
+                "${user}-${proj2.projectId}-3",
+
+                "${user}-${proj2.projectId}-${subj2.subjectId}-1",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-2",
+                "${user}-${proj2.projectId}-${subj2.subjectId}-3",
+
+                "${user}-${proj2.projectId}-${skill1.skillId}",
+        ].collect { it.toString() }.sort ()
     }
 
     def "cannot configure skill expiration for skills imported from catalog"() {

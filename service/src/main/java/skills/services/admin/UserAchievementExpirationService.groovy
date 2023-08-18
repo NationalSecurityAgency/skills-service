@@ -47,7 +47,7 @@ class UserAchievementExpirationService {
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional()
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {
         LocalDateTime now = LocalDateTime.now()
         ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillAttributesDef, ExpirationAttrs)
