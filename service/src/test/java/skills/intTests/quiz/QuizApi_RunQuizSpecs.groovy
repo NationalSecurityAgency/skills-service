@@ -290,13 +290,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         assert quizInfo.questions.size() == 10
 
         when:
-        skillsService.startQuizAttempt(quiz.quizId, null, quizInfo.questions)
-        def quizInfoAfterStart = skillsService.getQuizInfo(quiz.quizId)
-        skillsService.startQuizAttempt(quiz.quizId, null, quizInfo.questions)
-        def quizInfoSecondStart = skillsService.getQuizInfo(quiz.quizId)
+        def quizInfoAfterStart = skillsService.startQuizAttempt(quiz.quizId).body
+        def quizInfoSecondStart = skillsService.startQuizAttempt(quiz.quizId).body
 
         then:
-        quizInfo.questions == quizInfoAfterStart.questions
         quizInfoAfterStart.questions == quizInfoSecondStart.questions
     }
 
@@ -317,10 +314,8 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         assert quizInfoUser2.questions.size() == 10
 
         when:
-        skillsService.startQuizAttempt(quiz.quizId, 'user1', quizInfoUser1.questions)
-        def quizInfoAfterStartUser1 = skillsService.getQuizInfo(quiz.quizId, 'user1')
-        skillsService.startQuizAttempt(quiz.quizId, 'user2', quizInfoUser2.questions)
-        def quizInfoAfterStartUser2 = skillsService.getQuizInfo(quiz.quizId, 'user2')
+        def quizInfoAfterStartUser1 = skillsService.startQuizAttempt(quiz.quizId, 'user1').body
+        def quizInfoAfterStartUser2 = skillsService.startQuizAttempt(quiz.quizId, 'user2').body
 
         then:
         quizInfoAfterStartUser1.questions != quizInfoAfterStartUser2.questions
