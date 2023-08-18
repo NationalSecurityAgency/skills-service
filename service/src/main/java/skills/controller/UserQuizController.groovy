@@ -61,7 +61,7 @@ class UserQuizController {
                                             @RequestBody(required = false) StartQuizAttemptReq startQuizAttemptReq) {
         String userId = userInfoService.getUserName(startQuizAttemptReq?.userId, true, startQuizAttemptReq?.idType);
 
-        return quizRunService.startQuizAttempt(userId, quizId, startQuizAttemptReq.questions);
+        return quizRunService.startQuizAttempt(userId, quizId);
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

@@ -63,7 +63,7 @@ limitations under the License.
           <div class="h4 text-success font-weight-bold skills-page-title-text-color" data-cy="quizName">{{ quizInfo.name }}</div>
         </div>
         <div class="col-auto text-right text-muted">
-          <b-badge variant="success" data-cy="numQuestions">{{quizInfo.questions.length}}</b-badge> <span class="text-uppercase">questions</span>
+          <b-badge variant="success" data-cy="numQuestions">{{quizInfo.quizLength}}</b-badge> <span class="text-uppercase">questions</span>
         </div>
       </div>
 
@@ -186,7 +186,7 @@ limitations under the License.
           });
       },
       setQuizInfo(quizInfo) {
-        const percentToPass = quizInfo.minNumQuestionsToPass <= 0 ? 100 : Math.trunc(((quizInfo.minNumQuestionsToPass * 100) / quizInfo.questions.length));
+        const percentToPass = quizInfo.minNumQuestionsToPass <= 0 ? 100 : Math.trunc(((quizInfo.minNumQuestionsToPass * 100) / quizInfo.quizLength));
         this.quizInfo = { ...quizInfo, percentToPass };
         if (quizInfo.isAttemptAlreadyInProgress) {
           this.startQuizAttempt();
@@ -199,10 +199,11 @@ limitations under the License.
         this.isLoading = true;
         this.splashScreen.show = false;
 
-        QuizRunService.startQuizAttempt(this.quizId, this.quizInfo.questions)
+        QuizRunService.startQuizAttempt(this.quizId)
           .then((startQuizAttemptRes) => {
             this.quizAttemptId = startQuizAttemptRes.id;
-            const { selectedAnswerIds, enteredText } = startQuizAttemptRes;
+            const { selectedAnswerIds, enteredText, questions } = startQuizAttemptRes;
+            this.quizInfo.questions = questions;
             const copy = ({ ...this.quizInfo });
             copy.questions = this.quizInfo.questions.map((q) => {
               const answerOptions = q.answerOptions.map((a) => ({

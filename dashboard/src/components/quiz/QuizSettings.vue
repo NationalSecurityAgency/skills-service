@@ -25,7 +25,7 @@ limitations under the License.
       <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
         <div class="row">
           <div id="quizNumQuestions" class="col col-md-3 text-secondary" >
-            Quiz Length:
+            # of Questions per Quiz Attempt:
           </div>
           <div class="col">
             <ValidationProvider name="Quiz Length" vid="quizNumQuestions" rules="required|greaterThanOrEqualToPassing:@quizPassingQuestions" v-slot="{errors}">
