@@ -15,11 +15,13 @@
  */
 package skills.tasks.executors
 
+import callStack.profiler.CProf
+import callStack.profiler.Profile
+import callStack.profiler.ProfileEvent
 import com.github.kagkarlsson.scheduler.task.ExecutionContext
 import com.github.kagkarlsson.scheduler.task.TaskInstance
 import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.UserAchievementExpirationService
@@ -27,8 +29,6 @@ import skills.services.attributes.SkillAttributeService
 import skills.storage.model.SkillAttributesDef
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.tasks.data.ExpireUserAchievements
-
-import java.util.concurrent.TimeUnit
 
 import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
 
@@ -48,16 +48,17 @@ class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<ExpireU
     SkillAttributesDefRepo skillAttributesDefRepo
 
     @Override
+    @Profile
     void execute(TaskInstance<ExpireUserAchievements> taskInstance, ExecutionContext executionContext) {
-        StopWatch stopWatch = new StopWatch()
-        stopWatch.start()
+        CProf.clear()
+        String profName = "expireUserAchievementsReport".toString()
+        CProf.start(profName)
         try {
             removeExpiredUserAchievements()
         } finally {
-            stopWatch.stop()
-            long runTime = stopWatch.getTime(TimeUnit.MILLISECONDS)
-            if (runTime > LOGGING_THRESHOLD) {
-                log.info("Expiring user achievements took [${runTime}]ms")
+            ProfileEvent resProfEvent = CProf.stop(profName)
+            if (resProfEvent.getRuntimeInMillis() > LOGGING_THRESHOLD) {
+                log.info("Expiring user achievements took > [${LOGGING_THRESHOLD}]ms", CProf.prettyPrint())
             }
         }
     }
