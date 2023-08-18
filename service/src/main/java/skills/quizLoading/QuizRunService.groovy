@@ -86,45 +86,22 @@ class QuizRunService {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
 
-        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
-        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
-        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
-        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
-
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
                 quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
+        Integer numberOfQuestions = quizQuestionRepo.countByQuizId(quizId)
+
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
-        Integer lengthSetting = quizLength ? Integer.valueOf(quizLength.value) : questions.size()
-
-        List<QuizQuestionInfo> questionsForQuiz
-        UserQuizAttempt quizAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
-        if(quizAttempt) {
-            List<UserQuizQuestionAttempt> attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttempt.id)
-            questionsForQuiz = []
-            attemptQuestion.each { attempt ->
-                def selectedQuestion = questions.find { it ->
-                    it.id == attempt.quizQuestionDefinitionRefId && attempt.userId == userId
-                }
-                if (selectedQuestion) {
-                    selectedQuestion.displayOrder = attempt.displayOrder
-                    questionsForQuiz.push(selectedQuestion)
-                }
-            }
-        } else {
-            questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
-                it.displayOrder = index + 1
-            }
-        }
-
+        Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
+        Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
 
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
-                questions: questionsForQuiz.sort{ it.displayOrder },
                 quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
@@ -168,9 +145,20 @@ class QuizRunService {
     }
 
     @Transactional
-    QuizAttemptStartResult startQuizAttempt(String userId, String quizId, List<QuizQuestionInfo> quizQuestions) {
+    QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
+        QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
+        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
+        List<QuizQuestionInfo> questionsForQuiz = []
+        Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
+        Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
+
         log.info("Starting [{}] quiz attempt for [{}] user", quizId, userId)
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+
         if (inProgressAttempt) {
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
 
@@ -179,13 +167,29 @@ class QuizRunService {
                 new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: it.getAnswerText())
             }
 
+            List<UserQuizQuestionAttempt> attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(inProgressAttempt.id)
+            attemptQuestion.each { attempt ->
+                def selectedQuestion = questions.find { it ->
+                    it.id == attempt.quizQuestionDefinitionRefId && attempt.userId == userId
+                }
+                if (selectedQuestion) {
+                    selectedQuestion.displayOrder = attempt.displayOrder
+                    questionsForQuiz.push(selectedQuestion)
+                }
+            }
+
             log.info("Continued executing quiz attempt {}", inProgressAttempt)
             return new QuizAttemptStartResult(
                     id: inProgressAttempt.id,
                     inProgressAlready: true,
                     selectedAnswerIds: selectedAnswerIds ?: [],
                     enteredText: enteredText,
+                    questions: questionsForQuiz.sort{ it.displayOrder },
             )
+        } else {
+            questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
+                it.displayOrder = index + 1
+            }
         }
 
         QuizDef quizDef = getQuizDef(quizId)
@@ -204,7 +208,7 @@ class QuizRunService {
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
 
-        quizQuestions.each{ question ->
+        questionsForQuiz.each{ question ->
             UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
                     userQuizAttemptRefId: savedAttempt.id,
                     quizQuestionDefinitionRefId: question.id,
@@ -215,7 +219,7 @@ class QuizRunService {
             quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
         }
 
-        return new QuizAttemptStartResult(id: savedAttempt.id)
+        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder },)
     }
 
     @Profile

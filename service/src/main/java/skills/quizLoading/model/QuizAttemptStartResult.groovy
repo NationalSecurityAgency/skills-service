@@ -26,4 +26,6 @@ class QuizAttemptStartResult {
     // only applicable if there is already attempt in-progress
     List<Integer> selectedAnswerIds
     List<AnswerIdAndEnteredText> enteredText
+    List<QuizQuestionInfo> questions
+
 }
