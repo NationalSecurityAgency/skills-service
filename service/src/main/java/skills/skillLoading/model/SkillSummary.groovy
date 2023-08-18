@@ -46,4 +46,6 @@ class SkillSummary extends SkillSummaryParent {
     List<SkillTag> tags = []
 
     VideoSummary videoSummary
+
+    Date expirationDate
 }

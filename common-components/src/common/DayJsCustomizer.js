@@ -20,6 +20,7 @@ import utcPlugin from 'dayjs/plugin/utc';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
 import duration from 'dayjs/plugin/duration';
 import localeData from 'dayjs/plugin/localeData';
+import isSameOrAfer from 'dayjs/plugin/isSameOrAfter';
 
 dayjs.extend(advancedFormatPlugin);
 dayjs.extend(localizedFormatPlugin);
@@ -27,5 +28,6 @@ dayjs.extend(relativeTimePlugin);
 dayjs.extend(utcPlugin);
 dayjs.extend(duration);
 dayjs.extend(localeData);
+dayjs.extend(isSameOrAfer);
 
 export default dayjs;

@@ -45,6 +45,7 @@ import skills.services.admin.SkillsGroupAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.BonusAwardAttrs
+import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
@@ -519,7 +520,7 @@ class SkillsLoader {
         Integer points = up ? up.points : 0
         Integer todayPoints = userPointsRepo.calculatePointsForSingleSkillForADay(userId, skillDef.id, new Date().clearTime()) ?: 0
         Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
-
+        Date expirationDate = skillAttributeService.getExpirationAttrs(projectId, skillId)?.nextExpirationDate
 
         if (skillDef.copiedFrom != null && skillDef.selfReportingType) {
             // because of the catalog's async nature when self-approval honor skill is submitted todaysPoints and points are not consistent on the imported side
@@ -580,7 +581,8 @@ class SkillsLoader {
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
-                videoSummary: getVideoSummary(skillDef)
+                videoSummary: getVideoSummary(skillDef),
+                expirationDate: expirationDate,
         )
     }
 
@@ -1192,6 +1194,12 @@ class SkillsLoader {
                     })
                 }
 
+                Date expirationDate
+                if (skillDefAndUserPoints.attributes && skillDefAndUserPoints.attributes.type == SkillAttributesDef.SkillAttributesType.AchievementExpiration) {
+                    ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
+                    expirationDate = expirationAttrs.nextExpirationDate
+                }
+
                 skillsRes << new SkillSummary(
                         projectId: skillDef.projectId,
                         projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -1214,6 +1222,7 @@ class SkillsLoader {
                         isLastViewed: skillDefAndUserPoints.isLastViewed,
                         badges: skillDefAndUserPoints.badges,
                         tags: skillDefAndUserPoints.tags,
+                        expirationDate: expirationDate,
                 )
             }
         }
