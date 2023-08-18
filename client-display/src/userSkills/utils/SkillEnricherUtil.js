@@ -74,6 +74,7 @@ export default {
             honorSystem: skill.selfReporting && skill.selfReporting.type === 'HonorSystem',
             quiz: skill.selfReporting && skill.selfReporting.type === 'Quiz',
             survey: skill.selfReporting && skill.selfReporting.type === 'Survey',
+            video: skill.selfReporting && skill.selfReporting.type === 'Video',
         };
         return copy;
     },

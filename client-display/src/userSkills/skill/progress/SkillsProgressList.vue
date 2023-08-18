@@ -208,6 +208,7 @@ limitations under the License.
           honorSystem: 0,
           quiz: 0,
           survey: 0,
+          video: 0,
         },
         loading: false,
         showDescriptionsInternal: false,
@@ -273,6 +274,12 @@ limitations under the License.
                 icon: 'fas fa-file-contract',
                 id: 'survey',
                 html: 'Survey',
+                count: 0,
+              },
+              {
+                icon: 'fas fa-video',
+                id: 'video',
+                html: 'Video',
                 count: 0,
               },
             ],
@@ -389,6 +396,9 @@ limitations under the License.
         }
         if (meta.survey) {
           this.metaCounts.survey += 1;
+        }
+        if (meta.video) {
+          this.metaCounts.video += 1;
         }
       },
       onDetailsToggle() {
