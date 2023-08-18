@@ -392,14 +392,23 @@ class QuizRunService {
                 status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
             }
 
-            UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
-                    userQuizAttemptRefId: quizAttemptId,
-                    quizQuestionDefinitionRefId: quizQuestionDef.id,
-                    userId: userId,
-                    status: status
-            )
+            UserQuizQuestionAttempt attemptedQuestion = existingAttempt.find { it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId }
 
-            quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+            if (attemptedQuestion) {
+                attemptedQuestion.status = status
+                quizQuestionAttemptRepo.save(attemptedQuestion)
+            }
+            else {
+                UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
+                        id: attemptedQuestion.id,
+                        userQuizAttemptRefId: attemptedQuestion.userQuizAttemptRefId,
+                        quizQuestionDefinitionRefId: attemptedQuestion.quizQuestionDefinitionRefId,
+                        userId: userId,
+                        status: status
+                )
+
+                quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+            }
 
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
