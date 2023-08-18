@@ -382,7 +382,7 @@ describe('SkillsUsageHelper', () => {
     }
     skills.sort(() => Math.random() - 0.5);
     const resAfter = SkillsUsageHelper.addTags(skills);
-    console.log(JSON.stringify(resAfter, null, 2));
+    // console.log(JSON.stringify(resAfter, null, 2));
 
     const highActivityTags = resAfter.filter((item) => item.isHighActivityTag);
     expect(highActivityTags.map((i) => i.skillId)

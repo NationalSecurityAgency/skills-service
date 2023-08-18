@@ -288,7 +288,7 @@ aria-label="search for projects to pin"></b-input>
         return this.originalProjects && this.originalProjects.length > 0;
       },
       ...mapGetters([
-         'isEmailEnabled',
+        'isEmailEnabled',
       ]),
     },
     methods: {

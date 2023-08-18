@@ -65,7 +65,7 @@ limitations under the License.
   import HelpButton from './HelpButton';
 
   export default {
-    name: 'Header',
+    name: 'DashboardHeader',
     components: {
       HelpButton,
       InceptionButton,

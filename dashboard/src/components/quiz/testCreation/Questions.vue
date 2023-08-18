@@ -310,16 +310,16 @@ limitations under the License.
         }
       },
       sortOrderUpdate(updateEvent) {
-          const { id } = updateEvent.item;
-          this.sortOrder.loadingQuestionId = id;
-          this.sortOrder.loading = true;
-          QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
-            .finally(() => {
-              this.sortOrder.loading = false;
-              this.$nextTick(() => {
-                this.$announcer.polite(`Sort order changed. This is now a question number ${updateEvent.newIndex + 1}`);
-              });
+        const { id } = updateEvent.item;
+        this.sortOrder.loadingQuestionId = id;
+        this.sortOrder.loading = true;
+        QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
+          .finally(() => {
+            this.sortOrder.loading = false;
+            this.$nextTick(() => {
+              this.$announcer.polite(`Sort order changed. This is now a question number ${updateEvent.newIndex + 1}`);
             });
+          });
       },
     },
   };

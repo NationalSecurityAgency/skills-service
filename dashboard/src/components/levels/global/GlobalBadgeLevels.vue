@@ -238,7 +238,7 @@ limitations under the License.
             }
           }).finally(() => {
             this.loadingAvailableProjects = false;
-        });
+          });
       }, 250),
       searchChanged(query) {
         this.projectSearch = query;

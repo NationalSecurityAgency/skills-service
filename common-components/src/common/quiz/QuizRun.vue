@@ -205,8 +205,8 @@ limitations under the License.
             const copy = ({ ...this.quizInfo });
             copy.questions = this.quizInfo.questions.map((q) => {
               const answerOptions = q.answerOptions.map((a) => ({
-                  ...a,
-                  selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
+                ...a,
+                selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
               }));
               if (enteredText && q.questionType === QuestionType.TextInput) {
                 const answerId = q.answerOptions[0].id;

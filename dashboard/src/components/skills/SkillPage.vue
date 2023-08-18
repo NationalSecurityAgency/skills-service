@@ -191,19 +191,19 @@ limitations under the License.
         }).then(() => {
           this.$nextTick(() => this.$announcer.polite(`Skill ${editedSkil.name} has been edited`));
         })
-        .catch((err) => {
-          if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
-            this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
-          } else if (err?.response?.data?.errorCode === 'DbUpgradeInProgress') {
-            this.$router.push({ name: 'DbUpgradeInProgressPage' });
-          } else {
-            throw err;
-          }
-        })
-        .finally(() => {
-          this.isLoadingData = false;
-          this.handleFocus();
-        });
+          .catch((err) => {
+            if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
+              this.msgOk(err.response.data.explanation, 'Maximum Skills Reached');
+            } else if (err?.response?.data?.errorCode === 'DbUpgradeInProgress') {
+              this.$router.push({ name: 'DbUpgradeInProgressPage' });
+            } else {
+              throw err;
+            }
+          })
+          .finally(() => {
+            this.isLoadingData = false;
+            this.handleFocus();
+          });
       },
       handleHide(e) {
         this.showEdit = false;

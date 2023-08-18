@@ -119,7 +119,7 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-         'isEmailEnabled',
+        'isEmailEnabled',
       ]),
     },
     methods: {

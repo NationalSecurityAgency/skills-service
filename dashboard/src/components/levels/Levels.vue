@@ -136,7 +136,7 @@ limitations under the License.
             pagination: {
               remove: true,
             },
-            tableDescription: `Skills for subject ${this.tableDescription}`,
+            tableDescription: '',
           },
         },
       };
@@ -173,7 +173,7 @@ limitations under the License.
             },
           ];
           this.table.options.fields = fields;
-          this.table.options.tableDescription = this.tableDescription;
+          this.table.options.tableDescription = this.computedtableDescription;
 
           const pointsEnabled = data && (data.value === true || data.value === 'true');
           if (pointsEnabled) {
@@ -194,7 +194,7 @@ limitations under the License.
       ...subjectsStore.mapGetters([
         'subject',
       ]),
-      tableDescription() {
+      computedTableDescription() {
         if (this.$route.params.subjectId) {
           return `Subject ${this.subject.name} Levels`;
         }

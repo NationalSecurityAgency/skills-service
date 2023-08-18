@@ -72,7 +72,7 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-          'displayProjectDescription',
+        'displayProjectDescription',
       ]),
       version() {
         return this.$store.state.version;

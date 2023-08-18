@@ -4,7 +4,7 @@ module.exports = {
   root: true,
 
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@babel/eslint-parser',
   },
 
   env: {
@@ -71,12 +71,13 @@ module.exports = {
       },
     ],
     'vue/max-attributes-per-line': [
-      2,
+      'error',
       {
-        singleline: 5,
+        singleline: {
+          max: 5,
+        },
         multiline: {
           max: 5,
-          allowFirstLine: true,
         },
       },
     ],
@@ -87,5 +88,6 @@ module.exports = {
       },
     ],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'vue/multi-word-component-names': 'off',
   },
 };

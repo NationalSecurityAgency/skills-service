@@ -258,7 +258,6 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  // eslint-disable-next-line camelcase
   import { max_value, min_value } from 'vee-validate/dist/rules';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';

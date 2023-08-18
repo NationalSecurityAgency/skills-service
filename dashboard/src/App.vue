@@ -42,15 +42,15 @@ limitations under the License.
 <script>
   import ScrollToTop from '@/common-components/utilities/ScrollToTop';
   import PkiAppBootstrap from '@/components/access/PkiAppBootstrap';
-  import HeaderView from './components/header/Header';
-  import LoadingContainer from './components/utils/LoadingContainer';
-  import CustomizableHeader from './components/customization/CustomizableHeader';
-  import CustomizableFooter from './components/customization/CustomizableFooter';
-  import IconManagerService from './components/utils/iconPicker/IconManagerService';
-  import InceptionConfigurer from './InceptionConfigurer';
-  import InceptionProgressMessagesMixin from './components/inception/InceptionProgressMessagesMixin';
-  import NewSoftwareVersionComponent from './components/header/NewSoftwareVersion';
-  import DashboardFooter from './components/header/DashboardFooter';
+  import HeaderView from '@/components/header/DashboardHeader';
+  import LoadingContainer from '@/components/utils/LoadingContainer';
+  import CustomizableHeader from '@/components/customization/CustomizableHeader';
+  import CustomizableFooter from '@/components/customization/CustomizableFooter';
+  import IconManagerService from '@/components/utils/iconPicker/IconManagerService';
+  import InceptionConfigurer from '@/InceptionConfigurer';
+  import InceptionProgressMessagesMixin from '@/components/inception/InceptionProgressMessagesMixin';
+  import NewSoftwareVersionComponent from '@/components/header/NewSoftwareVersion';
+  import DashboardFooter from '@/components/header/DashboardFooter';
 
   export default {
     name: 'App',

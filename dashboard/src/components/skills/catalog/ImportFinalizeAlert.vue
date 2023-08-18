@@ -134,9 +134,9 @@ limitations under the License.
               }
             }
           })
-          .catch(() => {
-            this.checkFinalizationState();
-          });
+            .catch(() => {
+              this.checkFinalizationState();
+            });
         }, 5000);
       },
       areOrIs(numItems) {
