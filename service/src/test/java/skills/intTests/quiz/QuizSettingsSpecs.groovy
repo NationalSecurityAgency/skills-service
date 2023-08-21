@@ -384,7 +384,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
-    def "QuizLength setting - when a question is removed adjust the MinNumQuestionsToPass setting if needed"() {
+    def "QuizLength setting - when a question is removed adjust the QuizLength setting if needed"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
