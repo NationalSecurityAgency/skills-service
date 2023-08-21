@@ -400,9 +400,8 @@ class QuizRunService {
             }
             else {
                 UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
-                        id: attemptedQuestion.id,
-                        userQuizAttemptRefId: attemptedQuestion.userQuizAttemptRefId,
-                        quizQuestionDefinitionRefId: attemptedQuestion.quizQuestionDefinitionRefId,
+                        userQuizAttemptRefId: quizAttemptId,
+                        quizQuestionDefinitionRefId: quizQuestionDef.id,
                         userId: userId,
                         status: status
                 )
