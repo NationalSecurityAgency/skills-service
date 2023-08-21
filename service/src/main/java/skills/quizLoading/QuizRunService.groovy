@@ -95,12 +95,18 @@ class QuizRunService {
                 quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDesc.id,
                         UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
 
+        Integer numberOfQuestions = quizQuestionRepo.countByQuizId(quizId)
+
         QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
+        QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
+        Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
+        Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
+
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
-                questions: questions,
+                questions: questions.take(lengthSetting),
                 quizType: quizDefWithDesc.getType().toString(),
                 isAttemptAlreadyInProgress: userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false,
                 userNumPreviousQuizAttempts: userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0,
@@ -108,6 +114,7 @@ class QuizRunService {
                 userLastQuizAttemptDate: userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null,
                 maxAttemptsAllowed: maxNumAttemptsSetting ? Integer.valueOf(maxNumAttemptsSetting.value) : -1,
                 minNumQuestionsToPass: minNumQuestionsToPassSetting ? Integer.valueOf(minNumQuestionsToPassSetting.value) : -1,
+                quizLength: lengthSetting
         )
     }
 
@@ -144,8 +151,19 @@ class QuizRunService {
 
     @Transactional
     QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
+        QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
+        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
+        List<QuizQuestionInfo> questionsForQuiz = []
+        Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
+        Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
+
         log.info("Starting [{}] quiz attempt for [{}] user", quizId, userId)
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
+
         if (inProgressAttempt) {
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
 
@@ -154,13 +172,29 @@ class QuizRunService {
                 new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: it.getAnswerText())
             }
 
+            List<UserQuizQuestionAttempt> attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(inProgressAttempt.id)
+            attemptQuestion.each { attempt ->
+                def selectedQuestion = questions.find { it ->
+                    it.id == attempt.quizQuestionDefinitionRefId && attempt.userId == userId
+                }
+                if (selectedQuestion) {
+                    selectedQuestion.displayOrder = attempt.displayOrder
+                    questionsForQuiz.push(selectedQuestion)
+                }
+            }
+
             log.info("Continued executing quiz attempt {}", inProgressAttempt)
             return new QuizAttemptStartResult(
                     id: inProgressAttempt.id,
                     inProgressAlready: true,
                     selectedAnswerIds: selectedAnswerIds ?: [],
                     enteredText: enteredText,
+                    questions: questionsForQuiz.sort{ it.displayOrder },
             )
+        }
+
+        questionsForQuiz = questions.take(lengthSetting).eachWithIndex { it, index ->
+            it.displayOrder = index + 1
         }
 
         QuizDef quizDef = getQuizDef(quizId)
@@ -178,7 +212,19 @@ class QuizRunService {
                 started: new Date())
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
-        return new QuizAttemptStartResult(id: savedAttempt.id)
+
+        questionsForQuiz.each{ question ->
+            UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
+                    userQuizAttemptRefId: savedAttempt.id,
+                    quizQuestionDefinitionRefId: question.id,
+                    userId: userId,
+                    status: UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE,
+                    displayOrder: question.displayOrder
+            )
+            quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+        }
+
+        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder },)
     }
 
     @Profile
@@ -205,17 +251,24 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting])
     }
 
     @Profile
     private Integer getMaxQuizAttemptsSetting(Integer quizRefId) {
-        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizRefId)
-        return quizSetting ? Integer.valueOf(quizSetting.value) : -1
+        return getQuizSettingAsInteger(quizRefId, QuizSettings.MaxNumAttempts.setting)
     }
     @Profile
     private Integer getMinNumQuestionsToPassSetting(Integer quizRefId) {
-        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizRefId)
+        return getQuizSettingAsInteger(quizRefId, QuizSettings.MinNumQuestionsToPass.setting)
+    }
+    @Profile
+    private Integer getQuizLength(Integer quizRefId) {
+        return getQuizSettingAsInteger(quizRefId, QuizSettings.QuizLength.setting)
+    }
+    @Profile
+    private Integer getQuizSettingAsInteger(Integer quizRefId, String setting) {
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(setting, quizRefId)
         return quizSetting ? Integer.valueOf(quizSetting.value) : -1
     }
 
@@ -322,31 +375,49 @@ class QuizRunService {
         Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
 
         Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(quizAttemptId).toSet()
+        List<UserQuizQuestionAttempt> existingAttempt = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttemptId)
 
         List<QuizQuestionGradedResult> gradedQuestions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = answerDefByQuestionId[quizQuestionDef.id]
 
             List<Integer> correctIds = quizAnswerDefs.findAll({ Boolean.valueOf(it.isCorrectAnswer) }).collect { it.id }.sort()
             List<Integer> selectedIds = quizAnswerDefs.findAll { selectedAnswerIds.contains(it.id) }?.collect { it.id }
+            UserQuizQuestionAttempt.QuizQuestionStatus status
             if (!selectedIds) {
-                throw new SkillQuizException("There is no answer provided for question with [${quizQuestionDef.id}] id", quizId, ErrorCode.BadParam)
+                status = UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE
             }
 
             boolean isCorrect = isSurvey ?: selectedIds.containsAll(correctIds) && correctIds.containsAll(selectedIds)
+            if (status != UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE) {
+                status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+            }
 
-            UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
-                    userQuizAttemptRefId: quizAttemptId,
-                    quizQuestionDefinitionRefId: quizQuestionDef.id,
-                    userId: userId,
-                    status: isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG,
-            )
-            quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+            UserQuizQuestionAttempt attemptedQuestion = existingAttempt.find { it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId }
+
+            if (attemptedQuestion) {
+                attemptedQuestion.status = status
+                quizQuestionAttemptRepo.save(attemptedQuestion)
+            }
+            else {
+                UserQuizQuestionAttempt userQuizQuestionAttempt = new UserQuizQuestionAttempt(
+                        userQuizAttemptRefId: quizAttemptId,
+                        quizQuestionDefinitionRefId: quizQuestionDef.id,
+                        userId: userId,
+                        status: status
+                )
+
+                quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
+            }
 
             return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
         }
+        Integer quizLength = getQuizLength(quizDef.id)
+        if(quizLength == -1) {
+            quizLength = gradedQuestions.size()
+        }
         int numCorrect = gradedQuestions.count { it.isCorrect }
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
-        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : gradedQuestions.size();
+        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : quizLength;
         boolean quizPassed = numCorrect >= minNumQuestionsToPass
 
         boolean shouldReturnGradedRes = quizPassed && quizDef.type == QuizDefParent.QuizType.Quiz;
@@ -360,7 +431,7 @@ class QuizRunService {
             shouldReturnGradedRes = numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts;
         }
 
-        QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: gradedQuestions.size() - numCorrect,
+        QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect,
                 gradedQuestions: shouldReturnGradedRes ? gradedQuestions : [])
 
         userQuizAttempt.status = quizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED

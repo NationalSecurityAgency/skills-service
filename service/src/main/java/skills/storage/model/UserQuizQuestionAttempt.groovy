@@ -30,7 +30,7 @@ import jakarta.persistence.*
 class UserQuizQuestionAttempt {
 
     static enum QuizQuestionStatus {
-        CORRECT, WRONG
+        CORRECT, WRONG, INCOMPLETE
     }
 
     @Id
@@ -50,5 +50,7 @@ class UserQuizQuestionAttempt {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    Integer displayOrder
 
 }

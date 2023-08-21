@@ -225,19 +225,24 @@ class QuizDefService {
             throw new SkillQuizException("Provided Question Definition ID [${quizQuestionDefId}] does not belong to the quiz [${quizDef.quizId}]", quizDef.quizId, ErrorCode.BadParam)
         }
 
-        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MinNumQuestionsToPass.setting, quizDef.id)
-        if (quizSetting) {
-            Integer minNumQuestionsToPass = Integer.valueOf(quizSetting.value)
-            int numTotalQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId) -1
-            if (numTotalQuestions == 0) {
-                quizSettingsRepo.delete(quizSetting)
-            } else if (numTotalQuestions < minNumQuestionsToPass) {
-                quizSetting.value =  "${numTotalQuestions}"
-                quizSettingsRepo.save(quizSetting)
-            }
-        }
+        updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.MinNumQuestionsToPass.setting)
+        updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.QuizLength.setting)
 
         quizAnswerRepo.delete(quizQuestionDef)
+    }
+
+    void updateQuizSetting(Integer quizId, String quizDefQuizId, String setting) {
+        QuizSetting retrievedSetting = quizSettingsRepo.findBySettingAndQuizRefId(setting, quizId)
+        if (retrievedSetting) {
+            Integer quizLength = Integer.valueOf(retrievedSetting.value)
+            int numTotalQuestions = quizQuestionRepo.countByQuizId(quizDefQuizId) - 1
+            if (numTotalQuestions == 0) {
+                quizSettingsRepo.delete(retrievedSetting);
+            } else if (numTotalQuestions < quizLength) {
+                retrievedSetting.value = "${numTotalQuestions}"
+                quizSettingsRepo.save(retrievedSetting)
+            }
+        }
     }
 
     @Transactional()

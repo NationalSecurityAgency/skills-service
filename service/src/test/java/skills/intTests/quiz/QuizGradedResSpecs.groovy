@@ -39,8 +39,8 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -54,7 +54,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.started
         quizAttemptRes.completed
         !quizAttemptRes.userTag
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == questions.questionType
         quizAttemptRes.questions.isCorrect == [true, true]
@@ -79,9 +79,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -92,7 +92,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, true]
@@ -117,9 +117,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -130,7 +130,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, true]
@@ -154,9 +154,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -167,7 +167,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, false]
@@ -191,10 +191,10 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[3].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[3].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -205,7 +205,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [true, false]
@@ -229,9 +229,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
@@ -241,10 +241,10 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
-        quizAttemptRes.questions.isCorrect == [true, true]
+        quizAttemptRes.questions.isCorrect == [false, false]
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
@@ -265,8 +265,8 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
@@ -276,7 +276,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, false]
@@ -300,7 +300,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
@@ -310,7 +310,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Quiz.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         quizAttemptRes.questions.isCorrect == [false, false]
@@ -335,10 +335,10 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[3].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[3].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -349,7 +349,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Survey.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
         quizAttemptRes.questions.isCorrect == [true, true, true]
@@ -379,9 +379,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected:true, answerText: 'This is user provided answer'])
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
         when:
@@ -391,10 +391,10 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Survey.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [true, true, true]
+        quizAttemptRes.questions.isCorrect == [false, false, false]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
@@ -430,10 +430,10 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.userIdForDisplay == userAttrs.userIdForDisplay
         quizAttemptRes.quizType == QuizDefParent.QuizType.Survey.toString()
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
-        quizAttemptRes.questions.id == quizInfo.questions.id
+        quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [true, true, true]
+        quizAttemptRes.questions.isCorrect == [false, false, false]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
@@ -456,8 +456,8 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
 
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(skillsService.userName)
@@ -490,8 +490,8 @@ class QuizGradedResSpecs extends DefaultIntSpec {
 
         def quizInfo = regularUser.getQuizInfo(quiz.quizId)
         def quizAttempt =  regularUser.startQuizAttempt(quiz.quizId).body
-        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        regularUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         regularUser.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         UserAttrs userAttrs = userAttrsRepo.findByUserId(regularUser.userName)

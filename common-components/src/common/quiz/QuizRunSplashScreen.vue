@@ -86,7 +86,7 @@ limitations under the License.
     },
     computed: {
       numQuestions() {
-        return this.quizInfo.questions.length;
+        return this.quizInfo.quizLength;
       },
       isSurveyType() {
         return this.quizInfo.quizType === 'Survey';

@@ -23,18 +23,39 @@ limitations under the License.
                     message="Surveys do not have any available settings."/>
     <div v-if="!isSurveyType">
       <ValidationObserver ref="observer" v-slot="{ invalid, handleSubmit }" slim>
-      <div class="row">
-        <div id="quizPassingReq" class="col col-md-3 text-secondary" >
-          Passing Requirement:
+        <div class="row">
+          <div id="quizNumQuestions" class="col col-md-3 text-secondary" >
+            # of Questions per Quiz Attempt:
+          </div>
+          <div class="col">
+            <ValidationProvider name="Quiz Length" vid="quizNumQuestions" rules="required|greaterThanOrEqualToPassing:@quizPassingQuestions" v-slot="{errors}">
+              <b-form-select v-model="settings.quizLength.value"
+                             :options="quizLengthOptions"
+                             aria-labelledby="quizNumQuestions"
+                             ref="quizNumQuestions"
+                             data-cy="quizNumQuestions" />
+              <small role="alert" class="form-text text-danger" v-show="errors[0]">{{
+                  errors[0]}}
+              </small>
+            </ValidationProvider>
+          </div>
         </div>
-        <div class="col">
-          <b-form-select v-model="settings.passingReq.value"
-                         :options="numRequiredQuestionsOptions"
-                         aria-labelledby="quizPassingReq"
-                         data-cy="quizPassingSelector" />
+        <div class="row mt-3">
+          <div id="quizPassingReq" class="col col-md-3 text-secondary" >
+            Passing Requirement:
+          </div>
+          <div class="col">
+            <ValidationProvider name="Number of Required Questions" vid="quizPassingQuestions" rules="required|lessThanOrEqualToLength:@quizNumQuestions" v-slot="{errors}">
+              <b-form-select v-model="settings.passingReq.value"
+                             :options="numRequiredQuestionsOptions"
+                             aria-labelledby="quizPassingReq"
+                             data-cy="quizPassingSelector" />
+              <small role="alert" class="form-text text-danger" v-show="errors[0]">{{
+                  errors[0]}}
+              </small>
+            </ValidationProvider>
         </div>
       </div>
-
       <div class="row mt-3">
         <div id="quizMaxNumOfAttempts" class="col col-md-3 text-secondary" >
           Maximum Number of Attempts:
@@ -142,6 +163,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
+  import { extend } from 'vee-validate';
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import QuizService from '@/components/quiz/QuizService';
@@ -181,6 +203,11 @@ limitations under the License.
             setting: 'quizRandomizeAnswers',
             lastLoadedValue: false,
           },
+          quizLength: {
+            value: '-1',
+            setting: 'quizLength',
+            lastLoadedValue: '-1',
+          },
         },
         errMsg: null,
       };
@@ -198,12 +225,18 @@ limitations under the License.
         const questionBasedOptions = Array.from({ length: num }, (_, index) => ({ value: `${index + 1}`, text: `${index + 1} Correct Question${index > 0 ? 's' : ''}` }));
         return [{ value: '-1', text: 'ALL Questions - 100%' }].concat(questionBasedOptions);
       },
+      quizLengthOptions() {
+        const num = this.quizSummary.numQuestions;
+        const questionBasedOptions = Array.from({ length: num }, (_, index) => ({ value: `${index + 1}`, text: `${index + 1} Question${index > 0 ? 's' : ''}` }));
+        return [{ value: '-1', text: 'ALL Questions - 100%' }].concat(questionBasedOptions);
+      },
       hasChanged() {
         return this.settings.passingReq.value !== this.settings.passingReq.lastLoadedValue
           || this.settings.numAttempts.unlimited !== this.settings.numAttempts.lastLoadedUnlimited
           || (!this.settings.numAttempts.unlimited && this.settings.numAttempts.value !== this.settings.numAttempts.lastLoadedValue)
           || (this.settings.randomizeAnswers.value !== this.settings.randomizeAnswers.lastLoadedValue)
-          || (this.settings.randomizeQuestions.value !== this.settings.randomizeQuestions.lastLoadedValue);
+          || (this.settings.randomizeQuestions.value !== this.settings.randomizeQuestions.lastLoadedValue)
+          || this.settings.quizLength.value !== this.settings.quizLength.lastLoadedValue;
       },
       isSurveyType() {
         return this.quizSummary.type === 'Survey';
@@ -214,9 +247,29 @@ limitations under the License.
       this.loadAndUpdateQuizSettings()
         .then(() => {
           this.isLoadingSettings = false;
+          this.setupValidation();
         });
     },
     methods: {
+      setupValidation() {
+        extend('lessThanOrEqualToLength', {
+          message: () => 'Passing requirement must be less than or equal to the quiz length',
+          params: ['quizNumQuestions'],
+          validate(value, { quizNumQuestions }) {
+            const foundSelected = (quizNumQuestions !== '-1' && value <= quizNumQuestions) || quizNumQuestions === '-1';
+            return foundSelected;
+          },
+        });
+
+        extend('greaterThanOrEqualToPassing', {
+          message: () => 'Quiz length must be greater than or equal to the passing requirement',
+          params: ['quizPassingQuestions'],
+          validate(value, { quizPassingQuestions }) {
+            const foundSelected = (value !== '-1' && value >= quizPassingQuestions) || value === '-1';
+            return foundSelected;
+          },
+        });
+      },
       saveSettings() {
         this.$refs.observer.validate()
           .then((res1) => {

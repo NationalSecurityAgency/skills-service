@@ -91,6 +91,30 @@ describe('Quiz Metrics Tests', () => {
 
     });
 
+    it('quiz setting: configure number of questions', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+        cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
+
+        cy.get('[data-cy="quizNumQuestions"]').select(2);
+
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(3);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(2);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+    });
+
     it('surveys do not have settings, at least yet...', function () {
         cy.createQuizDef(1, { type: 'Survey' });
         cy.visit('/administrator/quizzes/quiz1/settings');

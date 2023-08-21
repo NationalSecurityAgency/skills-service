@@ -250,6 +250,27 @@ Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => 
     }]);
 });
 
+Cypress.Commands.add("setNumQuestionsForQuiz", (quizNum = 1, numQuestions) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizLength',
+        value: `${numQuestions}`
+    }]);
+});
+
+Cypress.Commands.add("setRandomizedQuestions", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizRandomizeQuestions',
+        value: `${enabled}`
+    }]);
+});
+
+Cypress.Commands.add("setRandomizedAnswers", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizRandomizeAnswers',
+        value: `${enabled}`
+    }]);
+});
+
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');

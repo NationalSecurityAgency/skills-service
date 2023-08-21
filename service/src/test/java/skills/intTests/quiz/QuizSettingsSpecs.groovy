@@ -357,16 +357,18 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+
         when:
         skillsService.saveQuizSettings(quiz.quizId, [
                 [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '3'],
         ])
         def settings_t0 = skillsService.getQuizSettings(quiz.quizId)
-        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizInfo.questions[0].id)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[0].id)
         def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
-        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizInfo.questions[1].id)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[1].id)
         def settings_t2 = skillsService.getQuizSettings(quiz.quizId)
-        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizInfo.questions[2].id)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[2].id)
         def settings_t3 = skillsService.getQuizSettings(quiz.quizId)
         then:
         settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
@@ -388,9 +390,9 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createChoiceQuestions(1, 1, 100)
         skillsService.createQuizQuestionDefs(questions)
 
-        def firstSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def secondSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def thirdSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def firstSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
+        def secondSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
+        def thirdSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
 
         assert firstSortedQuizInfo.questions[0].answerOptions == secondSortedQuizInfo.questions[0].answerOptions
         assert secondSortedQuizInfo.questions[0].answerOptions == thirdSortedQuizInfo.questions[0].answerOptions
@@ -401,9 +403,9 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         ])
 
         when:
-        def firstQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def secondQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def thirdQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def firstQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
+        def secondQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
+        def thirdQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body
 
         then:
         firstQuizInfo.questions[0].answerOptions != secondQuizInfo.questions[0].answerOptions
@@ -417,9 +419,9 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
         skillsService.createQuizQuestionDefs(questions)
 
-        def firstSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def secondSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def thirdSortedQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def firstSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user1").body
+        def secondSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user2").body
+        def thirdSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user3").body
 
         assert firstSortedQuizInfo.questions == secondSortedQuizInfo.questions
         assert secondSortedQuizInfo.questions == thirdSortedQuizInfo.questions
@@ -430,14 +432,64 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         ])
 
         when:
-        def firstQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def secondQuizInfo = skillsService.getQuizInfo(quiz.quizId)
-        def thirdQuizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def firstQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user4").body
+        def secondQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user5").body
+        def thirdQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user6").body
 
         then:
         firstQuizInfo.questions != secondQuizInfo.questions
         secondQuizInfo.questions != thirdQuizInfo.questions
         thirdQuizInfo.questions != firstQuizInfo.questions
+    }
+
+    def "Can select a subset of questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def fullQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user1").body
+
+        assert fullQuizInfo.questions.size() == 100
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 30],
+        ])
+
+        when:
+        def subsetQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user2").body
+
+        then:
+        subsetQuizInfo.questions.size() == 30
+    }
+
+    def "Can select a subset of randomized questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 100, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def fullQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user1").body
+
+        assert fullQuizInfo.questions.size() == 100
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 10],
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+        ])
+
+        when:
+        def firstSubsetQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user2").body
+        def secondSubsetQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user3").body
+        def thirdSubsetQuizInfo = skillsService.startQuizAttempt(quiz.quizId, "user4").body
+
+        then:
+        firstSubsetQuizInfo.questions.size() == 10
+        secondSubsetQuizInfo.questions.size() == 10
+        thirdSubsetQuizInfo.questions.size() == 10
+        thirdSubsetQuizInfo.questions != secondSubsetQuizInfo.questions
+        thirdSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
+        secondSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
     }
 
     def "get user admin role"() {
