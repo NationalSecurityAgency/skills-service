@@ -384,6 +384,40 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
+    def "QuizLength setting - when a question is removed adjust the MinNumQuestionsToPass setting if needed"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+
+        when:
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: '3'],
+        ])
+        def settings_t0 = skillsService.getQuizSettings(quiz.quizId)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[0].id)
+        def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[1].id)
+        def settings_t2 = skillsService.getQuizSettings(quiz.quizId)
+        skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[2].id)
+        def settings_t3 = skillsService.getQuizSettings(quiz.quizId)
+        then:
+        settings_t0.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
+        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString()]
+
+        settings_t1.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
+        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
+
+        settings_t2.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
+        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString()]
+
+        settings_t3.setting == [QuizSettings.QuizUserRole.setting]
+        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
+    }
+
     def "Answers for a question can be randomized"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
