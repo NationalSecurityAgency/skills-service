@@ -47,13 +47,14 @@ limitations under the License.
                 </div>
               </div>
               <div class="row ml-5">
-                <b-form-group :disabled="expirationType !== 'YEARLY'">
+                <b-form-group :disabled="expirationType !== 'YEARLY'" data-cy="yearlyFormGroup">
                   <div class="input-group">
                       <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'YEARLY'}">
                         <label for="yearlyYears-sb">Skills will expire every</label>
                         <b-form-spinbutton :disabled="expirationType !== 'YEARLY'"
                                            class="m-1"
                                            id="yearlyYears-sb"
+                                           data-cy="yearlyYears-sb"
                                            aria-label="Skills will expire every N years"
                                            v-model="yearlyYears"
                                            min="1"
@@ -84,17 +85,18 @@ limitations under the License.
             <template>
               <div class="row m-0">
                 <div class="col-12 col-lg-auto">
-                  <b-form-radio class="" value="MONTHLY" data-cy="monthlyRadio">Monthly</b-form-radio>
+                  <b-form-radio value="MONTHLY" data-cy="monthlyRadio">Monthly</b-form-radio>
                 </div>
               </div>
               <div class="row ml-5">
-                <b-form-group :disabled="expirationType !== 'MONTHLY'">
+                <b-form-group :disabled="expirationType !== 'MONTHLY'" data-cy="monthlyFormGroup" >
                   <div class="input-group">
                     <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'MONTHLY'}">
                       <label for="monthlyMonths-sb">Skills will expire every</label>
                       <b-form-spinbutton :disabled="expirationType !== 'MONTHLY'"
                                          class="m-1"
                                          id="monthlyMonths-sb"
+                                         data-cy="monthlyMonths-sb"
                                          aria-label="Skills will expire every N months"
                                          v-model="monthlyMonths"
                                          min="1"
@@ -113,6 +115,7 @@ limitations under the License.
                         <b-form-radio-group
                           class="pt-2"
                           v-model="monthlyDayOption"
+                          data-cy="monthlyDayOption"
                           aria-label="Day of month"
                           :options="[
                             {value: 'FIRST_DAY_OF_MONTH', text: 'First'},
@@ -143,7 +146,7 @@ limitations under the License.
 <!--                </div>-->
 <!--              </div>-->
 <!--              <div class="row ml-5">-->
-<!--                <b-form-group :disabled="expirationType !== 'DAILY'">-->
+<!--                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">-->
 <!--                  <div class="input-group">-->
 <!--                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">-->
 <!--                      <label for="dailyDays-sb">Skills will expire </label>-->
@@ -343,7 +346,7 @@ limitations under the License.
             if (this.monthlyDayOption === LAST_DAY_OF_MONTH || (this.monthlyDayOption === SET_DAY_OF_MONTH && currentDayOfMonth <= this.monthlyDay)) {
               incrementMonthBy -= 1;
             }
-            const nextExpirationDate = dayjs(now).date(1).add(incrementMonthBy, 'month');
+            const nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
             if (this.monthlyDayOption === FIRST_DAY_OF_MONTH) {
               expirationSettings.nextExpirationDate = nextExpirationDate.date(1);
             } else if (this.monthlyDayOption === LAST_DAY_OF_MONTH) {
