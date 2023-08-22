@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+import axios from 'axios';
 
-import groovy.transform.ToString
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.Table
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-
-@Entity
-@ToString(includeNames = true)
-@Table(name = 'user_achievement')
-@EntityListeners(AuditingEntityListener)
-class UserAchievement extends UserAchievementParent {
-
-}
+export default {
+  saveExpirationSettings(projectId, skillId, expirationSettings) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
+    return axios.post(url, expirationSettings)
+      .then((response) => response.data);
+  },
+  getExpirationSettings(projectId, skillId) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
+    return axios.get(url)
+      .then((response) => response.data);
+  },
+};

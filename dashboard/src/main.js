@@ -47,9 +47,11 @@ import {
   FormDatepickerPlugin,
   ProgressPlugin,
   BIcon,
-  BIconQuestion, ListGroupPlugin,
+  BIconQuestion,
+  ListGroupPlugin,
   FormFilePlugin,
   FormRatingPlugin,
+  BFormSpinbutton,
 } from 'bootstrap-vue';
 
 import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
@@ -122,6 +124,7 @@ Vue.use(TimeDurationFilter);
 Vue.use(FormFilePlugin);
 Vue.component('BIcon', BIcon);
 Vue.component('BIconQuestion', BIconQuestion);
+Vue.component('b-form-spinbutton', BFormSpinbutton);
 
 Vue.use(SkillsDirective);
 Vue.use(FiltersPlugin);

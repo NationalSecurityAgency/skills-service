@@ -23,6 +23,9 @@ import skills.storage.model.SkillAttributesDef
 interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long> {
 
     @Nullable
+    List<SkillAttributesDef> findAllByType(SkillAttributesDef.SkillAttributesType type)
+
+    @Nullable
     SkillAttributesDef findBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
 
     int deleteBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)

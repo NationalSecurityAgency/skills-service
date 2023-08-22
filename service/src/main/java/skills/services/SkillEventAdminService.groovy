@@ -74,9 +74,6 @@ class SkillEventAdminService {
     UserEventService userEventService
 
     @Autowired
-    private SkillEventsService skillsManagementFacade
-
-    @Autowired
     private UserInfoService userInfoService
 
     @Autowired
@@ -327,6 +324,34 @@ class SkillEventAdminService {
         return res
     }
 
+    @Transactional
+    @Profile
+    void deleteAllSkillEventsForSkill(Integer skillRefId) {
+        SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
+        String projectId = skillDef.projectId
+        String skillId = skillDef.skillId
+        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+        }
+
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefId(skillRefId)
+        expirePerformedSkillEvents(performedSkills)
+    }
+
+    @Transactional
+    @Profile
+    void deleteAllSkillEventsForSkillPerformedBefore(Integer skillRefId, Date expirationDate) {
+        SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
+        String projectId = skillDef.projectId
+        String skillId = skillDef.skillId
+        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+        }
+
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefIdAndPerformedOnBefore(skillRefId, expirationDate)
+        expirePerformedSkillEvents(performedSkills)
+    }
+
     @Profile
     void removeAssociatedQuizAttempts(UserPerformedSkill performedSkill) {
         List<Integer> quizRefIds = quizToSkillDefRepo.getQuizRefIdsBySkillRefId(performedSkill.skillRefId)
@@ -351,6 +376,22 @@ class SkillEventAdminService {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Profile
+    private void expirePerformedSkillEvents(List<UserPerformedSkill> performedSkills) {
+        if (performedSkills) {
+            log.info("Deleting [{}] performed skills [{}] for user [{}]", performedSkills.size(), performedSkills.first(), performedSkills.first().userId)
+            for (UserPerformedSkill performedSkill : performedSkills) {
+                String userId = performedSkill.userId
+                String projectId = performedSkill.projectId
+                String skillId = performedSkill.skillId
+                log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
+
+                removePerformedSkillEvent(performedSkill)
+                removeAssociatedQuizAttempts(performedSkill)
             }
         }
     }
@@ -461,7 +502,7 @@ class SkillEventAdminService {
             if (it.parent.type == SkillDef.ContainerType.Badge && BadgeUtils.withinActiveTimeframe(it.parent)) {
                 SkillDef badge = it.parent
                 List<SkillDef> nonAchievedChildren = achievedLevelRepo.findNonAchievedChildren(userId, badge.projectId, badge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
-                if (!nonAchievedChildren) {
+                if (!nonAchievedChildren || (nonAchievedChildren.size() == 1 && nonAchievedChildren[0].skillId == currentSkillDef.skillId) ) {
                     achievedLevelRepo.deleteByProjectIdAndSkillIdAndUserIdAndLevel(badge.projectId, badge.skillId, userId, null)
                 }
             }

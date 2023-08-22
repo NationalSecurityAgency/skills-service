@@ -23,8 +23,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
 @ToString(includeNames = true)
-@Table(name = 'user_achievement')
+@Table(name = 'expired_user_achievement')
 @EntityListeners(AuditingEntityListener)
-class UserAchievement extends UserAchievementParent {
+class ExpiredUserAchievement extends UserAchievementParent {
 
+    Date expiredOn
 }

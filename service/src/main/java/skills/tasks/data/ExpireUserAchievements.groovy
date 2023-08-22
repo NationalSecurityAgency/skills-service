@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.tasks.data
 
-import groovy.transform.ToString
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.Table
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-
-@Entity
-@ToString(includeNames = true)
-@Table(name = 'user_achievement')
-@EntityListeners(AuditingEntityListener)
-class UserAchievement extends UserAchievementParent {
-
+class ExpireUserAchievements {
+    //placeholder
 }

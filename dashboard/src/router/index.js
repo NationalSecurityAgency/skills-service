@@ -96,6 +96,7 @@ import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage';
 import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 import VideoConfigPage from '@/components/video/VideoConfigPage';
+import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage';
 
 Vue.use(Router);
 
@@ -780,6 +781,17 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Configure Video',
+          },
+        },
+        props: true,
+      }, {
+        name: 'ConfigureExpiration',
+        path: 'configExpiration',
+        component: ExpirationConfigPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Configure Expiration',
           },
         },
         props: true,

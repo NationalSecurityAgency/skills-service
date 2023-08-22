@@ -532,8 +532,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
      *      *  the parameter is withing left join clause and they didn't handle that properly
      */
-    @Query('''select sdChild, userPoints, pd.name, approval
+    @Query('''select sdChild, attributes, userPoints, pd.name, approval
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
     left join SkillApproval approval on (
@@ -552,8 +553,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      *  the reason for duplication is that when null is provided for the 'day' parameter JPA doesn't properly generate SQL statement, I am guessing the bug is because
      *      *  the parameter is withing left join clause and they didn't handle that properly
      */
-    @Query('''select sdChild, userPoints, approval
+    @Query('''select sdChild, attributes, userPoints, approval
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
+    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn=null and approval.approverUserId=null
       where srd.parent=sdParent and  srd.child=sdChild and sdChild.enabled = 'true' and

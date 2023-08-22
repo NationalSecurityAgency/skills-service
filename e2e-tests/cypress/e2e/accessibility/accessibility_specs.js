@@ -337,6 +337,19 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
+    it('configure expiration for a skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configExpiration');
+        cy.injectAxe();
+
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="expirationNeverRadio"]')
+        cy.customLighthouse();
+        cy.customA11y();
+    });
+
     it('badges', () => {
         cy.visit('/administrator/');
         cy.injectAxe();

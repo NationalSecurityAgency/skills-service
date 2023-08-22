@@ -15,36 +15,37 @@
  */
 package skills.storage.model
 
-import groovy.transform.ToString
-import io.hypersistence.utils.hibernate.type.json.JsonType
+import groovy.transform.CompileStatic
 import jakarta.persistence.*
-import org.hibernate.annotations.Type
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-@ToString(includeNames = true)
-@Entity()
-@Table(name='skill_attributes_definition')
-@EntityListeners(AuditingEntityListener)
-class SkillAttributesDef {
-
-    static enum SkillAttributesType {
-        Video, BonusAward, AchievementExpiration
-    };
+@CompileStatic
+@MappedSuperclass
+class UserAchievementParent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
+    String userId
+
+    // denormalize for performance and convenience
+    String projectId
+
+    // denormalize for performance and convenience
+    // null subject will represent overall points
+    String skillId // null will represent overall points for all
+
+    // fk to SkillDef
+    // null will represent overall points for all
     Integer skillRefId
 
-    @Enumerated(EnumType.STRING)
-    SkillAttributesType type
+    Integer level
 
-    @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb")
-    String attributes
+    int pointsWhenAchieved
+
+    Date achievedOn
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
@@ -53,4 +54,6 @@ class SkillAttributesDef {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    String notified
 }

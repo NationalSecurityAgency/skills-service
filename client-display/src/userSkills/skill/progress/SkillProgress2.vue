@@ -96,6 +96,13 @@ limitations under the License.
           <animated-number :num="skill.points"/>
           / {{ skill.totalPoints | number }} Points
         </div>
+
+        <div v-if="skill.points > 0 && expirationDate" data-cy="expirationDate">
+          <div class="my-2">
+            <i class="fas fa-hourglass-end skills-color-expiration mr-2"></i>Points will expire on <span class="font-weight-bold">{{ expirationDate }}</span>
+          </div>
+        </div>
+
         <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && allowDrillDown" data-cy="approvalPending">
           <span v-if="!skill.selfReporting.rejectedOn"><i class="far fa-clock" aria-hidden="true"></i> Pending Approval</span>
           <span v-else><i class="fas fa-heart-broken text-danger skills-theme-primary-color" aria-hidden="true"></i> Request Rejected</span>
@@ -194,6 +201,7 @@ limitations under the License.
 </template>
 
 <script>
+  import dayjs from 'dayjs';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import ProgressBar from '@/userSkills/skill/progress/ProgressBar';
@@ -301,6 +309,16 @@ limitations under the License.
       },
       showBadgesAndTagsRow() {
         return ((this.skill.badges && this.skill.badges.length > 0 && !this.badgeId) || (this.skill.tags && this.skill.tags.length > 0));
+      },
+      expirationDate() {
+        if (this.skill.expirationDate) {
+          let exp = dayjs(this.skill.expirationDate);
+          if (dayjs().isSameOrAfter(exp, 'day')) {
+            exp = dayjs().add(1, 'day'); // if date is in the past, then show as tomorrow
+          }
+          return exp.format('MMMM D YYYY');
+        }
+        return '';
       },
     },
     watch: {
@@ -415,5 +433,7 @@ limitations under the License.
 .self-report-badge:hover .sr-spelled-out {
   display: inline-block;
 }
-
+.skills-color-expiration {
+ color: #f4a261ff;
+}
 </style>
