@@ -256,7 +256,7 @@ limitations under the License.
           message: () => 'Passing requirement must be less than or equal to the quiz length',
           params: ['quizNumQuestions'],
           validate(value, { quizNumQuestions }) {
-            const foundSelected = (quizNumQuestions !== '-1' && value <= quizNumQuestions) || quizNumQuestions === '-1';
+            const foundSelected = (quizNumQuestions !== '-1' && parseInt(value, 10) <= parseInt(quizNumQuestions, 10)) || quizNumQuestions === '-1';
             return foundSelected;
           },
         });
@@ -265,7 +265,7 @@ limitations under the License.
           message: () => 'Quiz length must be greater than or equal to the passing requirement',
           params: ['quizPassingQuestions'],
           validate(value, { quizPassingQuestions }) {
-            const foundSelected = (value !== '-1' && value >= quizPassingQuestions) || value === '-1';
+            const foundSelected = (value !== '-1' && parseInt(value, 10) >= parseInt(quizPassingQuestions, 10)) || value === '-1';
             return foundSelected;
           },
         });
