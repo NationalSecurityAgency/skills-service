@@ -115,6 +115,46 @@ describe('Quiz Metrics Tests', () => {
 
     });
 
+    it('quiz setting: configure number of questions and num to pass at 10 or greater', function () {
+        cy.createQuizDef(1);
+        for(var x = 1; x < 15; x++) {
+            cy.createQuizQuestionDef(1, x);
+        }
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+        cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
+
+        cy.get('[data-cy="quizNumQuestions"]').select(9);
+
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(10);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(9);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="quizNumQuestions"]').select(12);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(13);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(4);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="quizPassingSelector"]').select(14);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="quizNumQuestions"]').select(14);
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+    });
+
     it('surveys do not have settings, at least yet...', function () {
         cy.createQuizDef(1, { type: 'Survey' });
         cy.visit('/administrator/quizzes/quiz1/settings');
