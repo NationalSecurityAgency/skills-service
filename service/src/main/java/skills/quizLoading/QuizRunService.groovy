@@ -168,21 +168,23 @@ class QuizRunService {
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
 
         if (inProgressAttempt) {
-            Date deadline = inProgressAttempt.started.clone()
-            deadline.minutes += quizTimeLimit
-            Date currentDate = new Date()
-            if(currentDate > deadline) {
-                log.info("Deadline has passed, quiz failed")
-                failQuizAttempt(userId, quizId, inProgressAttempt.id)
-                return new QuizAttemptStartResult(
-                        id: inProgressAttempt.id,
-                        inProgressAlready: true,
-                        selectedAnswerIds: [],
-                        enteredText: null,
-                        questions: [],
-                        existingAttemptFailed: true,
-                        deadline: deadline
-                )
+            if (quizTimeLimit > 0) {
+                Date deadline = inProgressAttempt.started.clone()
+                deadline.minutes += quizTimeLimit
+                Date currentDate = new Date()
+                if (currentDate > deadline) {
+                    log.info("Deadline has passed, quiz failed")
+                    failQuizAttempt(userId, quizId, inProgressAttempt.id)
+                    return new QuizAttemptStartResult(
+                            id: inProgressAttempt.id,
+                            inProgressAlready: true,
+                            selectedAnswerIds: [],
+                            enteredText: null,
+                            questions: [],
+                            existingAttemptFailed: true,
+                            deadline: deadline
+                    )
+                }
             }
 
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
@@ -226,9 +228,12 @@ class QuizRunService {
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numQuestions;
 
+        Date deadline = null
         Date start = new Date()
-        Date deadline = start.clone()
-        deadline.minutes += quizTimeLimit
+        if(quizTimeLimit > 0) {
+            deadline = start.clone()
+            deadline.minutes += quizTimeLimit
+        }
 
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
                 userId: userId,
