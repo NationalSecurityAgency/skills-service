@@ -186,26 +186,28 @@ limitations under the License.
     },
     methods: {
       beginDateTimer() {
-        this.currentDate = dayjs().utc().valueOf();
-        this.dateTimer = setInterval(() => {
+        if (this.quizInfo.deadline) {
           this.currentDate = dayjs().utc().valueOf();
-          if (this.currentDate >= dayjs(this.quizInfo.deadline).utc().valueOf()) {
-            this.destroyDateTimer();
-            QuizRunService.failQuizAttempt(this.quizId, this.quizAttemptId).then((gradedRes) => {
-              const numTotal = this.quizInfo.questions.length;
-              const numCorrect = 0;
-              const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
-              this.quizResult = {
-                gradedRes,
-                numCorrect,
-                numTotal,
-                percentCorrect,
-                missedBy: numTotal,
-                outOfTime: true,
-              };
-            });
-          }
-        }, 1000);
+          this.dateTimer = setInterval(() => {
+            this.currentDate = dayjs().utc().valueOf();
+            if (this.currentDate >= dayjs(this.quizInfo.deadline).utc().valueOf()) {
+              this.destroyDateTimer();
+              QuizRunService.failQuizAttempt(this.quizId, this.quizAttemptId).then((gradedRes) => {
+                const numTotal = this.quizInfo.questions.length;
+                const numCorrect = 0;
+                const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+                this.quizResult = {
+                  gradedRes,
+                  numCorrect,
+                  numTotal,
+                  percentCorrect,
+                  missedBy: numTotal,
+                  outOfTime: true,
+                };
+              });
+            }
+          }, 1000);
+        }
       },
       destroyDateTimer() {
         clearInterval(this.dateTimer);
