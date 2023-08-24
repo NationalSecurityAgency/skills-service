@@ -168,8 +168,9 @@ class QuizRunService {
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
 
         if (inProgressAttempt) {
+            Date deadline = null
             if (quizTimeLimit > 0) {
-                Date deadline = inProgressAttempt.started.clone()
+                deadline = inProgressAttempt.started.clone()
                 deadline.minutes += quizTimeLimit
                 Date currentDate = new Date()
                 if (currentDate > deadline) {
