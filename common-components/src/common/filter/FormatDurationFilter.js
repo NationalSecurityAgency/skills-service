@@ -48,7 +48,9 @@ const timeDurationFormatter = (valueInMs, alwaysIncludeSecondsWithMinutes = fals
     const minutes = totalMinutes - (hours * 60);
     let res = `${hours} hour${hours > 1 ? 's' : ''}`;
     if (detailedDays || hours < 10) {
-      res = `${res} and ${minutes} minute${minutes === 1 ? '' : 's'}`;
+      if (minutes > 0) {
+        res = `${res} and ${minutes} minute${minutes === 1 ? '' : 's'}`;
+      }
     }
     return res;
   }

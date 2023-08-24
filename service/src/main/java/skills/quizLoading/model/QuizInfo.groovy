@@ -31,4 +31,7 @@ class QuizInfo {
     Boolean userQuizPassed
     Date userLastQuizAttemptDate
     Integer quizLength
+    Integer quizTimeLimitInMinutes
+
+    Date deadline
 }

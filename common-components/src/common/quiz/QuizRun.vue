@@ -64,6 +64,7 @@ limitations under the License.
         </div>
         <div class="col-auto text-right text-muted">
           <b-badge variant="success" data-cy="numQuestions">{{quizInfo.quizLength}}</b-badge> <span class="text-uppercase">questions</span>
+          <span v-if="quizInfo.quizTimeLimitInMinutes > 0"> | {{currentDate | duration(quizInfo.deadline)}}</span>
         </div>
       </div>
 
@@ -117,6 +118,7 @@ limitations under the License.
 </template>
 
 <script>
+  import dayjs from 'dayjs';
   import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsSpinner from '@/common-components/utilities/SkillsSpinner';
   import QuizRunQuestion from '@/common-components/quiz/QuizRunQuestion';
@@ -154,6 +156,8 @@ limitations under the License.
         splashScreen: {
           show: false,
         },
+        currentDate: null,
+        dateTimer: null,
       };
     },
     mounted() {
@@ -162,6 +166,9 @@ limitations under the License.
       } else {
         this.loadData();
       }
+    },
+    beforeDestroy() {
+      this.destroyDateTimer();
     },
     computed: {
       isSurveyType() {
@@ -178,6 +185,32 @@ limitations under the License.
       },
     },
     methods: {
+      beginDateTimer() {
+        this.currentDate = dayjs().utc().valueOf();
+        this.dateTimer = setInterval(() => {
+          this.currentDate = dayjs().utc().valueOf();
+          if (this.currentDate >= dayjs(this.quizInfo.deadline).utc().valueOf()) {
+            this.destroyDateTimer();
+            QuizRunService.failQuizAttempt(this.quizId, this.quizAttemptId).then((gradedRes) => {
+              const numTotal = this.quizInfo.questions.length;
+              const numCorrect = 0;
+              const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+              this.quizResult = {
+                gradedRes,
+                numCorrect,
+                numTotal,
+                percentCorrect,
+                missedBy: numTotal,
+                outOfTime: true,
+              };
+            });
+          }
+        }, 1000);
+      },
+      destroyDateTimer() {
+        clearInterval(this.dateTimer);
+        this.dateTimer = null;
+      },
       loadData() {
         this.isLoading = true;
         QuizRunService.getQuizInfo(this.quizId)
@@ -195,14 +228,40 @@ limitations under the License.
           this.isLoading = false;
         }
       },
+      failQuizAttempt() {
+        this.destroyDateTimer();
+        this.quizResult = {
+          gradedRes: {
+            associatedSkillResults: [],
+            completed: null,
+            gradedQuestion: [],
+            numberQuestionsGotWrong: 0,
+            passed: false,
+            started: null,
+          },
+          missedBy: this.quizInfo.questions.length,
+          numCorrect: 0,
+          numTotal: this.quizInfo.questions.length,
+          percentCorrect: 0,
+          outOfTime: true,
+        };
+      },
       startQuizAttempt() {
         this.isLoading = true;
         this.splashScreen.show = false;
+        this.beginDateTimer();
 
         QuizRunService.startQuizAttempt(this.quizId)
           .then((startQuizAttemptRes) => {
+            if (startQuizAttemptRes.existingAttemptFailed) {
+              this.failQuizAttempt();
+              return;
+            }
             this.quizAttemptId = startQuizAttemptRes.id;
-            const { selectedAnswerIds, enteredText, questions } = startQuizAttemptRes;
+            const {
+              selectedAnswerIds, enteredText, questions, deadline,
+            } = startQuizAttemptRes;
+            this.quizInfo.deadline = deadline;
             this.quizInfo.questions = questions;
             const copy = ({ ...this.quizInfo });
             copy.questions = this.quizInfo.questions.map((q) => {

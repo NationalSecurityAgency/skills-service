@@ -100,6 +100,7 @@ class QuizRunService {
         QuizSetting maxNumAttemptsSetting = quizSettings?.find( { it.setting == QuizSettings.MaxNumAttempts.setting })
         QuizSetting minNumQuestionsToPassSetting = quizSettings?.find( { it.setting == QuizSettings.MinNumQuestionsToPass.setting })
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
+        QuizSetting quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
 
@@ -114,7 +115,8 @@ class QuizRunService {
                 userLastQuizAttemptDate: userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null,
                 maxAttemptsAllowed: maxNumAttemptsSetting ? Integer.valueOf(maxNumAttemptsSetting.value) : -1,
                 minNumQuestionsToPass: minNumQuestionsToPassSetting ? Integer.valueOf(minNumQuestionsToPassSetting.value) : -1,
-                quizLength: lengthSetting
+                quizLength: lengthSetting,
+                quizTimeLimitInMinutes: quizTimeLimit ? Integer.valueOf(quizTimeLimit.value) : -1,
         )
     }
 
@@ -155,6 +157,7 @@ class QuizRunService {
         List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
         boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        Integer quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })?.value?.toInteger()
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
         List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
         List<QuizQuestionInfo> questionsForQuiz = []
@@ -165,6 +168,23 @@ class QuizRunService {
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
 
         if (inProgressAttempt) {
+            Date deadline = inProgressAttempt.started.clone()
+            deadline.minutes += quizTimeLimit
+            Date currentDate = new Date()
+            if(currentDate > deadline) {
+                log.info("Deadline has passed, quiz failed")
+                failQuizAttempt(userId, quizId, inProgressAttempt.id)
+                return new QuizAttemptStartResult(
+                        id: inProgressAttempt.id,
+                        inProgressAlready: true,
+                        selectedAnswerIds: [],
+                        enteredText: null,
+                        questions: [],
+                        existingAttemptFailed: true,
+                        deadline: deadline
+                )
+            }
+
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
 
             List<Integer> selectedAnswerIds = alreadySelected?.findAll({!it.getAnswerText()}).collect { it.getAnswerId()}
@@ -190,6 +210,7 @@ class QuizRunService {
                     selectedAnswerIds: selectedAnswerIds ?: [],
                     enteredText: enteredText,
                     questions: questionsForQuiz.sort{ it.displayOrder },
+                    deadline: deadline
             )
         }
 
@@ -204,12 +225,17 @@ class QuizRunService {
 
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numQuestions;
+
+        Date start = new Date()
+        Date deadline = start.clone()
+        deadline.minutes += quizTimeLimit
+
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
                 userId: userId,
                 quizDefinitionRefId: quizDef.id,
                 status: UserQuizAttempt.QuizAttemptStatus.INPROGRESS,
                 numQuestionsToPass: minNumQuestionsToPass,
-                started: new Date())
+                started: start)
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
 
@@ -224,7 +250,7 @@ class QuizRunService {
             quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
         }
 
-        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder },)
+        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder }, deadline: deadline)
     }
 
     @Profile
@@ -251,7 +277,7 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting])
     }
 
     @Profile
@@ -352,6 +378,33 @@ class QuizRunService {
                 }
             }
         }
+    }
+
+    QuizGradedResult failQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
+        QuizDef quizDef = getQuizDef(quizId)
+        Optional<UserQuizAttempt> optionalUserQuizAttempt = quizAttemptRepo.findById(quizAttemptId)
+        if (!optionalUserQuizAttempt.isPresent()) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
+        }
+        UserQuizAttempt userQuizAttempt = optionalUserQuizAttempt.get()
+        if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
+        }
+        if (userQuizAttempt.userId != userId) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
+        }
+
+        QuizGradedResult gradedResult = new QuizGradedResult(passed: false, numQuestionsGotWrong: 0,
+                gradedQuestions: [])
+
+        userQuizAttempt.status = UserQuizAttempt.QuizAttemptStatus.FAILED
+        userQuizAttempt.completed = new Date()
+        quizAttemptRepo.save(userQuizAttempt)
+
+        gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)
+        gradedResult.started = userQuizAttempt.started
+        gradedResult.completed = userQuizAttempt.completed
+        return gradedResult
     }
 
     @Transactional

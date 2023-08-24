@@ -19,7 +19,8 @@ limitations under the License.
       <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
         <i class="fas fa-handshake text-info skills-page-title-text-color" aria-hidden="true"></i> Thank you for completing the {{ quizInfo.quizType }}!
       </slot>
-      <span v-else><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
+      <span v-else-if="!quizResult.outOfTime"><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
+      <span v-else>You've run out of time!</span>
     </div>
     <div class="mb-1 mt-4 h2">
       <span class="font-weight-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>

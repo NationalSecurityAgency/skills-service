@@ -40,6 +40,14 @@ limitations under the License.
         </b-card>
       </div>
       <div v-if="!isSurveyType" class="col-md pt-2">
+        <b-card class="skills-card-theme-border" body-class="pt-2 pb-1" data-cy="quizTimeLimitCard">
+          <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
+          <span class="text-secondary font-italic ml-1">Time Limit:</span>
+          <span v-if="quizInfo.quizTimeLimitInMinutes > 0" class="text-uppercase ml-1 font-weight-bold">{{quizTimeLimit | formatDuration}}</span>
+          <span v-else class="text-uppercase ml-1 font-weight-bold">NONE</span>
+        </b-card>
+      </div>
+      <div v-if="!isSurveyType" class="col-md pt-2">
         <b-card class="skills-card-theme-border" body-class="pt-2 pb-1" data-cy="quizInfoCard">
           <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;" aria-hidden="true"></i>
           <span class="text-secondary font-italic ml-1">Attempts:</span>
@@ -85,6 +93,9 @@ limitations under the License.
       quizInfo: Object,
     },
     computed: {
+      quizTimeLimit() {
+        return this.quizInfo.quizTimeLimitInMinutes * (60 * 1000);
+      },
       numQuestions() {
         return this.quizInfo.quizLength;
       },
