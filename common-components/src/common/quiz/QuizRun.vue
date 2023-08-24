@@ -64,7 +64,7 @@ limitations under the License.
         </div>
         <div class="col-auto text-right text-muted">
           <b-badge variant="success" data-cy="numQuestions">{{quizInfo.quizLength}}</b-badge> <span class="text-uppercase">questions</span>
-          <span v-if="quizInfo.quizTimeLimitInMinutes > 0"> | {{currentDate | duration(quizInfo.deadline)}}</span>
+          <span v-if="quizInfo.quizTimeLimitInMinutes > 0"> | {{currentDate | duration(quizInfo.deadline, false, true)}}</span>
         </div>
       </div>
 
@@ -251,7 +251,6 @@ limitations under the License.
       startQuizAttempt() {
         this.isLoading = true;
         this.splashScreen.show = false;
-        this.beginDateTimer();
 
         QuizRunService.startQuizAttempt(this.quizId)
           .then((startQuizAttemptRes) => {
@@ -282,6 +281,7 @@ limitations under the License.
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
+            this.beginDateTimer();
           }).finally(() => {
             this.isLoading = false;
           });
