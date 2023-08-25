@@ -299,6 +299,7 @@ limitations under the License.
               .then(() => {
                 this.reportTestRunToBackend()
                   .finally(() => {
+                    this.destroyDateTimer();
                     this.isCompleting = false;
                     if (!this.isSurveyType) {
                       this.$nextTick(() => {

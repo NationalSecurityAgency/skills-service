@@ -32,6 +32,4 @@ class QuizInfo {
     Date userLastQuizAttemptDate
     Integer quizLength
     Integer quizTimeLimitInMinutes
-
-    Date deadline
 }
