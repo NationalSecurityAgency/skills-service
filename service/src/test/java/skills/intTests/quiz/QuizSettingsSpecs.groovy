@@ -25,6 +25,7 @@ import skills.quizLoading.QuizSettings
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 
+import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicInteger
 
 import static skills.intTests.utils.SkillsFactory.createProject
@@ -524,6 +525,31 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         thirdSubsetQuizInfo.questions != secondSubsetQuizInfo.questions
         thirdSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
         secondSubsetQuizInfo.questions != firstSubsetQuizInfo.questions
+    }
+
+    def "Can set a time limit on quizzes"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId, "user1")
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId, "user1").body
+
+        assert quizInfo.quizTimeLimitInMinutes == -1
+        assert quizAttempt.deadline == null
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizTimeLimit.setting, value: 300],
+        ])
+
+        when:
+        def updatedQuizInfo = skillsService.getQuizInfo(quiz.quizId, "user1")
+        def deadlineQuizAttempt = skillsService.startQuizAttempt(quiz.quizId, "user2").body
+
+        then:
+        updatedQuizInfo.quizTimeLimitInMinutes == 300
+        deadlineQuizAttempt.deadline != null
     }
 
     def "get user admin role"() {

@@ -143,7 +143,7 @@ limitations under the License.
                         <input class="form-control d-inline" type="text" v-model="hoursForQuiz"
                                aria-labelledby="quizTimeLimitHours"
                                data-cy="timeLimitHoursInput"
-                               @change="updateTimeLimit"
+                               @input="updateTimeLimit"
                                ref="timeLimitHours" />
                         <div class="input-group-append">
                           <span class="input-group-text" id="hours-append">Hours</span>
@@ -157,8 +157,8 @@ limitations under the License.
                       <div class="input-group">
                         <input class="form-control d-inline" type="text" v-model="minutesForQuiz"
                                aria-labelledby="quizTimeLimit"
-                               data-cy="timeLimitInput"
-                               @change="updateTimeLimit"
+                               data-cy="timeLimitMinutesInput"
+                               @input="updateTimeLimit"
                                ref="timeLimitMinutes" />
                         <div class="input-group-append">
                           <span class="input-group-text" id="minutes-append">Minutes</span>
@@ -268,7 +268,7 @@ limitations under the License.
             lastLoadedUnlimited: true,
           },
         },
-        hoursForQuiz: 0,
+        hoursForQuiz: 1,
         minutesForQuiz: 0,
         errMsg: null,
       };
