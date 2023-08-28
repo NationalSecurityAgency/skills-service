@@ -36,6 +36,11 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+
 @Service
 @Slf4j
 class QuizRunService {
@@ -170,11 +175,12 @@ class QuizRunService {
         if (inProgressAttempt) {
             Date deadline = null
             if (quizTimeLimit > 0) {
-                deadline = inProgressAttempt.started.clone()
-                deadline.minutes += quizTimeLimit
-                Date currentDate = new Date()
-                if (currentDate > deadline) {
-                    log.info("Deadline has passed, quiz failed")
+                LocalDateTime deadlineLocal = inProgressAttempt.started.toLocalDateTime();
+                deadlineLocal.plusMinutes(quizTimeLimit)
+                LocalDateTime currentDate = LocalDateTime.now()
+                deadline = deadlineLocal.toDate()
+                if (currentDate.isAfter(deadlineLocal)) {
+                    log.info("Deadline has passed for user [{}] on quiz [{}], failing quiz attempt", userId, quizId)
                     failQuizAttempt(userId, quizId, inProgressAttempt.id)
                     return new QuizAttemptStartResult(
                             id: inProgressAttempt.id,
@@ -183,7 +189,7 @@ class QuizRunService {
                             enteredText: null,
                             questions: [],
                             existingAttemptFailed: true,
-                            deadline: deadline
+                            deadline: deadlineLocal.toDate()
                     )
                 }
             }
@@ -229,11 +235,11 @@ class QuizRunService {
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numQuestions;
 
-        Date deadline = null
-        Date start = new Date()
+        LocalDateTime deadline = null
+        LocalDateTime start = LocalDateTime.now()
         if(quizTimeLimit > 0) {
-            deadline = start.clone()
-            deadline.minutes += quizTimeLimit
+            deadline = start
+            deadline.plusMinutes(quizTimeLimit)
         }
 
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
@@ -241,7 +247,7 @@ class QuizRunService {
                 quizDefinitionRefId: quizDef.id,
                 status: UserQuizAttempt.QuizAttemptStatus.INPROGRESS,
                 numQuestionsToPass: minNumQuestionsToPass,
-                started: start)
+                started: start.toDate())
         UserQuizAttempt savedAttempt = quizAttemptRepo.saveAndFlush(userQuizAttempt)
         log.info("Started new quiz attempt {}", savedAttempt)
 
@@ -256,7 +262,7 @@ class QuizRunService {
             quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
         }
 
-        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder }, deadline: deadline)
+        return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder }, deadline: deadline?.toDate())
     }
 
     @Profile
