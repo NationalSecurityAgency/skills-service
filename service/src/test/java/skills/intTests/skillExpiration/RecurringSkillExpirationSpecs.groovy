@@ -24,6 +24,7 @@ import skills.intTests.utils.SkillsService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.storage.model.ExpiredUserAchievement
+import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
@@ -1468,7 +1469,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
         // bypass endpoint validation for testing purposes, show never get in this state though
         LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
-        skillAttributeService.saveExpirationAttrs(proj2.projectId, skill1.skillId, new ExpirationAttrs(
+        skillAttributeService.saveAttrs(proj2.projectId, skill1.skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, new ExpirationAttrs(
                 expirationType    : ExpirationAttrs.YEARLY,
                 every             : 1,
                 monthlyDay        : expirationDate.dayOfMonth,

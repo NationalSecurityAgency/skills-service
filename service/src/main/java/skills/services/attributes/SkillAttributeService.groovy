@@ -115,7 +115,7 @@ class SkillAttributeService {
         return  res
     }
 
-    private <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T attributes, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
+    <T> void saveAttrs(String projectId, String skillId, SkillAttributesDef.SkillAttributesType type, T attributes, SkillDef.ContainerType containerType = SkillDef.ContainerType.Skill) {
         Integer skillDefId = skillDefAccessor.getSkillDefId(projectId, skillId, containerType)
         SkillAttributesDef skillAttributesDef = skillAttributesDefRepo.findBySkillRefIdAndType(skillDefId, type)
         if (!skillAttributesDef) {
