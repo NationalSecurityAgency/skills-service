@@ -418,9 +418,6 @@ describe('Settings Tests', () => {
         cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
             .eq(0)
             .should('be.disabled');
-        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(0)
-            .click({ force: true });
         cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
 
         // click away to remove tooltip
