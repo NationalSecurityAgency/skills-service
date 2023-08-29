@@ -685,6 +685,33 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="takeQuizBtn"]').click();
         cy.get('[data-cy="completionSummaryTitle"]').contains("You've run out of time!")
     });
+
+    it('can refresh in the middle of a timed quiz', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.setQuizTimeLimit(1, 300);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.wait(1000);
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="completionSummaryTitle"]').should('not.exist');
+    });
 });
 
 

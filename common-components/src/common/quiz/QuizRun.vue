@@ -64,7 +64,7 @@ limitations under the License.
         </div>
         <div class="col-auto text-right text-muted">
           <b-badge variant="success" data-cy="numQuestions">{{quizInfo.quizLength}}</b-badge> <span class="text-uppercase">questions</span>
-          <span v-if="quizInfo.quizTimeLimit > 0"> | {{currentDate | duration(quizInfo.deadline, false, true)}}</span>
+          <span v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null"> | {{currentDate | duration(quizInfo.deadline, false, true)}}</span>
         </div>
       </div>
 
@@ -113,6 +113,9 @@ limitations under the License.
       </div>
     </b-card>
 
+    <div v-if="scrollDistance > 300" id="floating-timer">
+      <div v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null">{{currentDate | duration(quizInfo.deadline, false, true)}}</div>
+    </div>
   </div>
 </div>
 </template>
@@ -158,6 +161,7 @@ limitations under the License.
         },
         currentDate: null,
         dateTimer: null,
+        scrollDistance: 0,
       };
     },
     mounted() {
@@ -185,8 +189,12 @@ limitations under the License.
       },
     },
     methods: {
+      handleScroll() {
+        this.scrollDistance = window.scrollY;
+      },
       beginDateTimer() {
         if (this.quizInfo.deadline) {
+          window.addEventListener('scroll', this.handleScroll);
           this.currentDate = dayjs().utc().valueOf();
           this.dateTimer = setInterval(() => {
             this.currentDate = dayjs().utc().valueOf();
@@ -212,6 +220,7 @@ limitations under the License.
       destroyDateTimer() {
         clearInterval(this.dateTimer);
         this.dateTimer = null;
+        window.removeEventListener('scroll', this.handleScroll);
       },
       loadData() {
         this.isLoading = true;
@@ -377,5 +386,12 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+#floating-timer {
+  position: fixed;
+  top: 30px;
+  right: 45px;
+  z-index: 10;
+  padding: 5px;
+  border: 1px solid #000;
+}
 </style>
