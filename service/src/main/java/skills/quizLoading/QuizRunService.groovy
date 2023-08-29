@@ -176,8 +176,8 @@ class QuizRunService {
             Date deadline = null
             if (quizTimeLimit > 0) {
                 LocalDateTime deadlineLocal = inProgressAttempt.started.toLocalDateTime();
-                deadlineLocal.plusMinutes(quizTimeLimit)
-                LocalDateTime currentDate = LocalDateTime.now()
+                deadlineLocal = deadlineLocal.plusMinutes(quizTimeLimit)
+                LocalDateTime currentDate = LocalDateTime.now(ZoneOffset.UTC)
                 deadline = deadlineLocal.toDate()
                 if (currentDate.isAfter(deadlineLocal)) {
                     log.info("Deadline has passed for user [{}] on quiz [{}], failing quiz attempt", userId, quizId)
@@ -236,10 +236,9 @@ class QuizRunService {
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numQuestions;
 
         LocalDateTime deadline = null
-        LocalDateTime start = LocalDateTime.now()
+        LocalDateTime start = LocalDateTime.now(ZoneOffset.UTC)
         if(quizTimeLimit > 0) {
-            deadline = start
-            deadline.plusMinutes(quizTimeLimit)
+            deadline = start.plusMinutes(quizTimeLimit)
         }
 
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
