@@ -629,7 +629,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizQuestionDef(1, 2);
-        cy.setQuizTimeLimit(1, 1);
+        cy.setQuizTimeLimit(1, 3);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -648,7 +648,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
         cy.get('[data-cy="startQuizAttempt"]').click()
 
-        cy.wait(65000);
+        cy.wait(4000);
 
         cy.get('[data-cy="completionSummaryTitle"]').contains("You've run out of time!")
 
@@ -658,7 +658,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizQuestionDef(1, 2);
-        cy.setQuizTimeLimit(1, 1);
+        cy.setQuizTimeLimit(1, 5);
 
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -679,7 +679,7 @@ describe('Client Display Quiz Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
-        cy.wait(65000);
+        cy.wait(5000);
 
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="takeQuizBtn"]').click();

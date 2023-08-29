@@ -127,7 +127,7 @@ limitations under the License.
           </div>
           <div class="col">
             <div class="row">
-              <div class="col-auto">
+              <div class="col-auto my-auto">
                 <b-form-checkbox v-model="settings.quizTimeLimit.unlimited"
                                  aria-label="Quiz Time Limit setting, unlimited time checkbox"
                                  name="Unlimited Time"
@@ -135,7 +135,7 @@ limitations under the License.
                   Unlimited
                 </b-form-checkbox>
               </div>
-              <div class="col" v-if="!settings.quizTimeLimit.unlimited">
+              <div class="col-auto my-auto" v-if="!settings.quizTimeLimit.unlimited">
                 <div class="row">
                   <div class="col-12 col-sm">
                     <ValidationProvider name="Quiz Time Limit Hours" rules="optionalNumeric|required|min_value:0|max_value:24" v-slot="{errors}">
@@ -315,7 +315,7 @@ limitations under the License.
     },
     methods: {
       updateTimeLimit() {
-        this.settings.quizTimeLimit.value = (parseInt(this.hoursForQuiz, 10) * 60) + parseInt(this.minutesForQuiz, 10);
+        this.settings.quizTimeLimit.value = ((parseInt(this.hoursForQuiz, 10) * 60) + parseInt(this.minutesForQuiz, 10)) * 60;
       },
       setupValidation() {
         extend('lessThanOrEqualToLength', {
@@ -400,16 +400,17 @@ limitations under the License.
                     }
                   } else if (foundFromServer.setting === this.settings.quizTimeLimit.setting) {
                     if (foundFromServer.value === '-1') {
-                      this.settings.quizTimeLimit.value = '60';
-                      this.settings.quizTimeLimit.lastLoadedValue = '60';
+                      this.settings.quizTimeLimit.value = '3600';
+                      this.settings.quizTimeLimit.lastLoadedValue = '3600';
                       this.hoursForQuiz = 1;
                       this.minutesForQuiz = 0;
                       this.settings.quizTimeLimit.unlimited = true;
                       this.settings.quizTimeLimit.lastLoadedUnlimited = true;
                     } else {
                       this.settings.quizTimeLimit.value = foundFromServer.value;
-                      this.hoursForQuiz = Math.floor(foundFromServer.value / 60);
-                      this.minutesForQuiz = foundFromServer.value % 60;
+                      this.hoursForQuiz = Math.floor(foundFromServer.value / 3600);
+                      const remainingTime = foundFromServer.value - (this.hoursForQuiz * 3600);
+                      this.minutesForQuiz = remainingTime / 60;
                       this.settings.quizTimeLimit.lastLoadedValue = foundFromServer.value;
                       this.settings.quizTimeLimit.unlimited = false;
                       this.settings.quizTimeLimit.lastLoadedUnlimited = false;

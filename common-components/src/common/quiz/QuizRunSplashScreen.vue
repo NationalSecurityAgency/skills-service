@@ -43,7 +43,7 @@ limitations under the License.
         <b-card class="skills-card-theme-border" body-class="pt-2 pb-1" data-cy="quizTimeLimitCard">
           <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
           <span class="text-secondary font-italic ml-1">Time Limit:</span>
-          <span v-if="quizInfo.quizTimeLimitInMinutes > 0" class="text-uppercase ml-1 font-weight-bold">{{quizTimeLimit | formatDuration}}</span>
+          <span v-if="quizInfo.quizTimeLimit > 0" class="text-uppercase ml-1 font-weight-bold">{{quizTimeLimit | formatDuration}}</span>
           <span v-else class="text-uppercase ml-1 font-weight-bold">NONE</span>
         </b-card>
       </div>
@@ -94,7 +94,7 @@ limitations under the License.
     },
     computed: {
       quizTimeLimit() {
-        return this.quizInfo.quizTimeLimitInMinutes * (60 * 1000);
+        return this.quizInfo.quizTimeLimit * 1000;
       },
       numQuestions() {
         return this.quizInfo.quizLength;

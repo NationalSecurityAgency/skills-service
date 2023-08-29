@@ -536,7 +536,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def quizInfo = skillsService.getQuizInfo(quiz.quizId, "user1")
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId, "user1").body
 
-        assert quizInfo.quizTimeLimitInMinutes == -1
+        assert quizInfo.quizTimeLimit == -1
         assert quizAttempt.deadline == null
 
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -548,7 +548,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def deadlineQuizAttempt = skillsService.startQuizAttempt(quiz.quizId, "user2").body
 
         then:
-        updatedQuizInfo.quizTimeLimitInMinutes == 300
+        updatedQuizInfo.quizTimeLimit == 300
         deadlineQuizAttempt.deadline != null
     }
 

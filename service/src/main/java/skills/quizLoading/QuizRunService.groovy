@@ -121,7 +121,7 @@ class QuizRunService {
                 maxAttemptsAllowed: maxNumAttemptsSetting ? Integer.valueOf(maxNumAttemptsSetting.value) : -1,
                 minNumQuestionsToPass: minNumQuestionsToPassSetting ? Integer.valueOf(minNumQuestionsToPassSetting.value) : -1,
                 quizLength: lengthSetting,
-                quizTimeLimitInMinutes: quizTimeLimit ? Integer.valueOf(quizTimeLimit.value) : -1,
+                quizTimeLimit: quizTimeLimit ? Integer.valueOf(quizTimeLimit.value) : -1,
         )
     }
 
@@ -176,7 +176,7 @@ class QuizRunService {
             Date deadline = null
             if (quizTimeLimit > 0) {
                 LocalDateTime deadlineLocal = inProgressAttempt.started.toLocalDateTime();
-                deadlineLocal = deadlineLocal.plusMinutes(quizTimeLimit)
+                deadlineLocal = deadlineLocal.plusSeconds(quizTimeLimit)
                 LocalDateTime currentDate = LocalDateTime.now(ZoneOffset.UTC)
                 deadline = deadlineLocal.toDate()
                 if (currentDate.isAfter(deadlineLocal)) {
@@ -238,7 +238,7 @@ class QuizRunService {
         LocalDateTime deadline = null
         LocalDateTime start = LocalDateTime.now(ZoneOffset.UTC)
         if(quizTimeLimit > 0) {
-            deadline = start.plusMinutes(quizTimeLimit)
+            deadline = start.plusSeconds(quizTimeLimit)
         }
 
         UserQuizAttempt userQuizAttempt = new UserQuizAttempt(
