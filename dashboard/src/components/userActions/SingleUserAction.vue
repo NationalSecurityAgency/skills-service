@@ -30,8 +30,11 @@ limitations under the License.
       <div v-else class="row">
         <div class="col-3 font-italic">{{ formatLabel(propName) }}:</div>
         <div class="col my-auto">
-          <span v-if="value">{{ value }}</span>
-          <span v-else class="text-secondary">Not Provided</span>
+          <span v-if="!value" class="text-secondary">Not Provided</span>
+          <span v-else>
+            <div v-if="isTextAreaProp(propName)"><b-textarea :value="value" :readonly="true"/></div>
+            <span v-else>{{ value }}</span>
+          </span>
         </div>
       </div>
     </div>
@@ -43,14 +46,25 @@ limitations under the License.
 </template>
 
 <script>
+  import MarkdownText from '@/common-components/utilities/MarkdownText';
   import UserActionsService from '@/components/userActions/UserActionsService';
   import LoadingContainer from '@/components/utils/LoadingContainer';
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
 
   const propsLookupByItem = new Map();
-  propsLookupByItem.set('Skill', ['name', 'description', 'helpUrl', 'pointIncrement', 'numMaxOccurrencesIncrementInterval', 'pointIncrementInterval', 'selfReportingType', 'version']);
+  propsLookupByItem.set('Skill', ['name', 'description', 'groupId', 'helpUrl', 'pointIncrement', 'numMaxOccurrencesIncrementInterval', 'pointIncrementInterval', 'selfReportingType', 'version']);
   propsLookupByItem.set('Subject', ['name', 'description', 'helpUrl', 'iconClass']);
   propsLookupByItem.set('Project', ['name', 'projectId', 'description']);
+  propsLookupByItem.set('Level', ['level', 'percent', 'pointsTo', 'pointsFrom']);
+  const excludeLookupFromActions = ['Move', 'ImportFromCatalog', 'ReuseInProject'];
+  const valuesMap = new Map();
+  valuesMap.set('production.mode.enabled', 'Is in the Project Catalog');
+  valuesMap.set('invite_only', 'Is Private Invite Only Project');
+  valuesMap.set('project-admins_rank_and_leaderboard_optOut', 'Ranking and Leaderboard Opt-Out');
+  valuesMap.set('level.points.enabled', 'Use Points For Levels');
+  valuesMap.set('selfReport.type', 'Self Report Type');
+  valuesMap.set('help.url.root', 'Root Help URL');
+  valuesMap.set('group-descriptions', 'Always Show Group Descriptions');
+  valuesMap.set('show_project_description_everywhere', 'Show Project Description everywhere');
   export default {
     name: 'SingleUserAction',
     components: { MarkdownText, LoadingContainer },
@@ -73,14 +87,21 @@ limitations under the License.
         this.loading = true;
         UserActionsService.getDashboardSingleAction(this.actionId)
           .then((res) => {
-            let propsToShow = propsLookupByItem.get(this.item);
-            if (this.action === 'ImportFromCatalog') {
-              propsToShow = ['copiedFromProjectId'];
-            }
-            if (propsToShow) {
+            const propsToShow = propsLookupByItem.get(this.item);
+            if (!excludeLookupFromActions.includes(this.action) && propsToShow) {
               this.attributes = Object.fromEntries(Object.entries(res)
                 .filter(([key]) => propsToShow.includes(key)));
+            } else {
+              this.attributes = res;
             }
+            this.attributes = Object.fromEntries(Object.entries(res).map((entry) => {
+              console.log(entry);
+              const replacement = valuesMap.get(entry[1]);
+              if (replacement) {
+                return [entry[0], replacement];
+              }
+              return entry;
+            }));
           }).finally(() => {
             this.loading = false;
           });
@@ -89,6 +110,9 @@ limitations under the License.
         return originalLabel
           .replace(/([A-Z])/g, (match) => ` ${match}`)
           .replace(/^./, (match) => match.toUpperCase());
+      },
+      isTextAreaProp(propName) {
+        return propName === 'transcript' || propName === 'captions';
       },
     },
   };

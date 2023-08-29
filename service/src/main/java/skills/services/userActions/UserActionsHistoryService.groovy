@@ -35,6 +35,8 @@ import skills.services.inception.InceptionProjectService
 import skills.storage.model.UserActionsHistory
 import skills.storage.repos.UserActionsHistoryRepo
 
+import java.text.SimpleDateFormat
+
 @Service
 @Slf4j
 class UserActionsHistoryService {
@@ -57,6 +59,7 @@ class UserActionsHistoryService {
         FilterProvider filterProvider = new SimpleFilterProvider()
                 .addFilter("DynamicFilter", (SimpleBeanPropertyFilter)simpleBeanPropertyFilter);
         mapper.setFilterProvider(filterProvider)
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     }
 
     @Transactional

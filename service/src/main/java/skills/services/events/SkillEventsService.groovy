@@ -47,11 +47,15 @@ class SkillEventsService {
         boolean disableChecks = false
         boolean isFromPassingQuiz = false
         String approvalRequestedMsg
+        boolean forAnotherUser = false
 
         SkillApprovalParams(){}
 
         SkillApprovalParams(String approvalRequestedMsg) {
             this.approvalRequestedMsg = approvalRequestedMsg
+        }
+        void setForAnotherUser(boolean forAnotherUser) {
+            this.forAnotherUser = forAnotherUser
         }
     }
     static SkillApprovalParams defaultSkillApprovalParams = new SkillApprovalParams()

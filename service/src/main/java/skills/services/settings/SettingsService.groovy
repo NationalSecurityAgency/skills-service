@@ -130,6 +130,7 @@ class SettingsService {
         if (performSaveUserAction) {
             saveUserAction(setting)
         }
+        settingsDataAccessor.save(setting)
         log.debug("saved [{}]", setting)
 
         return convertToRes(setting)

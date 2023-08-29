@@ -25,10 +25,12 @@ enum DashboardItem {
     Question,
     Tag,
     VideoSettings,
+    ExpirationSettings,
     Level,
     LearningPathItem,
     Approver,
     SkillEvents,
     UserRole,
-    Settings
+    Settings,
+    ProjectPin,
 }

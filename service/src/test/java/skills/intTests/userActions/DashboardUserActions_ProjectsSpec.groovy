@@ -22,11 +22,14 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.ExpirationAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
+
+import java.time.LocalDateTime
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -91,6 +94,40 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         editAction.description == "this is a description allright"
 
         !deleteAction.id
+    }
+
+    def "track project pin/unpin actions"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        userActionsHistoryRepo.deleteAll()
+
+        when:
+        rootService.pinProject(p1.projectId)
+        rootService.unpinProject(p1.projectId)
+        def res = rootService.getUserActionsForEverything()
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(rootService.userName)
+        String rootDisplayName = userAttrs.getUserIdForDisplay()
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.ProjectPin.toString()
+        res.data[0].itemId == p1.projectId
+        res.data[0].userId == rootService.userName.toLowerCase()
+        res.data[0].userIdForDisplay == rootDisplayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.ProjectPin.toString()
+        res.data[1].itemId == p1.projectId
+        res.data[1].userId == rootService.userName.toLowerCase()
+        res.data[1].userIdForDisplay == rootDisplayName
+        res.data[1].projectId == p1.projectId
+        !res.data[1].quizId
     }
 
     def "track subject CRUD actions"() {
@@ -708,6 +745,42 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         !delete.videoUrl
     }
 
+    def "track skill expiration settings for a skill"() {
+        SkillsService rootService = createRootSkillService()
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime()
+        skillsService.saveSkillExpirationAttributes(p1.projectId, p1Skills[0].skillId, [
+                expirationType: ExpirationAttrs.YEARLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+
+        def res = rootService.getUserActionsForEverything()
+        def create = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        res.count == 1
+        res.data[0].action == DashboardAction.Create.toString()
+        res.data[0].item == DashboardItem.ExpirationSettings.toString()
+        res.data[0].itemId == p1Skills[0].skillId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        create.every == 1
+        create.monthlyDay
+        create.expirationType ==  ExpirationAttrs.YEARLY
+        create.nextExpirationDate
+    }
+
     def "track badge CRUD actions"() {
         SkillsService rootService = createRootSkillService()
         def p1 = createProject(1)
@@ -1312,6 +1385,43 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         createAction3.value == "val3"
 
         deleteAction.setting == "set1"
+    }
+
+    def "track when admin reports skill events for another user"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        userActionsHistoryRepo.deleteAll()
+        
+        def user = getRandomUsers(1)[0]
+        Date skillDate = new Date()
+        when:
+        def resReportForAnother = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, skillDate)
+        // this one must not produce an event
+        def resReportForMe = skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId])
+
+        def res = rootService.getUserActionsForEverything()
+        def reportSkillEvent = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        resReportForMe.body.pointsEarned == 100
+        resReportForAnother.body.pointsEarned == 100
+
+        res.count == 1
+        res.data[0].action == DashboardAction.Create.toString()
+        res.data[0].item == DashboardItem.SkillEvents.toString()
+        res.data[0].itemId == skills[0].skillId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        reportSkillEvent.reportedForUser == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
+        reportSkillEvent.reportedSkillEventDate
+
     }
 }
 

@@ -20,6 +20,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillAttributesDef.SkillAttributesType
@@ -40,6 +44,9 @@ class SkillAttributeService {
 
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     static final ObjectMapper mapper = new ObjectMapper()
 
@@ -64,6 +71,13 @@ class SkillAttributeService {
     }
 
     void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.ExpirationSettings,
+                itemId: skillId,
+                projectId: projectId,
+                actionAttributes: skillExpirationAttrs
+        ))
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, skillExpirationAttrs)
     }
 

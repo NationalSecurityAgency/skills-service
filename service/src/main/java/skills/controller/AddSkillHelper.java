@@ -72,6 +72,8 @@ public class AddSkillHelper {
         }
 
         SkillEventResult result;
+        String currentUser = userInfoService.getCurrentUserId();
+        boolean forAnotherUser = requestedUserId != null && currentUser != null && !requestedUserId.equalsIgnoreCase(currentUser);
         String userId = userInfoService.getUserName(requestedUserId, false, skillEventRequest != null ? skillEventRequest.getIdType() : null);
         if (log.isInfoEnabled()) {
             log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}], IsRetry=[{}])",
@@ -87,6 +89,7 @@ public class AddSkillHelper {
                 public SkillEventResult call() {
                     SkillEventsService.SkillApprovalParams skillApprovalParams = (skillEventRequest !=null && skillEventRequest.getApprovalRequestedMsg() != null) ?
                             new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
+                    skillApprovalParams.setForAnotherUser(forAnotherUser);
                     return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }
             };

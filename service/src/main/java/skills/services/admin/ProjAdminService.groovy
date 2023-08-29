@@ -272,6 +272,13 @@ class ProjAdminService {
 
         String userId = user ? user.userId : loadCurrentUser(true)?.username
         sortingService.setNewProjectDisplayOrder(projectId, userId?.toLowerCase())
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.ProjectPin,
+                projectId: projectId,
+                itemId: projectId,
+        ))
     }
 
     void pinAllExistingProjectsWhereUserIsAdminExceptInception(String userId) {
@@ -298,6 +305,13 @@ class ProjAdminService {
             )
             sortingService.deleteProjectDisplayOrder(projectId, currentUserIdLower)
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.ProjectPin,
+                projectId: projectId,
+                itemId: projectId,
+        ))
     }
     void unpinAllProjectsForRootUser(String userId) {
         List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId.toLowerCase(), ProjAdminService.rootUserPinnedProjectGroup)

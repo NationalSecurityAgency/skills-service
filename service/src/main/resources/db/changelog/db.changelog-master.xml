@@ -2585,7 +2585,7 @@
                                  referencedTableName="user_attrs"/>
     </changeSet>
 
-    <changeSet id="43" author="skills team">
+    <changeSet id="44" author="skills team">
         <createTable tableName="user_actions_history">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>

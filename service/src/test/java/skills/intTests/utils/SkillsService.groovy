@@ -1176,7 +1176,7 @@ class SkillsService {
         return wsHelper.rootPost("/pin/${projectId}")
     }
 
-    def unpinProject(String projecctId) {
+    def unpinProject(String projectId) {
         return wsHelper.rootDelete("/pin/${projectId}")
     }
 
