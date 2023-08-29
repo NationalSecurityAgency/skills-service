@@ -139,32 +139,32 @@ limitations under the License.
               </div>
             </template>
 
-<!--            <template>-->
-<!--              <div class="row m-0">-->
-<!--                <div class="col-12 col-lg-auto">-->
-<!--                  <b-form-radio class="" value="DAILY" data-cy="dailyRadio">Daily</b-form-radio>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--              <div class="row ml-5">-->
-<!--                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">-->
-<!--                  <div class="input-group">-->
-<!--                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">-->
-<!--                      <label for="dailyDays-sb">Skills will expire </label>-->
-<!--                      <b-form-spinbutton :disabled="expirationType !== 'DAILY'"-->
-<!--                                         class="m-1"-->
-<!--                                         id="dailyDays-sb"-->
-<!--                                         aria-label="Skills will expire every N days after user earns achievement"-->
-<!--                                         v-model="dailyDays"-->
-<!--                                         min="1"-->
-<!--                                         max="999"-->
-<!--                                         inline>-->
-<!--                      </b-form-spinbutton>-->
-<!--                      <span>day{{dailyDays > 1 ? 's' : ''}} after achievement</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </b-form-group>-->
-<!--              </div>-->
-<!--            </template>-->
+            <template>
+              <div class="row m-0">
+                <div class="col-12 col-lg-auto">
+                  <b-form-radio class="" value="DAILY" data-cy="dailyRadio">Daily</b-form-radio>
+                </div>
+              </div>
+              <div class="row ml-5">
+                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">
+                  <div class="input-group">
+                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">
+                      <label for="dailyDays-sb">Skills will expire </label>
+                      <b-form-spinbutton :disabled="expirationType !== 'DAILY'"
+                                         class="m-1"
+                                         id="dailyDays-sb"
+                                         aria-label="Skills will expire every N days after user earns achievement"
+                                         v-model="dailyDays"
+                                         min="1"
+                                         max="999"
+                                         inline>
+                      </b-form-spinbutton>
+                      <span>day{{dailyDays > 1 ? 's ' : ' '}}</span><span class="font-weight-bold">after achievement</span>
+                    </div>
+                  </div>
+                </b-form-group>
+              </div>
+            </template>
           </b-form-radio-group>
         </b-form-group>
         <hr/>

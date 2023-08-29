@@ -29,6 +29,8 @@ import skills.services.SelfReportingService
 import skills.services.UserEventService
 import skills.services.admin.SkillCatalogService
 import skills.services.admin.SkillsGroupAdminService
+import skills.services.attributes.ExpirationAttrs
+import skills.services.attributes.SkillAttributeService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
@@ -112,6 +114,8 @@ class SkillEventsTransactionalService {
     @Autowired
     TaskSchedulerService taskSchedulerService
 
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Transactional
     void notifyUserOfAchievements(String userId){
@@ -188,14 +192,16 @@ class SkillEventsTransactionalService {
         }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId
-            skillDefinition = getCopiedFromSkillDef(skillDefinition, skillId)
+            skillDefinition = getCopiedFromSkillDef(skillDefinition, userId)
             // override it as reused skill's id will not match
             skillId = skillDefinition.skillId
         }
+        ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
+        Boolean isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
+        AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition, isMotivationalSkill)
         if (!checkRes.skillApplied) {
             // record event should happen AFTER the lock OR if it does not need the lock;
             // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
@@ -223,7 +229,7 @@ class SkillEventsTransactionalService {
             recordEvent(skillDefinition, userId, skillDate)
         }
         numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
-        checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition)
+        checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition, isMotivationalSkill)
         if (!checkRes.skillApplied) {
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
@@ -240,6 +246,23 @@ class SkillEventsTransactionalService {
             res.skillApplied = checkRes.skillApplied
             res.explanation = checkRes.explanation
             return res
+        }
+
+        if (isMotivationalSkill && hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
+            UserPerformedSkill userPerformedSkill = performedSkillRepository.findTopBySkillRefIdAndUserIdOrderByPerformedOnAsc(skillDefinition.id, userId)
+            if (userPerformedSkill.performedOn.before(skillDate.date)) {
+                userPerformedSkill.performedOn = skillDate.date
+                performedSkillRepository.save(userPerformedSkill)
+                scheduleImportedSkills(skillDefinition, userId, skillDate, hasReachedMaxPoints(numExistingSkills, skillDefinition), true)
+                res.skillApplied = true
+                res.explanation = 'Skill Achievement retained'
+                return res
+            } else {
+                log.warn("incomingSkillDate [${skillDate.date}] is before oldest user_performed_skill [${userPerformedSkill}]")
+                res.skillApplied = false
+                res.explanation = "This skill reached its maximum points"
+                return res
+            }
         }
 
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId,
@@ -267,17 +290,17 @@ class SkillEventsTransactionalService {
             achievedGlobalBadgeHandler.checkForGlobalBadges(res, userId, skillDefinition.projectId, skillDefinition)
         }
 
-        scheduleImportedSkills(skillDefinition, userId, skillDate, requestedSkillCompleted)
+        scheduleImportedSkills(skillDefinition, userId, skillDate, requestedSkillCompleted, false)
 
         return res
     }
 
     @Profile
-    private void scheduleImportedSkills(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean requestedSkillCompleted) {
+    private void scheduleImportedSkills(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean requestedSkillCompleted, boolean isMotivationalSkill) {
         List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFrom(skillDefinition.id)
         if (importedSkillIds) {
             importedSkillIds.each { Integer importedSkillId ->
-                taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted)
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted, isMotivationalSkill)
             }
         }
     }
@@ -294,9 +317,9 @@ class SkillEventsTransactionalService {
     }
 
     @Profile
-    private AppliedCheckRes checkIfSkillApplied(String userId, long numExistingSkills, Date incomingSkillDate, SkillDefMin skillDefinition) {
+    private AppliedCheckRes checkIfSkillApplied(String userId, long numExistingSkills, Date incomingSkillDate, SkillDefMin skillDefinition, Boolean isMotivationalSkill) {
         AppliedCheckRes res = new AppliedCheckRes()
-        if (hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
+        if (!isMotivationalSkill && hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
             res.skillApplied = false
             res.explanation = "This skill reached its maximum points"
             return res

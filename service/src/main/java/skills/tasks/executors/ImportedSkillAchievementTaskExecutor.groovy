@@ -59,7 +59,7 @@ class ImportedSkillAchievementTaskExecutor implements VoidExecutionHandler<Impor
         CProf.clear()
         String profName = "asyncReport".toString()
         CProf.start(profName)
-        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, min, data.incomingSkillDate, data.thisRequestCompletedOriginalSkill)
+        importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, min, data.incomingSkillDate, data.thisRequestCompletedOriginalSkill, data.isMotivationalSkill)
         ProfileEvent resProfEvent = CProf.stop(profName)
         if (resProfEvent.getRuntimeInMillis() > minMillisToPrint) {
             log.info("Profiled ImportedSkillAchievementTaskExecutor for projectId=[{}], skillId=[{}], userId=[{}]:\n{}", min.projectId, min.skillId, data.userId, CProf.prettyPrint())

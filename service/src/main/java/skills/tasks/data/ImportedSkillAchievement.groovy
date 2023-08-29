@@ -23,4 +23,5 @@ class ImportedSkillAchievement {
     Integer rawSkillId
     SkillDate incomingSkillDate
     boolean thisRequestCompletedOriginalSkill
+    boolean isMotivationalSkill
 }

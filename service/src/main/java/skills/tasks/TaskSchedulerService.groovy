@@ -61,7 +61,7 @@ class TaskSchedulerService {
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
-    void scheduleImportedSkillAchievement(String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
+    void scheduleImportedSkillAchievement(String userId, Integer rawSkillId, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill, boolean isMotivationalSkill) {
         String uuid = UUID.randomUUID().toString()
         String id = "${rawSkillId}-${uuid}"
         ImportedSkillAchievement importedSkillAchievement = new ImportedSkillAchievement(
@@ -69,7 +69,8 @@ class TaskSchedulerService {
                 userId: userId,
                 rawSkillId: rawSkillId,
                 incomingSkillDate: incomingSkillDate,
-                thisRequestCompletedOriginalSkill: thisRequestCompletedOriginalSkill
+                thisRequestCompletedOriginalSkill: thisRequestCompletedOriginalSkill,
+                isMotivationalSkill: isMotivationalSkill,
         )
         log.debug("scheduling imported skill achievement task [{}] using db-scheduler", id)
         scheduler.schedule(importedSkillAchievementOneTimeTask.instance(id, importedSkillAchievement), Instant.now().plusSeconds(schedulingDelaySeconds))

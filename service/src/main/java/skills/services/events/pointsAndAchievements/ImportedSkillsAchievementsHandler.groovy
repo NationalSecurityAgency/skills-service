@@ -28,7 +28,9 @@ import skills.services.events.AchievedSkillsGroupHandler
 import skills.services.events.SkillDate
 import skills.services.events.SkillEventResult
 import skills.storage.model.SkillDefMin
+import skills.storage.model.UserPerformedSkill
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserPerformedSkillRepo
 
 @Component
 @Slf4j
@@ -54,21 +56,37 @@ class ImportedSkillsAchievementsHandler {
     AchievedSkillsGroupHandler achievedSkillsGroupHandler
 
     @Autowired
+    UserPerformedSkillRepo performedSkillRepository
+
+    @Autowired
     LockingService lockingService
 
-    void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill) {
+    void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill, boolean isMotivationalSkill) {
         if (log.isDebugEnabled()) {
             log.debug("userId=[${userId}], skill=[${skill.skillId}], incomingSkillDate=[${incomingSkillDate}], thisRequestCompletedOriginalSkill=[${thisRequestCompletedOriginalSkill}]")
         }
         lockTransaction(userId, skill.projectId)
-        // handle user points and level achievements
-        pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skill, incomingSkillDate)
 
-        if (thisRequestCompletedOriginalSkill) {
-            SkillEventResult mockResForBadgeAndGroupCheck = new SkillEventResult()
-            pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeAndGroupCheck, incomingSkillDate)
-            achievedBadgeHandler.checkForBadges(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
-            achievedSkillsGroupHandler.checkForSkillsGroup(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
+        if (isMotivationalSkill && thisRequestCompletedOriginalSkill) {
+            // just need to update the oldest performed_on date
+            UserPerformedSkill userPerformedSkill = performedSkillRepository.findTopBySkillRefIdAndUserIdOrderByPerformedOnAsc(skill.id, userId)
+            if (userPerformedSkill.performedOn.before(incomingSkillDate.date)) {
+                userPerformedSkill.performedOn = incomingSkillDate.date
+                performedSkillRepository.save(userPerformedSkill)
+            } else {
+                // this should never happen as this same check is made when the original skill was reported and the dates in theory should all line up
+                log.warn("incomingSkillDate [${incomingSkillDate}] is before oldest user_performed_skill [${userPerformedSkill}]")
+            }
+        } else {
+            // handle user points and level achievements
+            pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skill, incomingSkillDate)
+
+            if (thisRequestCompletedOriginalSkill) {
+                SkillEventResult mockResForBadgeAndGroupCheck = new SkillEventResult()
+                pointsAndAchievementsHandler.documentSkillAchieved(userId, skill, mockResForBadgeAndGroupCheck, incomingSkillDate)
+                achievedBadgeHandler.checkForBadges(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
+                achievedSkillsGroupHandler.checkForSkillsGroup(mockResForBadgeAndGroupCheck, userId, skill, incomingSkillDate)
+            }
         }
     }
 
