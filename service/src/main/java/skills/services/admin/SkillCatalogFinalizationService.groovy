@@ -24,9 +24,9 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.services.RuleSetDefGraphService
+import skills.services.attributes.SkillAttributeService
 import skills.services.events.SkillDate
 import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
-import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.SkillDef
@@ -77,6 +77,9 @@ class SkillCatalogFinalizationService {
 
     @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     final static String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
     static enum FinalizeState {
@@ -180,6 +183,7 @@ class SkillCatalogFinalizationService {
                 List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(originalSkillRefId, start, end)
                 if (foundEvents) {
                     SkillDefMin skill = skillDefRepo.findSkillDefMinById(originalSkillRefId)
+                    Boolean isMotivationalSkill = skillAttributeService.isMotivationalSkill(skill.projectId, skill.skillId)
                     log.info("Processing [{}] missed events for skill [{}] between [{}] and [{}]", foundEvents.size(), skill.skillId, start, end)
                     foundEvents.each {
                         log.info("Processing missed event skill=[{}], created=[{}], userId=[{}]", it.skillId, it.created.format(dateFormat), it.userId)
@@ -190,9 +194,9 @@ class SkillCatalogFinalizationService {
                             thisRequestCompletedOriginalSkill = userAchievement.achievedOn.time == it.performedOn.time
                         }
                         SkillDate skillDate = new SkillDate(date: new Date(it.performedOn.time), isProvided: true)
-                        log.info("scheduleImportedSkillAchievement userId=[{}], importedSkillRefId=[{}], skillDate=[{}], thisRequestCompletedOriginalSkill=[{}]",
-                                it.userId, importedSkillRefId, skillDate, thisRequestCompletedOriginalSkill)
-                        taskSchedulerService.scheduleImportedSkillAchievement(it.userId, importedSkillRefId, skillDate, thisRequestCompletedOriginalSkill)
+                        log.info("scheduleImportedSkillAchievement userId=[{}], importedSkillRefId=[{}], skillDate=[{}], thisRequestCompletedOriginalSkill=[{}], isMotivationalSkill=[{}]",
+                                it.userId, importedSkillRefId, skillDate, thisRequestCompletedOriginalSkill, isMotivationalSkill)
+                        taskSchedulerService.scheduleImportedSkillAchievement(it.userId, importedSkillRefId, skillDate, thisRequestCompletedOriginalSkill, isMotivationalSkill)
                     }
                 } else {
                     log.info("Handling Events that were reporting during the finalization: Found 0 events for originalSkillRefId=[{}], importedSkillRefId=[{}]. Nothing to do", originalSkillRefId, importedSkillRefId)

@@ -196,8 +196,7 @@ class SkillEventsTransactionalService {
             // override it as reused skill's id will not match
             skillId = skillDefinition.skillId
         }
-        ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
-        Boolean isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
+        Boolean isMotivationalSkill = skillAttributeService.isMotivationalSkill(projectId, skillId)
         SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
