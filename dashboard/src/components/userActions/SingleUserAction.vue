@@ -95,7 +95,6 @@ limitations under the License.
               this.attributes = res;
             }
             this.attributes = Object.fromEntries(Object.entries(res).map((entry) => {
-              console.log(entry);
               const replacement = valuesMap.get(entry[1]);
               if (replacement) {
                 return [entry[0], replacement];
