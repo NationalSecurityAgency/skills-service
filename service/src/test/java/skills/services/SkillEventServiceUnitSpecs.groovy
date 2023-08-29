@@ -19,6 +19,7 @@ package skills.services
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.services.admin.SkillCatalogService
+import skills.services.attributes.SkillAttributeService
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
 import skills.storage.model.SkillDef
@@ -51,6 +52,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
         SkillCatalogService mockCatalogService = Mock()
         SkillDefRepo skillDefRepo = Mock()
+        SkillAttributeService mockSkillAttributeService = Mock()
 
         SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -66,7 +68,8 @@ class SkillEventServiceUnitSpecs extends Specification {
                 userEventService: mockUserEventService,
                 achievedSkillsGroupHandler: mockAchievedSkillsGroupHandler,
                 skillCatalogService: mockCatalogService,
-                skillDefRepo: skillDefRepo
+                skillDefRepo: skillDefRepo,
+                skillAttributeService: mockSkillAttributeService,
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -107,13 +110,15 @@ class SkillEventServiceUnitSpecs extends Specification {
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
+        SkillAttributeService mockSkillAttributeService = Mock()
 
         SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
                 userEventService: mockUserEventService,
-                skillCatalogService: mockCatalogService
+                skillCatalogService: mockCatalogService,
+                skillAttributeService: mockSkillAttributeService,
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -150,13 +155,15 @@ class SkillEventServiceUnitSpecs extends Specification {
         MetricsLogger mockMetricsLogger = Mock()
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
+        SkillAttributeService mockSkillAttributeService = Mock()
 
         SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
                 skillEventsSupportRepo: mockSkillEventsSupportRepo,
                 performedSkillRepository: mockPerformedSkillRepository,
                 userEventService: mockUserEventService,
-                skillCatalogService: mockCatalogService
+                skillCatalogService: mockCatalogService,
+                skillAttributeService: mockSkillAttributeService,
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
