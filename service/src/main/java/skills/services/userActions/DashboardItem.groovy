@@ -22,6 +22,7 @@ enum DashboardItem {
     Skill,
     SkillsGroup,
     Quiz,
+    QuizAttempt,
     Question,
     Tag,
     VideoSettings,

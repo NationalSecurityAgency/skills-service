@@ -15,7 +15,6 @@
  */
 package skills.intTests.userActions
 
-import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
@@ -23,6 +22,8 @@ import skills.services.quiz.QuizQuestionType
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserQuizAttempt
+import skills.storage.model.auth.RoleName
 
 class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
 
@@ -46,13 +47,9 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
 
         then:
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(createAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(editAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -113,15 +110,10 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         skillsService.deleteQuizQuestionDef(quiz.quizId, q1Res.id)
         then:
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         def createAction1 = rootService.getUserActionAttributes(res.data[3].id)
         def createAction2 = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(createAction1))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(createAction2))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(editAction))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
         then:
         res.count == 4
         res.data[0].action == DashboardAction.Delete.toString()
@@ -190,6 +182,132 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         !deleteAction.id
         deleteAction.question == q1Res.question
         deleteAction.questionType == q1Res.questionType
+    }
+
+    def "remove quiz run"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+        userActionsHistoryRepo.deleteAll()
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        String userId = createService(getRandomUsers(1, true)).userName
+        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, userId)
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
+
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        when:
+        skillsService.deleteQuizRun(quiz.quizId, quizRuns.data[0].attemptId)
+
+        def res = rootService.getUserActionsForEverything()
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        res.count == 1
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.QuizAttempt.toString()
+        res.data[0].itemId == quiz.quizId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        !res.data[0].projectId
+        res.data[0].quizId == quiz.quizId
+
+        deleteAction.attemptStarted
+        deleteAction.attemptCompleted
+        deleteAction.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+    }
+
+    def "quiz user role CRUD"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        userActionsHistoryRepo.deleteAll()
+        SkillsService otherUser = createService(getRandomUsers(1))
+        when:
+        skillsService.addQuizUserRole(quiz.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        skillsService.deleteQuizUserRole(quiz.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        def res = rootService.getUserActionsForEverything()
+        def createAction = rootService.getUserActionAttributes(res.data[1].id)
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.UserRole.toString()
+        res.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        !res.data[0].projectId
+        res.data[0].quizId == quiz.quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.UserRole.toString()
+        res.data[1].itemId == userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        !res.data[1].projectId
+        res.data[1].quizId == quiz.quizId
+
+        createAction.userRole == RoleName.ROLE_QUIZ_ADMIN.toString()
+
+        deleteAction.userRole == RoleName.ROLE_QUIZ_ADMIN.toString()
+    }
+
+    def "quiz settings CRUD"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        userActionsHistoryRepo.deleteAll()
+        SkillsService otherUser = createService(getRandomUsers(1))
+        when:
+        String name1 = "set1"
+        String name2 = "set2"
+        String name3 = "set3"
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: name1, value: 'a-1'],
+                [setting: name2, value: 'a-2'],
+                [setting: name3, value: 'a-3'],
+        ])
+
+        def res = rootService.getUserActionsForEverything()
+        def settingAction3 = rootService.getUserActionAttributes(res.data[2].id)
+        def settingAction2 = rootService.getUserActionAttributes(res.data[1].id)
+        def settingAction1 = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        res.count == 3
+        res.data[0].action == DashboardAction.Create.toString()
+        res.data[0].item == DashboardItem.Settings.toString()
+        res.data[0].itemId == quiz.quizId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        !res.data[0].projectId
+        res.data[0].quizId == quiz.quizId
+
+        res.data[1].action == DashboardAction.Create.toString()
+        res.data[1].item == DashboardItem.Settings.toString()
+        res.data[1].itemId == quiz.quizId
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        !res.data[1].projectId
+        res.data[1].quizId == quiz.quizId
+
+        res.data[2].action == DashboardAction.Create.toString()
+        res.data[2].item == DashboardItem.Settings.toString()
+        res.data[2].itemId == quiz.quizId
+        res.data[2].userId == skillsService.userName
+        res.data[2].userIdForDisplay == displayName
+        !res.data[2].projectId
+        res.data[2].quizId == quiz.quizId
+
+        settingAction1.setting == name3
+        settingAction1.value == 'a-3'
+
+        settingAction2.setting == name2
+        settingAction2.value == 'a-2'
+
+        settingAction3.setting == name1
+        settingAction3.value == 'a-1'
     }
 
 }

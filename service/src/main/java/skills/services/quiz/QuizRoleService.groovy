@@ -23,11 +23,17 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.QuizDef
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
 
 import jakarta.transaction.Transactional
+import skills.storage.repos.UserAttrsRepo
 
 @Service
 @Slf4j
@@ -46,6 +52,12 @@ class QuizRoleService {
     @Autowired
     QuizDefRepo quizDefRepo
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     @Transactional
     void addQuizRole(String userIdParam, String quizId, RoleName roleName) {
         QuizDef quizDef = findQuizDef(quizId)
@@ -56,6 +68,18 @@ class QuizRoleService {
             throw new SkillQuizException("Cannot add roles to myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.addQuizDefUserRole(userId, quizDef.quizId, roleName)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+        String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create, item: DashboardItem.UserRole,
+                itemId: userIdForDisplay, quizId: quizDef.quizId,
+                actionAttributes: [
+                        userRole: roleName,
+                        quizName: quizDef.name,
+                        quizId: quizDef.quizId,
+                ]
+        ))
     }
 
     List<UserRoleRes> getQuizUserRoles(String quizId) {
@@ -73,6 +97,18 @@ class QuizRoleService {
             throw new SkillQuizException("Cannot remove roles from myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteQuizUserRole(userId, quizDef.quizId, roleName)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+        String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete, item: DashboardItem.UserRole,
+                itemId: userIdForDisplay, quizId: quizDef.quizId,
+                actionAttributes: [
+                        userRole: roleName,
+                        quizName: quizDef.name,
+                        quizId: quizDef.quizId,
+                ]
+        ))
     }
 
     private void ensureValidRole(RoleName roleName, String quizId) {

@@ -543,6 +543,15 @@ class QuizDefService {
             throw new SkillQuizException("Provided attempt id [${attemptId}] does not belong to quiz [${quizId}]", quizId, ErrorCode.BadParam)
         }
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete, item: DashboardItem.QuizAttempt,
+                itemId: quizDef1.quizId, quizId: quizDef1.quizId,
+                actionAttributes: [
+                        attemptStarted: userQuizAttempt.started,
+                        attemptCompleted: userQuizAttempt.completed,
+                        status: userQuizAttempt.status,
+                ]
+        ))
         userQuizAttemptRepo.delete(userQuizAttempt)
         log.info("Removed [{}]", userQuizAttempt.toString())
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
