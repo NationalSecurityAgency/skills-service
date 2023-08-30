@@ -17,7 +17,6 @@
 const moment = require("moment-timezone");
 describe('Configure Skill Expiration Tests', () => {
 
-    const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/expiration').as('getExpirationProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -185,6 +184,35 @@ describe('Configure Skill Expiration Tests', () => {
             expect(requestBody.expirationType).to.eq('MONTHLY')
             expect(requestBody.monthlyDay).to.eq(15)
             expect(requestBody.nextExpirationDate).to.eq(theFifteenth.toISOString())
+        })
+
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    });
+
+    it('expiration type of DAILY defaults to 90 days after achievement', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
+        cy.get('[data-cy="dailyDays-sb"]').contains('90')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings').then((xhr) => {
+            expect(xhr.response.statusCode).to.eq(200)
+            const requestBody = xhr.request.body
+            expect(requestBody.every).to.eq(90)
+            expect(requestBody.expirationType).to.eq('DAILY')
         })
 
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
