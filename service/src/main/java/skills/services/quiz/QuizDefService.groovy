@@ -244,6 +244,17 @@ class QuizDefService {
         updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.MinNumQuestionsToPass.setting)
         updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.QuizLength.setting)
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Question,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+                actionAttributes: [
+                        question: quizQuestionDef.question?.toString(),
+                        questionType: quizQuestionDef.type?.toString()
+                ],
+        ))
+
         quizAnswerRepo.delete(quizQuestionDef)
     }
 
@@ -279,6 +290,22 @@ class QuizDefService {
             savedQuestion = createQuizQuestionDef(quizDef, questionDefRequest)
             savedAnswers = createQuizQuestionAnswerDefs(questionDefRequest, savedQuestion)
         }
+
+        Map actionAttributes = [
+                question: savedQuestion.question,
+                questionType: savedQuestion.type,
+        ]
+        savedAnswers.sort (false, {it.displayOrder}).eachWithIndex { QuizAnswerDef q, Integer index ->
+            actionAttributes["Answer${index+1}:text"] = q.answer
+            actionAttributes["Answer${index+1}:isCorrectAnswer"] = q.isCorrectAnswer
+        }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Question,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+                actionAttributes: actionAttributes
+        ))
 
         return convert(savedQuestion, savedAnswers)
     }
@@ -804,6 +831,12 @@ class QuizDefService {
         }
         int numRemoved = quizDefRepo.deleteByQuizIdIgnoreCase(quizDef.quizId)
         log.debug("Deleted project with id [{}]. Removed [{}] record", quizId, numRemoved)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Quiz,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+        ))
     }
 
     @Transactional()
