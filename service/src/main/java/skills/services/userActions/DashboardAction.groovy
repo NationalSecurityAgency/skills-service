@@ -30,4 +30,6 @@ enum DashboardAction {
     RemoveSkillAssignment,
     Configure,
     RemoveConfiguration,
+    Extend,
+    Remind,
 }

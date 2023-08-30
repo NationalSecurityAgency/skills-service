@@ -15,16 +15,18 @@
  */
 package skills.intTests.userActions
 
-import groovy.json.JsonOutput
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.ExpirationAttrs
+import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
+import skills.storage.model.ProjectError
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
@@ -397,7 +399,6 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         when:
         def res = rootService.getUserActionsForEverything()
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         def reuseAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[1].id)
 
@@ -787,6 +788,10 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         skillsService.createProject(p1)
 
         def badge = createBadge(1, 1)
+        badge.helpUrl = "https://skilltreeHelpBadgeNow.com"
+        badge.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+        badge.startDate = new Date() + 2
+        badge.endDate = new Date() + 2
         skillsService.createBadge(badge)
         badge.description = "this is a description allright"
         Thread.sleep(100)
@@ -796,7 +801,6 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         when:
         def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Badge)
-
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
@@ -830,12 +834,19 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         createAction.id == res.data[2].itemRefId
         createAction.name == badge.name
         createAction.skillId == badge.badgeId
+        createAction.helpUrl == "https://skilltreeHelpBadgeNow.com"
+        createAction["BonusAward:name"] == "Test Badge"
+        createAction["BonusAward:iconClass"] == "abc"
+        createAction["BonusAward:numMinutes"] == 60
         !createAction.description
 
         editAction.id == res.data[1].itemRefId
         editAction.name == badge.name
         editAction.skillId == badge.badgeId
         editAction.description == "this is a description allright"
+        editAction["BonusAward:name"] == "Test Badge"
+        editAction["BonusAward:iconClass"] == "abc"
+        editAction["BonusAward:numMinutes"] == 60
 
         !deleteAction.id
     }
@@ -856,6 +867,57 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         when:
         skillsService.assignSkillsToBadge(p1.projectId, badge.badgeId, [skill.skillId])
+        Thread.sleep(0)
+        skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+
+        def res = rootService.getUserActionsForEverything()
+
+        def createAction = rootService.getUserActionAttributes(res.data[1].id)
+        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.RemoveSkillAssignment.toString()
+        res.data[0].item == DashboardItem.Badge.toString()
+        res.data[0].itemId == badge.badgeId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.AssignSkill.toString()
+        res.data[1].item == DashboardItem.Badge.toString()
+        res.data[1].itemId == badge.badgeId
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == p1.projectId
+        !res.data[1].quizId
+
+        createAction.id == res.data[1].itemRefId
+        createAction.badgeId == badge.badgeId
+        createAction.skillId == skill.skillId
+
+        deleteAction.id == res.data[0].itemRefId
+        deleteAction.badgeId == badge.badgeId
+        deleteAction.skillId == skill.skillId
+    }
+
+    def "track adding/removing single skill to/from badge"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        def subj = createSubject(1, 1)
+        skillsService.createSubject(subj)
+        def skill = createSkill(1, 1, )
+        skillsService.createSkill(skill)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+
+        userActionsHistoryRepo.deleteAll()
+
+        when:
+        skillsService.assignSkillToBadge(p1.projectId, badge.badgeId, skill.skillId)
         Thread.sleep(0)
         skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
 
@@ -1339,8 +1401,6 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction3 = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(deleteAction))
-
         then:
         res.count == 4
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1422,6 +1482,138 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         reportSkillEvent.reportedForUser == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
         reportSkillEvent.reportedSkillEventDate
 
+    }
+
+    def "project issues"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        userActionsHistoryRepo.deleteAll()
+
+        try {
+            skillsService.addSkill([projectId: proj.projectId, skillId: "this is not a skill id"])
+        } catch (SkillsClientException skillsClientException) {
+            //expected to fail
+        }
+        def errorsBeforeDelete = skillsService.getProjectErrors(proj.projectId, 10, 1, "lastSeen", false)
+
+        when:
+        skillsService.deleteSpecificProjectError(proj.projectId, errorsBeforeDelete.data[0].errorId)
+        skillsService.deleteAllProjectErrors(proj.projectId)
+
+        def res = rootService.getUserActionsForEverything()
+        def deleteAll = rootService.getUserActionAttributes(res.data[0].id)
+        def deleteOne = rootService.getUserActionAttributes(res.data[1].id)
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.ProjectIssue.toString()
+        res.data[0].itemId == proj.projectId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Delete.toString()
+        res.data[1].item == DashboardItem.ProjectIssue.toString()
+        res.data[1].itemId == proj.projectId
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        deleteOne.errorType == ProjectError.ErrorType.SkillNotFound.toString()
+        deleteOne.error == "this is not a skill id"
+
+        deleteAll.allIssues == true
+        !deleteAll.errorType
+
+    }
+
+    def "reset trusted client secret"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        userActionsHistoryRepo.deleteAll()
+
+        when:
+        skillsService.resetClientSecret(proj.projectId)
+        def res = rootService.getUserActionsForEverything()
+        then:
+        res.count == 1
+        res.data[0].action == DashboardAction.Create.toString()
+        res.data[0].item == DashboardItem.TrustedClientSecret.toString()
+        res.data[0].itemId == proj.projectId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+    }
+
+    def "private project invite management"() {
+        startEmailServer()
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        skillsService.changeSetting(proj.projectId, Settings.INVITE_ONLY_PROJECT.settingName, [projectId: proj.projectId, setting: Settings.INVITE_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()])
+        userActionsHistoryRepo.deleteAll()
+
+        when:
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        skillsService.extendProjectInviteExpiration(proj.projectId, "someemail@email.foo", "PT1H")
+        skillsService.remindUserOfPendingInvite(proj.projectId, "someemail@email.foo")
+        skillsService.deletePendingInvite(proj.projectId, "someemail@email.foo")
+        def res = rootService.getUserActionsForEverything()
+        def delete = rootService.getUserActionAttributes(res.data[0].id)
+        def remind = rootService.getUserActionAttributes(res.data[1].id)
+        def extend = rootService.getUserActionAttributes(res.data[2].id)
+        def invite = rootService.getUserActionAttributes(res.data[3].id)
+        then:
+        res.count == 4
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.ProjectInvite.toString()
+        res.data[0].itemId == "someemail@email.foo"
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.Remind.toString()
+        res.data[1].item == DashboardItem.ProjectInvite.toString()
+        res.data[1].itemId == "someemail@email.foo"
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+
+        res.data[2].action == DashboardAction.Extend.toString()
+        res.data[2].item == DashboardItem.ProjectInvite.toString()
+        res.data[2].itemId == "someemail@email.foo"
+        res.data[2].userId == skillsService.userName
+        res.data[2].userIdForDisplay == displayName
+        res.data[2].projectId == proj.projectId
+        !res.data[2].quizId
+
+        res.data[3].action == DashboardAction.Create.toString()
+        res.data[3].item == DashboardItem.ProjectInvite.toString()
+        res.data[3].itemId == proj.projectId
+        res.data[3].userId == skillsService.userName
+        res.data[3].userIdForDisplay == displayName
+        res.data[3].projectId == proj.projectId
+        !res.data[3].quizId
+
+        invite.emailAddresses == [ "someemail@email.foo"]
+        invite.duration == "PT5M"
+
+        extend.duration == "PT1H"
     }
 }
 

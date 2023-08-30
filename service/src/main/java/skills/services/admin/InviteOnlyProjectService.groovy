@@ -37,6 +37,10 @@ import skills.services.FeatureService
 import skills.services.ProjectInvite
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Notification
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjectAccessToken
@@ -99,6 +103,9 @@ class InviteOnlyProjectService {
 
     @Autowired
     UIConfigProperties uiConfigProperties
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     /**
      * Generates an invite token for a specific project
@@ -302,6 +309,17 @@ class InviteOnlyProjectService {
             }
         }
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.ProjectInvite,
+                actionAttributes: [
+                        emailAddresses: emailAddresses,
+                        duration      : duration
+                ],
+                itemId: projectId,
+                projectId: projectId,
+        ))
+
         return new InviteUsersResult(projectId: projectId, successful: successfullySent, unsuccessful: couldNotBeSent, unsuccessfulErrors: couldNotBeSentErrors)
     }
 
@@ -386,11 +404,27 @@ class InviteOnlyProjectService {
         Expiration expiration = ExpirationUtils.extendExpiration(accessToken.expires, duration)
         accessToken.expires = expiration.expiresOn
         projectAccessTokenRepo.save(accessToken)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Extend,
+                item: DashboardItem.ProjectInvite,
+                actionAttributes: [
+                        duration      : duration
+                ],
+                itemId: recipientEmail,
+                projectId: projectId,
+        ))
     }
 
     @Transactional(readOnly = false)
     void deleteInvite(String projectId, String recipientEmail) {
         projectAccessTokenRepo.deleteByProjectIdAndRecipientEmail(projectId, recipientEmail.toLowerCase())
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.ProjectInvite,
+                itemId: recipientEmail,
+                projectId: projectId,
+        ))
     }
 
     void remindUser(String projectId, String recipientEmail) {
@@ -426,6 +460,13 @@ class InviteOnlyProjectService {
                 ],
         )
         notifier.sendNotification(request)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Remind,
+                item: DashboardItem.ProjectInvite,
+                itemId: recipientEmail,
+                projectId: projectId,
+        ))
     }
 
     private ProjectInviteStatus convert(ProjectAccessToken token) {

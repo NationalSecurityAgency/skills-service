@@ -26,6 +26,10 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.TableResult
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.ProjectError
 import skills.storage.repos.ProjectErrorRepo
 import skills.storage.repos.SkillDefRepo
@@ -39,6 +43,9 @@ class ProjectErrorService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Transactional
     public void invalidSkillReported(String projectId, String reportedSkillId) {
@@ -82,7 +89,11 @@ class ProjectErrorService {
 
     @Transactional
     public void deleteError(String projectId, Integer errorId) {
-        ProjectError error = errorRepo.findById(errorId)?.get()
+        Optional<ProjectError> errorFromDB = errorRepo.findById(errorId)
+        if (errorFromDB.isEmpty()) {
+            throw new SkillException("Provided error id [${errorId}] does not exist", projectId, null, ErrorCode.BadParam)
+        }
+        ProjectError error = errorFromDB.get()
         if (error) {
             if (error.projectId != projectId) {
                 throw new SkillException("Provided error id [${errorId}] does not belong to this project", projectId, null, ErrorCode.AccessDenied)
@@ -92,11 +103,26 @@ class ProjectErrorService {
         } else {
             log.warn("ProjectError does not exists for [${projectId}]-[${errorId}]")
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.ProjectIssue,
+                actionAttributes: error,
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional
     public void deleteAllErrors(String projectId) {
         errorRepo.deleteByProjectId(projectId)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.ProjectIssue,
+                actionAttributes: [allIssues: true],
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional(readOnly = true)

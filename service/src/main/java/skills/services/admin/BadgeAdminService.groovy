@@ -206,15 +206,34 @@ class BadgeAdminService {
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
+        saveUserDashboardAction(savedSkill, badgeRequest, isEdit)
+        log.debug("Saved [{}]", savedSkill)
+    }
+
+    @Profile
+    private void saveUserDashboardAction(SkillDefWithExtra savedSkill, BadgeRequest badgeRequest, boolean isEdit) {
+        Map actionAttributes = [:]
+        Closure addAttributes = { Object obj, String prependToKey = null ->
+            obj.properties
+                    .findAll { key, val -> val instanceof String || val instanceof Number }
+                    .each { key, val ->
+                        String newKey = prependToKey ? "${prependToKey}:${key}" : key
+                        actionAttributes[newKey] = val
+                    }
+        }
+        addAttributes(savedSkill)
+        if (badgeRequest.awardAttrs) {
+            addAttributes(badgeRequest.awardAttrs, "BonusAward")
+        }
+
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Badge,
-                actionAttributes: savedSkill,
+                actionAttributes: actionAttributes,
                 itemId: savedSkill.skillId,
                 itemRefId: savedSkill.id,
                 projectId: savedSkill.projectId,
         ))
-        log.debug("Saved [{}]", savedSkill)
     }
 
     @Transactional
@@ -297,6 +316,16 @@ class BadgeAdminService {
     @Transactional()
     @Profile
     void addSkillToBadge(String projectId, String badgeId, String skillid) {
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.AssignSkill,
+                item: DashboardItem.Badge,
+                actionAttributes: [
+                        skillId: skillid,
+                        badgeId: badgeId,
+                ],
+                itemId: badgeId,
+                projectId: projectId,
+        ))
         ruleSetDefGraphService.assignGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge, skillid, SkillRelDef.RelationshipType.BadgeRequirement, true)
         validateAgainstLearningPath(projectId, badgeId, skillid)
     }

@@ -548,6 +548,12 @@ class ProjAdminService {
     void updateClientSecret(String projectId, String clientSecret) {
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
         projDef.clientSecret = clientSecret
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.TrustedClientSecret,
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional(readOnly = true)

@@ -59,7 +59,7 @@ class UserActionsHistoryService {
         FilterProvider filterProvider = new SimpleFilterProvider()
                 .addFilter("DynamicFilter", (SimpleBeanPropertyFilter)simpleBeanPropertyFilter);
         mapper.setFilterProvider(filterProvider)
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"));
     }
 
     @Transactional
