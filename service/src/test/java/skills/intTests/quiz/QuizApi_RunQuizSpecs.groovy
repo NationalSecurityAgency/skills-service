@@ -16,6 +16,7 @@
 package skills.intTests.quiz
 
 import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.exceptions.SkillQuizException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -319,5 +320,108 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
         then:
         quizInfoAfterStartUser1.questions != quizInfoAfterStartUser2.questions
+    }
+
+    def "Can fail a quiz via the endpoint"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def firstQuizAttempt = skillsService.startQuizAttempt(quiz.quizId, 'user1').body
+        def initialQuizInfo = skillsService.getQuizInfo(quiz.quizId, 'user1')
+        assert initialQuizInfo.isAttemptAlreadyInProgress == true
+        assert initialQuizInfo.userNumPreviousQuizAttempts == 0
+        assert initialQuizInfo.userQuizPassed == false
+
+        when:
+        skillsService.failQuizAttempt(quiz.quizId, firstQuizAttempt.id,'user1')
+
+        then:
+        def failedQuizInfo = skillsService.getQuizInfo(quiz.quizId, 'user1')
+        assert failedQuizInfo.isAttemptAlreadyInProgress == false
+        assert failedQuizInfo.userNumPreviousQuizAttempts == 1
+        assert failedQuizInfo.userQuizPassed == false
+
+    }
+
+    def "Can not submit answers to a failed quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.failQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+
+        then:
+        SkillsClientException quizException = thrown()
+        quizException.message.contains("Provided attempt id [${quizAttempt.id}], which corresponds to a failed quiz")
+    }
+
+    def "Can not submit a completed attempt to a failed quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.failQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        when:
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        then:
+        SkillsClientException quizException = thrown()
+        quizException.message.contains("Provided attempt id [${quizAttempt.id}], which corresponds to a failed quiz")
+    }
+
+    def "Can not submit answers to a quiz after the deadline"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizTimeLimit.setting, value: 1],
+        ])
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        Thread.sleep(1500)
+
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+
+        then:
+        SkillsClientException quizException = thrown()
+        quizException.message.contains("Deadline for [${quizAttempt.id}] has expired")
+    }
+
+    def "Can not submit a completed attempt after the deadline"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizTimeLimit.setting, value: 1],
+        ])
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        Thread.sleep(1500)
+
+        when:
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        then:
+        SkillsClientException quizException = thrown()
+        quizException.message.contains("Deadline for [${quizAttempt.id}] has expired")
     }
 }

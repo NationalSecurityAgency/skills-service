@@ -1786,6 +1786,10 @@ class SkillsService {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/complete"
         return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
+    def failQuizAttempt(String quizId, Integer attemptId, String userId = null) {
+        String url = "/quizzes/${quizId}/attempt/${attemptId}/fail"
+        return wsHelper.apiPost(url, userId ? [userId : userId] : null)
+    }
 
     def startQuizAttemptForUserId(String quizId, String userId) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
@@ -1797,6 +1801,10 @@ class SkillsService {
     }
     def completeQuizAttemptForUserId(String quizId, Integer attemptId, String userId) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete"
+        return wsHelper.adminPost(url, [])
+    }
+    def failQuizAttemptForUserId(String quizId, Integer attemptId, String userId) {
+        String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/fail"
         return wsHelper.adminPost(url, [])
     }
 
