@@ -19,6 +19,7 @@ enum DashboardItem {
     Project,
     Subject,
     Badge,
+    GlobalBadge,
     Skill,
     SkillsGroup,
     Quiz,

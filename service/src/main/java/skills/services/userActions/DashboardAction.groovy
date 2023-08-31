@@ -28,6 +28,8 @@ enum DashboardAction {
     Move,
     AssignSkill,
     RemoveSkillAssignment,
+    AssignLevel,
+    RemoveLevelAssignment,
     Configure,
     RemoveConfiguration,
     Extend,

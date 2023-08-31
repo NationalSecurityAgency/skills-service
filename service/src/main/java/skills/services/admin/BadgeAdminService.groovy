@@ -206,12 +206,12 @@ class BadgeAdminService {
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
-        saveUserDashboardAction(savedSkill, badgeRequest, isEdit)
+        saveUserDashboardAction(savedSkill, badgeRequest, isEdit, type == SkillDef.ContainerType.GlobalBadge)
         log.debug("Saved [{}]", savedSkill)
     }
 
     @Profile
-    private void saveUserDashboardAction(SkillDefWithExtra savedSkill, BadgeRequest badgeRequest, boolean isEdit) {
+    private void saveUserDashboardAction(SkillDefWithExtra savedSkill, BadgeRequest badgeRequest, boolean isEdit, boolean isGlobalBadge) {
         Map actionAttributes = [:]
         Closure addAttributes = { Object obj, String prependToKey = null ->
             obj.properties
@@ -228,7 +228,7 @@ class BadgeAdminService {
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
-                item: DashboardItem.Badge,
+                item: isGlobalBadge ? DashboardItem.GlobalBadge : DashboardItem.Badge,
                 actionAttributes: actionAttributes,
                 itemId: savedSkill.skillId,
                 itemRefId: savedSkill.id,
@@ -278,9 +278,10 @@ class BadgeAdminService {
         badges = badges?.findAll({ it.id != badgeDefinition.id }) // need to remove because of JPA level caching?
         displayOrderService.resetDisplayOrder(badges)
 
+        boolean isGlobalBadge = type == SkillDef.ContainerType.GlobalBadge
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Delete,
-                item: DashboardItem.Badge,
+                item: isGlobalBadge ? DashboardItem.GlobalBadge : DashboardItem.Badge,
                 itemId: badgeDefinition.skillId,
                 projectId: badgeDefinition.projectId,
         ))
