@@ -38,4 +38,5 @@ enum DashboardItem {
     ProjectIssue,
     TrustedClientSecret,
     ProjectInvite,
+    UserPreference
 }

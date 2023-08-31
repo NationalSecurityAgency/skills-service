@@ -15,15 +15,12 @@
  */
 package skills.intTests.userActions
 
-import groovy.json.JsonOutput
-import org.springframework.beans.factory.annotation.Autowired
-import skills.intTests.catalog.CatalogIntSpec
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
-import skills.storage.repos.UserActionsHistoryRepo
 import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*

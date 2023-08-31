@@ -41,6 +41,10 @@ import skills.services.UserAgreementService
 import skills.services.admin.UserCommunityService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
@@ -63,6 +67,9 @@ class UserInfoController {
 
     @Autowired
     UserAuthService userAuthService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Autowired
     UserRepo userRepo
@@ -129,17 +136,27 @@ class UserInfoController {
     RequestResult updateUserInfo(@RequestBody UserInfoRes userInfoReq) {
         UserInfo currentUser = loadCurrentUser(true)
         if (currentUser) {
+            Map<String,String> actionAttributes = [:]
             // first and last name fields cannot be changed when in PKI mode
             if (authMode != AuthMode.PKI) {
                 if (userInfoReq.first) {
                     currentUser.firstName = userInfoReq.first
+                    actionAttributes["firstName"] = userInfoReq.first
                 }
                 if (userInfoReq.last) {
                     currentUser.lastName = userInfoReq.last
+                    actionAttributes["lastName"] = userInfoReq.last
                 }
             }
             currentUser.nickname = userInfoReq.nickname
+            actionAttributes["nickname"] = userInfoReq.nickname
             userAuthService.createOrUpdateUser(currentUser)
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Edit, item: DashboardItem.UserPreference,
+                    actionAttributes: actionAttributes,
+                    itemId: DashboardItem.UserPreference.toString(),
+            ))
         }
         return new RequestResult(success: true)
     }
@@ -157,11 +174,33 @@ class UserInfoController {
         List<UserSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
         if (toDelete) {
             settingsService.deleteUserSettings(toDelete)
+            toDelete.each {
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Delete, item: DashboardItem.UserPreference,
+                        actionAttributes: [
+                                settingGroup: it.settingGroup,
+                                setting: it.setting,
+                                value: it.value,
+                        ],
+                        itemId: DashboardItem.UserPreference.toString(),
+                ))
+            }
         }
 
         List<UserSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
         if (toSave) {
             settingsService.saveSettings(toSave)
+            toSave.each {
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Edit, item: DashboardItem.UserPreference,
+                        actionAttributes: [
+                                settingGroup: it.settingGroup,
+                                setting: it.setting,
+                                value: it.value,
+                        ],
+                        itemId: DashboardItem.UserPreference.toString(),
+                ))
+            }
         }
 
         return new RequestResult(success: true)
