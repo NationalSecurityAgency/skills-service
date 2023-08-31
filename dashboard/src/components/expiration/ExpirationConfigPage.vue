@@ -366,19 +366,33 @@ limitations under the License.
             // any user achievement achievedOn before this date
             // expirationSettings.nextExpirationDate = dayjs(now).subtract(this.dailyDays, 'day');
           }
+          ExpirationService.saveExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
+            .then(() => {
+              this.updateLoadedSettings(expirationSettings);
+              this.showSavedMsg = true;
+              setTimeout(() => {
+                this.showSavedMsg = false;
+              }, 3500);
+              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
+            })
+            .finally(() => {
+              this.loading = false;
+            });
+        } else {
+          // expirationType changed to NEVER so delete existing settings
+          ExpirationService.deleteExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
+            .then(() => {
+              this.updateLoadedSettings(expirationSettings);
+              this.showSavedMsg = true;
+              setTimeout(() => {
+                this.showSavedMsg = false;
+              }, 3500);
+              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
+            })
+            .finally(() => {
+              this.loading = false;
+            });
         }
-        ExpirationService.saveExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
-          .then(() => {
-            this.updateLoadedSettings(expirationSettings);
-            this.showSavedMsg = true;
-            setTimeout(() => {
-              this.showSavedMsg = false;
-            }, 3500);
-            this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
-          })
-          .finally(() => {
-            this.loading = false;
-          });
       },
       loadSkillInfo() {
         this.loadSkill({

@@ -67,6 +67,11 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, skillExpirationAttrs)
     }
 
+    @Transactional
+    void deleteExpirationAttrs(String projectId, String skillId) {
+        deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration)
+    }
+
     ExpirationAttrs getExpirationAttrs(String projectId, String skillId) {
         ExpirationAttrs skillExpirationAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, ExpirationAttrs.class)
         return skillExpirationAttrs

@@ -608,6 +608,14 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/expiration", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSkillExpirationAttrs(@PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId) {
+        skillAttributeService.deleteExpirationAttrs(projectId, skillId)
+        return new RequestResult(success: true)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/expiration", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     ExpirationAttrs getSkillExpirationAttrs(@PathVariable("projectId") String projectId,

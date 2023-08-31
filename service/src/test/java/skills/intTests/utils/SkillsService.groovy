@@ -1844,6 +1844,10 @@ class SkillsService {
         String url = "/projects/${projectId}/skills/${skillId}/expiration"
         return wsHelper.adminGet(url)
     }
+    def deleteSkillExpirationAttributes(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/expiration"
+        return wsHelper.adminDelete(url)
+    }
 
     private String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()

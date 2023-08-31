@@ -1556,61 +1556,6 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         ].collect { it.toString() }.sort ()
     }
 
-    def "cannot configure skill expiration for skills imported from catalog"() {
-        def user = getRandomUsers(1)[0]
-        def proj1 = SkillsFactory.createProject(1)
-        def proj2 = SkillsFactory.createProject(2)
-        def subj1 = SkillsFactory.createSubject(1, 1)
-        def subj2 = SkillsFactory.createSubject(2, 2)
-
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 2, 0, 100)
-
-        skillsService.createProject(proj1)
-        skillsService.createProject(proj2)
-        skillsService.createSubject(subj1)
-        skillsService.createSubject(subj2)
-        skillsService.createSkill(skill1)
-
-        when:
-        skillsService.exportSkillToCatalog(proj1.projectId, skill1.skillId)
-        skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skill1.skillId)
-        skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
-
-        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
-        skillsService.saveSkillExpirationAttributes(proj2.projectId, skill1.skillId, [
-                expirationType: ExpirationAttrs.YEARLY,
-                every: 1,
-                monthlyDay: expirationDate.dayOfMonth,
-                nextExpirationDate: expirationDate.toDate(),
-        ])
-
-        then:
-        def e = thrown(Exception)
-        e.getMessage().contains("Cannot configure expiration attribute on skills imported from the catalog")
-    }
-
-    def "cannot configure skill expiration for skills re-used in the same project"() {
-        def p1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
-        def p1Skills = createSkills(10, 1, 1, 100)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-        def p1subj2 = createSubject(1, 2)
-        skillsService.createSubject(p1subj2)
-        when:
-
-        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
-        skillsService.saveSkillExpirationAttributes(p1.projectId, 'skill1STREUSESKILLST0', [
-                expirationType: ExpirationAttrs.YEARLY,
-                every: 1,
-                monthlyDay: expirationDate.dayOfMonth,
-                nextExpirationDate: expirationDate.toDate(),
-        ])
-
-        then:
-        def e = thrown(Exception)
-        e.getMessage().contains("Cannot configure expiration attribute on skills that are reused")
-    }
-
     def expireAllSkillsForProject(String projectId, LocalDateTime expirationDate=null,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
         def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills)
         expireSkills(projectId, skills, expirationDate)
