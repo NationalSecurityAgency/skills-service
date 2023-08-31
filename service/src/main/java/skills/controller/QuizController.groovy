@@ -215,6 +215,14 @@ class QuizController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{quizAttempId}/fail", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizGradedResult failQuizAttempt(@PathVariable("quizId") String quizId,
+                                     @PathVariable("userId") String userId,
+                                     @PathVariable("quizAttempId") Integer quizAttemptId) {
+        return quizRunService.failQuizAttempt(userId, quizId, quizAttemptId);
+    }
+
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{quizAttempId}/complete", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizGradedResult completeQuizAttempt(@PathVariable("quizId") String quizId,

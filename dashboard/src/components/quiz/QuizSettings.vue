@@ -121,6 +121,58 @@ limitations under the License.
         </div>
       </div>
 
+        <div class="row mt-3">
+          <div id="quizTimeLimit" class="col col-md-3 text-secondary" >
+            Quiz Time Limit:
+          </div>
+          <div class="col">
+            <div class="row">
+              <div class="col-auto my-auto">
+                <b-form-checkbox v-model="settings.quizTimeLimit.unlimited"
+                                 aria-label="Quiz Time Limit setting, unlimited time checkbox"
+                                 name="Unlimited Time"
+                                 data-cy="unlimitedTimeSwitch" switch>
+                  Unlimited
+                </b-form-checkbox>
+              </div>
+              <div class="col-auto my-auto" v-if="!settings.quizTimeLimit.unlimited">
+                <div class="row">
+                  <div class="col-12 col-sm">
+                    <ValidationProvider name="Quiz Time Limit Hours" rules="optionalNumeric|required|min_value:0|max_value:24" v-slot="{errors}">
+                      <div class="input-group">
+                        <input class="form-control d-inline" type="text" v-model="hoursForQuiz"
+                               aria-labelledby="quizTimeLimitHours"
+                               data-cy="timeLimitHoursInput"
+                               @input="updateTimeLimit"
+                               ref="timeLimitHours" />
+                        <div class="input-group-append">
+                          <span class="input-group-text" id="hours-append">Hours</span>
+                        </div>
+                      </div>
+                      <small role="alert" class="form-text text-danger" v-show="errors[0]">{{errors[0]}}</small>
+                    </ValidationProvider>
+                  </div>
+                  <div class="col-12 col-sm">
+                    <ValidationProvider name="Quiz Time Limit Minutes" rules="optionalNumeric|required|min_value:0|max_value:59" v-slot="{errors}">
+                      <div class="input-group">
+                        <input class="form-control d-inline" type="text" v-model="minutesForQuiz"
+                               aria-labelledby="quizTimeLimit"
+                               data-cy="timeLimitMinutesInput"
+                               @input="updateTimeLimit"
+                               ref="timeLimitMinutes" />
+                        <div class="input-group-append">
+                          <span class="input-group-text" id="minutes-append">Minutes</span>
+                        </div>
+                      </div>
+                      <small role="alert" class="form-text text-danger" v-show="errors[0]">{{errors[0]}}</small>
+                    </ValidationProvider>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       <div v-if="errMsg" class="alert alert-danger">
         {{ errMsg }}
       </div>
@@ -208,7 +260,16 @@ limitations under the License.
             setting: 'quizLength',
             lastLoadedValue: '-1',
           },
+          quizTimeLimit: {
+            value: 60,
+            unlimited: true,
+            setting: 'quizTimeLimit',
+            lastLoadedValue: 60,
+            lastLoadedUnlimited: true,
+          },
         },
+        hoursForQuiz: 1,
+        minutesForQuiz: 0,
         errMsg: null,
       };
     },
@@ -236,7 +297,9 @@ limitations under the License.
           || (!this.settings.numAttempts.unlimited && this.settings.numAttempts.value !== this.settings.numAttempts.lastLoadedValue)
           || (this.settings.randomizeAnswers.value !== this.settings.randomizeAnswers.lastLoadedValue)
           || (this.settings.randomizeQuestions.value !== this.settings.randomizeQuestions.lastLoadedValue)
-          || this.settings.quizLength.value !== this.settings.quizLength.lastLoadedValue;
+          || this.settings.quizLength.value !== this.settings.quizLength.lastLoadedValue
+          || (!this.settings.quizTimeLimit.unlimited && this.settings.quizTimeLimit.value !== this.settings.quizTimeLimit.lastLoadedValue)
+          || this.settings.quizTimeLimit.unlimited !== this.settings.quizTimeLimit.lastLoadedUnlimited;
       },
       isSurveyType() {
         return this.quizSummary.type === 'Survey';
@@ -251,6 +314,9 @@ limitations under the License.
         });
     },
     methods: {
+      updateTimeLimit() {
+        this.settings.quizTimeLimit.value = ((parseInt(this.hoursForQuiz, 10) * 60) + parseInt(this.minutesForQuiz, 10)) * 60;
+      },
       setupValidation() {
         extend('lessThanOrEqualToLength', {
           message: () => 'Passing requirement must be less than or equal to the quiz length',
@@ -282,7 +348,7 @@ limitations under the License.
       },
       collectAndSave() {
         let dirtySettings = Object.values(this.settings).filter((s) => {
-          if (s.setting === this.settings.numAttempts.setting) {
+          if (s.setting === this.settings.numAttempts.setting || s.setting === this.settings.quizTimeLimit.setting) {
             return s.unlimited !== s.lastLoadedUnlimited || (!s.unlimited && s.value !== s.lastLoadedValue);
           }
           return s.value !== s.lastLoadedValue;
@@ -290,7 +356,7 @@ limitations under the License.
         if (dirtySettings) {
           this.isSaving = true;
           dirtySettings = dirtySettings.map((s) => {
-            if (s.setting === this.settings.numAttempts.setting && s.unlimited) {
+            if ((s.setting === this.settings.numAttempts.setting || s.setting === this.settings.quizTimeLimit.setting) && s.unlimited) {
               return ({ ...s, value: '-1' });
             }
             return s;
@@ -331,6 +397,23 @@ limitations under the License.
                       this.settings.numAttempts.lastLoadedValue = foundFromServer.value;
                       this.settings.numAttempts.unlimited = false;
                       this.settings.numAttempts.lastLoadedUnlimited = false;
+                    }
+                  } else if (foundFromServer.setting === this.settings.quizTimeLimit.setting) {
+                    if (foundFromServer.value === '-1') {
+                      this.settings.quizTimeLimit.value = '3600';
+                      this.settings.quizTimeLimit.lastLoadedValue = '3600';
+                      this.hoursForQuiz = 1;
+                      this.minutesForQuiz = 0;
+                      this.settings.quizTimeLimit.unlimited = true;
+                      this.settings.quizTimeLimit.lastLoadedUnlimited = true;
+                    } else {
+                      this.settings.quizTimeLimit.value = foundFromServer.value;
+                      this.hoursForQuiz = Math.floor(foundFromServer.value / 3600);
+                      const remainingTime = foundFromServer.value - (this.hoursForQuiz * 3600);
+                      this.minutesForQuiz = remainingTime / 60;
+                      this.settings.quizTimeLimit.lastLoadedValue = foundFromServer.value;
+                      this.settings.quizTimeLimit.unlimited = false;
+                      this.settings.quizTimeLimit.lastLoadedUnlimited = false;
                     }
                   } else {
                     this.settings[key].value = foundFromServer.value;

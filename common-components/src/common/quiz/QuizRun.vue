@@ -64,6 +64,7 @@ limitations under the License.
         </div>
         <div class="col-auto text-right text-muted">
           <b-badge variant="success" data-cy="numQuestions">{{quizInfo.quizLength}}</b-badge> <span class="text-uppercase">questions</span>
+          <span v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null"> | {{currentDate | duration(quizInfo.deadline, false, true)}}</span>
         </div>
       </div>
 
@@ -112,11 +113,15 @@ limitations under the License.
       </div>
     </b-card>
 
+    <div v-if="scrollDistance > 300" id="floating-timer">
+      <div v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null">{{currentDate | duration(quizInfo.deadline, false, true)}}</div>
+    </div>
   </div>
 </div>
 </template>
 
 <script>
+  import dayjs from 'dayjs';
   import QuizRunService from '@/common-components/quiz/QuizRunService';
   import SkillsSpinner from '@/common-components/utilities/SkillsSpinner';
   import QuizRunQuestion from '@/common-components/quiz/QuizRunQuestion';
@@ -154,6 +159,9 @@ limitations under the License.
         splashScreen: {
           show: false,
         },
+        currentDate: null,
+        dateTimer: null,
+        scrollDistance: 0,
       };
     },
     mounted() {
@@ -162,6 +170,9 @@ limitations under the License.
       } else {
         this.loadData();
       }
+    },
+    beforeDestroy() {
+      this.destroyDateTimer();
     },
     computed: {
       isSurveyType() {
@@ -178,6 +189,39 @@ limitations under the License.
       },
     },
     methods: {
+      handleScroll() {
+        this.scrollDistance = window.scrollY;
+      },
+      beginDateTimer() {
+        if (this.quizInfo.deadline) {
+          window.addEventListener('scroll', this.handleScroll);
+          this.currentDate = dayjs().utc().valueOf();
+          this.dateTimer = setInterval(() => {
+            this.currentDate = dayjs().utc().valueOf();
+            if (this.currentDate >= dayjs(this.quizInfo.deadline).utc().valueOf()) {
+              this.destroyDateTimer();
+              QuizRunService.failQuizAttempt(this.quizId, this.quizAttemptId).then((gradedRes) => {
+                const numTotal = this.quizInfo.questions.length;
+                const numCorrect = 0;
+                const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+                this.quizResult = {
+                  gradedRes,
+                  numCorrect,
+                  numTotal,
+                  percentCorrect,
+                  missedBy: numTotal,
+                  outOfTime: true,
+                };
+              });
+            }
+          }, 1000);
+        }
+      },
+      destroyDateTimer() {
+        clearInterval(this.dateTimer);
+        this.dateTimer = null;
+        window.removeEventListener('scroll', this.handleScroll);
+      },
       loadData() {
         this.isLoading = true;
         QuizRunService.getQuizInfo(this.quizId)
@@ -195,14 +239,39 @@ limitations under the License.
           this.isLoading = false;
         }
       },
+      failQuizAttempt() {
+        this.destroyDateTimer();
+        this.quizResult = {
+          gradedRes: {
+            associatedSkillResults: [],
+            completed: null,
+            gradedQuestion: [],
+            numberQuestionsGotWrong: 0,
+            passed: false,
+            started: null,
+          },
+          missedBy: this.quizInfo.questions.length,
+          numCorrect: 0,
+          numTotal: this.quizInfo.questions.length,
+          percentCorrect: 0,
+          outOfTime: true,
+        };
+      },
       startQuizAttempt() {
         this.isLoading = true;
         this.splashScreen.show = false;
 
         QuizRunService.startQuizAttempt(this.quizId)
           .then((startQuizAttemptRes) => {
+            if (startQuizAttemptRes.existingAttemptFailed) {
+              this.failQuizAttempt();
+              return;
+            }
             this.quizAttemptId = startQuizAttemptRes.id;
-            const { selectedAnswerIds, enteredText, questions } = startQuizAttemptRes;
+            const {
+              selectedAnswerIds, enteredText, questions, deadline,
+            } = startQuizAttemptRes;
+            this.quizInfo.deadline = deadline;
             this.quizInfo.questions = questions;
             const copy = ({ ...this.quizInfo });
             copy.questions = this.quizInfo.questions.map((q) => {
@@ -221,6 +290,7 @@ limitations under the License.
               return ({ ...q, answerOptions });
             });
             this.quizInfo = copy;
+            this.beginDateTimer();
           }).finally(() => {
             this.isLoading = false;
           });
@@ -238,6 +308,7 @@ limitations under the License.
               .then(() => {
                 this.reportTestRunToBackend()
                   .finally(() => {
+                    this.destroyDateTimer();
                     this.isCompleting = false;
                     if (!this.isSurveyType) {
                       this.$nextTick(() => {
@@ -315,5 +386,12 @@ limitations under the License.
 </script>
 
 <style scoped>
-
+#floating-timer {
+  position: fixed;
+  top: 30px;
+  right: 45px;
+  z-index: 10;
+  padding: 5px;
+  border: 1px solid #000;
+}
 </style>

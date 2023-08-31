@@ -27,5 +27,7 @@ class QuizAttemptStartResult {
     List<Integer> selectedAnswerIds
     List<AnswerIdAndEnteredText> enteredText
     List<QuizQuestionInfo> questions
+    Boolean existingAttemptFailed = false
+    Date deadline
 
 }

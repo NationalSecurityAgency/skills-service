@@ -49,6 +49,10 @@ export default {
     return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/complete`, { ...this.getUserIdParams() })
         .then((response) => response.data);
   },
+  failQuizAttempt(quizId, attemptId) {
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/fail`, { ...this.getUserIdParams() })
+        .then((response) => response.data);
+  },
   validateDescription(description) {
     return axios.post('/api/validation/description', { value: description })
         .then((response) => response.data);

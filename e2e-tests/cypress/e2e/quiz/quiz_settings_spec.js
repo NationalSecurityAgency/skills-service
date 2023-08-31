@@ -155,6 +155,45 @@ describe('Quiz Metrics Tests', () => {
 
     });
 
+    it('quiz setting: configure quiz time limit', function () {
+        cy.createQuizDef(1);
+        for(var x = 1; x < 3; x++) {
+            cy.createQuizQuestionDef(1, x);
+        }
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+        cy.get('[data-cy="timeLimitHoursInput"]').should('not.exist')
+        cy.get('[data-cy="timeLimitMinutesInput"]').should('not.exist')
+
+        cy.get('[data-cy="unlimitedTimeSwitch"]').click({force: true});
+        cy.get('[data-cy="timeLimitHoursInput"]').should('exist')
+        cy.get('[data-cy="timeLimitMinutesInput"]').should('exist')
+
+        cy.get('[data-cy="timeLimitHoursInput"]').should('have.value', '1')
+        cy.get('[data-cy="timeLimitMinutesInput"]').should('have.value', '0')
+
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+
+        cy.get('[data-cy="timeLimitHoursInput"]').type('555');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="timeLimitHoursInput"]').type('{selectall}6');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="timeLimitMinutesInput"]').type('555');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="timeLimitMinutesInput"]').type('{selectall}30');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+    });
+
     it('surveys do not have settings, at least yet...', function () {
         cy.createQuizDef(1, { type: 'Survey' });
         cy.visit('/administrator/quizzes/quiz1/settings');

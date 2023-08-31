@@ -271,6 +271,13 @@ Cypress.Commands.add("setRandomizedAnswers", (quizNum = 1, enabled) => {
     }]);
 });
 
+Cypress.Commands.add("setQuizTimeLimit", (quizNum = 1, timeLimit) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizTimeLimit',
+        value: `${timeLimit}`
+    }]);
+});
+
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');

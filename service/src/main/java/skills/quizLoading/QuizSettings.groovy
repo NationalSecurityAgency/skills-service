@@ -21,7 +21,8 @@ enum QuizSettings {
     QuizUserRole('quizUserRole'),
     RandomizeQuestions('quizRandomizeQuestions'),
     RandomizeAnswers('quizRandomizeAnswers'),
-    QuizLength('quizLength');
+    QuizLength('quizLength'),
+    QuizTimeLimit('quizTimeLimit');
 
     String setting;
 

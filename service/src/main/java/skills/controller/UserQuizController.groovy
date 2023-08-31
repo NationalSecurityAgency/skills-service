@@ -84,4 +84,12 @@ class UserQuizController {
         return quizRunService.completeQuizAttempt(userId, quizId, quizAttemptId);
     }
 
+    @RequestMapping(value = "/quizzes/{quizId}/attempt/{quizAttempId}/fail", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizGradedResult failQuizAttempt(@PathVariable("quizId") String quizId,
+                                         @PathVariable("quizAttempId") Integer quizAttemptId,
+                                         @RequestBody(required = false) CompleteQuizAttemptReq completeQuizAttemptReq) {
+        String userId = userInfoService.getUserName(completeQuizAttemptReq?.userId, true, completeQuizAttemptReq?.idType);
+        return quizRunService.failQuizAttempt(userId, quizId, quizAttemptId);
+    }
 }
