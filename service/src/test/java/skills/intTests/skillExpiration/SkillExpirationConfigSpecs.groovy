@@ -23,7 +23,6 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.services.attributes.ExpirationAttrs
-import skills.services.attributes.SkillAttributeService
 import skills.storage.model.SkillAttributesDef
 import skills.storage.repos.SkillAttributesDefRepo
 
@@ -38,9 +37,6 @@ class SkillExpirationConfigSpecs extends DefaultIntSpec {
 
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
-
-    @Autowired
-    SkillAttributeService skillAttributeService
 
     def "cannot configure skill expiration for skills imported from catalog"() {
         def user = getRandomUsers(1)[0]
