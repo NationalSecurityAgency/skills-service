@@ -37,10 +37,15 @@ import skills.controller.result.model.UserRoleRes
 import skills.services.admin.UserCommunityService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
 
@@ -82,6 +87,12 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
@@ -202,6 +213,10 @@ class AccessSettingsStorageService {
             addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
         inceptionProjectService.createInceptionAndAssignUser(userId)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId.toLowerCase())
+        String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
+        saveUserRoleActions(userId, RoleName.ROLE_SUPER_DUPER_USER, DashboardAction.Create)
         return convert(userRole)
     }
 
@@ -215,13 +230,32 @@ class AccessSettingsStorageService {
             deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
         inceptionProjectService.removeUser(userId)
+
+        saveUserRoleActions(userId, RoleName.ROLE_SUPER_DUPER_USER, DashboardAction.Delete)
+    }
+
+    @Profile
+    void saveUserRoleActions(String userId, RoleName roleName, DashboardAction action) {
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId.toLowerCase())
+        String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: action, item: DashboardItem.UserRole,
+                actionAttributes: [
+                        userId  : userIdForDisplay,
+                        userRole: roleName
+                ],
+                itemId: userIdForDisplay,
+        ))
     }
 
     @Transactional()
-    void deleteUserRole(String userId, String projectId, RoleName roleName) {
+    void deleteUserRole(String userId, String projectId, RoleName roleName, boolean saveUserAction = false) {
         userId = userId?.toLowerCase()
         if (userId != userInfoService.getCurrentUser().username.toLowerCase()) {
             deleteUserRoleInternal(userId, projectId, roleName)
+            if (saveUserAction) {
+                saveUserRoleActions(userId, roleName, DashboardAction.Delete)
+            }
         } else {
             throw new SkillException("You cannot delete yourself.")
         }
@@ -251,8 +285,11 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    UserRoleRes addUserRole(String userId, String projectId, RoleName roleName) {
+    UserRoleRes addUserRole(String userId, String projectId, RoleName roleName, boolean saveRoleAction = false) {
         UserRole role = addUserRoleInternal(userId, projectId, roleName)
+        if (saveRoleAction) {
+            saveUserRoleActions(userId, roleName, DashboardAction.Create)
+        }
         return convert(role)
     }
 

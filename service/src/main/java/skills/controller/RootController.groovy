@@ -45,6 +45,7 @@ import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
@@ -207,7 +208,7 @@ class RootController {
             addRoot(userKey)
         } else {
             String userId = getUserId(userKey)
-            accessSettingsStorageService.addUserRole(userId, null, roleName)
+            accessSettingsStorageService.addUserRole(userId, null, roleName, true)
         }
         return new RequestResult(success: true)
     }
@@ -220,7 +221,7 @@ class RootController {
             deleteRoot(userId)
             projAdminService.unpinAllProjectsForRootUser(userId)
         } else {
-            accessSettingsStorageService.deleteUserRole(userId, null, roleName)
+            accessSettingsStorageService.deleteUserRole(userId, null, roleName, true)
         }
     }
 
@@ -251,6 +252,11 @@ class RootController {
             settings.userAgreemmentVersion = agreementVersion
         }
         systemSettingsService.save(settings)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create, item: DashboardItem.Settings,
+                actionAttributes: settings,
+                itemId: "SystemSettings",
+        ))
         return RequestResult.success()
     }
 
@@ -264,7 +270,7 @@ class RootController {
         SkillsValidator.isNotBlank(setting, "Setting Id")
         SkillsValidator.isTrue(setting == settingRequest.setting, "Setting Id must equal")
 
-        settingsService.saveSetting(settingRequest)
+        settingsService.saveSetting(settingRequest, null, true)
         return new RequestResult(success: true)
     }
 
@@ -279,7 +285,7 @@ class RootController {
 
         List<GlobalSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
         if (toSave) {
-            settingsService.saveSettings(toSave)
+            settingsService.saveSettings(toSave, null, true)
         }
 
         return new RequestResult(success: true)
