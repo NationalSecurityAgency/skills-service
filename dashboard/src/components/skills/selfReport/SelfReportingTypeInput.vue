@@ -90,7 +90,7 @@ limitations under the License.
           </li>
         </ul>
       </div>
-      <div class="alert alert-info" v-if="selfReport.approvals.newSelfReportingType === 'Disabled'">
+      <div class="alert alert-info" v-if="selfReport.approvals.newSelfReportingType === 'Disabled' || selfReport.approvals.newSelfReportingType === 'Quiz' || selfReport.approvals.newSelfReportingType === 'Video'">
         <i class="fas fa-exclamation-triangle mr-2"></i> Disabling <i>Self Reporting</i> will automatically:
         <ul>
           <li v-if="selfReport.approvals.numPending > 0">
@@ -185,7 +185,7 @@ limitations under the License.
       handleSelfReportingWarning() {
         if (this.isEdit) {
           this.selfReport.approvals.showWarning = false;
-          if (this.selfReport.originalSelfReportingType === 'Approval' && (this.selfReport.selected === 'HonorSystem' || !this.selfReport.enabled)) {
+          if (this.selfReport.originalSelfReportingType === 'Approval' && (this.selfReport.selected === 'HonorSystem' || !this.selfReport.enabled || this.selfReport.selected === 'Video' || this.selfReport.selected === 'Quiz')) {
             this.selfReport.approvals.loading = true;
             SelfReportService.getSkillApprovalsStats(this.skill.projectId, this.skill.skillId)
               .then((res) => {

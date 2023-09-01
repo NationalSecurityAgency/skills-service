@@ -283,7 +283,7 @@ class SkillApprovalService {
             return;
         }
 
-        if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && !incomingType) {
+        if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && (!incomingType || incomingType == SkillDef.SelfReportingType.Quiz || incomingType == SkillDef.SelfReportingType.Video)) {
             skillApprovalRepo.deleteByProjectIdAndSkillRefId(existing.projectId, existing.id)
         } else if (existing.selfReportingType == SkillDef.SelfReportingType.Approval && incomingType == SkillDef.SelfReportingType.HonorSystem) {
             skillApprovalRepo.findAllBySkillRefIdAndRejectedOnIsNull(existing.id).withCloseable { Stream<SkillApproval> existingApprovals ->
