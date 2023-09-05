@@ -100,6 +100,10 @@ jobs:
           - 5432:5432
 
     steps:
+      - name: print default vars
+        run: |
+          echo ${{ github.GITHUB_EVENT_NAME }}
+
       - name: Install libs
         run: |
           sudo apt-get update
