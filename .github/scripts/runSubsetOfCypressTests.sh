@@ -32,7 +32,9 @@ echo "Base SkillTree URL: $baseSkillTreeUrl"
 
 cd ./cypress/e2e
 IFS=$'\n'
-allTests=($(find . | grep -i -E 'spec[s]?\.js' | sort))
+# locate all of the tests files then "shuffle" in a repetitive order by sorting using md5sum
+allTests=($(find . -type f -exec md5sum {} + | grep -i -E 'spec[s]?\.js' | sort | cut -d " " -f 3))
+#allTests=($(find . | grep -i -E 'spec[s]?\.js' | sort | cut -d " " -f 3))
 unset IFS
 cd ../../
 
@@ -70,5 +72,5 @@ do
 #  commandToRun="TZ=UTC cypress run --browser chrome${customSnapDir} --config baseUrl=${baseSkillTreeUrl} --spec \"${testClass}\""
   commandToRun="npm run cy:run -- ${customSnapDir}--spec cypress/e2e/${testClass}"
   echo "Running command [${commandToRun}]"
-  exec $commandToRun
+  eval $commandToRun
 done
