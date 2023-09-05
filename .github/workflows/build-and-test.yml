@@ -123,10 +123,10 @@ jobs:
           npm -v
           node -v
 
-          - uses: actions/download-artifact@v3
-            with:
-              name: service jar
-              path: ./service/target/
+      - uses: actions/download-artifact@v3
+        with:
+          name: service jar
+          path: ./service/target/
 
 #      - name: Download latest jar
 #        run: |
