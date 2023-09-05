@@ -47,7 +47,12 @@ fi
 testsInThisRun=${allTests[@]:$start:$numPerRun}
 echo "There are [$totalNum] total tests. Run [$currentRun]: Start Number=[$start], running up to [$numPerRun] tests"
 
-echo "Cypres tests:"
+echo "Cypress tests:"
+returnCode=0
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NOCOLOR='\033[0m'
+testResultOutput="Test Results:\n"
 count=1;
 for testClass in ${testsInThisRun[@]}
 do
@@ -58,7 +63,8 @@ echo "------------------------------------------------"
 count=1;
 for testClass in ${testsInThisRun[@]}
 do
-  printf "\nRunning $count: $testClass ----------------------------------\n"
+  testNum=$count
+  printf "\nRunning $testNum: $testClass ----------------------------------\n"
   count=$((count+1))
 
   baseDir=$(echo "${testClass}" | cut -d "/" -f2)
@@ -73,4 +79,18 @@ do
   commandToRun="npm run cy:run -- ${customSnapDir}--spec cypress/e2e/${testClass}"
   echo "Running command [${commandToRun}]"
   eval $commandToRun
+  commandStatusCode=$?
+  if [ $commandStatusCode -ne 0 ];
+  then
+    returnCode=$commandStatusCode
+    testResultOutput="${testResultOutput}Test $testNum: ${RED}\u274c FAILED${NOCOLOR} => ${testClass}\n"
+  else
+    testResultOutput="${testResultOutput}Test $testNum: ${GREEN}\u2714 PASSED${NOCOLOR} => ${testClass}\n"
+  fi
 done
+
+echo "-------------------"
+echo -e $testResultOutput
+echo "-------------------"
+echo "Thanks for testing! Return code is [${returnCode}]"
+exit $returnCode
