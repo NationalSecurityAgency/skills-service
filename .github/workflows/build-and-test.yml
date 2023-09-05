@@ -100,7 +100,7 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: print default vars  [${{ github.GITHUB_EVENT_NAME }}]
+      - name: print default vars  [${{ GITHUB_EVENT_NAME }}], [${{ github.EVENT_NAME }}], [${{ github.eventName }}]
         run: |
           echo "${{ github.GITHUB_EVENT_NAME }}"
 
