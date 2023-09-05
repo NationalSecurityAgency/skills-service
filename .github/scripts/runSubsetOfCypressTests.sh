@@ -68,7 +68,7 @@ do
   fi
 
 #  commandToRun="TZ=UTC cypress run --browser chrome${customSnapDir} --config baseUrl=${baseSkillTreeUrl} --spec \"${testClass}\""
-  commandToRun="npm run cy:run:dev -- ${customSnapDir}--spec cypress/e2e/${testClass}"
+  commandToRun="npm run cy:run -- ${customSnapDir}--spec cypress/e2e/${testClass}"
   echo "Running command [${commandToRun}]"
   exec $commandToRun
 done
