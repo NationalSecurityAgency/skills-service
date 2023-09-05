@@ -168,7 +168,6 @@ jobs:
           cd e2e-tests
           npm run verifyThatNewSnapshotsAreNotCreated
 
-
 #  ui-tests-against-postgres-cypress-dashboard:
 #    runs-on: ubuntu-22.04
 #    container:
