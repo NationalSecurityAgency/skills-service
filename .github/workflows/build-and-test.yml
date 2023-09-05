@@ -76,6 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     #    needs: [build-skills-service-for-ui-tests]
     strategy:
+      fail-fast: false
       matrix:
         #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
         container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
@@ -130,6 +131,7 @@ jobs:
 
       - name: Download latest jar
         run: |
+          mkdir -p service/target
           cd service/target
           curl -s https://api.github.com/repos/NationalSecurityAgency/skills-service/releases/latest | grep browser_download_url | cut -d '"' -f 4 | wget -qi -
           ls -la ./
