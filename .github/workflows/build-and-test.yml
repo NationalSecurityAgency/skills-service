@@ -24,58 +24,52 @@ on:
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/publish-image-snapshot.yml'
       - '.gitlab-ci.yml'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/publish-image-snapshot.yml'
-#      - '.gitlab-ci.yml'
 
 jobs:
-  #  build-skills-service-for-ui-tests:
-  #    runs-on: ubuntu-latest
-  #
-  #    steps:
-  #      - uses: actions/checkout@v3
-  #
-  #      - uses: actions/setup-node@v3
-  #        with:
-  #          node-version: '14'
-  #
-  #      - uses: actions/setup-java@v3
-  #        with:
-  #          distribution: 'temurin'
-  #          java-version: '19' # The JDK version to make available on the path.
-  #
-  #      - name: Print Versions
-  #        run: |
-  #          java -version
-  #          mvn --version
-  #
-  #      - name: Cache local Maven repository
-  #        uses: actions/cache@v3
-  #        with:
-  #          path: ~/.m2/repository
-  #          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-  #          restore-keys: |
-  #            ${{ runner.os }}-maven-
-  #
-  #      - name: Build skills-service
-  #        env:
-  #          MAVEN_OPTS: -Xmx2048m
-  #        run: |
-  #          mvn --batch-mode install -DskipTests
-  #
-  #      - name: upload service jar
-  #        uses: actions/upload-artifact@v3
-  #        with:
-  #          name: service jar
-  #          path: ./service/target/*.jar
+  build-skills-service-for-ui-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '19' # The JDK version to make available on the path.
+
+      - name: Print Versions
+        run: |
+          java -version
+          mvn --version
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build skills-service
+        env:
+          MAVEN_OPTS: -Xmx2048m
+        run: |
+          mvn --batch-mode install -DskipTests
+
+      - name: upload service jar
+        uses: actions/upload-artifact@v3
+        with:
+          name: service jar
+          path: ./service/target/*.jar
 
   ui-tests-against-postgres:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
-    #    needs: [build-skills-service-for-ui-tests]
+    needs: [build-skills-service-for-ui-tests]
     strategy:
       fail-fast: false
       matrix:
@@ -129,18 +123,18 @@ jobs:
           npm -v
           node -v
 
-      #    - uses: actions/download-artifact@v3
-      #      with:
-      #        name: service jar
-      #        path: ./service/target/
+          - uses: actions/download-artifact@v3
+            with:
+              name: service jar
+              path: ./service/target/
 
-      - name: Download latest jar
-        run: |
-          mkdir -p service/target
-          cd service/target
-          curl -s https://api.github.com/repos/NationalSecurityAgency/skills-service/releases/latest | grep browser_download_url | cut -d '"' -f 4 | wget -qi -
-          ls -la ./
-          cd ../../
+#      - name: Download latest jar
+#        run: |
+#          mkdir -p service/target
+#          cd service/target
+#          curl -s https://api.github.com/repos/NationalSecurityAgency/skills-service/releases/latest | grep browser_download_url | cut -d '"' -f 4 | wget -qi -
+#          ls -la ./
+#          cd ../../
 
       - name: Prep Services for Cypress tests
         run: |
@@ -179,7 +173,7 @@ jobs:
     runs-on: ubuntu-22.04
     container:
       image: cypress/browsers:node-18.16.0-chrome-114.0.5735.133-1-ff-114.0.2-edge-114.0.1823.51-1
-#    needs: [build-skills-service-for-ui-tests]
+    needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -278,71 +272,71 @@ jobs:
           npm run verifyThatNewSnapshotsAreNotCreated
 
 
-#  service-against-postgresql:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      # when one test fails, DO NOT cancel the other containers
-#      fail-fast: false
-#      matrix:
-#        # run 3 copies of the current job in parallel
-#        # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
-#        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
-#
-#    services:
-#      postgres:
-#        image: postgres
-#        # Provide the password for postgres
-#        env:
-#          POSTGRES_PASSWORD: skillsPassword
-#          POSTGRES_DB: skills
-#        # Set health checks to wait until postgres has started
-#        options: >-
-#          --health-cmd pg_isready
-#          --health-interval 10s
-#          --health-timeout 5s
-#          --health-retries 5
-#        ports:
-#          # Maps tcp port 5432 on service container to the host
-#          - 5432:5432
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - uses: actions/setup-node@v3
-#        with:
-#          node-version: '14'
-#
-#      - uses: actions/setup-java@v3
-#        with:
-#          distribution: 'temurin'
-#          java-version: '19' # The JDK version to make available on the path.
-#
-#      - name: Print Versions
-#        run: |
-#          mvn --version
-#          java -version
-#
-#      - name: Cache local Maven repository
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.m2/repository
-#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: |
-#            ${{ runner.os }}-maven-
-#
-#      - name: Run skills-service tests
-#        env:
-#          MAVEN_OPTS: -Xmx2048m
-#        run: |
-#          cd service
-#          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
-#
-#      - name: upload result artifacts
-#        if: ${{ always() }}
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: Service test artifacts (${{ matrix.container }})
-#          path: |
-#            ./service/target/*.log
-#            ./e2e-tests/logs
-#            ./e2e-tests/cypress/snapshots/*.js/__diff_output__/**
+  service-against-postgresql:
+    runs-on: ubuntu-latest
+    strategy:
+      # when one test fails, DO NOT cancel the other containers
+      fail-fast: false
+      matrix:
+        # run 3 copies of the current job in parallel
+        # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
+
+    services:
+      postgres:
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: skillsPassword
+          POSTGRES_DB: skills
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '19' # The JDK version to make available on the path.
+
+      - name: Print Versions
+        run: |
+          mvn --version
+          java -version
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run skills-service tests
+        env:
+          MAVEN_OPTS: -Xmx2048m
+        run: |
+          cd service
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
+
+      - name: upload result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Service test artifacts (${{ matrix.container }})
+          path: |
+            ./service/target/*.log
+            ./e2e-tests/logs
+            ./e2e-tests/cypress/snapshots/*.js/__diff_output__/**
