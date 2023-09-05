@@ -100,9 +100,9 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: print default vars
+      - name: print default vars  [${{ github.GITHUB_EVENT_NAME }}]
         run: |
-          echo ${{ github.GITHUB_EVENT_NAME }}
+          echo "${{ github.GITHUB_EVENT_NAME }}"
 
       - name: Install libs
         run: |
