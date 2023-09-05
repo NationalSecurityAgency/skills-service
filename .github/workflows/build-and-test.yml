@@ -128,14 +128,6 @@ jobs:
           name: service jar
           path: ./service/target/
 
-#      - name: Download latest jar
-#        run: |
-#          mkdir -p service/target
-#          cd service/target
-#          curl -s https://api.github.com/repos/NationalSecurityAgency/skills-service/releases/latest | grep browser_download_url | cut -d '"' -f 4 | wget -qi -
-#          ls -la ./
-#          cd ../../
-
       - name: Prep Services for Cypress tests
         run: |
           cd e2e-tests
