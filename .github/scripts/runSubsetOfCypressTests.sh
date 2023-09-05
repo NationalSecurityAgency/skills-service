@@ -72,21 +72,3 @@ do
   echo "Running command [${commandToRun}]"
   exec $commandToRun
 done
-
-
-
-#IFS=,;
-#testsExecString="${testsInThisRun[*]}"
-#verifyExecString=""
-#if (( ${#integrationTests[@]} != 0 )); then
-#  integrationTestsString="${integrationTests[*]}"
-#  integrationTestsExecString="-Dit.test="$integrationTestsString""
-#  verifyExecString="verify"
-#fi
-#unset IFS
-
-#echo ${testsExecString}
-#commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test ${verifyExecString}"
-#commandToRun="TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:8082 --spec \"cypress/e2e/discoverable_proj_invite_spec.js\""
-#echo $commandToRun
-#exec $commandToRun
