@@ -155,7 +155,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: UI test artifacts (${{ matrix.containers }})
+          name: UI test artifacts (${{ matrix.container }})
           path: |
             ./e2e-tests/logs
             ./e2e-tests/videos
