@@ -75,10 +75,9 @@ do
     fi
   fi
 
-#  commandToRun="TZ=UTC cypress run --browser chrome${customSnapDir} --config baseUrl=${baseSkillTreeUrl} --spec \"${testClass}\""
   commandToRun="npm run cy:run -- ${customSnapDir}--spec cypress/e2e/${testClass}"
   echo "Running command [${commandToRun}]"
-#  eval $commandToRun
+  eval $commandToRun
   commandStatusCode=$?
   if [ $commandStatusCode -ne 0 ];
   then
