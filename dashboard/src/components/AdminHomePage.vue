@@ -84,7 +84,7 @@ limitations under the License.
           });
 
           items.push({
-            name: 'User Actions',
+            name: 'Activity History',
             iconClass: 'fas fa-users-cog text-success',
             page: 'UserActions',
           });
@@ -92,10 +92,6 @@ limitations under the License.
 
         return items;
       },
-    },
-    mounted() {
-    },
-    methods: {
     },
   };
 </script>

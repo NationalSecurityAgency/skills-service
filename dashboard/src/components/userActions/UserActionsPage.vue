@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="User Actions History" />
+    <sub-page-header title="Dashboard Activity History" />
     <b-card body-class="p-0">
       <b-overlay :show="table.options.busy || this.options.loading">
         <div class="p-2 py-3">
@@ -127,21 +127,33 @@ limitations under the License.
           <b-button variant="outline-primary"
                     size="sm"
                     @click="data.toggleDetails"
+                    :data-cy="`row${data.index}-toggleDetails`"
+                    :aria-label="`Expand details for row ${data.index}`"
                     class="mr-2 px-1 py-0">
             <i class="fas" :class="{'fa-plus': !data.detailsShowing, 'fa-minus' : data.detailsShowing}"></i>
           </b-button>
         </template>
 
         <template v-slot:cell(userIdForDisplay)="data">
-          <span>{{ data.value }}</span>
+          <span :data-cy="`row${data.index}-userId`">{{ data.value }}</span>
         </template>
 
         <template v-slot:cell(action)="data">
-          <span>{{ formatLabel(data.value) }}</span>
+          <span :data-cy="`row${data.index}-action`">{{ formatLabel(data.value) }}</span>
         </template>
 
         <template v-slot:cell(item)="data">
-          <span>{{ formatLabel(data.value) }}</span>
+          <span :data-cy="`row${data.index}-item`">{{ formatLabel(data.value) }}</span>
+        </template>
+
+        <template v-slot:cell(itemId)="data">
+          <span :data-cy="`row${data.index}-itemId`">{{ data.value }}</span>
+        </template>
+        <template v-slot:cell(projectId)="data">
+          <span :data-cy="`row${data.index}-projectId`">{{ data.value }}</span>
+        </template>
+        <template v-slot:cell(quizId)="data">
+          <span :data-cy="`row${data.index}-quizId`">{{ data.value }}</span>
         </template>
 
         <template v-slot:cell(created)="data">
@@ -149,7 +161,8 @@ limitations under the License.
         </template>
 
         <template #row-details="row">
-          <single-user-action :action-id="row.item.id" :item="row.item.item" :action="row.item.action"/>
+          <single-user-action :data-cy="`row${row.index}-expandedDetails`"
+            :action-id="row.item.id" :item="row.item.item" :action="row.item.action"/>
         </template>
       </skills-b-table>
     </b-card>
