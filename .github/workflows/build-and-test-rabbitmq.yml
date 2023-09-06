@@ -97,20 +97,10 @@ jobs:
         cd ..
 
     - name: Run Cypress tests
-      uses: cypress-io/github-action@v4
-      with:
-        working-directory: e2e-tests
-        record: true
-        parallel: false
-        group: 'skills-service with STOMP using RabbitMQ'
-        tag: "${{ github.workflow }}"
-        browser: chrome
-      env:
-        # pass the Dashboard record key as an environment variable
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        # pass GitHub token to allow accurately detecting a build vs a re-run build
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      run: |
+        cd e2e-tests
+        npm run cy:run
+        cd ..
 
     - name: upload result artifacts
       if: ${{ always() }}
@@ -118,8 +108,8 @@ jobs:
       with:
         name: CI result artifacts
         path: |
-          ./service/target/*.jar
-          ./service/target/*.log
           ./e2e-tests/logs
+          ./e2e-tests/cypress/videos
+          ./e2e-tests/cypress/screenshots
           ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
           ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png

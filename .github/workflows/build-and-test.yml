@@ -24,12 +24,6 @@ on:
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/publish-image-snapshot.yml'
       - '.gitlab-ci.yml'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/publish-image-snapshot.yml'
-#      - '.gitlab-ci.yml'
 
 jobs:
   build-skills-service-for-ui-tests:
@@ -73,6 +67,101 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    needs: [build-skills-service-for-ui-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
+
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: skillsPassword
+          POSTGRES_DB: skills
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - name: print default vars  [${{ github.event_name }}]
+        run: |
+          echo "${{ github.event_name }}"
+
+      - name: Install libs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          sudo psql --version
+          sudo apt-get install fonts-noto-color-emoji
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '19' # The JDK version to make available on the path.
+
+      - name: Print Versions
+        run: |
+          java -version
+          npm -v
+          node -v
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: service jar
+          path: ./service/target/
+
+      - name: Prep Services for Cypress tests
+        run: |
+          cd e2e-tests
+          npm install
+          npm run backend:dropAllDBTables
+          npm run cyServices:start
+          cd ..
+
+      - name: Run Cypress tests
+        run: |
+          cd e2e-tests
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 20 -c ${{ matrix.container }}
+          cd ..
+
+      - name: upload result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: UI test artifacts (${{ matrix.container }})
+          path: |
+            ./e2e-tests/logs
+            ./e2e-tests/cypress/videos
+            ./e2e-tests/cypress/screenshots
+            ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
+            ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
+
+      - name: verify that new screenshot snapshots were not created
+        run: |
+          cd e2e-tests
+          npm run verifyThatNewSnapshotsAreNotCreated
+
+
+  ui-tests-against-postgres-cypress-dashboard:
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-22.04
     container:
       image: cypress/browsers:node-18.16.0-chrome-114.0.5735.133-1-ff-114.0.2-edge-114.0.1823.51-1
@@ -106,73 +195,74 @@ jobs:
           - 5432:5432
 
     steps:
-    - name: Install libs
-      run: |
-        apt-get update
-        apt-get install -y postgresql-client
-        psql --version
-        apt-get install fonts-noto-color-emoji
+      - name: Install libs
+        run: |
+          apt-get update
+          apt-get install -y postgresql-client
+          psql --version
+          apt-get install fonts-noto-color-emoji
 
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '14'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14'
 
-    - uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '19' # The JDK version to make available on the path.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '19' # The JDK version to make available on the path.
 
-    - name: Print Versions
-      run: |
-        java -version
+      - name: Print Versions
+        run: |
+          java -version
 
-    - uses: actions/download-artifact@v3
-      with:
-        name: service jar
-        path: ./service/target/
+      - uses: actions/download-artifact@v3
+        with:
+          name: service jar
+          path: ./service/target/
 
-    - name: Prep Services for Cypress tests
-      run: |
-        cd e2e-tests
-        ls
-        sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
-        cat package.json
-        npm install
-        npm run backend:dropAllDBTables
-        npm run cyServices:start
-        cd ..
+      - name: Prep Services for Cypress tests
+        run: |
+          cd e2e-tests
+          ls
+          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
+          cat package.json
+          npm install
+          npm run backend:dropAllDBTables
+          npm run cyServices:start
+          cd ..
 
-    - name: Run Cypress tests
-      uses: cypress-io/github-action@v5
-      with:
-        working-directory: e2e-tests
-        record: true
-        parallel: true
-        group: 'skills-service tests'
-        tag: "${{ github.workflow }}"
-        browser: chrome
-      env:
-        # pass the Dashboard record key as an environment variable
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        # pass GitHub token to allow accurately detecting a build vs a re-run build
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5
+        with:
+          working-directory: e2e-tests
+          record: true
+          parallel: true
+          group: 'skills-service tests'
+          tag: "${{ github.workflow }}"
+          browser: chrome
+        env:
+          # pass the Dashboard record key as an environment variable
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          # pass GitHub token to allow accurately detecting a build vs a re-run build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: upload result artifacts
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: UI test artifacts (${{ matrix.containers }})
-        path: |
-          ./e2e-tests/logs
-          ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
-          ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
+      - name: upload result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: UI test artifacts (${{ matrix.containers }})
+          path: |
+            ./e2e-tests/logs
+            ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
+            ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
 
-    - name: verify that new screenshot snapshots were not created
-      run: |
-        cd e2e-tests
-        npm run verifyThatNewSnapshotsAreNotCreated
+      - name: verify that new screenshot snapshots were not created
+        run: |
+          cd e2e-tests
+          npm run verifyThatNewSnapshotsAreNotCreated
+
 
   service-against-postgresql:
     runs-on: ubuntu-latest
