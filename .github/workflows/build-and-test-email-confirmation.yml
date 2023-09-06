@@ -91,7 +91,7 @@ jobs:
     - name: Run Cypress tests
       run: |
         cd e2e-tests
-        npm run cy:run --env verifyEmail=true --spec "cypress/e2e/verify_email_spec.js"
+        npm run cy:run -- --env verifyEmail=true --spec cypress/e2e/verify_email_spec.js
         cd ../
 
     - name: upload result artifacts
