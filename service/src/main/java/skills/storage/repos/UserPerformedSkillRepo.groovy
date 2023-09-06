@@ -292,4 +292,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Nullable
     List<UserPerformedSkill> findAllBySkillRefIdAndPerformedOnBefore(Integer skillRefId, Date expirationDate)
 
+    @Nullable
+    // returns oldest UPS for skill/user
+    UserPerformedSkill findTopBySkillRefIdAndUserIdOrderByPerformedOnAsc(Integer skillRefId, String userId)
+
+    @Nullable
+    // returns most recent UPS for skill/user
+    UserPerformedSkill findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(Integer skillRefId, String userId)
+
 }

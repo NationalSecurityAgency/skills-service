@@ -27,9 +27,7 @@ class ExpirationAttrs {
     static final String DAILY = 'DAILY'
 
     // type specific attributes
-    static final String FIRST_DAY_OF_MONTH = 'FIRST_DAY_OF_MONTH'
     static final String LAST_DAY_OF_MONTH = 'LAST_DAY_OF_MONTH'
-    static final String SET_DAY_OF_MONTH = 'SET_DAY_OF_MONTH'  // don't think we need this one here, only in ui?
 
     String expirationType = NEVER
     Integer every

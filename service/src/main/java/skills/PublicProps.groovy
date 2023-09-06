@@ -66,7 +66,8 @@ class PublicProps {
         maxQuestionsPerQuiz,
         maxQuizTextAnswerLength,
         maxVideoCaptionsLength,
-        maxVideoTranscriptLength
+        maxVideoTranscriptLength,
+        motivationalSkillWarningGracePeriod,
     }
 
     @Autowired

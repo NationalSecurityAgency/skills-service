@@ -122,6 +122,7 @@ class PublicConfigController {
         res["descriptionMaxLength"] = uiConfigProperties.ui.descriptionMaxLength
         res["paragraphValidationRegex"] = uiConfigProperties.ui.paragraphValidationRegex
         res["paragraphValidationMessage"] = uiConfigProperties.ui.paragraphValidationMessage
+        res["motivationalSkillWarningGracePeriod"] = uiConfigProperties.ui.motivationalSkillWarningGracePeriod
         res["projectDisplayName"] = 'Project'
         res["subjectDisplayName"] = 'Subject'
         res["groupDisplayName"] = 'Group'

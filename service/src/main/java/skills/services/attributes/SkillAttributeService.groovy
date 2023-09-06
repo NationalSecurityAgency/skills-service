@@ -67,14 +67,18 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, skillExpirationAttrs)
     }
 
+    @Transactional
+    void deleteExpirationAttrs(String projectId, String skillId) {
+        deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration)
+    }
+
     ExpirationAttrs getExpirationAttrs(String projectId, String skillId) {
         ExpirationAttrs skillExpirationAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, ExpirationAttrs.class)
         return skillExpirationAttrs
     }
-
-    List<ExpirationAttrs> getAllExpirationAttrs() {
-        List<ExpirationAttrs> skillExpirationAttrs = getAttrsList(SkillAttributesDef.SkillAttributesType.AchievementExpiration, ExpirationAttrs.class)
-        return skillExpirationAttrs
+    Boolean isMotivationalSkill(String projectId, String skillId) {
+        ExpirationAttrs expirationAttrs = getExpirationAttrs(projectId, skillId)
+        return expirationAttrs?.expirationType == ExpirationAttrs.DAILY
     }
 
     void saveBadgeBonusAwardAttrs(String projectId, String skillId, BonusAwardAttrs bonusAwardAttrs) {

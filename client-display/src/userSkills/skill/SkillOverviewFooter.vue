@@ -119,9 +119,13 @@ limitations under the License.
     <div v-if="!selfReport.msgHidden" class="alert alert-success mt-2" role="alert" data-cy="selfReportAlert">
       <div class="row">
         <div class="col">
-          <div v-if="isPointsEarned">
+          <div v-if="isPointsEarned && !isMotivationalSkill">
             <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congrats! You just earned <span
               class="text-success font-weight-bold">{{ selfReport.res.pointsEarned }}</span> points<span v-if="isCompleted"> and <b>completed</b> the {{ skillDisplayName.toLowerCase() }}</span>!
+          </div>
+          <div v-if="isPointsEarned && isMotivationalSkill">
+          <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congratulations! You just retained your <span
+            class="text-success font-weight-bold">{{ skillInternal.totalPoints }}</span> points!
           </div>
           <div v-if="!isPointsEarned && (this.isAlreadyPerformed() || !isApprovalRequired)">
             <i class="fas fa-cloud-sun-rain mr-2 text-info" style="font-size: 1.5rem"></i> <span> <b class="text-info">Unfortunately</b> no points.</span>
@@ -189,7 +193,7 @@ limitations under the License.
     },
     mounted() {
       this.skillInternal = { ...this.skill };
-      this.selfReport.available = this.selfReportConfigured() && !this.isCompleted && !this.isLocked() && !this.isCrossProject();
+      this.selfReport.available = this.selfReportConfigured() && (!this.isCompleted || this.isMotivationalSkill) && !this.isLocked() && !this.isCrossProject();
     },
     computed: {
       isPointsEarned() {
@@ -199,7 +203,7 @@ limitations under the License.
         return this.skillInternal.points === this.skillInternal.totalPoints;
       },
       selfReportDisabled() {
-        return this.isCompleted || this.isPendingApproval();
+        return (this.isCompleted && !this.isMotivationalSkill) || this.isPendingApproval();
       },
       isHonorSystem() {
         return this.skillInternal.selfReporting && this.skillInternal.selfReporting.type === 'HonorSystem';
@@ -222,6 +226,9 @@ limitations under the License.
       },
       isQuizOrSurveySkill() {
         return this.isQuizSkill || this.isSurveySkill;
+      },
+      isMotivationalSkill() {
+        return this.skillInternal && this.skillInternal.isMotivationalSkill;
       },
     },
     methods: {
@@ -314,7 +321,7 @@ limitations under the License.
         }
       },
       updateEarnedPoints(res) {
-        if (res.pointsEarned > 0) {
+        if (res.pointsEarned > 0 || this.isMotivationalSkill) {
           this.skillInternal.points += res.pointsEarned;
           this.$emit('points-earned', res.pointsEarned);
         }

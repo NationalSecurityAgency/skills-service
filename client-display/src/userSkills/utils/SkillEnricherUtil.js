@@ -53,7 +53,7 @@ export default {
         const copy = { ...skill };
         copy.points += pts;
         copy.todaysPoints += pts;
-        if (copy.points === copy.totalPoints) {
+        if (pts > 0 && copy.points === copy.totalPoints) {
             copy.meta.complete = true;
             copy.achievedOn = new Date();
         }

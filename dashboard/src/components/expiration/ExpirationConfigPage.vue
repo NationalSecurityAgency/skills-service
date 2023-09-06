@@ -40,6 +40,9 @@ limitations under the License.
                 </div>
               </div>
             </template>
+
+            <hr class="my-3"/>
+
             <template>
               <div class="row m-0">
                 <div class="col-12 col-lg-auto">
@@ -55,7 +58,7 @@ limitations under the License.
                                            class="m-1"
                                            id="yearlyYears-sb"
                                            data-cy="yearlyYears-sb"
-                                           aria-label="Skills will expire every N years"
+                                           :aria-label="`Skills will expire every ${yearlyYears} years`"
                                            v-model="yearlyYears"
                                            min="1"
                                            max="99"
@@ -81,7 +84,6 @@ limitations under the License.
                 </b-form-group>
               </div>
             </template>
-
             <template>
               <div class="row m-0">
                 <div class="col-12 col-lg-auto">
@@ -97,7 +99,7 @@ limitations under the License.
                                          class="m-1"
                                          id="monthlyMonths-sb"
                                          data-cy="monthlyMonths-sb"
-                                         aria-label="Skills will expire every N months"
+                                         :aria-label="`Skills will expire every ${monthlyMonths} months`"
                                          v-model="monthlyMonths"
                                          min="1"
                                          max="99"
@@ -139,32 +141,35 @@ limitations under the License.
               </div>
             </template>
 
-<!--            <template>-->
-<!--              <div class="row m-0">-->
-<!--                <div class="col-12 col-lg-auto">-->
-<!--                  <b-form-radio class="" value="DAILY" data-cy="dailyRadio">Daily</b-form-radio>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--              <div class="row ml-5">-->
-<!--                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">-->
-<!--                  <div class="input-group">-->
-<!--                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">-->
-<!--                      <label for="dailyDays-sb">Skills will expire </label>-->
-<!--                      <b-form-spinbutton :disabled="expirationType !== 'DAILY'"-->
-<!--                                         class="m-1"-->
-<!--                                         id="dailyDays-sb"-->
-<!--                                         aria-label="Skills will expire every N days after user earns achievement"-->
-<!--                                         v-model="dailyDays"-->
-<!--                                         min="1"-->
-<!--                                         max="999"-->
-<!--                                         inline>-->
-<!--                      </b-form-spinbutton>-->
-<!--                      <span>day{{dailyDays > 1 ? 's' : ''}} after achievement</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </b-form-group>-->
-<!--              </div>-->
-<!--            </template>-->
+            <hr class="my-3"/>
+
+            <template>
+              <div class="row m-0">
+                <div class="col-12 col-lg-auto">
+                  <b-form-radio class="" value="DAILY" data-cy="dailyRadio">Daily with ability to retain</b-form-radio>
+                </div>
+              </div>
+              <div class="row ml-5">
+                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">
+                  <div class="input-group">
+                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">
+                      <span for="dailyDays-sb">Achievement will expire after</span>
+                      <b-form-spinbutton :disabled="expirationType !== 'DAILY'"
+                                         class="m-1"
+                                         id="dailyDays-sb"
+                                         data-cy="dailyDays-sb"
+                                         :aria-label="`Skills will expire every ${dailyDays} days after user earns achievement`"
+                                         v-model="dailyDays"
+                                         min="1"
+                                         max="999"
+                                         inline>
+                      </b-form-spinbutton>
+                      <span>day{{dailyDays > 1 ? 's' : ''}} of inactivity</span>
+                    </div>
+                  </div>
+                </b-form-group>
+              </div>
+            </template>
           </b-form-radio-group>
         </b-form-group>
         <hr/>
@@ -218,7 +223,7 @@ limitations under the License.
         monthlyMonths: 1,
         monthlyDay: '1',
         monthlyDayOption: FIRST_DAY_OF_MONTH,
-        dailyDays: 45,
+        dailyDays: 90,
         expirationType: NEVER,
         loading: true,
         showSavedMsg: false,
@@ -361,19 +366,33 @@ limitations under the License.
             // any user achievement achievedOn before this date
             // expirationSettings.nextExpirationDate = dayjs(now).subtract(this.dailyDays, 'day');
           }
+          ExpirationService.saveExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
+            .then(() => {
+              this.updateLoadedSettings(expirationSettings);
+              this.showSavedMsg = true;
+              setTimeout(() => {
+                this.showSavedMsg = false;
+              }, 3500);
+              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
+            })
+            .finally(() => {
+              this.loading = false;
+            });
+        } else {
+          // expirationType changed to NEVER so delete existing settings
+          ExpirationService.deleteExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
+            .then(() => {
+              this.updateLoadedSettings(expirationSettings);
+              this.showSavedMsg = true;
+              setTimeout(() => {
+                this.showSavedMsg = false;
+              }, 3500);
+              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
+            })
+            .finally(() => {
+              this.loading = false;
+            });
         }
-        ExpirationService.saveExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
-          .then(() => {
-            this.updateLoadedSettings(expirationSettings);
-            this.showSavedMsg = true;
-            setTimeout(() => {
-              this.showSavedMsg = false;
-            }, 3500);
-            this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
-          })
-          .finally(() => {
-            this.loading = false;
-          });
       },
       loadSkillInfo() {
         this.loadSkill({

@@ -21,6 +21,11 @@ export default {
     return axios.post(url, expirationSettings)
       .then((response) => response.data);
   },
+  deleteExpirationSettings(projectId, skillId, expirationSettings) {
+    const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
+    return axios.delete(url, expirationSettings)
+      .then((response) => response.data);
+  },
   getExpirationSettings(projectId, skillId) {
     const url = `/admin/projects/${projectId}/skills/${skillId}/expiration`;
     return axios.get(url)

@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import skills.storage.model.ExpiredUserAchievement
+import skills.storage.model.UserAchievement
 
 @CompileStatic
 interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchievement, Integer> {
@@ -38,14 +39,28 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
 
     @Modifying
     @Query(value = '''
-        WITH expired_rows AS (
-        DELETE FROM user_achievement
-        WHERE
-            achieved_on <= :expirationDate AND
-            skill_ref_id = :skillRefId
+        WITH expired_row AS (
+        DELETE FROM user_achievement ua
+        WHERE ua.id = ?1
         RETURNING *)
-        INSERT INTO expired_user_achievement SELECT * FROM expired_rows;
+        INSERT INTO expired_user_achievement SELECT * FROM expired_row;
     ''', nativeQuery = true)
-    void expireAchievementsForSkillAchievedBefore(@Param("skillRefId") Integer skillRefId,
-                                                  @Param("expirationDate") Date expirationDate)
+    void expireAchievementById(Integer id)
+
+    @Query(value = '''
+        SELECT ua
+        FROM UserAchievement ua
+             INNER JOIN UserPerformedSkill ups ON
+                ua.skillRefId = ups.skillRefId AND
+                ua.userId = ups.userId AND
+                ups.performedOn = (
+                    SELECT MAX(ups2.performedOn) 
+                    FROM UserPerformedSkill ups2
+                    WHERE ups2.skillRefId = ups.skillRefId AND ups2.userId = ups.userId
+                )
+        WHERE ups.performedOn < :olderThanDate
+          AND ua.skillRefId = :skillRefId
+    ''')
+    List<UserAchievement> findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(@Param("skillRefId") Integer skillRefId,
+                                                                                                 @Param("olderThanDate") Date olderThanDate)
 }

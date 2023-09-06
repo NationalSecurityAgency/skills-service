@@ -335,12 +335,12 @@ class SkillEventAdminService {
         }
 
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefId(skillRefId)
-        expirePerformedSkillEvents(performedSkills)
+        removePerformedSkillEvents(performedSkills)
     }
 
     @Transactional
     @Profile
-    void deleteAllSkillEventsForSkillPerformedBefore(Integer skillRefId, Date expirationDate) {
+    void deleteAllSkillEventsForSkillAndUser(Integer skillRefId, String userId) {
         SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
         String projectId = skillDef.projectId
         String skillId = skillDef.skillId
@@ -348,8 +348,8 @@ class SkillEventAdminService {
             throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
         }
 
-        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefIdAndPerformedOnBefore(skillRefId, expirationDate)
-        expirePerformedSkillEvents(performedSkills)
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllBySkillRefIdAndUserId(skillRefId, userId)
+        removePerformedSkillEvents(performedSkills)
     }
 
     @Profile
@@ -381,13 +381,11 @@ class SkillEventAdminService {
     }
 
     @Profile
-    private void expirePerformedSkillEvents(List<UserPerformedSkill> performedSkills) {
+    private void removePerformedSkillEvents(List<UserPerformedSkill> performedSkills) {
         if (performedSkills) {
             log.info("Deleting [{}] performed skills [{}] for user [{}]", performedSkills.size(), performedSkills.first(), performedSkills.first().userId)
             for (UserPerformedSkill performedSkill : performedSkills) {
                 String userId = performedSkill.userId
-                String projectId = performedSkill.projectId
-                String skillId = performedSkill.skillId
                 log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
 
                 removePerformedSkillEvent(performedSkill)

@@ -17,7 +17,6 @@
 const moment = require("moment-timezone");
 describe('Configure Skill Expiration Tests', () => {
 
-    const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/expiration').as('getExpirationProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -28,6 +27,7 @@ describe('Configure Skill Expiration Tests', () => {
             cy.get('.spinner-border').should('not.exist')
         });
         cy.intercept('POST', '/admin/projects/proj1/skills/skill1/expiration').as('saveExpirationSettings')
+        cy.intercept('DELETE', '/admin/projects/proj1/skills/skill1/expiration').as('deleteExpirationSettings')
     });
 
     it('expiration type of NONE is selected by default', () => {
@@ -190,6 +190,82 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    });
+
+    it('expiration type of DAILY defaults to 90 days after achievement', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
+        cy.get('[data-cy="dailyDays-sb"]').contains('90')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings').then((xhr) => {
+            expect(xhr.response.statusCode).to.eq(200)
+            const requestBody = xhr.request.body
+            expect(requestBody.every).to.eq(90)
+            expect(requestBody.expirationType).to.eq('DAILY')
+        })
+
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+    });
+
+    it('changing expiration type back to NEVER after configuring to something else calls DELETE', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        const today = moment.utc();
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').should('be.checked')
+        cy.get('[data-cy="yearlyYears-sb"]').contains('1')
+        cy.get('[data-cy="yearlyMonth"]').contains(today.format('MMMM'))
+        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.day())
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings').then((xhr) => {
+            expect(xhr.response.statusCode).to.eq(200)
+            const requestBody = xhr.request.body
+            expect(requestBody.every).to.eq(1)
+            expect(requestBody.expirationType).to.eq('YEARLY')
+            expect(requestBody.monthlyDay).to.eq(null)
+            expect(requestBody.nextExpirationDate).to.eq(today.startOf('day').toISOString())
+        })
+
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"]').check({ force: true });
+
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@deleteExpirationSettings').then((xhr) => {
+            expect(xhr.request.method).to.eq('DELETE')
+            expect(xhr.response.statusCode).to.eq(200)
+        })
     });
 
 });

@@ -22,7 +22,6 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.attributes.ExpirationAttrs
-import skills.services.attributes.SkillAttributeService
 import skills.storage.model.ExpiredUserAchievement
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
@@ -34,14 +33,11 @@ import java.time.LocalDateTime
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class RecurringSkillExpirationSpecs extends DefaultIntSpec {
+class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
     String projId = SkillsFactory.defaultProjId
 
     List<String> sampleUserIds // loaded from system props
-
-    @Autowired
-    SkillAttributeService skillAttributeService
 
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
@@ -64,7 +60,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         String userId = "user1"
-        Long timestamp = new Date().time
+        Long timestamp = (new Date()-8).time
 
         setup:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
@@ -125,7 +121,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
         String userId = "user1"
         String secondUserId = "user2"
-        Long timestamp = new Date().time
+        Long timestamp = (new Date()-8).time
 
         setup:
         skills.forEach { it ->
@@ -192,6 +188,149 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
     }
 
+    def "retain skill that would otherwise expire"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+        skills = [SkillsFactory.createSkill(1, 1, 1, 0, 1, 0, 100,)]
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user1"
+        Date eightDaysAgo = (new Date()-8)
+        Date sixDaysAgo = (new Date()-6)
+
+        setup:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, eightDaysAgo)
+
+        assert res.body.skillApplied
+        assert res.body.explanation == "Skill event was applied"
+
+        assert res.body.completed.size() == 11
+        assert res.body.completed.find({ it.type == "Skill" }).id == skills[0].skillId
+        assert res.body.completed.find({ it.type == "Skill" }).name == skills[0].name
+
+        assert res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
+        assert res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
+        assert res.body.completed.find({ it.type == "Overall" }).level == 1
+
+        assert res.body.completed.find({ it.type == "Subject" }).id == subj.subjectId
+        assert res.body.completed.find({ it.type == "Subject" }).name == subj.name
+        assert res.body.completed.find({ it.type == "Subject" }).level == 1
+
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        assert addedSkills
+        assert addedSkills.data.find { it.skillId == skills[0].skillId}
+
+        def userPeformedSkills_t0 = userPerformedSkillRepo.findAll()
+        def userAchievements_t0 = userAchievedRepo.findAll()
+        def expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
+
+        when:
+        skillsService.saveSkillExpirationAttributes( proj.projectId, skills[0].skillId, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 7,
+        ])
+
+        res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, sixDaysAgo)
+        assert res.body.skillApplied
+        assert res.body.explanation == "Skill Achievement retained"
+
+        def userPeformedSkills_t1 = userPerformedSkillRepo.findAll()
+
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        def userPeformedSkills_t2 = userPerformedSkillRepo.findAll()
+        def userAchievements_t1 = userAchievedRepo.findAll()
+        def expiredUserAchievements_t1 = expiredUserAchievementRepo.findAll()
+
+        then:
+        addedSkills?.data?.find { it.skillId == skills[0].skillId }
+        userPeformedSkills_t0.find { it.skillId == skills[0].skillId && it.performedOn == eightDaysAgo }
+        userAchievements_t0.find { it.skillId == skills[0].skillId }
+        !expiredUserAchievements_t0.find { it.skillId == skills[0].skillId }
+
+        userPeformedSkills_t1.find { it.skillId == skills[0].skillId && it.performedOn == sixDaysAgo }
+        userPeformedSkills_t2.find { it.skillId == skills[0].skillId && it.performedOn == sixDaysAgo }
+        userAchievements_t1.find { it.skillId == skills[0].skillId }
+        !expiredUserAchievements_t1.find { it.skillId == skills[0].skillId }
+    }
+
+    def "reporting a skill with a date older then the expiration date does NOT retain skill and the skill will still expire"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+        skills = [SkillsFactory.createSkill(1, 1, 1, 0, 1, 0, 100,)]
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user1"
+        Date eightDaysAgo = (new Date()-8)
+        Date nineDaysAgo = (new Date()-9)
+
+        setup:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, eightDaysAgo)
+
+        assert res.body.skillApplied
+        assert res.body.explanation == "Skill event was applied"
+
+        assert res.body.completed.size() == 11
+        assert res.body.completed.find({ it.type == "Skill" }).id == skills[0].skillId
+        assert res.body.completed.find({ it.type == "Skill" }).name == skills[0].name
+
+        assert res.body.completed.find({ it.type == "Overall" }).id == "OVERALL"
+        assert res.body.completed.find({ it.type == "Overall" }).name == "OVERALL"
+        assert res.body.completed.find({ it.type == "Overall" }).level == 1
+
+        assert res.body.completed.find({ it.type == "Subject" }).id == subj.subjectId
+        assert res.body.completed.find({ it.type == "Subject" }).name == subj.name
+        assert res.body.completed.find({ it.type == "Subject" }).level == 1
+
+        def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        assert addedSkills
+        assert addedSkills.data.find { it.skillId == skills[0].skillId}
+
+        def userPeformedSkills_t0 = userPerformedSkillRepo.findAll()
+        def userAchievements_t0 = userAchievedRepo.findAll()
+        def expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
+
+        when:
+        skillsService.saveSkillExpirationAttributes( proj.projectId, skills[0].skillId, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 7,
+        ])
+
+        res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, nineDaysAgo)
+        assert !res.body.skillApplied
+        assert res.body.explanation == "This skill reached its maximum points"
+
+        def userPeformedSkills_t1 = userPerformedSkillRepo.findAll()
+
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+        def userPeformedSkills_t2 = userPerformedSkillRepo.findAll()
+        def userAchievements_t1 = userAchievedRepo.findAll()
+        def expiredUserAchievements_t1 = expiredUserAchievementRepo.findAll()
+
+        then:
+        addedSkills.totalCount == 0
+        userPeformedSkills_t0.find { it.skillId == skills[0].skillId && it.performedOn == eightDaysAgo }
+        userAchievements_t0.find { it.skillId == skills[0].skillId }
+        !expiredUserAchievements_t0.find { it.skillId == skills[0].skillId }
+
+        userPeformedSkills_t1.find { it.skillId == skills[0].skillId && it.performedOn == eightDaysAgo }  // older date was reported, so performedOn was not changed
+
+        !userPeformedSkills_t2.find { it.skillId == skills[0].skillId }
+        !userAchievements_t1.find { it.skillId == skills[0].skillId }
+        expiredUserAchievements_t1.find { it.skillId == skills[0].skillId }
+    }
+
     def "expiring skill events propagates to imported projects -- all traces of a user are gone from the imported project"() {
         List<String> users = getRandomUsers(2)
 
@@ -215,17 +354,18 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], new Date())
+        Date eightDaysAgo = new Date()-8
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], eightDaysAgo)
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         when:
@@ -420,20 +560,21 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], new Date())
+        Date eightDaysAgo = new Date()-8
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[1].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[1].skillId], users[0], eightDaysAgo)
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         when:
@@ -654,20 +795,21 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], new Date())
+        Date eightDaysAgo = new Date()-8
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[1].skillId], users[0], new Date())
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj4.projectId, skillId: proj4_native_skills[1].skillId], users[0], eightDaysAgo)
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         when:
@@ -978,17 +1120,18 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         proj4_badge.enabled = true
         skillsService.createBadge(proj4_badge)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], new Date())
+        Date eightDaysAgo = new Date()-8
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[1], eightDaysAgo)
 
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], new Date())
-        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], new Date())
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[0], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[0].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[1].skillId], users[1], eightDaysAgo)
+        skillsService.addSkill([projectId: proj.projectId, skillId: subj2_skills[2].skillId], users[1], eightDaysAgo)
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         when:
@@ -1006,7 +1149,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         !userAchievements_t1.find { it.projectId == proj4.projectId && it.skillId == proj4_badge.badgeId && it.userId == users[1]}
     }
 
-    def "expire skill events when there's more than 1 event that falls within the configured time window"() {
+    def "expire skill events after achievement will NOT expire events, points and achievements if the skill has yet been achieved"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2, 1, 1, 20 )
@@ -1018,22 +1161,78 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         String userId = "user1"
-        Long timestamp = new Date().time
 
         setup:
-        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
-        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date(timestamp))
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-8)
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-9)
+        def res3 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-10)
+        def res4 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-11)
+//        def res5 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-12)
         when:
         def before = skillsService.getPerformedSkills(userId, proj.projectId)
+        List<UserAchievement> userAchievements_t0 = userAchievedRepo.findAll()
+
         expireSkill(proj.projectId, skills[0])
+
         def after = skillsService.getPerformedSkills(userId, proj.projectId)
+        List<UserAchievement> userAchievements_t1 = userAchievedRepo.findAll()
+
 
         then:
         res1.body.skillApplied
         res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
 
-        before.data.size() == 2
+        before.data.size() == 4
+        !userAchievements_t0.find { it.projectId == proj.projectId && it.skillId == skills[0].skillId && it.userId == userId}
+
+        after.data.size() == 4
+        !userAchievements_t1.find { it.projectId == proj.projectId && it.skillId == skills[0].skillId && it.userId == userId}
+    }
+
+    def "expire skill events when there's more than 1 event that falls within the configured time window"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 20 )
+        skills[0].numPerformToCompletion = 5
+        skills[0].numMaxOccurrencesIncrementInterval = 5
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user1"
+        Date eightDaysAgo = new Date()-8
+
+        setup:
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-8)
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-9)
+        def res3 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-10)
+        def res4 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-11)
+        def res5 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date()-12)
+
+        when:
+        def before = skillsService.getPerformedSkills(userId, proj.projectId)
+        List<UserAchievement> userAchievements_t0 = userAchievedRepo.findAll()
+
+        expireSkill(proj.projectId, skills[0])
+
+        def after = skillsService.getPerformedSkills(userId, proj.projectId)
+        List<UserAchievement> userAchievements_t1 = userAchievedRepo.findAll()
+
+        then:
+        res1.body.skillApplied
+        res2.body.skillApplied
+        res3.body.skillApplied
+        res4.body.skillApplied
+        res5.body.skillApplied
+
+        before.data.size() == 5
+        userAchievements_t0.find { it.projectId == proj.projectId && it.skillId == skills[0].skillId && it.userId == userId}
+
         after.data.size() == 0
+        !userAchievements_t1.find { it.projectId == proj.projectId && it.skillId == skills[0].skillId && it.userId == userId}
     }
 
     def "attempt to expire skill event that doesn't exist"() {
@@ -1067,7 +1266,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
     def "expiring skill event required for a badge will remove the achieved badge"() {
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
@@ -1097,10 +1296,10 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         badge.enabled = 'true'
         skillsService.createBadge(badge)
 
-        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
-        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
-        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
-        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], userId, date).body
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, eightDaysAgo).body
+        def resSkill4 = skillsService.addSkill([projectId: projId, skillId: skill4.skillId], userId, eightDaysAgo).body
 
         assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
         assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
@@ -1135,7 +1334,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
     def "expiring a skill event tied to a global badge will remove the global badges"() {
         SkillsService supervisorService = createSupervisor()
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         String subj2 = "testSubj2"
@@ -1169,10 +1368,10 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
         supervisorService.createGlobalBadge(badge)
 
-        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
-        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
-        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
-        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, eightDaysAgo).body
+        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, eightDaysAgo).body
 
         assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
         assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
@@ -1209,7 +1408,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
     def "expiring a skill event tied to a global badge that uses levels will remove the global badges"() {
         SkillsService supervisorService = createSupervisor()
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         String subj2 = "testSubj2"
@@ -1240,10 +1439,10 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         supervisorService.updateGlobalBadge(badge)
         supervisorService.createGlobalBadge(badge)
 
-        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
-        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
-        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
-        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, eightDaysAgo).body
 
         when:
         def level = skillsService.getUserLevel(projId, userId)
@@ -1274,7 +1473,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
     def "expiring all skill events will remove any achieved global badges"() {
         SkillsService supervisorService = createSupervisor()
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         String subj2 = "testSubj2"
@@ -1308,10 +1507,10 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
         supervisorService.createGlobalBadge(badge)
 
-        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
-        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
-        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
-        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+        def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
+        def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
+        def resSkill2 = skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, eightDaysAgo).body
+        def resSkill4 = skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, eightDaysAgo).body
 
         assert resSkill1.skillApplied && !resSkill1.completed.find { it.id == 'badge1'}
         assert resSkill2.skillApplied && !resSkill2.completed.find { it.id == 'badge1'}
@@ -1349,7 +1548,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
     def "expiring all skill events tied to a global badge that uses levels will remove the global badges"() {
         SkillsService supervisorService = createSupervisor()
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         String subj2 = "testSubj2"
@@ -1380,10 +1579,10 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         supervisorService.updateGlobalBadge(badge)
         supervisorService.createGlobalBadge(badge)
 
-        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
-        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
-        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, date).body
-        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, date).body
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: projId, skillId: skill2.skillId], userId, eightDaysAgo).body
+        skillsService.addSkill([projectId: "proj2", skillId: skill4.skillId], userId, eightDaysAgo).body
 
         when:
         def level = skillsService.getUserLevel(projId, userId)
@@ -1413,7 +1612,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
 
     def "expiring skill event should remove level achievements" () {
         String userId = "user1"
-        Date date = new Date()
+        Date eightDaysAgo = new Date()-8
 
         String subj = "testSubj"
         Map skill1 = [projectId: projId, subjectId: subj, skillId: "skill1", name  : "Test Skill 1", type: "Skill",
@@ -1423,7 +1622,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSubject([projectId: projId, subjectId: subj, name: "Test Subject"])
         skillsService.createSkill(skill1)
         def subjSummaryPreAddSkill = skillsService.getSkillSummary(userId, projId, subj)
-        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date)
+        skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo)
         def subjSummaryPostAddSkillEvent = skillsService.getSkillSummary(userId, projId, subj)
 
         when:
@@ -1439,142 +1638,70 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         subjSummaryPostDelete.skills[0].points == 0
     }
 
-    def "cannot expire skill event for skill imported from catalog"() {
+    def "cannot configure skill expiration for skills imported from catalog"() {
         def user = getRandomUsers(1)[0]
         def proj1 = SkillsFactory.createProject(1)
         def proj2 = SkillsFactory.createProject(2)
         def subj1 = SkillsFactory.createSubject(1, 1)
         def subj2 = SkillsFactory.createSubject(2, 2)
 
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 1, 0, 100)
-        def skill2 = SkillsFactory.createSkill(2, 2, 2, 1, 1, 0, 100)
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 2, 0, 100)
 
         skillsService.createProject(proj1)
         skillsService.createProject(proj2)
         skillsService.createSubject(subj1)
         skillsService.createSubject(subj2)
         skillsService.createSkill(skill1)
-        skillsService.createSkill(skill2)
 
         when:
         skillsService.exportSkillToCatalog(proj1.projectId, skill1.skillId)
         skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj1.projectId, skill1.skillId)
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
-        Date date = new Date()
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], user, date)
-        skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], user, date)
 
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        // bypass endpoint validation for testing purposes, show never get in this state though
-        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
-        skillAttributeService.saveExpirationAttrs(proj2.projectId, skill1.skillId, new ExpirationAttrs(
-                expirationType    : ExpirationAttrs.YEARLY,
-                every             : 1,
-                monthlyDay        : expirationDate.dayOfMonth,
-                nextExpirationDate: expirationDate.toDate(),
-        ))
-        skillsService.saveSkillExpirationAttributes(proj2.projectId, skill2.skillId, [
-                expirationType: ExpirationAttrs.YEARLY,
-                every: 1,
-                monthlyDay: expirationDate.dayOfMonth,
-                nextExpirationDate: expirationDate.toDate(),
+        skillsService.saveSkillExpirationAttributes(proj2.projectId, skill1.skillId, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 14,
         ])
 
-        def userAchievements_t0 = userAchievedRepo.findAll()
-        def expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
+        then:
+        def e = thrown(Exception)
+        e.getMessage().contains("Cannot configure expiration attribute on skills imported from the catalog")
+    }
 
-        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+    def "cannot configure skill expiration for skills re-used in the same project"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        when:
 
-        def userAchievements_t1 = userAchievedRepo.findAll()
-        def expiredUserAchievements_t1 = expiredUserAchievementRepo.findAll()
+        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
+        skillsService.saveSkillExpirationAttributes(p1.projectId, 'skill1STREUSESKILLST0', [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 10,
+        ])
 
         then:
-        // instead of failing the batch, the executor will log the error and move on to the next
-        // imported skill achievements are not removed or moved to the expired table
-        // other skills continue to be processed/expired even though the exception occurred
-        !expiredUserAchievements_t0
-        expiredUserAchievements_t1.size() == 1 && expiredUserAchievements_t1.find { it.skillId == skill2.skillId }
-
-        userAchievements_t0.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
-
-                "${user}-${proj1.projectId}-1",
-                "${user}-${proj1.projectId}-2",
-                "${user}-${proj1.projectId}-3",
-                "${user}-${proj1.projectId}-4",
-                "${user}-${proj1.projectId}-5",
-
-                "${user}-${proj1.projectId}-${subj1.subjectId}-1",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-2",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-3",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-4",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-5",
-
-                "${user}-${proj1.projectId}-${skill1.skillId}",
-
-                "${user}-${proj2.projectId}-1",
-                "${user}-${proj2.projectId}-2",
-                "${user}-${proj2.projectId}-3",
-                "${user}-${proj2.projectId}-4",
-                "${user}-${proj2.projectId}-5",
-
-                "${user}-${proj2.projectId}-${subj2.subjectId}-1",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-2",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-3",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-4",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-5",
-
-                "${user}-${proj2.projectId}-${skill1.skillId}",
-                "${user}-${proj2.projectId}-${skill2.skillId}",
-        ].collect { it.toString() }.sort ()
-
-        userAchievements_t1.collect { UserAchievement ua -> "${ua.userId}-${ua.skillId ? "${ua.projectId}-${ua.skillId}" : ua.projectId}${ua.level ? "-$ua.level" : ""}".toString() }.sort () == [
-
-                "${user}-${proj1.projectId}-1",
-                "${user}-${proj1.projectId}-2",
-                "${user}-${proj1.projectId}-3",
-                "${user}-${proj1.projectId}-4",
-                "${user}-${proj1.projectId}-5",
-
-                "${user}-${proj1.projectId}-${subj1.subjectId}-1",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-2",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-3",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-4",
-                "${user}-${proj1.projectId}-${subj1.subjectId}-5",
-
-                "${user}-${proj1.projectId}-${skill1.skillId}",
-
-                "${user}-${proj2.projectId}-1",
-                "${user}-${proj2.projectId}-2",
-                "${user}-${proj2.projectId}-3",
-
-                "${user}-${proj2.projectId}-${subj2.subjectId}-1",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-2",
-                "${user}-${proj2.projectId}-${subj2.subjectId}-3",
-
-                "${user}-${proj2.projectId}-${skill1.skillId}",
-        ].collect { it.toString() }.sort ()
+        def e = thrown(Exception)
+        e.getMessage().contains("Cannot configure expiration attribute on skills that are reused")
     }
 
-    def expireAllSkillsForProject(String projectId, LocalDateTime expirationDate=null,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
+    def expireAllSkillsForProject(String projectId, Integer numDaysAfterAchievement=7,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
         def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills)
-        expireSkills(projectId, skills, expirationDate)
+        expireSkills(projectId, skills, numDaysAfterAchievement)
     }
 
-    def expireSkill(String projectId, def skill, LocalDateTime expirationDate=null) {
-        expireSkills(projectId, [skill], expirationDate)
+    def expireSkill(String projectId, def skill, Integer numDaysAfterAchievement=7) {
+        expireSkills(projectId, [skill], numDaysAfterAchievement)
     }
 
-    def expireSkills(String projectId, def skills, LocalDateTime expirationDate=null) {
-        if (!expirationDate) {
-            expirationDate = (new Date()-1).toLocalDateTime() // yesterday
-        }
+    def expireSkills(String projectId, def skills, Integer numDaysAfterAchievement=7) {
         skills.forEach { it ->
             skillsService.saveSkillExpirationAttributes(projectId, it.skillId, [
-                    expirationType: ExpirationAttrs.YEARLY,
-                    every: 1,
-                    monthlyDay: expirationDate.dayOfMonth,
-                    nextExpirationDate: expirationDate.toDate(),
+                    expirationType: ExpirationAttrs.DAILY,
+                    every: numDaysAfterAchievement,
             ])
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
