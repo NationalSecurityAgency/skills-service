@@ -20,6 +20,7 @@ import groovy.lang.Closure
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillApproval
@@ -981,5 +982,199 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         then:
         requestedOnDescPg1.data.collect { it.userId } == [ users[0] ]
         requestedOnDescPg1.data.collect { it.requestMsg } == [ "Please approve this 1 " ]
+    }
+
+    void "remove existing approval requests if the skill's self approval type to be 'quiz'"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(3,2)
+        skills1.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        5.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+            def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it+1}", date, "Please approve this ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        when:
+        List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
+        List<String> performedBefore = userPerformedSkillRepo.findAll().collect { it.id }
+
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[1].quizId = quiz1.quizId
+        skillsService.createSkills([skills[1]])
+        List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
+        List<String> performedAfter = userPerformedSkillRepo.findAll().collect { it.id }
+
+        then:
+        approvalBefore == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        approvalAfter1Delete == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        !performedBefore
+        !performedAfter
+    }
+
+    void "remove existing approval requests if the skill's self approval type to be 'video'"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def proj1 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(2)
+        def skills1 = SkillsFactory.createSkills(3,2)
+        skills1.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skills1)
+
+        5.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it}", date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+            def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], "user${it+1}", date, "Please approve this ${it}!")
+            assert res1.body.explanation == "Skill was submitted for approval"
+        }
+
+        3.times {
+            Date date = new Date() - it
+            def res = skillsService.addSkill([projectId: proj1.projectId, skillId: skills1[it].skillId], "user${it}", date, "Other reason ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        Closure<List<String>> getIds = { approvals->
+            return approvals.collect {
+                SkillDef skillDef = skillDefRepo.findById(it.skillRefId).get()
+                assert skillDef
+                return "${skillDef.projectId}-${skillDef.skillId}_${it.userId}"
+            }.sort()
+        }
+
+        when:
+        List<String> approvalBefore = getIds(skillApprovalRepo.findAll())
+        List<String> performedBefore = userPerformedSkillRepo.findAll().collect { it.id }
+
+        skillsService.saveSkillVideoAttributes(proj.projectId, skills[1].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Video
+        skillsService.createSkills([skills[1]])
+        List<String> approvalAfter1Delete = getIds(skillApprovalRepo.findAll())
+        List<String> performedAfter = userPerformedSkillRepo.findAll().collect { it.id }
+
+        then:
+        approvalBefore == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill2_user1",
+                "TestProject1-skill2_user2",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        approvalAfter1Delete == [
+                "TestProject1-skill1_user0",
+                "TestProject1-skill1_user1",
+                "TestProject1-skill3_user2",
+                "TestProject1-skill3_user3",
+                "TestProject1-skill4_user3",
+                "TestProject1-skill4_user4",
+                "TestProject1-skill5_user4",
+                "TestProject1-skill5_user5",
+
+                "TestProject2-skill1_user0",
+                "TestProject2-skill2_user1",
+                "TestProject2-skill3_user2"]
+
+        !performedBefore
+        !performedAfter
     }
 }
