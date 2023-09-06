@@ -129,9 +129,7 @@ limitations under the License.
           });
       },
       onPointsEarned(pts) {
-        if (!this.skill.isMotivationalSkill) {
-          this.skill = SkillEnricherUtil.addPts(this.skill, pts);
-        }
+        this.skill = SkillEnricherUtil.addPts(this.skill, pts);
       },
       isDependency() {
         const routeName = this.$route.name;
