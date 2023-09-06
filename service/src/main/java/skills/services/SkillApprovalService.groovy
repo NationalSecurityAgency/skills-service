@@ -484,11 +484,25 @@ class SkillApprovalService {
             skillApprovalConfRepo.delete(approvalConf)
 
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(approvalConf.approverUserId)
+            String skillId
+            if (approvalConf.skillRefId) {
+                Optional<SkillDef> skillDefOptional = skillDefRepo.findById(approvalConf.skillRefId)
+                if (skillDefOptional.isPresent()) {
+                    skillId = skillDefOptional.get().skillId
+                }
+            }
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: DashboardAction.RemoveConfiguration,
                     item: DashboardItem.Approver,
                     itemId: userAttrs?.userIdForDisplay ?: approvalConf.approverUserId,
                     projectId: projectId,
+                    actionAttributes: [
+                            approverUserId: approvalConf.approverUserId,
+                            userId: approvalConf.userId,
+                            userTagKey: approvalConf.userTagKey,
+                            userTagValue: approvalConf.userTagValue,
+                            skillId: skillId,
+                    ]
             ))
             log.info("Removed {}", approvalConf)
         } else {

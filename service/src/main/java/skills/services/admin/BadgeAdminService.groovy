@@ -215,7 +215,7 @@ class BadgeAdminService {
         Map actionAttributes = [:]
         Closure addAttributes = { Object obj, String prependToKey = null ->
             obj.properties
-                    .findAll { key, val -> val instanceof String || val instanceof Number }
+                    .findAll { key, val -> val instanceof String || val instanceof Number || val instanceof Date }
                     .each { key, val ->
                         String newKey = prependToKey ? "${prependToKey}:${key}" : key
                         actionAttributes[newKey] = val

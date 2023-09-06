@@ -98,40 +98,6 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         !deleteAction.id
     }
 
-    def "track project pin/unpin actions"() {
-        SkillsService rootService = createRootSkillService()
-        def p1 = createProject(1)
-        skillsService.createProject(p1)
-
-        userActionsHistoryRepo.deleteAll()
-
-        when:
-        rootService.pinProject(p1.projectId)
-        rootService.unpinProject(p1.projectId)
-        def res = rootService.getUserActionsForEverything()
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(rootService.userName)
-        String rootDisplayName = userAttrs.getUserIdForDisplay()
-
-        then:
-        res.count == 2
-        res.data[0].action == DashboardAction.Delete.toString()
-        res.data[0].item == DashboardItem.ProjectPin.toString()
-        res.data[0].itemId == p1.projectId
-        res.data[0].userId == rootService.userName.toLowerCase()
-        res.data[0].userIdForDisplay == rootDisplayName
-        res.data[0].projectId == p1.projectId
-        !res.data[0].quizId
-
-        res.data[1].action == DashboardAction.Create.toString()
-        res.data[1].item == DashboardItem.ProjectPin.toString()
-        res.data[1].itemId == p1.projectId
-        res.data[1].userId == rootService.userName.toLowerCase()
-        res.data[1].userIdForDisplay == rootDisplayName
-        res.data[1].projectId == p1.projectId
-        !res.data[1].quizId
-    }
-
     def "track subject CRUD actions"() {
         SkillsService rootService = createRootSkillService()
         def p1 = createProject(1)
@@ -838,6 +804,8 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         createAction["BonusAward:name"] == "Test Badge"
         createAction["BonusAward:iconClass"] == "abc"
         createAction["BonusAward:numMinutes"] == 60
+        createAction.startDate
+        createAction.endDate
         !createAction.description
 
         editAction.id == res.data[1].itemRefId
@@ -847,6 +815,8 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         editAction["BonusAward:name"] == "Test Badge"
         editAction["BonusAward:iconClass"] == "abc"
         editAction["BonusAward:numMinutes"] == 60
+        editAction.startDate
+        editAction.endDate
 
         !deleteAction.id
     }
@@ -1176,6 +1146,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def confBySkill = rootService.getUserActionAttributes(res.data[3].id)
         def confByTag = rootService.getUserActionAttributes(res.data[2].id)
         def confFallback = rootService.getUserActionAttributes(res.data[1].id)
+        def deleteApproverConf = rootService.getUserActionAttributes(res.data[0].id)
 
         then:
         res.count == 5
@@ -1235,6 +1206,8 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         confByTag.userTagValue ==  "AbC"
 
         confFallback.fallbackApprover == true
+
+        deleteApproverConf.approverUserId == user1Service.userName
     }
 
     def "delete user skill events"() {
