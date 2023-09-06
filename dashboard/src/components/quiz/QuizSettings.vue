@@ -261,10 +261,10 @@ limitations under the License.
             lastLoadedValue: '-1',
           },
           quizTimeLimit: {
-            value: 60,
+            value: 3600,
             unlimited: true,
             setting: 'quizTimeLimit',
-            lastLoadedValue: 60,
+            lastLoadedValue: 3600,
             lastLoadedUnlimited: true,
           },
         },
