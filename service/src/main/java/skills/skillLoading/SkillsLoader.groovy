@@ -520,7 +520,24 @@ class SkillsLoader {
         Integer points = up ? up.points : 0
         Integer todayPoints = userPointsRepo.calculatePointsForSingleSkillForADay(userId, skillDef.id, new Date().clearTime()) ?: 0
         Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
-        Date expirationDate = skillAttributeService.getExpirationAttrs(projectId, skillId)?.nextExpirationDate
+
+        ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
+        Date expirationDate
+        Date mostRecentlyPerformedOn
+        int daysOfInactivityBeforeExp = 0
+        Boolean isMotivationalSkill = false
+        if (expirationAttrs) {
+            expirationDate = expirationAttrs.nextExpirationDate
+            isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
+            if (isMotivationalSkill) {
+                UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
+                if (mostRecentUPS) {
+                    mostRecentlyPerformedOn = mostRecentUPS.performedOn
+                    expirationDate = mostRecentUPS.performedOn + expirationAttrs.every
+                    daysOfInactivityBeforeExp = expirationAttrs.every
+                }
+            }
+        }
 
         if (skillDef.copiedFrom != null && skillDef.selfReportingType) {
             // because of the catalog's async nature when self-approval honor skill is submitted todaysPoints and points are not consistent on the imported side
@@ -583,6 +600,9 @@ class SkillsLoader {
                 tags: loadSkillTags(skillDef.id),
                 videoSummary: getVideoSummary(skillDef),
                 expirationDate: expirationDate,
+                isMotivationalSkill: isMotivationalSkill,
+                daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
+                mostRecentlyPerformedOn: mostRecentlyPerformedOn,
         )
     }
 
@@ -1194,10 +1214,23 @@ class SkillsLoader {
                     })
                 }
 
+                Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, skillDef.projectId, skillDef.skillId)
                 Date expirationDate
+                Date mostRecentlyPerformedOn
+                int daysOfInactivityBeforeExp = 0
+                Boolean isMotivationalSkill = false
                 if (skillDefAndUserPoints.attributes && skillDefAndUserPoints.attributes.type == SkillAttributesDef.SkillAttributesType.AchievementExpiration) {
                     ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
                     expirationDate = expirationAttrs.nextExpirationDate
+                    isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
+                    if (isMotivationalSkill) {
+                        UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
+                        if (mostRecentUPS) {
+                            mostRecentlyPerformedOn = mostRecentUPS.performedOn
+                            expirationDate = mostRecentUPS.performedOn + expirationAttrs.every
+                            daysOfInactivityBeforeExp = expirationAttrs.every
+                        }
+                    }
                 }
 
                 skillsRes << new SkillSummary(
@@ -1211,6 +1244,7 @@ class SkillsLoader {
                         pointIncrementInterval: skillDef.pointIncrementInterval,
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
+                        achievedOn: achievedOn,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
                         badgeDependencyInfo: badgeDependencySummary,
                         selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
@@ -1223,6 +1257,9 @@ class SkillsLoader {
                         badges: skillDefAndUserPoints.badges,
                         tags: skillDefAndUserPoints.tags,
                         expirationDate: expirationDate,
+                        isMotivationalSkill: isMotivationalSkill,
+                        daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
+                        mostRecentlyPerformedOn: mostRecentlyPerformedOn,
                 )
             }
         }

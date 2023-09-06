@@ -97,9 +97,14 @@ limitations under the License.
           / {{ skill.totalPoints | number }} Points
         </div>
 
-        <div v-if="skill.points > 0 && expirationDate" data-cy="expirationDate">
+        <div v-if="skill.points > 0 && expirationDate && !skill.isMotivationalSkill" data-cy="expirationDate">
           <div class="my-2">
             <i class="fas fa-hourglass-end skills-color-expiration mr-2"></i>Points will expire on <span class="font-weight-bold">{{ expirationDate }}</span>
+          </div>
+        </div>
+        <div v-if="showMotivationalExpirationMessage" data-cy="expirationDate">
+          <div class="my-2">
+            <i class="fas fa-clock skills-color-expiration mr-2"></i>Expires <span class="font-weight-bold">{{ expirationDate | relativeTime() }}</span>, perform this skill to keep your points!
           </div>
         </div>
 
@@ -152,7 +157,7 @@ limitations under the License.
           {{ subjectDisplayName }}: {{ skill.subjectName }}
         </p>
 
-        <achievement-date v-if="skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
+        <achievement-date v-if="skill && skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>
 
         <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>
         <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>
@@ -310,6 +315,19 @@ limitations under the License.
       showBadgesAndTagsRow() {
         return ((this.skill.badges && this.skill.badges.length > 0 && !this.badgeId) || (this.skill.tags && this.skill.tags.length > 0));
       },
+      showMotivationalExpirationMessage() {
+        if (this.skillInternal && this.skillInternal.achievedOn && this.expirationDate && this.skillInternal.isMotivationalSkill) {
+          if (this.motivationalSkillWarningGracePeriod) {
+            const mostRecentlyPerformedOn = dayjs(this.skillInternal.mostRecentlyPerformedOn);
+            const now = dayjs();
+            const daysSinceLastPerformed = now.diff(mostRecentlyPerformedOn, 'day');
+            const gracePeriod = this.skillInternal.daysOfInactivityBeforeExp * this.motivationalSkillWarningGracePeriod;
+            return daysSinceLastPerformed > gracePeriod;
+          }
+          return true;
+        }
+        return false;
+      },
       expirationDate() {
         if (this.skill.expirationDate) {
           let exp = dayjs(this.skill.expirationDate);
@@ -319,6 +337,9 @@ limitations under the License.
           return exp.format('MMMM D YYYY');
         }
         return '';
+      },
+      motivationalSkillWarningGracePeriod() {
+        return this.$store.getters.config.motivationalSkillWarningGracePeriod;
       },
     },
     watch: {
@@ -359,6 +380,7 @@ limitations under the License.
         this.$emit('points-earned', pts, this.skill.skillId, skillId);
       },
       pointsEarned(pts) {
+        this.skillInternal.mostRecentlyPerformedOn = dayjs();
         this.$emit('points-earned', pts, this.skill.skillId);
       },
       skillClicked() {

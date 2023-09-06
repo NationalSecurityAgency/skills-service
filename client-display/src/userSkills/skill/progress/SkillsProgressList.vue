@@ -422,13 +422,15 @@ limitations under the License.
         this.$emit('scrollTo');
       },
       onPointsEarned(pts, skillId, childSkillId = null) {
-        // childSkillId is only provided for SkillsGroup skills
-        if (childSkillId) {
-          SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternal, pts, skillId, childSkillId);
-          SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternalOrig, pts, skillId, childSkillId);
-        } else {
-          SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
-          SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
+        if (!this.skill.isMotivationalSkill) {
+          // childSkillId is only provided for SkillsGroup skills
+          if (childSkillId) {
+            SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternal, pts, skillId, childSkillId);
+            SkillEnricherUtil.updateSkillPtsUnderSkillGroup(this.skillsInternalOrig, pts, skillId, childSkillId);
+          } else {
+            SkillEnricherUtil.updateSkillPtsInList(this.skillsInternalOrig, pts, skillId);
+            SkillEnricherUtil.updateSkillPtsInList(this.skillsInternal, pts, skillId);
+          }
         }
 
         const event = { skillId, pointsEarned: pts };

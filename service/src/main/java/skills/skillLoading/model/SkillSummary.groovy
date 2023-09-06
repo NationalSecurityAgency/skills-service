@@ -47,5 +47,8 @@ class SkillSummary extends SkillSummaryParent {
 
     VideoSummary videoSummary
 
+    Boolean isMotivationalSkill
+    int daysOfInactivityBeforeExp
+    Date mostRecentlyPerformedOn
     Date expirationDate
 }
