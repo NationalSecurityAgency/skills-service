@@ -36,10 +36,16 @@ import skills.services.FeatureService
 import skills.services.SkillApprovalService
 import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.ProjDef
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -88,6 +94,12 @@ class AccessSettingsController {
 
     @Autowired
     UIConfigProperties uiConfigProperties
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -148,6 +160,7 @@ class AccessSettingsController {
 
         skillApprovalService.deleteApproverForProject(projectId, userIdLower)
 
+        saveUserAction(userId, roleName, projectId, DashboardAction.Delete)
         return new RequestResult(success: true)
     }
 
@@ -176,7 +189,25 @@ class AccessSettingsController {
             }
             projAdminService.pinProjectForRootUser(projectId, user)
         }
+
+        saveUserAction(userId, roleName, projectId, DashboardAction.Create)
         return new RequestResult(success: true)
+    }
+
+    @Profile
+    private void saveUserAction(String userId, RoleName roleName, String projectId, DashboardAction action) {
+        UserAttrs removeUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId.toLowerCase())
+        String removeUserId = removeUserAttrs?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: action,
+                item: DashboardItem.UserRole,
+                actionAttributes: [
+                        userId  : removeUserId,
+                        userRole: roleName
+                ],
+                itemId: removeUserId,
+                projectId: projectId,
+        ))
     }
 
     @Profile

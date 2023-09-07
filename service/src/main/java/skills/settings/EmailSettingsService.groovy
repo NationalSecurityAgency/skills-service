@@ -29,6 +29,11 @@ import skills.services.SystemSettingsService
 import skills.services.settings.SettingsService
 
 import jakarta.mail.MessagingException
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
+
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -63,9 +68,21 @@ class EmailSettingsService {
     @Autowired
     SystemSettingsService systemSettingsService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     EmailConfigurationResult updateConnectionInfo(EmailConnectionInfo emailConnectionInfo) {
         EmailConfigurationResult configurationSuccessful = configureMailSender(emailConnectionInfo)
         storeSettings(emailConnectionInfo)
+        Map actionAttributes = emailConnectionInfo.properties
+                .findAll { key, val -> key != "password" && val instanceof String || val instanceof Number }
+                .collectEntries { key, val -> [(key): val] }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.Settings,
+                actionAttributes: actionAttributes,
+                itemId: "EmailSettings",
+        ))
         return configurationSuccessful;
     }
 

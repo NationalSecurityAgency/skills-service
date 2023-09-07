@@ -24,7 +24,6 @@ import skills.UIConfigProperties
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserRoleRes
@@ -210,7 +209,7 @@ class SelfReportingService {
 
         if (userRoleRes) {
             ProjDef projDef = projDefRepo.findByProjectId(skillDefinition.projectId)
-            UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
             Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(projectId)
             Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                     userIds: userRoleRes.collect { it.userId },

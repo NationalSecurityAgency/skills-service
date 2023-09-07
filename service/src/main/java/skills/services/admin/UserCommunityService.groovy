@@ -22,15 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
-import skills.auth.UserInfoService
-import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.EnableProjValidationRes
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
 import skills.storage.model.ProjDef
-import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ExportedSkillRepo
@@ -109,7 +105,7 @@ class UserCommunityService {
                 List<UserRole> unique = allRoles.unique { it.userId }
                 unique.each { UserRole userWithRole ->
                     if (!isUserCommunityMember(userWithRole.userId)) {
-                        String userIdForDisplay = userAttrsRepo.findByUserId(userWithRole.userId).userIdForDisplay
+                        String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
 
                         res.isAllowed = false
                         res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())

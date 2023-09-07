@@ -15,6 +15,7 @@
  */
 package skills.services.settings
 
+import callStack.profiler.Profile
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -34,9 +35,15 @@ import skills.controller.result.model.SettingsResult
 import skills.services.LockingService
 import skills.services.admin.UserCommunityService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Setting
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 import skills.utils.Props
 
@@ -68,10 +75,16 @@ class SettingsService {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     @Transactional
-    void saveSettings(List<SettingsRequest> request, User user=null) {
+    void saveSettings(List<SettingsRequest> request, User user=null, boolean saveUserAction = false) {
         request.each {
-            saveSetting(it, user)
+            saveSetting(it, user, saveUserAction)
         }
     }
 
@@ -96,7 +109,7 @@ class SettingsService {
     }
 
     @Transactional
-    SettingsResult saveSetting(SettingsRequest request, User user=null) {
+    SettingsResult saveSetting(SettingsRequest request, User user=null, boolean performSaveUserAction = false) {
         validateSettingRequest(request)
         Integer userRefId = user ? user.id : getUserRefId(request)
         String userId = user ? user.userId : loadCurrentUser(isUserSettingRequest(request))?.username
@@ -114,11 +127,40 @@ class SettingsService {
             applyListeners(null, request)
         }
 
+        if (performSaveUserAction) {
+            saveUserAction(setting)
+        }
         settingsDataAccessor.save(setting)
         log.debug("saved [{}]", setting)
 
         return convertToRes(setting)
     }
+
+    @Profile
+    private saveUserAction(Setting setting) {
+        Setting.SettingType settingType = setting.type
+
+        Map actionAttributes = [
+                value: setting.value,
+                setting: setting.setting,
+        ]
+
+        if (setting.userRefId) {
+            UserAttrs userAttrs = userAttrsRepo.findUserAttrsByUserTableRefId(setting.userRefId)
+            if (userAttrs) {
+                actionAttributes.userId = userAttrs.userIdForDisplay
+            }
+        }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.Settings,
+                itemId: settingType,
+                projectId: setting.projectId,
+                actionAttributes: actionAttributes
+        ))
+    }
+
 
     private void validateSettingRequest(SettingsRequest request) {
         if (request instanceof ProjectSettingsRequest && request.setting.endsWith('.displayName')) {

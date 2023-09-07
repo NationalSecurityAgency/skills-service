@@ -17,7 +17,6 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -36,18 +35,16 @@ import skills.controller.result.model.*
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.SkillAttributeService
-import skills.services.attributes.SkillVideoAttrs
 import skills.services.events.pointsAndAchievements.InsufficientPointsForFinalizationValidator
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
-import skills.storage.repos.ExportedSkillRepo
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.QuizToSkillDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillDefWithExtraRepo
-import skills.storage.repos.SkillRelDefRepo
+import skills.storage.repos.*
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -114,6 +111,9 @@ class SkillCatalogService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -235,6 +235,13 @@ class SkillCatalogService {
 
         ExportedSkill exportedSkill = new ExportedSkill(projectId: skillDef.projectId, skill: skillDef)
         exportedSkillRepo.save(exportedSkill)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.ExportToCatalog,
+                item: DashboardItem.Skill,
+                itemId: skillDef.skillId,
+                projectId: projDef.projectId,
+        ))
     }
 
 
@@ -252,9 +259,16 @@ class SkillCatalogService {
         ExportedSkill es = exportedSkillRepo.getCatalogSkill(projectId, skillId)
         List<SkillDef> related = skillDefRepo.findSkillsCopiedFrom(es.skill.id)
         related?.each {
-            skillsAdminService.deleteSkill(it.projectId, it.skillId)
+            skillsAdminService.deleteSkill(it.projectId, it.skillId, false)
         }
         exportedSkillRepo.delete(es)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.RemoveFromCatalog,
+                item: DashboardItem.Skill,
+                itemId: skillId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional
@@ -333,6 +347,18 @@ class SkillCatalogService {
         copy.skillId = newSkillId
 
         skillsAdminService.saveSkill(copy.skillId, copy, true, groupId, false)
+
+        if (!isReusedSkill) {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.ImportFromCatalog,
+                    item: DashboardItem.Skill,
+                    actionAttributes: [
+                            fromProjectId: projectIdFrom,
+                    ],
+                    itemId: newSkillId,
+                    projectId: projectIdTo,
+            ))
+        }
     }
 
     @Transactional
@@ -391,6 +417,12 @@ class SkillCatalogService {
         }
 
         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.FinalizeCatalogImport,
+                item: DashboardItem.Project,
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {

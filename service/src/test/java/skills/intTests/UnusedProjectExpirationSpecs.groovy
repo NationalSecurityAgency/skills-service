@@ -15,15 +15,12 @@
  */
 package skills.intTests
 
-import org.junit.Rule
+
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.system.OutputCaptureRule
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.support.TransactionTemplate
-import skills.controller.request.model.GlobalSettingsRequest
-import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
@@ -35,13 +32,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.repos.SkillDefRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -202,9 +193,9 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
-        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(otherUser)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(DEFAULT_ROOT_USER_ID.toLowerCase())
 
         when:
         expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))

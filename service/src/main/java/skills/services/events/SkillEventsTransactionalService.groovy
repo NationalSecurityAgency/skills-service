@@ -32,6 +32,10 @@ import skills.services.admin.SkillsGroupAdminService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.events.pointsAndAchievements.PointsAndAchievementsHandler
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
@@ -117,6 +121,9 @@ class SkillEventsTransactionalService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional
     void notifyUserOfAchievements(String userId){
         try {
@@ -189,6 +196,18 @@ class SkillEventsTransactionalService {
             SkillException e = new SkillException("Cannot report skill events directly to a quiz-based skill. Can only achieve by completing quiz/survey.", projectId, skillId, ErrorCode.SkillEventForQuizSkillIsNotAllowed)
             e.doNotRetry = true
             throw e;
+        }
+        if (approvalParams.forAnotherUser) {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Create,
+                    item: DashboardItem.SkillEvents,
+                    projectId: projectId,
+                    itemId: skillId,
+                    actionAttributes: [
+                            reportedForUser: userId,
+                            reportedSkillEventDate: incomingSkillDateParam
+                    ],
+            ))
         }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId

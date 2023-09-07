@@ -97,6 +97,7 @@ import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 import VideoConfigPage from '@/components/video/VideoConfigPage';
 import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage';
+import UserActionsPage from '@/components/userActions/UserActionsPage';
 
 Vue.use(Router);
 
@@ -160,6 +161,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Contact Project Admins',
+          },
+        },
+      }, {
+        name: 'UserActions',
+        path: 'userActions',
+        component: UserActionsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Actions History',
           },
         },
       }],

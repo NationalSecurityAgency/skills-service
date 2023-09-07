@@ -84,7 +84,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
 
     }
 
@@ -109,7 +109,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
     }
 
     def "validation endpoint - cannot enable community because number of requirements are not met"() {
@@ -135,8 +135,8 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         then:
         res.isAllowed == false
         res.unmetRequirements.sort() == [
-                "Has existing ${userAttrsRepo.findByUserId(allDragonsUser.userName).userIdForDisplay} user that is not authorized",
-                "Has existing ${userAttrsRepo.findByUserId(allDragonsUser1.userName).userIdForDisplay} user that is not authorized",
+                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized",
+                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser1.userName).userIdForDisplay} user that is not authorized",
                 "Has skill(s) that have been exported to the Skills Catalog"
         ].sort()
     }

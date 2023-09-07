@@ -41,6 +41,10 @@ import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
@@ -116,6 +120,9 @@ class GlobalBadgesService {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
@@ -141,6 +148,17 @@ class GlobalBadgesService {
         }
 
         assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.AssignSkill,
+                item: DashboardItem.GlobalBadge,
+                actionAttributes: [
+                        badgeId: badgeId,
+                        projectId: projectId,
+                        skillId: skillId,
+                ],
+                itemId: badgeId,
+        ))
     }
 
     @Transactional()
@@ -173,6 +191,17 @@ class GlobalBadgesService {
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null) {
             globalBadgeLevelDefRepo.save(globalBadgeLevelDef)
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.AssignLevel,
+                item: DashboardItem.GlobalBadge,
+                actionAttributes: [
+                        badgeId: badgeId,
+                        projectId: projectId,
+                        level: level,
+                ],
+                itemId: badgeId,
+        ))
     }
 
     @Transactional()
@@ -201,6 +230,18 @@ class GlobalBadgesService {
             globalBadgeLevelDefRepo.save(existing)
             badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.AssignLevel,
+                item: DashboardItem.GlobalBadge,
+                actionAttributes: [
+                        badgeId: badgeId,
+                        projectId: projectId,
+                        level: newLevel,
+                        previousLevel: existingLevel,
+                ],
+                itemId: badgeId,
+        ))
     }
 
 
@@ -215,6 +256,17 @@ class GlobalBadgesService {
 
         SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
         badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.RemoveLevelAssignment,
+                item: DashboardItem.GlobalBadge,
+                actionAttributes: [
+                        badgeId: badgeId,
+                        projectId: projectId,
+                        level: level,
+                ],
+                itemId: badgeId,
+        ))
     }
 
     @Transactional(readOnly = true)
@@ -229,11 +281,22 @@ class GlobalBadgesService {
     }
 
     @Transactional()
-    void removeSkillFromBadge(String badgeId, projectId, String skillId) {
+    void removeSkillFromBadge(String badgeId, String projectId, String skillId) {
         removeGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
 
         SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
         badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.RemoveSkillAssignment,
+                item: DashboardItem.GlobalBadge,
+                actionAttributes: [
+                        badgeId: badgeId,
+                        projectId: projectId,
+                        skillId: skillId,
+                ],
+                itemId: badgeId,
+        ))
     }
 
     @Transactional

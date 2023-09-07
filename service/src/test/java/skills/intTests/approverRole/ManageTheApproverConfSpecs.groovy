@@ -43,7 +43,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
 
         // should be DN in case of pki
-        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
@@ -84,8 +84,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "2. Please approve ${users[2]} request!")
 
         // should be DN in case of pki
-        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
-        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[3]).dn : users[3]
+        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
+        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[3]).dn : users[3]
 
         def user4Service = createService(users[4])
         skillsService.addUserRole(user4Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
@@ -288,7 +288,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
-        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
         when:
         def approvals_t0 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
@@ -330,7 +330,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[2], userTagKey, ["abcd"])
         rootUser.saveUserTag(users[3], userTagKey, ["efgh"])
 
-        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+        String user2ForDisplay = userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         when:
         def forUserConf = skillsService.configureApproverForUser(proj.projectId, user1Service.userName, users[2]).body
@@ -437,7 +437,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "abc")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
 
-        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+        String user2ForDisplay = userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         when:
         def approverConf = skillsService.getApproverConf(proj.projectId)
@@ -481,7 +481,7 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUserTag(proj.projectId, user1Service.userName, userTagKey, "Abc")
         skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, "nomatch")
 
-        String user2ForDisplay = userAttrsRepo.findByUserId(users[2]).userIdForDisplay
+        String user2ForDisplay = userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         when:
         def approverConf = skillsService.getApproverConf(proj.projectId)
@@ -711,8 +711,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.addUserRole(user1Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
         skillsService.addUserRole(user2Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
         skillsService.addUserRole(user5Service.userName, proj2.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
-        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[2]).dn : users[2]
-        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserId(users[3]).dn : users[3]
+        String user1IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
+        String user2IdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[3]).dn : users[3]
         skillsService.configureApproverForUser(proj2.projectId, user1Service.userName, user1IdConConf)
         skillsService.configureApproverForUser(proj2.projectId, user1Service.userName, user2IdConConf)
         skillsService.configureApproverForUser(proj2.projectId, user2Service.userName, user1IdConConf)

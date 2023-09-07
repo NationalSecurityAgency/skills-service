@@ -68,9 +68,9 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherUser)
-        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(otherUser)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(DEFAULT_ROOT_USER_ID.toLowerCase())
 
         when:
         expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))
@@ -131,9 +131,9 @@ class ProjectExpirationEmailIT extends DefaultIntSpec {
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(regularDragonSkillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(divineDragonSkillsService.userName)
-        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserId(DEFAULT_ROOT_USER_ID.toLowerCase())
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(regularDragonSkillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(divineDragonSkillsService.userName)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(DEFAULT_ROOT_USER_ID.toLowerCase())
 
         when:
         expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))

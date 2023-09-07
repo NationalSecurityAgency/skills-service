@@ -87,7 +87,7 @@ class RankingLoader {
 
     @Profile
     LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null) {
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(userId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         LocalDateTime userCreatedDate = userAttrs.created
         OptOutInfo optOutInfo = getOptOutInfo(userId, projectId)
 

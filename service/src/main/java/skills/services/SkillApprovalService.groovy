@@ -38,6 +38,10 @@ import skills.services.admin.UserCommunityService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
@@ -103,6 +107,9 @@ class SkillApprovalService {
 
     @Autowired
     UIConfigProperties uiConfigProperties
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     static class ConfExistInfo {
         boolean projConfExist = false;
@@ -311,7 +318,7 @@ class SkillApprovalService {
             return
         }
 
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(skillApproval.userId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillApproval.userId)
         if (!userAttrs.email) {
             return
         }
@@ -350,7 +357,7 @@ class SkillApprovalService {
         SkillApprovalConf saved
         if (skillApproverConfRequest.userId) {
             String userId = userInfoService.lookupUserId(skillApproverConfRequest.userId);
-            if(!userAttrsRepo.findByUserId(userId)) {
+            if(!userAttrsRepo.findByUserIdIgnoreCase(userId)) {
                 throw new SkillException("Provided user id [${userId}] does not exist", projectId)
             }
 
@@ -389,6 +396,15 @@ class SkillApprovalService {
 
         log.info("Saved {}", saved)
         SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(approverId)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Configure,
+                item: DashboardItem.Approver,
+                actionAttributes: skillApproverConfRequest,
+                itemId: userAttrs?.userIdForDisplay ?: approverId,
+                projectId: projectId,
+        ))
         return convertToClientRes(dbRes)
     }
 
@@ -466,6 +482,28 @@ class SkillApprovalService {
                 throw new SkillException("You are not authorized to delete approval with id [${approverConfId}]", projectId, null, ErrorCode.AccessDenied)
             }
             skillApprovalConfRepo.delete(approvalConf)
+
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(approvalConf.approverUserId)
+            String skillId
+            if (approvalConf.skillRefId) {
+                Optional<SkillDef> skillDefOptional = skillDefRepo.findById(approvalConf.skillRefId)
+                if (skillDefOptional.isPresent()) {
+                    skillId = skillDefOptional.get().skillId
+                }
+            }
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.RemoveConfiguration,
+                    item: DashboardItem.Approver,
+                    itemId: userAttrs?.userIdForDisplay ?: approvalConf.approverUserId,
+                    projectId: projectId,
+                    actionAttributes: [
+                            approverUserId: approvalConf.approverUserId,
+                            userId: approvalConf.userId,
+                            userTagKey: approvalConf.userTagKey,
+                            userTagValue: approvalConf.userTagValue,
+                            skillId: skillId,
+                    ]
+            ))
             log.info("Removed {}", approvalConf)
         } else {
             log.warn("Failed to find SkillApprovalConf with id [{}]", approverConfId)
@@ -495,6 +533,17 @@ class SkillApprovalService {
 
         log.info("Saved {}", saved)
         SkillApprovalConfRepo.ApproverConfResult dbRes = skillApprovalConfRepo.findConfResultById(saved.id)
+        UserAttrs approverUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(dbRes.approverUserId)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Configure,
+                item: DashboardItem.Approver,
+                actionAttributes: [
+                        fallbackApprover: true,
+                ],
+                itemId: approverUserAttrs?.userIdForDisplay ?: dbRes.approverUserId,
+                projectId: projectId,
+        ))
         return convertToClientRes(dbRes)
     }
 

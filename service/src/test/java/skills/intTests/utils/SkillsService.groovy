@@ -24,8 +24,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
-
 
 @Slf4j
 class SkillsService {
@@ -1174,7 +1176,7 @@ class SkillsService {
         return wsHelper.rootPost("/pin/${projectId}")
     }
 
-    def unpinProject(String projecctId) {
+    def unpinProject(String projectId) {
         return wsHelper.rootDelete("/pin/${projectId}")
     }
 
@@ -1537,6 +1539,22 @@ class SkillsService {
 
     def rebuildUserAndProjectPoints(String projectId) {
         return wsHelper.rootPost("/rebuildUserAndProjectPoints/${projectId}")
+    }
+
+    def getUserActionsForEverything(int limit = 10, int page = 1, String orderBy = "created", Boolean ascending = false,
+                                    String projectIdFilter = '',
+                                    DashboardItem itemFilter = null,
+                                    String userFilter = '',
+                                    String quizFilter = '',
+                                    String itemIdFilter = '',
+                                    DashboardAction actionFilter = null) {
+        return wsHelper.rootGet("/dashboardActions?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}"
+                + "&projectIdFilter=${projectIdFilter}&itemFilter=${itemFilter ?: ''}&userFilter=${userFilter}"
+                + "&quizFilter=${quizFilter}&itemIdFilter=${itemIdFilter}&actionFilter=${actionFilter ?: ''}".toString())
+    }
+
+    def getUserActionAttributes(Long actionId) {
+        return wsHelper.rootGet("/dashboardActions/${actionId}/attributes".toString())
     }
 
     def unsubscribeFromSelfApprovalRequestEmails(String projectId) {

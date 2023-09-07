@@ -101,7 +101,7 @@ class SuggestUsersSpecs extends DefaultIntSpec {
         // user by registering with dashboard
         createService(users[1])
 
-        String user1UserIdForDisplay = userAttrsRepo.findByUserId(users[1].toLowerCase()).userIdForDisplay
+        String user1UserIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(users[1].toLowerCase()).userIdForDisplay
 
         when:
         def allUsers = skillsService.suggestClientUsers("user")

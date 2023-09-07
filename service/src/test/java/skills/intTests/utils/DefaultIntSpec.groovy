@@ -112,6 +112,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     TransactionHelper transactionHelper
 
+    @Autowired
+    UserActionsHistoryRepo userActionsHistoryRepo
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -149,6 +152,8 @@ class DefaultIntSpec extends Specification {
         }
 
         deleteAllAttachments()
+
+        userActionsHistoryRepo.deleteAll()
 
         waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()
@@ -261,7 +266,7 @@ class DefaultIntSpec extends Specification {
         }
         if (createEmail) {
             userIds?.each {
-                if (!(userAttrsRepo.findByUserId(it))) {
+                if (!(userAttrsRepo.findByUserIdIgnoreCase(it))) {
                     try {
                         UserAttrs userAttrs = new UserAttrs()
                         userAttrs.userId = it.toLowerCase()

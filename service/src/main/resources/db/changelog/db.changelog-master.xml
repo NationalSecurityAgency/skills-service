@@ -2585,4 +2585,76 @@
                                  referencedTableName="user_attrs"/>
     </changeSet>
 
+    <changeSet id="44" author="skills team">
+        <createTable tableName="user_actions_history">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="action" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_ref_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="quiz_id" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="action_attributes" type="jsonb">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_user_actions_history_action"
+                     tableName="user_actions_history" unique="false">
+            <column name="action" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_actions_history_item"
+                     tableName="user_actions_history" unique="false">
+            <column name="item" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_actions_history_item_id"
+                     tableName="user_actions_history" unique="false">
+            <column name="item_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_actions_history_item_ref_id"
+                     tableName="user_actions_history" unique="false">
+            <column name="item_ref_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_user_actions_history_user_id"
+                     tableName="user_actions_history" unique="false">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_actions_history"
+                                 constraintName="fk_user_actions_history_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createIndex indexName="index_user_actions_history_project_id"
+                     tableName="user_actions_history" unique="false">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_actions_history_quiz_id"
+                     tableName="user_actions_history" unique="false">
+            <column name="quiz_id" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

@@ -21,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Setting
 import skills.storage.model.Setting.SettingType
 import skills.storage.model.auth.User
@@ -40,6 +44,9 @@ class SettingsDataAccessor {
 
     @Autowired
     UserRepo userRepo
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     Setting getGlobalSetting(String setting, String settingGroup){
         settingRepo.findByTypeAndUserRefIdAndProjectIdIgnoreCaseAndSettingGroupAndSetting(Setting.SettingType.Global, null, null, settingGroup, setting)
@@ -122,8 +129,18 @@ class SettingsDataAccessor {
         settingRepo.saveAll(settings)
     }
 
-    void deleteProjectSetting(String project, String setting) {
-        settingRepo.deleteProjectSetting(project, setting)
+    void deleteProjectSetting(String projectId, String setting) {
+        SettingType type = Setting.SettingType.Project
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Settings,
+                itemId: type,
+                projectId: projectId,
+                actionAttributes: [
+                        setting: setting
+                ]
+        ))
+        settingRepo.deleteProjectSetting(projectId, setting)
     }
 
     void deleteUserProjectSetting(String setting, Integer userRefId) {

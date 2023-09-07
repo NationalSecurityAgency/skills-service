@@ -19,8 +19,12 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import skills.SpringBootApp
 import skills.auth.UserAuthService
+import skills.auth.UserInfo
 import skills.controller.request.model.BadgeRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.SkillRequest
@@ -91,6 +95,13 @@ class UpgradeInProgressIT extends DefaultIntSpec {
         SkillsFactory.createSkill(8, 8, 8)
         SkillsFactory.createBadge(8, 8)
 
+        SecurityContext securityContext = Mock()
+        Authentication authentication = Mock()
+        UserInfo userInfo = Mock()
+        userInfo.getUsername() >> skillsService.userName.toLowerCase()
+        authentication.getPrincipal() >> userInfo
+        securityContext.getAuthentication() >> authentication
+        SecurityContextHolder.setContext(securityContext)
         projAdminService.saveProject('SampleProject', new ProjectRequest('SampleProject', 'Sample Project'), skillsService.userName)
         subjAdminService.saveSubject('SampleProject', 'Subject1Subject', new SubjectRequest('Subject1Subject', 'Subject 1 Subject', 'blah', 'icon', 'helpUrl'))
         skillsAdminService.saveSkill('Skill1Skill', new SkillRequest('Skill1Skill', 'Subject1Subject', 'SampleProject', 'Skill1 Skill', 100, 60*8, 1, 1))

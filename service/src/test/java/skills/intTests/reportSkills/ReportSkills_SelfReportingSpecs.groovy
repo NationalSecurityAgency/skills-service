@@ -76,8 +76,8 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase("user0")
 
         then:
         greenMail.getReceivedMessages().length == 1
@@ -153,8 +153,8 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase("user0")
 
         then:
         greenMail.getReceivedMessages().length == 1
@@ -210,9 +210,9 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherAdminUser)
-        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserId(projectUser)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(otherAdminUser)
+        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(projectUser)
 
         Date date = new Date() - 60
         when:
@@ -252,9 +252,9 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserId(otherAdminUser)
-        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserId(projectUser)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(otherAdminUser)
+        UserAttrs projectUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(projectUser)
 
         Date date = new Date() - 60
         when:
@@ -287,8 +287,8 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
         when:
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "user0", date, "Please approve this!")
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId("user0")
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase("user0")
 
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() > 0 }
@@ -422,8 +422,8 @@ SkillTree Bot'''
 
         Date date = new Date() - 60
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
         when:
         def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
@@ -539,9 +539,9 @@ Always yours, <br/> -SkillTree Bot
 
         Date date = new Date() - 60
 
-        UserAttrs approverUserAttrs = userAttrsRepo.findByUserId(approver)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
-        UserAttrs skillsServiceUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
+        UserAttrs approverUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(approver)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
+        UserAttrs skillsServiceUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
 
         SkillsService approveService = createService(new SkillsService.UseParams(username: approverUserAttrs.userId, email:  approverUserAttrs.email))
         skillsService.addUserRole(approveService.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
@@ -660,8 +660,8 @@ Always yours, <br/> -SkillTree Bot
         int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
         String expectedPlainText = '''
 Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.
@@ -801,8 +801,8 @@ Always yours, <br/> -SkillTree Bot
         int deniedEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, deniedEmailIdx)
 
-        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserId(skillsService.userName)
-        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserId(user)
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
         String expectedPlainText = '''
 Your request for the Test Skill 1 skill in the Test Project#1 project has been denied.

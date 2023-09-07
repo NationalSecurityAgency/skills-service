@@ -39,6 +39,10 @@ import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
@@ -117,6 +121,9 @@ class QuizDefService {
     @Autowired
     AttachmentService attachmentService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
         UserInfo userInfo = userInfoService.currentUser
@@ -177,6 +184,7 @@ class QuizDefService {
         if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
             serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
         }
+        final boolean isEdit = quizDefWithDescription
         if (quizDefWithDescription) {
             QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
             QuizValidator.isTrue(quizDefWithDescription.type == incomingType, "Existing quiz type cannot be changed", quizDefWithDescription.quizId)
@@ -208,6 +216,14 @@ class QuizDefService {
 
             accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Quiz,
+                actionAttributes: quizDefWithDescription,
+                itemId: quizDefWithDescription.quizId,
+                itemRefId: quizDefWithDescription.id,
+                quizId: quizDefWithDescription.quizId,
+        ))
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
@@ -227,6 +243,17 @@ class QuizDefService {
 
         updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.MinNumQuestionsToPass.setting)
         updateQuizSetting(quizDef.id, quizDef.quizId, QuizSettings.QuizLength.setting)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Question,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+                actionAttributes: [
+                        question: quizQuestionDef.question?.toString(),
+                        questionType: quizQuestionDef.type?.toString()
+                ],
+        ))
 
         quizAnswerRepo.delete(quizQuestionDef)
     }
@@ -263,6 +290,22 @@ class QuizDefService {
             savedQuestion = createQuizQuestionDef(quizDef, questionDefRequest)
             savedAnswers = createQuizQuestionAnswerDefs(questionDefRequest, savedQuestion)
         }
+
+        Map actionAttributes = [
+                question: savedQuestion.question,
+                questionType: savedQuestion.type,
+        ]
+        savedAnswers.sort (false, {it.displayOrder}).eachWithIndex { QuizAnswerDef q, Integer index ->
+            actionAttributes["Answer${index+1}:text"] = q.answer
+            actionAttributes["Answer${index+1}:isCorrectAnswer"] = q.isCorrectAnswer
+        }
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
+                item: DashboardItem.Question,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+                actionAttributes: actionAttributes
+        ))
 
         return convert(savedQuestion, savedAnswers)
     }
@@ -500,6 +543,15 @@ class QuizDefService {
             throw new SkillQuizException("Provided attempt id [${attemptId}] does not belong to quiz [${quizId}]", quizId, ErrorCode.BadParam)
         }
 
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete, item: DashboardItem.QuizAttempt,
+                itemId: quizDef1.quizId, quizId: quizDef1.quizId,
+                actionAttributes: [
+                        attemptStarted: userQuizAttempt.started,
+                        attemptCompleted: userQuizAttempt.completed,
+                        status: userQuizAttempt.status,
+                ]
+        ))
         userQuizAttemptRepo.delete(userQuizAttempt)
         log.info("Removed [{}]", userQuizAttempt.toString())
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
@@ -614,7 +666,7 @@ class QuizDefService {
         if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
         }
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(userQuizAttempt.userId)
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
@@ -788,6 +840,12 @@ class QuizDefService {
         }
         int numRemoved = quizDefRepo.deleteByQuizIdIgnoreCase(quizDef.quizId)
         log.debug("Deleted project with id [{}]. Removed [{}] record", quizId, numRemoved)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.Quiz,
+                itemId: quizDef.quizId,
+                quizId: quizDef.quizId,
+        ))
     }
 
     @Transactional()

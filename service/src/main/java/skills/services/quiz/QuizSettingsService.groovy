@@ -31,6 +31,10 @@ import skills.controller.result.model.QuizSettingsRes
 import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
 import skills.services.settings.Settings
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.QuizSetting
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
@@ -53,6 +57,9 @@ class QuizSettingsService {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
+
     @Transactional
     void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests) {
         Integer quizRefId = getQuizDefRefId(quizId)
@@ -66,6 +73,15 @@ class QuizSettingsService {
             } else {
                 quizSettingsRepo.save(new QuizSetting(setting: it.setting, value: it.value, quizRefId: quizRefId))
             }
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Create, item: DashboardItem.Settings,
+                    itemId: quizId, quizId: quizId,
+                    actionAttributes: [
+                            setting: it.setting,
+                            value: it.value,
+                    ]
+            ))
         }
     }
 

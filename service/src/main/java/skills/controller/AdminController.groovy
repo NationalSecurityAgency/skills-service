@@ -1215,7 +1215,7 @@ class AdminController {
 
         List<ProjectSettingsRequest> toSave = values.findAll { !StringUtils.isBlank(it.value)}
         if (toSave) {
-            settingsService.saveSettings(toSave)
+            settingsService.saveSettings(toSave, null, true)
         }
 
         return new RequestResult(success: true)

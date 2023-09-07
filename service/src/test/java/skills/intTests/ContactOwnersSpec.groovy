@@ -24,7 +24,6 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
-import spock.lang.IgnoreRest
 
 class ContactOwnersSpec extends DefaultIntSpec {
 
@@ -76,7 +75,7 @@ class ContactOwnersSpec extends DefaultIntSpec {
 
         when:
         userService.contactProjectOwner(proj1.projectId, "a message")
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(users[3])
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(users[3])
         def displayName = userAttrs.getUserIdForDisplay()
 
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
@@ -184,7 +183,7 @@ class ContactOwnersSpec extends DefaultIntSpec {
 
         when:
         userService.contactProjectOwner(proj1.projectId, "a message\n\nthat has\n\nmultiple\n\nnewlines")
-        UserAttrs userAttrs = userAttrsRepo.findByUserId(users[3])
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(users[3])
         def displayName = userAttrs.getUserIdForDisplay()
 
         WaitFor.wait { greenMail.getReceivedMessages().length > 0 }

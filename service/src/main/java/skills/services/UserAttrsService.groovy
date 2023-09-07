@@ -223,7 +223,7 @@ class UserAttrsService {
     @Profile
     private UserAttrs loadUserAttrsFromLocalDb(String userId) {
         assert userId
-        return userAttrsRepo.findByUserId(userId?.toLowerCase())
+        return userAttrsRepo.findByUserIdIgnoreCase(userId?.toLowerCase())
     }
 
 }

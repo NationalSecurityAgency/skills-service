@@ -52,7 +52,7 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
 
         // little trick to force PKI-based runs to create UserAttrs record
         skillsService.isRoot()
-        email = userAttrsRepo.findByUserId(skillsService.userName).email
+        email = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName).email
         assert email
     }
 
