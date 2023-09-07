@@ -41,4 +41,5 @@ describe('Accessibility for Root Role Page Tests', () => {
         cy.injectAxe();
         cy.customA11y();
     });
+
 });
