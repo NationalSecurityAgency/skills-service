@@ -334,6 +334,7 @@ limitations under the License.
         <template #row-details="row">
             <child-row-skill-group-display v-if="row.item.isGroupType" :group="row.item"
                                            :add-skill-disabled="addSkillDisabled"
+                                           :subject-name="subjectName"
                                            @skills-reused="handleSkillsAreReusedOrMoved"
                                            @group-changed="groupChanged(row, arguments[0])"/>
             <ChildRowSkillsDisplay v-if="row.item.isSkillType" :project-id="projectId" :subject-id="subjectId" v-skills-onMount="'ExpandSkillDetailsSkillsPage'"

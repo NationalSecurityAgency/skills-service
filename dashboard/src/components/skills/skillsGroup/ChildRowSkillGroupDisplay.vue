@@ -79,6 +79,7 @@ limitations under the License.
                         :skills-prop="skills" :is-top-level="true"
                         :project-id="this.$route.params.projectId"
                         :subject-id="this.$route.params.subjectId"
+                        :subject-name="subjectName"
                         @skill-removed="skillRemoved"
                         @skills-change="skillChanged"
                         @skills-reused="skillReused"
@@ -136,6 +137,7 @@ limitations under the License.
     },
     props: {
       group: Object,
+      subjectName: String,
     },
     data() {
       return {
