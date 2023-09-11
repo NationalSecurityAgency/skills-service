@@ -172,6 +172,7 @@ skills:
       maxVideoTranscriptLength: 20000
       motivationalSkillWarningGracePeriod: .3
       videoUploadWarningMessage:
+      videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

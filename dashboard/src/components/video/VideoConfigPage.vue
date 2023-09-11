@@ -16,7 +16,15 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Configure Video"/>
-    <b-overlay :show="loading.video || loadingSkill || isLoadingProjConfig">
+    <b-overlay :show="loading.video || loadingSkill || isLoadingProjConfig" no-center>
+      <template v-if="videoConf.file" #overlay>
+        <div class="text-center pt-5">
+          <div class="h4 mb-3"><i class="fas fa-video text-success" aria-hidden="true"/> Uploading Video</div>
+          <div class="w-75 mx-auto">
+            <lengthy-operation-progress-bar height="8px" :animated="true" :timeout="lengthyOperationLoadingBarTimeout" />
+          </div>
+        </div>
+      </template>
     <b-card>
       <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
         <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Video attributes of <span
@@ -222,12 +230,13 @@ limitations under the License.
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import NavigationErrorMixin from '@/components/utils/NavigationErrorMixin';
   import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
+  import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
 
   const skills = createNamespacedHelpers('skills');
 
   export default {
     name: 'VideoConfigPage',
-    components: { VideoPlayer, SubPageHeader },
+    components: { LengthyOperationProgressBar, VideoPlayer, SubPageHeader },
     mixins: [MsgBoxMixin, ProjConfigMixin, NavigationErrorMixin, CommunityLabelsMixin],
     data() {
       return {
@@ -276,6 +285,17 @@ limitations under the License.
           videoType: this.videoConf.videoType,
           captionsUrl,
         };
+      },
+      lengthyOperationLoadingBarTimeout() {
+        const { file } = this.videoConf;
+        if (!file || !file.size) {
+          return 500;
+        }
+        const timeoutRatio = this.$store.getters.config?.videoUploadLoadingBarLengthyCalculationTimeoutRatio || 75001;
+        let timeout = Math.trunc(file.size / timeoutRatio);
+        timeout = Math.min(1000, timeout);
+        timeout = Math.max(100, timeout);
+        return timeout;
       },
       hasVideoUrl() {
         return this.videoConf.url && this.videoConf.url.trim().length > 0;
