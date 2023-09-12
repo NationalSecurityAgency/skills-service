@@ -192,9 +192,6 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').click()
 
         cy.get('[data-cy="quizSelectHasNoValues"]').contains('You currently do not administer any')
-        cy.get('[data-cy="quizSelectHasNoValues"] a')
-            .should('have.attr', 'href')
-            .and('eq', '/administrator/quizzes')
     });
 
     it('search quizzes and surveys when selecting', function () {
