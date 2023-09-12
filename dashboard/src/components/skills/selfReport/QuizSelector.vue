@@ -40,7 +40,7 @@ limitations under the License.
         <div class="text-left pl-3 pb-2" data-cy="quizSelectHasNoValues">
           <div v-if="noQuizzes">
             <div>You currently do not administer any quizzes or surveys.</div>
-            <div>Please navigate to the <router-link target="_blank" :to="{ name: 'QuizzesAndSurveys' }" class="skills-underline-container">Quizzes and Surveys <i class="fas fa-external-link-alt text-secondary" aria-hidden="true"></i></router-link> page to start creating.</div>
+            <div>Please navigate to the Quizzes and Surveys page to start creating.</div>
           </div>
           <div v-else>
             No results. Please refine your search string.
