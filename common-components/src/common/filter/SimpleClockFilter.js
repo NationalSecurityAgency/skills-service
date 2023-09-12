@@ -24,7 +24,7 @@ const simpleClockFilter = (valueInMs) => {
         return 'N/A';
     }
     if (valueInMs < second) {
-        return `00:00:00.${valueInMs}`;
+        return '00:00:00';
     }
     if (valueInMs < minute) {
         const seconds = Math.trunc(valueInMs / second);
