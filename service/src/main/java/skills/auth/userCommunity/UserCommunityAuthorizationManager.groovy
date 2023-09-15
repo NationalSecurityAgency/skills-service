@@ -63,6 +63,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private RequestMatcher attachmentsRequestMatcher
 
     @Autowired
+    @Lazy
     UserCommunityService userCommunityService
 
     @Autowired

@@ -51,7 +51,7 @@ limitations under the License.
                         aria-label="Switch to Video Upload input option"
                         @click="switchToFileUploadOption" data-cy="showFileUploadBtn"><i class="fas fa-arrow-circle-up" aria-hidden="true" /> Switch to Upload</b-button>
               <b-button v-if="showFileUpload" variant="outline-info" size="sm"
-                        aria-label="Clear uploaded video"
+                        aria-label="Switch to External Link input option"
                         @click="switchToExternalUrlOption" data-cy="showExternalUrlBtn"><i class="fas fa-globe"></i> Switch to External Link</b-button>
             </div>
           </div>
