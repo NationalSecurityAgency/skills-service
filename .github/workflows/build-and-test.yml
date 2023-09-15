@@ -318,7 +318,7 @@ jobs:
 
       - name: Run skills-service tests
         env:
-          MAVEN_OPTS: -Xmx3G
+          MAVEN_OPTS: -Xmx3G -XX:GCLockerRetryAllocationCount=100
         run: |
           cd service
           ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"

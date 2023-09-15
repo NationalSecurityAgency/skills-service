@@ -37,10 +37,9 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
-    String  displayName
-    def setup() {
+    private def getDisplayName() {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
-        displayName = userAttrs.getUserIdForDisplay()
+        return userAttrs.getUserIdForDisplay()
     }
     def "track project CRUD actions"() {
         SkillsService rootService = createRootSkillService()
@@ -59,6 +58,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
 
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -117,7 +117,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -177,7 +177,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -237,7 +237,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -303,7 +303,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -367,7 +367,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def res = rootService.getUserActionsForEverything()
         def reuseAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[1].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.StopInProjectReuse.toString()
@@ -408,7 +408,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         when:
         def res = rootService.getUserActionsForEverything()
         def moveAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 1
         res.data[0].action == DashboardAction.Move.toString()
@@ -446,7 +446,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         when:
         def res = rootService.getUserActionsForEverything()
         def importAction = rootService.getUserActionAttributes(res.data[2].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 4
         res.data[0].action == DashboardAction.RemoveFromCatalog.toString()
@@ -507,6 +507,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def res = rootService.getUserActionsForEverything()
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        String displayName = getDisplayName()
         then:
         res.count == 1
         res.data[0].action == DashboardAction.Delete.toString()
@@ -543,7 +544,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def addTag = rootService.getUserActionAttributes(res.data[1].id)
         def removeTag = rootService.getUserActionAttributes(res.data[0].id)
 
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -598,7 +599,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def create = rootService.getUserActionAttributes(res.data[2].id)
         def edit = rootService.getUserActionAttributes(res.data[1].id)
         def delete = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -670,7 +671,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def create = rootService.getUserActionAttributes(res.data[2].id)
         def edit = rootService.getUserActionAttributes(res.data[1].id)
         def delete = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -732,6 +733,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def res = rootService.getUserActionsForEverything()
         def create = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
         then:
         res.count == 1
         res.data[0].action == DashboardAction.Create.toString()
@@ -770,7 +772,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -844,7 +846,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.RemoveSkillAssignment.toString()
@@ -895,7 +897,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.RemoveSkillAssignment.toString()
@@ -945,6 +947,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
 
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1009,7 +1012,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1069,7 +1072,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1124,6 +1127,8 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         rootService.saveUserTag(users[3], userTagKey, ["EfGh"])
 
         userActionsHistoryRepo.deleteAll()
+
+        createService(users[2]).getProjects() // initialize UserAttrs records for user2 for pki
         when:
 
         // should be DN in case of pki
@@ -1147,7 +1152,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def confByTag = rootService.getUserActionAttributes(res.data[2].id)
         def confFallback = rootService.getUserActionAttributes(res.data[1].id)
         def deleteApproverConf = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 5
         res.data[0].action == DashboardAction.RemoveConfiguration.toString()
@@ -1233,7 +1238,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def deleteAllSkillEvents = rootService.getUserActionAttributes(res.data[0].id)
         def deleteSingleEvent = rootService.getUserActionAttributes(res.data[1].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1279,7 +1284,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1324,7 +1329,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1373,7 +1378,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def createAction2 = rootService.getUserActionAttributes(res.data[2].id)
         def createAction3 = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-
+        String displayName = getDisplayName()
         then:
         res.count == 4
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1439,6 +1444,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         def res = rootService.getUserActionsForEverything()
         def reportSkillEvent = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
         then:
         resReportForMe.body.pointsEarned == 100
         resReportForAnother.body.pointsEarned == 100
@@ -1481,6 +1487,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def res = rootService.getUserActionsForEverything()
         def deleteAll = rootService.getUserActionAttributes(res.data[0].id)
         def deleteOne = rootService.getUserActionAttributes(res.data[1].id)
+        String displayName = getDisplayName()
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -1514,7 +1521,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         skillsService.createProject(proj)
 
         userActionsHistoryRepo.deleteAll()
-
+        String displayName = getDisplayName()
         when:
         skillsService.resetClientSecret(proj.projectId)
         def res = rootService.getUserActionsForEverything()
@@ -1549,6 +1556,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def remind = rootService.getUserActionAttributes(res.data[1].id)
         def extend = rootService.getUserActionAttributes(res.data[2].id)
         def invite = rootService.getUserActionAttributes(res.data[3].id)
+        String displayName = getDisplayName()
         then:
         res.count == 4
         res.data[0].action == DashboardAction.Delete.toString()
