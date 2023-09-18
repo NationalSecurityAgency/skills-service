@@ -206,7 +206,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
-        cy.get('[data-cy="dailyDays-sb"]').contains('90')
+        cy.get('[data-cy="dailyDays-sb"]').should('have.value', 90)
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -266,6 +266,54 @@ describe('Configure Skill Expiration Tests', () => {
             expect(xhr.request.method).to.eq('DELETE')
             expect(xhr.response.statusCode).to.eq(200)
         })
+    });
+
+    it('DAILY validation', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
+        cy.get('[data-cy="dailyDays-sb"]').should('have.value', 90)
+
+        cy.get('[data-cy="dailyDays-sb"]').clear()
+
+        cy.get('[data-cy=dailyDaysError]')
+          .contains('Expiration Days is required')
+          .should('be.visible');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="dailyDays-sb"]').clear().type('a')
+
+        cy.get('[data-cy=dailyDaysError]')
+          .contains('Expiration Days may only contain numeric characters')
+          .should('be.visible');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="dailyDays-sb"]').clear().type('0')
+        cy.get('[data-cy=dailyDaysError]')
+          .contains('Expiration Days must be 1 or greater')
+          .should('be.visible');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="dailyDays-sb"]').clear().type('1000')
+        cy.get('[data-cy=dailyDaysError]')
+          .contains('Expiration Days must be 999 or less')
+          .should('be.visible');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="dailyDays-sb"]').clear().type('30')
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
     });
 
 });
