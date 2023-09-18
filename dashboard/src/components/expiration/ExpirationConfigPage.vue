@@ -17,12 +17,13 @@ limitations under the License.
   <div>
     <sub-page-header title="Configure Expiration"/>
     <b-overlay :show="loading || loadingSkill">
-      <b-card>
+      <b-card v-if="!loading && !loadingSkill">
         <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
           <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Expiration attributes of <span
           v-if="isImported"><b-badge variant="success"><i class="fas fa-book" aria-hidden="true"/> Imported</b-badge></span><span v-if="isReused"><b-badge variant="success"><i class="fas fa-recycle" aria-hidden="true"/> Reused</b-badge></span>
           skills are read-only.
         </div>
+        <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
         <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0" :disabled="isReadOnly">
           <b-form-radio-group
             id="expiration-type"
@@ -150,32 +151,39 @@ limitations under the License.
                 </div>
               </div>
               <div class="row ml-5">
-                <b-form-group :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">
+                <b-form inline :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">
                   <div class="input-group">
                     <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">
                       <span for="dailyDays-sb">Achievement will expire after</span>
-                      <b-form-spinbutton :disabled="expirationType !== 'DAILY'"
-                                         class="m-1"
-                                         id="dailyDays-sb"
-                                         data-cy="dailyDays-sb"
-                                         :aria-label="`Skills will expire every ${dailyDays} days after user earns achievement`"
-                                         v-model="dailyDays"
-                                         min="1"
-                                         max="999"
-                                         inline>
-                      </b-form-spinbutton>
-                      <span>day{{dailyDays > 1 ? 's' : ''}} of inactivity</span>
+                      <ValidationProvider :rules="{ 'optionalNumeric':true, 'required':expirationType === 'DAILY', 'min_value':1, 'max_value':999 }" :debounce="250" v-slot="{ errors }" name="Expiration Days">
+                        <input class="form-control m-1" type="text"
+                               style="max-width: 4rem;"
+                               v-model="dailyDays"
+                               data-cy="dailyDays-sb" aria-required="true"
+                               v-on:keydown.enter="handleSubmit(saveSettings)"
+                               id="dailyDays-sb"
+                               aria-describedby="dailyDaysError"
+                               aria-errormessage="dailyDaysError"
+                               :disabled="expirationType !== 'DAILY'"
+                               :aria-label="`Skills will expire every ${dailyDays} days after user earns achievement`"
+                               :aria-invalid="errors && errors.length > 0"/>
+                        <span>day{{dailyDays > 1 ? 's' : ''}} of inactivity</span>
+                        <small role="alert" class="form-text text-danger" data-cy="dailyDaysError" id="dailyDaysError">{{ errors[0] }}</small>
+                      </ValidationProvider>
                     </div>
                   </div>
-                </b-form-group>
+                </b-form>
               </div>
             </template>
           </b-form-radio-group>
         </b-form-group>
         <hr/>
         <div class="row">
+          <div v-if="overallErrMsg" class="alert alert-danger">
+            {{ overallErrMsg }}
+          </div>
           <div class="col">
-            <b-button variant="outline-success" @click="saveSettings()" :disabled="!isDirty" data-cy="saveSettingsBtn">
+            <b-button variant="outline-success" @click="handleSubmit(saveSettings)" :disabled="!isDirty || invalid" data-cy="saveSettingsBtn">
               Save <i class="fas fa-arrow-circle-right"/>
             </b-button>
 
@@ -190,6 +198,7 @@ limitations under the License.
               </span>
           </div>
         </div>
+        </ValidationObserver>
       </b-card>
 
     </b-overlay>
@@ -228,6 +237,7 @@ limitations under the License.
         loading: true,
         showSavedMsg: false,
         loadedSettings: {},
+        overallErrMsg: null,
       };
     },
     mounted() {
