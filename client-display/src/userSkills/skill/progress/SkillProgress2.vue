@@ -322,7 +322,7 @@ limitations under the License.
             const now = dayjs();
             const daysSinceLastPerformed = now.diff(mostRecentlyPerformedOn, 'day');
             const gracePeriod = this.skillInternal.daysOfInactivityBeforeExp * this.motivationalSkillWarningGracePeriod;
-            return daysSinceLastPerformed > gracePeriod;
+            return gracePeriod < 1 || daysSinceLastPerformed > gracePeriod;
           }
           return true;
         }
