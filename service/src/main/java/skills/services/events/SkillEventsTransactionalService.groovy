@@ -44,6 +44,7 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.tasks.TaskSchedulerService
@@ -124,6 +125,9 @@ class SkillEventsTransactionalService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     @Transactional
     void notifyUserOfAchievements(String userId){
         try {
@@ -198,13 +202,14 @@ class SkillEventsTransactionalService {
             throw e;
         }
         if (approvalParams.forAnotherUser) {
+            String displayUserId = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: DashboardAction.Create,
                     item: DashboardItem.SkillEvents,
                     projectId: projectId,
                     itemId: skillId,
                     actionAttributes: [
-                            reportedForUser: userId,
+                            reportedForUser: displayUserId,
                             reportedSkillEventDate: incomingSkillDateParam
                     ],
             ))

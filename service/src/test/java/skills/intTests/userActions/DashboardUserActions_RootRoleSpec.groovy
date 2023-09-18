@@ -34,13 +34,14 @@ class DashboardUserActions_RootRoleSpec extends DefaultIntSpec {
 
     def "add/remove root user role"() {
         SkillsService otherUser = createService(getRandomUsers(1))
-        String otherUserDisplay = userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
+
         when:
         rootService.addRootRole(otherUser.userName)
         rootService.removeRootRole(otherUser.userName)
         def res = rootService.getUserActionsForEverything()
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
+        String otherUserDisplay = userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()
@@ -68,13 +69,14 @@ class DashboardUserActions_RootRoleSpec extends DefaultIntSpec {
 
     def "add/remove supervisor user role"() {
         SkillsService otherUser = createService(getRandomUsers(1))
-        String otherUserDisplay = userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
+
         when:
         rootService.grantSupervisorRole(otherUser.userName)
         rootService.removeSupervisorRole(otherUser.userName)
         def res = rootService.getUserActionsForEverything()
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
+        String otherUserDisplay = userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
         then:
         res.count == 2
         res.data[0].action == DashboardAction.Delete.toString()

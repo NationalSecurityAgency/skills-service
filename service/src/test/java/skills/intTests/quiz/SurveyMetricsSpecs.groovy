@@ -23,6 +23,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
+import spock.lang.IgnoreIf
 
 class SurveyMetricsSpecs extends DefaultIntSpec {
 
@@ -345,6 +346,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         String userTag
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get text answers"() {
         List<String> users = getRandomUsers(9, true)
         List<String> exclude = [[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME],users].flatten()

@@ -21,17 +21,20 @@ import skills.intTests.utils.SkillsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.storage.model.UserAttrs
+import spock.lang.IgnoreIf
 
 class DashboardUserActions_UserPreferencesSpec extends DefaultIntSpec {
 
-    String  displayName
     SkillsService rootService
     def setup() {
-        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
-        displayName = userAttrs.getUserIdForDisplay()
         rootService = createRootSkillService()
     }
+    private String getDisplayName() {
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        return userAttrs.getUserIdForDisplay()
+    }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "update user profile settings"() {
         def currentUser = skillsService.getCurrentUser()
         currentUser.first = "newFirst"
