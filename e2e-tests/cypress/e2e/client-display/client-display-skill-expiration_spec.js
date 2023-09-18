@@ -45,6 +45,12 @@ describe('Client Display Expiration Tests', () => {
             pointIncrement: 50,
             pointIncrementInterval: 0
         });
+        cy.createSkill(1, 1, 3, {
+            selfReportingType: 'HonorSystem',
+            pointIncrement: 50,
+            pointIncrementInterval: 0,
+            numPerformToCompletion: 1,
+        });
     });
 
     it('expiration date shows when it should', () => {
@@ -149,9 +155,12 @@ describe('Client Display Expiration Tests', () => {
         const sixtyDaysAgo = moment.utc().subtract(60, 'day')
 
         cy.configureExpiration(1, 0, 90, 'DAILY');
+        cy.configureExpiration(3, 0, 1, 'DAILY');
 
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: sixtyDaysAgo.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: sixtyDaysAgo.add(1, 'day').format('YYYY-MM-DD HH:mm') })
+
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: moment.utc().format('YYYY-MM-DD HH:mm') })
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -208,6 +217,12 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get(`[data-cy="expirationDate"]`).should('not.exist');
 
+        cy.get('[data-cy="nextSkill"]').click();
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
+        cy.get(`[data-cy="expirationDate"]`).should('exist');
+        cy.get(`[data-cy="expirationDate"]`).contains('perform this skill to keep your points!')
+
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
@@ -215,6 +230,8 @@ describe('Client Display Expiration Tests', () => {
           .should('not.exist');
         cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
           .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`)
+          .should('exist');
     });
 
     it('post achievement expiration warning message will show if the most recently reported skill was NOT within the grace period', () => {
