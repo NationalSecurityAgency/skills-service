@@ -16,10 +16,6 @@
 
 describe('Dashboard User Actions Tests', () => {
 
-    beforeEach(() => {
-
-    });
-
     it('Display user activity history on multiple pages', () => {
         cy.createProject(1)
         cy.createProject(2)

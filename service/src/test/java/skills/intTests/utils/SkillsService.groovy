@@ -1553,8 +1553,48 @@ class SkillsService {
                 + "&quizFilter=${quizFilter}&itemIdFilter=${itemIdFilter}&actionFilter=${actionFilter ?: ''}".toString())
     }
 
+    def getUserActionsForProject(String projectId, int limit = 10, int page = 1, String orderBy = "created", Boolean ascending = false,
+                                    DashboardItem itemFilter = null,
+                                    String userFilter = '',
+                                    String itemIdFilter = '',
+                                    DashboardAction actionFilter = null) {
+        return wsHelper.adminGet("/projects/${projectId}/dashboardActions?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}"
+                + "&itemFilter=${itemFilter ?: ''}&userFilter=${userFilter}"
+                + "&itemIdFilter=${itemIdFilter}&actionFilter=${actionFilter ?: ''}".toString())
+    }
+
+    def getUserActionsForQuiz(String quizId, int limit = 10, int page = 1, String orderBy = "created", Boolean ascending = false,
+                              DashboardItem itemFilter = null,
+                              String userFilter = '',
+                              String itemIdFilter = '',
+                              DashboardAction actionFilter = null) {
+        return wsHelper.adminGet("/quiz-definitions/${quizId}/dashboardActions?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}"
+                + "&itemFilter=${itemFilter ?: ''}&userFilter=${userFilter}"
+                + "&itemIdFilter=${itemIdFilter}&actionFilter=${actionFilter ?: ''}".toString())
+    }
+
     def getUserActionAttributes(Long actionId) {
         return wsHelper.rootGet("/dashboardActions/${actionId}/attributes".toString())
+    }
+
+    def getQuizUserActionAttributes(String quizId, Long actionId) {
+        return wsHelper.adminGet("/quiz-definitions/${quizId}/dashboardActions/${actionId}/attributes".toString())
+    }
+
+    def getProjectUserActionAttributes(String projectId, Long actionId) {
+        return wsHelper.adminGet("/projects/${projectId}/dashboardActions/${actionId}/attributes".toString())
+    }
+
+    def getUserActionFilterOptions() {
+        return wsHelper.rootGet("/dashboardActions/filterOptions".toString())
+    }
+
+    def getUserActionFilterOptionsForQuiz(String quizId) {
+        return wsHelper.adminGet("/quiz-definitions/${quizId}/dashboardActions/filterOptions".toString())
+    }
+
+    def getUserActionFilterOptionsForProject(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/dashboardActions/filterOptions".toString())
     }
 
     def unsubscribeFromSelfApprovalRequestEmails(String projectId) {

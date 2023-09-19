@@ -16,18 +16,36 @@
 import axios from 'axios';
 
 export default {
-  getDashboardActionsForEverything(params) {
-    const url = '/root/dashboardActions';
+  getDashboardActionsForEverything(projectId, quizId, params) {
+    let url = '/root/dashboardActions';
+    if (projectId) {
+      url = `/admin/projects/${projectId}/dashboardActions`;
+    }
+    if (quizId) {
+      url = `/admin/quiz-definitions/${quizId}/dashboardActions`;
+    }
     return axios.get(url, { params })
       .then((response) => response.data);
   },
-  getDashboardActionsFilterOptions() {
-    const url = '/root/dashboardActions/filterOptions';
+  getDashboardActionsFilterOptions(projectId = null, quizId = null) {
+    let url = '/root/dashboardActions/filterOptions';
+    if (projectId) {
+      url = `/admin/projects/${projectId}/dashboardActions/filterOptions`;
+    }
+    if (quizId) {
+      url = `/admin/quiz-definitions/${quizId}/dashboardActions/filterOptions`;
+    }
     return axios.get(url)
       .then((response) => response.data);
   },
-  getDashboardSingleAction(actionId) {
-    const url = `/root/dashboardActions/${actionId}/attributes`;
+  getDashboardSingleAction(actionId, projectId = null, quizId = null) {
+    let url = `/root/dashboardActions/${actionId}/attributes`;
+    if (projectId) {
+      url = `/admin/projects/${projectId}/dashboardActions/${actionId}/attributes`;
+    }
+    if (quizId) {
+      url = `/admin/quiz-definitions/${quizId}/dashboardActions/${actionId}/attributes`;
+    }
     return axios.get(url)
       .then((response) => response.data);
   },

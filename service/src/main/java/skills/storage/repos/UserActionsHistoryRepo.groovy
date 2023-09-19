@@ -69,4 +69,21 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                                         @Nullable @Param("actionFilter") DashboardAction actionFilter,
                                         Pageable pageable)
 
+    @Nullable
+    @Query('''select distinct action.action
+                from UserActionsHistory action
+                where (:projectId is null OR lower(action.projectId) = lower(:projectId))
+                    and (:quizId is null OR lower(action.quizId) = lower(:quizId))
+    ''')
+    List<DashboardAction> findDistinctDashboardActions(@Nullable @Param("projectId") String projectId,
+                                                        @Nullable @Param("quizId") String quizId)
+
+    @Nullable
+    @Query('''select distinct action.item
+                from UserActionsHistory action
+                where (:projectId is null OR lower(action.projectId) = lower(:projectId))
+                    and (:quizId is null OR lower(action.quizId) = lower(:quizId))
+    ''')
+    List<DashboardItem> findDistinctDashboardItems(@Nullable @Param("projectId") String projectId,
+                                                       @Nullable @Param("quizId") String quizId)
 }

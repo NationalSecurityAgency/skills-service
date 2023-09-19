@@ -385,16 +385,11 @@ class RootController {
                 actionFilter ? DashboardAction.valueOf(actionFilter) : null)
     }
 
-    private final static DashboardUserActionsFilterOptions dashboardUserActionsFilterOptions =
-            new DashboardUserActionsFilterOptions(
-                    actionFilterOptions: DashboardAction.values().collect( { it.toString() }),
-                    itemFilterOptions: DashboardItem.values().collect( { it.toString() })
-            );
     @RequestMapping(value = "/dashboardActions/filterOptions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @CompileStatic
     DashboardUserActionsFilterOptions getActionFilterOptions() {
-        return dashboardUserActionsFilterOptions
+        return userActionsHistoryService.getUserActionsFilterOptions()
     }
 
     @RequestMapping(value = "/dashboardActions/{actionId}/attributes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

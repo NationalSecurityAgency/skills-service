@@ -50,6 +50,9 @@ import skills.services.settings.ProjectSettingsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
@@ -169,6 +172,9 @@ class AdminController {
 
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -1660,5 +1666,40 @@ class AdminController {
         return success
     }
 
+    @RequestMapping(value = "/projects/{projectId}/dashboardActions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    TableResult getDashboardActions(@PathVariable("projectId") String projectId,
+                                    @RequestParam int limit,
+                                    @RequestParam int page,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending,
+                                    @RequestParam(required=false) String itemFilter,
+                                    @RequestParam(required=false) String userFilter,
+                                    @RequestParam(required=false) String itemIdFilter,
+                                    @RequestParam(required=false) String actionFilter) {
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return userActionsHistoryService.getUsersActions(pageRequest,
+                projectId,
+                itemFilter? DashboardItem.valueOf(itemFilter) : null,
+                userFilter ? URLDecoder.decode(userFilter, StandardCharsets.UTF_8) : null,
+                null,
+                itemIdFilter ? URLDecoder.decode(itemIdFilter, StandardCharsets.UTF_8) : null,
+                actionFilter ? DashboardAction.valueOf(actionFilter) : null)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/dashboardActions/filterOptions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    DashboardUserActionsFilterOptions getActionFilterOptions(@PathVariable("projectId") String projectId) {
+        return userActionsHistoryService.getUserActionsFilterOptions(projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/dashboardActions/{actionId}/attributes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    Map getDashboardActionAttributes(@PathVariable("projectId") String projectId, @PathVariable("actionId") Long actionId) {
+        return userActionsHistoryService.getActionAttributes(actionId, projectId)
+    }
 }
 
