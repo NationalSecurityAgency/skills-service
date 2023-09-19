@@ -47,6 +47,7 @@ import skills.tasks.executors.RemoveSkillEventsForAUserExecutor
 import skills.tasks.executors.UnachievableLevelIdentificationTaskExecutor
 
 import java.time.Duration
+import java.time.Instant
 
 @Slf4j
 @Configuration
@@ -67,7 +68,7 @@ class TaskConfig {
     @Value('#{"${skills.config.unachievableLevelIdentificationSchedule:DAILY|23:45}"}')
     String unachievableLevelIdentificationSchedule
 
-    @Value('#{"${skills.config.expireUserAchievementsSchedule:DAILY|23:15}"}')
+    @Value('#{"${skills.config.expireUserAchievementsSchedule:DAILY|01:00}"}')
     String expireUserAchievementsSchedule
 
     @Bean
@@ -169,4 +170,12 @@ class TaskConfig {
         return Tasks.recurring("expire-user-achievements", Schedules.parseSchedule(expireUserAchievementsSchedule)).execute(expireUserAchievementsTaskExecutor)
     }
 
+    Instant getExpireUserAchievementsTaskExecutionTime(Instant expirationTime) {
+        Instant now = Instant.now()
+        if (expirationTime.isBefore(now)) {
+            // the calculated expiration time is in the past, so get the next task execution time
+            Schedules.parseSchedule(expireUserAchievementsSchedule).getNextExecutionTime(ExecutionComplete.simulatedSuccess(now))
+        }
+        return Schedules.parseSchedule(expireUserAchievementsSchedule).getNextExecutionTime(ExecutionComplete.simulatedSuccess(expirationTime))
+    }
 }
