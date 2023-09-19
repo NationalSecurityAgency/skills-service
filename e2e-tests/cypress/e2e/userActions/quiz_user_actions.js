@@ -75,7 +75,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="activityHistoryStartRecordingWarning"]').contains(`Started recording user activity on ${tomorrow.format('ll')}`);
     });
 
-    it.only('do not show recording activity warning if quiz ws created after start date', () => {
+    it('do not show recording activity warning if quiz ws created after start date', () => {
         const tomorrow = dayjs().subtract(1, 'day');
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
