@@ -28,8 +28,12 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.DashboardUserActionRes
+import skills.controller.result.model.DashboardUserActionsFilterOptions
 import skills.controller.result.model.TableResult
 import skills.services.inception.InceptionProjectService
 import skills.storage.model.UserActionsHistory
@@ -114,12 +118,22 @@ class UserActionsHistoryService {
         )
     }
 
-    Map getActionAttributes(Long id) {
+    Map getActionAttributes(Long id, String assertThisProjectId = null, String assertThisQuizId = null) {
         Optional<UserActionsHistory> optional = userActionsHistoryRepo.findById(id)
         if (optional.empty) {
             throw new SkillException("Failed to locate UserActionsHistory by id [${id}]");
         }
         UserActionsHistory userActionsHistory = optional.get()
+
+        if (assertThisProjectId
+                && (!userActionsHistory.projectId || !userActionsHistory.projectId.equalsIgnoreCase(assertThisProjectId))) {
+           throw new SkillException("UserActionsHistory id [${id}] does not belong to project [${assertThisProjectId}]", assertThisProjectId, null, ErrorCode.AccessDenied);
+        }
+
+        if (assertThisQuizId
+                && (!userActionsHistory.quizId || !userActionsHistory.quizId.equalsIgnoreCase(assertThisQuizId))) {
+            throw new SkillQuizException("UserActionsHistory id [${id}] does not belong to quiz [${assertThisQuizId}]", assertThisQuizId, ErrorCode.AccessDenied);
+        }
 
         if (!userActionsHistory.actionAttributes) {
             return new HashMap<>()
@@ -127,5 +141,15 @@ class UserActionsHistoryService {
 
         Map result = mapper.readValue(userActionsHistory.actionAttributes, Map.class)
         return result
+    }
+
+    DashboardUserActionsFilterOptions getUserActionsFilterOptions(String projectId = null, String quizId = null) {
+        List<DashboardAction> dashboardActions = userActionsHistoryRepo.findDistinctDashboardActions(projectId, quizId)
+        List<DashboardItem> dashboardItems = userActionsHistoryRepo.findDistinctDashboardItems(projectId, quizId)
+
+        return new DashboardUserActionsFilterOptions(
+                actionFilterOptions: dashboardActions.collect { it.toString() },
+                itemFilterOptions: dashboardItems.collect { it.toString() }
+        )
     }
 }

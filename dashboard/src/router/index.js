@@ -598,6 +598,16 @@ const router = new Router({
           },
         },
       }, {
+        name: 'ProjectActivityHistory',
+        path: 'activityHistory',
+        component: UserActionsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Activity History',
+          },
+        },
+      }, {
         name: 'EmailUsers',
         path: 'contact-users',
         component: EmailUsers,
@@ -1020,6 +1030,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'Quiz Settings',
+          },
+        },
+      }, {
+        name: 'QuizActivityHistory',
+        path: 'activityHistory',
+        component: UserActionsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Activity History',
           },
         },
       }],

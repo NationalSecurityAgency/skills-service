@@ -98,7 +98,7 @@ limitations under the License.
     methods: {
       loadData() {
         this.loading = true;
-        UserActionsService.getDashboardSingleAction(this.actionId)
+        UserActionsService.getDashboardSingleAction(this.actionId, this.$route.params.projectId, this.$route.params.quizId)
           .then((res) => {
             const propsToShow = propsLookupByItem.get(this.item);
             let loadedObj = res;

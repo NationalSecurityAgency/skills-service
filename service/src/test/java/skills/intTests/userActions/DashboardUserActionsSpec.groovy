@@ -201,4 +201,24 @@ class DashboardUserActionsSpec extends DefaultIntSpec {
         res.count == 1
         res.totalCount == 1
     }
+
+    def "get available filters"() {
+        SkillsService rootService = createRootSkillService()
+
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        skillsService.updateProject(p1)
+        skillsService.deleteProject(p1.projectId)
+
+        when:
+        def options = rootService.getUserActionFilterOptions()
+        skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        def options1 = rootService.getUserActionFilterOptions()
+        then:
+        options.actionFilterOptions.sort() == [DashboardAction.Delete.toString(), DashboardAction.Create.toString(), DashboardAction.Edit.toString()].sort()
+        options.itemFilterOptions.sort() == [DashboardItem.Project.toString()].sort()
+
+        options1.actionFilterOptions.sort() == [DashboardAction.Delete.toString(), DashboardAction.Create.toString(), DashboardAction.Edit.toString()].sort()
+        options1.itemFilterOptions.sort() == [DashboardItem.Project.toString(), DashboardItem.Quiz.toString()].sort()
+    }
 }

@@ -15,12 +15,16 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Dashboard Activity History" />
+    <sub-page-header title="Admin Activity History">
+      <template slot="underTitle" v-if="!isAllEvents">
+        <start-recording-user-actions-date-warning />
+      </template>
+    </sub-page-header>
     <b-card body-class="p-0">
       <b-overlay :show="table.options.busy || this.options.loading">
         <div class="p-2 py-3">
         <div class="row px-3 pt-1">
-          <div class="col-md border-right">
+          <div class="border-right" :class="{ 'col-md-4': isAllEvents, 'col-md-6': !isAllEvents }">
             <b-form-group label="User:" label-for="user-filter" label-class="text-muted">
               <b-form-input id="user-filter" v-model="filters.user"
                             v-on:keydown.enter="loadData"
@@ -28,7 +32,7 @@ limitations under the License.
                             data-cy="userFilter"/>
             </b-form-group>
           </div>
-          <div class="col-md border-right">
+          <div :class="{ 'col-md-4 border-right': isAllEvents, 'col-md-6': !isAllEvents }">
             <b-form-group label="Action:" label-for="action-filter" label-class="text-muted">
               <b-form-select id="action-filter"
                              v-model="filters.action"
@@ -37,7 +41,7 @@ limitations under the License.
                              data-cy="actionFilter"/>
             </b-form-group>
           </div>
-          <div class="col-md">
+          <div :class="{ 'col-md-4': isAllEvents, 'col-md-6 border-right': !isAllEvents }">
             <b-form-group label="Item:" label-for="item-filter" label-class="text-muted">
               <b-form-select id="item-filter"
                              v-model="filters.item"
@@ -46,9 +50,7 @@ limitations under the License.
                              data-cy="itemFilter"/>
             </b-form-group>
           </div>
-        </div>
-        <div class="row px-3 pt-1">
-          <div class="col-md border-right">
+          <div :class="{ 'col-md-4 border-right': isAllEvents, 'col-md-6': !isAllEvents }">
             <b-form-group label="Item ID:" label-for="item-id-filter" label-class="text-muted">
               <b-form-input id="item-id-filter" v-model="filters.itemId"
                             v-on:keydown.enter="loadData"
@@ -56,7 +58,7 @@ limitations under the License.
                             data-cy="itemIdFilter"/>
             </b-form-group>
           </div>
-          <div class="col-md border-right">
+          <div class="col-md-4 border-right" v-if="isAllEvents">
             <b-form-group label="Project ID:" label-for="project-id-filter" label-class="text-muted">
               <b-form-input id="project-id-filter" v-model="filters.projectId"
                             v-on:keydown.enter="loadData"
@@ -64,7 +66,7 @@ limitations under the License.
                             data-cy="projectIdFilter"/>
             </b-form-group>
           </div>
-          <div class="col-md">
+          <div class="col-md-4"  v-if="isAllEvents">
             <b-form-group label="Quiz ID:" label-for="quiz-id-filter" label-class="text-muted">
               <b-form-input id="quiz-id-filter" v-model="filters.quizId"
                             v-on:keydown.enter="loadData"
@@ -175,11 +177,16 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import SingleUserAction from '@/components/userActions/SingleUserAction';
+  import StartRecordingUserActionsDateWarning from '@/components/userActions/StartRecordingUserActionsDateWarning';
 
   export default {
     name: 'UserActionsPage',
     components: {
-      SingleUserAction, DateCell, SkillsBTable, SubPageHeader,
+      StartRecordingUserActionsDateWarning,
+      SingleUserAction,
+      DateCell,
+      SkillsBTable,
+      SubPageHeader,
     },
     data() {
       return {
@@ -205,49 +212,7 @@ limitations under the License.
             sortBy: 'created',
             sortDesc: true,
             tableDescription: 'UserActions',
-            fields: [
-              {
-                key: 'controls',
-                label: '',
-                sortable: false,
-                thStyle: { width: '2rem' },
-              },
-              {
-                key: 'userIdForDisplay',
-                label: 'User',
-                sortable: true,
-              },
-              {
-                key: 'action',
-                label: 'Action',
-                sortable: true,
-              },
-              {
-                key: 'item',
-                label: 'Item',
-                sortable: true,
-              },
-              {
-                key: 'itemId',
-                label: 'Item ID',
-                sortable: true,
-              },
-              {
-                key: 'projectId',
-                label: 'Project ID',
-                sortable: true,
-              },
-              {
-                key: 'quizId',
-                label: 'Quiz ID',
-                sortable: true,
-              },
-              {
-                key: 'created',
-                label: 'Performed',
-                sortable: true,
-              },
-            ],
+            fields: [],
             pagination: {
               server: true,
               currentPage: 1,
@@ -258,9 +223,57 @@ limitations under the License.
           },
           items: [],
         },
+        isAllEvents: true,
       };
     },
     mounted() {
+      this.isAllEvents = !(this.$route.params.projectId || this.$route.params.quizId);
+      const fields = [
+        {
+          key: 'controls',
+          label: '',
+          sortable: false,
+          thStyle: { width: '2rem' },
+        },
+        {
+          key: 'userIdForDisplay',
+          label: 'User',
+          sortable: true,
+        },
+        {
+          key: 'action',
+          label: 'Action',
+          sortable: true,
+        },
+        {
+          key: 'item',
+          label: 'Item',
+          sortable: true,
+        },
+        {
+          key: 'itemId',
+          label: 'Item ID',
+          sortable: true,
+        }];
+      if (this.isAllEvents) {
+        fields.push({
+          key: 'projectId',
+          label: 'Project ID',
+          sortable: true,
+        });
+        fields.push({
+          key: 'quizId',
+          label: 'Quiz ID',
+          sortable: true,
+        });
+      }
+      fields.push({
+        key: 'created',
+        label: 'Performed',
+        sortable: true,
+      });
+      this.table.options.fields = fields;
+
       this.loadData();
       this.loadFilterOptions();
     },
@@ -273,10 +286,11 @@ limitations under the License.
         this.filters.projectId = '';
         this.filters.quizId = '';
         this.loadData();
+        this.loadFilterOptions();
       },
       loadFilterOptions() {
         this.options.loading = true;
-        UserActionsService.getDashboardActionsFilterOptions()
+        UserActionsService.getDashboardActionsFilterOptions(this.$route.params.projectId, this.$route.params.quizId)
           .then((res) => {
             this.options.actions = res.actionFilterOptions.map((val) => ({ text: this.formatLabel(val), value: val }));
             this.options.items = res.itemFilterOptions.map((val) => ({ text: this.formatLabel(val), value: val }));
@@ -298,7 +312,7 @@ limitations under the License.
           itemIdFilter: encodeURIComponent(this.filters.itemId.trim()),
           actionFilter: encodeURIComponent(this.filters.action.trim()),
         };
-        UserActionsService.getDashboardActionsForEverything(params)
+        UserActionsService.getDashboardActionsForEverything(this.$route.params.projectId, this.$route.params.quizId, params)
           .then((res) => {
             this.table.options.pagination.totalRows = res.totalCount;
             this.table.items = res.data;

@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -33,11 +34,16 @@ import skills.quizLoading.model.QuizReportAnswerReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.LabeledCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserQuizAttemptRepo
+
+import java.nio.charset.StandardCharsets
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -59,6 +65,9 @@ class QuizController {
 
     @Autowired
     QuizRoleService quizRoleService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -294,4 +303,39 @@ class QuizController {
         return res
     }
 
+    @RequestMapping(value = "/{quizId}/dashboardActions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    TableResult getDashboardActions(@PathVariable("quizId") String quizId,
+                                    @RequestParam int limit,
+                                    @RequestParam int page,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending,
+                                    @RequestParam(required=false) String itemFilter,
+                                    @RequestParam(required=false) String userFilter,
+                                    @RequestParam(required=false) String itemIdFilter,
+                                    @RequestParam(required=false) String actionFilter) {
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return userActionsHistoryService.getUsersActions(pageRequest,
+                null,
+                itemFilter? DashboardItem.valueOf(itemFilter) : null,
+                userFilter ? URLDecoder.decode(userFilter, StandardCharsets.UTF_8) : null,
+                quizId,
+                itemIdFilter ? URLDecoder.decode(itemIdFilter, StandardCharsets.UTF_8) : null,
+                actionFilter ? DashboardAction.valueOf(actionFilter) : null)
+    }
+
+    @RequestMapping(value = "/{quizId}/dashboardActions/filterOptions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    DashboardUserActionsFilterOptions getActionFilterOptions(@PathVariable("quizId") String quizId) {
+        return userActionsHistoryService.getUserActionsFilterOptions(null, quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/dashboardActions/{actionId}/attributes", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @CompileStatic
+    Map getDashboardActionAttributes(@PathVariable("quizId") String quizId, @PathVariable("actionId") Long actionId) {
+        return userActionsHistoryService.getActionAttributes(actionId, null, quizId)
+    }
 }

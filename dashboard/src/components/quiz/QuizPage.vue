@@ -102,6 +102,7 @@ limitations under the License.
         if (!this.isReadOnlyQuiz) {
           res.push({ name: 'Access', iconClass: 'fas fa-shield-alt skills-color-access', page: 'QuizAccessPage' });
           res.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings' });
+          res.push({ name: 'Activity History', iconClass: 'fa-users-cog text-success', page: 'QuizActivityHistory' });
         }
 
         return res;

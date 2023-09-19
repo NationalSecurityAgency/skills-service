@@ -34,6 +34,7 @@ limitations under the License.
         </slot>
       </div>
     </div>
+    <slot name="underTitle"/>
   </div>
 </template>
 

@@ -173,6 +173,7 @@ skills:
       motivationalSkillWarningGracePeriod: .3
       videoUploadWarningMessage:
       videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000
+      activityHistoryStartDate:
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
