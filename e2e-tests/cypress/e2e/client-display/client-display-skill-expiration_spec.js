@@ -54,7 +54,10 @@ describe('Client Display Expiration Tests', () => {
     });
 
     it('expiration date shows when it should', () => {
-        const expirationDate = moment.utc().add(30, 'day');
+        let expirationDate = moment.utc().add(30, 'day');
+        if (expirationDate.hour() >= 1) {
+            expirationDate = expirationDate.add(1, 'day')
+        }
         cy.configureExpiration();
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -109,46 +112,6 @@ describe('Client Display Expiration Tests', () => {
           .contains(expirationDate.format('MMMM D YYYY'))
         cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
           .should('not.exist');
-    });
-
-    it('expiration date will show as tomorrow when the actual date is in the past', () => {
-        const tomorrow = moment.utc().add(1, 'day');
-        cy.configureExpiration(1, -30);
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
-          .should('not.exist');
-        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
-          .should('not.exist');
-        cy.cdClickSkill(0);
-
-        cy.get('[data-cy="claimPointsBtn"]')
-          .click();
-
-        cy.get('[data-cy="selfReportAlert"]')
-          .contains('You just earned 50 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-          .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
-          .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
-          .contains('50');
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
-          .contains('50 / 100 Points');
-
-        cy.get(`[data-cy="expirationDate"]`).should('exist');
-        cy.get(`[data-cy="expirationDate"]`).contains(tomorrow.format('MMMM D YYYY'))
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
-          .should('exist');
-        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
-          .contains(tomorrow.format('MMMM D YYYY'))
-        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
-          .should('not.exist')
     });
 
     it('post achievement expiration date shows when it should', () => {
@@ -268,5 +231,47 @@ describe('Client Display Expiration Tests', () => {
         cy.cdClickSkill(0);
 
         cy.get(`[data-cy="expirationDate"]`).should('not.exist');
+    });
+
+    it('post achievement expiration warning message is formatted properly in line with the scheduled expiration run', () => {
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        cy.configureExpiration(2, 0, 2, 'DAILY');
+        cy.configureExpiration(3, 0, 3, 'DAILY');
+        const yesterday = moment.utc().subtract(1, 'day')
+        const twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+
+        const nextRuntime = moment.utc().add(1, 'day').hour(1).minute(0).second(0).millisecond(0)
+        cy.log(`nextRuntime [${nextRuntime}], from now [${nextRuntime.fromNow()}]`);
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+          .should('exist');
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`).contains(`Expires ${nextRuntime.fromNow()}`)
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+          .should('exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`).contains('Expires in a day')
+        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`)
+          .should('exist');
+        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`).contains('Expires in 2 days')
+
+        cy.cdClickSkill(0);
+        cy.get(`[data-cy="expirationDate"]`).should('exist');
+        cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${nextRuntime.fromNow()}`)
+
+        cy.get('[data-cy="nextSkill"]').click();
+        cy.get(`[data-cy="expirationDate"]`).should('exist');
+        cy.get(`[data-cy="expirationDate"]`).contains('Expires in a day')
+
+        cy.get('[data-cy="nextSkill"]').click();
+        cy.get(`[data-cy="expirationDate"]`).should('exist');
+        cy.get(`[data-cy="expirationDate"]`).contains('Expires in 2 days')
+
     });
 });

@@ -16,7 +16,6 @@
 package skills.skillLoading
 
 import callStack.profiler.Profile
-import groovy.time.TimeCategory
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.SerializationUtils
@@ -57,11 +56,13 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
+import skills.tasks.config.TaskConfig
 import skills.utils.InputSanitizer
+
 import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
-import static skills.storage.model.SkillDef.*
+import static skills.storage.model.SkillDef.ContainerType
 
 @Component
 @CompileStatic
@@ -160,6 +161,9 @@ class SkillsLoader {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    TaskConfig taskConfig
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -536,6 +540,11 @@ class SkillsLoader {
                     expirationDate = mostRecentUPS.performedOn + expirationAttrs.every
                     daysOfInactivityBeforeExp = expirationAttrs.every
                 }
+            }
+
+            if (expirationDate) {
+                // set expiration date to the next expiration task for the calculated expiration time
+                expirationDate = taskConfig.getExpireUserAchievementsTaskExecutionTime(expirationDate.toInstant()).toDate()
             }
         }
 
@@ -1230,6 +1239,10 @@ class SkillsLoader {
                             expirationDate = mostRecentUPS.performedOn + expirationAttrs.every
                             daysOfInactivityBeforeExp = expirationAttrs.every
                         }
+                    }
+                    if (expirationDate) {
+                        // set expiration date to the next expiration task for the calculated expiration time
+                        expirationDate = taskConfig.getExpireUserAchievementsTaskExecutionTime(expirationDate.toInstant()).toDate()
                     }
                 }
 

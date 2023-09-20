@@ -15,6 +15,8 @@
  */
 package skills.intTests.skillExpiration
 
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -29,11 +31,16 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.ExpiredUserAchievementRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
+
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     String projId = SkillsFactory.defaultProjId
 
@@ -1686,6 +1693,57 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         then:
         def e = thrown(Exception)
         e.getMessage().contains("Cannot configure expiration attribute on skills that are reused")
+    }
+
+    def "skill summary reflect expiration time relative to the next expiration task exeution time"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = "user1"
+        Date yesterday = (new Date()-1)
+        Date tomorrow = (new Date()+1)
+
+        setup:
+        (0..2).each {
+            skillsService.saveSkillExpirationAttributes( proj.projectId, skills[it].skillId, [
+                    expirationType: ExpirationAttrs.DAILY,
+                    every: it+1,
+            ])
+
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], userId, yesterday)
+            assert res.body.skillApplied
+            assert res.body.explanation == "Skill event was applied"
+
+            assert res.body.completed.find({ it.type == "Skill" }).id == skills[it].skillId
+            assert res.body.completed.find({ it.type == "Skill" }).name == skills[it].name
+
+            def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
+            assert addedSkills
+            assert addedSkills.data.find { it2 -> it2.skillId == skills[it].skillId }
+        }
+
+        Instant now = Instant.now()
+        Boolean before1am = now.atOffset(ZoneOffset.UTC).getHour() < 1
+        Instant nextExpirationRun
+        if (before1am) {
+            nextExpirationRun = now.atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).withHour(1).toInstant()
+        } else {
+            nextExpirationRun = tomorrow.toInstant().atOffset(ZoneOffset.UTC).truncatedTo(ChronoUnit.DAYS).withHour(1).toInstant()
+        }
+
+        when:
+
+        def subjectSummary = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+
+        then:
+        subjectSummary.skills[0].expirationDate == DTF.print(nextExpirationRun.toDate().time)
+        subjectSummary.skills[1].expirationDate == DTF.print((nextExpirationRun.toDate()+1).time)
+        subjectSummary.skills[2].expirationDate == DTF.print((nextExpirationRun.toDate()+2).time)
     }
 
     def expireAllSkillsForProject(String projectId, Integer numDaysAfterAchievement=7,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
