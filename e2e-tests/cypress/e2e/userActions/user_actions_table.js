@@ -16,6 +16,18 @@
 
 describe('Dashboard User Actions Tests', () => {
 
+    let adminUserIdForDisplay;
+    beforeEach(() => {
+        cy.fixture('vars.json')
+          .then((vars) => {
+              adminUserIdForDisplay = vars.defaultUser;
+              if (Cypress.env('oauthMode')) {
+                  const projAdminUser = vars.oauthUser;
+                  adminUserIdForDisplay = vars.oauthUser.substring(0, projAdminUser.indexOf('@'));
+              }
+          });
+    });
+
     it('Display user activity history on multiple pages', () => {
         cy.createProject(1)
         cy.createProject(2)
@@ -37,14 +49,14 @@ describe('Dashboard User Actions Tests', () => {
         cy.visit('/administrator/userActions')
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
 
-        cy.get('[data-cy="row0-userId"]').contains('skills@skills.org')
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
         cy.get('[data-cy="row0-action"]').contains('Edit')
         cy.get('[data-cy="row0-item"]').contains('Skill')
         cy.get('[data-cy="row0-itemId"]').contains('skill5')
         cy.get('[data-cy="row0-projectId"]').contains('proj1')
         cy.get('[data-cy="row0-quizId"]').should('be.empty')
 
-        cy.get('[data-cy="row3-userId"]').contains('skills@skills.org')
+        cy.get('[data-cy="row3-userId"]').contains(adminUserIdForDisplay)
         cy.get('[data-cy="row3-action"]').contains('Create')
         cy.get('[data-cy="row3-item"]').contains('Skill')
         cy.get('[data-cy="row3-itemId"]').contains('skill4')
@@ -64,7 +76,7 @@ describe('Dashboard User Actions Tests', () => {
 
         // testing pagination
         cy.get('[data-cy="skillsBTablePaging"] [aria-label="Go to page 2"]').click();
-        cy.get('[data-cy="row0-userId"]').contains('skills@skills.org')
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
         cy.get('[data-cy="row0-action"]').contains('Create')
         cy.get('[data-cy="row0-item"]').contains('Project')
         cy.get('[data-cy="row0-itemId"]').contains('proj2')
@@ -89,7 +101,7 @@ describe('Dashboard User Actions Tests', () => {
 
         cy.visit('/administrator/userActions')
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
-        cy.get('[data-cy="row0-userId"]').contains('skills@skills.org')
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
         cy.get('[data-cy="row1-userId"]').contains('root@skills.org')
 
         cy.get('[data-cy="userFilter"]').type('OoT')
