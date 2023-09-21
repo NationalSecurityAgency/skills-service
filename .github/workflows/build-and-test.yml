@@ -27,7 +27,7 @@ on:
 
 jobs:
   build-skills-service-for-ui-tests:
-    runs-on: Ubuntu 20.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -68,7 +68,7 @@ jobs:
 
   ui-tests-against-postgres:
     if: github.event_name != 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: Ubuntu 20.04
     needs: [build-skills-service-for-ui-tests]
     strategy:
       fail-fast: false
