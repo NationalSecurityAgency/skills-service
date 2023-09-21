@@ -39,6 +39,9 @@ class AuthUtils {
     // Example: /projects/{projectId}/approvalEmails/unsubscribe
     static final Pattern PROJECT_SELF_REPORT_EMAIL_UNSUB_CONF_PATTERN = Pattern.compile("^/admin/projects/[^/]+/approvalEmails/(?:unsubscribe|subscribe)\$")
 
+    // Example: /admin/projects/{projectId}/dashboardActions
+    static final Pattern PROJECT_DASHBOARD_ACTIONS_PATTERN = Pattern.compile("^/admin/projects/[^/]+/dashboardActions.*\$")
+
     static String getProjectIdFromRequest(HttpServletRequest servletRequest) {
        return this.getIdFromRequest(servletRequest, PROJECT_ID_PATTERN, "projectId")
     }
@@ -101,6 +104,13 @@ class AuthUtils {
         return false
     }
 
+    static boolean isDashboardActionsEndpoint(HttpServletRequest servletRequest) {
+        if (servletRequest) {
+            String servletPath = servletRequest.getServletPath()
+            return PROJECT_DASHBOARD_ACTIONS_PATTERN.matcher(servletPath).matches()
+        }
+        return false
+    }
 
 
 }

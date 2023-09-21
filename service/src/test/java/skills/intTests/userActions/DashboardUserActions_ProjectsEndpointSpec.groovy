@@ -15,14 +15,15 @@
  */
 package skills.intTests.userActions
 
+import org.springframework.http.HttpStatus
 import skills.controller.exceptions.ErrorCode
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
-import skills.services.quiz.QuizQuestionType
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
+import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -239,4 +240,34 @@ class DashboardUserActions_ProjectsEndpointSpec extends DefaultIntSpec {
         p2Options.itemFilterOptions.sort() == [DashboardItem.Project.toString()].sort()
     }
 
+    def "approver role is not allowed to view user actions - getUserActionsForProject"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def approverService = createService(getRandomUsers(1, true)[0])
+        skillsService.addUserRole(approverService.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        when:
+        approverService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.resBody.contains("You do not have permission")
+        skillsClientException.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "approver role is not allowed to view user actions - getProjectUserActionAttributes"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def approverService = createService(getRandomUsers(1, true)[0])
+        skillsService.addUserRole(approverService.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        def actions = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
+        when:
+        approverService.getProjectUserActionAttributes(p1.projectId, actions.data[0].id)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.resBody.contains("You do not have permission")
+        skillsClientException.httpStatus == HttpStatus.FORBIDDEN
+    }
 }

@@ -128,5 +128,24 @@ class AuthUtilsSpec extends Specification {
         false   | "/admin/projects//proj1/approvalEmails/subscribe"
     }
 
+    def "only match dashboard actions for project-based endpoints"() {
+        HttpServletRequest httpServletRequest = Mock()
+        httpServletRequest.getServletPath() >> url
+
+        expect:
+        AuthUtils.isDashboardActionsEndpoint(httpServletRequest) == matched
+
+        where:
+        matched | url
+        true    | "/admin/projects/proj1/dashboardActions"
+        true    | "/admin/projects/pROJ2/dashboardActions/filterOptions"
+        true    | "/admin/projects/pROJ2/dashboardActions/1/attributes"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe1"
+        false   | "/admin/projects/proj1/approvalEmails/unsubscribe/"
+        false   | "/admin/projects/proj1/approvalEmails/unsubsdcribe"
+        false   | "/b/admin/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/co/projects/proj1/approvalEmails/unsubscribe"
+        false   | "/admin/projects//proj1/approvalEmails/unsubscribe"
+    }
 }
 
