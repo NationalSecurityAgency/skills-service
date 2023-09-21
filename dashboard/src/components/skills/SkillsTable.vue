@@ -246,6 +246,19 @@ limitations under the License.
           </div>
         </template>
 
+        <template v-slot:cell(expiration)="data">
+          <div v-if="data.item.expirationType && data.item.expirationType !== 'NEVER'">{{
+              getExpirationDescription(data.item)
+            }}
+            <div v-if="getNextExpirationDate(data.item)" class="text-muted small">
+              {{ getNextExpirationDate(data.item) }}
+            </div>
+          </div>
+          <div v-else class="text-secondary">
+            None
+          </div>
+        </template>
+
         <template v-slot:cell(timeWindow)="data">
           <div v-if="data.item.isSkillType">{{ timeWindowTitle(data.item) }}
             <i v-if="!timeWindowHasLength(data.item)" class="fas fa-question-circle text-muted"
@@ -431,6 +444,11 @@ limitations under the License.
   const subjects = createNamespacedHelpers('subjects');
   const subjectSkills = createNamespacedHelpers('subjectSkills');
 
+  const YEARLY = 'YEARLY';
+  const MONTHLY = 'MONTHLY';
+  const DAILY = 'DAILY';
+  const LAST_DAY_OF_MONTH = 'LAST_DAY_OF_MONTH';
+
   export default {
     name: 'SkillsTable',
     mixins: [MsgBoxMixin, ToastSupport, TimeWindowMixin, ProjConfigMixin],
@@ -565,6 +583,9 @@ limitations under the License.
               value: 'catalogType',
               text: 'Catalog',
             }, {
+              value: 'expiration',
+              text: 'Expiration',
+            }, {
               value: 'timeWindow',
               text: 'Time Window',
             }, {
@@ -684,6 +705,11 @@ limitations under the License.
           catalogType: {
             key: 'catalogType',
             label: 'Catalog',
+            sortable: true,
+          },
+          expiration: {
+            key: 'expiration',
+            label: 'Expiration',
             sortable: true,
           },
         };
@@ -1125,6 +1151,30 @@ limitations under the License.
           const ref = this.$refs[refId];
           this.focusOn(ref);
         }
+      },
+      getExpirationDescription(skill) {
+        if (skill.expirationType === YEARLY) {
+          const d = dayjs(skill.nextExpirationDate);
+          const plural = skill.every > 1;
+          return `Every${plural ? ` ${skill.every}` : ''} year${plural ? 's' : ''} on ${d.format('MMMM')} ${d.format('Do')}`;
+        }
+        if (skill.expirationType === MONTHLY) {
+          const d = dayjs(skill.nextExpirationDate);
+          const plural = skill.every > 1;
+          const date = skill.monthlyDay === LAST_DAY_OF_MONTH ? 'last' : d.format('Do');
+          return `Every${plural ? ` ${skill.every}` : ''} month${plural ? 's' : ''} on the ${date} day of the month`;
+        }
+        if (skill.expirationType === DAILY) {
+          const plural = skill.every > 1;
+          return `After ${skill.every} day${plural ? 's' : ''} of inactivity`;
+        }
+        return '';
+      },
+      getNextExpirationDate(skill) {
+        if (skill.nextExpirationDate) {
+          return `Expires next on ${dayjs(skill.nextExpirationDate).format('YYYY-MM-DD')}`;
+        }
+        return '';
       },
     },
   };
