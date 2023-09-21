@@ -9,7 +9,39 @@ then
     echo "Added EXTRA_JAVA_OPTS to JAVA_OPTS = [$EXTRA_JAVA_OPTS]"
 fi
 
-echo "JAVA_OPTS=${JAVA_OPTS}"
+if [[ -z "${JAVA_OPTS_FILES}" ]]; then
+   echo "Optional JAVA_OPTS_FILES is not set"
+else
+  for sinleOptsFile in ${JAVA_OPTS_FILES//,/ } ; do
+     echo "Loading Java environment variables from JAVA_OPTS_FILES=[${sinleOptsFile}]"
+     OLDIFS=$IFS; IFS=$'\n';
+     for textLine in $(cat $sinleOptsFile) ; do
+      JAVA_OPTS="${JAVA_OPTS} -D${textLine}"
+     done
+     IFS=$OLDIFS
+  done
+fi
+echo "JAVA_OPTS=[${JAVA_OPTS}]"
+
+if [[ -z "${SPRING_PROPS_FILES}" ]]; then
+   echo "Optional SPRING_PROPS_FILES is not set"
+else
+  for sinleOptsFile in ${SPRING_PROPS_FILES//,/ } ; do
+     echo "Loading Spring properties from SPRING_PROPS_FILES=[${sinleOptsFile}]"
+      OLDIFS=$IFS; IFS=$'\n';
+        springProps=()
+        for textLine in $(cat $sinleOptsFile) ; do
+          springProps+=("${textLine}")
+        done
+        IFS=","
+        if [[ -z "${SPRING_PROPS}" ]]; then
+          SPRING_PROPS="${springProps[*]}"
+        else
+          SPRING_PROPS="${SPRING_PROPS},${springProps[*]}"
+        fi
+        IFS=$OLDIFS
+  done
+fi
 
 if [ "$DEBUG_MODE" == true ]
 then
@@ -50,7 +82,7 @@ term_handler() {
 }
 trap term_handler SIGTERM
 
-java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar &
+#java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar &
 pid="$!"
 
 # wait forever
