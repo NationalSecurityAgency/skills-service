@@ -16,11 +16,36 @@ limitations under the License.
 <template>
   <div>
     <sub-page-header title="Expiration History"/>
+    <b-card body-class="p-0">
+      <div class="row px-3 pt-3">
+        <div class="col-md-6">
+          <b-form-group label="Skill Id Filter" label-class="text-muted">
+            <b-input v-model="filters.skillId" v-on:keydown.enter="applyFilters" data-cy="skillIdFilter" aria-label="skill id filter"/>
+          </b-form-group>
+        </div>
+        <div class="col-md-6">
+          <b-form-group label="User Id Filter" label-class="text-muted">
+            <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="userIdFilter" aria-label="user id filter"/>
+          </b-form-group>
+        </div>
+      </div>
+      <div class="row pl-3 mb-3">
+        <div class="col">
+          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
+          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
+        </div>
+      </div>
+      <b-overlay :show="table.options.busy">
+        <skills-b-table :options="table.options" :items="table.items"
+                        @page-size-changed="pageSizeChanged"
+                        @page-changed="pageChanged"
+                        @sort-changed="sortTable"
+                        tableStoredStateId="expirationHistoryTable"
+                        data-cy="expirationHistoryTable">
 
-    <skills-b-table :options="table.options" :items="table.items"
-                    tableStoredStateId="expirationHistoryTable"
-                    data-cy="expirationHistoryTable">
-    </skills-b-table>
+        </skills-b-table>
+      </b-overlay>
+    </b-card>
   </div>
 </template>
 
@@ -37,6 +62,10 @@ limitations under the License.
     },
     data() {
       return {
+        filters: {
+          skillId: '',
+          userId: '',
+        },
         table: {
           options: {
             busy: false,
@@ -85,9 +114,47 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
           ascending: !this.table.options.sortDesc,
+          skillId: this.filters.skillId,
+          userId: this.filters.userId,
         };
         ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
           this.table.items = res;
+        });
+      },
+      sortTable(sortContext) {
+        this.table.options.sortBy = sortContext.sortBy;
+        this.table.options.sortDesc = sortContext.sortDesc;
+
+        // set to the first page
+        this.table.options.pagination.currentPage = 1;
+        this.loadData();
+      },
+      pageChanged(pageNum) {
+        this.table.options.pagination.currentPage = pageNum;
+        this.loadData();
+      },
+      pageSizeChanged(newSize) {
+        this.table.options.pagination.pageSize = newSize;
+        this.loadData();
+      },
+      applyFilters() {
+        this.table.options.pagination.currentPage = 1;
+        this.loadData().then(() => {
+          let filterMessage = 'Expiration history table has been filtered by';
+          if (this.filters.skillId) {
+            filterMessage += ` ${this.filters.skillId}`;
+          }
+          if (this.filters.userId) {
+            filterMessage += ` ${this.filters.userId}`;
+          }
+          this.$nextTick(() => this.$announcer.polite(filterMessage));
+        });
+      },
+      reset() {
+        this.filters.userId = '';
+        this.filters.skillId = '';
+        this.loadData().then(() => {
+          this.$nextTick(() => this.$announcer.polite('Expiration history table filters have been removed'));
         });
       },
     },

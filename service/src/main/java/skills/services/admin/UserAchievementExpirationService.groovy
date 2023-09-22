@@ -49,8 +49,8 @@ class UserAchievementExpirationService {
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
 
-    List<ExpiredUserAchievement> findAllExpiredAchievements(String projectId, PageRequest pageRequest) {
-        return expiredUserAchievementRepo.findAllExpiredAchievements(projectId, pageRequest)
+    List<ExpiredUserAchievement> findAllExpiredAchievements(String projectId, String userId, String skillId, PageRequest pageRequest) {
+        return expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillId, pageRequest)
     }
 
     @Transactional()

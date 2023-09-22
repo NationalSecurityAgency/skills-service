@@ -68,7 +68,11 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     @Query(value = '''
        SELECT eua
        FROM ExpiredUserAchievement eua
-       WHERE eua.projectId = ?1
+       WHERE eua.projectId = :projectId
+       AND(:userId is null OR lower(eua.userId) like lower(concat('%', :userId, '%')))
+       AND(:skillId is null OR lower(eua.skillId) like lower(concat('%', :skillId, '%')))
     ''')
-    List<ExpiredUserAchievement> findAllExpiredAchievements(String projectId, PageRequest pageRequest)
+    List<ExpiredUserAchievement> findAllExpiredAchievements(@Param("projectId") String projectId,
+                                                            @Param("userId") String userId,
+                                                            @Param("skillId") String skillId, PageRequest pageRequest)
 }

@@ -1707,13 +1707,14 @@ class AdminController {
     @ResponseBody
     List<ExpiredSkillRes> getExpiredSkills(@PathVariable(name = "projectId") String projectId,
                                            @RequestParam(name = "userId", required = false) String userIdParam,
+                                           @RequestParam(name = "skillId", required = false) String skillIdParam,
                                            @RequestParam int page,
                                            @RequestParam int limit,
                                            @RequestParam String orderBy,
                                            @RequestParam Boolean ascending) {
         String userId = userInfoService.getUserName(userIdParam);
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return userAchievementExpirationService.findAllExpiredAchievements(projectId, pageRequest).collect{ it -> new ExpiredSkillRes(userId: it.userId, skillId: it.skillId, expiredOn: it.expiredOn)};
+        return userAchievementExpirationService.findAllExpiredAchievements(projectId, userIdParam, skillIdParam, pageRequest).collect{ it -> new ExpiredSkillRes(userId: it.userId, skillId: it.skillId, expiredOn: it.expiredOn)};
     }
 }
 
