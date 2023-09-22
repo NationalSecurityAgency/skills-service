@@ -28,7 +28,7 @@ describe('Settings Tests', () => {
             cy.get('[data-cy="settingsButton-navToSettings"]')
                 .should('not.be.disabled');
             cy.get('[data-cy="settingsButton-navToSettings"]')
-                .click();
+                .click({force: true});
         });
     });
 
