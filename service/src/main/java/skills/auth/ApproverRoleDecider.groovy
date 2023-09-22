@@ -28,6 +28,7 @@ class ApproverRoleDecider {
 
     boolean shouldGrantApproverRole(HttpServletRequest servletRequest, UserRole userRole) {
         return isAllowedProject(servletRequest, userRole) &&
+                !AuthUtils.isDashboardActionsEndpoint(servletRequest) &&
                 (
                         isSupportedHttpMethod(servletRequest)
                         || isSelfReportAction(servletRequest)
