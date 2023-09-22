@@ -101,8 +101,7 @@ describe('Levels Management Tests', () => {
     });
 
     it('once max levels are reached add level button should be disabled', () => {
-        cy.server();
-        cy.route('POST', '/admin/projects/proj1/settings')
+        cy.intercept('POST', '/admin/projects/proj1/settings')
             .as('setSettings');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -273,8 +272,7 @@ describe('Levels Management Tests', () => {
     });
 
     it('subject: once max levels are reached add level button should be disabled', () => {
-        cy.server();
-        cy.route('POST', '/admin/projects/proj1/settings')
+        cy.intercept('POST', '/admin/projects/proj1/settings')
             .as('setSettings');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -799,115 +797,13 @@ describe('Levels Management Tests', () => {
         cy.validateTable(tableSelector, expected, 5, true, null, false);
     });
 
-    // it('add new level without name, then add name', () => {
-    //     cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-    //         projectId: 'proj1',
-    //         subjectId: 'subj1',
-    //         name: "Subject 1"
-    //     });
-    //
-    //     cy.visit('/administrator/projects/proj1/');
-    //     cy.clickNav('Levels');
-    //
-    //     const rowSelector = '[data-cy=levelsTable] tbody tr'
-    //     cy.get(rowSelector).should('have.length', 5).as('cyRows');
-    //
-    //     cy.get('[data-cy=addLevel]').first().click();
-    //
-    //     // add a level with no name initially
-    //     cy.get('[data-cy=levelPercent]').type('95');
-    //     cy.get('[data-cy=levelPercentError]').should('not.be.visible');
-    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
-    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-    //     cy.get('[data-cy=saveLevelButton]').click();
-    //
-    //     // verify the new row was added as expected
-    //     cy.get(rowSelector).should('have.length', 6).as('cyRows');
-    //     cy.get('@cyRows')
-    //         .eq(5)
-    //         .find('[data-cy=levelsTable_name]')
-    //         .as('row6NameCol')
-    //     cy.get('@cyRows')
-    //         .eq(5)
-    //         .find('td')
-    //         .eq(2)
-    //         .as('row6PercentCol')
-    //     cy.get('@row6NameCol').should('be.empty')
-    //     cy.get('@row6PercentCol').contains('95')
-    //
-    //     // now give the level a name
-    //     cy.get('[data-cy=editLevelButton]').eq(5).click();
-    //     cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
-    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-    //     cy.get('[data-cy=levelName]').type('{enter}');
-    //
-    //     // verify that the new name is present
-    //     cy.get('@row6NameCol').contains('Coral Belt')
-    // });
-    //
-    // it('subjects: add new level without name, then add name', () => {
-    //     cy.server();
-    //     cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-    //         projectId: 'proj1',
-    //         subjectId: 'subj1',
-    //         name: "Subject 1"
-    //     });
-    //     cy.route({
-    //         method: 'GET',
-    //         url: '/admin/projects/proj1/subjects/subj1'
-    //     }).as('loadSubject');
-    //
-    //     cy.visit('/administrator/projects/proj1/subjects/subj1');
-    //     cy.wait('@loadSubject');
-    //
-    //     cy.clickNav('Levels');
-    //
-    //     const rowSelector = '[data-cy=levelsTable] tbody tr'
-    //     cy.get(rowSelector).should('have.length', 5).as('cyRows');
-    //
-    //     cy.get('[data-cy=addLevel]').first().click();
-    //
-    //     // add a level with no name initially
-    //     cy.get('[data-cy=levelPercent]').type('95');
-    //     cy.get('[data-cy=levelPercentError]').should('not.be.visible');
-    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
-    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-    //     cy.get('[data-cy=saveLevelButton]').click();
-    //
-    //     // verify the new row was added as expected
-    //     cy.get(rowSelector).should('have.length', 6).as('cyRows');
-    //     cy.get('@cyRows')
-    //       .eq(5)
-    //       .find('[data-cy=levelsTable_name]')
-    //       .as('row6NameCol')
-    //     cy.get('@cyRows')
-    //       .eq(5)
-    //       .find('td')
-    //       .eq(2)
-    //       .as('row6PercentCol')
-    //     cy.get('@row6NameCol').should('be.empty')
-    //     cy.get('@row6PercentCol').contains('95')
-    //
-    //     // now give the level a name
-    //     cy.get('[data-cy=editLevelButton]').eq(5).click();
-    //     cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-    //     cy.get('[data-cy=levelNameError]').should('not.be.visible');
-    //     cy.get('[data-cy=saveLevelButton]').should('not.be.disabled');
-    //     cy.get('[data-cy=levelName]').type('{enter}');
-    //
-    //     // verify that the new name is present
-    //     cy.get('@row6NameCol').contains('Coral Belt')
-    // });
-
     it('subjects: levels validation', () => {
-        cy.server();
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
             name: 'Subject 1'
         });
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1'
         })
@@ -959,20 +855,19 @@ describe('Levels Management Tests', () => {
     });
 
     it('new level dialog should return focus to new level button', () => {
-        cy.server();
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/MyNewtestProject'
         })
             .as('loadProject');
 
-        cy.route({
+        cy.intercept({
             method: 'PUT',
             url: '/admin/projects/MyNewtestProject/levels/edit/**'
         })
             .as('saveLevel');
 
-        cy.route({
+        cy.intercept({
             method: 'GET',
             url: '/admin/projects/MyNewtestProject/levels'
         })

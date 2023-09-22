@@ -313,8 +313,7 @@ describe('Subjects Tests', () => {
         // TODO - waiting on https://github.com/cypress-io/cypress/issues/1647
         // cy.intercept('/admin/projects/proj1/icons/upload').as('uploadIcon');
 
-        cy.server();
-        cy.route({
+        cy.intercept({
             method: 'POST',
             url: '/admin/projects/proj1/icons/upload',
         }).as('uploadIcon');
