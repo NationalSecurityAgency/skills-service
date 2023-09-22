@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -63,4 +64,11 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     ''')
     List<UserAchievement> findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(@Param("skillRefId") Integer skillRefId,
                                                                                                  @Param("olderThanDate") Date olderThanDate)
+
+    @Query(value = '''
+       SELECT eua
+       FROM ExpiredUserAchievement eua
+       WHERE eua.projectId = ?1
+    ''')
+    List<ExpiredUserAchievement> findAllExpiredAchievements(String projectId, PageRequest pageRequest)
 }

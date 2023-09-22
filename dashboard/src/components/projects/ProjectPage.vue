@@ -160,6 +160,7 @@ limitations under the License.
           items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' });
           items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' });
           items.push({ name: 'Admin Activity', iconClass: 'fa-users-cog text-success', page: 'ProjectActivityHistory' });
+          items.push({ name: 'Expiration History', iconClass: 'fa-clock text-success', page: 'ExpirationHistory' });
         }
 
         return items;
