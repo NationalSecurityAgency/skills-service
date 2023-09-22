@@ -62,4 +62,10 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     String quizId
     String quizName
     QuizDefParent.QuizType quizType
+
+    // expiration props
+    String expirationType
+    Integer every
+    String monthlyDay
+    Date nextExpirationDate
 }

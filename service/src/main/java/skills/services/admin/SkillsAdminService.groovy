@@ -37,6 +37,8 @@ import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillTagRes
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.ExpirationAttrs
+import skills.services.attributes.SkillAttributeService
 import skills.services.quiz.QuizToSkillService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -128,6 +130,9 @@ class SkillsAdminService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
@@ -808,7 +813,7 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    private SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
+    SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
         SkillDefPartialRes res = new SkillDefPartialRes(
@@ -860,6 +865,14 @@ class SkillsAdminService {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
             res.numSkillsInGroup = groupChildSkills.size()
             res.numSelfReportSkills = groupChildSkills.count( {it.selfReportingType })?.intValue()
+        }
+
+        ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(partial.projectId, partial.skillId)
+        if (expirationAttrs) {
+            res.expirationType = expirationAttrs.expirationType
+            res.every = expirationAttrs.every
+            res.monthlyDay = expirationAttrs.monthlyDay
+            res.nextExpirationDate = expirationAttrs.nextExpirationDate
         }
         return res;
     }

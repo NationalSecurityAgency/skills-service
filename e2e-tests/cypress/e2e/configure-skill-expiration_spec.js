@@ -316,4 +316,121 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
     });
 
+    it('expiration date shows properly in skills table', () => {
+        const tableSelector = '[data-cy="skillsTable"]';
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        // yearly
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="yearlyMonth"]').select('October')
+        cy.get('[data-cy="yearlyDayOfMonth"]').select('30')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every year on October 30th'
+            }],
+        ], 1, false, null, false);
+
+        // yearly plural
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy=yearlyYears-sb] > [aria-label=Increment]').click();
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every 2 years on October 30th'
+            }],
+        ], 1, false, null, false);
+
+        // monthly
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').check({ force: true });
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every month on the 1st day of the month'
+            }],
+        ], 1, false, null, false);
+
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').check({ force: true });
+        cy.get('[data-cy="monthlyDay"]').select('15')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every month on the 15th day of the month'
+            }],
+        ], 1, false, null, false);
+
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy=monthlyMonths-sb] > [aria-label=Increment]').click();
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every 2 months on the 15th day of the month'
+            }],
+        ], 1, false, null, false);
+
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="monthlyDayOption"] [value="LAST_DAY_OF_MONTH"]').check({ force: true });
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'Every 2 months on the last day of the month'
+            }],
+        ], 1, false, null, false);
+
+        // daily
+        cy.visitExpirationConfPage();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.wait('@saveExpirationSettings')
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 3,
+                value: 'After 90 days of inactivity'
+            }],
+        ], 1, false, null, false);
+    });
+
 });
