@@ -275,7 +275,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
         cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
 
-        cy.get('[data-cy="emailUsers_body"]').clear();
+        cy.get('[data-cy="emailUsers_body"]').type('{selectall}{backspace}');
         cy.get('[data-cy="emailUsers_body"]').type('test');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
         cy.get('#emailBodyError').should('be.empty');

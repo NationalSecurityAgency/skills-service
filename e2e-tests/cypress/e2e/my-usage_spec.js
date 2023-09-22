@@ -174,14 +174,10 @@ describe('My Usage Tests', () => {
     it('point history chart - all projects removed', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__deselect')
-            .should('have.length', 4)
-            .as('removeBtns');
-        for (let i = 0; i < 4; i += 1) {
-            cy.get('@removeBtns')
-                .eq(0)
-                .click();
-        }
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 2"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 3"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 4"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 5"]').click()
         cy.get('[data-cy=eventHistoryChart]')
             .contains('Please select at least one project from the list above.');
 
@@ -190,14 +186,10 @@ describe('My Usage Tests', () => {
     it('point history chart - projects with no user events', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .vs__deselect')
-            .should('have.length', 4)
-            .as('removeBtns');
-        for (let i = 0; i < 4; i += 1) {
-            cy.get('@removeBtns')
-                .eq(0)
-                .click();
-        }
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 2"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 3"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 4"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="Deselect This is project 5"]').click()
         cy.get('[data-cy=eventHistoryChart]')
             .contains('Please select at least one project from the list above.');
 

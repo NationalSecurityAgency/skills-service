@@ -222,18 +222,9 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector]  .vs__deselect')
-            .should('have.length', 4)
-            .as('removeBtns');
-        cy.get('@removeBtns')
-            .eq(1)
-            .click();
-        cy.get('@removeBtns')
-            .eq(1)
-            .click();
-        cy.get('@removeBtns')
-            .eq(1)
-            .click();
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Deselect Grand Project 2"]').click()
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Deselect Grand Project 1"]').click()
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Deselect Grand Project 0"]').click()
 
         cy.trainingProf()
             .contains('Need more projects');

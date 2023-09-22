@@ -179,10 +179,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .click();
 
                 // unpin that project
-                cy.get('@projects')
-                    .eq(0)
-                    .contains('Unpin')
-                    .click();
+                cy.get('[data-cy="projectCard_proj4"] [data-cy="unpin"]').click()
                 cy.contains('No Projects Yet');
             });
     });

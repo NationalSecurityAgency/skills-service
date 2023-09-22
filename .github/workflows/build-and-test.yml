@@ -141,6 +141,8 @@ jobs:
           cd e2e-tests
           ../.github/scripts/runSubsetOfCypressTests.sh -t 20 -c ${{ matrix.container }}
           cd ..
+        env:
+          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
 
       - name: upload result artifacts
         if: ${{ always() }}

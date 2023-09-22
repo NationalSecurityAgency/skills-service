@@ -53,7 +53,8 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.wait('@validateDescription');
         cy.get('[data-cy="projectDescriptionError"]').contains('Project Description - May not contain divinedragon word.');
         cy.get('[data-cy="saveProjectButton"]').should('be.disabled');
@@ -83,7 +84,8 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="subjectDescError"]').should('not.be.visible')
         cy.get('[data-cy="saveSubjectButton"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.get('[data-cy="subjectDescError"]').contains('Subject Description - May not contain divinedragon word.');
         cy.get('[data-cy="saveSubjectButton"]').should('be.disabled');
 
@@ -110,7 +112,8 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="skillDescriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - May not contain divinedragon word.');
         cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
 
@@ -138,7 +141,8 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="badgeDescriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveBadgeButton"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.get('[data-cy="badgeDescriptionError"]').contains('Badge Description - May not contain divinedragon word.');
         cy.get('[data-cy="saveBadgeButton"]').should('be.disabled');
 
