@@ -166,8 +166,8 @@ jobs:
   ui-tests-against-postgres-cypress-dashboard:
 #    if: github.event_name == 'schedule'
     runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
+#    container:
+#      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -200,10 +200,10 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          apt-get update
-          apt-get install -y postgresql-client
-          psql --version
-          apt-get install fonts-noto-color-emoji
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          sudo psql --version
+          sudo apt-get install fonts-noto-color-emoji
 
       - uses: actions/checkout@v3
 
