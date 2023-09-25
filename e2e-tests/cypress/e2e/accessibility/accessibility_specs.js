@@ -434,6 +434,8 @@ describe('Accessibility Tests', () => {
 
         cy.get('[data-cy=addGlobalBadgeLevel]')
             .click();
+        cy.get('[data-cy="simpleLevelsTable"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '1');
         cy.customA11y();
     });
 

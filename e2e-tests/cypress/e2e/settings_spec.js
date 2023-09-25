@@ -22,9 +22,16 @@ describe('Settings Tests', () => {
                 cy.login(vars.rootUser, vars.defaultPass);
             });
 
-        Cypress.Commands.add('navToSettings', () => {
+        cy.intercept('GET', '/app/projects').as('getProjects')
+        Cypress.Commands.add('navToSettings', (isAdmin=false) => {
             cy.get('[data-cy="settings-button"] button')
                 .click();
+            if(isAdmin) {
+                cy.wait('@getProjects')
+                cy.get('#projectCards')
+            } else {
+                cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+            }
             cy.get('[data-cy="settingsButton-navToSettings"]')
                 .should('not.be.disabled');
             cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -219,6 +226,8 @@ describe('Settings Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.wait('@isSupervisor');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
         cy.get('[data-cy="settings-button"] button')
@@ -259,6 +268,8 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -328,6 +339,8 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
 
@@ -473,6 +486,8 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
 
@@ -531,6 +546,8 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
 
         // root user can see/manage global badges
         cy.get('[data-cy="nav-Global Badges"]');
@@ -562,6 +579,8 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -671,6 +690,8 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -707,6 +728,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -762,6 +785,8 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -802,6 +827,8 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -845,6 +872,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -886,6 +915,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -938,6 +969,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -986,6 +1019,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -1063,6 +1098,8 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.wait('@getProjects')
+        cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
@@ -1143,6 +1180,7 @@ describe('Settings Tests', () => {
 
     it('display logged in user under user icon', () => {
         cy.visit('/');
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-loggedInName"]')
@@ -1215,7 +1253,7 @@ describe('Settings Tests', () => {
             .should('be.visible');
 
         // now update home page back to 'Progress and Rankings'
-        cy.navToSettings();
+        cy.navToSettings(true);
         cy.get('[data-cy="nav-Preferences"]')
             .click();
         cy.contains('Default Home Page')
