@@ -482,6 +482,7 @@ describe('Skills Group Tests', () => {
     });
 
     it('Report Skill Events: ability to report skill events after group is enabled', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill2').as('getSkill2')
         cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -500,6 +501,9 @@ describe('Skills Group Tests', () => {
 
         // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
+        cy.wait('@getSkill2')
+        cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+        cy.get('[data-cy="skillId"]').contains('skill2')
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
@@ -508,6 +512,7 @@ describe('Skills Group Tests', () => {
     });
 
     it('Report Skill Events:  must not be able to report skill events if there is not enough points because group is not enabled', () => {
+        cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill2').as('getSkill2')
         cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
 
         cy.createSkillsGroup(1, 1, 1);
@@ -525,6 +530,10 @@ describe('Skills Group Tests', () => {
 
         // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
+        cy.wait('@getSkill2')
+        cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+        cy.get('[data-cy="skillId"]').contains('skill2')
+
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
         cy.get('[data-cy="userIdInput"]').contains('user1')

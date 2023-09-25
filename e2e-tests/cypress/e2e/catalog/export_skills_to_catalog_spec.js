@@ -993,12 +993,18 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
         cy.get('[data-cy="skillSelect-skill1"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
+            .should('be.visible');
+        cy.get('[data-cy="skillExportToCatalogBtn"]')
             .click();
+        cy.get('.modal-body').contains('This will export [Very Great Skill 1]')
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
         cy.get('[data-cy="okButton"]')

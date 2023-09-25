@@ -335,6 +335,9 @@ describe('Subjects Tests', () => {
 
 
     it('upload custom icon - invalid mime type client validation', () => {
+        cy.intercept('/app/projects/proj1/customIcons').as('getCustomIcons')
+        cy.intercept('/api/projects/proj1/customIconCss').as('getCustomIconsCss')
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -342,13 +345,16 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
+        cy.wait('@getCustomIconsCss')
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.wait('@getCustomIcons')
 
         cy.get('a.nav-link').contains('Custom').click();
         cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
+        cy.wait(2000)
 
         const filename = 'invalid_file.txt';
         cy.get('input[type=file]').attachFile(filename);

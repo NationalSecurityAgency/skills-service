@@ -165,6 +165,8 @@ describe('Levels Management Tests', () => {
     });
 
     it('warn if there are not enough points declared for a level', () => {
+        cy.intercept('/admin/projects/proj1/levels').as('getLevels')
+
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -195,15 +197,16 @@ describe('Levels Management Tests', () => {
             version: 0,
         });
 
-        cy.visit('/administrator/projects/proj1/');
+        cy.request('POST', '/admin/projects/proj1/settings/level.points.enabled', {
+            projectId: 'proj1',
+            setting: 'level.points.enabled',
+            value: 'true'
+        });
 
-        cy.clickNav('Settings');
-        cy.get('[data-cy="usePointsForLevelsSwitch"]')
-            .check({ force: true });
-        cy.get('[data-cy="saveSettingsBtn"]')
-            .click();
+        cy.visit('/administrator/projects/proj1/levels');
+        cy.wait('@getLevels')
+        cy.get('[data-cy="levelsTable"]')
 
-        cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
         cy.get('[data-cy="newLevelPoints"]')
