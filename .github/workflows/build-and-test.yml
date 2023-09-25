@@ -229,8 +229,8 @@ jobs:
         run: |
           cd e2e-tests
           ls
-          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
-          cat package.json
+#          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
+#          cat package.json
           npm install
           npm run backend:dropAllDBTables
           npm run cyServices:start
