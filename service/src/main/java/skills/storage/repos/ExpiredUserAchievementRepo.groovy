@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import skills.controller.result.model.ExpiredSkillRes
 import skills.storage.model.ExpiredUserAchievement
 import skills.storage.model.UserAchievement
 
@@ -66,13 +67,14 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
                                                                                                  @Param("olderThanDate") Date olderThanDate)
 
     @Query(value = '''
-       SELECT eua
-       FROM ExpiredUserAchievement eua
-       WHERE eua.projectId = :projectId
+       SELECT eua.userId as userId, eua.skillId as skillId, eua.expiredOn as expiredOn, skill.name as skillName
+       FROM ExpiredUserAchievement eua, SkillDef skill
+       WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId
        AND(:userId is null OR lower(eua.userId) like lower(concat('%', :userId, '%')))
-       AND(:skillId is null OR lower(eua.skillId) like lower(concat('%', :skillId, '%')))
+       AND(:skillNameFilter is null OR lower(skill.name) like lower(concat('%', :skillNameFilter, '%')))
     ''')
-    List<ExpiredUserAchievement> findAllExpiredAchievements(@Param("projectId") String projectId,
-                                                            @Param("userId") String userId,
-                                                            @Param("skillId") String skillId, PageRequest pageRequest)
+    List<ExpiredSkillRes> findAllExpiredAchievements(@Param("projectId") String projectId,
+                                                     @Param("userId") String userId,
+                                                     @Param("skillNameFilter") String skillNameFilter, PageRequest pageRequest)
+
 }

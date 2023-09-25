@@ -1,7 +1,8 @@
 package skills.controller.result.model
 
-class ExpiredSkillRes {
-    String userId
-    String skillId
-    Date expiredOn
+interface ExpiredSkillRes {
+    String getUserId()
+    String getSkillId()
+    Date getExpiredOn()
+    String getSkillName()
 }

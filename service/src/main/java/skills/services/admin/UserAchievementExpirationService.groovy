@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.ExpiredSkillRes
 import skills.services.SkillEventAdminService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
@@ -49,8 +50,8 @@ class UserAchievementExpirationService {
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
 
-    List<ExpiredUserAchievement> findAllExpiredAchievements(String projectId, String userId, String skillId, PageRequest pageRequest) {
-        return expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillId, pageRequest)
+    List<ExpiredSkillRes> findAllExpiredAchievements(String projectId, String userId, String skillName, PageRequest pageRequest) {
+        return expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
     }
 
     @Transactional()

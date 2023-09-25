@@ -19,8 +19,8 @@ limitations under the License.
     <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-md-6">
-          <b-form-group label="Skill Id Filter" label-class="text-muted">
-            <b-input v-model="filters.skillId" v-on:keydown.enter="applyFilters" data-cy="skillIdFilter" aria-label="skill id filter"/>
+          <b-form-group label="Skill Name Filter" label-class="text-muted">
+            <b-input v-model="filters.skillName" v-on:keydown.enter="applyFilters" data-cy="skillNameFilter" aria-label="skill name filter"/>
           </b-form-group>
         </div>
         <div class="col-md-6">
@@ -42,7 +42,9 @@ limitations under the License.
                         @sort-changed="sortTable"
                         tableStoredStateId="expirationHistoryTable"
                         data-cy="expirationHistoryTable">
-
+          <template v-slot:cell(expiredOn)="data">
+            <date-cell :value="data.value" />
+          </template>
         </skills-b-table>
       </b-overlay>
     </b-card>
@@ -53,17 +55,19 @@ limitations under the License.
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import ExpirationService from '@/components/expiration/ExpirationService';
+  import DateCell from '../utils/table/DateCell';
 
   export default {
     name: 'ExpirationHistory',
     components: {
       SubPageHeader,
       SkillsBTable,
+      DateCell,
     },
     data() {
       return {
         filters: {
-          skillId: '',
+          skillName: '',
           userId: '',
         },
         table: {
@@ -77,8 +81,8 @@ limitations under the License.
             tableDescription: 'ExpirationHistory',
             fields: [
               {
-                key: 'skillId',
-                label: 'Skill',
+                key: 'skillName',
+                label: 'Skill Name',
                 sortable: true,
               },
               {
@@ -114,7 +118,7 @@ limitations under the License.
           page: this.table.options.pagination.currentPage,
           orderBy: this.table.options.sortBy,
           ascending: !this.table.options.sortDesc,
-          skillId: this.filters.skillId,
+          skillName: this.filters.skillName,
           userId: this.filters.userId,
         };
         ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
@@ -141,8 +145,8 @@ limitations under the License.
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
           let filterMessage = 'Expiration history table has been filtered by';
-          if (this.filters.skillId) {
-            filterMessage += ` ${this.filters.skillId}`;
+          if (this.filters.skillName) {
+            filterMessage += ` ${this.filters.skillName}`;
           }
           if (this.filters.userId) {
             filterMessage += ` ${this.filters.userId}`;
@@ -152,7 +156,7 @@ limitations under the License.
       },
       reset() {
         this.filters.userId = '';
-        this.filters.skillId = '';
+        this.filters.skillName = '';
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Expiration history table filters have been removed'));
         });
