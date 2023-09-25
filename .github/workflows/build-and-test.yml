@@ -67,7 +67,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
-    if: github.event_name == 'schedule'
+#    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
