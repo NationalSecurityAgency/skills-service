@@ -35,6 +35,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import skills.utils.SecretsUtil;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -62,12 +66,26 @@ public class SpringBootApp {
         boolean disableHostnameVerifier = Boolean.parseBoolean(System.getProperty(DISABLE_HOSTNAME_VERIFIER_PROP));
         if (disableHostnameVerifier) {
             log.info("disabling hostname verification");
-            HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
+            try {
+                HttpsURLConnection.setDefaultHostnameVerifier((s, sslSession) -> true);
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to disable hostname verification", e);
+            }
         }
 
 
         SpringApplication.run(SpringBootApp.class, args);
     }
+    private static final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+        public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+
+        public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+
+        public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+    } };
 
     static final class SkillsAutoConfigurationImportSelector extends AutoConfigurationImportSelector {
         static final String REDIS = "redis";
