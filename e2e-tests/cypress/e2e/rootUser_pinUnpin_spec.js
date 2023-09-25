@@ -478,7 +478,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.visit('/administrator/');
                 cy.get('[data-cy=subPageHeader]')
                     .contains('Projects');
-                cy.get('[data-cy="settings-button"]')
+                cy.get('[data-cy="settings-button"] button')
                     .click();
                 cy.get('[data-cy="settingsButton-navToSettings"]')
                     .click();

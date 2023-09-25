@@ -29,7 +29,7 @@ describe('Community Project Email Header/Footer Tests', () => {
               });
         });
         Cypress.Commands.add('navToSettings', () => {
-            cy.get('[data-cy="settings-button"]')
+            cy.get('[data-cy="settings-button"] button')
               .click();
             cy.get('[data-cy="settingsButton-navToSettings"]')
               .should('not.be.disabled');

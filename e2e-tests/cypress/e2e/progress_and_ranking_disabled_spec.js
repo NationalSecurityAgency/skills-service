@@ -38,7 +38,7 @@ describe('Project and Ranking Views are disabled Tests', () => {
 
     it('Admin and Progress and Ranking navigation is NOT shown', () => {
         cy.visit('/administrator');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToMyProgress"]')
             .should('exist');
@@ -57,7 +57,7 @@ describe('Project and Ranking Views are disabled Tests', () => {
         cy.visit('/administrator');
         cy.wait('@getConfig');
 
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToMyProgress"]')
             .should('not.exist');

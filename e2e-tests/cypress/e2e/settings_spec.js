@@ -23,7 +23,7 @@ describe('Settings Tests', () => {
             });
 
         Cypress.Commands.add('navToSettings', () => {
-            cy.get('[data-cy="settings-button"]')
+            cy.get('[data-cy="settings-button"] button')
                 .click();
             cy.get('[data-cy="settingsButton-navToSettings"]')
                 .should('not.be.disabled');
@@ -221,7 +221,7 @@ describe('Settings Tests', () => {
         cy.wait('@isSupervisor');
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -259,7 +259,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -340,7 +340,7 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -485,7 +485,7 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -541,7 +541,7 @@ describe('Settings Tests', () => {
                     .its('state.access.isSupervisor')
                     .should('equal', false);
             });
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -562,7 +562,7 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -671,7 +671,7 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -707,7 +707,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -762,7 +762,7 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -802,7 +802,7 @@ describe('Settings Tests', () => {
 
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -845,7 +845,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -886,7 +886,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -938,7 +938,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -986,7 +986,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -1063,7 +1063,7 @@ describe('Settings Tests', () => {
             .as('loadConfig');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
             .click();
@@ -1143,7 +1143,7 @@ describe('Settings Tests', () => {
 
     it('display logged in user under user icon', () => {
         cy.visit('/');
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-loggedInName"]')
             .contains('Firstname LastName');

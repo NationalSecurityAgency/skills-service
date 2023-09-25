@@ -57,7 +57,7 @@ describe('User Agreement Specs', ()=> {
        cy.contains('PROJECT: Bananas').should('be.visible');
        cy.get('[data-cy=breadcrumb-projBanana]').should('be.visible');
 
-       cy.get('[data-cy="settings-button"]').click();
+       cy.get('[data-cy="settings-button"] button').click();
        cy.contains('Log Out').click();
        cy.contains('Email Address').should('be.visible');
        cy.get('#username').type('user1@fake.fake');

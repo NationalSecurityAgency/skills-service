@@ -3,7 +3,6 @@ const fs = require('fs')
 
 module.exports = defineConfig({
   projectId: '7kivjf',
-  video: true,
   requestTimeout: 10000,
   defaultCommandTimeout: 10000,
   numTestsKeptInMemory: 50,
