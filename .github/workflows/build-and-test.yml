@@ -225,12 +225,20 @@ jobs:
           name: service jar
           path: ./service/target/
 
+#      - name: Prep Services for Cypress tests when running in a cypress docker container
+#        run: |
+#          cd e2e-tests
+#          ls
+#          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
+#          cat package.json
+#          npm install
+#          npm run backend:dropAllDBTables
+#          npm run cyServices:start
+#          cd ..
+
       - name: Prep Services for Cypress tests
         run: |
           cd e2e-tests
-          ls
-#          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
-#          cat package.json
           npm install
           npm run backend:dropAllDBTables
           npm run cyServices:start
