@@ -142,7 +142,7 @@ class PkiUserLookup {
 
     @Profile
     boolean isServiceAvailable() {
-        return restTemplate.getForObject(userInfoHealthCheckUri, Status).status == Status.STATUS.UP
+        return restTemplate.getForObject(userInfoHealthCheckUri, Status).status == Status.STATUS.OK
     }
 
     private void validate(UserInfo userInfo, String requestValue) {
@@ -188,7 +188,7 @@ class PkiUserLookup {
     }
 
     static class Status {
-        enum STATUS { UP }
+        enum STATUS { OK }
         STATUS status
     }
 }
