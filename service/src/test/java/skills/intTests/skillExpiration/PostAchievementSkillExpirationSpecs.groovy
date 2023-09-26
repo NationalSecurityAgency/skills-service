@@ -1764,4 +1764,98 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
     }
+
+    def "get list of expired skills for project"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        String secondUserId = "user2"
+        Long timestamp = (new Date()-8).time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date(timestamp))
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(timestamp))
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+
+        def user1Expired = skillsService.getExpiredSkills(proj.projectId, "user1", "", 30, 1, "skillName", true)
+        def user2Expired = skillsService.getExpiredSkills(proj.projectId, "user2", "", 30, 1, "skillName", true)
+
+        then:
+        user1Expired.skillId == [
+            "skill1", "skill10", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"
+        ]
+        user1Expired.skillName == [
+            "Test Skill 1", "Test Skill 10", "Test Skill 2", "Test Skill 3", "Test Skill 4", "Test Skill 5", "Test Skill 6", "Test Skill 7", "Test Skill 8", "Test Skill 9"
+        ]
+        user2Expired.skillId == [
+            "skill1", "skill10", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"
+        ]
+        user2Expired.skillName == [
+            "Test Skill 1", "Test Skill 10", "Test Skill 2", "Test Skill 3", "Test Skill 4", "Test Skill 5", "Test Skill 6", "Test Skill 7", "Test Skill 8", "Test Skill 9"
+        ]
+
+    }
+
+    def "get list of expired skills for project filtered by skill name"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        String secondUserId = "user2"
+        Long timestamp = (new Date()-8).time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date(timestamp))
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(timestamp))
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+
+        def skill4Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 4", 30, 1, "userId", true)
+        def skill7Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 7", 30, 1, "userId", true)
+
+        then:
+        skill4Expired.skillId == [
+                "skill4", "skill4"
+        ]
+        skill4Expired.skillName == [
+                "Test Skill 4", "Test Skill 4"
+        ]
+        skill7Expired.skillId == [
+                "skill7", "skill7"
+        ]
+        skill7Expired.skillName == [
+                "Test Skill 7", "Test Skill 7"
+        ]
+
+    }
 }
