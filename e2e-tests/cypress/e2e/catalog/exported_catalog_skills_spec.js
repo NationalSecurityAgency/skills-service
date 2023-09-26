@@ -637,6 +637,7 @@ describe('Skills Exported to Catalog Tests', () => {
     });
 
     it('Select larger page', () => {
+        cy.intercept('/admin/projects/proj1/skills/exported?*').as('loadExportedSkills')
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -663,11 +664,13 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.exportSkillToCatalog(1, 2, 11);
 
         cy.visit('/administrator/projects/proj1/skills-catalog');
+        cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '11');
         cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`)
             .select('10');
-        cy.get(`${tableSelector} [data-cy="nameCell_skill10Subj2"]`)
+        cy.wait('@loadExportedSkills');
+        cy.get(`${tableSelector} table tbody [role="row"]`).should('have.length', 10)
 
         cy.get(`${tableSelector} th`)
             .contains('Subject')

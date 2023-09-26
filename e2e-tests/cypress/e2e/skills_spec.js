@@ -536,14 +536,14 @@ describe('Skills Tests', () => {
       numPerformToCompletion: '5'
     });
 
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
-    }).as('loadSkill');
+    cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill1').as('loadSkill');
+    cy.intercept('/admin/projects/proj1').as('loadProject');
 
-    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent');
     cy.wait('@loadSkill');
-    cy.contains('Add Event').click();
+    cy.wait('@loadProject')
+    cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+    cy.get('[data-cy="skillId"]').contains('skill1')
 
     const expectedErrMsg = 'User Id may not contain spaces';
     const userIdSelector = '[data-cy=userIdInput]';

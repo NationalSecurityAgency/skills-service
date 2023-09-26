@@ -65,7 +65,8 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-
+        cy.get('[data-cy="noContent"]').contains('No Projects Yet');
+        cy.get('[data-cy=newProjectButton]').should('be.enabled')
         cy.get('[data-cy=newProjectButton]')
             .focus()
             .realPress('Enter');

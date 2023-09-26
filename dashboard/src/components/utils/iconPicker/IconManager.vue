@@ -389,7 +389,7 @@ limitations under the License.
       },
       customIconUploadRequest(event) {
         this.$refs.validationProvider.validate(event).then((res) => {
-          if (res) {
+          if (res && res.valid) {
             this.disableCustomUpload = true;
             FileUploadService.upload(this.uploadUrl, event.form, (response) => {
               self.handleUploadedIcon(response.data);

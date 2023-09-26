@@ -497,6 +497,8 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@getAvailableSkillsForGlobalBadge')
+        cy.get('[data-cy="noContent"]').contains('No Skills Added Yet')
+        cy.wait(1000)
         cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
@@ -2311,6 +2313,8 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@getAvailableSkillsForGlobalBadge')
+        cy.get('[data-cy="noContent"]').contains('No Skills Added Yet')
+        cy.wait(1000)
         cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
