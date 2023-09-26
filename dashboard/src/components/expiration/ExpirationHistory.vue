@@ -42,6 +42,20 @@ limitations under the License.
                         @sort-changed="sortTable"
                         tableStoredStateId="expirationHistoryTable"
                         data-cy="expirationHistoryTable">
+          <template #head(userId)="data">
+            <span class="text-primary">
+              <i class="fas fa-user-cog skills-color-skills" aria-hidden="true"/> {{ data.label }}
+            </span>
+          </template>
+          <template #head(skillName)="data">
+            <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" aria-hidden="true"></i> {{ data.label }}</span>
+          </template>
+          <template #head(expiredOn)="data">
+            <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
+          </template>
+          <template v-slot:cell(skillName)="data">
+            <link-to-skill-page :project-id="projectId" :skill-id="data.item.skillId" :link-label="data.label" data-cy="linkToSkill"/>
+          </template>
           <template v-slot:cell(expiredOn)="data">
             <date-cell :value="data.value" />
           </template>
@@ -54,6 +68,7 @@ limitations under the License.
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
+  import LinkToSkillPage from '@/components/utils/LinkToSkillPage';
   import ExpirationService from '@/components/expiration/ExpirationService';
   import DateCell from '../utils/table/DateCell';
 
@@ -63,9 +78,11 @@ limitations under the License.
       SubPageHeader,
       SkillsBTable,
       DateCell,
+      LinkToSkillPage,
     },
     data() {
       return {
+        projectId: this.$route.params.projectId,
         filters: {
           skillName: '',
           userId: '',
