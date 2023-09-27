@@ -1176,6 +1176,10 @@ class SkillsService {
         return wsHelper.rootPut("/addRoot/${userId}")
     }
 
+    def expireSkills() {
+        wsHelper.rootPost('/runSkillExpiration');
+    }
+
     def pinProject(String projectId) {
         return wsHelper.rootPost("/pin/${projectId}")
     }

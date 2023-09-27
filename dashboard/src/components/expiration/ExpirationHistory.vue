@@ -139,7 +139,8 @@ limitations under the License.
           userId: this.filters.userId,
         };
         ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
-          this.table.items = res;
+          this.table.items = res.data;
+          this.table.options.pagination.totalRows = res.totalCount;
         });
       },
       sortTable(sortContext) {

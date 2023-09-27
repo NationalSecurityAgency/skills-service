@@ -54,6 +54,7 @@ import skills.settings.SystemSettings
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
+import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 
 import javax.xml.bind.DatatypeConverter
 import java.nio.charset.StandardCharsets
@@ -111,6 +112,9 @@ class RootController {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor
+
     @GetMapping('/rootUsers')
     @ResponseBody
     List<UserRoleRes> getRootUsers() {
@@ -161,6 +165,10 @@ class RootController {
         }
     }
 
+    @PostMapping('/runSkillExpiration')
+    void runSkillExpiration() {
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+    }
 
     @GetMapping('/isRoot')
     boolean isRoot(Principal principal) {

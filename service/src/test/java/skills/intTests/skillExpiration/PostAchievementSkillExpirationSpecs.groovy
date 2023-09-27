@@ -1793,8 +1793,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         when:
         expireSkills(proj.projectId, skills)
 
-        def user1Expired = skillsService.getExpiredSkills(proj.projectId, "user1", "", 30, 1, "skillName", true)
-        def user2Expired = skillsService.getExpiredSkills(proj.projectId, "user2", "", 30, 1, "skillName", true)
+        def user1Expired = skillsService.getExpiredSkills(proj.projectId, "user1", "", 30, 1, "skillName", true).data
+        def user2Expired = skillsService.getExpiredSkills(proj.projectId, "user2", "", 30, 1, "skillName", true).data
 
         then:
         user1Expired.skillId == [
@@ -1840,8 +1840,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         when:
         expireSkills(proj.projectId, skills)
 
-        def skill4Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 4", 30, 1, "userId", true)
-        def skill7Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 7", 30, 1, "userId", true)
+        def skill4Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 4", 30, 1, "userId", true).data
+        def skill7Expired = skillsService.getExpiredSkills(proj.projectId, "", "Test Skill 7", 30, 1, "userId", true).data
 
         then:
         skill4Expired.skillId == [

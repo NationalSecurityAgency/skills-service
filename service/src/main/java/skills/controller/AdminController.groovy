@@ -1705,7 +1705,7 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/expirations", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<ExpiredSkillRes> getExpiredSkills(@PathVariable(name = "projectId") String projectId,
+    TableResult getExpiredSkills(@PathVariable(name = "projectId") String projectId,
                                            @RequestParam(name = "userId", required = false) String userIdParam,
                                            @RequestParam(name = "skillName", required = false) String skillName,
                                            @RequestParam int page,
