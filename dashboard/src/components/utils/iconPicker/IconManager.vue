@@ -57,10 +57,10 @@ limitations under the License.
           </template>
           <div data-cy="customIconUpload">
             <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ errors }" rules="image|imageDimensions|duplicateFilename">
-            <file-upload
-                         :name="'customIcon'"
-                         @file-selected="customIconUploadRequest"
-                        :disable-input="disableCustomUpload"/>
+              <b-form-file
+                  v-model="currentCustomIconFile"
+                  placeholder="Drag your file here to upload"
+                  @input="customIconUploadRequest" />
             <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
 
             <b-alert show variant="danger" v-show="errors[0]" class="text-center" data-cy="customIconErr">
@@ -103,7 +103,6 @@ limitations under the License.
   import { extend } from 'vee-validate';
   import { image } from 'vee-validate/dist/rules';
   import FileUploadService from '@/common-components/utilities/FileUploadService';
-  import FileUpload from '../upload/FileUpload';
   import fontAwesomeIconsCanonical from './font-awesome-index';
   import materialIconsCanonical from './material-index';
   import IconManagerService from './IconManagerService';
@@ -167,7 +166,7 @@ limitations under the License.
     validate(value) {
       return new Promise((resolve) => {
         if (value) {
-          const file = value.form.get('customIcon');
+          const file = value;
           const customIcon = new Image();
           customIcon.src = window.URL.createObjectURL(file);
           customIcon.onload = () => {
@@ -199,7 +198,7 @@ limitations under the License.
     validate(value) {
       return new Promise((resolve) => {
         if (value) {
-          const file = value.form.get('customIcon');
+          const file = value;
 
           const index = definitiveCustomIconList.findIndex((item) => item.filename === file.name);
           if (index >= 0) {
@@ -231,7 +230,7 @@ limitations under the License.
 
   export default {
     name: 'IconManager',
-    components: { FileUpload, 'virtual-list': VirtualList },
+    components: { 'virtual-list': VirtualList },
     mixins: [ToastSupport],
     props: {
       searchBox: String,
@@ -268,6 +267,7 @@ limitations under the License.
         customIconList,
         disableCustomUpload: false,
         rowItemComponent: IconRow,
+        currentCustomIconFile: null,
       };
     },
     computed: {
@@ -387,11 +387,13 @@ limitations under the License.
 
         this.$emit('selected-icon', result);
       },
-      customIconUploadRequest(event) {
-        this.$refs.validationProvider.validate(event).then((res) => {
+      customIconUploadRequest(customIcon) {
+        this.$refs.validationProvider.validate(customIcon).then((res) => {
           if (res && res.valid) {
             this.disableCustomUpload = true;
-            FileUploadService.upload(this.uploadUrl, event.form, (response) => {
+            const data = new FormData();
+            data.append('customIcon', customIcon);
+            FileUploadService.upload(this.uploadUrl, data, (response) => {
               self.handleUploadedIcon(response.data);
               self.successToast('Success!', 'File successfully uploaded');
               this.disableCustomUpload = false;
