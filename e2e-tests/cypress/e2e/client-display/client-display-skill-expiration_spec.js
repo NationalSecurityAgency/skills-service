@@ -245,33 +245,38 @@ describe('Client Display Expiration Tests', () => {
         cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
 
-        const nextRuntime = moment.utc().add(1, 'day').hour(1).minute(0).second(0).millisecond(0)
-        cy.log(`nextRuntime [${nextRuntime}], from now [${nextRuntime.fromNow()}]`);
+        const currentHourOfDay = moment.utc().hour()
+        const hourOfRun = 1
+        const incrementStartDays = currentHourOfDay < hourOfRun ? 0 : 1;
+        const firstRuntime = moment.utc().add(incrementStartDays, 'day').hour(hourOfRun).minute(0).second(0).millisecond(0)
+        const secondRuntime = moment.utc().add(incrementStartDays+1, 'day').hour(hourOfRun).minute(0).second(0).millisecond(0)
+        const thirdRuntime = moment.utc().add(incrementStartDays+2, 'day').hour(hourOfRun).minute(0).second(0).millisecond(0)
+        cy.log(`currentHourOfDay [${currentHourOfDay}], firstRuntime [${firstRuntime}], from now [${firstRuntime.fromNow()}]`);
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('exist');
-        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`).contains(`Expires ${nextRuntime.fromNow()}`)
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`).contains(`Expires ${firstRuntime.fromNow()}`)
         cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
           .should('exist');
-        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`).contains('Expires in a day')
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`).contains(`Expires ${secondRuntime.fromNow()}`)
         cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`)
           .should('exist');
-        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`).contains('Expires in 2 days')
+        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="expirationDate"]`).contains(`Expires ${thirdRuntime.fromNow()}`)
 
         cy.cdClickSkill(0);
         cy.get(`[data-cy="expirationDate"]`).should('exist');
-        cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${nextRuntime.fromNow()}`)
+        cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${firstRuntime.fromNow()}`)
 
         cy.get('[data-cy="nextSkill"]').click();
         cy.get(`[data-cy="expirationDate"]`).should('exist');
-        cy.get(`[data-cy="expirationDate"]`).contains('Expires in a day')
+        cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${secondRuntime.fromNow()}`)
 
         cy.get('[data-cy="nextSkill"]').click();
         cy.get(`[data-cy="expirationDate"]`).should('exist');
-        cy.get(`[data-cy="expirationDate"]`).contains('Expires in 2 days')
+        cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${thirdRuntime.fromNow()}`)
 
     });
 });
