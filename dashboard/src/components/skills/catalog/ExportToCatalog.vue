@@ -99,6 +99,7 @@ limitations under the License.
     <div v-if="isExportable" slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right"
                 @click="handleExport"
+                :disabled="loadingData"
                 data-cy="exportToCatalogButton">
         Export
       </b-button>
