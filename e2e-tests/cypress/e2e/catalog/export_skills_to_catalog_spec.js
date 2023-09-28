@@ -58,6 +58,10 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
         cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
+        cy.get('[data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -149,6 +153,10 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
         cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
+        cy.get('[data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -235,6 +243,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -329,6 +341,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -944,11 +960,14 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
             .should('be.visible');
-
         cy.get('[data-cy="skillExportToCatalogBtn"]')
             .click();
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist');
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -957,6 +976,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .contains('Nothing Available for Import');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -1014,6 +1037,10 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('.modal-body').contains('This will export [Very Great Skill 1]')
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
