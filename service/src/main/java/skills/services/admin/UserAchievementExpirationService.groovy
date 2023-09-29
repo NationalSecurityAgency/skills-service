@@ -68,7 +68,7 @@ class UserAchievementExpirationService {
             if (nextExpirationDate.isBefore(now)) {
                 expireAchievementsForSkill(skillAttributesDef.skillRefId)
 
-                expirationAttrs.lastExpirationDate = nextExpirationDate
+                expirationAttrs.lastExpirationDate = expirationAttrs.nextExpirationDate
                 // update nextExpirationDate
                 expirationAttrs.nextExpirationDate = getNextExpirationDate(expirationAttrs)?.toDate()
                 skillAttributesDef.attributes = skillAttributeService.mapper.writeValueAsString(expirationAttrs)
