@@ -199,7 +199,7 @@ describe('Verify Email Tests', () => {
 
     it('register dashboard and confirm email address', () => {
       Cypress.Commands.add('navToSettings', () => {
-        cy.get('[data-cy="settings-button"]')
+        cy.get('[data-cy="settings-button"] button')
           .click();
         cy.get('[data-cy="settingsButton-navToSettings"]')
           .should('not.be.disabled');

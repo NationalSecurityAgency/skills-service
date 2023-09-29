@@ -18,6 +18,8 @@ var moment = require('moment-timezone');
 describe('Export Skills to the Catalog Tests', () => {
 
     beforeEach(() => {
+        // bootstrap-vue tooltip in a table warns erroneously
+        Cypress.env('ignoreConsoleWarnings', true);
 
         cy.createProject(1);
         cy.createSubject(1, 1);
@@ -55,6 +57,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -147,6 +153,10 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
         cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
+        cy.get('[data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -233,6 +243,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -327,6 +341,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -932,16 +950,24 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.exportSkillToCatalog(1, 1, 5);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-
+        cy.get('[data-cy="manageSkillBtn_skill6"]')
         // export another skill to validate that it makes it to import dialog
         cy.get('[data-cy="skillSelect-skill6"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
+        cy.get('[data-cy="skillExportToCatalogBtn"]')
+            .should('be.visible');
         cy.get('[data-cy="skillExportToCatalogBtn"]')
             .click();
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist');
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -950,6 +976,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .contains('Nothing Available for Import');
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -993,14 +1023,24 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
         cy.get('[data-cy="skillSelect-skill1"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
+            .should('be.visible');
+        cy.get('[data-cy="skillExportToCatalogBtn"]')
             .click();
+        cy.get('.modal-body').contains('This will export [Very Great Skill 1]')
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
+        cy.get('[data-cy="okButton"]')
+            .should('be.enabled');
+        cy.get('[data-cy="checkingCatalogStatus"]')
+            .should('not.exist')
         cy.get('[data-cy="okButton"]')
             .click();
 
@@ -1054,8 +1094,11 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(2, 1, 5);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
         cy.get('[data-cy="skillSelect-skill1"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
@@ -1083,6 +1126,8 @@ describe('Export Skills to the Catalog Tests', () => {
             .click({ force: true });
         cy.get('[data-cy="skillSelect-diffId"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 2);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
@@ -1114,6 +1159,9 @@ describe('Export Skills to the Catalog Tests', () => {
             .click({ force: true });
         cy.get('[data-cy="skillSelect-skill4"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 3);
+
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
@@ -1143,6 +1191,8 @@ describe('Export Skills to the Catalog Tests', () => {
         // multiple skills can be exported while some cannot
         cy.get('[data-cy="selectAllSkillsBtn"]')
             .click();
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 5);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
@@ -1193,8 +1243,12 @@ describe('Export Skills to the Catalog Tests', () => {
         }
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="skillsTable"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', 15);
         cy.get('[data-cy="selectAllSkillsBtn"]')
             .click();
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 15);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')
@@ -1242,8 +1296,11 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(2, 1, 7);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
         cy.get('[data-cy="selectAllSkillsBtn"]')
             .click();
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 7);
 
         // export after loading the page
         cy.exportSkillToCatalog(2, 1, 7);
@@ -1275,8 +1332,12 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.addCrossProjectLearningPathItem(1, 1, 2, 1)
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]');
+
         cy.get('[data-cy="selectAllSkillsBtn"]')
             .click();
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
 
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
@@ -1319,9 +1380,12 @@ describe('Export Skills to the Catalog Tests', () => {
     it('do not allow to export if the project has insufficient points', () => {
         cy.createSkill(1, 1, 1, { pointIncrement: 10 });
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillBtn_skill1"]')
 
         cy.get('[data-cy="skillSelect-skill1"]')
             .click({ force: true });
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+            .should('have.text', 1);
         cy.get('[data-cy="skillActionsBtn"] button')
             .click();
         cy.get('[data-cy="skillExportToCatalogBtn"]')

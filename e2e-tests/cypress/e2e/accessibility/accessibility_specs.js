@@ -386,6 +386,9 @@ describe('Accessibility Tests', () => {
 
         cy.intercept('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1')
             .as('saveGlobalBadgeLevel');
+        cy.intercept('/supervisor/badges/globalbadgeBadge/skills/available?query=').as('getAvailableSkills')
+        cy.intercept('/supervisor/badges/globalbadgeBadge/projects/available?query=').as('getAvailableProjects')
+        cy.intercept('/supervisor/projects/MyNewtestProject/levels').as('getProjectLevels')
         cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
         cy.visit('/administrator');
         cy.injectAxe();
@@ -402,6 +405,7 @@ describe('Accessibility Tests', () => {
             .click();
         cy.contains('Manage')
             .click();
+        cy.wait('@getAvailableSkills')
         cy.customLighthouse();
         cy.customA11y();
 
@@ -419,11 +423,13 @@ describe('Accessibility Tests', () => {
 
         cy.get('#project-selector')
             .click();
+        cy.wait('@getAvailableProjects')
         cy.get('#project-selector .vs__dropdown-option')
             .eq(0)
             .click();
         cy.get('#level-selector')
             .click();
+        cy.wait('@getProjectLevels')
         cy.get('#level-selector .vs__dropdown-option')
             .eq(1)
             .click();
@@ -434,6 +440,8 @@ describe('Accessibility Tests', () => {
 
         cy.get('[data-cy=addGlobalBadgeLevel]')
             .click();
+        cy.get('[data-cy="simpleLevelsTable"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '1');
         cy.customA11y();
     });
 

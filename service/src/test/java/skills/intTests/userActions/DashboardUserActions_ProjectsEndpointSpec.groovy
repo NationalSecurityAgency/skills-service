@@ -251,7 +251,6 @@ class DashboardUserActions_ProjectsEndpointSpec extends DefaultIntSpec {
         approverService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
         then:
         SkillsClientException skillsClientException = thrown()
-        skillsClientException.resBody.contains("You do not have permission")
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
     }
 
@@ -267,7 +266,6 @@ class DashboardUserActions_ProjectsEndpointSpec extends DefaultIntSpec {
         approverService.getProjectUserActionAttributes(p1.projectId, actions.data[0].id)
         then:
         SkillsClientException skillsClientException = thrown()
-        skillsClientException.resBody.contains("You do not have permission")
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
     }
 }

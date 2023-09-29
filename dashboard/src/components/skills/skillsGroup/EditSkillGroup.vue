@@ -33,6 +33,7 @@ limitations under the License.
               <label for="groupNameInput">* Group Name</label>
               <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueGroupName|customNameValidator"
                                   v-slot="{errors}"
+                                  :debounce="250"
                                   name="Group Name">
                 <input class="form-control" type="text" v-model="internalGroup.name"
                        v-on:input="updateId"

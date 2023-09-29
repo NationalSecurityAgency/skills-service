@@ -559,6 +559,7 @@ describe('Survey Question CRUD Tests', () => {
     });
 
     it('user keyboard to sort questions', function () {
+        cy.intercept('PATCH', '/admin/quiz-definitions/quiz1/questions/*').as('patchQuestion');
         cy.createSurveyDef(1);
         cy.createTextInputQuestionDef(1, 1)
         cy.createSurveyMultipleChoiceQuestionDef(1, 2)
@@ -566,33 +567,45 @@ describe('Survey Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
+        cy.log("Operation: 1")
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{downArrow}');
+        cy.wait('@patchQuestion')
+        cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]').should('have.focus');
+        cy.log("Operation: 2")
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{downArrow}');
+        cy.wait('@patchQuestion')
+        cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 3', 'question # 1']);
 
         // attempt to move the lowest item - should not change anything
+        cy.log("Operation: 3")
         cy.get('[data-cy="deleteQuestionButton_2"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 3', 'question # 1']);
 
+        cy.log("Operation: 4")
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{upArrow}');
+        cy.wait('@patchQuestion')
+        cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
         // attempt to move the top item - should not change anything
+        cy.log("Operation: 5")
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
+        cy.log("Operation: 6")
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });

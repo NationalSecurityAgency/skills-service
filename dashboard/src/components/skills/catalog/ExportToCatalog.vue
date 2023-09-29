@@ -21,7 +21,7 @@ limitations under the License.
 
     <div v-if="loadingData" class="mb-5">
       <skills-spinner :is-loading="loadingData" />
-      <div class="h5 text-center text-primary mt-1">Checking Catalog...</div>
+      <div class="h5 text-center text-primary mt-1" data-cy="checkingCatalogStatus">Checking Catalog...</div>
     </div>
     <div v-if="!loadingData">
       <div v-if="isUserCommunityRestricted" class="alert alert-warning" data-cy="userCommunityRestrictedWarning">
@@ -90,7 +90,8 @@ limitations under the License.
     </div>
 
     <div v-if="!isExportable" slot="modal-footer" class="w-100">
-      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="okButton">
+      <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="okButton"
+                :disabled="loadingData">
         OK
       </b-button>
     </div>
@@ -98,6 +99,7 @@ limitations under the License.
     <div v-if="isExportable" slot="modal-footer" class="w-100">
       <b-button variant="success" size="sm" class="float-right"
                 @click="handleExport"
+                :disabled="loadingData"
                 data-cy="exportToCatalogButton">
         Export
       </b-button>
