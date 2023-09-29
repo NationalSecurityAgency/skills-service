@@ -107,6 +107,11 @@ limitations under the License.
             <i class="fas fa-clock skills-color-expiration mr-2"></i>Expires <span class="font-weight-bold">{{ expirationDate(true) | relativeTime() }}</span>, perform this skill to keep your points!
           </div>
         </div>
+        <div v-if="showHasExpiredMessage" data-cy="hasExpired">
+          <div class="my-2">
+            <i class="fas fa-clock skills-color-expiration mr-2"></i>Points expired <span class="font-weight-bold">{{ skill.lastExpirationDate | relativeTime() }}</span>
+          </div>
+        </div>
 
         <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && allowDrillDown" data-cy="approvalPending">
           <span v-if="!skill.selfReporting.rejectedOn"><i class="far fa-clock" aria-hidden="true"></i> Pending Approval</span>
@@ -314,6 +319,12 @@ limitations under the License.
       },
       showBadgesAndTagsRow() {
         return ((this.skill.badges && this.skill.badges.length > 0 && !this.badgeId) || (this.skill.tags && this.skill.tags.length > 0));
+      },
+      showHasExpiredMessage() {
+        if (this.skillInternal && this.skillInternal.lastExpirationDate && this.skillInternal.points === 0) {
+          return true;
+        }
+        return false;
       },
       showMotivationalExpirationMessage() {
         if (this.skillInternal && this.skillInternal.achievedOn && this.expirationDate() && this.skillInternal.isMotivationalSkill) {

@@ -528,10 +528,12 @@ class SkillsLoader {
         ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
         Date expirationDate
         Date mostRecentlyPerformedOn
+        Date lastExpirationDate
         int daysOfInactivityBeforeExp = 0
         Boolean isMotivationalSkill = false
         if (expirationAttrs) {
             expirationDate = expirationAttrs.nextExpirationDate
+            lastExpirationDate = expirationAttrs.lastExpirationDate
             isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
             if (isMotivationalSkill) {
                 UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
@@ -612,6 +614,7 @@ class SkillsLoader {
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
+                lastExpirationDate: lastExpirationDate
         )
     }
 
@@ -1226,11 +1229,13 @@ class SkillsLoader {
                 Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, skillDef.projectId, skillDef.skillId)
                 Date expirationDate
                 Date mostRecentlyPerformedOn
+                Date lastExpirationDate
                 int daysOfInactivityBeforeExp = 0
                 Boolean isMotivationalSkill = false
                 if (skillDefAndUserPoints.attributes && skillDefAndUserPoints.attributes.type == SkillAttributesDef.SkillAttributesType.AchievementExpiration) {
                     ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
                     expirationDate = expirationAttrs.nextExpirationDate
+                    lastExpirationDate = expirationAttrs.lastExpirationDate
                     isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
                     if (isMotivationalSkill) {
                         UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
@@ -1273,6 +1278,7 @@ class SkillsLoader {
                         isMotivationalSkill: isMotivationalSkill,
                         daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                         mostRecentlyPerformedOn: mostRecentlyPerformedOn,
+                        lastExpirationDate: lastExpirationDate
                 )
             }
         }
