@@ -20,11 +20,11 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.CacheStats
 import com.google.common.cache.LoadingCache
-import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.ParameterizedTypeReference
@@ -47,7 +47,8 @@ import java.util.concurrent.TimeUnit
 class PkiUserLookup {
 
 //    use @Autowired if you want to utilize apache HttpClient (see HttpClientRestTemplateConfig)
-    RestTemplate restTemplate = new RestTemplate()
+    @Autowired
+    RestTemplate restTemplate // = new RestTemplate()
 
     @Value('${skills.authorization.userInfoUri}')
     String userInfoUri
@@ -77,9 +78,14 @@ class PkiUserLookup {
             @Override
             UserInfo load(String dn) throws Exception {
                 String issuerDn = getIssuerDn()
-                UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn, issuerDn)
-                validate(userInfo, dn)
-                return userInfo
+                try {
+                    UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn, issuerDn)
+                    validate(userInfo, dn)
+                    return userInfo
+                } catch (Throwable t) {
+                    log.error("Failed while calling [${userInfoUri}], dn=[${dn}], issuerDn=[${issuerDn}]", t)
+                    throw t
+                }
             }
         })
 
