@@ -15,25 +15,20 @@ limitations under the License.
 */
 <template>
   <div class="inception-container pb-4">
-    <skills-display
-      :options="options"
-      :version="skillsVersion"
-      :theme="theme"
-      ref="skillsDisplayRef"
-      @route-changed="skillsDisplayRouteChanged"/>
+    <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
   </div>
 </template>
 
 <script>
-  import { SkillsDisplay } from '@skilltree/skills-client-vue';
+  import { SkillsDisplayJS } from '@skilltree/skills-client-js';
   import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
 
   export default {
     name: 'InceptionSkills',
     mixins: [SkillsDisplayOptionsMixin],
-    components: {
-      SkillsDisplay,
-    },
+    // components: {
+    //   SkillsDisplay,
+    // },
     data() {
       return {
         projectId: 'Inception',
@@ -48,6 +43,14 @@ limitations under the License.
           pageTitleFontSize: '1.5rem',
         },
       };
+    },
+    mounted() {
+      const clientDisplay = new SkillsDisplayJS({
+        version: this.skillsVersion,
+        options: this.options,
+        theme: this.theme,
+      });
+      clientDisplay.attachTo(document.querySelector('#skills-client-container'));
     },
   };
 </script>

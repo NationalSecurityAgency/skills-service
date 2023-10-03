@@ -117,7 +117,7 @@ limitations under the License.
 
 <script>
   import Sortable from 'sortablejs';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import MyProject from '@/components/projects/MyProject';
   import EditProject from '@/components/projects/EditProject';
   import LoadingContainer from '@/components/utils/LoadingContainer';

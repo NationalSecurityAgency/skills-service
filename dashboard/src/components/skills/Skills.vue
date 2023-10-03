@@ -72,7 +72,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import SkillsTable from '@/components/skills/SkillsTable';

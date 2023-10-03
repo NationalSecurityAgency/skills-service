@@ -53,8 +53,8 @@ import {
   FormRatingPlugin,
   BFormSpinbutton,
 } from 'bootstrap-vue';
-
-import { SkillsConfiguration, SkillsDirective, SkillsReporter } from '@skilltree/skills-client-vue';
+// SkillsDirective
+import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
 } from 'vee-validate';
@@ -69,6 +69,7 @@ import '@/common-components/filter/ByteFilter';
 import '@/common-components/filter/FormatDurationFilter';
 import PageVisitService from '@/components/PageVisitService';
 import InceptionConfigurer from './InceptionConfigurer';
+import SkillsReporterDirective from './directives/SkillsReporterDirective';
 import 'babel-polyfill';
 import 'matchmedia-polyfill';
 import 'matchmedia-polyfill/matchMedia.addListener';
@@ -126,7 +127,15 @@ Vue.component('BIcon', BIcon);
 Vue.component('BIconQuestion', BIconQuestion);
 Vue.component('b-form-spinbutton', BFormSpinbutton);
 
-Vue.use(SkillsDirective);
+const install = (vue) => {
+  vue.directive('skills', SkillsReporterDirective);
+};
+
+window.SkillsReporterDirective = SkillsReporterDirective;
+Vue.use(install);
+SkillsReporterDirective.install = install;
+
+Vue.use(SkillsReporterDirective);
 Vue.use(FiltersPlugin);
 Vue.use(VueAnnouncer, {}, router);
 

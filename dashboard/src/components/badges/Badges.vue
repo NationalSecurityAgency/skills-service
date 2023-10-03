@@ -61,7 +61,7 @@ limitations under the License.
 <script>
   import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
 
   import BadgesService from '@/components/badges/BadgesService';
   import Badge from '@/components/badges/Badge';

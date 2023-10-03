@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
-    "@skilltree/skills-client-vue": "3.5.0",
+    "@skilltree/skills-client-js": "3.5.0",
     "@toast-ui/editor": "3.2.1",
     "@toast-ui/vue-editor": "3.2.2",
     "@vue-a11y/announcer": "2.1.0",

@@ -111,7 +111,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import CatalogService from '@/components/skills/catalog/CatalogService';
   import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';

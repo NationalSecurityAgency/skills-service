@@ -358,7 +358,7 @@ limitations under the License.
 
 <script>
   import { extend, ValidationProvider } from 'vee-validate';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
   import SettingService from './SettingsService';
   import SubPageHeader from '../utils/pages/SubPageHeader';

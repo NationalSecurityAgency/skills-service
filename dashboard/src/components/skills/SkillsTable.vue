@@ -412,7 +412,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import dayjs from '@/common-components/DayJsCustomizer';
   import StringHighlighter from '@/common-components/utilities/StringHighlighter';
   import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';

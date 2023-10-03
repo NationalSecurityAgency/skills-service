@@ -33,14 +33,7 @@ limitations under the License.
       </b-form>
     </sub-page-header>
     <loading-container :is-loading="checkingAccess">
-      <skills-display
-        v-if="canAccess"
-        :options="configuration"
-        :version="selectedVersion"
-        :user-id="userIdParam"
-        :theme="theme"
-        ref="skillsDisplayRef"
-        @route-changed="skillsDisplayRouteChanged"/>
+      <div v-if="canAccess" id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
       <div v-else class="container">
         <div class="row justify-content-center">
           <div class="col-md-6 mt-3">
@@ -57,7 +50,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsDisplayJS, SkillsReporter } from '@skilltree/skills-client-js';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
@@ -71,7 +64,7 @@ limitations under the License.
     components: {
       InlineHelp,
       SubPageHeader,
-      SkillsDisplay,
+      // SkillsDisplay,
       LoadingContainer,
     },
     data() {
@@ -137,6 +130,14 @@ limitations under the License.
           UsersService.canAccess(this.projectId, this.userIdParam).then((res) => {
             this.canAccess = res === true;
             this.checkingAccess = false;
+          }).finally(() => {
+            const clientDisplay = new SkillsDisplayJS({
+              version: this.selectedVersion,
+              options: this.configuration,
+              theme: this.theme,
+              userId: this.userIdParam,
+            });
+            clientDisplay.attachTo(document.querySelector('#skills-client-container'));
           });
         } else {
           this.checkingAccess = false;
