@@ -16,16 +16,25 @@
 package skills.websocket
 
 import groovy.util.logging.Slf4j
+import io.netty.handler.ssl.SslContextBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
+import org.springframework.messaging.simp.config.StompBrokerRelayRegistration
+import org.springframework.messaging.simp.stomp.StompReactorNettyCodec
+import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient
+import org.springframework.util.ResourceUtils
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 import skills.auth.AuthMode
+
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.TrustManagerFactory
+import java.security.KeyStore
 
 @Configuration
 @Slf4j
@@ -42,6 +51,9 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value('#{"${skills.websocket.relayPort:61613}"}')
     Integer relayPort
 
+    @Value('#{"${skills.websocket.enableRelayTls:false}"}')
+    Boolean enableRelayTls
+
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
@@ -52,11 +64,43 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     void configureMessageBroker(MessageBrokerRegistry registry) {
         if (enableStompBrokerRelay) {
-            registry.enableStompBrokerRelay('/topic', '/queue')
+            StompBrokerRelayRegistration stompBrokerRelayRegistration = registry.enableStompBrokerRelay('/topic', '/queue')
                     .setRelayHost(relayHost)
                     .setRelayPort(relayPort)
                     .setUserRegistryBroadcast('/topic/registry')
                     .setUserDestinationBroadcast('/topic/unresolved-user-destination')
+
+             if (enableRelayTls) {
+                 ReactorNettyTcpClient<byte[]> tcpClient = new ReactorNettyTcpClient<>((configurer) -> configurer
+                         .host(relayHost)
+                         .port(relayPort)
+                         .secure((spec) -> {
+                             String keyStoreLocation = System.getProperty("javax.net.ssl.keyStore");
+                             String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
+                             String trustStoreLocation = System.getProperty("javax.net.ssl.trustStore");
+                             String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+
+                             KeyStore keyStore = KeyStore.getInstance("JKS");
+                             keyStore.load(new FileInputStream(ResourceUtils.getFile(keyStoreLocation)), keyStorePassword.toCharArray());
+
+                             // Set up key manager factory to use our key store
+                             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                             keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+
+                             // truststore
+                             KeyStore trustStore = KeyStore.getInstance("JKS");
+                             trustStore.load(new FileInputStream((ResourceUtils.getFile(trustStoreLocation))), trustStorePassword.toCharArray());
+
+                             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                             trustManagerFactory.init(trustStore);
+
+                             spec.sslContext(SslContextBuilder.forClient()
+                                     .keyManager(keyManagerFactory)
+                                     .trustManager(trustManagerFactory)
+                                     .build());
+                         }), new StompReactorNettyCodec())
+                 stompBrokerRelayRegistration.setTcpClient(tcpClient)
+             }
         } else {
             registry.enableSimpleBroker('/topic', '/queue')
         }
