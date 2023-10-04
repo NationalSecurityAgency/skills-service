@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="!loading.availableVersions && !loading.userInfo">
+  <div>
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
         <label class="pr-3 d-none d-sm-inline font-weight-bold"
@@ -33,8 +33,8 @@ limitations under the License.
       </b-form>
     </sub-page-header>
     <loading-container :is-loading="checkingAccess">
-      <div v-if="canAccess" id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
-      <div v-else class="container">
+      <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
+      <div v-if="!canAccess" class="container">
         <div class="row justify-content-center">
           <div class="col-md-6 mt-3">
             <div class="text-center mt-5">
@@ -64,11 +64,11 @@ limitations under the License.
     components: {
       InlineHelp,
       SubPageHeader,
-      // SkillsDisplay,
       LoadingContainer,
     },
     data() {
       return {
+        displayLoaded: false,
         projectId: '',
         inviteOnly: false,
         userIdParam: '',
@@ -131,17 +131,17 @@ limitations under the License.
             this.canAccess = res === true;
             this.checkingAccess = false;
           }).finally(() => {
-            const clientDisplay = new SkillsDisplayJS({
-              version: this.selectedVersion,
-              options: this.configuration,
-              theme: this.theme,
-              userId: this.userIdParam,
+            this.$nextTick(() => {
+              this.loadClientDisplay();
             });
-            clientDisplay.attachTo(document.querySelector('#skills-client-container'));
           });
         } else {
           this.checkingAccess = false;
         }
+      }).finally(() => {
+        this.$nextTick(() => {
+          this.loadClientDisplay();
+        });
       });
     },
     computed: {
@@ -163,6 +163,18 @@ limitations under the License.
       },
     },
     methods: {
+      loadClientDisplay() {
+        if (document.querySelector('#skills-client-container') && this.canAccess && !this.displayLoaded) {
+          const clientDisplay = new SkillsDisplayJS({
+            version: this.selectedVersion,
+            options: this.configuration,
+            theme: this.theme,
+            userId: this.userIdParam,
+          });
+          clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+          this.displayLoaded = true;
+        }
+      },
       versionChanged(newValue) {
         const maxVersion = Math.max(...this.versionOptions);
         if (maxVersion !== newValue) {
