@@ -26,9 +26,6 @@ limitations under the License.
   export default {
     name: 'InceptionSkills',
     mixins: [SkillsDisplayOptionsMixin],
-    // components: {
-    //   SkillsDisplay,
-    // },
     data() {
       return {
         projectId: 'Inception',

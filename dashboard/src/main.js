@@ -53,7 +53,7 @@ import {
   FormRatingPlugin,
   BFormSpinbutton,
 } from 'bootstrap-vue';
-// SkillsDirective
+
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js';
 import {
   localize, ValidationProvider, ValidationObserver, setInteractionMode,
@@ -135,7 +135,7 @@ window.SkillsReporterDirective = SkillsReporterDirective;
 Vue.use(install);
 SkillsReporterDirective.install = install;
 
-Vue.use(SkillsReporterDirective);
+// Vue.use(SkillsReporterDirective);
 Vue.use(FiltersPlugin);
 Vue.use(VueAnnouncer, {}, router);
 

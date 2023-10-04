@@ -40,7 +40,9 @@ limitations under the License.
           this.isConfigurationInitialized = true;
         }).finally(() => {
           const skillsLevel = new SkillsLevelJS('Inception');
-          skillsLevel.attachTo(document.querySelector('#skills-level-container'));
+          if (document.querySelector('#skills-level-container')) {
+            skillsLevel.attachTo(document.querySelector('#skills-level-container'));
+          }
         });
     },
     computed: {

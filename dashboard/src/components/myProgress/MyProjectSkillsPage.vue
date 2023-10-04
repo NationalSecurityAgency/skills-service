@@ -29,7 +29,7 @@ limitations under the License.
           Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
         </b-button>
       </div>
-      <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged">
+      <div v-if="!isLoadingSettings" id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged">
       </div>
     </div>
     <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
@@ -149,7 +149,9 @@ limitations under the License.
             options: this.options,
             theme: this.themeObj,
           });
-          clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+          this.$nextTick(() => {
+            clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+          });
         });
       this.handleProjInvitation();
     },
