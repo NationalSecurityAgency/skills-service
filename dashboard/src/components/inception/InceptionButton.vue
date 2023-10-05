@@ -26,9 +26,6 @@ limitations under the License.
 
   export default {
     name: 'InceptionButton',
-    components: {
-      // SkillsLevel,
-    },
     data() {
       return {
         isConfigurationInitialized: false,

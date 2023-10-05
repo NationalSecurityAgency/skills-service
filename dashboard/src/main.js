@@ -135,7 +135,6 @@ window.SkillsReporterDirective = SkillsReporterDirective;
 Vue.use(install);
 SkillsReporterDirective.install = install;
 
-// Vue.use(SkillsReporterDirective);
 Vue.use(FiltersPlugin);
 Vue.use(VueAnnouncer, {}, router);
 
