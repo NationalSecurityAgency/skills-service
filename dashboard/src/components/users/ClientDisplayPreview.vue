@@ -69,6 +69,7 @@ limitations under the License.
     data() {
       return {
         displayLoaded: false,
+        clientDisplay: null,
         projectId: '',
         inviteOnly: false,
         userIdParam: '',
@@ -172,6 +173,7 @@ limitations under the License.
             userId: this.userIdParam,
           });
           clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+          this.clientDisplay = clientDisplay;
           this.displayLoaded = true;
         }
       },

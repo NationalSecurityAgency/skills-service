@@ -55,6 +55,7 @@ limitations under the License.
     data() {
       return {
         isLoadingSettings: true,
+        clientDisplay: null,
         windowWidth: 0,
         oneRem: 0,
         projectId: this.$route.params.projectId,
@@ -151,6 +152,7 @@ limitations under the License.
           });
           this.$nextTick(() => {
             clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+            this.clientDisplay = clientDisplay;
           });
         });
       this.handleProjInvitation();

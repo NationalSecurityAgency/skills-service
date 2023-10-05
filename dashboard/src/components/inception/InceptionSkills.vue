@@ -30,6 +30,7 @@ limitations under the License.
       return {
         projectId: 'Inception',
         skillsVersion: 0,
+        clientDisplay: null,
         theme: {
           disableSkillTreeBrand: true,
           disableBreadcrumb: true,
@@ -48,6 +49,7 @@ limitations under the License.
         theme: this.theme,
       });
       clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+      this.clientDisplay = clientDisplay;
     },
   };
 </script>
