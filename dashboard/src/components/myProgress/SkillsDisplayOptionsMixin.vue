@@ -56,7 +56,8 @@ limitations under the License.
         const currentRoute = this.$route;
         if (newVal.fromDashboard) {
           if (newVal.path && newVal.path !== oldVal.path) { // && newVal.path !== currentRoute.query.skillsClientDisplayPath) {
-            this.$refs.skillsDisplayRef.navigate(newVal.path);
+            const newPath = `/static/clientPortal${newVal.path === '/' ? '/index.html' : newVal.path}`;
+            this.$refs.skillsDisplayRef.querySelector('iframe').src = newPath;
           }
         } else if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
           const newRoute = {
