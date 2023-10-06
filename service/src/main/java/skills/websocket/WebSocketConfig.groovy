@@ -24,17 +24,25 @@ import org.springframework.core.annotation.Order
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
 import org.springframework.messaging.simp.config.StompBrokerRelayRegistration
+import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler
 import org.springframework.messaging.simp.stomp.StompReactorNettyCodec
+import org.springframework.messaging.simp.stomp.StompTcpConnectionHandler
+import org.springframework.messaging.tcp.ReconnectStrategy
+import org.springframework.messaging.tcp.TcpConnectionHandler
+import org.springframework.messaging.tcp.reactor.ReactorNettyCodec
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient
 import org.springframework.util.ResourceUtils
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
+import reactor.netty.tcp.TcpClient
 import skills.auth.AuthMode
 
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.TrustManagerFactory
 import java.security.KeyStore
+import java.util.concurrent.CompletableFuture
+import java.util.function.Function
 
 @Configuration
 @Slf4j
@@ -71,7 +79,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     .setUserDestinationBroadcast('/topic/unresolved-user-destination')
 
              if (enableRelayTls) {
-                 ReactorNettyTcpClient<byte[]> tcpClient = new ReactorNettyTcpClient<>((configurer) -> configurer
+                 ReactorNettyTcpClient<byte[]> tcpClient = new SkillsReactorNettyTcpClient<>((configurer) -> configurer
                          .host(relayHost)
                          .port(relayPort)
                          .secure((spec) -> {
@@ -118,6 +126,32 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     void configureClientInboundChannel(ChannelRegistration registration) {
         if(chainedChannelInterceptor) {
             registration.interceptors(chainedChannelInterceptor)
+        }
+    }
+
+    static class SkillsReactorNettyTcpClient<P> extends ReactorNettyTcpClient<P> {
+
+        SkillsReactorNettyTcpClient(Function<TcpClient, TcpClient> clientConfigurer, ReactorNettyCodec<P> codec) {
+            super(clientConfigurer, codec)
+        }
+
+        @Override
+        CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> handler) {
+            removeAuthHeaders(handler)
+            return super.connectAsync(handler)
+        }
+
+        @Override
+        CompletableFuture<Void> connectAsync(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
+            removeAuthHeaders(handler)
+            return super.connectAsync(handler, strategy)
+        }
+
+        private void removeAuthHeaders(TcpConnectionHandler<P> handler) {
+            if (handler instanceof StompTcpConnectionHandler && handler.getSessionId().equals(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID)) {
+                handler.getConnectHeaders().removeNativeHeader('login')
+                handler.getConnectHeaders().removeNativeHeader('passcode')
+            }
         }
     }
 
