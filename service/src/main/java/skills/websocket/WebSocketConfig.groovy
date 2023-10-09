@@ -148,7 +148,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         }
 
         private void removeAuthHeaders(TcpConnectionHandler<P> handler) {
-            if (handler instanceof StompTcpConnectionHandler && handler.getSessionId().equals(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID)) {
+            if (handler instanceof StompTcpConnectionHandler) {
                 handler.getConnectHeaders().removeNativeHeader('login')
                 handler.getConnectHeaders().removeNativeHeader('passcode')
             }
