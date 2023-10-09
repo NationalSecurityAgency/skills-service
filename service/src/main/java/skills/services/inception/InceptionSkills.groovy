@@ -196,7 +196,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         numPerformToCompletion: 20,
                         description: "Lookup:Desc_VisitBadgeUsers.md",
                 ),
-                new SkillRequest(name: "Visit Project Dependencies", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Visit Project Learning Path", skillId: "VisitProjectDependencies", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
@@ -453,14 +453,6 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_VisitSkillOverview.md",
                         helpUrl: "/dashboard/user-guide/skills.html"
                 ),
-                new SkillRequest(name: "Visit Skill Dependencies", skillId: "VisitSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
-                        pointIncrement: 5,
-                        pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 2, // up-to 1 per day
-                        numPerformToCompletion: 6,
-                        description: "Lookup:Desc_VisitSkillDependencies.md",
-                        helpUrl: "/dashboard/user-guide/dependencies.html"
-                ),
                 new SkillRequest(name: "Visit Skill Users", skillId: "VisitSkillUsers", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
@@ -468,7 +460,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         numPerformToCompletion: 5,
                         description: "Lookup:Desc_VisitSkillUsers.md",
                 ),
-                new SkillRequest(name: "Create Skill Dependencies", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Create Learning Path", skillId: "CreateSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day
                         numMaxOccurrencesIncrementInterval: 3, // up-to 1 per day
@@ -476,7 +468,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_CreateSkillDependencies.md",
                         helpUrl: "/dashboard/user-guide/dependencies.html"
                 ),
-                new SkillRequest(name: "Create Cross-Project Skill Dependencies", skillId: "CreateCrossProjectSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Create Cross-Project Learning Path", skillId: "CreateCrossProjectSkillDependencies", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 25,
                         numPerformToCompletion: 1,
                         description: "Lookup:Desc_CreateCrossProjectSkillDependencies.md",

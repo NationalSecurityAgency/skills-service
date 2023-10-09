@@ -56,6 +56,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
+  import { SkillsReporter } from '@skilltree/skills-client-vue';
   import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSelector2 from '@/components/skills/SkillsSelector2';
@@ -171,6 +172,11 @@ limitations under the License.
                 .then(() => {
                   const from = this.selectedFromSkills[0].name;
                   const to = this.toSkillName;
+                  if (this.toProjectId === this.selectedFromSkills[0].projectId) {
+                    SkillsReporter.reportSkill('CreateSkillDependencies');
+                  } else {
+                    SkillsReporter.reportSkill('CreateCrossProjectSkillDependencies');
+                  }
                   this.$nextTick(() => this.$announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
                   this.clearData();
                   this.$emit('update');
