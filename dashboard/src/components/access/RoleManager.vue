@@ -49,9 +49,6 @@ limitations under the License.
 
     <skills-b-table :options="table.options"
                     :items="data"
-                    @page-changed="pageChanged"
-                    @page-size-changed="pageSizeChanged"
-                    @sort-changed="sortTable"
                     tableStoredStateId="roleManagerTable"
                     data-cy="roleManagerTable">
       <template #head(userId)="data">
@@ -190,7 +187,7 @@ limitations under the License.
             ],
             pagination: {
               hideUnnecessary: true,
-              server: true,
+              server: false,
               currentPage: 1,
               totalRows: 1,
               pageSize: 5,
@@ -283,28 +280,12 @@ limitations under the License.
             });
         }
       },
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadData();
-      },
-      pageSizeChanged(newSize) {
-        this.table.options.pagination.pageSize = newSize;
-        this.loadData();
-      },
-      sortTable(sortContext) {
-        this.table.options.sortBy = sortContext.sortBy;
-        this.table.options.sortDesc = sortContext.sortDesc;
-
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadData();
-      },
       loadData() {
         this.table.options.busy = true;
         const pageParams = {
-          limit: this.table.options.pagination.pageSize,
+          limit: 200,
           ascending: !this.table.options.sortDesc,
-          page: this.table.options.pagination.currentPage,
+          page: 1,
           orderBy: this.table.options.sortBy,
         };
         AccessService.getUserRoles(this.projectId, this.roles, pageParams)
