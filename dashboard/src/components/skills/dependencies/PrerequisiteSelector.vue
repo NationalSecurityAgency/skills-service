@@ -56,7 +56,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import MetricsCard from '@/components/metrics/utils/MetricsCard';
   import SkillsService from '@/components/skills/SkillsService';
   import SkillsSelector2 from '@/components/skills/SkillsSelector2';
