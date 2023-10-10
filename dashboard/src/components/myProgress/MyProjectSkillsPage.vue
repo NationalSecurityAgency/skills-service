@@ -29,13 +29,8 @@ limitations under the License.
           Contact Project <i aria-hidden="true" class="fas fas fa-mail-bulk"/>
         </b-button>
       </div>
-      <skills-display v-if="!isLoadingSettings"
-                      :options="options"
-                      :version="skillsVersion"
-                      :theme="themeObj"
-                      ref="skillsDisplayRef"
-                      @route-changed="skillsDisplayRouteChanged">
-      </skills-display>
+      <div v-if="!isLoadingSettings" id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged">
+      </div>
     </div>
     <contact-owners-dialog v-if="showContact" :project-name="projectName" v-model="showContact" :project-id="projectId"/>
   </div>
@@ -43,7 +38,7 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex';
-  import { SkillsDisplay } from '@skilltree/skills-client-vue';
+  import { SkillsDisplayJS } from '@skilltree/skills-client-js';
   import MyProgressService from '@/components/myProgress/MyProgressService';
   import SkillsDisplayOptionsMixin from '@/components/myProgress/SkillsDisplayOptionsMixin';
   import SettingsService from '@/components/settings/SettingsService';
@@ -54,12 +49,13 @@ limitations under the License.
     name: 'MyProjectSkillsPage',
     mixins: [SkillsDisplayOptionsMixin],
     components: {
-      SkillsDisplay,
+      // SkillsDisplay,
       ContactOwnersDialog,
     },
     data() {
       return {
         isLoadingSettings: true,
+        clientDisplay: null,
         windowWidth: 0,
         oneRem: 0,
         projectId: this.$route.params.projectId,
@@ -148,6 +144,16 @@ limitations under the License.
       })
         .finally(() => {
           this.isLoadingSettings = false;
+
+          const clientDisplay = new SkillsDisplayJS({
+            version: this.skillsVersion,
+            options: this.options,
+            theme: this.themeObj,
+          });
+          this.$nextTick(() => {
+            clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+            this.clientDisplay = clientDisplay;
+          });
         });
       this.handleProjInvitation();
     },

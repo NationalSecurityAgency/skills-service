@@ -17,18 +17,15 @@ limitations under the License.
   <b-button v-if="isConfigurationInitialized" to="/administrator/skills" variant="outline-primary" size="sm" aria-label="Dashboard Skills"
             data-cy="inception-button">
     <i class="fas fa-trophy mr-1" aria-hidden="true"></i>
-    <skills-level project-id="Inception" />
+    <span id="skills-level-container" />
   </b-button>
 </template>
 
 <script>
-  import { SkillsLevel, SkillsConfiguration } from '@skilltree/skills-client-vue';
+  import { SkillsLevelJS, SkillsConfiguration } from '@skilltree/skills-client-js';
 
   export default {
     name: 'InceptionButton',
-    components: {
-      SkillsLevel,
-    },
     data() {
       return {
         isConfigurationInitialized: false,
@@ -38,6 +35,11 @@ limitations under the License.
       SkillsConfiguration.afterConfigure()
         .then(() => {
           this.isConfigurationInitialized = true;
+        }).finally(() => {
+          const skillsLevel = new SkillsLevelJS('Inception');
+          if (document.querySelector('#skills-level-container')) {
+            skillsLevel.attachTo(document.querySelector('#skills-level-container'));
+          }
         });
     },
     computed: {

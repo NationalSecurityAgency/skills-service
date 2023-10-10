@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="!loading.availableVersions && !loading.userInfo">
+  <div>
     <sub-page-header title="Client Display">
       <b-form class="float-right" inline>
         <label class="pr-3 d-none d-sm-inline font-weight-bold"
@@ -33,15 +33,8 @@ limitations under the License.
       </b-form>
     </sub-page-header>
     <loading-container :is-loading="checkingAccess">
-      <skills-display
-        v-if="canAccess"
-        :options="configuration"
-        :version="selectedVersion"
-        :user-id="userIdParam"
-        :theme="theme"
-        ref="skillsDisplayRef"
-        @route-changed="skillsDisplayRouteChanged"/>
-      <div v-else class="container">
+      <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
+      <div v-if="!canAccess" class="container">
         <div class="row justify-content-center">
           <div class="col-md-6 mt-3">
             <div class="text-center mt-5">
@@ -57,7 +50,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsDisplay, SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsDisplayJS, SkillsReporter } from '@skilltree/skills-client-js';
   import LoadingContainer from '@/components/utils/LoadingContainer';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import SkillsDisplayOptionsMixin from '../myProgress/SkillsDisplayOptionsMixin';
@@ -71,11 +64,12 @@ limitations under the License.
     components: {
       InlineHelp,
       SubPageHeader,
-      SkillsDisplay,
       LoadingContainer,
     },
     data() {
       return {
+        displayLoaded: false,
+        clientDisplay: null,
         projectId: '',
         inviteOnly: false,
         userIdParam: '',
@@ -137,10 +131,18 @@ limitations under the License.
           UsersService.canAccess(this.projectId, this.userIdParam).then((res) => {
             this.canAccess = res === true;
             this.checkingAccess = false;
+          }).finally(() => {
+            this.$nextTick(() => {
+              this.loadClientDisplay();
+            });
           });
         } else {
           this.checkingAccess = false;
         }
+      }).finally(() => {
+        this.$nextTick(() => {
+          this.loadClientDisplay();
+        });
       });
     },
     computed: {
@@ -162,6 +164,19 @@ limitations under the License.
       },
     },
     methods: {
+      loadClientDisplay() {
+        if (document.querySelector('#skills-client-container') && this.canAccess && !this.displayLoaded) {
+          const clientDisplay = new SkillsDisplayJS({
+            version: this.selectedVersion,
+            options: this.configuration,
+            theme: this.theme,
+            userId: this.userIdParam,
+          });
+          clientDisplay.attachTo(document.querySelector('#skills-client-container'));
+          this.clientDisplay = clientDisplay;
+          this.displayLoaded = true;
+        }
+      },
       versionChanged(newValue) {
         const maxVersion = Math.max(...this.versionOptions);
         if (maxVersion !== newValue) {

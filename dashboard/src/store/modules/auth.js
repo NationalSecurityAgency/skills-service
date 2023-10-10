@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import { SkillsConfiguration } from '@skilltree/skills-client-vue';
+import { SkillsConfiguration } from '@skilltree/skills-client-js';
 import router from '../../router';
 
 const getters = {

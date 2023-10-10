@@ -170,7 +170,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import SkillsSpinner from '@/components/utils/SkillsSpinner';
   import SkillsService from '@/components/skills/SkillsService';
   import BadgesService from '@/components/badges/BadgesService';

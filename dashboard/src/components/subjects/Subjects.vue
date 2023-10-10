@@ -57,7 +57,7 @@ limitations under the License.
 <script>
   import Sortable from 'sortablejs';
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
   import Subject from './Subject';
   import EditSubject from './EditSubject';

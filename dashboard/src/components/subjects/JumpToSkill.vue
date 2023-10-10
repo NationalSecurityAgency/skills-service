@@ -32,7 +32,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import SkillsService from '../skills/SkillsService';
   import SkillsSelector2 from '../skills/SkillsSelector2';
 

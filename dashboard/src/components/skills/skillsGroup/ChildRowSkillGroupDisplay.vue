@@ -108,7 +108,7 @@ limitations under the License.
 
 <script>
   import { createNamespacedHelpers } from 'vuex';
-  import { SkillsReporter } from '@skilltree/skills-client-vue';
+  import { SkillsReporter } from '@skilltree/skills-client-js';
   import MarkdownText from '@/common-components/utilities/MarkdownText';
   import SkillsService from '../SkillsService';
   import EditSkill from '../EditSkill';

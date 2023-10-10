@@ -56,7 +56,7 @@ limitations under the License.
         const currentRoute = this.$route;
         if (newVal.fromDashboard) {
           if (newVal.path && newVal.path !== oldVal.path) { // && newVal.path !== currentRoute.query.skillsClientDisplayPath) {
-            this.$refs.skillsDisplayRef.navigate(newVal.path);
+            this.clientDisplay.navigate(newVal.path);
           }
         } else if (this.pathsAreDifferent(newVal.path, oldVal.path, currentRoute)) {
           const newRoute = {
