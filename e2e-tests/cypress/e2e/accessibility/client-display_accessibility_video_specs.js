@@ -58,6 +58,13 @@ describe('Client Display Accessibility Video Tests', () => {
         cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
 
+        cy.get('[data-cy="skillLink-proj1-skill2"]')
+        cy.get('#dependent-skills-network canvas')
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
+
+        // wait for graph to finish loading
+        cy.wait(3000)
+
         cy.customLighthouse();
         cy.injectAxe();
         cy.customA11y();

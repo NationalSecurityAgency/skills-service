@@ -94,9 +94,9 @@ describe('Settings Tests', () => {
         cy.visit('/settings/security');
         cy.wait('@checkRoot');
         cy.wait('@loadRootUsers');
-        cy.get('[data-cy=skillsBTableTotalRows]')
+        cy.get('[data-cy="rootrm"] [data-cy="roleManagerTable"] [data-cy=skillsBTableTotalRows]')
             .should('have.text', '15');
-        cy.get('[data-cy=skillsBTablePaging] .page-item')
+        cy.get('[data-cy="rootrm"] [data-cy="roleManagerTable"] [data-cy=skillsBTablePaging] .page-item')
             .should('have.length', 7);
     });
 
