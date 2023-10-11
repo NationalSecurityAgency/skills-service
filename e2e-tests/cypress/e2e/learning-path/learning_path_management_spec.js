@@ -390,7 +390,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.clickOnNode(350, 250);
+        cy.clickOnNode(340, 250);
         cy.get('button').contains('Remove').click();
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
