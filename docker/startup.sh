@@ -11,6 +11,7 @@ print_and_mask() {
 
     for PROP in "${!PROPS[@]}"; do
       PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+      PROPS[$PROP]=$(sed -e 's/\(.*client-secret.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
     done
 
     FORMATTED=$(printf ",%s" "${PROPS[@]}")
@@ -86,7 +87,7 @@ term_handler() {
 }
 trap term_handler SIGTERM
 
-java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar &
+#java ${DEBUG_OPTS} ${JAVA_OPTS} -jar skills.jar &
 pid="$!"
 
 # wait forever
