@@ -44,7 +44,7 @@ describe('Expired Skill Table Tests', () => {
         cy.logout();
         cy.fixture('vars.json')
             .then((vars) => {
-                cy.login(vars.rootUser, vars.defaultPass);
+                cy.login(vars.defaultUser, vars.defaultPass);
             });
     });
 
@@ -93,4 +93,317 @@ describe('Expired Skill Table Tests', () => {
         ], 3);
     });
 
+    it('Sort and page table', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        let yesterday = moment.utc().subtract(1, 'day')
+        let twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+
+        for(let x = 1; x < 20; x++) {
+            const user = "user" + x;
+            yesterday = moment.utc().subtract(1, 'day')
+            twoDaysAgo = moment.utc().subtract(2, 'day')
+            cy.doReportSkill({
+                project: 1,
+                skill: 1,
+                subjNum: 1,
+                userId: user,
+                date: yesterday.format('YYYY-MM-DD HH:mm')
+            })
+            cy.doReportSkill({
+                project: 1,
+                skill: 1,
+                subjNum: 1,
+                userId: user,
+                date: twoDaysAgo.format('YYYY-MM-DD HH:mm')
+            })
+        };
+
+        cy.expireSkills();
+
+        cy.visit('/administrator/projects/proj1/expirationHistory');
+
+        const tableSelector = '[data-cy=expirationHistoryTable]';
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user9'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user8'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user7'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user6'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user5'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user4'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user19'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user18'
+            }],
+        ], 10, true, 20);
+
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(headerSelector).contains('User').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user10'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user11'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user12'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user13'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user14'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user15'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user16'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user17'
+            }],
+        ], 10, true, 20);
+
+        cy.get(headerSelector).contains('User').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user9'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user8'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user7'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user6'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user5'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user4'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user19'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user18'
+            }],
+        ], 10, true, 20);
+
+        cy.get(tableSelector).get('[data-cy=skillsBTablePaging]').contains(2).click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user17'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user16'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user15'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user14'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user13'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user12'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user11'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user10'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+        ], 10, true, 20);
+    });
+
+    it('Filter table', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        let yesterday = moment.utc().subtract(1, 'day')
+        let twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+
+        for(let x = 1; x < 5; x++) {
+            const user = "user" + x;
+            yesterday = moment.utc().subtract(1, 'day')
+            twoDaysAgo = moment.utc().subtract(2, 'day')
+            cy.doReportSkill({
+                project: 1,
+                skill: 1,
+                subjNum: 1,
+                userId: user,
+                date: yesterday.format('YYYY-MM-DD HH:mm')
+            })
+            cy.doReportSkill({
+                project: 1,
+                skill: 1,
+                subjNum: 1,
+                userId: user,
+                date: twoDaysAgo.format('YYYY-MM-DD HH:mm')
+            })
+        };
+
+        cy.expireSkills();
+
+        cy.visit('/administrator/projects/proj1/expirationHistory');
+
+        const tableSelector = '[data-cy=expirationHistoryTable]';
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(headerSelector).contains('User').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user4'
+            }],
+        ], 5);
+
+        cy.get('[data-cy=userIdFilter]').type('user4')
+        cy.get('[data-cy=users-filterBtn]').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user4'
+            }],
+        ], 1);
+
+        cy.get('[data-cy=users-resetBtn]').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'user4'
+            }],
+        ], 5);
+    });
 });

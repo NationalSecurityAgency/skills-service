@@ -615,7 +615,7 @@ const router = new Router({
         meta: {
           requiresAuth: true,
           announcer: {
-            message: 'Expiration History',
+            message: 'Skill Expiration History',
           },
         },
       }, {

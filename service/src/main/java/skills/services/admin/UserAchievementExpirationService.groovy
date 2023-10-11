@@ -17,6 +17,7 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -52,9 +53,10 @@ class UserAchievementExpirationService {
     ExpiredUserAchievementRepo expiredUserAchievementRepo
 
     TableResult findAllExpiredAchievements(String projectId, String userId, String skillName, PageRequest pageRequest) {
-        List<ExpiredSkillRes> results = expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
-        def totalExpirations = expiredUserAchievementRepo.countExpiredAchievements(projectId, userId, skillName)
-        return new TableResult(data: results, count: results.size(), totalCount: totalExpirations)
+        Page<ExpiredSkillRes> results = expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
+        def totalExpirations = results.getTotalElements()
+        def data = results.getContent();
+        return new TableResult(data: data, count: data.size(), totalCount: totalExpirations)
     }
 
     @Transactional()

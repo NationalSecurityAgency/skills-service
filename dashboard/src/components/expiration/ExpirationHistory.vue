@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div>
-    <sub-page-header title="Expiration History"/>
+    <sub-page-header title="Skill Expiration History"/>
     <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-md-6">
@@ -138,7 +138,7 @@ limitations under the License.
           skillName: this.filters.skillName,
           userId: this.filters.userId,
         };
-        ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
+        return ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
           this.table.items = res.data;
           this.table.options.pagination.totalRows = res.totalCount;
         });
@@ -162,7 +162,7 @@ limitations under the License.
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
-          let filterMessage = 'Expiration history table has been filtered by';
+          let filterMessage = 'Skill expiration history table has been filtered by';
           if (this.filters.skillName) {
             filterMessage += ` ${this.filters.skillName}`;
           }
@@ -176,7 +176,7 @@ limitations under the License.
         this.filters.userId = '';
         this.filters.skillName = '';
         this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite('Expiration history table filters have been removed'));
+          this.$nextTick(() => this.$announcer.polite('Skill expiration history table filters have been removed'));
         });
       },
     },
