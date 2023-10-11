@@ -1338,3 +1338,34 @@ Cypress.Commands.add('beforeTestSuiteThatReusesData', () => {
 Cypress.Commands.add('afterTestSuiteThatReusesData', () => {
     Cypress.env('disableResetDb', false);
 });
+
+Cypress.Commands.add('configureExpiration', (skillNum = '1', numDays = 30, every=1, expirationType='YEARLY') => {
+    const isRecurring = expirationType === 'YEARLY' || expirationType === 'MONTHLY'
+    const m = isRecurring ? moment.utc().add(numDays, 'day') : null;
+    cy.request('POST', `/admin/projects/proj1/skills/skill${skillNum}/expiration`, {
+        expirationType: expirationType,
+        every: every,
+        monthlyDay: m ? m.date() : null,
+        nextExpirationDate: m ? m.format('x') : null
+    });
+});
+
+Cypress.Commands.add('expireSkills', () => {
+    cy.logout();
+    cy.resetEmail();
+
+    cy.fixture('vars.json')
+        .then((vars) => {
+            cy.register(vars.rootUser, vars.defaultPass, true);
+        });
+
+    cy.login('root@skills.org', 'password');
+
+    cy.request('POST', `/root/runSkillExpiration`);
+
+    cy.logout();
+    cy.fixture('vars.json')
+        .then((vars) => {
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+});
