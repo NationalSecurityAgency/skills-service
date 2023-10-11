@@ -169,7 +169,8 @@ Cypress.Commands.add("removeFromMyProjects", (projNum) => {
 });
 
 Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = null) => {
-    return cy.request(`/app/users/validExistingDashboardUserId/${user}`)
+    let requestStatus = 0;
+    cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {
             if (response.body !== true) {
                 if (grantRoot) {
@@ -180,8 +181,9 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                         email: user,
                         password: pass,
                         usernameForDisplay,
+                    }).then((innerResponse) => {
+                        requestStatus = innerResponse.status;
                     });
-                    // cy.request('POST', '/grantFirstRoot');
                 } else {
                     cy.log(`Creating app user [${user}]`)
                     cy.request('PUT', '/createAccount', {
@@ -190,17 +192,28 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                         email: user,
                         password: pass,
                         usernameForDisplay,
+                    }).then((innerResponse) => {
+                        requestStatus = innerResponse.status;
                     });
                 }
                 cy.request('POST', '/logout');
             } else {
                 cy.log(`User [${user}] already exist`)
+                requestStatus = response.status;
             }
         });
+
+    cy.log('Will wait for up to 30 seconds for user creation');
+    cy.waitUntil(() => requestStatus === 200, {
+        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+    });
+    cy.log(`Completed user registration for [${user}]`);
 });
 
 Cypress.Commands.add("login", (user, pass) => {
-    cy.log(`logging in as [${user}] with [${pass}]`);
+    cy.log(`Logging in as [${user}] with [${pass}]`);
+
+    let requestStatus = 0;
     cy.request( {
         method: 'POST',
         url: '/performLogin',
@@ -209,7 +222,15 @@ Cypress.Commands.add("login", (user, pass) => {
             password: pass
         },
         form: true,
+    }).then((response) => {
+        requestStatus = response.status;
     })
+
+    cy.log('Will wait for up to 30 seconds for user creation');
+    cy.waitUntil(() => requestStatus === 200, {
+        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+    });
+    cy.log(`Logged in as [${user}] with [${pass}]`);
 });
 
 Cypress.Commands.add("resetEmail", () => {
@@ -838,7 +859,16 @@ Cypress.Commands.add('customA11y', ()=> {
 
 
 Cypress.Commands.add("logout", () => {
-    cy.request('POST', '/logout');
+    let requestStatus= 0;
+    cy.request('POST', '/logout')
+        .then((response) => {
+            requestStatus = response.status;
+        })
+
+    cy.log('Will wait for up to 30 seconds for user creation');
+    cy.waitUntil(() => requestStatus === 200, {
+        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+    });
     cy.log('Logged out')
 });
 

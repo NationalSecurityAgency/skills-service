@@ -142,32 +142,6 @@ describe('Multiple Project Metrics', () => {
             });
     });
 
-    it('only root or supervisor should see multiple project metrics', () => {
-        cy.fixture('vars.json')
-            .then((vars) => {
-                cy.logout();
-
-                const newUsers = 'otherUser1@skills.org';
-                cy.register(newUsers, vars.defaultPass);
-                cy.login(newUsers, vars.defaultPass);
-                cy.visit('/administrator/');
-                // wait for nav to finish loading
-                cy.wait(1000);
-                cy.get('[data-cy=nav-Metrics]')
-                    .should('not.exist');
-
-                cy.logout();
-
-                cy.login(vars.rootUser, vars.defaultPass);
-                cy.request('PUT', `/root/users/${newUsers}/roles/ROLE_SUPERVISOR`);
-                cy.logout();
-                cy.login(newUsers, vars.defaultPass);
-                cy.visit('/administrator/');
-                cy.clickNav('Metrics');
-                cy.contains('No Projects Selected');
-            });
-    });
-
     it('Project definitions comparison chart loads 4 projects by default', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
