@@ -1,12 +1,31 @@
 #!/usr/bin/env bash
 
+print_and_mask() {
+  PROPS_TO_PRINT=$1
+  LABEL=$2
+  if [ "$DEBUG_MODE" == true ]
+  then
+    FORMATTED=$PROPS_TO_PRINT
+  else
+    PROPS=(${PROPS_TO_PRINT//,/ })
+
+    for PROP in "${!PROPS[@]}"; do
+      PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+    done
+
+    FORMATTED=$(printf ",%s" "${PROPS[@]}")
+    FORMATTED=${FORMATTED:1}
+  fi
+  echo -e "${LABEL}=[${FORMATTED}]"
+}
+
 echo "Starting Skills Service"
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.file=/logs/webapp.log"
 
+print_and_mask "${EXTRA_JAVA_OPTS}", "EXTRA_JAVA_OPTS"
 if [ ! -z "${EXTRA_JAVA_OPTS}" ]
 then
     JAVA_OPTS="${EXTRA_JAVA_OPTS} ${JAVA_OPTS}"
-    echo "Added EXTRA_JAVA_OPTS to JAVA_OPTS = [$EXTRA_JAVA_OPTS]"
 fi
 
 if [[ -z "${JAVA_OPTS_FILES}" ]]; then
@@ -21,7 +40,7 @@ else
      IFS=$OLDIFS
   done
 fi
-echo "JAVA_OPTS=[${JAVA_OPTS}]"
+print_and_mask "${JAVA_OPTS}", "JAVA_OPTS"
 
 if [[ -z "${SPRING_PROPS_FILES}" ]]; then
    echo "Optional SPRING_PROPS_FILES is not set"
@@ -42,22 +61,7 @@ else
         IFS=$OLDIFS
   done
 fi
-
-if [ "$DEBUG_MODE" == true ]
-then
-  FORMATTED=$SPRING_PROPS
-else
-  PROPS=(${SPRING_PROPS//,/ })
-
-  for PROP in "${!PROPS[@]}"; do
-    PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
-  done
-
-  FORMATTED=$(printf ",%s" "${PROPS[@]}")
-  FORMATTED=${FORMATTED:1}
-fi
-
-echo -e "SPRING_PROPS=${FORMATTED}"
+print_and_mask "${SPRING_PROPS}", "SPRING_PROPS"
 
 # support both \n and , as a prop separator
 echo -e $SPRING_PROPS | sed -r 's$([^\])[,]\s?$\1\n$g; s$\\,$,$g' >> application.properties
