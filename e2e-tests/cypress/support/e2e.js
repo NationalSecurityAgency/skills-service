@@ -40,8 +40,8 @@ import { clear } from 'idb-keyval';
 // require('./commands')
 
 Cypress.on('window:before:load', (win) => {
-    cy.spy(win.console, 'error');
-    cy.spy(win.console, 'warn');
+    cy.spy(win.console, 'error').as('consoleError')
+    cy.spy(win.console, 'warn').as('consoleWarn')
     win.addEventListener('unhandledrejection', (event) => {
         throw new Error(event.reason.message)
     });
@@ -111,17 +111,19 @@ beforeEach(function () {
 afterEach(function () {
     cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] end`)
     Cypress.env('hydraAuthenticated', false);
-
-    cy.window().then((win) => {
-        if (!Cypress.env('ignoreConsoleErrors')) {
-            expect(win.console.error).to.have.callCount(0);
-            Cypress.env('ignoreConsoleErrors', false); // reset flag
+    const aliases = cy.state('aliases');
+    if (!Cypress.env('ignoreConsoleErrors')) {
+        if (aliases.consoleError) {
+            cy.get('@consoleError').should('not.be.called')
         }
-        if (!Cypress.env('ignoreConsoleWarnings')) {
-            expect(win.console.warn).to.have.callCount(0);
-            Cypress.env('ignoreConsoleWarnings', false);  // reset flag
+        Cypress.env('ignoreConsoleErrors', false); // reset flag
+    }
+    if (!Cypress.env('ignoreConsoleWarnings')) {
+        if (aliases.consoleWarn) {
+            cy.get('@consoleWarn').should('not.be.called')
         }
-    });
+        Cypress.env('ignoreConsoleWarnings', false);  // reset flag
+    }
 });
 
 Cypress.on('fail', (err) => {

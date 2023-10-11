@@ -39,6 +39,27 @@ describe('Multiple Project With no Results', () => {
             });
     });
 
+      it('only root or supervisor should see multiple project metrics', () => {
+        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR').as('hasRole');
+        cy.intercept('GET', '/app/projects').as('getProjects');
+        cy.logout();
+        const newUsers = 'otherUser1@skills.org';
+        cy.register(newUsers, "password");
+        cy.login(newUsers, "password");
+
+        cy.visit('/administrator/');
+        cy.wait('@hasRole');
+        cy.wait('@getProjects')
+        cy.get('[data-cy=nav-Projects]')
+        cy.get('[data-cy="nav-Quizzes and Surveys"]')
+        cy.get('[data-cy="noContent"]').contains("No Projects");
+
+        // wait for nav to finish loading
+        cy.wait(3000);
+        cy.get('[data-cy=nav-Metrics]')
+            .should('not.exist');
+    });
+
     it('2 projects required for training profile comparator to work', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
