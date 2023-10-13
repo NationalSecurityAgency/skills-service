@@ -201,19 +201,6 @@ class SkillEventsTransactionalService {
             e.doNotRetry = true
             throw e;
         }
-        if (approvalParams.forAnotherUser) {
-            String displayUserId = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
-            userActionsHistoryService.saveUserAction(new UserActionInfo(
-                    action: DashboardAction.Create,
-                    item: DashboardItem.SkillEvents,
-                    projectId: projectId,
-                    itemId: skillId,
-                    actionAttributes: [
-                            reportedForUser: displayUserId,
-                            reportedSkillEventDate: incomingSkillDateParam
-                    ],
-            ))
-        }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
             projectId = skillDefinition.copiedFromProjectId
             skillDefinition = getCopiedFromSkillDef(skillDefinition, userId)
