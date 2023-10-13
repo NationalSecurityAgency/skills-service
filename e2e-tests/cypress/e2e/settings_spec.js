@@ -83,6 +83,66 @@ describe('Settings Tests', () => {
                             firstName: 'five',
                             lastName: 'five'
                         },
+                        {
+                            userId: 'six@six',
+                            userIdForDisplay: 'six@one',
+                            firstName: 'six',
+                            lastName: 'six'
+                        },
+                        {
+                            userId: 'seven@seven',
+                            userIdForDisplay: 'seven@one',
+                            firstName: 'seven',
+                            lastName: 'seven'
+                        },
+                        {
+                            userId: 'eight@eight',
+                            userIdForDisplay: 'eight@one',
+                            firstName: 'eight',
+                            lastName: 'eight'
+                        },
+                        {
+                            userId: 'nine@nine',
+                            userIdForDisplay: 'nine@one',
+                            firstName: 'nine',
+                            lastName: 'nine'
+                        },
+                        {
+                            userId: 'ten@ten',
+                            userIdForDisplay: 'ten@one',
+                            firstName: 'ten',
+                            lastName: 'ten'
+                        },
+                        {
+                            userId: 'eleven@eleven',
+                            userIdForDisplay: 'eleven@one',
+                            firstName: 'eleven',
+                            lastName: 'eleven'
+                        },
+                        {
+                            userId: 'twelve@twelve',
+                            userIdForDisplay: 'twelve@one',
+                            firstName: 'twelve',
+                            lastName: 'twelve'
+                        },
+                        {
+                            userId: 'thirteen@thirteen',
+                            userIdForDisplay: 'thirteen@one',
+                            firstName: 'thirteen',
+                            lastName: 'thirteen'
+                        },
+                        {
+                            userId: 'fourteen@fourteen',
+                            userIdForDisplay: 'fourteen@one',
+                            firstName: 'fourteen',
+                            lastName: 'fourteen'
+                        },
+                        {
+                            userId: 'fifteen@fifteen',
+                            userIdForDisplay: 'fifteen@one',
+                            firstName: 'fifteen',
+                            lastName: 'fifteen'
+                        },
                     ],
                     totalCount: 15
                 };
