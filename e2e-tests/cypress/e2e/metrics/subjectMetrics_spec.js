@@ -17,7 +17,7 @@ var moment = require('moment-timezone');
 
 describe('Metrics Tests - Subject', () => {
 
-    const waitForSnap = 4000;
+    const waitForSnap = 6000;
 
     before(() => {
         Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
