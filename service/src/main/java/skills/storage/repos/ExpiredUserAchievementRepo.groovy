@@ -78,15 +78,4 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
                                                      @Param("userId") String userId,
                                                      @Param("skillNameFilter") String skillNameFilter, PageRequest pageRequest)
 
-    @Query(value = '''
-       SELECT count(eua.userId)
-       FROM ExpiredUserAchievement eua, SkillDef skill
-       WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId
-       AND(:userId is null OR lower(eua.userId) like lower(concat('%', :userId, '%')))
-       AND(:skillNameFilter is null OR lower(skill.name) like lower(concat('%', :skillNameFilter, '%')))
-    ''')
-    long countExpiredAchievements(@Param("projectId") String projectId,
-                                  @Param("userId") String userId,
-                                  @Param("skillNameFilter") String skillNameFilter)
-
 }
