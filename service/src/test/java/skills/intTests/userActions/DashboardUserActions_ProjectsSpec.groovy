@@ -1425,7 +1425,7 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         deleteAction.setting == "set1"
     }
 
-    def "track when admin reports skill events for another user"() {
+    def "DO NOT track when admin reports skill events for another user"() {
         SkillsService rootService = createRootSkillService()
 
         def proj = SkillsFactory.createProject()
@@ -1443,24 +1443,11 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def resReportForMe = skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId])
 
         def res = rootService.getUserActionsForEverything()
-        def reportSkillEvent = rootService.getUserActionAttributes(res.data[0].id)
-        String displayName = getDisplayName()
         then:
         resReportForMe.body.pointsEarned == 100
         resReportForAnother.body.pointsEarned == 100
 
-        res.count == 1
-        res.data[0].action == DashboardAction.Create.toString()
-        res.data[0].item == DashboardItem.SkillEvents.toString()
-        res.data[0].itemId == skills[0].skillId
-        res.data[0].userId == skillsService.userName
-        res.data[0].userIdForDisplay == displayName
-        res.data[0].projectId == proj.projectId
-        !res.data[0].quizId
-
-        reportSkillEvent.reportedForUser == userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay
-        reportSkillEvent.reportedSkillEventDate
-
+        res.count == 0
     }
 
     def "project issues"() {
