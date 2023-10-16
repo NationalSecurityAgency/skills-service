@@ -2657,4 +2657,10 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="45" author="skills team">
+        <sql>
+            delete from user_actions_history where item = 'SkillEvents' and action = 'Create'
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
