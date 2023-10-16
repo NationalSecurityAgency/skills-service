@@ -17,11 +17,16 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.ExpiredSkillRes
+import skills.controller.result.model.TableResult
 import skills.services.SkillEventAdminService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
+import skills.storage.model.ExpiredUserAchievement
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.ExpiredUserAchievementRepo
@@ -46,6 +51,13 @@ class UserAchievementExpirationService {
 
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
+
+    TableResult findAllExpiredAchievements(String projectId, String userId, String skillName, PageRequest pageRequest) {
+        Page<ExpiredSkillRes> results = expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
+        def totalExpirations = results.getTotalElements()
+        def data = results.getContent();
+        return new TableResult(data: data, count: data.size(), totalCount: totalExpirations)
+    }
 
     @Transactional()
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {

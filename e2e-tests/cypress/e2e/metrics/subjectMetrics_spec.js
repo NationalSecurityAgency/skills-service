@@ -17,7 +17,7 @@ var moment = require('moment-timezone');
 
 describe('Metrics Tests - Subject', () => {
 
-    const waitForSnap = 4000;
+    const waitForSnap = 6000;
 
     before(() => {
         Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
@@ -32,10 +32,10 @@ describe('Metrics Tests - Subject', () => {
         });
 
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    projectMetricsTagCharts: '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]'
-                },
+            req.reply((res) => {
+                const conf = res.body;
+                conf.projectMetricsTagCharts = '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
+                res.send(conf);
             });
         })
             .as('getConfig');

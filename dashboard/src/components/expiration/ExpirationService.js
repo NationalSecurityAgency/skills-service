@@ -31,4 +31,8 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
+  getExpiredSkills(projectId, params) {
+    const url = `/admin/projects/${projectId}/expirations`;
+    return axios.get(url, { params }).then((response) => response.data);
+  },
 };

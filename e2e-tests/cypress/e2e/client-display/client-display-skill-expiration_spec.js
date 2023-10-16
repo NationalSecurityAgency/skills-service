@@ -20,17 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Expiration Tests', () => {
 
-    Cypress.Commands.add('configureExpiration', (skillNum = '1', numDays = 30, every=1, expirationType='YEARLY') => {
-        const isRecurring = expirationType === 'YEARLY' || expirationType === 'MONTHLY'
-        const m = isRecurring ? moment.utc().add(numDays, 'day') : null;
-        cy.request('POST', `/admin/projects/proj1/skills/skill${skillNum}/expiration`, {
-            expirationType: expirationType,
-            every: every,
-            monthlyDay: m ? m.date() : null,
-            nextExpirationDate: m ? m.format('x') : null
-        });
-    });
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.createProject(1);

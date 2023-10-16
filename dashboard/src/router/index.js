@@ -97,6 +97,7 @@ import QuizRun from '@/components/quiz/QuizRunInDashboard';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage';
 import VideoConfigPage from '@/components/video/VideoConfigPage';
 import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage';
+import ExpirationHistory from '@/components/expiration/ExpirationHistory';
 import UserActionsPage from '@/components/userActions/UserActionsPage';
 
 Vue.use(Router);
@@ -605,6 +606,16 @@ const router = new Router({
           requiresAuth: true,
           announcer: {
             message: 'User Activity History',
+          },
+        },
+      }, {
+        name: 'ExpirationHistory',
+        path: 'expirationHistory',
+        component: ExpirationHistory,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Skill Expiration History',
           },
         },
       }, {

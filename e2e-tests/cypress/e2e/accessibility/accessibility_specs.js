@@ -350,6 +350,26 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
+    it('skill expirations', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        let yesterday = moment.utc().subtract(1, 'day')
+        let twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.expireSkills();
+
+        cy.visit('/administrator/projects/proj1/expirationHistory');
+        cy.injectAxe();
+
+        cy.get('[data-cy="expirationHistoryTable"]')
+        cy.customLighthouse();
+        cy.customA11y();
+    });
+
     it('badges', () => {
         cy.visit('/administrator/');
         cy.injectAxe();

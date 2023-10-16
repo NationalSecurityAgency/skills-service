@@ -16,10 +16,13 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import skills.controller.result.model.ExpiredSkillRes
 import skills.storage.model.ExpiredUserAchievement
 import skills.storage.model.UserAchievement
 
@@ -63,4 +66,16 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     ''')
     List<UserAchievement> findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(@Param("skillRefId") Integer skillRefId,
                                                                                                  @Param("olderThanDate") Date olderThanDate)
+
+    @Query(value = '''
+       SELECT eua.userId as userId, eua.skillId as skillId, eua.expiredOn as expiredOn, skill.name as skillName
+       FROM ExpiredUserAchievement eua, SkillDef skill
+       WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId
+       AND(:userId is null OR lower(eua.userId) like lower(concat('%', :userId, '%')))
+       AND(:skillNameFilter is null OR lower(skill.name) like lower(concat('%', :skillNameFilter, '%')))
+    ''')
+    Page<ExpiredSkillRes> findAllExpiredAchievements(@Param("projectId") String projectId,
+                                                     @Param("userId") String userId,
+                                                     @Param("skillNameFilter") String skillNameFilter, PageRequest pageRequest)
+
 }

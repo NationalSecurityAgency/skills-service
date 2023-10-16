@@ -1033,6 +1033,10 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/users/${userId}/stats".toString())
     }
 
+    def getExpiredSkills(String projectId, String userId, String skillName, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
+        return wsHelper.adminGet("/projects/${projectId}/expirations?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&orderBy=${orderBy}&userId=${userId}&skillName=${skillName}".toString())
+    }
+
     def getLastSkillEventForProject(String projectId) {
         return wsHelper.adminGet("/projects/${projectId}/lastSkillEvent".toString())
     }
@@ -1170,6 +1174,10 @@ class SkillsService {
     def addRootRole(String userId) {
         userId = getUserId(userId, false)
         return wsHelper.rootPut("/addRoot/${userId}")
+    }
+
+    def expireSkills() {
+        wsHelper.rootPost('/runSkillExpiration');
     }
 
     def pinProject(String projectId) {

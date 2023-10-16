@@ -54,6 +54,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
+import skills.storage.model.ExpiredUserAchievement
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
@@ -1700,6 +1701,20 @@ class AdminController {
     @CompileStatic
     Map getDashboardActionAttributes(@PathVariable("projectId") String projectId, @PathVariable("actionId") Long actionId) {
         return userActionsHistoryService.getActionAttributes(actionId, projectId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/expirations", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getExpiredSkills(@PathVariable(name = "projectId") String projectId,
+                                           @RequestParam(name = "userId", required = false) String userIdParam,
+                                           @RequestParam(name = "skillName", required = false) String skillName,
+                                           @RequestParam int page,
+                                           @RequestParam int limit,
+                                           @RequestParam String orderBy,
+                                           @RequestParam Boolean ascending) {
+        String userId = userInfoService.getUserName(userIdParam);
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return userAchievementExpirationService.findAllExpiredAchievements(projectId, userIdParam, skillName, pageRequest);
     }
 }
 

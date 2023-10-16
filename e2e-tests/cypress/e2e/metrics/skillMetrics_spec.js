@@ -32,10 +32,10 @@ describe('Metrics Tests - Skills', () => {
         });
 
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    projectMetricsTagCharts: '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]'
-                },
+            req.reply((res) => {
+                const conf = res.body;
+                conf.projectMetricsTagCharts = '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
+                res.send(conf);
             });
         })
             .as('getConfig');
