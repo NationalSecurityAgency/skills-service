@@ -33,5 +33,4 @@ class ExpirationAttrs {
     Integer every
     String monthlyDay
     Date nextExpirationDate
-    Date lastExpirationDate
 }

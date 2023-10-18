@@ -68,7 +68,6 @@ class UserAchievementExpirationService {
             if (nextExpirationDate.isBefore(now)) {
                 expireAchievementsForSkill(skillAttributesDef.skillRefId)
 
-                expirationAttrs.lastExpirationDate = expirationAttrs.nextExpirationDate
                 // update nextExpirationDate
                 expirationAttrs.nextExpirationDate = getNextExpirationDate(expirationAttrs)?.toDate()
                 skillAttributesDef.attributes = skillAttributeService.mapper.writeValueAsString(expirationAttrs)
@@ -76,7 +75,7 @@ class UserAchievementExpirationService {
             }
         } else if (expirationAttrs.expirationType == ExpirationAttrs.DAILY) {
             LocalDateTime achievedOnOlderThan = now.minusDays(expirationAttrs.every)
-            expireAchievementsForSkillAchievedBefore(skillAttributesDef, achievedOnOlderThan?.toDate(), expirationAttrs)
+            expireAchievementsForSkillAchievedBefore(skillAttributesDef, achievedOnOlderThan?.toDate())
         } else if (expirationAttrs.expirationType != ExpirationAttrs.NEVER) {
             log.error("Unexpected expirationType [${expirationAttrs?.expirationType}] - ${expirationAttrs}")
         }
@@ -90,7 +89,7 @@ class UserAchievementExpirationService {
         skillEventAdminService.deleteAllSkillEventsForSkill(skillRefId)
     }
 
-    private void expireAchievementsForSkillAchievedBefore(SkillAttributesDef skillAttributesDef, Date expirationDate, ExpirationAttrs expirationAttrs) {
+    private void expireAchievementsForSkillAchievedBefore(SkillAttributesDef skillAttributesDef, Date expirationDate) {
         // find any UserAchievement's for this skill where the most recent associated UserPerformedSkill.performedOn is older than the expiration date
         List<UserAchievement> expiredUserAchievements = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(skillAttributesDef.skillRefId, expirationDate)
 
@@ -99,9 +98,6 @@ class UserAchievementExpirationService {
             expiredUserAchievementRepo.expireAchievementById(ua.id)
             // remove all skill events for this skill and user
             skillEventAdminService.deleteAllSkillEventsForSkillAndUser(skillAttributesDef.skillRefId, ua.userId)
-
-            expirationAttrs.lastExpirationDate = new Date()
-            skillAttributesDef.attributes = skillAttributeService.mapper.writeValueAsString(expirationAttrs)
             skillAttributesDefRepo.save(skillAttributesDef)
         }
     }

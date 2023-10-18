@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.lang.Nullable
 import org.springframework.data.repository.query.Param
 import skills.controller.result.model.ExpiredSkillRes
 import skills.storage.model.ExpiredUserAchievement
@@ -78,4 +79,12 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
                                                      @Param("userId") String userId,
                                                      @Param("skillNameFilter") String skillNameFilter, PageRequest pageRequest)
 
+    @Query(value = '''
+        SELECT eua
+        FROM ExpiredUserAchievement eua
+        WHERE eua.projectId = :projectId AND eua.skillId = :skillId AND eua.userId = :userId
+        ORDER BY eua.expiredOn DESC LIMIT 1
+    ''')
+    @Nullable
+    ExpiredUserAchievement findMostRecentExpirationForSkill(@Param("projectId") String projectId, @Param("userId") String userId, @Param("skillId") String skillId)
 }

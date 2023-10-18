@@ -1858,4 +1858,84 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         ]
 
     }
+
+    def "get expired skill summaries"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        String secondUserId = "user2"
+        Date timestamp8Days = new Date()-8
+        Date timestamp9Days = new Date()-8
+        Long secondTimestamp = new Date().time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp8Days)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp9Days)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(secondTimestamp))
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+        def skill4Information = skillsService.getSingleSkillSummary(userId, proj.projectId, skills[3].skillId)
+        def skill7Information = skillsService.getSingleSkillSummary(userId, proj.projectId, skills[6].skillId)
+        def skill4InformationUser2 = skillsService.getSingleSkillSummary(secondUserId, proj.projectId, skills[3].skillId)
+        def skill7InformationUser2 = skillsService.getSingleSkillSummary(secondUserId, proj.projectId, skills[6].skillId)
+
+        then:
+        skill4Information.lastExpirationDate != null
+        skill7Information.lastExpirationDate != null
+        skill4InformationUser2.lastExpirationDate == null
+        skill7InformationUser2.lastExpirationDate == null
+    }
+
+    def "achieve skill after expiration"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        Long timestamp = (new Date()-8).time
+        Date yesterday = (new Date()-1)
+        Date twoDaysAgo = (new Date()-2)
+        Date timestamp8Days = new Date()-8
+        Date timestamp9Days = new Date()-8
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp8Days)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp9Days)
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId, yesterday)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[3].skillId], userId, twoDaysAgo)
+        def skill4Information = skillsService.getSingleSkillSummary(userId, proj.projectId, skills[3].skillId)
+
+        then:
+        skill4Information.lastExpirationDate == null
+    }
 }
