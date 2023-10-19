@@ -30,9 +30,6 @@ const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
 const objectScan = require('object-scan');
 const fs = require('fs');
 const Path = require('path');
-const {
-    addMatchImageSnapshotPlugin,
-} = require('cypress-image-snapshot/plugin');
 const { makeBadge, ValidationError } = require('badge-maker');
 const moment = require('moment-timezone');
 
@@ -90,8 +87,6 @@ const generateAvgLighthouseScore = () => {
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
-    addMatchImageSnapshotPlugin(on, config);
-
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
         return launchOptions

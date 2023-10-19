@@ -102,7 +102,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
         const snapshotOptions = {
-            blackout: ['[data-cy="quizRuntime"]'],
+            blackout: '[data-cy="quizRuntime"]',
         };
         cy.matchSnapshotImage(snapshotOptions);
     });
@@ -204,7 +204,7 @@ describe('Client Display Quiz Visual Tests', () => {
 
         cy.wait(500)
         const snapshotOptions = {
-            blackout: ['[data-cy="surveyRuntimeCard"]'],
+            blackout: '[data-cy="surveyRuntimeCard"]',
         };
         cy.matchSnapshotImage(snapshotOptions);
     });

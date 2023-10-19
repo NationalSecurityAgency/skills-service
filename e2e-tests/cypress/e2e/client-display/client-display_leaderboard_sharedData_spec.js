@@ -20,13 +20,6 @@ const dateFormatter = value => moment.utc(value)
     .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Leaderboard (with shared data) Tests', () => {
-    const snapshotOptions = {
-        blackout: ['[data-cy="userFirstSeen"]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
     const tableSelector = '[data-cy="leaderboardTable"]';
     const rowSelector = `${tableSelector} tbody tr`;
 
@@ -110,7 +103,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         }
 
         cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', { blackout: '[data-cy="userFirstSeen"]' });
     });
 
     it('leaderboard top 10 - opt out', () => {
@@ -128,7 +121,10 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.get('[data-cy="myRank"]')
             .contains('Your position would be 13 if you opt-in');
         cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'my-rank-opted-out', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
+            name: 'my-rank-opted-out',
+            blackout: '[data-cy="userFirstSeen"]'
+        });
 
         cy.cdClickRank();
 
@@ -145,7 +141,10 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             .contains('You selected to opt-out');
 
         cy.wait(2000)
-        cy.matchSnapshotImage('rank-overview-leaderboard-opted-out', snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'rank-overview-leaderboard-opted-out',
+            blackout: '[data-cy="userFirstSeen"]'
+        });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -185,7 +184,9 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             }
 
             cy.wait(2000)
-            cy.matchSnapshotImage('leaderboard-10AroundMe', snapshotOptions);
+            cy.matchSnapshotImage({
+                blackout: '[data-cy="userFirstSeen"]'
+            });
         });
 
         it('switch between "top 10" and "10 around me" ', () => {

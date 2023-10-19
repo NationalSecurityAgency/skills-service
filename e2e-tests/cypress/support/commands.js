@@ -39,12 +39,13 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-import { addMatchImageSnapshotCommand } from 'cypress-image-snapshot/command';
 import "cypress-audit/commands";
 import './cliend-display-commands';
 import 'cypress-file-upload';
 import 'cypress-wait-until';
 var moment = require('moment-timezone');
+const compareSnapshotCommand = require('cypress-visual-regression/dist/command');
+compareSnapshotCommand();
 
 function terminalLog(violations) {
     violations = violations || { length: 0 };
@@ -75,45 +76,95 @@ function terminalLog(violations) {
     }
 }
 
-addMatchImageSnapshotCommand();
-
-Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions, commandOptions) => {
-    cy.wait(1500);
-    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, selector)
-})
-
-Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions) => {
-    cy.wait(1500);
-    cy.doMatchSnapshotImage(maybeNameOtherwiseCommandOptions, commandOptions, null)
-})
-
-Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
-    cy.closeToasts();
-    cy.wait(500);
-
-    let options = commandOptions ? commandOptions :
-        ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
-    const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
-
-    const snapDir = Cypress.env('customSnapshotsDir');
-    if (snapDir) {
-        options = {...options, customSnapshotsDir: snapDir }
+const getName = (maybeNameOtherwiseCommandOptions) => {
+    const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
+    let snapName = Cypress.currentTest.title;
+    if (options && options.name) {
+        snapName = options.name
+    } else if (!options && maybeNameOtherwiseCommandOptions) {
+        snapName = maybeNameOtherwiseCommandOptions
     }
+    return snapName;
+}
 
-    if (namePresent) {
-        if (selector) {
-            cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-        } else {
-            cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-        }
+Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwiseCommandOptions) => {
+    const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
+    let snapName =getName(maybeNameOtherwiseCommandOptions)
+    const params = {
+        name : snapName,
+        selector,
+        blackout: ((options && options.blackout) || null)
+    };
+    cy.doMatchSnapshotImage(params);
+})
+
+Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) => {
+    const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
+    let snapName =getName(maybeNameOtherwiseCommandOptions)
+    const params = { name : snapName, blackout: ((options && options.blackout) || null)};
+    cy.doMatchSnapshotImage(params);
+})
+
+Cypress.Commands.add("doMatchSnapshotImage", (options) => {
+    cy.wait(1500);
+    if (options && options.blackout) {
+        cy
+            // wait for content to be ready
+            .get('body')
+            // hide ignored elements
+            .then($app => {
+                return new Cypress.Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        $app.find(options.blackout).css("visibility", "hidden");
+                        resolve();
+                        // add a very small delay to wait for the elements to be there, but you should
+                        // make sure your test already handles this
+                    }, 300);
+                });
+            })
+            .then(() => {
+                if (options.selector) {
+                    return cy.get(options.selector).compareSnapshot(options.name)
+                } else {
+                    return cy.compareSnapshot(options.name);
+                }
+            });
     } else {
-        if (selector) {
-            cy.get(selector).matchImageSnapshot(options);
+        if (options.selector) {
+            return cy.get(options.selector).compareSnapshot(options.name)
         } else {
-            cy.matchImageSnapshot(options);
+            return cy.compareSnapshot(options.name);
         }
     }
 })
+
+// Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
+//     cy.closeToasts();
+//     cy.wait(500);
+//
+//     let options = commandOptions ? commandOptions :
+//         ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
+//     const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
+//
+//     const snapDir = Cypress.env('customSnapshotsDir');
+//     if (snapDir) {
+//         options = {...options, customSnapshotsDir: snapDir }
+//     }
+//
+//     if (namePresent) {
+//         if (selector) {
+//             cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+//         } else {
+//             cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
+//         }
+//     } else {
+//         if (selector) {
+//             cy.get(selector).matchImageSnapshot(options);
+//         } else {
+//             cy.matchImageSnapshot(options);
+//         }
+//     }
+// })
 
 Cypress.Commands.add("enableProdMode", (projNum) => {
     cy.request('POST', `/admin/projects/proj${projNum}/settings/production.mode.enabled`, {

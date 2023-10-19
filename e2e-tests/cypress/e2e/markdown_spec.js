@@ -15,14 +15,6 @@
  */
 describe('Markdown Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=skillTableCellCreatedDate]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
-
     const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
 
     Cypress.Commands.add('clickToolbarButton', (buttonName) => {
@@ -335,7 +327,7 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('codeblock')
 
         cy.clickSave();
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'WYSIWYG-Features', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]');
     });
 
     it('on skills pages', () => {
@@ -410,7 +402,9 @@ describe('Markdown Tests', () => {
         cy.contains('Level');
         cy.contains('Emojis');
         cy.contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SkillsPage-Overview', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
+            name: 'Markdown-SkillsPage-Overview',
+        });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
@@ -421,7 +415,9 @@ describe('Markdown Tests', () => {
         cy.contains('Description');
         cy.contains('Emojis');
         cy.contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', 'Markdown-SubjectPage-SkillPreview', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
+            name: 'Markdown-SkillsPage-SkillPreview',
+        });
     });
 
     it('enter a block quote', () => {

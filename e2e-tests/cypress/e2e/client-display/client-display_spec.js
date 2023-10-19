@@ -22,13 +22,7 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=timePassed]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
+    // '[data-cy=timePassed]'
 
     const cssAttachedToNavigableCards = 'skills-navigable-item';
 
@@ -185,7 +179,9 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.get('input.v-switch-input')
             .focus();
-        cy.matchSnapshotImageForElement('.skill-details-toggle', 'Skill-Details-Toggle-Focused', snapshotOptions);
+        cy.matchSnapshotImageForElement('.skill-details-toggle', {
+            blackout: '[data-cy=pointHistoryChart]'
+        });
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
         cy.contains('Lorem ipsum dolor sit amet');
@@ -234,7 +230,9 @@ describe('Client Display Tests', () => {
             .should('be.visible');
         cy.get('input.v-switch-input')
             .focus();
-        cy.matchSnapshotImageForElement('.skill-details-toggle', 'Badge-Skill-Details-Toggle-Focused', snapshotOptions);
+        cy.matchSnapshotImageForElement('.skill-details-toggle', {
+            blackout: '[data-cy=pointHistoryChart]'
+        });
     });
 
     it('internal back button', () => {
@@ -389,7 +387,10 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('500');
 
-        cy.matchSnapshotImage(`Skill-Overview-Achieved`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Skill-Overview-Achieved',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
@@ -405,7 +406,10 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('500');
 
-        cy.matchSnapshotImage(`Skill-Overview-Achieved-Themed`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Skill-Overview-Achieved-Themed',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         cy.setResolution('iphone-6');
 
@@ -420,7 +424,10 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('500');
 
-        cy.matchSnapshotImage(`Skill-Overview-Achieved-iphone6`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Skill-Overview-Achieved-iphone6',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         cy.setResolution('ipad-2');
 
@@ -435,7 +442,10 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
             .contains('500');
 
-        cy.matchSnapshotImage(`Skill-Overview-Achieved-ipad2`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Skill-Overview-Achieved-ipad2',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
     });
 
@@ -488,7 +498,9 @@ describe('Client Display Tests', () => {
 
         cy.wait(4000);
         cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
-        cy.matchSnapshotImage('Skill-Dependency', snapshotOptions);
+        cy.matchSnapshotImage({
+            blackout: '[data-cy=pointHistoryChart]'
+        });
     });
 
     it('skilltree brand should link to docs', () => {
@@ -874,7 +886,9 @@ describe('Client Display Tests', () => {
         cy.cdVisit('/');
         cy.injectAxe();
         cy.contains('I am a description');
-        cy.matchSnapshotImageForElement('.project-description', 'Project-Description', snapshotOptions);
+        cy.matchSnapshotImageForElement('.project-description', {
+            blackout: '[data-cy=pointHistoryChart]'
+        });
     });
 
     it('badges details page shows achievement info for skills', () => {

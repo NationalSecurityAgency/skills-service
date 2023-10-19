@@ -20,14 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Skills Filtering Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
@@ -1250,7 +1242,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('Visual Tests: filter selected and last viewed button present', () => {

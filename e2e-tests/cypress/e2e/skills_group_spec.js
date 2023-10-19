@@ -88,7 +88,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="expandDetailsBtn_group1"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
-        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]', 'Groups Description Markdown');
+        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
     });
 
     it('handle focus', () => {
