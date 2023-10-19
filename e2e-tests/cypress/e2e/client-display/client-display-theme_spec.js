@@ -966,7 +966,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('skills group - partial completion ', () => {
+    it('skills group - partial completion', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);

@@ -202,8 +202,19 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy=skillName]')
           .type('skill1');
 
-        const attachmentFiles = cy.task('getFilesFromDir', { directory: 'cypress/attachments/', ignore: 'invalid' });
-        attachmentFiles.each((file) => {
+        const attachmentFiles = [
+            'test-doc.doc',
+            'test-docx.docx',
+            'test-odp.odp',
+            'test-ods.ods',
+            'test-odt.odt',
+            'test-pdf.pdf',
+            'test-ppt.ppt',
+            'test-pptx.pptx',
+            'test-xls.xls',
+            'test-xlsx.xlsx'
+        ]
+        attachmentFiles.forEach((file) => {
             cy.get('input[type=file]').selectFile(`cypress/attachments/${file}`, {force: true})
             cy.get(markdownInput).get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
             cy.get(markdownInput).type('\n\n')
@@ -213,7 +224,7 @@ describe('Markdown Tests', () => {
         cy.clickSave();
         cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
 
-        attachmentFiles.each((file) => {
+        attachmentFiles.forEach((file) => {
             cy.get('[data-cy="skillOverviewDescription"]').get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
         });
     });

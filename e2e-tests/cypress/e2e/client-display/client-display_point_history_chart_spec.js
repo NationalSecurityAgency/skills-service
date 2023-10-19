@@ -656,7 +656,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'PointHistoryChart-Reset');
     });
 
-    it('subject: rapid growth of points af start followed by no activity', () => {
+    it('subject rapid growth of points af start followed by no activity', () => {
         const pointHistory = createTimeline('2019-09-12', 240, 10, 100, 7, 30);
         cy.log(`Generated ${pointHistory.length} points`);
         const data = {

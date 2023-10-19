@@ -67,15 +67,7 @@ do
   printf "\nRunning $testNum: $testClass ----------------------------------\n"
   count=$((count+1))
 
-  baseDir=$(echo "${testClass}" | cut -d "/" -f2)
-  customSnapDir=""
-  if [ "${baseDir}" != "" ];then
-    if [[ ${baseDir} != *"js" ]];then
-     customSnapDir="--env customSnapshotsDir=./cypress/snapshots/${baseDir} "
-    fi
-  fi
-
-  commandToRun="npm run cy:run -- ${customSnapDir}--spec cypress/e2e/${testClass}"
+  commandToRun="npm run cy:run -- --spec cypress/e2e/${testClass}"
   echo "Running command [${commandToRun}]"
   eval $commandToRun
   commandStatusCode=$?

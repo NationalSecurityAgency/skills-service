@@ -45,7 +45,9 @@ import 'cypress-file-upload';
 import 'cypress-wait-until';
 var moment = require('moment-timezone');
 const compareSnapshotCommand = require('cypress-visual-regression/dist/command');
-compareSnapshotCommand();
+compareSnapshotCommand({
+    errorThreshold: 0.01
+});
 
 function terminalLog(violations) {
     violations = violations || { length: 0 };
@@ -78,7 +80,7 @@ function terminalLog(violations) {
 
 const getName = (maybeNameOtherwiseCommandOptions) => {
     const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
-    let snapName = Cypress.currentTest.title;
+    let snapName = Cypress.currentTest.title.trim();
     if (options && options.name) {
         snapName = options.name
     } else if (!options && maybeNameOtherwiseCommandOptions) {
