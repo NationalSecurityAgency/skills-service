@@ -1034,7 +1034,7 @@ class SkillsService {
     }
 
     def getExpiredSkills(String projectId, String userId, String skillName, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
-        return wsHelper.adminGet("/projects/${projectId}/expirations?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&orderBy=${orderBy}&userId=${userId}&skillName=${skillName}".toString())
+        return wsHelper.adminGet("/projects/${projectId}/expirations?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&orderBy=${orderBy}&userIdForDisplay=${userId}&skillName=${skillName}".toString())
     }
 
     def getLastSkillEventForProject(String projectId) {
