@@ -19,14 +19,6 @@ const dateFormatter = value => moment.utc(value)
     .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Markdown Tests', () => {
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
@@ -168,20 +160,29 @@ describe('Client Display Markdown Tests', () => {
         // check subject
         cy.cdClickSubj(0, 'Subject 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage(`Markdown-subject`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Markdown-subject',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         // check skill
         cy.cdClickSkill(0);
         cy.contains('This is 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage(`Markdown-skill`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Markdown-skill',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         // check expanded skill
         cy.cdBack('Subject 1');
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
         cy.contains('Overall Points Earned');
-        cy.matchSnapshotImage(`Markdown-Skill-Preview`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Markdown-Skill-Preview',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
 
         cy.cdVisit('/?internalBackButton=true');
         cy.contains('Overall Points');
@@ -190,6 +191,9 @@ describe('Client Display Markdown Tests', () => {
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage(`Markdown-Badge`, snapshotOptions);
+        cy.matchSnapshotImage({
+            name: 'Markdown-Badge',
+            blackout: '[data-cy=pointHistoryChart]'
+        });
     });
 });

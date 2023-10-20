@@ -20,13 +20,6 @@ const dateFormatter = value => moment.utc(value)
     .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
 
 describe('Client Display Leaderboard Tests', () => {
-    const snapshotOptions = {
-        blackout: ['[data-cy="userFirstSeen"]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
     const tableSelector = '[data-cy="leaderboardTable"]';
     const rowSelector = `${tableSelector} tbody tr`;
 
@@ -52,7 +45,9 @@ describe('Client Display Leaderboard Tests', () => {
 
         cy.get('[data-cy="noDataYet"]')
             .contains('No Users');
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'leaderboard-empty', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
+            blackout: '[data-cy="userFirstSeen"]'
+        });
     });
 
     it('just me with points', () => {

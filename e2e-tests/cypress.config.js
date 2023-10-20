@@ -1,5 +1,6 @@
 const { defineConfig } = require('cypress')
 const fs = require('fs')
+const getCompareSnapshotsPlugin = require('cypress-visual-regression/dist/plugin');
 
 module.exports = defineConfig({
   projectId: '7kivjf',
@@ -18,7 +19,7 @@ module.exports = defineConfig({
     seo: 50,
     pwa: 50,
   },
-  trashAssetsBeforeRuns: false,
+  trashAssetsBeforeRuns: true,
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
@@ -40,5 +41,14 @@ module.exports = defineConfig({
     },
     baseUrl: 'http://localhost:8080',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
+    setupNodeEvents(on, config) {
+      getCompareSnapshotsPlugin(on, config);
+    }
   },
+  env: {
+    "type": "actual",
+    "SNAPSHOT_BASE_DIRECTORY": "./cypress/visualRegression/base",
+    "SNAPSHOT_DIFF_DIRECTORY": "./cypress/visualRegression/diff",
+    "ALWAYS_GENERATE_DIFF": false
+  }
 })

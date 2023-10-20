@@ -16,13 +16,6 @@
 import moment from 'moment-timezone';
 
 describe('Client Display Prerequisites Snapshot Tests', () => {
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
 
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
@@ -85,7 +78,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Not Yet')
 
         cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 1 out 4');
+        cy.matchSnapshotImageForElement('#dependent-skills-network');
     });
 
     it('Deps Chart - partially completed deps - 3 out 4', () => {
@@ -126,7 +119,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - partially completed - 3 out 4');
+        cy.matchSnapshotImageForElement('#dependent-skills-network');
     });
 
     it('Deps Chart - fully satisfied deps', () => {
@@ -168,7 +161,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
 
         cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps');
+        cy.matchSnapshotImageForElement('#dependent-skills-network');
     });
 
     it('Deps Chart - fully satisfied deps with cross-project dep', () => {
@@ -214,7 +207,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Yes')
         cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Yes')
 
-        cy.matchSnapshotImageForElement('#dependent-skills-network', 'Deps Chart - fully satisfied deps with cross-project skill');
+        cy.matchSnapshotImageForElement('#dependent-skills-network');
     });
 
     it('cross-project dependency properly displayed', () => {
@@ -260,7 +253,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains('Prerequisites');
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`, snapshotOptions);
+        cy.matchSnapshotImage(`LockedSkill-CrossProjectDependency`);
     });
 
     it('parent and child Prerequisites are properly displayed', () => {
@@ -279,7 +272,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             .contains('Very Great Skill 3');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '2')
         cy.wait(4000);
-        cy.matchSnapshotImage(`InProjectDependency-parent`, snapshotOptions);
+        cy.matchSnapshotImage(`InProjectDependency-parent`);
 
         // Go to child dependency page
         cy.clickOnNode(550, 262);
@@ -288,7 +281,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         // should render Prerequisites section
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
         cy.wait(4000);
-        cy.matchSnapshotImage(`InProjectDependency-child`, snapshotOptions);
+        cy.matchSnapshotImage(`InProjectDependency-child`);
     });
 
     it('cross-project skill dep is shown when skill ids match', function () {
@@ -310,7 +303,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         // should render Prerequisites section
         cy.contains('Prerequisites');
         cy.wait(4000);
-        cy.matchSnapshotImage(`CrossProject Dep with the same skillId`, snapshotOptions);
+        cy.matchSnapshotImage(`CrossProject Dep with the same skillId`);
 
     });
 
@@ -330,7 +323,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSubj(0, 'Subject 1');
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`, snapshotOptions);
+        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`);
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
@@ -340,7 +333,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains('Prerequisites');
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`LockedSkill-ThatWasPartiallyAchieved`, snapshotOptions);
+        cy.matchSnapshotImage(`LockedSkill-ThatWasPartiallyAchieved`);
 
         // make sure the other locked skill doesn't contain the same message
         cy.cdBack('Subject 1');
@@ -376,7 +369,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');
 
-        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`, snapshotOptions);
+        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`);
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
@@ -384,7 +377,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains(msg);
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`LockedSkill-ThatWasFullyAchieved`, snapshotOptions);
+        cy.matchSnapshotImage(`LockedSkill-ThatWasFullyAchieved`);
 
         // other skill should not have the message
         cy.cdBack('Subject 1');
@@ -437,7 +430,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(1);
 
-        cy.matchSnapshotImage(`BadgeSkill-WithBadgeDependencies`, snapshotOptions);
+        cy.matchSnapshotImage(`BadgeSkill-WithBadgeDependencies`);
     });
 
 });

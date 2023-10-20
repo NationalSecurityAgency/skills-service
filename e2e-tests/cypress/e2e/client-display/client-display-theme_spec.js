@@ -20,13 +20,7 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '[data-cy=achievementDate]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
+    // '[data-cy=achievementDate]'
     const sizes = [
         'iphone-6',
         'ipad-2',
@@ -215,7 +209,7 @@ describe('Client Display Tests', () => {
                 .contains('1');
             cy.get('[data-cy=myBadges]')
                 .contains('1 Badge');
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - project rank - ${size}`, () => {
@@ -254,7 +248,7 @@ describe('Client Display Tests', () => {
             cy.contains('You are Level 2!');
             // wait for the bar (on the bar chart) to render
             cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - badge - ${size}`, () => {
@@ -266,7 +260,7 @@ describe('Client Display Tests', () => {
 
             cy.cdClickBadges();
             cy.contains('Badge 3');
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
 
         });
 
@@ -286,7 +280,7 @@ describe('Client Display Tests', () => {
             cy.contains('This is 3');
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - subject overview - ${size}`, () => {
@@ -304,7 +298,7 @@ describe('Client Display Tests', () => {
             cy.contains('Earn up to 1,400 points');
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - subject overview with skill details - ${size}`, () => {
@@ -332,7 +326,7 @@ describe('Client Display Tests', () => {
 
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - skill details - ${size}`, () => {
@@ -350,7 +344,7 @@ describe('Client Display Tests', () => {
             cy.contains('This is 1');
             cy.contains('Lorem ipsum dolor sit amet');
             cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '200')
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
         it(`test theming - new version notification  - ${size}`, () => {
@@ -375,7 +369,7 @@ describe('Client Display Tests', () => {
             cy.wait('@getRank');
             cy.wait(renderWait);
 
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
     });
@@ -416,7 +410,7 @@ describe('Client Display Tests', () => {
             cy.contains('Lorem ipsum dolor sit amet');
             cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
             cy.wait(4000);
-            cy.matchSnapshotImage(snapshotOptions);
+            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
     });
 
@@ -427,7 +421,7 @@ describe('Client Display Tests', () => {
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Subjects have not been added yet.');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('test theming - Empty Subject', () => {
@@ -450,7 +444,7 @@ describe('Client Display Tests', () => {
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Description');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('Point History\'s open menu must respect tiles.background option', () => {
@@ -615,7 +609,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -642,7 +636,10 @@ describe('Client Display Tests', () => {
             cy.reportSkill(1, 3, otherUser, 'now');
 
             cy.cdVisit(`/?enableTheme=true&loginAsUser=skills@skills.org`);
-            cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'Client Display Tests - My rank themed where user opted-out', snapshotOptions);
+            cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
+                name: 'Client Display Tests - My rank themed where user opted-out',
+                blackout: '[data-cy=pointHistoryChart]'
+            });
 
             cy.cdClickRank();
 
@@ -660,9 +657,14 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy="leaderboard"]')
                 .contains('You selected to opt-out');
 
-            cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', 'Client Display Tests - Rank Overview of My rank themed where user opted-out', snapshotOptions);
-            cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out', snapshotOptions);
-
+            cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', {
+                name: 'Client Display Tests - Rank Overview of My rank themed where user opted-out',
+                blackout: '[data-cy=pointHistoryChart]'
+            });
+            cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
+                name: 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out',
+                blackout: '[data-cy=pointHistoryChart]'
+            });
         });
     }
 
@@ -709,7 +711,9 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"]')
             .contains('Skill: skill1');
         cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb default', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', {
+            name: 'Client Display Tests - breadcrumb default'
+        });
 
         // // make sure buttons color doesn't affect breadcrumb
         const buttonsParam = 'buttons|{"backgroundColor":"pink","foregroundColor":"purple","disabledColor":"purple"}';
@@ -719,7 +723,9 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"]')
             .contains('Skill: skill1');
         cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with buttons themed', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol',  {
+            name: 'Client Display Tests - breadcrumb with buttons themed'
+        });
 
         // test breadcrumb theme
         const breadcrumbParam = 'breadcrumb|{"linkColor":"pink","linkHoverColor":"purple","currentPageColor":"green"}';
@@ -729,7 +735,9 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"]')
             .contains('Skill: skill1');
         cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', 'Client Display Tests - breadcrumb with breadcrumb themed', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', {
+            name: 'Client Display Tests - breadcrumb with breadcrumb themed'
+        });
     });
 
     it('ability to control title color and size as well as border, padding and margin', () => {
@@ -746,7 +754,9 @@ describe('Client Display Tests', () => {
             '"borderStyle": "none none solid none", ' +
             '"backgroundColor": "%230374ff" }';
         cy.cdVisit(`/?enableTheme=true&themeParam=${pageTitle}`);
-        cy.matchSnapshotImage('Client Display Tests - theme page title card', snapshotOptions);
+        cy.matchSnapshotImage({
+            blackout: '[data-cy=pointHistoryChart]'
+        });
     });
 
     it('ability to left align breadcrumb', () => {
@@ -758,7 +768,7 @@ describe('Client Display Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
-        cy.matchSnapshotImageForElement('.skills-theme-page-title', 'Client Display Tests - left align breadcrumb', snapshotOptions);
+        cy.matchSnapshotImageForElement('.skills-theme-page-title');
     });
 
     it('change text color of "powered by" logo', () => {
@@ -771,19 +781,28 @@ describe('Client Display Tests', () => {
 
         // legacy pageTitleTextColor param
         cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - legacy title color param', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
+            name: 'Client Display Tests - legacy title color param'
+        });
 
         // new pageTitle.textColor overrides legacy pageTitleTextColor param
         cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}&${pageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param overrides legacy', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
+            name: 'Client Display Tests - title color param overrides legacy'
+        });
 
         // explicit brand color overrides title param
         cy.cdVisit(`/?enableTheme=true&${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - explicit brand color', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
+            name: 'Client Display Tests - explicit brand color'
+        });
 
         // just pageTitle.textColor param
         cy.cdVisit(`/?enableTheme=true&${pageTitleParam}`);
         // cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
+            name: 'Client Display Tests - title color param'
+        });
     });
 
     it('badge search and badge filter selected', () => {
@@ -923,7 +942,7 @@ describe('Client Display Tests', () => {
         cy.get('.skills-badge')
             .eq(1)
             .contains('Badge 3');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage();
     });
 
     it('skills group', () => {
@@ -947,7 +966,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('skills group - partial completion ', () => {
+    it('skills group - partial completion', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);

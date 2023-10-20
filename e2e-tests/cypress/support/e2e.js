@@ -104,22 +104,22 @@ beforeEach(function () {
             cy.loginAsAdminUser()
         }
     });
-    cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`)
+    cy.log(`[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`)
 });
 
 
 afterEach(function () {
-    cy.task('logToConsole', `[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] end`)
+    cy.log(`[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] end`)
     Cypress.env('hydraAuthenticated', false);
     const aliases = cy.state('aliases');
     if (!Cypress.env('ignoreConsoleErrors')) {
-        if (aliases.consoleError) {
+        if (aliases && aliases.consoleError) {
             cy.get('@consoleError').should('not.be.called')
         }
         Cypress.env('ignoreConsoleErrors', false); // reset flag
     }
     if (!Cypress.env('ignoreConsoleWarnings')) {
-        if (aliases.consoleWarn) {
+        if (aliases && aliases.consoleWarn) {
             cy.get('@consoleWarn').should('not.be.called')
         }
         Cypress.env('ignoreConsoleWarnings', false);  // reset flag

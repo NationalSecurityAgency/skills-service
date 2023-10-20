@@ -20,14 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Theme Components Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=achievementDate]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
-
     beforeEach(() => {
         cy.createProject(1);
         cy.createSubject(1, 1);
@@ -119,13 +111,18 @@ describe('Client Display Theme Components Tests', () => {
         ``;
         cy.get('[data-cy="filterMenu"] .dropdown')
             .click();
-        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-skills', snapshotOptions);
+
+        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', {
+            name: 'filterMenu-skills'
+        });
 
         cy.cdBack();
         cy.cdClickBadges();
         cy.get('[data-cy="filterMenu"] .dropdown')
             .click();
-        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', 'filterMenu-badges', snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', {
+            name: 'filterMenu-badges'
+        });
     });
 
     it('theme info cards', () => {
@@ -167,8 +164,8 @@ describe('Client Display Theme Components Tests', () => {
         cy.get('[data-cy="timeWindowPts"]')
             .contains('100');
 
-        cy.matchSnapshotImage(`Client Display Theme Components Tests -- theme info cards border overrides tile border`, {
-            blackout: ['[data-cy="timePassed"]'],
+        cy.matchSnapshotImage({
+            blackout: '[data-cy="timePassed"]',
         });
     });
 
@@ -178,7 +175,7 @@ describe('Client Display Theme Components Tests', () => {
 
         cy.get('[data-cy="pointHistoryChart-animationEnded"]');
         cy.wait(1111);
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage( { blackout: '[data-cy=achievementDate]' });
     });
 
 });

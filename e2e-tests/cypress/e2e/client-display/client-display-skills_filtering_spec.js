@@ -20,14 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Skills Filtering Tests', () => {
 
-    const snapshotOptions = {
-        blackout: ['[data-cy=pointHistoryChart]', '#dependent-skills-network', '[data-cy=achievementDate]'],
-        failureThreshold: 0.03, // threshold for entire image
-        failureThresholdType: 'percent', // percent of image or number of pixels
-        customDiffConfig: { threshold: 0.01 }, // threshold for each pixel
-        capture: 'fullPage', // When fullPage, the application under test is captured in its entirety from top to bottom.
-    };
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
@@ -1132,7 +1124,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
     });
 
-    it('Visual Test: skills search and skills filter selected', () => {
+    it('Visual Test skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1186,7 +1178,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('Visual Test: skills filter open', () => {
+    it('Visual Test skills filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1250,10 +1242,10 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it('Visual Tests: filter selected and last viewed button present', () => {
+    it('Visual Tests filter selected and last viewed button present', () => {
 
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
