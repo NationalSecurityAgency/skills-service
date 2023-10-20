@@ -75,7 +75,7 @@ class UserAchievementExpirationService {
             }
         } else if (expirationAttrs.expirationType == ExpirationAttrs.DAILY) {
             LocalDateTime achievedOnOlderThan = now.minusDays(expirationAttrs.every)
-            expireAchievementsForSkillAchievedBefore(skillAttributesDef, achievedOnOlderThan?.toDate())
+            expireAchievementsForSkillAchievedBefore(skillAttributesDef.skillRefId, achievedOnOlderThan?.toDate())
         } else if (expirationAttrs.expirationType != ExpirationAttrs.NEVER) {
             log.error("Unexpected expirationType [${expirationAttrs?.expirationType}] - ${expirationAttrs}")
         }
@@ -89,16 +89,15 @@ class UserAchievementExpirationService {
         skillEventAdminService.deleteAllSkillEventsForSkill(skillRefId)
     }
 
-    private void expireAchievementsForSkillAchievedBefore(SkillAttributesDef skillAttributesDef, Date expirationDate) {
+    private void expireAchievementsForSkillAchievedBefore(Integer skillRefId, Date expirationDate) {
         // find any UserAchievement's for this skill where the most recent associated UserPerformedSkill.performedOn is older than the expiration date
-        List<UserAchievement> expiredUserAchievements = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(skillAttributesDef.skillRefId, expirationDate)
+        List<UserAchievement> expiredUserAchievements = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(skillRefId, expirationDate)
 
         expiredUserAchievements.each { ua ->
             // move this user_achievement record to the expired_user_achievements table
             expiredUserAchievementRepo.expireAchievementById(ua.id)
             // remove all skill events for this skill and user
-            skillEventAdminService.deleteAllSkillEventsForSkillAndUser(skillAttributesDef.skillRefId, ua.userId)
-            skillAttributesDefRepo.save(skillAttributesDef)
+            skillEventAdminService.deleteAllSkillEventsForSkillAndUser(skillRefId, ua.userId)
         }
     }
 

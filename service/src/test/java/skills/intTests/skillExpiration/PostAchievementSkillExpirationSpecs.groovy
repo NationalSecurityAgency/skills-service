@@ -1917,7 +1917,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.updateBadge(badge, badge.badgeId)
 
         String userId = "user1"
-        Long timestamp = (new Date()-8).time
         Date yesterday = (new Date()-1)
         Date twoDaysAgo = (new Date()-2)
         Date timestamp8Days = new Date()-8
@@ -1937,5 +1936,41 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         then:
         skill4Information.lastExpirationDate == null
+    }
+
+    def "get expired skill summaries for subject"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+        String secondUserId = "user2"
+        Date timestamp8Days = new Date()-8
+        Date timestamp9Days = new Date()-8
+        Long secondTimestamp = new Date().time
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp8Days)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, timestamp9Days)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], secondUserId, new Date(secondTimestamp))
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+        def subjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+
+        then:
+        subjectInfo.skills.lastExpiredDate != null
     }
 }

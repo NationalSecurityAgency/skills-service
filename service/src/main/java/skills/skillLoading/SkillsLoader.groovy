@@ -1245,10 +1245,7 @@ class SkillsLoader {
                     ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
                     expirationDate = expirationAttrs.nextExpirationDate
                     if(!achievedOn) {
-                        def expiredSkill = expiredUserAchievementRepo.findMostRecentExpirationForSkill(skillDef.projectId, userId, skillDef.skillId)
-                        if (expiredSkill) {
-                            lastExpirationDate = expiredSkill.expiredOn
-                        }
+                        lastExpirationDate = skillDefAndUserPoints.expiredOn
                     }
                     isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
                     if (isMotivationalSkill) {

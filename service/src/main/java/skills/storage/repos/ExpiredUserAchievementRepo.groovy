@@ -87,4 +87,12 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     ''')
     @Nullable
     ExpiredUserAchievement findMostRecentExpirationForSkill(@Param("projectId") String projectId, @Param("userId") String userId, @Param("skillId") String skillId)
+
+    @Query(value = '''
+        SELECT eua
+        FROM ExpiredUserAchievement eua
+        WHERE eua.projectId = :projectId AND eua.skillId IN (:skills) AND eua.userId = :userId
+    ''')
+    @Nullable
+    List<ExpiredUserAchievement> findMostRecentExpirationForAllSkills(@Param("projectId") String projectId, @Param("userId") String userId, @Param("skills") List<String> skills)
 }
