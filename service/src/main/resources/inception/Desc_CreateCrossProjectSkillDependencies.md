@@ -8,4 +8,4 @@ To create a cross-project skill:
 4. Select which project to share the skill with *OR* share with all projects, click `Share` button
     * for example, `Skill A` is shared with `Project B`
 5. In `Project B` navigate to `Project -> Learning Path`, you will see that `Skill A` was shared with this project under `Available skills from other projects for use as prerequisites` section
-6. Now in `Project B` `Skill A` can be added as a dependency to any local skills using `Project -> Learning Path`
+6. Now in `Project B` `Skill A` can be added as a prerequisite to any local skills using `Project -> Learning Path`
