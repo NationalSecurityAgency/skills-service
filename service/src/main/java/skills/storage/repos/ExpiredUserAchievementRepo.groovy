@@ -68,14 +68,18 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
                                                                                                  @Param("olderThanDate") Date olderThanDate)
 
     @Query(value = '''
-       SELECT eua.userId as userId, eua.skillId as skillId, eua.expiredOn as expiredOn, skill.name as skillName
-       FROM ExpiredUserAchievement eua, SkillDef skill
-       WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId
-       AND(:userId is null OR lower(eua.userId) like lower(concat('%', :userId, '%')))
+       SELECT eua.userId as userId, eua.skillId as skillId, eua.expiredOn as expiredOn, skill.name as skillName, userAttrs.userIdForDisplay as userIdForDisplay, subjectDef.skillId as subjectId
+       FROM ExpiredUserAchievement eua, SkillDef skill, UserAttrs userAttrs, SkillDef subjectDef, SkillRelDef srd
+       WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId AND userAttrs.userId = eua.userId
+       AND subjectDef = srd.parent AND 
+           skill = srd.child AND
+           (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') AND
+           subjectDef.type = 'Subject'       
+       AND(:userFilter is null OR lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%')))
        AND(:skillNameFilter is null OR lower(skill.name) like lower(concat('%', :skillNameFilter, '%')))
     ''')
     Page<ExpiredSkillRes> findAllExpiredAchievements(@Param("projectId") String projectId,
-                                                     @Param("userId") String userId,
+                                                     @Param("userFilter") String userFilter,
                                                      @Param("skillNameFilter") String skillNameFilter, PageRequest pageRequest)
 
 }

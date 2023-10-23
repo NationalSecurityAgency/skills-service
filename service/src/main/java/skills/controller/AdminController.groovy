@@ -1706,13 +1706,12 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/expirations", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     TableResult getExpiredSkills(@PathVariable(name = "projectId") String projectId,
-                                           @RequestParam(name = "userId", required = false) String userIdParam,
+                                           @RequestParam(name = "userIdForDisplay", required = false) String userIdParam,
                                            @RequestParam(name = "skillName", required = false) String skillName,
                                            @RequestParam int page,
                                            @RequestParam int limit,
                                            @RequestParam String orderBy,
                                            @RequestParam Boolean ascending) {
-        String userId = userInfoService.getUserName(userIdParam);
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userAchievementExpirationService.findAllExpiredAchievements(projectId, userIdParam, skillName, pageRequest);
     }

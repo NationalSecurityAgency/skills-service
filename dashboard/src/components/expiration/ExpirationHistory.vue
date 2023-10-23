@@ -24,8 +24,8 @@ limitations under the License.
           </b-form-group>
         </div>
         <div class="col-md-6">
-          <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="userIdFilter" aria-label="user id filter"/>
+          <b-form-group label="User Filter" label-class="text-muted">
+            <b-input v-model="filters.userIdForDisplay" v-on:keydown.enter="applyFilters" data-cy="userIdFilter" aria-label="user id filter"/>
           </b-form-group>
         </div>
       </div>
@@ -42,7 +42,7 @@ limitations under the License.
                         @sort-changed="sortTable"
                         tableStoredStateId="expirationHistoryTable"
                         data-cy="expirationHistoryTable">
-          <template #head(userId)="data">
+          <template #head(userIdForDisplay)="data">
             <span class="text-primary">
               <i class="fas fa-user-cog skills-color-skills" aria-hidden="true"/> {{ data.label }}
             </span>
@@ -54,7 +54,7 @@ limitations under the License.
             <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
           </template>
           <template v-slot:cell(skillName)="data">
-            <link-to-skill-page :project-id="projectId" :skill-id="data.item.skillId" :link-label="data.label" data-cy="linkToSkill"/>
+            <a :href="getUrl(data.item)">{{ data.value }}</a>
           </template>
           <template v-slot:cell(expiredOn)="data">
             <date-cell :value="data.value" />
@@ -68,7 +68,6 @@ limitations under the License.
 <script>
   import SubPageHeader from '@/components/utils/pages/SubPageHeader';
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import LinkToSkillPage from '@/components/utils/LinkToSkillPage';
   import ExpirationService from '@/components/expiration/ExpirationService';
   import DateCell from '../utils/table/DateCell';
 
@@ -78,14 +77,13 @@ limitations under the License.
       SubPageHeader,
       SkillsBTable,
       DateCell,
-      LinkToSkillPage,
     },
     data() {
       return {
         projectId: this.$route.params.projectId,
         filters: {
           skillName: '',
-          userId: '',
+          userIdForDisplay: '',
         },
         table: {
           options: {
@@ -93,7 +91,7 @@ limitations under the License.
             bordered: true,
             outlined: true,
             stacked: 'md',
-            sortBy: 'userId',
+            sortBy: 'userIdForDisplay',
             sortDesc: true,
             tableDescription: 'ExpirationHistory',
             fields: [
@@ -103,7 +101,7 @@ limitations under the License.
                 sortable: true,
               },
               {
-                key: 'userId',
+                key: 'userIdForDisplay',
                 label: 'User',
                 sortable: true,
               },
@@ -136,7 +134,7 @@ limitations under the License.
           orderBy: this.table.options.sortBy,
           ascending: !this.table.options.sortDesc,
           skillName: this.filters.skillName,
-          userId: this.filters.userId,
+          userIdForDisplay: this.filters.userIdForDisplay,
         };
         return ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
           this.table.items = res.data;
@@ -166,18 +164,21 @@ limitations under the License.
           if (this.filters.skillName) {
             filterMessage += ` ${this.filters.skillName}`;
           }
-          if (this.filters.userId) {
-            filterMessage += ` ${this.filters.userId}`;
+          if (this.filters.userIdForDisplay) {
+            filterMessage += ` ${this.filters.userIdForDisplay}`;
           }
           this.$nextTick(() => this.$announcer.polite(filterMessage));
         });
       },
       reset() {
-        this.filters.userId = '';
+        this.filters.userIdForDisplay = '';
         this.filters.skillName = '';
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Skill expiration history table filters have been removed'));
         });
+      },
+      getUrl(item) {
+        return `/administrator/projects/${encodeURIComponent(this.projectId)}/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
       },
     },
   };

@@ -375,4 +375,64 @@ describe('Expired Skill Table Tests', () => {
             }],
         ], 5);
     });
+
+    it('Sort by skill name', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        cy.configureExpiration(2, 0, 1, 'DAILY');
+        cy.configureExpiration(3, 0, 1, 'DAILY');
+        let yesterday = moment.utc().subtract(1, 'day')
+        let twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+
+        cy.expireSkills();
+
+        cy.visit('/administrator/projects/proj1/expirationHistory');
+
+        const tableSelector = '[data-cy=expirationHistoryTable]';
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(headerSelector).contains('Skill Name').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 3'
+            }],
+        ], 3);
+
+        cy.get(headerSelector).contains('Skill Name').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 3'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 1'
+            }],
+        ], 3);
+    });
 });
