@@ -20,7 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Tests', () => {
 
-    // '[data-cy=achievementDate]'
     const sizes = [
         'iphone-6',
         'ipad-2',
@@ -248,7 +247,7 @@ describe('Client Display Tests', () => {
             cy.contains('You are Level 2!');
             // wait for the bar (on the bar chart) to render
             cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImage({ blackout: '[data-cy=userFirstSeen]' });
         });
 
         it(`test theming - badge - ${size}`, () => {
@@ -659,11 +658,11 @@ describe('Client Display Tests', () => {
 
             cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', {
                 name: 'Client Display Tests - Rank Overview of My rank themed where user opted-out',
-                blackout: '[data-cy=pointHistoryChart]'
+                blackout: '[data-cy=userFirstSeen]'
             });
             cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
                 name: 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out',
-                blackout: '[data-cy=pointHistoryChart]'
+                blackout: '[data-cy=userFirstSeen]'
             });
         });
     }
