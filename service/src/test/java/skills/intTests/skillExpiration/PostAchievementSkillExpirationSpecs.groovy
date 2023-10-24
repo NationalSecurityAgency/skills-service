@@ -1971,6 +1971,83 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         def subjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
 
         then:
-        subjectInfo.skills.lastExpiredDate != null
+        subjectInfo.skills.lastExpirationDate != null
+    }
+
+    def "achieve skill after expiration and get subject summary"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date() - 21)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date() - 20)
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+        def subjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 8)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 9)
+        def laterSubjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+
+        then:
+        subjectInfo.skills.lastExpirationDate != null
+        laterSubjectInfo.skills[0].lastExpirationDate == null
+    }
+
+    def "with multiple expirations, latest expiration is returned in subject summary"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Map badge = [projectId: proj.projectId, badgeId: 'badge1', name: 'Test Badge 1']
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        String userId = "user1"
+
+        setup:
+        skills.forEach { it ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date() - 31)
+            skillsService.addSkill([projectId: proj.projectId, skillId: it.skillId], userId, new Date() - 30)
+        }
+
+        when:
+        expireSkills(proj.projectId, skills)
+        def subjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 20)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 19)
+        expireSkills(proj.projectId, skills)
+        def secondSubjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 9)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, new Date() - 8)
+        expireSkills(proj.projectId, skills)
+        def laterSubjectInfo = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
+
+        then:
+        laterSubjectInfo.skills[0].lastExpirationDate != null
+        subjectInfo.skills[0].lastExpirationDate != laterSubjectInfo.skills[0].lastExpirationDate != null
+        secondSubjectInfo.skills[0].lastExpirationDate != laterSubjectInfo.skills[0].lastExpirationDate != null
+        subjectInfo.skills[0].lastExpirationDate != secondSubjectInfo.skills[0].lastExpirationDate != null
     }
 }

@@ -184,8 +184,11 @@ class SubjectDataLoader {
             def expiredSkills = expiredUserAchievementRepo.findMostRecentExpirationForAllSkills(projectId, userId, skillIds)
             if (expiredSkills) {
                 skillsAndPoints.each { it ->
-                    def expirationInfo = expiredSkills.find{ skill -> skill.skillId == it.skillDef.skillId }
-                    it.expiredOn = expirationInfo?.expiredOn
+                    def expirations = expiredSkills.findAll{skill -> skill.skillId == it.skillDef.skillId}
+                    if(expirations) {
+                        expirations?.sort { skill -> skill.expiredOn }
+                        it.expiredOn = expirations.first()?.expiredOn
+                    }
                 }
             }
         }
