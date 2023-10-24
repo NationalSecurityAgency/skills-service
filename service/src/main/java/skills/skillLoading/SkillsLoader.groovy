@@ -41,6 +41,7 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
+import skills.services.admin.UserAchievementExpirationService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.BonusAwardAttrs
@@ -161,6 +162,9 @@ class SkillsLoader {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    ExpiredUserAchievementRepo expiredUserAchievementRepo
 
     @Autowired
     TaskConfig taskConfig
@@ -528,10 +532,17 @@ class SkillsLoader {
         ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
         Date expirationDate
         Date mostRecentlyPerformedOn
+        Date lastExpirationDate
         int daysOfInactivityBeforeExp = 0
         Boolean isMotivationalSkill = false
         if (expirationAttrs) {
             expirationDate = expirationAttrs.nextExpirationDate
+            if(!achievedOn) {
+                def expiredSkill = expiredUserAchievementRepo.findMostRecentExpirationForSkill(projectId, userId, skillId)
+                if (expiredSkill) {
+                    lastExpirationDate = expiredSkill.expiredOn
+                }
+            }
             isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
             if (isMotivationalSkill) {
                 UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
@@ -612,6 +623,7 @@ class SkillsLoader {
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
+                lastExpirationDate: lastExpirationDate
         )
     }
 
@@ -1226,11 +1238,15 @@ class SkillsLoader {
                 Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, skillDef.projectId, skillDef.skillId)
                 Date expirationDate
                 Date mostRecentlyPerformedOn
+                Date lastExpirationDate
                 int daysOfInactivityBeforeExp = 0
                 Boolean isMotivationalSkill = false
                 if (skillDefAndUserPoints.attributes && skillDefAndUserPoints.attributes.type == SkillAttributesDef.SkillAttributesType.AchievementExpiration) {
                     ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
                     expirationDate = expirationAttrs.nextExpirationDate
+                    if(!achievedOn) {
+                        lastExpirationDate = skillDefAndUserPoints.expiredOn
+                    }
                     isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
                     if (isMotivationalSkill) {
                         UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillDef.id, userId)
@@ -1273,6 +1289,7 @@ class SkillsLoader {
                         isMotivationalSkill: isMotivationalSkill,
                         daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                         mostRecentlyPerformedOn: mostRecentlyPerformedOn,
+                        lastExpirationDate: lastExpirationDate
                 )
             }
         }

@@ -1402,7 +1402,6 @@ Cypress.Commands.add('configureExpiration', (skillNum = '1', numDays = 30, every
         nextExpirationDate: m ? m.format('x') : null
     });
 });
-
 Cypress.Commands.add('expireSkills', () => {
     cy.logout();
     cy.resetEmail();

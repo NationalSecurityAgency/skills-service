@@ -268,4 +268,42 @@ describe('Client Display Expiration Tests', () => {
         cy.get(`[data-cy="expirationDate"]`).contains(`Expires ${thirdRuntime.fromNow()}`)
 
     });
+
+    it('expired achievement shows how long ago in UI', () => {
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        cy.configureExpiration(2, 0, 1, 'DAILY');
+        cy.configureExpiration(3, 0, 3, 'DAILY');
+        const yesterday = moment.utc().subtract(1, 'day')
+        const twoDaysAgo = moment.utc().subtract(2, 'day')
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
+
+        cy.expireSkills();
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="hasExpired"]`)
+            .should('exist');
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="hasExpired"]`).contains(`Points expired a few seconds ago`)
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="hasExpired"]`)
+            .should('exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="hasExpired"]`).contains('Points expired a few seconds ago')
+        cy.get(`[data-cy="skillProgress_index-2"] [data-cy="hasExpired"]`)
+            .should('not.exist');
+
+        cy.cdClickSkill(0);
+        cy.get(`[data-cy="hasExpired"]`).should('exist');
+        cy.get(`[data-cy="hasExpired"]`).contains(`Points expired a few seconds ago`)
+
+        cy.get('[data-cy="nextSkill"]').click();
+        cy.get(`[data-cy="hasExpired"]`).should('exist');
+        cy.get(`[data-cy="hasExpired"]`).contains('Points expired a few seconds ago')
+
+        cy.get('[data-cy="nextSkill"]').click();
+        cy.get(`[data-cy="hasExpired"]`).should('not.exist');
+
+    });
 });

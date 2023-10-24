@@ -51,4 +51,5 @@ class SkillSummary extends SkillSummaryParent {
     int daysOfInactivityBeforeExp
     Date mostRecentlyPerformedOn
     Date expirationDate
+    Date lastExpirationDate
 }
