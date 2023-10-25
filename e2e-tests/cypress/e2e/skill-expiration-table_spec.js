@@ -16,7 +16,12 @@
 
 const moment = require("moment-timezone");
 describe('Expired Skill Table Tests', () => {
-
+    let proxyUser, userToValidate;
+    before(() => {
+        proxyUser = Cypress.env('proxyUser');
+        userToValidate = Cypress.env('oauthMode') ? 'foo' : proxyUser;
+    })
+    
     it('Expired skills show up in table', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -25,8 +30,8 @@ describe('Expired Skill Table Tests', () => {
         cy.configureExpiration(1, 0, 1, 'DAILY');
         const yesterday = moment.utc().subtract(1, 'day')
         const twoDaysAgo = moment.utc().subtract(2, 'day')
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') })
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') })
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: "user1", date: yesterday.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: "user1", date: twoDaysAgo.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: "user2", date: yesterday.format('YYYY-MM-DD HH:mm') })
@@ -57,7 +62,7 @@ describe('Expired Skill Table Tests', () => {
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
-                value: 'user0'
+                value: userToValidate
             }],
         ], 3);
     });
@@ -70,8 +75,8 @@ describe('Expired Skill Table Tests', () => {
         cy.configureExpiration(1, 0, 1, 'DAILY');
         let yesterday = moment.utc().subtract(1, 'day')
         let twoDaysAgo = moment.utc().subtract(2, 'day')
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
 
         for(let x = 1; x < 20; x++) {
             const user = "user" + x;
@@ -147,7 +152,7 @@ describe('Expired Skill Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'user0'
+                value: userToValidate
             }],
             [{
                 colIndex: 1,
@@ -273,7 +278,7 @@ describe('Expired Skill Table Tests', () => {
             }],
             [{
                 colIndex: 1,
-                value: 'user0'
+                value: userToValidate
             }],
         ], 10, true, 20);
     });
@@ -286,8 +291,8 @@ describe('Expired Skill Table Tests', () => {
         cy.configureExpiration(1, 0, 1, 'DAILY');
         let yesterday = moment.utc().subtract(1, 'day')
         let twoDaysAgo = moment.utc().subtract(2, 'day')
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
 
         for(let x = 1; x < 5; x++) {
             const user = "user" + x;
@@ -320,7 +325,7 @@ describe('Expired Skill Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'user0'
+                value: userToValidate
             }],
             [{
                 colIndex: 1,
@@ -355,7 +360,7 @@ describe('Expired Skill Table Tests', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'user0'
+                value: userToValidate
             }],
             [{
                 colIndex: 1,
@@ -388,12 +393,12 @@ describe('Expired Skill Table Tests', () => {
         cy.configureExpiration(3, 0, 1, 'DAILY');
         let yesterday = moment.utc().subtract(1, 'day')
         let twoDaysAgo = moment.utc().subtract(2, 'day')
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: yesterday.format('YYYY-MM-DD HH:mm') });
-        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: proxyUser, date: yesterday.format('YYYY-MM-DD HH:mm') });
+        cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: proxyUser, date: twoDaysAgo.format('YYYY-MM-DD HH:mm') });
 
         cy.expireSkills();
 
