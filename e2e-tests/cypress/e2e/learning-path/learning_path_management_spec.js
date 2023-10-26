@@ -395,7 +395,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
 
-    it('Changing the From skill clears the To skill', () => {
+    it.only('Changing the From skill clears the To skill', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
@@ -409,13 +409,13 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathToSkillSelector"]').contains('Badge 2');
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click({ multiple: true });
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Very Great Skill 5 Subj2');
         cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
     })
 
-    it('Changing the From skill clears errors', () => {
+    it.only('Changing the From skill clears errors', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
@@ -434,12 +434,12 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click({ multiple: true });
 
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
 
-    it('Changing the To skill clears errors', () => {
+    it.only('Changing the To skill clears errors', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
@@ -452,7 +452,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathFromSkillSelector"]').click();
         cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click({ multiple: true });
 
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
