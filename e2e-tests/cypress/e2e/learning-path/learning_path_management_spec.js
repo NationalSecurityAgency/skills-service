@@ -439,7 +439,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
 
-    it.only('Changing the To skill clears errors', () => {
+    it('Changing the To skill clears errors', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
