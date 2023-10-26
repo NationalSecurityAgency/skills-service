@@ -187,5 +187,4 @@ jobs:
         name: CI result artifacts
         path: |
           ./e2e-tests/logs
-          ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
-          ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
+          ./e2e-tests/cypress/visualRegression/diff
