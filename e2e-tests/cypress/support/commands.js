@@ -1416,8 +1416,5 @@ Cypress.Commands.add('expireSkills', () => {
     cy.request('POST', `/root/runSkillExpiration`);
 
     cy.logout();
-    cy.fixture('vars.json')
-        .then((vars) => {
-            cy.login(vars.defaultUser, vars.defaultPass);
-        });
+    cy.loginAsAdminUser();
 });

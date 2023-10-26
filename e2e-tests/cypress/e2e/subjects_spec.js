@@ -974,6 +974,12 @@ describe('Subjects Tests', () => {
     });
 
     it('subject modal shows Root Help Url after it was update via UI', () => {
+
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+          .as('loadSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+          .as('saveSettings');
+
         cy.createSubject(1, 2, {helpUrl: '/some/path'})
         cy.createSubject(1, 3, {helpUrl: 'https://www.OverrideHelpUrl.com/other/path'})
 
@@ -984,8 +990,11 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="closeSubjectButton"]').click();
 
         cy.clickNav('Settings');
+        cy.wait('@loadSettings');
         cy.get('[data-cy="rootHelpUrlInput"]').type('https://someCoolWebsite.com/');
         cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.wait('@saveSettings');
+        cy.wait('@loadSettings');
 
         cy.clickNav('Subjects');
         cy.get('[data-cy="manageBtn_subj2"]').should('exist')

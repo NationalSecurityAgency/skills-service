@@ -614,6 +614,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{upArrow}');
+        cy.wait('@patchQuestion')
+        cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
         // attempt to move the top item - should not change anything
@@ -621,8 +623,6 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{upArrow}');
-        cy.wait('@patchQuestion')
-        cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
         cy.log("Reload")
