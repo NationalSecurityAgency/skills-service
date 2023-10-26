@@ -395,7 +395,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
 
-    it.only('Changing the From skill clears the To skill', () => {
+    it('Changing the From skill clears the To skill', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
@@ -415,7 +415,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
     })
 
-    it.only('Changing the From skill clears errors', () => {
+    it('Changing the From skill clears errors', () => {
         cy.visit('/administrator/projects/proj1/learning-path')
 
         // Add Badge1 as a prerequisite for Badge2
