@@ -441,9 +441,9 @@ describe('Accessibility Tests', () => {
         cy.contains('No Levels Added Yet');
         cy.customLighthouse();
 
+        cy.wait('@getAvailableProjects')
         cy.get('#project-selector')
             .click();
-        cy.wait('@getAvailableProjects')
         cy.get('#project-selector .vs__dropdown-option')
             .eq(0)
             .click();
