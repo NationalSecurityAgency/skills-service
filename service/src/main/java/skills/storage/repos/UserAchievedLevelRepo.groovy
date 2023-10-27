@@ -48,6 +48,10 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select ua.achievedOn from UserAchievement ua where ua.userId= ?1 and ua.projectId=?2 and ua.skillId=?3''')
     Date getAchievedDateByUserIdAndProjectIdAndSkillId(String userId, String projectId, String skillId)
 
+    @Nullable
+    @Query('''select ua from UserAchievement ua where ua.userId = ?1 and ua.projectId = ?2 and ua.skillId in ?3''')
+    List<UserAchievement> getAchievedDateByUserIdAndProjectIdAndSkillBatch(String userId, String projectId, List<String> skillId)
+
     @Query('''select ua from UserAchievement ua where ua.userId = ?1 and ua.projectId in ?2''')
     List<UserAchievement> findAllByUserAndProjectIds(String userId, Collection<String> projectId)
 
