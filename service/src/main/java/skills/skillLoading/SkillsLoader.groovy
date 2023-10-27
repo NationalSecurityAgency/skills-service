@@ -1235,7 +1235,6 @@ class SkillsLoader {
                     })
                 }
 
-                Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, skillDef.projectId, skillDef.skillId)
                 Date expirationDate
                 Date mostRecentlyPerformedOn
                 Date lastExpirationDate
@@ -1244,7 +1243,7 @@ class SkillsLoader {
                 if (skillDefAndUserPoints.attributes && skillDefAndUserPoints.attributes.type == SkillAttributesDef.SkillAttributesType.AchievementExpiration) {
                     ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillDefAndUserPoints.attributes, ExpirationAttrs)
                     expirationDate = expirationAttrs.nextExpirationDate
-                    if(!achievedOn) {
+                    if(!skillDefAndUserPoints.achievedOn) {
                         lastExpirationDate = skillDefAndUserPoints.expiredOn
                     }
                     isMotivationalSkill = expirationAttrs?.expirationType == ExpirationAttrs.DAILY
@@ -1273,7 +1272,7 @@ class SkillsLoader {
                         pointIncrementInterval: skillDef.pointIncrementInterval,
                         maxOccurrencesWithinIncrementInterval: skillDef.numMaxOccurrencesIncrementInterval,
                         totalPoints: skillDef.totalPoints,
-                        achievedOn: achievedOn,
+                        achievedOn: skillDefAndUserPoints.achievedOn,
                         dependencyInfo: skillDefAndUserPoints.dependencyInfo,
                         badgeDependencyInfo: badgeDependencySummary,
                         selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
