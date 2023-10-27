@@ -211,44 +211,46 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
-        it(`test theming - project rank - ${size}`, () => {
-            cy.setResolution(size);
+        if (!Cypress.env('oauthMode')) {
+            it(`test theming - project rank - ${size}`, () => {
+                cy.setResolution(size);
 
-            cy.cdInitProjWithSkills();
+                cy.cdInitProjWithSkills();
 
-            const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-            for (let i = 0; i < 5; i += 1) {
-                cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                    userId: `uniqueUser${i}`,
-                    timestamp: m.clone()
-                        .add(1, 'day')
-                        .format('x')
-                });
-                cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                    userId: `uniqueUser${i}`,
-                    timestamp: m.clone()
-                        .add(2, 'day')
-                        .format('x')
-                });
-            }
+                const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+                for (let i = 0; i < 5; i += 1) {
+                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                        userId: `uniqueUser${i}`,
+                        timestamp: m.clone()
+                          .add(1, 'day')
+                          .format('x')
+                    });
+                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                        userId: `uniqueUser${i}`,
+                        timestamp: m.clone()
+                          .add(2, 'day')
+                          .format('x')
+                    });
+                }
 
-            cy.cdVisit('/?enableTheme=true&internalBackButton=true');
+                cy.cdVisit('/?enableTheme=true&internalBackButton=true');
 
-            // back button - border color
-            cy.cdClickRank();
-            // THEME: "pageTitleTextColor": "#fdfbfb",
-            cy.get('[data-cy=back]')
-                .should('have.css', 'border-color')
-                .and('equal', 'rgb(253, 251, 251)');
-            cy.get('[data-cy=back]')
-                .should('have.css', 'color')
-                .and('equal', 'rgb(253, 251, 251)');
+                // back button - border color
+                cy.cdClickRank();
+                // THEME: "pageTitleTextColor": "#fdfbfb",
+                cy.get('[data-cy=back]')
+                  .should('have.css', 'border-color')
+                  .and('equal', 'rgb(253, 251, 251)');
+                cy.get('[data-cy=back]')
+                  .should('have.css', 'color')
+                  .and('equal', 'rgb(253, 251, 251)');
 
-            cy.contains('You are Level 2!');
-            // wait for the bar (on the bar chart) to render
-            cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-            cy.matchSnapshotImage({ blackout: '[data-cy=userFirstSeen]' });
-        });
+                cy.contains('You are Level 2!');
+                // wait for the bar (on the bar chart) to render
+                cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
+                cy.matchSnapshotImage({blackout: '[data-cy=userFirstSeen]'});
+            });
+        }
 
         it(`test theming - badge - ${size}`, () => {
             cy.setResolution(size);
