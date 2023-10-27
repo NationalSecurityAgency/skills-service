@@ -186,7 +186,7 @@ class SubjectDataLoader {
 
     private List<SkillsAndPoints> handleAchievements(String projectId, String userId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
-            List<String> skillIds = collectUnachievedSkillIds(skillsAndPoints)
+            List<String> skillIds = collectSkillIds(skillsAndPoints)
             def achievedSkills = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillBatch(userId, projectId, skillIds)
             if (achievedSkills) {
                 skillsAndPoints.each { it ->
@@ -203,7 +203,7 @@ class SubjectDataLoader {
 
     private List<SkillsAndPoints> handleSkillExpirations(String projectId, String userId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
-            List<String> skillIds = collectSkillIds(skillsAndPoints)
+            List<String> skillIds = collectUnachievedSkillIds(skillsAndPoints)
             def expiredSkills = expiredUserAchievementRepo.findMostRecentExpirationForAllSkills(projectId, userId, skillIds)
             if (expiredSkills) {
                 skillsAndPoints.each { it ->
@@ -283,7 +283,7 @@ class SubjectDataLoader {
             if(!it.achievedOn) {
                 if (it.skillDef.type == SkillDef.ContainerType.SkillsGroup) {
                     if (it.children) {
-                        skillIds.addAll(it.children.collect { child -> child.skillDef.skillId })
+                        skillIds.addAll(it.children.findAll{ child -> !child.achievedOn }.collect { child -> child.skillDef.skillId })
                     }
                 } else if (it.skillDef.type == SkillDef.ContainerType.Skill) {
                     skillIds.add(it.skillDef.skillId)
