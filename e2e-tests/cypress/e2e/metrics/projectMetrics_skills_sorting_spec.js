@@ -24,9 +24,6 @@ describe('Metrics Tests - Skills Sorting', () => {
             name: 'proj1'
         });
 
-        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
-            .as('skillUsageNavigatorChartBuilder');
-
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -82,6 +79,8 @@ describe('Metrics Tests - Skills Sorting', () => {
     });
 
     it('skills table - sorting by skill', () => {
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+            .as('skillUsageNavigatorChartBuilder');
         cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
         const tableSelector = '[data-cy=skillsNavigator-table]';
@@ -133,6 +132,8 @@ describe('Metrics Tests - Skills Sorting', () => {
     });
 
     it('skills table - sorting by num user achieved', () => {
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+            .as('skillUsageNavigatorChartBuilder');
         cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
         const tableSelector = '[data-cy=skillsNavigator-table]';
@@ -185,6 +186,8 @@ describe('Metrics Tests - Skills Sorting', () => {
     });
 
     it('skills table - sorting by num user in progress', () => {
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+            .as('skillUsageNavigatorChartBuilder');
         cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
         const tableSelector = '[data-cy=skillsNavigator-table]';
@@ -236,6 +239,8 @@ describe('Metrics Tests - Skills Sorting', () => {
     });
 
     it('skills table - sorting by last reported', () => {
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+            .as('skillUsageNavigatorChartBuilder');
         cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
         const tableSelector = '[data-cy=skillsNavigator-table]';
