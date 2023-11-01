@@ -377,7 +377,10 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains(msg);
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`LockedSkill-ThatWasFullyAchieved`);
+        cy.matchSnapshotImage({
+            name: 'LockedSkill-ThatWasFullyAchieved',
+            blackout: '[data-cy="achievementOn"]'
+        });
 
         // other skill should not have the message
         cy.cdBack('Subject 1');
