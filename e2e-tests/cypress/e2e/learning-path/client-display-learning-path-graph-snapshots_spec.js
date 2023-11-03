@@ -323,7 +323,10 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSubj(0, 'Subject 1');
 
         cy.wait(4000);
-        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWerePartiallyAchieved`);
+        cy.matchSnapshotImage({
+            name: 'Subject-WithLockedSkills-ThatWerePartiallyAchieved',
+            blackout: '[data-cy="pointHistoryChart"]'
+        });
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
@@ -369,7 +372,10 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdVisit('/?internalBackButton=true');
         cy.cdClickSubj(0, 'Subject 1');
 
-        cy.matchSnapshotImage(`Subject-WithLockedSkills-ThatWereFullyAchieved`);
+        cy.matchSnapshotImage({
+            name: 'Subject-WithLockedSkills-ThatWereFullyAchieved',
+            blackout: '[data-cy="pointHistoryChart"]'
+        });
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
