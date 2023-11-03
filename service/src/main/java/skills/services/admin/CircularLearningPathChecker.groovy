@@ -36,6 +36,7 @@ class CircularLearningPathChecker {
     // private
     private BadgeAndSkillsLookup badgeAndSkillsLookup = new BadgeAndSkillsLookup()
     private PrerequisiteNodeLookup prerequisiteNodeLookup = new PrerequisiteNodeLookup()
+    private Set<String> allItemIdsOnFinalLearningPath
     private SkillInfo start
 
     // contains all of the badges by following start node in the opposite direction of prerequisite path
@@ -182,6 +183,7 @@ class CircularLearningPathChecker {
         SkillInfo skillInfo = new SkillInfo(projectId: skillDef.projectId, skillId: skillDef.skillId, name: skillDef.name, type: skillDef.type)
         SkillInfo prereqSkillInfo = new SkillInfo(projectId: prereqSkillDef.projectId, skillId: prereqSkillDef.skillId, name: prereqSkillDef.name, type: prereqSkillDef.type)
         List<SkillInfo> path = [skillInfo]
+        allItemIdsOnFinalLearningPath = constructAllItemIdsOnFinalLearningPath(edgePairs, skillInfo, prereqSkillInfo)
 
         startNodeBadgesOnParentPath = []
         collectParentBadges(skillInfo, startNodeBadgesOnParentPath, 0)
@@ -274,7 +276,9 @@ class CircularLearningPathChecker {
             badgesOnPath = badgesOnPath.findAll { it.type == SkillDef.ContainerType.Badge }
             for (SkillInfo badgeOnPathSkillInfo : badgesOnPath) {
                 BadgeAndSkills badge = badgeAndSkillsLookup.getBadgeByBadgeId(badgeOnPathSkillInfo.skillId)
-                if (badge.badgeHasSkillId(current.skillId) && badge.badgeGraphNode.skillId != current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId) {
+                if (isBadgeOnCurrentLearningPath(badge) &&
+                        badge.badgeHasSkillId(current.skillId) &&
+                        badge.badgeGraphNode.skillId != current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId) {
                     return new DependencyCheckResult(possible: false,
                             failureType: DependencyCheckResult.FailureType.BadgeSkillIsAlreadyOnPath,
                             violatingSkillId: current.skillId,
@@ -327,19 +331,34 @@ class CircularLearningPathChecker {
     private DependencyCheckResult checkBadgesForSkillOverlap(BadgeAndSkills badge, List<SkillInfo> checkAgainst) {
         for (SkillInfo badgeOnPathSkillInfo : checkAgainst) {
             BadgeAndSkills badgeOnPath = badgeAndSkillsLookup.getBadgeByBadgeId(badgeOnPathSkillInfo.skillId)
-            SkillInfo found = badgeOnPath.skills.find { SkillInfo searchFor -> badge.skills.find { searchFor.skillId == it.skillId } }
-            if (found) {
-                return new DependencyCheckResult(possible: false,
-                        failureType: DependencyCheckResult.FailureType.BadgeOverlappingSkills,
-                        violatingSkillInBadgeId: badge.badgeGraphNode.skillId,
-                        violatingSkillInBadgeName:  badge.badgeGraphNode.name,
-                        violatingSkillId: found.skillId,
-                        violatingSkillName: found.name,
-                        reason: "Multiple badges on the same Learning path cannot have overlapping skills. Both badge [${badge.badgeGraphNode.name}] and [${badgeOnPath.badgeGraphNode.name}] badge have [${found.name}] skill.")
+            if (isBadgeOnCurrentLearningPath(badgeOnPath)) {
+                SkillInfo found = badgeOnPath.skills.find { SkillInfo searchFor -> badge.skills.find { searchFor.skillId == it.skillId } }
+                if (found) {
+                    return new DependencyCheckResult(possible: false,
+                            failureType: DependencyCheckResult.FailureType.BadgeOverlappingSkills,
+                            violatingSkillInBadgeId: badge.badgeGraphNode.skillId,
+                            violatingSkillInBadgeName:  badge.badgeGraphNode.name,
+                            violatingSkillId: found.skillId,
+                            violatingSkillName: found.name,
+                            reason: "Multiple badges on the same Learning path cannot have overlapping skills. Both badge [${badge.badgeGraphNode.name}] and [${badgeOnPath.badgeGraphNode.name}] badge have [${found.name}] skill.")
+                }
             }
         }
 
         return new DependencyCheckResult()
+    }
+
+    private Set<String> constructAllItemIdsOnFinalLearningPath(List<SkillDefGraphResPair> edgePairs, SkillInfo skillInfo, SkillInfo prereqSkillInfo) {
+        Set res = edgePairs.collect {
+            ["${it.node.projectId}-${it.node.skillId}".toString(), "${it.prerequisite.projectId}-${it.prerequisite.skillId}".toString()]
+        }.flatten().toSet()
+        res.add("${skillInfo.projectId}-${skillInfo.skillId}".toString())
+        res.add("${prereqSkillInfo.projectId}-${prereqSkillInfo.skillId}".toString())
+        return res
+    }
+    private boolean isBadgeOnCurrentLearningPath(BadgeAndSkills badge) {
+        boolean isBadgeOnPath = allItemIdsOnFinalLearningPath.contains("${badge.badgeGraphNode.projectId}-${badge.badgeGraphNode.skillId}".toString())
+        return isBadgeOnPath
     }
 
     private void collectParentBadges(SkillInfo start, List<SkillInfo> badges, int currentIteration) {

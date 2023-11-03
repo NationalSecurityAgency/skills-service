@@ -742,4 +742,29 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         !result.violatingSkillName
         result.reason == "Discovered circular prerequisite [Skill:skill1 -> Skill:skill3 -> Badge:badge1(Skill:skill1)]"
     }
+
+    def "skills can be belong to multiple badges"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(4, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[3].skillId])
+
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId,  p1Skills[2].skillId)
+
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1.projectId,  p1Skills[0].skillId)
+
+        then:
+        result.possible == true
+    }
 }
