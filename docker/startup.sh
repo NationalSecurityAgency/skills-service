@@ -1,31 +1,68 @@
 #!/usr/bin/env bash
 
+print_and_mask() {
+  PROPS_TO_PRINT=$1
+  LABEL=$2
+  if [ "$DEBUG_MODE" == true ]
+  then
+    FORMATTED=$PROPS_TO_PRINT
+  else
+    PROPS=(${PROPS_TO_PRINT//,/ })
+
+    for PROP in "${!PROPS[@]}"; do
+      PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+      PROPS[$PROP]=$(sed -e 's/\(.*client-secret.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+    done
+
+    FORMATTED=$(printf ",%s" "${PROPS[@]}")
+    FORMATTED=${FORMATTED:1}
+  fi
+  echo -e "${LABEL}=[${FORMATTED}]"
+}
+
 echo "Starting Skills Service"
 JAVA_OPTS="${JAVA_OPTS} -Dlogging.file=/logs/webapp.log"
 
+print_and_mask "${EXTRA_JAVA_OPTS}", "EXTRA_JAVA_OPTS"
 if [ ! -z "${EXTRA_JAVA_OPTS}" ]
 then
     JAVA_OPTS="${EXTRA_JAVA_OPTS} ${JAVA_OPTS}"
-    echo "Added EXTRA_JAVA_OPTS to JAVA_OPTS = [$EXTRA_JAVA_OPTS]"
 fi
 
-echo "JAVA_OPTS=${JAVA_OPTS}"
-
-if [ "$DEBUG_MODE" == true ]
-then
-  FORMATTED=$SPRING_PROPS
+if [[ -z "${JAVA_OPTS_FILES}" ]]; then
+   echo "Optional JAVA_OPTS_FILES is not set"
 else
-  PROPS=(${SPRING_PROPS//,/ })
-
-  for PROP in "${!PROPS[@]}"; do
-    PROPS[$PROP]=$(sed -e 's/\(.*[pP]ass.*=\)\(.*\)/\1******/' <<< "${PROPS[$PROP]}")
+  for sinleOptsFile in ${JAVA_OPTS_FILES//,/ } ; do
+     echo "Loading Java environment variables from JAVA_OPTS_FILES=[${sinleOptsFile}]"
+     OLDIFS=$IFS; IFS=$'\n';
+     for textLine in $(cat $sinleOptsFile) ; do
+      JAVA_OPTS="${JAVA_OPTS} -D${textLine}"
+     done
+     IFS=$OLDIFS
   done
-
-  FORMATTED=$(printf ",%s" "${PROPS[@]}")
-  FORMATTED=${FORMATTED:1}
 fi
+print_and_mask "${JAVA_OPTS}", "JAVA_OPTS"
 
-echo -e "SPRING_PROPS=${FORMATTED}"
+if [[ -z "${SPRING_PROPS_FILES}" ]]; then
+   echo "Optional SPRING_PROPS_FILES is not set"
+else
+  for sinleOptsFile in ${SPRING_PROPS_FILES//,/ } ; do
+     echo "Loading Spring properties from SPRING_PROPS_FILES=[${sinleOptsFile}]"
+      OLDIFS=$IFS; IFS=$'\n';
+        springProps=()
+        for textLine in $(cat $sinleOptsFile) ; do
+          springProps+=("${textLine}")
+        done
+        IFS=","
+        if [[ -z "${SPRING_PROPS}" ]]; then
+          SPRING_PROPS="${springProps[*]}"
+        else
+          SPRING_PROPS="${SPRING_PROPS},${springProps[*]}"
+        fi
+        IFS=$OLDIFS
+  done
+fi
+print_and_mask "${SPRING_PROPS}", "SPRING_PROPS"
 
 # support both \n and , as a prop separator
 echo -e $SPRING_PROPS | sed -r 's$([^\])[,]\s?$\1\n$g; s$\\,$,$g' >> application.properties
