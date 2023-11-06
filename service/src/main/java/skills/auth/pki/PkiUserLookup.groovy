@@ -24,7 +24,6 @@ import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.ParameterizedTypeReference
@@ -47,8 +46,8 @@ import java.util.concurrent.TimeUnit
 class PkiUserLookup {
 
 //    use @Autowired if you want to utilize apache HttpClient (see HttpClientRestTemplateConfig)
-    @Autowired
-    RestTemplate restTemplate // = new RestTemplate()
+//    @Autowired
+    RestTemplate restTemplate = new RestTemplate()
 
     @Value('${skills.authorization.userInfoUri}')
     String userInfoUri
