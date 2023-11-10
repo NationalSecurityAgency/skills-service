@@ -67,6 +67,10 @@ class HttpClientRestTemplateConfig {
 
     @Bean
     PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
+        return createPoolingHttpClientConnectionManager();
+    }
+
+    PoolingHttpClientConnectionManager createPoolingHttpClientConnectionManager() {
         SSLContext sslContext = SSLContexts.createSystemDefault()
         HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(
