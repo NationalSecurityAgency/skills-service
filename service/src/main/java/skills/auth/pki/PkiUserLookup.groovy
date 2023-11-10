@@ -48,7 +48,7 @@ class PkiUserLookup {
 
 //    use @Autowired if you want to utilize apache HttpClient (see HttpClientRestTemplateConfig)
     @Autowired
-    RestTemplate restTemplate // = new RestTemplate()
+    RestTemplate restTemplate
 
     @Value('${skills.authorization.userInfoUri}')
     String userInfoUri

@@ -47,7 +47,7 @@ import skills.storage.repos.UserRepo
         'skills.config.ui.rankingAndProgressViewsEnabled=false',
         'skills.config.ui.defaultLandingPage=progress',
         'skills.config.db-upgrade-in-progress=true',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8189/actuator/health',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8189/status',
         'skills.authorization.userInfoUri=https://localhost:8189/userInfo?dn={dn}',
         'skills.authorization.userQueryUri=https://localhost:8189/userQuery?query={query}',
         ], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)

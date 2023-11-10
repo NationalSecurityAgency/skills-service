@@ -70,7 +70,7 @@ public class MockUserInfoService {
 
     @PostConstruct
     void start() {
-        def matcher = userInfoHealthCheckUri =~ /https:\/\/localhost:(\d\d\d\d)\/actuator\/health/
+        def matcher = userInfoHealthCheckUri =~ /https:\/\/localhost:(\d\d\d\d)\/status/
         int port = Integer.parseInt(matcher[0][1]);
 
         log.info("starting mock user-info-service on port ${port}")
@@ -88,10 +88,10 @@ public class MockUserInfoService {
                 .needClientAuth(true)
                 .extensions(new UserInfoResponseTransformer(userAttrsRepo)));
 
-        mockServer.stubFor(any(urlPathEqualTo("/actuator/health")).willReturn(
+        mockServer.stubFor(any(urlPathEqualTo("/status")).willReturn(
                 ok()
                 .withHeader(CONTENT_TYPE, "application/json")
-                .withBody("""{ "status": "UP" }""")
+                .withBody("""{ "status": "OK" }""")
         ));
         mockServer.stubFor(any(urlPathEqualTo("/userQuery")).willReturn(
                 ok()

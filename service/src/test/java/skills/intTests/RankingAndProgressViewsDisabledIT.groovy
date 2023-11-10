@@ -26,7 +26,7 @@ import skills.intTests.utils.SkillsFactory
 @SpringBootTest(properties = ['skills.h2.port=9091', 'skills.config.ui.rankingAndProgressViewsEnabled=false', 'skills.config.ui.defaultLandingPage=progress',
         'skills.authorization.userInfoUri=https://localhost:8182/userInfo?dn={dn}',
         'skills.authorization.userQueryUri=https://localhost:8182/userQuery?query={query}',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8182/actuator/health'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8182/status'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class RankingAndProgressViewsDisabledIT extends DefaultIntSpec {
 
     def "landingPage page is always admin when rankingAndProgressViewsDisabled=true"() {

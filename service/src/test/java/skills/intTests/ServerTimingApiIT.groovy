@@ -23,7 +23,7 @@ import skills.intTests.utils.DefaultIntSpec
 @SpringBootTest(properties = ['skills.prof.serverTimingAPI.enabled=false',
         'skills.authorization.userInfoUri=https://localhost:8183/userInfo?dn={dn}',
         'skills.authorization.userQueryUri=https://localhost:8183/userQuery?query={query}',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8183/actuator/health'],
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8183/status'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class ServerTimingApiIT extends DefaultIntSpec {
 
