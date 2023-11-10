@@ -24,6 +24,8 @@ import skills.auth.SecurityMode
 
 import jakarta.annotation.PostConstruct
 
+import javax.net.ssl.SSLContext
+
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
 @Component
@@ -54,6 +56,9 @@ class SystemSSLConfiguration {
             System.setProperty("javax.net.ssl.trustStore", trustFile.getPath())
             System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword)
             System.setProperty("javax.net.ssl.trustStoreType", trustStoreType)
+
+            // override any existing default SSLContext
+            SSLContext.setDefault(SSLContext.getInstance("Default"))
         }
     }
 }
