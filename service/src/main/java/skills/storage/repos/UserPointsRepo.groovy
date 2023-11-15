@@ -689,15 +689,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         )
         SELECT COUNT(*)
         FROM (
-            SELECT DISTINCT up.user_id 
+            SELECT up.user_id, SUM(up.points) as total_points
             from user_points up, user_attrs usattr 
             where 
                 up.user_id = usattr.user_id and
                 up.skill_ref_id in (select id from subj_skills) and 
-                up.points >= :minimumPoints and
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
                  lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%')))
-        ) AS temp
+            group by up.user_id
+        ) AS temp  WHERE total_points >= :minimumPoints
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints)
 
