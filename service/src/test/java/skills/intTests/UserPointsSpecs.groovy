@@ -380,21 +380,34 @@ class UserPointsSpecs extends DefaultIntSpec {
     }
 
     def 'get skill users with minimum points'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(5), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
+
         when:
         def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0)
         def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 45)
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 80)
 
         then:
         results1
-        results1.count == 1
-        results1.totalCount == 1
-        results1.data.size() == 1
+        results1.count == 5
+        results1.totalCount == 5
+        results1.data.size() == 5
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
 
         results2
-        results2.count == 0
-        results2.totalCount == 1
+        results2.count == 3
+        results2.totalCount == 5
+
+        results3
+        results3.count == 0
+        results3.totalCount == 5
     }
 
     def 'can not get skills with negative points'() {
