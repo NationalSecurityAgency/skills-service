@@ -160,6 +160,16 @@ limitations under the License.
                 sortable: true,
               },
               {
+                key: 'firstName',
+                label: 'First Name',
+                sortable: true,
+              },
+              {
+                key: 'lastName',
+                label: 'Last Name',
+                sortable: true,
+              },
+              {
                 key: 'totalPoints',
                 label: 'Progress',
                 sortable: true,
