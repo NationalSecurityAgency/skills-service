@@ -33,7 +33,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     String projId = SkillsFactory.defaultProjId
 
-    List<String> sampleUserIds = ['haNson', 'haRry', 'tom', 'user4', 'user5', 'user6', 'user7']
+    List<String> sampleUserIds = ['haNson', 'haRry', 'tom', 'user4', 'user5']
     List<String> subjects
     List<List<String>> allSkillIds
     String badgeId
@@ -288,11 +288,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), threeDaysAgo)
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(5), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), twoDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), twoDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), twoDaysAgo)
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(5), twoDaysAgo)
 
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0)
@@ -301,23 +299,23 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         results1
-        results1.count == 6
-        results1.totalCount == 6
-        results1.data.size() == 6
+        results1.count == 5
+        results1.totalCount == 5
+        results1.data.size() == 5
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
         results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results1.data.get(1).totalPoints == 35
 
         results2
-        results2.count == 4
-        results2.totalCount == 6
-        results2.data.size() == 4
+        results2.count == 3
+        results2.totalCount == 5
+        results2.data.size() == 3
         results2.data.get(0).totalPoints == 70
 
         results3
         results3.count == 0
-        results3.totalCount == 6
+        results3.totalCount == 5
         results3.data.size() == 0
     }
 
@@ -383,7 +381,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), threeDaysAgo)
-        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(5), threeDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), twoDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), twoDaysAgo)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
@@ -395,19 +392,19 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         results1
-        results1.count == 5
-        results1.totalCount == 5
-        results1.data.size() == 5
+        results1.count == 4
+        results1.totalCount == 4
+        results1.data.size() == 4
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 3
-        results2.totalCount == 5
+        results2.totalCount == 4
 
         results3
         results3.count == 0
-        results3.totalCount == 5
+        results3.totalCount == 4
     }
 
     def 'can not get skills with negative points'() {
