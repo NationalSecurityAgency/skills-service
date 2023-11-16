@@ -99,7 +99,7 @@ limitations under the License.
   import AccessService from '@/components/access/AccessService';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
 
-  const validEmail = /^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]{1,64}@[a-zA-Z0-9.-]{1,64}$/i;
+  const validEmail = /^[a-z0-9_!#$%&'*+/=?`{|}~^.-]{1,64}@[a-z0-9.-]{1,64}$/i;
   const stripNames = /<([^\s<>@]+@[^\s<>@]+)>/;
   export default {
     name: 'InviteUsersToProject',
