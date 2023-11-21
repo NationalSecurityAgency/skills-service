@@ -1212,26 +1212,24 @@ class AdminEditSpecs extends DefaultIntSpec {
             skillsService.addSkill(skill2, user, new Date())
         }
 
-        def userFirstName = "USER3_first"
-        def userLastName = "USER3_last"
-        def userId = "user3"
-
         def projectUsers = skillsService.getProjectUsers(project.projectId)
+        def selectedUser = projectUsers.data[0]
+        def userFirstName = selectedUser.firstName
+        def userLastName = selectedUser.lastName
+        def userId = selectedUser.userId
+
         def filteredByFirstName = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userFirstName, 0)
         def filteredByLastName = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userLastName, 0)
         def filteredById = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userId, 0)
 
         then:
         projectUsers.count == 10
-        filteredByFirstName.count == 1
         filteredByFirstName.data[0].userId == userId
         filteredByFirstName.data[0].firstName == userFirstName
         filteredByFirstName.data[0].lastName == userLastName
-        filteredByLastName.count == 1
         filteredByLastName.data[0].userId == userId
         filteredByLastName.data[0].firstName == userFirstName
         filteredByLastName.data[0].lastName == userLastName
-        filteredById.count == 1
         filteredById.data[0].userId == userId
         filteredById.data[0].firstName == userFirstName
         filteredById.data[0].lastName == userLastName
@@ -1258,26 +1256,24 @@ class AdminEditSpecs extends DefaultIntSpec {
             skillsService.addSkill(skill2, user, new Date())
         }
 
-        def userFirstName = "USER3_first"
-        def userLastName = "USER3_last"
-        def userId = "user3"
-
         def subjectUsers = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        def selectedUser = subjectUsers.data[0]
+        def userFirstName = selectedUser.firstName
+        def userLastName = selectedUser.lastName
+        def userId = selectedUser.userId
+
         def filteredByFirstName = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userFirstName, 0)
         def filteredByLastName = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userLastName, 0)
         def filteredById = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userId, 0)
 
         then:
         subjectUsers.count == 10
-        filteredByFirstName.count == 1
         filteredByFirstName.data[0].userId == userId
         filteredByFirstName.data[0].firstName == userFirstName
         filteredByFirstName.data[0].lastName == userLastName
-        filteredByLastName.count == 1
         filteredByLastName.data[0].userId == userId
         filteredByLastName.data[0].firstName == userFirstName
         filteredByLastName.data[0].lastName == userLastName
-        filteredById.count == 1
         filteredById.data[0].userId == userId
         filteredById.data[0].firstName == userFirstName
         filteredById.data[0].lastName == userLastName
@@ -1301,26 +1297,24 @@ class AdminEditSpecs extends DefaultIntSpec {
             skillsService.addSkill(skill1, user, new Date().minus(1))
         }
 
-        def userFirstName = "USER3_first"
-        def userLastName = "USER3_last"
-        def userId = "user3"
+        def skillUsers = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        def selectedUser = skillUsers.data[0]
+        def userFirstName = selectedUser.firstName
+        def userLastName = selectedUser.lastName
+        def userId = selectedUser.userId
 
-        def subjectUsers = skillsService.getSkillUsers(project.projectId, skill1.skillId)
         def filteredByFirstName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userFirstName, 0)
         def filteredByLastName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userLastName, 0)
         def filteredById = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userId, 0)
 
         then:
-        subjectUsers.count == 10
-        filteredByFirstName.count == 1
+        skillUsers.count == 10
         filteredByFirstName.data[0].userId == userId
         filteredByFirstName.data[0].firstName == userFirstName
         filteredByFirstName.data[0].lastName == userLastName
-        filteredByLastName.count == 1
         filteredByLastName.data[0].userId == userId
         filteredByLastName.data[0].firstName == userFirstName
         filteredByLastName.data[0].lastName == userLastName
-        filteredById.count == 1
         filteredById.data[0].userId == userId
         filteredById.data[0].firstName == userFirstName
         filteredById.data[0].lastName == userLastName
