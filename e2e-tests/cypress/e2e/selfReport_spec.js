@@ -1068,35 +1068,35 @@ describe('Self Report Skills Management Tests', () => {
                 colIndex: 0,
                 value: 'user0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
                 colIndex: 0,
                 value: 'user4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
         ]);
