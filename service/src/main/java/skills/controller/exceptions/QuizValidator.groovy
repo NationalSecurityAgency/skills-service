@@ -19,8 +19,8 @@ import org.apache.commons.lang3.StringUtils
 
 class QuizValidator {
 
-    static void isNotBlank(String value, String attrName, String quizId = null) {
-        if (StringUtils.isBlank(value) || value?.trim().equalsIgnoreCase("null")) {
+    static void isNotBlank(String value, String attrName, String quizId = null, boolean allowNullValueStr = false) {
+        if (StringUtils.isBlank(value) || (!allowNullValueStr && value?.trim().equalsIgnoreCase("null"))) {
             throw new SkillQuizException("${attrName} was not provided.".toString(), quizId, ErrorCode.BadParam)
         }
     }

@@ -19,8 +19,8 @@ import org.apache.commons.lang3.StringUtils
 
 class SkillsValidator {
 
-    static void isNotBlank(String value, String attrName, String projectId = null, String skillId = null) {
-        if (StringUtils.isBlank(value) || value?.trim().equalsIgnoreCase("null")) {
+    static void isNotBlank(String value, String attrName, String projectId = null, String skillId = null, boolean allowNullValueStr = false) {
+        if (StringUtils.isBlank(value) || (!allowNullValueStr && value?.trim().equalsIgnoreCase("null"))) {
             throw new SkillException("${attrName} was not provided.".toString(), projectId, skillId, ErrorCode.BadParam)
         }
     }

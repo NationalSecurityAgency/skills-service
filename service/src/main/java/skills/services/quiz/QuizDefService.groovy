@@ -765,7 +765,7 @@ class QuizDefService {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {
-                QuizValidator.isNotBlank(it.answer, "answers.answer", quizId)
+                QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
             }
         }
