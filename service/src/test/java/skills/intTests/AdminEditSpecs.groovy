@@ -1190,4 +1190,139 @@ class AdminEditSpecs extends DefaultIntSpec {
         !u1LevelPostDelete
         u2LevelPostDelete == 1
     }
+
+    def "can filter project users by id and name"() {
+        def project = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 5)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        def users = getRandomUsers(10)
+
+        when:
+        users.each {user ->
+            skillsService.addSkill(skill1, user, new Date().minus(5))
+            skillsService.addSkill(skill1, user, new Date().minus(1))
+            skillsService.addSkill(skill2, user, new Date())
+        }
+
+        def userFirstName = "USER3_first"
+        def userLastName = "USER3_last"
+        def userId = "user3"
+
+        def projectUsers = skillsService.getProjectUsers(project.projectId)
+        def filteredByFirstName = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userFirstName, 0)
+        def filteredByLastName = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userLastName, 0)
+        def filteredById = skillsService.getProjectUsers(project.projectId, 10, 1,'userId', true, userId, 0)
+
+        then:
+        projectUsers.count == 10
+        filteredByFirstName.count == 1
+        filteredByFirstName.data[0].userId == userId
+        filteredByFirstName.data[0].firstName == userFirstName
+        filteredByFirstName.data[0].lastName == userLastName
+        filteredByLastName.count == 1
+        filteredByLastName.data[0].userId == userId
+        filteredByLastName.data[0].firstName == userFirstName
+        filteredByLastName.data[0].lastName == userLastName
+        filteredById.count == 1
+        filteredById.data[0].userId == userId
+        filteredById.data[0].firstName == userFirstName
+        filteredById.data[0].lastName == userLastName
+    }
+
+    def "can filter subject users by id and name"() {
+        def project = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 0, 5)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        def users = getRandomUsers(10)
+
+        when:
+        users.each {user ->
+            skillsService.addSkill(skill1, user, new Date().minus(5))
+            skillsService.addSkill(skill1, user, new Date().minus(1))
+            skillsService.addSkill(skill2, user, new Date())
+        }
+
+        def userFirstName = "USER3_first"
+        def userLastName = "USER3_last"
+        def userId = "user3"
+
+        def subjectUsers = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        def filteredByFirstName = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userFirstName, 0)
+        def filteredByLastName = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userLastName, 0)
+        def filteredById = skillsService.getSubjectUsers(project.projectId, subject.subjectId, 10, 1,'userId', true, userId, 0)
+
+        then:
+        subjectUsers.count == 10
+        filteredByFirstName.count == 1
+        filteredByFirstName.data[0].userId == userId
+        filteredByFirstName.data[0].firstName == userFirstName
+        filteredByFirstName.data[0].lastName == userLastName
+        filteredByLastName.count == 1
+        filteredByLastName.data[0].userId == userId
+        filteredByLastName.data[0].firstName == userFirstName
+        filteredByLastName.data[0].lastName == userLastName
+        filteredById.count == 1
+        filteredById.data[0].userId == userId
+        filteredById.data[0].firstName == userFirstName
+        filteredById.data[0].lastName == userLastName
+    }
+
+    def "can filter skill users by id and name"() {
+        def project = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+
+        def users = getRandomUsers(10)
+
+        when:
+        users.each {user ->
+            skillsService.addSkill(skill1, user, new Date().minus(5))
+            skillsService.addSkill(skill1, user, new Date().minus(1))
+        }
+
+        def userFirstName = "USER3_first"
+        def userLastName = "USER3_last"
+        def userId = "user3"
+
+        def subjectUsers = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        def filteredByFirstName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userFirstName, 0)
+        def filteredByLastName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userLastName, 0)
+        def filteredById = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userId, 0)
+
+        then:
+        subjectUsers.count == 10
+        filteredByFirstName.count == 1
+        filteredByFirstName.data[0].userId == userId
+        filteredByFirstName.data[0].firstName == userFirstName
+        filteredByFirstName.data[0].lastName == userLastName
+        filteredByLastName.count == 1
+        filteredByLastName.data[0].userId == userId
+        filteredByLastName.data[0].firstName == userFirstName
+        filteredByLastName.data[0].lastName == userLastName
+        filteredById.count == 1
+        filteredById.data[0].userId == userId
+        filteredById.data[0].firstName == userFirstName
+        filteredById.data[0].lastName == userLastName
+    }
 }
