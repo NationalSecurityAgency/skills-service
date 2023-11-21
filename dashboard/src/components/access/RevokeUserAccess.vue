@@ -84,17 +84,7 @@ limitations under the License.
             fields: [
               {
                 key: 'userId',
-                label: 'User Id',
-                sortable: true,
-              },
-              {
-                key: 'firstName',
-                label: 'First Name',
-                sortable: true,
-              },
-              {
-                key: 'lastName',
-                label: 'Last Name',
+                label: 'User',
                 sortable: true,
               },
             ],
@@ -179,16 +169,21 @@ limitations under the License.
       getUserDisplay(props) {
         const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
         const { oAuthProviders } = this.$store.getters.config;
+        let userName = '';
+        console.log(props);
+        if (props.firstName && props.lastName) {
+          userName = `(${props.lastName}, ${props.firstName})`;
+        }
         if (oAuthProviders) {
           const indexOfDash = userDisplay.lastIndexOf('-');
           if (indexOfDash > 0) {
             const provider = userDisplay.substr(indexOfDash + 1);
             if (oAuthProviders.includes(provider)) {
-              return userDisplay.substr(0, indexOfDash);
+              return `${userDisplay.substr(0, indexOfDash)} ${userName}`;
             }
           }
         }
-        return userDisplay;
+        return `${userDisplay} ${userName}`;
       },
     },
   };

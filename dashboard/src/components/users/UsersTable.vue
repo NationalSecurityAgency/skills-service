@@ -156,17 +156,7 @@ limitations under the License.
             fields: [
               {
                 key: 'userId',
-                label: 'User Id',
-                sortable: true,
-              },
-              {
-                key: 'firstName',
-                label: 'First Name',
-                sortable: true,
-              },
-              {
-                key: 'lastName',
-                label: 'Last Name',
+                label: 'User',
                 sortable: true,
               },
               {
