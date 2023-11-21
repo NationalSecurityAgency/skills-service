@@ -18,8 +18,8 @@ limitations under the License.
     <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
-          <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="privateProjectUsers-userIdFilter" aria-label="user id filter"/>
+          <b-form-group label="User Filter" label-class="text-muted">
+            <b-input v-model="filters.user" v-on:keydown.enter="applyFilters" data-cy="privateProjectUsers-userIdFilter" aria-label="user filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -70,7 +70,7 @@ limitations under the License.
     data() {
       return {
         filters: {
-          userId: '',
+          user: '',
         },
         table: {
           items: [],
@@ -85,6 +85,16 @@ limitations under the License.
               {
                 key: 'userId',
                 label: 'User Id',
+                sortable: true,
+              },
+              {
+                key: 'firstName',
+                label: 'First Name',
+                sortable: true,
+              },
+              {
+                key: 'lastName',
+                label: 'Last Name',
                 sortable: true,
               },
             ],
@@ -123,11 +133,11 @@ limitations under the License.
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite(`Revoke user access table has been filtered by ${this.filters.userId}`));
+          this.$nextTick(() => this.$announcer.polite(`Revoke user access table has been filtered by ${this.filters.user}`));
         });
       },
       reset() {
-        this.filters.userId = '';
+        this.filters.user = '';
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Revoke user access table filters have been removed'));
@@ -136,7 +146,7 @@ limitations under the License.
       loadData() {
         this.table.options.busy = true;
         const pageParams = {
-          query: this.filters.userId,
+          query: this.filters.user,
           limit: this.table.options.pagination.pageSize,
           ascending: !this.table.options.sortDesc,
           page: this.table.options.pagination.currentPage,
