@@ -81,7 +81,7 @@ limitations under the License.
     },
     data() {
       return {
-        rules: `required|minIdLength|maxIdLength|${this.isSkillId ? 'skill_id_validator' : 'id_validator'}`,
+        rules: `required|minIdLength|maxIdLength|nullValueNotAllowed|${this.isSkillId ? 'skill_id_validator' : 'id_validator'}`,
         canEdit: false,
         internalValue: this.value,
       };

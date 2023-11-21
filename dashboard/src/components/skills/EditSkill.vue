@@ -26,7 +26,7 @@ limitations under the License.
             <div class="col-12 col-lg">
               <div class="form-group">
                 <label for="skillName">* Skill Name</label>
-                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueName|customNameValidator" :debounce="250" v-slot="{errors}" name="Skill Name" ref="skillNameProvider">
+                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|nullValueNotAllowed|uniqueName|customNameValidator" :debounce="250" v-slot="{errors}" name="Skill Name" ref="skillNameProvider">
                   <input type="text" class="form-control" id="skillName" @input="updateSkillId"
                          v-model="skillInternal.name" v-focus
                          aria-required="true"

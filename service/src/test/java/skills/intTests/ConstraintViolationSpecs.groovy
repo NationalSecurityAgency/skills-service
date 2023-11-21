@@ -460,4 +460,13 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:ConstraintViolation")
     }
 
+    def "subject name exists does not fail on the null word"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        when:
+        def exist = skillsService.subjectNameExists([projectId: proj.projectId, subjectName: "null"])
+
+        then:
+        exist == false
+    }
 }

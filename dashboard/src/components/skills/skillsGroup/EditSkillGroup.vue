@@ -31,7 +31,7 @@ limitations under the License.
           <div class="col-12">
             <div class="form-group">
               <label for="groupNameInput">* Group Name</label>
-              <ValidationProvider rules="required|minNameLength|maxSkillNameLength|uniqueGroupName|customNameValidator"
+              <ValidationProvider rules="required|minNameLength|maxSkillNameLength|nullValueNotAllowed|uniqueGroupName|customNameValidator"
                                   v-slot="{errors}"
                                   :debounce="250"
                                   name="Group Name">
