@@ -40,7 +40,7 @@ limitations under the License.
                       tableStoredStateId="privateProjectUsersTable"
                       data-cy="privateProjectUsersTable">
         <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item) }}
+          {{ getUserDisplay(data.item, true) }}
 
           <b-button-group class="float-right">
             <b-button @click="revokeAccess(data.value, getUserDisplay(data.item))"
@@ -166,23 +166,23 @@ limitations under the License.
           }
         });
       },
-      getUserDisplay(props) {
+      getUserDisplay(props, fullName = false) {
         const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
         const { oAuthProviders } = this.$store.getters.config;
         let userName = '';
-        if (props.firstName && props.lastName) {
-          userName = `(${props.lastName}, ${props.firstName})`;
+        if (fullName && props.firstName && props.lastName) {
+          userName = ` (${props.lastName}, ${props.firstName})`;
         }
         if (oAuthProviders) {
           const indexOfDash = userDisplay.lastIndexOf('-');
           if (indexOfDash > 0) {
             const provider = userDisplay.substr(indexOfDash + 1);
             if (oAuthProviders.includes(provider)) {
-              return `${userDisplay.substr(0, indexOfDash)} ${userName}`;
+              return `${userDisplay.substr(0, indexOfDash)}${userName}`;
             }
           }
         }
-        return `${userDisplay} ${userName}`;
+        return `${userDisplay}${userName}`;
       },
     },
   };

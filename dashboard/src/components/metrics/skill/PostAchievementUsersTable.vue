@@ -27,7 +27,7 @@ limitations under the License.
                           @page-size-changed="pageSizeChanged"
                           @sort-changed="sortTable">
         <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item) }}
+          {{ getUserDisplay(data.item, true) }}
 
           <b-button-group class="float-right">
             <b-button :to="calculateClientDisplayRoute(data.item)"
