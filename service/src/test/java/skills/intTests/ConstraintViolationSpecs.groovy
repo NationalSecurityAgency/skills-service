@@ -257,7 +257,7 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()
         Map skill = SkillsFactory.createSkill()
-        Map skill2 = SkillsFactory.createSkill(1, 1, 2, )
+        Map skill2 = SkillsFactory.createSkill(1, 1, 2,)
         Map copy = new HashMap(skill)
         copy.skillId = skill2.skillId.toUpperCase()
         copy.name = "somethingElse"
@@ -469,4 +469,39 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
         then:
         exist == false
     }
+
+    def "project name exists does not fail on the null word"() {
+        when:
+        def exist = skillsService.projectNameExists([projectName: "null"])
+        then:
+        exist == false
+    }
+
+    def "badge name exists does not fail on the null word"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        when:
+        def exist = skillsService.badgeNameExists([projectId: proj.projectId, badgeName: "null"])
+        then:
+        exist == false
+    }
+
+    def "skill name exists does not fail on the null word"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+        def subj = SkillsFactory.createSubject(1, 1)
+        skillsService.createSubject(subj)
+        when:
+        def exist = skillsService.skillNameExists([projectId: proj.projectId, skillName: "null"])
+        then:
+        exist == false
+    }
+
+    def "quiz name exists does not fail on the null word"() {
+        when:
+        def exist = skillsService.quizNameExist("null")
+        then:
+        exist.body == false
+    }
+
 }
