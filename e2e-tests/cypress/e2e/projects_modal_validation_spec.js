@@ -359,9 +359,9 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy=projectNameError]').should('not.be.visible')
         cy.get('[data-cy=idError]').should('not.be.visible')
 
-        // verify validator is case insensitive
+        // verify validator is case-insensitive and trims whitespace
         cy.get('[data-cy="projectName"]').clear()
-            .type('NUlL');
+            .type(' NUlL ');
         cy.get('[data-cy=projectNameError]')
             .contains('Null is not allowed for Project Name')
             .should('be.visible');
