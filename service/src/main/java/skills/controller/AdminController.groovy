@@ -342,7 +342,7 @@ class AdminController {
                              @RequestBody NameExistsRequest nameExistsRequest) {
         String badgeName = nameExistsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(badgeName, "Badge Name")
+        SkillsValidator.isNotBlank(badgeName, "Badge Name", projectId, null, true)
         return badgeAdminService.existsByBadgeName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(badgeName))
     }
 
@@ -353,7 +353,7 @@ class AdminController {
                            @RequestBody NameExistsRequest existsRequest) {
         String skillName = existsRequest.name?.trim()
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillName, "Skill Name")
+        SkillsValidator.isNotBlank(skillName, "Skill Name", projectId, null, true)
         return skillsAdminService.existsBySkillName(InputSanitizer.sanitize(projectId), InputSanitizer.sanitize(skillName))
     }
 
