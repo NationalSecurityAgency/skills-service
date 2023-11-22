@@ -18,7 +18,7 @@ import { extend } from 'vee-validate';
 const validator = {
   message: (field) => `Null is not allowed for ${field}`,
   validate(value) {
-    return !value || value.toLowerCase() !== 'null';
+    return !value || value.trim().toLowerCase() !== 'null';
   },
 };
 
