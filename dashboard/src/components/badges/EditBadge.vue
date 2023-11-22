@@ -32,7 +32,7 @@ limitations under the License.
             <div class="media-body">
               <div class="form-group">
                 <label for="badgeName">* Badge Name</label>
-                <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|uniqueName|customNameValidator"
+                <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|nullValueNotAllowed|uniqueName|customNameValidator"
                                     v-slot="{errors}" name="Badge Name" :debounce="250">
                   <input v-focus class="form-control" id="badgeName" type="text" v-model="badgeInternal.name"
                          @input="updateBadgeId" aria-required="true" data-cy="badgeName"

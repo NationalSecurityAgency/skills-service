@@ -33,7 +33,7 @@ limitations under the License.
           <div class="col-12">
             <div class="form-group">
               <label for="projectIdInput">* {{ nameLabelTxt }}</label>
-              <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator"
+              <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator|nullValueNotAllowed"
                                   v-slot="{errors}"
                                   :debounce="250"
                                   name="Project Name">

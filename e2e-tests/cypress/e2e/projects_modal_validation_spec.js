@@ -342,4 +342,34 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy="projectDescriptionError"]').contains('Mocked up validation failure')
     });
 
+    it('null word is not allowed for project ID or project name', () => {
+        cy.visit('/administrator/');
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="projectName"]')
+            .type('null');
+        cy.get('[data-cy=projectNameError]')
+            .contains('Null is not allowed for Project Name')
+            .should('be.visible');
+        cy.get('[data-cy="idError"]')
+            .contains('Null is not allowed for Project ID')
+            .should('be.visible');
+        cy.get('[data-cy=saveProjectButton]')
+            .should('be.disabled');
+        cy.get('[data-cy="projectName"]').clear().type('one')
+        cy.get('[data-cy=projectNameError]').should('not.be.visible')
+        cy.get('[data-cy=idError]').should('not.be.visible')
+
+        // verify validator is case insensitive
+        cy.get('[data-cy="projectName"]').clear()
+            .type('NUlL');
+        cy.get('[data-cy=projectNameError]')
+            .contains('Null is not allowed for Project Name')
+            .should('be.visible');
+        cy.get('[data-cy="idError"]')
+            .contains('Null is not allowed for Project ID')
+            .should('be.visible');
+        cy.get('[data-cy=saveProjectButton]')
+            .should('be.disabled');
+    });
+
 });

@@ -25,7 +25,7 @@ limitations under the License.
       <b-container v-if="!loading" fluid data-cy="editQuestionModal">
         <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
 
-        <ValidationProvider rules="required|maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Question">
+        <ValidationProvider rules="required|maxDescriptionLength|nullValueNotAllowed|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Question">
           <markdown-editor v-if="showQuestion && questionDefInternal"
                            :quiz-id="quizId"
                            label="Question"
