@@ -18,7 +18,6 @@ limitations under the License.
     name: 'UserIdForDisplayMixin',
     methods: {
       getUserDisplay(props) {
-        console.log(props);
         const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
         const { oAuthProviders } = this.$store.getters.config;
         let userName = '';

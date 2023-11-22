@@ -170,7 +170,6 @@ limitations under the License.
         const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
         const { oAuthProviders } = this.$store.getters.config;
         let userName = '';
-        console.log(props);
         if (props.firstName && props.lastName) {
           userName = `(${props.lastName}, ${props.firstName})`;
         }
