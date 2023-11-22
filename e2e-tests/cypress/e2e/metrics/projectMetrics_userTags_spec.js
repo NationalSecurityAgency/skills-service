@@ -379,7 +379,7 @@ describe('Metrics Using User Tags Tests', () => {
               .contains('Level 1: 0 users');
 
             cy.intercept('/admin/projects/proj1/userTags/manyValues/tag0/users*').as('getUsers');
-            cy.get(`${usersTableSelector}`).contains('User Id').click();
+            cy.get(`${usersTableSelector}`).contains('User').click();
             cy.wait('@getUsers')
 
             cy.get('[data-cy="levelsChart"] [data-cy="metricsCard-header"]').contains('Overall Levels for Best Label: tag0')
