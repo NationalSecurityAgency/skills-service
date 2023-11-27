@@ -297,6 +297,33 @@ describe('Users Tests', () => {
         }
     });
 
+    it('displays user name if available', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"","lastName":"","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: 'skills@evoforge.org (Tree, Skill)'}],
+            [{colIndex: 0, value: 'skills@evo-forge.org (Tree, Skill)'}],
+            [{colIndex: 0, value: 'foo-hydra'}]
+        ], 5);
+    });
+
     it('reset should reset paging', () => {
         cy.intercept('/admin/projects/proj1/users?query=*')
             .as('getUsers');
