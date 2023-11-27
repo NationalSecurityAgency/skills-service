@@ -67,7 +67,8 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.userId = ua.userId and 
             ur.projectId = ?1 and
             ur.roleName = ?2 and
-            (lower(CONCAT(ua.userIdForDisplay, ' (', ua.lastName, ', ', ua.firstName,  ')')) like lower(CONCAT(\'%\', ?3, \'%\')))
+            (ur.userId like lower(CONCAT('%', ?3, '%')) or
+            (lower(CONCAT(ua.userIdForDisplay, ' (', ua.lastName, ', ', ua.firstName,  ')')) like lower(CONCAT('%', ?3, '%'))))
     ''')
     List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(String projectId, RoleName roleName, String userIdQuery, PageRequest pageRequest)
 
@@ -76,7 +77,8 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
                 ur.userId = ua.userId and
                 ur.projectId = ?1 and
                 ur.roleName = ?2 and
-                (lower(CONCAT(ua.userIdForDisplay, ' (', ua.lastName, ', ', ua.firstName,  ')')) like lower(CONCAT(\'%\', ?3, \'%\')))
+                (ur.userId like lower(CONCAT('%', ?3, '%')) or
+                (lower(CONCAT(ua.userIdForDisplay, ' (', ua.lastName, ', ', ua.firstName,  ')')) like lower(CONCAT('%', ?3, '%'))))
     ''')
     Integer countRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(String projectId, RoleName roleName, String userIdQuery)
 
