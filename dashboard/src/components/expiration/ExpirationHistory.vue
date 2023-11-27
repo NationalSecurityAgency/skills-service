@@ -53,6 +53,18 @@ limitations under the License.
           <template #head(expiredOn)="data">
             <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
           </template>
+          <template v-slot:cell(userIdForDisplay)="data">
+            {{ data.value }}
+
+            <b-button-group class="float-right">
+              <b-button :to="calculateClientDisplayRoute(data)"
+                        variant="outline-info" size="sm" class="text-secondary"
+                        v-b-tooltip.hover="'View User Details'"
+                        :aria-label="`View details for user ${data.label}`"
+                        data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
+              </b-button>
+            </b-button-group>
+          </template>
           <template v-slot:cell(skillName)="data">
             <a :href="getUrl(data.item)">{{ data.value }}</a>
           </template>
@@ -179,6 +191,17 @@ limitations under the License.
       },
       getUrl(item) {
         return `/administrator/projects/${encodeURIComponent(this.projectId)}/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
+      },
+      calculateClientDisplayRoute(props) {
+        const routeObj = {
+          name: 'ClientDisplayPreview',
+          params: {
+            projectId: this.$route.params.projectId,
+            userId: props.item.userId,
+          },
+        };
+
+        return routeObj;
       },
     },
   };

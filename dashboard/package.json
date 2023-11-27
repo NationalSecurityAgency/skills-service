@@ -28,7 +28,7 @@
     "@vue-a11y/announcer": "2.1.0",
     "animate.css": "4.1.1",
     "apexcharts": "3.27.2",
-    "axios": "0.27.2",
+    "axios": "1.6.0",
     "babel-polyfill": "6.26.0",
     "bootstrap": "4.6.2",
     "bootstrap-vue": "2.23.1",
