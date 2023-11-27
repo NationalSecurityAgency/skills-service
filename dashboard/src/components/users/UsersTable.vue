@@ -63,13 +63,13 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item) }}
+          {{ getUserDisplay(data.item, true) }}
 
           <b-button-group class="float-right">
             <b-button :to="calculateClientDisplayRoute(data.item)"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'View User Details'"
-                      :aria-label="`View details for user ${getUserDisplay(data.item)}`"
+                      :aria-label="`View details for user ${getUserDisplay(data.item, true)}`"
                       data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
             </b-button>
           </b-button-group>
