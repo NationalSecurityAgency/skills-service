@@ -22,4 +22,6 @@ interface ExpiredSkillRes {
     Date getExpiredOn()
     String getSkillName()
     String getSubjectId()
+    String getFirstName()
+    String getLastName()
 }

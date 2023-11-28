@@ -69,14 +69,25 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
                                                                                                  @Param("olderThanDate") Date olderThanDate)
 
     @Query(value = '''
-       SELECT eua.userId as userId, eua.skillId as skillId, eua.expiredOn as expiredOn, skill.name as skillName, userAttrs.userIdForDisplay as userIdForDisplay, subjectDef.skillId as subjectId
+       SELECT eua.userId as userId,
+              eua.skillId as skillId, 
+              eua.expiredOn as expiredOn, 
+              skill.name as skillName, 
+              userAttrs.userIdForDisplay as userIdForDisplay, 
+              subjectDef.skillId as subjectId,
+              userAttrs.firstName as firstName,
+              userAttrs.lastName as lastName
        FROM ExpiredUserAchievement eua, SkillDef skill, UserAttrs userAttrs, SkillDef subjectDef, SkillRelDef srd
        WHERE eua.projectId = :projectId AND eua.skillId = skill.skillId AND eua.projectId = skill.projectId AND userAttrs.userId = eua.userId
        AND subjectDef = srd.parent AND 
            skill = srd.child AND
            (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') AND
            subjectDef.type = 'Subject'       
-       AND(:userFilter is null OR lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%')))
+       AND (
+         :userFilter is null OR lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%')) or
+         (lower(CONCAT(userAttrs.firstName, ' ', userAttrs.lastName, ' (',  userAttrs.userIdForDisplay, ')')) like lower(CONCAT(\'%\', :userFilter, \'%\'))) OR
+         (lower(CONCAT(userAttrs.userIdForDisplay, ' (', userAttrs.lastName, ', ', userAttrs.firstName,  ')')) like lower(CONCAT(\'%\', :userFilter, \'%\')))
+       )
        AND(:skillNameFilter is null OR lower(skill.name) like lower(concat('%', :skillNameFilter, '%')))
     ''')
     Page<ExpiredSkillRes> findAllExpiredAchievements(@Param("projectId") String projectId,
