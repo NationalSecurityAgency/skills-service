@@ -125,7 +125,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         from UserQuizAttempt quizAttempt, QuizDef quizDef, UserAttrs userAttrs
         where quizAttempt.quizDefinitionRefId = quizDef.id
             and quizAttempt.userId = userAttrs.userId
-            and lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%'))
+            and (lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%')) OR
+                (lower(CONCAT(userAttrs.firstName, ' ', userAttrs.lastName, ' (',  userAttrs.userIdForDisplay, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))) OR
+                (lower(CONCAT(userAttrs.userIdForDisplay, ' (', userAttrs.lastName, ', ', userAttrs.firstName,  ')')) like lower(CONCAT(\'%\', ?2, \'%\'))))
             and quizDef.quizId = ?1
      ''')
     Integer countQuizRuns(String quizId, String userQuery)

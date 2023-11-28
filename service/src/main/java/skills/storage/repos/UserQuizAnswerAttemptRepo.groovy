@@ -57,7 +57,9 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
                    userAttrs.user_id             as userId,
                    userAttrs.user_id_for_display as userIdForDisplay,
                    quizAttempt.id                as userQuizAttemptId,
-                   ut.value                      as userTag
+                   ut.value                      as userTag,
+                   userAttrs.first_name          as firstName,
+                   userAttrs.last_name           as lastName
             from user_quiz_answer_attempt answerAttempt,
                  user_quiz_attempt quizAttempt,
                  user_attrs userAttrs
