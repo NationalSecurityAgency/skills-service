@@ -661,9 +661,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%')) OR
-                (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', ?3, '%'))) OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
+                ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                 (lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
                 ) and 
                 up.skill_id is null and
                 up.points >= ?4

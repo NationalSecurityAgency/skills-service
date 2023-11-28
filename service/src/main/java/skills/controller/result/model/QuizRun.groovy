@@ -25,4 +25,6 @@ interface QuizRun {
     Date getCompleted()
     UserQuizAttempt.QuizAttemptStatus getStatus()
     String getUserTag()
+    String getFirstName()
+    String getLastName()
 }

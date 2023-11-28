@@ -1302,10 +1302,12 @@ class AdminEditSpecs extends DefaultIntSpec {
         def userFirstName = selectedUser.firstName
         def userLastName = selectedUser.lastName
         def userId = selectedUser.userId
+        def fullNameString = userFirstName + ' ' + userLastName + ' (' + selectedUser.userIdForDisplay + ')';
 
         def filteredByFirstName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userFirstName, 0)
         def filteredByLastName = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userLastName, 0)
         def filteredById = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, userId, 0)
+        def filteredByString = skillsService.getSkillUsers(project.projectId, skill1.skillId, 10, 1,'userId', true, fullNameString, 0)
 
         then:
         skillUsers.count == 10
@@ -1318,5 +1320,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         filteredById.data[0].userId == userId
         filteredById.data[0].firstName == userFirstName
         filteredById.data[0].lastName == userLastName
+        filteredByString.data[0].userId == userId
+        filteredByString.data[0].firstName == userFirstName
+        filteredByString.data[0].lastName == userLastName
     }
 }
