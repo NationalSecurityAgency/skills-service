@@ -72,17 +72,12 @@ limitations under the License.
         });
       }
 
-      if (this.$store.getters.isPkiAuthenticated) {
-        UsersService.getUserInfo(this.$route.params.projectId, this.$route.params.userId)
-          .then((result) => {
-            this.userIdForDisplay = result.userIdForDisplay;
-            this.userTitle = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
-            userDetails = this.loadUserDetails();
-          });
-      } else {
-        userDetails = this.loadUserDetails();
-      }
-      userDetails = this.loadUserDetails();
+      UsersService.getUserInfo(this.$route.params.projectId, this.$route.params.userId)
+        .then((result) => {
+          this.userIdForDisplay = result.userIdForDisplay;
+          this.userTitle = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
+          userDetails = this.loadUserDetails();
+        });
 
       Promise.all([userTags, userDetails]).finally(() => {
         this.isLoading = false;
