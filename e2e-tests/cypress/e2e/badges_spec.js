@@ -59,7 +59,8 @@ describe('Badges Tests', () => {
             .as('nameExistsCheck');
         cy.intercept('GET', '/admin/projects/proj1/badges')
             .as('loadBadges');
-
+        cy.intercept('GET', '/admin/projects/proj1/skills?*')
+          .as('loadSkills');
     });
 
     it('create badge with special chars', () => {
@@ -615,6 +616,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait('@loadSkills');
         cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
@@ -669,6 +671,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait('@loadSkills');
         cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
@@ -772,6 +775,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait('@loadSkills');
         cy.get('[data-cy="skillsSelector2"]')
             .click();
         cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
