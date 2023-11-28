@@ -40,6 +40,8 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
         String getQuizId()
 
         Date getCreated()
+        String getFirstName()
+        String getLastName()
     }
 
     @Query('''select action.id as id, 
@@ -51,12 +53,18 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                     userAttrs.userIdForDisplay as userIdForDisplay,
                     action.projectId as projectId,
                     action.quizId as quizId,
-                    action.created as created
+                    action.created as created,
+                    userAttrs.firstName as firstName,
+                    userAttrs.lastName as lastName
                 from UserActionsHistory action, UserAttrs userAttrs
                 where action.userId = userAttrs.userId
                     and (:projectIdFilter is null OR lower(action.projectId) like lower(concat('%', :projectIdFilter, '%')))
                     and (:itemFilter is null OR action.item = :itemFilter)
-                    and (:userFilter is null OR lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%')))
+                    and (:userFilter is null OR (
+                        lower(userAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) OR 
+                        ((lower(CONCAT(userAttrs.firstName, ' ', userAttrs.lastName, ' (',  userAttrs.userIdForDisplay, ')')) like lower(CONCAT('%', :userFilter, '%'))) OR
+                        (lower(CONCAT(userAttrs.userIdForDisplay, ' (', userAttrs.lastName, ', ', userAttrs.firstName,  ')')) like lower(CONCAT('%', :userFilter, '%')))                        )
+                    )
                     and (:quizFilter is null OR lower(action.quizId) like lower(concat('%', :quizFilter, '%')))
                     and (:itemIdFilter is null OR lower(action.itemId) like lower(concat('%', :itemIdFilter, '%')))
                     and (:actionFilter is null OR action.action = :actionFilter)

@@ -33,4 +33,6 @@ class DashboardUserActionRes {
     String quizId
 
     Date created
+    String firstName
+    String lastName
 }
