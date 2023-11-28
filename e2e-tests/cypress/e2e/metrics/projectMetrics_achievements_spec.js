@@ -201,13 +201,13 @@ describe('Metrics Tests - Achievements', () => {
 
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
+            userId: 'user0good@skills.org',
             timestamp: m.clone()
                 .subtract(1, 'day')
                 .format('x')
         });
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'user0Good@skills.org',
+            userId: 'user0good@skills.org',
             timestamp: m.clone()
                 .subtract(4, 'day')
                 .format('x')
@@ -223,7 +223,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
-                value: 'user0Good@skills.org'
+                value: 'user0good@skills.org'
             }, {
                 colIndex: 1,
                 value: 'Skill'
@@ -239,7 +239,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
             [{
                 colIndex: 0,
-                value: 'user0Good@skills.org'
+                value: 'user0good@skills.org'
             }, {
                 colIndex: 1,
                 value: 'Skill'
