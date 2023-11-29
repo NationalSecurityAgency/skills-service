@@ -187,12 +187,12 @@ class SubjectDataLoader {
     private List<SkillsAndPoints> handleAchievements(String projectId, String userId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
             List<String> skillIds = collectSkillIds(skillsAndPoints)
-            def achievedSkills = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillBatch(userId, projectId, skillIds)
+            List<UserAchievement> achievedSkills = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillBatch(userId, projectId, skillIds)
             if (achievedSkills) {
                 skillsAndPoints.each { it ->
-                    def achievements = achievedSkills.findAll{skill -> skill.skillId == it.skillDef.skillId}
+                    List<UserAchievement> achievements = achievedSkills.findAll{skill -> skill.skillId == it.skillDef.skillId}
                     if(achievements) {
-                        achievements?.sort { skill -> skill }
+                        achievements?.sort { skill -> skill.achievedOn }
                         it.achievedOn = achievements.first()?.achievedOn
                     }
                 }
