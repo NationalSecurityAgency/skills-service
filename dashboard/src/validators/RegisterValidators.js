@@ -21,6 +21,7 @@ import './OptionalNumericValidator';
 import './CustomNameValidator';
 import './IdValidator';
 import './SkillIdValidator';
+import './NotNullValidator';
 import './UrlValidator';
 import store from '../store/store';
 

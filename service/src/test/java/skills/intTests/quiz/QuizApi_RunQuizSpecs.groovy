@@ -15,8 +15,8 @@
  */
 package skills.intTests.quiz
 
+
 import org.springframework.beans.factory.annotation.Autowired
-import skills.controller.exceptions.SkillQuizException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -423,5 +423,28 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         then:
         SkillsClientException quizException = thrown()
         quizException.message.contains("Deadline for [${quizAttempt.id}] has expired")
+    }
+
+    def "allow word NULL in as quiz answer"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        questions[0].answers[0].answer = "Null"
+        questions[1].answers[0].answer = "NULL"
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.numQuestionsGotWrong == 0
+        gradedQuizAttempt.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
     }
 }

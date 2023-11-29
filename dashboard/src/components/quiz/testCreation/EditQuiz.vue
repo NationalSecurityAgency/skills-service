@@ -29,7 +29,7 @@ limitations under the License.
             <div class="form-group">
           <label for="quizNameInput">* Name</label>
           <ValidationProvider
-            rules="required|minNameLength|maxQuizNameLength|uniqueName|customNameValidator"
+            rules="required|minNameLength|maxQuizNameLength|nullValueNotAllowed|uniqueName|customNameValidator"
             :debounce="500"
             v-slot="{errors}"
             name="Quiz Name">
