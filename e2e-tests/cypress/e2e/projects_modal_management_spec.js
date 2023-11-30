@@ -63,6 +63,7 @@ describe('Projects Modal Management Tests', () => {
             .as('loadUserInfo');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.get('[data-cy="noContent"]').contains('No Projects Yet');

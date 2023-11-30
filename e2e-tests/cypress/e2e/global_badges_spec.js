@@ -56,6 +56,7 @@ describe('Global Badges Tests', () => {
             .as('checkSupervisorRole');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -88,6 +89,7 @@ describe('Global Badges Tests', () => {
             .as('checkSupervisorRole');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -127,6 +129,7 @@ describe('Global Badges Tests', () => {
             .as('customUrlValidation');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -220,6 +223,7 @@ describe('Global Badges Tests', () => {
             .as('deleteGlobalBadge');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -300,6 +304,7 @@ describe('Global Badges Tests', () => {
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
         cy.wait('@getBadges');
         cy.get('[data-cy="manageBtn_a_badge"]')
@@ -403,6 +408,7 @@ describe('Global Badges Tests', () => {
             .as('getGlobalBadges');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
         cy.contains('No Badges Yet');
@@ -424,6 +430,7 @@ describe('Global Badges Tests', () => {
             .as('getExpectedBadge');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -489,6 +496,7 @@ describe('Global Badges Tests', () => {
             .as('getExpectedBadge');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -575,6 +583,7 @@ describe('Global Badges Tests', () => {
             .as('checkSupervisorRole');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -688,6 +697,7 @@ describe('Global Badges Tests', () => {
         });
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
@@ -827,6 +837,7 @@ describe('Global Badges Tests', () => {
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
@@ -930,6 +941,7 @@ describe('Global Badges Tests', () => {
             .as('getGlobalBadges');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
@@ -1001,6 +1013,7 @@ describe('Global Badges Tests', () => {
         }
 
         cy.visit('/administrator/globalBadges/badge1');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.get(`${tableSelector} th`)
             .contains('Skill ID')
@@ -1049,6 +1062,7 @@ describe('Global Badges Tests', () => {
         }
 
         cy.visit('/administrator/globalBadges/badge1');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get(`${tableSelector} th`)
             .contains('Skill Name')
             .click();
@@ -1319,6 +1333,7 @@ describe('Global Badges Tests', () => {
         }
 
         cy.visit('/administrator/globalBadges/badge1/levels');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get(`${levelsTableSelector} th`)
             .contains('Level')
             .click();
@@ -1508,6 +1523,7 @@ describe('Global Badges Tests', () => {
         }
 
         cy.visit('/administrator/globalBadges/badge1');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get(`${tableSelector} th`)
             .contains('Skill ID')
             .click();
@@ -1564,6 +1580,7 @@ describe('Global Badges Tests', () => {
         }
 
         cy.visit('/administrator/globalBadges/badge1/levels');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get(`${levelsTableSelector} th`)
             .contains('Level')
             .click();
@@ -1616,6 +1633,7 @@ describe('Global Badges Tests', () => {
             .as('getGlobalBadges');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
@@ -1680,6 +1698,7 @@ describe('Global Badges Tests', () => {
             .as('getGlobalBadges');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
 
         cy.get('[data-cy="btn_Global Badges"]')
@@ -1712,6 +1731,7 @@ describe('Global Badges Tests', () => {
           .as('getGlobalBadges');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
 
         cy.get('[data-cy="btn_Global Badges"]')
@@ -1805,6 +1825,7 @@ describe('Global Badges Tests', () => {
             .as('removeLevel');
 
         cy.visit('/administrator/globalBadges/a_badge/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.contains('BADGE: A Badge')
             .should('be.visible');
@@ -1893,6 +1914,7 @@ describe('Global Badges Tests', () => {
         cy.assignProjectToGlobalBadge(1, 1, 2);
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
@@ -1922,6 +1944,7 @@ describe('Global Badges Tests', () => {
         cy.createGlobalBadge(2);
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.get('[data-cy="badgeCard-globalBadge1"]')
             .contains('Global Badge 1');
@@ -1949,6 +1972,7 @@ describe('Global Badges Tests', () => {
         cy.createGlobalBadge(2);
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         // using title link
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="titleLink"]')
@@ -1957,6 +1981,7 @@ describe('Global Badges Tests', () => {
         cy.contains('No Skills Added Yet');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         // using icon link
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="iconLink"]')
@@ -1979,6 +2004,7 @@ describe('Global Badges Tests', () => {
         const badge5Card = '[data-cy="badgeCard-globalBadge5"] [data-cy="sortControlHandle"]';
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 5']);
         cy.get(badge1Card)
             .dragAndDrop(badge4Card);
@@ -1986,6 +2012,7 @@ describe('Global Badges Tests', () => {
 
         // refresh to make sure it was saved
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
         cy.get(badge5Card)
@@ -1998,18 +2025,21 @@ describe('Global Badges Tests', () => {
 
         // refresh to make sure it was saved
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
     });
 
     it('no drag-and-drag sort controls when there is only 1 badge', () => {
         cy.createGlobalBadge(1);
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="badgeCard-globalBadge1"]');
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]')
             .should('not.exist');
 
         cy.createGlobalBadge(2);
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="badgeCard-globalBadge1"]');
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]');
     });
@@ -2029,6 +2059,7 @@ describe('Global Badges Tests', () => {
         const badge2Card = '[data-cy="badgeCard-globalBadge2"] [data-cy="sortControlHandle"]';
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
         cy.get(badge1Card)
             .dragAndDrop(badge2Card);
@@ -2061,6 +2092,7 @@ describe('Global Badges Tests', () => {
         cy.createGlobalBadge(2);
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="pagePreviewCardStat_# Skills"] [data-cy="statNum"]')
             .contains(2);
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="pagePreviewCardStat_Projects"] [data-cy="statNum"]')
@@ -2145,6 +2177,7 @@ describe('Global Badges Tests', () => {
         });
 
         cy.visit('/administrator/globalBadges/badge1');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadBadgeSkills');
 
         cy.get('[data-cy="skillsSelector"]').click();
@@ -2228,6 +2261,7 @@ describe('Global Badges Tests', () => {
             .as('getAvailableLevels');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
         cy.wait('@getBadges');
         cy.get('[data-cy="manageBtn_a_badge"]')
@@ -2285,6 +2319,7 @@ describe('Global Badges Tests', () => {
             .as('getExpectedBadge');
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
@@ -2312,6 +2347,7 @@ describe('Global Badges Tests', () => {
         ], 5);
 
         cy.visit('/administrator/globalBadges/TestBadgeBadge');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.contains('Test Badge')
             .should('exist');
@@ -2334,6 +2370,7 @@ describe('Global Badges Tests', () => {
         cy.createGlobalBadge(1);
 
         cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.get('[data-cy="badgeCard-globalBadge1"]')
             .contains('Global Badge 1');
