@@ -55,6 +55,14 @@ describe('Badges Tests', () => {
                 .click();
         });
 
+        Cypress.Commands.add('selectSkill', (skillIndex=0) => {
+            cy.get('[data-cy="skillsSelector2"]').as('getOptions')
+              .click();
+            cy.get('@getOptions').get('[data-cy="skillsSelector2"] .vs__dropdown-option')
+              .eq(skillIndex)
+              .click();
+        });
+
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')
             .as('nameExistsCheck');
         cy.intercept('GET', '/admin/projects/proj1/badges')
@@ -617,11 +625,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
         cy.wait('@loadSkills');
-        cy.get('[data-cy="skillsSelector2"]')
-            .click();
-        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-            .eq(0)
-            .click();
+        cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
             .click();
 
@@ -672,11 +676,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
         cy.wait('@loadSkills');
-        cy.get('[data-cy="skillsSelector2"]')
-            .click();
-        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-            .eq(0)
-            .click();
+        cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
             .click();
 
@@ -726,11 +726,8 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
-        cy.get('[data-cy="skillsSelector2"]')
-            .click();
-        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-            .eq(0)
-            .click();
+        cy.wait('@loadSkills');
+        cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
             .click();
         cy.contains('Test Badge')
@@ -776,11 +773,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
         cy.wait('@loadSkills');
-        cy.get('[data-cy="skillsSelector2"]')
-            .click();
-        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-            .eq(0)
-            .click();
+        cy.selectSkill(0);
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
