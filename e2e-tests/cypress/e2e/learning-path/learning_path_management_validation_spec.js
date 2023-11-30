@@ -149,8 +149,8 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.visit('/administrator/projects/proj1/learning-path')
 
-        cy.get('[data-cy="learningPathFromSkillSelector"]').find('[data-cy="learningPathFromSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-skill9"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-skill9"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge3"]').click();
         cy.get('[data-cy="learningPathError"]').contains('Multiple badges on the same Learning path cannot have overlapping skills. Both Badge 1 badge and Badge 3 badge have Very Great Skill 12 skill')
