@@ -45,6 +45,7 @@ describe('Projects Modal Management Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy=deleteProjBtn]')
             .eq(0)
             .click();
@@ -63,9 +64,9 @@ describe('Projects Modal Management Tests', () => {
             .as('loadUserInfo');
 
         cy.visit('/administrator/');
-        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="noContent"]').contains('No Projects Yet');
         cy.get('[data-cy=newProjectButton]').should('be.enabled')
         cy.get('[data-cy=newProjectButton]')
@@ -93,6 +94,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
         cy.get('[data-cy="projectName"]')
@@ -129,6 +131,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
         cy.get('[data-cy=closeProjectButton]')
@@ -153,6 +156,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickButton('Project');
         cy.get('[data-cy="projectName"]')
             .type(providedName);
@@ -173,9 +177,9 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
-        ;
         cy.get('[data-cy="projectName"]')
             .type('InitValue');
         cy.getIdField()
@@ -197,6 +201,7 @@ describe('Projects Modal Management Tests', () => {
 
     it('focus should be returned to new project button', () => {
         cy.visit('/administrator');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy=newProjectButton]')
             .click();
         cy.contains('New Project').should('be.visible');
@@ -239,6 +244,7 @@ describe('Projects Modal Management Tests', () => {
             name: 'proj2'
         });
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         const proj1EditBtn = '[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]';
 
         cy.get(proj1EditBtn)
@@ -290,6 +296,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.visit('/administrator/projects/MyNewtestProject/');
         cy.wait('@loadProject');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.contains('Levels')
             .click();
@@ -416,6 +423,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/projects/my_project_123');
         cy.wait('@loadProj');
         cy.wait('@loadInception');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy=nav-Users]')
             .click();
         cy.wait('@loadUsers');
