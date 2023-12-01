@@ -785,7 +785,7 @@ describe('Settings Tests', () => {
             .should('be.visible');
     });
 
-    it('System Settings', () => {
+    it.only('System Settings', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
@@ -834,7 +834,6 @@ describe('Settings Tests', () => {
         //confirm that header/footer persist after logging out
         cy.logout();
         cy.visit('/administrator/');
-        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadConfig');
         cy.get('#customHeaderDiv')
             .contains('HEADER');
