@@ -28,12 +28,17 @@ describe('Global Badges Tests', () => {
         cy.login(supervisorUser, 'password');
         cy.log('completed supervisor user login');
 
-        Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]') => {
+        Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
             cy.get('[data-cy="skillsSelector2"]').as('getOptions')
               .click();
-            cy.wait(250);
-            cy.get('@getOptions').get(skillsSelector)
-              .click({force: true});
+            cy.get('@getOptions').then(($el) => {
+                if ($el.find(skillsSelector).length > 0) {
+                    cy.get(skillsSelector) .click();
+                } else if (retry) {
+                    cy.selectSkill(skillsSelector, false);}
+            })
+            // cy.get('@getOptions').get(skillsSelector)
+            //   .click({force: true});
         });
 
         cy.intercept('GET', '/supervisor/badges/*/skills/available?*')

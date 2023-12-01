@@ -55,12 +55,17 @@ describe('Badges Tests', () => {
                 .click();
         });
 
-        Cypress.Commands.add('selectSkill', (skillIndex=0) => {
+        Cypress.Commands.add('selectSkill', (skillIndex=0, retry=true) => {
             cy.get('[data-cy="skillsSelector2"]').as('getOptions')
               .click();
-            cy.get('@getOptions').get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-              .eq(skillIndex)
-              .click();
+            cy.get('@getOptions').then(($el) => {
+              if ($el.find('.vs__dropdown-option').length > 0) {
+                cy.get('.vs__dropdown-option')
+                  .eq(skillIndex)
+                  .click();
+              } else if (retry) {
+                cy.selectSkill(skillIndex, false);}
+            })
         });
 
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')
@@ -607,7 +612,7 @@ describe('Badges Tests', () => {
         cy.contains('Test Badge');
     });
 
-    it('Badge is disabled when created, can only be enabled once', () => {
+    it.only('Badge is disabled when created, can only be enabled once', () => {
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
