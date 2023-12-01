@@ -60,6 +60,7 @@ describe('Badges Tests', () => {
               .click();
             cy.get('@getOptions').then(($el) => {
               if ($el.find('.vs__dropdown-option').length > 0) {
+                cy.wait(500);
                 cy.get('.vs__dropdown-option')
                   .eq(skillIndex)
                   .click();
