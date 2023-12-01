@@ -259,7 +259,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
                 res.send(conf);
             });
         }).as('loadConfig');
-        cy.visit('/administrator');
+        cy.visitAdmin();
         cy.wait('@loadConfig')
 
         cy.get('[data-cy="newProjectButton"]').click()
