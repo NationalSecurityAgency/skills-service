@@ -612,7 +612,7 @@ describe('Badges Tests', () => {
         cy.contains('Test Badge');
     });
 
-    it.only('Badge is disabled when created, can only be enabled once', () => {
+    it('Badge is disabled when created, can only be enabled once', () => {
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

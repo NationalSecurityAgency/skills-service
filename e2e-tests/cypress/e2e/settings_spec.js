@@ -785,7 +785,7 @@ describe('Settings Tests', () => {
             .should('be.visible');
     });
 
-    it.only('System Settings', () => {
+    it('System Settings', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
