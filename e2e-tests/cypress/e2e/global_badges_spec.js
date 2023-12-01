@@ -32,8 +32,8 @@ describe('Global Badges Tests', () => {
             cy.get('[data-cy="skillsSelector2"]').as('getOptions')
               .click();
             cy.get('@getOptions').then(($el) => {
+                cy.wait(500);
                 if ($el.find(skillsSelector).length > 0) {
-                    cy.wait(500);
                     cy.get(skillsSelector).click();
                 } else if (retry) {
                     cy.selectSkill(skillsSelector, false);}

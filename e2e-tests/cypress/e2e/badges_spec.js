@@ -59,8 +59,8 @@ describe('Badges Tests', () => {
             cy.get('[data-cy="skillsSelector2"]').as('getOptions')
               .click();
             cy.get('@getOptions').then(($el) => {
-              if ($el.find('.vs__dropdown-option').length > 0) {
                 cy.wait(500);
+              if ($el.find('.vs__dropdown-option').length > 0) {
                 cy.get('.vs__dropdown-option')
                   .eq(skillIndex)
                   .click();
