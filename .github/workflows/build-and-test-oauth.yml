@@ -171,7 +171,14 @@ jobs:
       with:
         working-directory: e2e-tests
         record: true
-        spec: cypress/e2e/contact_admins_spec.js
+        spec: |
+          cypress/e2e/global_badges_spec.js
+          cypress/e2e/badges_spec.js
+          cypress/e2e/settings_spec.js
+          cypress/e2e/contact_admins_spec.js
+          cypress/e2e/manage-my-projects_spec.js
+          cypress/e2e/video/configure_video_features_spec.js
+          cypress/e2e/skills-display-integration_spec.js
         parallel: true
         group: 'skills-service with OAuth'
         tag: "${{ github.workflow }}"

@@ -31,8 +31,9 @@ describe('Global Badges Tests', () => {
         Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]') => {
             cy.get('[data-cy="skillsSelector2"]').as('getOptions')
               .click();
+            cy.wait(250);
             cy.get('@getOptions').get(skillsSelector)
-              .click();
+              .click({force: true});
         });
 
         cy.intercept('GET', '/supervisor/badges/*/skills/available?*')
