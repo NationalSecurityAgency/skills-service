@@ -160,6 +160,9 @@ describe('Contact Project Admins Specs', () => {
             .as('emailSupported');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
             .as('isRoot');
+        cy.intercept('POST', '/api/validation/description')
+          .as('validateDescription');
+
 
         cy.intercept('POST', '/root/users/previewEmail', {
             statusCode: 200,
@@ -182,6 +185,7 @@ describe('Contact Project Admins Specs', () => {
             .should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]')
             .type('Test Body');
+        cy.wait('@validateDescription');
         cy.get('[data-cy=previewAdminEmail]')
             .should('be.enabled');
         cy.get('[data-cy=previewAdminEmail]')
@@ -242,6 +246,8 @@ describe('Contact Project Admins Specs', () => {
     it('validation works correctly', () => {
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
             .as('isRoot');
+        cy.intercept('POST', '/api/validation/description')
+          .as('validateDescription');
 
         cy.intercept('POST', '/root/users/previewEmail', {
             statusCode: 200,
@@ -260,6 +266,7 @@ describe('Contact Project Admins Specs', () => {
 
         cy.get('[data-cy="emailUsers_subject"]').type('test');
         cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.wait('@validateDescription');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
 
         cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
@@ -272,11 +279,13 @@ describe('Contact Project Admins Specs', () => {
         cy.get('#emailSubjectError').should('be.empty');
 
         cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
+        cy.wait('@validateDescription');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
         cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
 
         cy.get('[data-cy="emailUsers_body"]').type('{selectall}{backspace}');
         cy.get('[data-cy="emailUsers_body"]').type('test');
+        cy.wait('@validateDescription');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
         cy.get('#emailBodyError').should('be.empty');
     });

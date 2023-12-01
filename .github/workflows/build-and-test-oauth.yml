@@ -171,7 +171,7 @@ jobs:
       with:
         working-directory: e2e-tests
         record: true
-        spec: cypress/e2e/manage-my-projects_spec.js
+        spec: cypress/e2e/contact_admins_spec.js
         parallel: true
         group: 'skills-service with OAuth'
         tag: "${{ github.workflow }}"
