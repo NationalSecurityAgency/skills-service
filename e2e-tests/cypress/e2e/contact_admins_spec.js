@@ -176,6 +176,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="nav-Contact Admins"]')
             .click();
         cy.wait('@isRoot');
+        cy.wait(1000);
 
         cy.get('[data-cy=previewAdminEmail]')
             .should('be.disabled');
@@ -261,6 +262,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="nav-Contact Admins"]')
             .click();
         cy.wait('@isRoot');
+        cy.wait(1000);
 
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
 
