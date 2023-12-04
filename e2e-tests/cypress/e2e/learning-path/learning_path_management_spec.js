@@ -403,13 +403,13 @@ describe('Learning Path Management Validation Tests', () => {
             .click();
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
         cy.get('[data-cy="learningPathToSkillSelector"]').contains('Badge 2');
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').first().click();
+        cy.get('[data-cy="learningPathFromSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').first().click();
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Very Great Skill 5 Subj2');
         cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
