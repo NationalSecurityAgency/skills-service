@@ -360,7 +360,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.clickOnNode(360, 300);
@@ -368,7 +368,7 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
 
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
@@ -387,7 +387,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.clickOnNode(340, 250);
