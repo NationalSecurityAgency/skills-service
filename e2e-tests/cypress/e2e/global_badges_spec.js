@@ -34,7 +34,7 @@ describe('Global Badges Tests', () => {
             cy.get('@getOptions').then(($el) => {
                 cy.wait(500);
                 if ($el.find(skillsSelector).length > 0 && $el.find(skillsSelector).is(':visible')) {
-                    cy.get(skillsSelector).click();
+                    $el.find(skillsSelector).click();
                 } else if (retry) {
                     cy.selectSkill(skillsSelector, false);}
             })
