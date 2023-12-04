@@ -79,7 +79,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathFromSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-skill6Subj2"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         // Add Skill7 as a prerequisite for Skill5
@@ -208,7 +208,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
+        cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge2"]').click();
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@badge1ToBadge2')
 
@@ -216,7 +216,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathFromSkillSelector"]')
             .click();
 
-        cy.get('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-skill5Subj2"]').click();
         cy.get('[data-cy="learningPathToSkillSelector"]')
             .click();
         cy.get('[data-cy="learningPathToSkillSelector"]').find('[data-cy="skillsSelectionItem-proj1-badge1"]').click();
