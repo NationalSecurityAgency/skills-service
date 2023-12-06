@@ -75,7 +75,10 @@ limitations under the License.
         <template v-slot:cell(userIdForDisplay)="data">
           <div class="row" :data-cy="`row${data.index}-userCell`">
             <div class="col">
-              <span v-if="data.item.userIdForDisplayHtml" v-html="data.item.userIdForDisplayHtml"></span><span v-else>{{ data.item.userIdForDisplay }}</span>
+              <span v-if="data.item.userIdForDisplayHtml" v-html="data.item.userIdForDisplayHtml"></span>
+              <span v-else>
+                {{ getUserDisplay(data.item, true) }}
+              </span>
             </div>
             <div class="col-auto">
               <b-button variant="outline-info" size="sm" :data-cy="`row${data.index}-viewRun`"
@@ -142,12 +145,13 @@ limitations under the License.
   import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
   import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart';
   import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart';
+  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
 
   const { mapActions } = createNamespacedHelpers('quiz');
 
   export default {
     name: 'QuizRunsHistoryPage',
-    mixins: [UserTagsConfigMixin],
+    mixins: [UserTagsConfigMixin, UserIdForDisplayMixin],
     components: {
       QuizRunStatus,
       DateCell,
@@ -247,7 +251,7 @@ limitations under the License.
                 let items = res.data;
                 if (this.filters.userId && this.filters.userId.trim().length > 0) {
                   items = items.map((item) => {
-                    const userIdForDisplayHtml = StringHighlighter.highlight(item.userIdForDisplay, this.filters.userId);
+                    const userIdForDisplayHtml = StringHighlighter.highlight(this.getUserDisplay(item, true), this.filters.userId);
                     return { userIdForDisplayHtml, ...item };
                   });
                 }

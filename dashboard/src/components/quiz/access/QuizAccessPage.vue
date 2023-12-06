@@ -60,7 +60,7 @@ limitations under the License.
           <template v-slot:cell(userIdForDisplay)="data">
             <div class="row" :data-cy="`quizAdmin_${data.item.userId}`">
               <div class="col">
-                {{ data.value }}
+                {{ getUserDisplay(data.item, true) }}
               </div>
               <div class="col-auto">
                 <b-tooltip target="warningIconForSelfRemoval" triggers="hover">
@@ -100,9 +100,11 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import ExistingUserInput from '@/components/utils/ExistingUserInput';
   import RemovalValidation from '@/components/utils/modal/RemovalValidation';
+  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
 
   export default {
     name: 'QuizAccessPage',
+    mixins: [UserIdForDisplayMixin],
     components: {
       ExistingUserInput,
       SubPageHeader,

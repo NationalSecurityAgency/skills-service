@@ -108,6 +108,8 @@ class UserActionsHistoryService {
                     projectId: it.projectId,
                     quizId: it.quizId,
                     created: it.created,
+                    firstName: it.firstName,
+                    lastName: it.lastName
             )
         }
 

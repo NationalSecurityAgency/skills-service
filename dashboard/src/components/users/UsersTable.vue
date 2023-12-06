@@ -17,8 +17,8 @@ limitations under the License.
     <div>
       <div class="row px-3 pt-3">
         <div class="col-md-6">
-          <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user id filter"/>
+          <b-form-group label="User Filter" label-class="text-muted">
+            <b-input v-model="filters.user" v-on:keydown.enter="applyFilters" data-cy="users-skillIdFilter" aria-label="user filter"/>
           </b-form-group>
         </div>
         <div class="col-md-6">
@@ -63,13 +63,13 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item) }}
+          {{ getUserDisplay(data.item, true) }}
 
           <b-button-group class="float-right">
             <b-button :to="calculateClientDisplayRoute(data.item)"
                       variant="outline-info" size="sm" class="text-secondary"
                       v-b-tooltip.hover="'View User Details'"
-                      :aria-label="`View details for user ${getUserDisplay(data.item)}`"
+                      :aria-label="`View details for user ${getUserDisplay(data.item, true)}`"
                       data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
             </b-button>
           </b-button-group>
@@ -138,7 +138,7 @@ limitations under the License.
         inviteOnlyProject: false,
         data: [],
         filters: {
-          userId: '',
+          user: '',
           progress: 0,
           minimumPoints: 0,
         },
@@ -156,7 +156,7 @@ limitations under the License.
             fields: [
               {
                 key: 'userId',
-                label: 'User Id',
+                label: 'User',
                 sortable: true,
               },
               {
@@ -236,17 +236,17 @@ limitations under the License.
         this.filters.minimumPoints = Math.floor(this.totalPoints * (this.filters.progress / 100));
         this.loadData().then(() => {
           let filterMessage = 'Users table has been filtered by';
-          if (this.filters.userId) {
-            filterMessage += ` ${this.filters.userId}`;
+          if (this.filters.user) {
+            filterMessage += ` ${this.filters.user}`;
           }
           if (this.filters.minimumPoints > 0) {
-            filterMessage += `${this.filters.userId ? ' and' : ''} users with at least ${this.filters.minimumPoints} points`;
+            filterMessage += `${this.filters.user ? ' and' : ''} users with at least ${this.filters.minimumPoints} points`;
           }
           this.$nextTick(() => this.$announcer.polite(filterMessage));
         });
       },
       reset() {
-        this.filters.userId = '';
+        this.filters.user = '';
         this.filters.minimumPoints = 0;
         this.filters.progress = 0;
         this.table.options.pagination.currentPage = 1;
@@ -258,7 +258,7 @@ limitations under the License.
         this.table.options.busy = true;
         const url = this.getUrl();
         return UsersService.ajaxCall(url, {
-          query: this.filters.userId,
+          query: this.filters.user,
           limit: this.table.options.pagination.pageSize,
           ascending: !this.table.options.sortDesc,
           page: this.table.options.pagination.currentPage,

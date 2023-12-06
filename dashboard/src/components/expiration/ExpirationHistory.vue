@@ -54,7 +54,7 @@ limitations under the License.
             <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
           </template>
           <template v-slot:cell(userIdForDisplay)="data">
-            {{ data.value }}
+            {{ getUserDisplay(data.item, true) }}
 
             <b-button-group class="float-right">
               <b-button :to="calculateClientDisplayRoute(data)"
@@ -82,9 +82,11 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import ExpirationService from '@/components/expiration/ExpirationService';
   import DateCell from '../utils/table/DateCell';
+  import UserIdForDisplayMixin from '../users/UserIdForDisplayMixin';
 
   export default {
     name: 'ExpirationHistory',
+    mixins: [UserIdForDisplayMixin],
     components: {
       SubPageHeader,
       SkillsBTable,

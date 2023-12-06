@@ -598,6 +598,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     usr.skill_id is null and 
                     usr.points >= ?3 and
                     (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
+                    (lower(CONCAT(usattr.user_id_for_display, ' (', usattr.last_name, ', ', usattr.first_name,  ')')) like lower(CONCAT('%', ?2, '%'))) OR
                      lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))) 
                 AS temp''',
             nativeQuery = true)
@@ -660,8 +661,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
             WHERE 
                 up.project_id=?1 and 
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))  OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%'))
+                ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                 (lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
                 ) and 
                 up.skill_id is null and
                 up.points >= ?4

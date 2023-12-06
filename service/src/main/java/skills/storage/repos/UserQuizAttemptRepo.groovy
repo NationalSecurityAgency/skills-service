@@ -125,7 +125,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         from UserQuizAttempt quizAttempt, QuizDef quizDef, UserAttrs userAttrs
         where quizAttempt.quizDefinitionRefId = quizDef.id
             and quizAttempt.userId = userAttrs.userId
-            and lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%'))
+            and (lower(userAttrs.userIdForDisplay) like lower(CONCAT('%', ?2, '%')) OR
+                (lower(CONCAT(userAttrs.firstName, ' ', userAttrs.lastName, ' (',  userAttrs.userIdForDisplay, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))) OR
+                (lower(CONCAT(userAttrs.userIdForDisplay, ' (', userAttrs.lastName, ', ', userAttrs.firstName,  ')')) like lower(CONCAT(\'%\', ?2, \'%\'))))
             and quizDef.quizId = ?1
      ''')
     Integer countQuizRuns(String quizId, String userQuery)
@@ -136,7 +138,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                            quizAttempt.status            as status,
                            userAttrs.user_id             as userId,
                            userAttrs.user_id_for_display as userIdForDisplay,
-                           ut.value                      as userTag 
+                           ut.value                      as userTag, 
+                           userAttrs.first_name          as firstName,
+                           userAttrs.last_name           as lastName
                     from user_quiz_attempt quizAttempt,
                          quiz_definition quizDef,
                          user_attrs userAttrs
@@ -146,7 +150,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                         group by ut.user_id) ut ON ut.user_id = userAttrs.user_id
                     where quizAttempt.quiz_definition_ref_id = quizDef.id
                       and quizAttempt.user_id = userAttrs.user_id
-                      and lower(userAttrs.user_id_for_display) like lower(CONCAT('%', ?2, '%'))
+                      and (lower(userAttrs.user_id_for_display) like lower(CONCAT('%', ?2, '%')) or
+                      (lower(CONCAT(userAttrs.first_name, ' ', userAttrs.last_name, ' (',  userAttrs.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?2, \'%\'))) OR
+                      (lower(CONCAT(userAttrs.user_id_for_display, ' (', userAttrs.last_name, ', ', userAttrs.first_name,  ')')) like lower(CONCAT(\'%\', ?2, \'%\'))))
                       and quizDef.quiz_id = ?1
      ''', nativeQuery = true)
     List<QuizRun> findQuizRuns(String quizId, String userQuery, String usersTableAdditionalUserTagKey, PageRequest pageRequest)

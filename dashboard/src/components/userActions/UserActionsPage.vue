@@ -137,7 +137,7 @@ limitations under the License.
         </template>
 
         <template v-slot:cell(userIdForDisplay)="data">
-          <span :data-cy="`row${data.index}-userId`">{{ data.value }}</span>
+          <span :data-cy="`row${data.index}-userId`">{{ getUserDisplay(data.item, true) }}</span>
         </template>
 
         <template v-slot:cell(action)="data">
@@ -178,9 +178,11 @@ limitations under the License.
   import DateCell from '@/components/utils/table/DateCell';
   import SingleUserAction from '@/components/userActions/SingleUserAction';
   import StartRecordingUserActionsDateWarning from '@/components/userActions/StartRecordingUserActionsDateWarning';
+  import UserIdForDisplayMixin from '../users/UserIdForDisplayMixin';
 
   export default {
     name: 'UserActionsPage',
+    mixins: [UserIdForDisplayMixin],
     components: {
       StartRecordingUserActionsDateWarning,
       SingleUserAction,

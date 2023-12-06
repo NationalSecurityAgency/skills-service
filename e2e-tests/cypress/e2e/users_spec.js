@@ -71,7 +71,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 3,  value: dateFormatter(m.clone().add(7, 'day')) }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: '4,500' }],
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: '6,000' }],
@@ -81,7 +81,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: '12,000' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'user5@skills.org' }, { colIndex: 2,  value: '12,000' }],
             [{ colIndex: 0,  value: 'user4@skills.org' }, { colIndex: 2,  value: '10,500' }],
@@ -125,7 +125,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -165,7 +165,7 @@ describe('Users Tests', () => {
         ], 15, true, 12);
     });
 
-    it('filter by user id', () => {
+    it('filter by user information', () => {
         cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
 
         for (let i = 0; i < 7; i += 1) {
@@ -180,7 +180,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera0@skills.org' }],
             [{ colIndex: 0,  value: 'usera1@skills.org' }],
@@ -252,7 +252,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         const rowSelector = `${tableSelector} tbody tr`
         cy.get(rowSelector).should('have.length', 2).as('cyRows');
 
@@ -297,6 +297,33 @@ describe('Users Tests', () => {
         }
     });
 
+    it('displays user name if available', () => {
+        const res = `
+        {"data":
+            [
+                  {"userIdForDisplay":"skills@evoforge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"skills@evo-forge.org","firstName":"Skill","lastName":"Tree","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"},
+                  {"userIdForDisplay":"foo-hydra","firstName":"","lastName":"","email":"skills@evoforge.org","dn":null,"userId":"skills@evoforge.org","totalPoints":492,"lastUpdated":"2021-03-04T19:22:44.714+00:00"}
+            ],
+        "count":3,"totalCount":3}`;
+        cy.intercept('/admin/projects/proj1/users?query=*', {
+            statusCode: 200,
+            body: res,
+        }).as('getUsers');
+
+        cy.request('POST', `/api/projects/proj1/skills/skill1`);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: 'skills@evoforge.org (Tree, Skill)'}],
+            [{colIndex: 0, value: 'skills@evo-forge.org (Tree, Skill)'}],
+            [{colIndex: 0, value: 'foo-hydra'}]
+        ], 5);
+    });
+
     it('reset should reset paging', () => {
         cy.intercept('/admin/projects/proj1/users?query=*')
             .as('getUsers');
@@ -311,7 +338,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.get('[data-cy="skillsBTablePaging"]').contains('2').click();
         cy.wait('@getUsers')
 
@@ -356,7 +383,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getProjectUsers')
 
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -576,7 +603,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
         cy.get('[data-cy="skillsBTablePageSize"]').select('10');
         cy.wait('@getUsers')
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getUsers')
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '12%')
@@ -599,7 +626,7 @@ describe('Users Tests', () => {
         cy.wait('@getSubjUsers');
         cy.get('[data-cy="skillsBTablePageSize"]').select('20');
         cy.wait('@getSubjUsers');
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getSubjUsers');
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '38%')
@@ -619,7 +646,7 @@ describe('Users Tests', () => {
         cy.wait('@getSkill1Users')
         cy.get('[data-cy="skillsBTablePageSize"]').select('10');
         cy.wait('@getSkill1Users')
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getSkill1Users')
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
@@ -637,7 +664,7 @@ describe('Users Tests', () => {
         cy.wait('@getBadgeUsers');
         cy.get('[data-cy="skillsBTablePageSize"]').select('20');
         cy.wait('@getBadgeUsers');
-        cy.get(`${tableSelector}`).contains('User Id').click();
+        cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getBadgeUsers');
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%')

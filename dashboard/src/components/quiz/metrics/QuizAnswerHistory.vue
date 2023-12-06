@@ -50,7 +50,7 @@ limitations under the License.
         <template v-slot:cell(userIdForDisplay)="data">
           <div class="row" style="min-width: 15rem;" :data-cy="`row${data.index}-colUserId`">
             <div class="col mb-2">
-              {{ data.value }}
+              {{ getUserDisplay(data.item, true) }}
             </div>
             <div class="col-auto mb-2">
               <b-button size="sm" variant="outline-info"
@@ -80,10 +80,11 @@ limitations under the License.
   import SkillsBTable from '@/components/utils/table/SkillsBTable';
   import DateCell from '@/components/utils/table/DateCell';
   import UserTagsConfigMixin from '@/components/users/UserTagsConfigMixin';
+  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
 
   export default {
     name: 'QuizAnswerHistory',
-    mixins: [UserTagsConfigMixin],
+    mixins: [UserTagsConfigMixin, UserIdForDisplayMixin],
     components: { DateCell, SkillsBTable },
     props: {
       answerDefId: Number,

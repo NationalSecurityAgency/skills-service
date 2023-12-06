@@ -18,8 +18,8 @@ limitations under the License.
     <b-card body-class="p-0">
       <div class="row px-3 pt-3">
         <div class="col-12">
-          <b-form-group label="User Id Filter" label-class="text-muted">
-            <b-input v-model="filters.userId" v-on:keydown.enter="applyFilters" data-cy="privateProjectUsers-userIdFilter" aria-label="user id filter"/>
+          <b-form-group label="User Filter" label-class="text-muted">
+            <b-input v-model="filters.user" v-on:keydown.enter="applyFilters" data-cy="privateProjectUsers-userIdFilter" aria-label="user filter"/>
           </b-form-group>
         </div>
         <div class="col-md">
@@ -40,7 +40,7 @@ limitations under the License.
                       tableStoredStateId="privateProjectUsersTable"
                       data-cy="privateProjectUsersTable">
         <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item) }}
+          {{ getUserDisplay(data.item, true) }}
 
           <b-button-group class="float-right">
             <b-button @click="revokeAccess(data.value, getUserDisplay(data.item))"
@@ -70,7 +70,7 @@ limitations under the License.
     data() {
       return {
         filters: {
-          userId: '',
+          user: '',
         },
         table: {
           items: [],
@@ -84,7 +84,7 @@ limitations under the License.
             fields: [
               {
                 key: 'userId',
-                label: 'User Id',
+                label: 'User',
                 sortable: true,
               },
             ],
@@ -123,11 +123,11 @@ limitations under the License.
       applyFilters() {
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite(`Revoke user access table has been filtered by ${this.filters.userId}`));
+          this.$nextTick(() => this.$announcer.polite(`Revoke user access table has been filtered by ${this.filters.user}`));
         });
       },
       reset() {
-        this.filters.userId = '';
+        this.filters.user = '';
         this.table.options.pagination.currentPage = 1;
         this.loadData().then(() => {
           this.$nextTick(() => this.$announcer.polite('Revoke user access table filters have been removed'));
@@ -136,7 +136,7 @@ limitations under the License.
       loadData() {
         this.table.options.busy = true;
         const pageParams = {
-          query: this.filters.userId,
+          query: this.filters.user,
           limit: this.table.options.pagination.pageSize,
           ascending: !this.table.options.sortDesc,
           page: this.table.options.pagination.currentPage,
@@ -166,19 +166,23 @@ limitations under the License.
           }
         });
       },
-      getUserDisplay(props) {
+      getUserDisplay(props, fullName = false) {
         const userDisplay = props.userIdForDisplay ? props.userIdForDisplay : props.userId;
         const { oAuthProviders } = this.$store.getters.config;
+        let userName = '';
+        if (fullName && props.firstName && props.lastName) {
+          userName = ` (${props.lastName}, ${props.firstName})`;
+        }
         if (oAuthProviders) {
           const indexOfDash = userDisplay.lastIndexOf('-');
           if (indexOfDash > 0) {
             const provider = userDisplay.substr(indexOfDash + 1);
             if (oAuthProviders.includes(provider)) {
-              return userDisplay.substr(0, indexOfDash);
+              return `${userDisplay.substr(0, indexOfDash)}${userName}`;
             }
           }
         }
-        return userDisplay;
+        return `${userDisplay}${userName}`;
       },
     },
   };

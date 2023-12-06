@@ -28,4 +28,6 @@ interface UserQuizAnswer {
     Integer getUserQuizAttemptId()
 
     String getUserTag()
+    String getFirstName()
+    String getLastName()
 }
