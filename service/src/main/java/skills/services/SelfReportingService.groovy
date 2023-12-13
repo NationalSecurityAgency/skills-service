@@ -140,7 +140,7 @@ class SelfReportingService {
             )
 
             skillApprovalRepo.save(skillApproval)
-            sentNotifications(skillDefinition, userId, requestMsg)
+            sentNotifications(skillDefinition, userId)
 
             res = new SkillEventsService.AppliedCheckRes(
                     skillApplied: false,
@@ -187,7 +187,7 @@ class SelfReportingService {
         settingsService.saveSetting(userProjectSettingsRequest)
     }
 
-    private void sentNotifications(SkillDefMin skillDefinition, String userId, String requestMsg) {
+    private void sentNotifications(SkillDefMin skillDefinition, String userId) {
         String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
@@ -220,7 +220,6 @@ class SelfReportingService {
                             skillName     : skillDefinition.name,
                             approveUrl    : "${publicUrl}administrator/projects/${skillDefinition.projectId}/self-report",
                             skillId       : skillDefinition.skillId,
-                            requestMsg    : requestMsg,
                             projectId     : skillDefinition.projectId,
                             publicUrl     : publicUrl,
                             projectName   : projDef.name,
