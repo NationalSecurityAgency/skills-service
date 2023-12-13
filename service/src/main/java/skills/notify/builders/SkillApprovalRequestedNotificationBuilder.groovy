@@ -56,7 +56,6 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("approveUrl", parsed.approveUrl)
         templateContext.setVariable("skillId", parsed.skillId)
-        templateContext.setVariable("requestMsg", parsed.requestMsg)
         templateContext.setVariable("projectId", parsed.projectId)
         templateContext.setVariable("publicUrl", parsed.publicUrl)
         templateContext.setVariable("projectName", parsed.projectName)
@@ -73,7 +72,6 @@ class SkillApprovalRequestedNotificationBuilder implements NotificationEmailBuil
                 "\n   Project: ${parsed.projectName}" +
                 "\n   Skill: ${parsed.skillName} (${parsed.skillId})" +
                 "\n   Number of Points: ${String.format("%,d", parsed.numPoints)}" +
-                "\n   Request Message: ${parsed.requestMsg}" +
                 "\n" +
                 "\nAs an approver for the '${parsed.projectId}' project, you can approve or reject this request." +
                 "\n\n" +

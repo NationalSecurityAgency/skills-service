@@ -55,9 +55,9 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
         templateContext.setVariable("approved", parsed.approved)
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("skillId", parsed.skillId)
+        templateContext.setVariable("subjectId", parsed.subjectId)
         templateContext.setVariable("projectName", parsed.projectName)
         templateContext.setVariable("projectId", parsed.projectId)
-        templateContext.setVariable("rejectionMsg", parsed.rejectionMsg ?: '')
         templateContext.setVariable("publicUrl", parsed.publicUrl)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
@@ -76,9 +76,7 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
                 "\n   Project: ${parsed.projectName}" +
                 "\n   Skill: ${parsed.skillName}" +
                 "\n   Approver: ${parsed.approver}" +
-                "\n   ${parsed.approved ? '' : "Message: ${parsed.rejectionMsg ?: ''}\n"}" +
-                "\n" +
-                "\nAlways yours," +
+                "\n\n\nAlways yours," +
                 "\nSkillTree Bot"
 
         if (formatting.plaintextHeader) {

@@ -347,7 +347,6 @@ limitations under the License.
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
     <li><span class="label">Points</span>: 2,000</li>
-    <li><span class="label">Message</span>: Please approve this!</li>
 </ul>
 
 <p>
@@ -363,7 +362,6 @@ Always yours, <br/> -SkillTree Bot
    Project: Test Project#1
    Skill: Test Skill 1 (skill1)
    Number of Points: 2,000
-   Request Message: Please approve this!
 
 As an approver for the 'TestProject1' project, you can approve or reject this request.
 
@@ -447,10 +445,7 @@ SkillTree Bot'''
 Congratulations! Your request for the Test Skill 1 skill in the Test Project#1 project has been approved.
    Project: Test Project#1
    Skill: Test Skill 1
-   Approver: ''' + projectAdminUserAttrs.userIdForDisplay + '''
-   
-
-Always yours,
+   Approver: ''' + projectAdminUserAttrs.userIdForDisplay + '''Always yours,
 SkillTree Bot
 '''
         String expectedHtml = '''
@@ -483,14 +478,13 @@ limitations under the License.
 </head>
 <body class="overall-container">
 <h1>SkillTree Points <span>Approved!</span></h1>
-<p>Congratulations! Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been approved!</p>
+<p>Congratulations! Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been approved!</p>
 
 
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
     <li><span class="label">Approver</span>: '''+ projectAdminUserAttrs.userIdForDisplay + '''</li>
-    
 </ul>
 
 <p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>
@@ -668,9 +662,6 @@ Your request for the Test Skill 1 skill in the Test Project#1 project has been d
    Project: Test Project#1
    Skill: Test Skill 1
    Approver: '''+projectAdminUserAttrs.userIdForDisplay+'''
-   Message: Just felt like it
-
-
 Always yours,
 SkillTree Bot
 '''
@@ -705,13 +696,12 @@ limitations under the License.
 <body class="overall-container">
 <h1>SkillTree Points <span>Denied</span></h1>
 
-<p>Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been denied.</p>
+<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
 
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
     <li><span class="label">Approver</span>: '''+projectAdminUserAttrs.userIdForDisplay+'''</li>
-    <li><span class="label">Message</span>: Just felt like it</li>
 </ul>
 
 <p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>
@@ -752,7 +742,7 @@ Always yours, <br/> -SkillTree Bot
         approvalsEndpointResAfter.data.get(0).requestedOn == date1.time
     }
 
-    def "report via approval should validate approval message if 'paragraphValidationRegex' property is configurede"() {
+    def "report via approval should validate approval message if 'paragraphValidationRegex' property is configured"() {
         String user = "user0"
 
         def proj = SkillsFactory.createProject()
@@ -809,9 +799,6 @@ Your request for the Test Skill 1 skill in the Test Project#1 project has been d
    Project: Test Project#1
    Skill: Test Skill 1
    Approver: '''+projectAdminUserAttrs.userIdForDisplay+'''
-   Message: 
-
-
 Always yours,
 SkillTree Bot
 '''
@@ -846,13 +833,12 @@ limitations under the License.
 <body class="overall-container">
 <h1>SkillTree Points <span>Denied</span></h1>
 
-<p>Your request for the <b>Test Skill 1</b> skill in the <b>Test Project#1</b> project has been denied.</p>
+<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
 
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
     <li><span class="label">Skill</span>: Test Skill 1</li>
     <li><span class="label">Approver</span>: '''+projectAdminUserAttrs.userIdForDisplay+'''</li>
-    <li><span class="label">Message</span>: </li>
 </ul>
 
 <p>You can view your progress for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1">Test Project#1</a> project in the SkillTree dashboard.</p>

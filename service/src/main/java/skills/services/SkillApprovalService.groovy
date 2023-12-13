@@ -70,6 +70,9 @@ class SkillApprovalService {
     SkillDefRepo skillDefRepo
 
     @Autowired
+    SkillRelDefRepo skillRelDefRepo
+
+    @Autowired
     SkillDefAccessor skillDefAccessor
 
     @Autowired
@@ -261,7 +264,7 @@ class SkillApprovalService {
             // send email
             Optional<SkillDef> optional = skillDefRepo.findById(it.skillRefId)
             SkillDef skillDef = optional.get()
-            sendApprovalNotifications(it, skillDef, false, rejectionMsg)
+            sendApprovalNotifications(it, skillDef, false)
         }
     }
 
@@ -312,7 +315,7 @@ class SkillApprovalService {
         }
     }
 
-    private void sendApprovalNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved, String rejectionMsg=null) {
+    private void sendApprovalNotifications(SkillApproval skillApproval, SkillDef skillDefinition, boolean approved) {
         String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
@@ -326,6 +329,8 @@ class SkillApprovalService {
         UserInfo currentUser = userInfoService.getCurrentUser()
         String sender = currentUser.getEmail()
 
+        String subjectId = skillRelDefRepo.findSubjectSkillIdByChildId(skillDefinition.id)
+
         ProjectSummaryResult projDef = projDefRepo.getProjectName(skillDefinition.projectId)
         Boolean isUcProject = userCommunityService.isUserCommunityOnlyProject(skillDefinition.projectId)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
@@ -336,9 +341,9 @@ class SkillApprovalService {
                         approved     : approved,
                         skillName    : skillDefinition.name,
                         skillId      : skillDefinition.skillId,
+                        subjectId    : subjectId,
                         projectName  : projDef.getProjectName(),
                         projectId    : skillDefinition.projectId,
-                        rejectionMsg : rejectionMsg,
                         publicUrl    : publicUrl,
                         replyTo      : sender,
                         communityHeaderDescriptor : isUcProject ? uiConfigProperties.ui.userCommunityRestrictedDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
