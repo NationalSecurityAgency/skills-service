@@ -27,7 +27,18 @@ const timeFromNowFormatter = (value) => dayjs(value)
 
 const testTime = new Date().getTime();
 const yesterday = new Date().getTime() - (1000 * 60 * 60 * 24);
-
+const getIframeBody = () => {
+    // get the iframe > document > body
+    // and retry until the body element is not empty
+    return cy
+      .get('iframe')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      // wraps "body" DOM element to allow
+      // chaining more Cypress commands, like ".find(...)"
+      // https://on.cypress.io/wrap
+      .then(cy.wrap);
+};
 describe('My Progress Breadcrumb Tests', () => {
 
     beforeEach(() => {
@@ -1039,6 +1050,177 @@ describe('My Progress Breadcrumb Tests', () => {
             .eq(3)
             .should('contain.text', 'Badge: globalBadge1');
 
+    });
+
+    it('navigate through and validate breadcrumbs', function () {
+
+        cy.visit('/');
+
+        cy.get('[data-cy=project-link-proj1]')
+          .click();
+        cy.wait('@pointHistoryChart');
+
+        cy.dashboardCd()
+          .contains('Overall Points');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
+          .should('be.visible');
+        cy.get('[data-cy=breadcrumb-proj1]')
+          .should('be.visible');
+        cy.get('[data-cy=breadcrumb-proj1]')
+          .should('exist');
+        cy.get('[data-cy=breadcrumb-proj1]')
+          .should('not.have.attr', 'href');
+        cy.get('[data-cy=breadcrumb-bar]')
+          .contains('Project: proj1')
+          .should('be.visible');
+
+        // click on subject
+        getIframeBody()
+          .find('.user-skill-subject-tile:nth-child(1)')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('Subject 1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 3);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Subject: subj1');
+
+        // click on skill
+        getIframeBody()
+          .find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('Skill Overview');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 4);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Subject: subj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(3)
+          .should('contain.text', 'Skill: skill1');
+
+        // back to subject page
+        cy.get('[data-cy=breadcrumb-subj1]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('Subject 1');
+
+        // click on rank
+        getIframeBody()
+          .find('[data-cy=myRank]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('My Rank');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 4);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Subject: subj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(3)
+          .should('contain.text', 'Rank');
+
+
+        // back to home page
+        cy.get('[data-cy=breadcrumb-proj1]')
+          .click();
+        cy.dashboardCd()
+          .contains('Overall Points');
+        // click on rank
+        getIframeBody()
+          .find('[data-cy=myRank]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('My Rank');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 3);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Rank');
+
+        // back to home page
+        cy.get('[data-cy=breadcrumb-proj1]')
+          .click();
+        cy.dashboardCd()
+          .contains('Overall Points');
+
+        // click on my badges
+        getIframeBody()
+          .find('[data-cy=myBadges]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('My Badges');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 3);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Badges');
+
+        // click on badge
+        getIframeBody()
+          .find('[data-cy=earnedBadgeLink_badge1]')
+          .click();
+        getIframeBody()
+          .find('[data-cy=title]')
+          .contains('Badge Details');
+        cy.get('[data-cy=breadcrumb-item]')
+          .its('length')
+          .should('eq', 4);
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(0)
+          .should('contain.text', 'Progress And Rankings');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(1)
+          .should('contain.text', 'Project: proj1');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(2)
+          .should('contain.text', 'Badges');
+        cy.get('[data-cy=breadcrumb-item]')
+          .eq(3)
+          .should('contain.text', 'Badge: badge1');
     });
 
 });
