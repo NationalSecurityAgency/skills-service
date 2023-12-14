@@ -15,7 +15,7 @@ limitations under the License.
 */
 <template>
   <div class="inception-container pb-4">
-    <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
+    <div id="skills-client-container"></div>
   </div>
 </template>
 
@@ -47,6 +47,7 @@ limitations under the License.
         version: this.skillsVersion,
         options: this.options,
         theme: this.theme,
+        handleRouteChanged: (newPath) => { this.skillsDisplayRouteChanged(newPath); },
       });
       clientDisplay.attachTo(document.querySelector('#skills-client-container'));
       this.clientDisplay = clientDisplay;

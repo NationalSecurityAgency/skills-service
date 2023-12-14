@@ -33,7 +33,7 @@ limitations under the License.
       </b-form>
     </sub-page-header>
     <loading-container :is-loading="checkingAccess">
-      <div id="skills-client-container" ref="skillsDisplayRef" @route-changed="skillsDisplayRouteChanged"></div>
+      <div id="skills-client-container"></div>
       <div v-if="!canAccess" class="container">
         <div class="row justify-content-center">
           <div class="col-md-6 mt-3">
@@ -171,6 +171,7 @@ limitations under the License.
             options: this.configuration,
             theme: this.theme,
             userId: this.userIdParam,
+            handleRouteChanged: (newPath) => { this.skillsDisplayRouteChanged(newPath); },
           });
           clientDisplay.attachTo(document.querySelector('#skills-client-container'));
           this.clientDisplay = clientDisplay;
