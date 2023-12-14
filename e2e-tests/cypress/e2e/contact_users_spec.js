@@ -631,4 +631,33 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
         cy.get('#emailBodyError').should('be.empty');
     });
+
+    it('email body and subject validation for community-protected project still uses non-community validator', () => {
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.logout();
+                cy.login(vars.rootUser, vars.defaultPass, true);
+                cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.logout();
+                cy.login(vars.defaultUser, vars.defaultPass);
+            });
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.visit('/administrator/projects/proj1/contact-users');
+        cy.wait('@emailSupported');
+        // ensure that this is a community-protected project
+        cy.get('[data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+
+        cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
+        cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
+        cy.get('#emailSubjectError').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+    });
 });

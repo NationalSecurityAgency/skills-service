@@ -18,12 +18,12 @@ import store from '../../store/store';
 import DescriptionValidatorService from './DescriptionValidatorService';
 
 const validator = {
-  validate(value) {
+  validate(value, args) {
     if (!store.getters.config.paragraphValidationRegex) {
       return true;
     }
-
-    return DescriptionValidatorService.validateDescription(value).then((result) => {
+    const enableProjectIdParam = !(args && args.length > 0 && args[0] === 'false');
+    return DescriptionValidatorService.validateDescription(value, enableProjectIdParam).then((result) => {
       if (result.valid) {
         return true;
       }

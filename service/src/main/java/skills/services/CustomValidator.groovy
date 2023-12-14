@@ -149,13 +149,13 @@ class CustomValidator {
     }
 
     CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false) {
-        Pattern paragraphPattern = this.paragraphPattern
-        String paragraphValidationMsg = this.paragraphValidationMsg
+        Pattern paragraphPatternToUse = this.paragraphPattern
+        String paragraphValidationMsgToUse = this.paragraphValidationMsg
         if ((utilizeUserCommunityParagraphPatternByDefault || projectId) && this.userCommunityParagraphPattern) {
             boolean shouldUseCommunityValidation = projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
             if (shouldUseCommunityValidation) {
-                paragraphPattern = this.userCommunityParagraphPattern
-                paragraphValidationMsg = this.userCommunityParagraphValidationMsg ?: paragraphValidationMsg
+                paragraphPatternToUse = this.userCommunityParagraphPattern
+                paragraphValidationMsgToUse = this.userCommunityParagraphValidationMsg ?: this.paragraphValidationMsg
 
                 String userId = userInfoService.currentUserId
                 if (!userCommunityService.isUserCommunityMember(userId)) {
@@ -163,7 +163,7 @@ class CustomValidator {
                 }
             }
         }
-        if (!paragraphPattern || StringUtils.isBlank(description)) {
+        if (!paragraphPatternToUse || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
         log.debug("Validating description:\n[{}]", description)
@@ -177,22 +177,64 @@ class CustomValidator {
         if (StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
-        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
 
+        CustomValidationResult validationResult = null
+
+        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
+        if (paragraphs) {
+            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, paragraphs.toList())
+            if (validationResult && !validationResult.valid) {
+                return validationResult
+            }
+        }
+
+        List<String> htmlParagraphs = extractHtmlParagraphs(description)
+        if (htmlParagraphs) {
+            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, htmlParagraphs)
+        }
+        return validationResult
+    }
+
+    CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
+        CustomValidationResult res = validateDescription(contactUsersRequest.emailBody, null)
+        if (!res.valid) {
+            res.msg = "Custom validation failed: msg=[${res.msg}] for email's body"
+            return res
+        }
+        res = validateDescription(contactUsersRequest.emailSubject, null)
+        if (!res.valid) {
+            res.msg = "Custom validation failed: msg=[${res.msg}] for email's subject'"
+            return res
+        }
+        return res
+    }
+
+    private CustomValidationResult validateParagraphs(Pattern paragraphPatternToUse, String paragraphValidationMsgToUse, List<String> paragraphs){
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
             if (!s){
                 continue
             }
-
             String toValidate = adjustForMarkdownSupport(s)
-            validationResult = validateInternal(paragraphPattern, toValidate, paragraphValidationMsg)
-            if (!validationResult.valid) {
-                break
+            if (StringUtils.isNotBlank(toValidate)) {
+                validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
+                if (!validationResult.valid) {
+                    break
+                }
             }
         }
 
         return validationResult
+    }
+
+    final static Pattern HTML_PARAGRAPHS_PATTERN = Pattern.compile("<p>(.+?)</p>", Pattern.DOTALL);
+    private List<String> extractHtmlParagraphs(String description) {
+        Matcher matcher = HTML_PARAGRAPHS_PATTERN.matcher(description)
+        List<String> htmlParagraphs = []
+        while (matcher.find()) {
+            htmlParagraphs.add(matcher.group(1));
+        }
+        return htmlParagraphs
     }
 
     private String preProcessForMarkdownSupport(String toValidate) {

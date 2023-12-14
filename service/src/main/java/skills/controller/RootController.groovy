@@ -39,6 +39,8 @@ import skills.controller.result.model.*
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
+import skills.services.CustomValidationResult
+import skills.services.CustomValidator
 import skills.services.FeatureService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
@@ -99,6 +101,9 @@ class RootController {
 
     @Autowired
     ContactUsersService contactUsersService
+
+    @Autowired
+    CustomValidator customValidator
 
     @Autowired
     UserTagRepo userTagRepo
@@ -337,8 +342,7 @@ class RootController {
 
     @PostMapping('/users/contactAllProjectAdmins')
     RequestResult contactProjectAdministrators(@RequestBody ContactUsersRequest cur) {
-        SkillsValidator.isNotBlank(cur?.emailSubject, "emailSubject")
-        SkillsValidator.isNotBlank(cur?.emailBody, "emailBody")
+        validateEmailBodyAndSubject(cur)
         //intentionally ignore queryCriteria as that doesn't apply to this use case
         contactUsersService.contactAllProjectAdmins(cur.emailSubject, cur.emailBody)
         return RequestResult.success()
@@ -346,11 +350,19 @@ class RootController {
 
     @RequestMapping(value="/users/previewEmail", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     RequestResult testEmail(@RequestBody ContactUsersRequest contactUsersRequest) {
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        validateEmailBodyAndSubject(contactUsersRequest)
         String userId = userInfoService.getCurrentUserId()
         contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId)
         return RequestResult.success()
+    }
+
+    private void validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        CustomValidationResult customValidationResult = customValidator.validateEmailBodyAndSubject(contactUsersRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg)
+        }
     }
 
     @RequestMapping(value="/users/{userId}/tags/{tagKey}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

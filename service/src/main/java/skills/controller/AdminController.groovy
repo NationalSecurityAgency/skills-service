@@ -148,6 +148,9 @@ class AdminController {
     ContactUsersService contactUsersService
 
     @Autowired
+    CustomValidator customValidator
+
+    @Autowired
     UserInfoService userInfoService
 
     @Autowired
@@ -1318,19 +1321,26 @@ class AdminController {
     @ResponseBody
     RequestResult contactUsers(@PathVariable("id") String projectId, @RequestBody ContactUsersRequest contactUsersRequest) {
         contactUsersRequest?.queryCriteria?.projectId = projectId
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        validateEmailBodyAndSubject(contactUsersRequest)
         contactUsersService.contactUsers(contactUsersRequest, projectId)
         return RequestResult.success()
     }
 
     @RequestMapping(value="/projects/{id}/previewEmail", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     RequestResult testEmail(@PathVariable("id") String projectId, @RequestBody ContactUsersRequest contactUsersRequest) {
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
-        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        validateEmailBodyAndSubject(contactUsersRequest)
         String userId = userInfoService.getCurrentUserId()
         contactUsersService.sendEmail(contactUsersRequest.emailSubject, contactUsersRequest.emailBody, userId, projectId)
         return RequestResult.success()
+    }
+
+    private void validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailSubject, "emailSubject")
+        SkillsValidator.isNotBlank(contactUsersRequest?.emailBody, "emailBody")
+        CustomValidationResult customValidationResult = customValidator.validateEmailBodyAndSubject(contactUsersRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg)
+        }
     }
 
     @RequestMapping(value="/projects/{projectId}/skills/{skillId}/export", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
