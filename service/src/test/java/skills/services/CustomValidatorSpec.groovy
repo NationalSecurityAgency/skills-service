@@ -721,5 +721,20 @@ line-height:107%">(A) fancy formatting</span>""").valid
 (A) [https://www.blahblah.com<span class="dgfdsgdsd dfgdsfg" role="text" style="color: rgb(33, 44, 55);"> › htmlcss › how-to-do-stuff-...</span>](https://www.blahblah.com/en/kb/htmlcss/how-to-do-stuff-link.html)
 <span>quis nostrud exercitation ullamco laboris nisi ut aliquip ex </span><em><span>ea commodo consequat</span></em><span>. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur " ...</span>''').valid
     }
+
+    def "test html paragraph validation"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.init()
+
+        when:
+
+        String paragraphs = "<p>(A) Paragraph 1</p><p><br></p><p>Paragraph2</p>"
+        CustomValidationResult result = validator.validateDescription(paragraphs)
+
+        then:
+        !result.valid
+    }
 }
 

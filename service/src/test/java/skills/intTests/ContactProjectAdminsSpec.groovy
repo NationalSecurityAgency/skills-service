@@ -17,6 +17,7 @@ package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
@@ -162,5 +163,61 @@ limitations under the License.
 
 </body>
 </html>'''
+    }
+
+    def "contact project admins email should perform paragraphValidationRegex on body"() {
+        def users = getRandomUsers(1, true)
+        def service = createService(users[0])
+
+        def proj = SkillsFactory.createProject(1)
+        service.createProject(proj)
+
+        when:
+        rootServiceOne.contactAllProjectAdmins("a subject", "has jabberwocky")
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("explanation:Custom validation failed: msg=[paragraphs may not contain jabberwocky] for email's body")
+    }
+
+    def "contact project admins should perform paragraphValidationRegex on subject"() {
+        def users = getRandomUsers(1, true)
+        def service = createService(users[0])
+
+        def proj = SkillsFactory.createProject(1)
+        service.createProject(proj)
+
+        when:
+        rootServiceOne.contactAllProjectAdmins("has jabberwocky", "a body")
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("explanation:Custom validation failed: msg=[paragraphs may not contain jabberwocky] for email's subject")
+    }
+
+    def "preview project admins email should perform paragraphValidationRegex on body"() {
+        def users = getRandomUsers(1, true)
+        def service = createService(users[0])
+
+        def proj = SkillsFactory.createProject(1)
+        service.createProject(proj)
+
+        when:
+        rootServiceOne.previewEmail("a subject", "has jabberwocky")
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("explanation:Custom validation failed: msg=[paragraphs may not contain jabberwocky] for email's body")
+    }
+
+    def "preview project admins email should perform paragraphValidationRegex on subject"() {
+        def users = getRandomUsers(1, true)
+        def service = createService(users[0])
+
+        def proj = SkillsFactory.createProject(1)
+        service.createProject(proj)
+
+        when:
+        rootServiceOne.previewEmail("has jabberwocky", "a body")
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("explanation:Custom validation failed: msg=[paragraphs may not contain jabberwocky] for email's subject")
     }
 }
