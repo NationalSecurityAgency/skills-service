@@ -149,13 +149,13 @@ class CustomValidator {
     }
 
     CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false) {
-        Pattern paragraphPattern = this.paragraphPattern
-        String paragraphValidationMsg = this.paragraphValidationMsg
+        Pattern paragraphPatternToUse = this.paragraphPattern
+        String paragraphValidationMsgToUse = this.paragraphValidationMsg
         if ((utilizeUserCommunityParagraphPatternByDefault || projectId) && this.userCommunityParagraphPattern) {
             boolean shouldUseCommunityValidation = projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
             if (shouldUseCommunityValidation) {
-                paragraphPattern = this.userCommunityParagraphPattern
-                paragraphValidationMsg = this.userCommunityParagraphValidationMsg ?: paragraphValidationMsg
+                paragraphPatternToUse = this.userCommunityParagraphPattern
+                paragraphValidationMsgToUse = this.userCommunityParagraphValidationMsg ?: this.paragraphValidationMsg
 
                 String userId = userInfoService.currentUserId
                 if (!userCommunityService.isUserCommunityMember(userId)) {
@@ -163,7 +163,7 @@ class CustomValidator {
                 }
             }
         }
-        if (!paragraphPattern || StringUtils.isBlank(description)) {
+        if (!paragraphPatternToUse || StringUtils.isBlank(description)) {
             return new CustomValidationResult(valid: true)
         }
         log.debug("Validating description:\n[{}]", description)
@@ -182,7 +182,7 @@ class CustomValidator {
 
         String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
         if (paragraphs) {
-            validationResult = validateParagraphs(paragraphs.toList())
+            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, paragraphs.toList())
             if (validationResult && !validationResult.valid) {
                 return validationResult
             }
@@ -190,7 +190,7 @@ class CustomValidator {
 
         List<String> htmlParagraphs = extractHtmlParagraphs(description)
         if (htmlParagraphs) {
-            validationResult = validateParagraphs(htmlParagraphs)
+            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, htmlParagraphs)
         }
         return validationResult
     }
@@ -209,7 +209,7 @@ class CustomValidator {
         return res
     }
 
-    private CustomValidationResult validateParagraphs(List<String> paragraphs){
+    private CustomValidationResult validateParagraphs(Pattern paragraphPatternToUse, String paragraphValidationMsgToUse, List<String> paragraphs){
         CustomValidationResult validationResult = null
         for (String s : paragraphs) {
             if (!s){
@@ -217,7 +217,7 @@ class CustomValidator {
             }
             String toValidate = adjustForMarkdownSupport(s)
             if (StringUtils.isNotBlank(toValidate)) {
-                validationResult = validateInternal(paragraphPattern, toValidate, paragraphValidationMsg)
+                validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
                 if (!validationResult.valid) {
                     break
                 }
