@@ -121,6 +121,26 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
     });
 
+    it('description validates multiple paragraphs', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@loadSubject');
+        cy.get('[data-cy="newSkillButton"]').click();
+
+        cy.get('[data-cy="skillName"]').type('Great Name');
+        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('first\n\nsecond\n\nthird has divinedragon yes');
+        cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - May not contain divinedragon word.');
+        cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+    });
+
     it('badge description is validated against custom validators', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1, 1);

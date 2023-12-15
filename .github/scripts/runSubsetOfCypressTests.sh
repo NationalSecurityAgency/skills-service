@@ -54,20 +54,18 @@ RED='\033[0;31m'
 NOCOLOR='\033[0m'
 testResultOutput="Test Results:\n"
 count=1;
+testsToRun=()
 for testClass in ${testsInThisRun[@]}
 do
   echo "$count: $testClass"
   count=$((count+1))
+  testsToRun+=("cypress/e2e/${testClass}")
 done
 echo "------------------------------------------------"
-count=1;
-for testClass in ${testsInThisRun[@]}
-do
-  testNum=$count
-  printf "\nRunning $testNum: $testClass ----------------------------------\n"
-  count=$((count+1))
+testToRunStr=$(echo ${testsToRun[*]} | tr ' ' ',')
+echo "Will run [$testToRunStr]"
 
-  commandToRun="npm run cy:run -- --spec cypress/e2e/${testClass}"
+  commandToRun="npm run cy:run -- --spec \"${testToRunStr}\""
   echo "Running command [${commandToRun}]"
   eval $commandToRun
   commandStatusCode=$?
@@ -78,7 +76,6 @@ do
   else
     testResultOutput="${testResultOutput}Test $testNum: ${GREEN}\u2714 PASSED${NOCOLOR} => ${testClass}\n"
   fi
-done
 
 echo "-------------------"
 echo -e $testResultOutput
