@@ -221,6 +221,8 @@ class CustomValidator {
                 if (!validationResult.valid) {
                     break
                 }
+            } else if(!validationResult) {
+                validationResult = new CustomValidationResult(valid: true)
             }
         }
 
