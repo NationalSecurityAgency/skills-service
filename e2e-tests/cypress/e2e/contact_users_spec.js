@@ -660,4 +660,23 @@ describe('Contact Project Users Specs', () => {
         cy.get('#emailSubjectError').contains('paragraphs may not contain jabberwocky')
         cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
     });
+
+    it('multiple paragraph validation', () => {
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+
+        cy.createProject(1)
+        cy.visit('/administrator/projects/proj1/contact-users');
+        cy.wait('@emailSupported');
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+
+        cy.get('[data-cy="emailUsers_subject"]').type('subj');
+        cy.get('[data-cy="emailUsers_body"]').type('first paragraph\n\nsecond paragraph');
+        cy.get('#emailBodyError').should('not.be.visible')
+        cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
+
+        cy.get('[data-cy="emailUsers_body"]').type('\n\nthird has jabberwocky yes');
+        cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
+    });
 });
