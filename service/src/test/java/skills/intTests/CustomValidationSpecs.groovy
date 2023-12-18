@@ -154,6 +154,13 @@ paragraph"""
         resGood.body.valid
     }
 
+    def "check against description validation with empty html paragraphs"() {
+        when:
+        def resGood = skillsService.checkCustomDescriptionValidation("<p><br></p>")
+        then:
+        resGood.body.valid
+    }
+
     def "check codeblock against description validation endpoint"() {
         String descWithCodeBlock = """(A)
 ```
