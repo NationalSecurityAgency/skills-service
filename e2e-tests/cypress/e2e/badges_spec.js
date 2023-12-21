@@ -640,6 +640,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
@@ -692,6 +693,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
@@ -744,6 +746,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill(0);
         cy.contains('.router-link-active', 'Badges')
@@ -791,6 +794,7 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadges');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill(0);
         cy.validateTable(tableSelector, [
@@ -823,6 +827,7 @@ describe('Badges Tests', () => {
             .should('exist');
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
             .click();
+        cy.wait(500);
         cy.get('[data-cy=deleteSkill_skill1]')
             .click();
         cy.contains('YES, Delete It!')
