@@ -712,13 +712,13 @@ describe('Global Badges Tests', () => {
         cy.clickButton('Badge');
 
         cy.get('#badgeName')
-            .type('A Badge');
+            .type('A Badge', { delay: 100 })
         cy.wait('@nameExists');
         cy.clickSave();
         cy.wait('@idExists');
         cy.wait('@postGlobalBadge');
 
-        cy.contains('A Badge', { delay: 100 })
+        cy.contains('A Badge')
             .should('exist');
         cy.contains('Manage')
             .click();
@@ -852,7 +852,7 @@ describe('Global Badges Tests', () => {
         cy.clickButton('Badge');
 
         cy.get('#badgeName')
-            .type('A Badge');
+            .type('A Badge', { delay: 100 })
         cy.wait('@nameExists');
         cy.clickSave();
         cy.wait('@idExists');
