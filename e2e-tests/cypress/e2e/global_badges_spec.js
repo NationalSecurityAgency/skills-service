@@ -718,7 +718,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@idExists');
         cy.wait('@postGlobalBadge');
 
-        cy.contains('A Badge')
+        cy.contains('A Badge', { delay: 100 })
             .should('exist');
         cy.contains('Manage')
             .click();
