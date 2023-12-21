@@ -382,7 +382,7 @@ describe('Quiz CRUD Tests', () => {
         cy.visit('/administrator/quizzes')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
 
-        cy.get('[data-cy="quizName"]').type(providedName)
+        cy.get('[data-cy="quizName"]').type(providedName, { delay: 100 })
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
 
         cy.get('[data-cy="saveQuizButton"]').click()
@@ -391,7 +391,7 @@ describe('Quiz CRUD Tests', () => {
         // id is not derived from name during edit
         cy.get(`[data-cy="editQuizButton_${expectedId}"]`).click()
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
-        cy.get('[data-cy="quizName"]').type('More')
+        cy.get('[data-cy="quizName"]').type('More', { delay: 100 })
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
     });
 
