@@ -116,8 +116,9 @@ jobs:
       with:
         node-version: '14'
 
-    - uses: actions/setup-java@v1
+    - uses: actions/setup-java@v3
       with:
+        distribution: 'temurin'
         java-version: '19' # The JDK version to make available on the path.
 
     - name: Print Versions
@@ -125,7 +126,7 @@ jobs:
         mvn --version
         java -version
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: service jar
         path: ./service/target/
@@ -166,32 +167,6 @@ jobs:
         npm run cyServices:start:skills-service:oauth
         npm run cyServices:start:client-display:oauth
         cd ..
-
-#    - name: Run Cypress tests
-#      uses: cypress-io/github-action@v4
-#      with:
-#        working-directory: e2e-tests
-#        record: true
-#        parallel: true
-#        group: 'skills-service with OAuth'
-#        tag: "${{ github.workflow }}"
-#        env: oauthMode=true
-#        browser: chrome
-#      env:
-#        # pass the Dashboard record key as an environment variable
-#        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-#        # pass GitHub token to allow accurately detecting a build vs a re-run build
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
-#    - name: upload result artifacts
-#      if: ${{ always() }}
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: CI result artifacts
-#        path: |
-#          ./e2e-tests/logs
-#          ./e2e-tests/cypress/visualRegression/diff
-
 
     - name: Run Cypress tests
       run: |
