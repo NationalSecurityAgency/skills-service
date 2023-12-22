@@ -546,6 +546,7 @@ describe('Community Project Email Header/Footer Tests', () => {
 
         cy.get('[data-cy="nav-Contact Admins"]').click();
         cy.wait('@isRoot');
+        cy.get('[data-cy="projectAdminCount"]').should('have.text', '2')
 
         cy.get('[data-cy=emailUsers_subject]')
           .type('Test Subject');

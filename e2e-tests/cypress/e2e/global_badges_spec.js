@@ -851,7 +851,7 @@ describe('Global Badges Tests', () => {
 
         cy.clickButton('Badge');
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="badgeName"]')
             .type('A Badge', { delay: 100 })
         cy.wait('@nameExists');
         cy.clickSave();
