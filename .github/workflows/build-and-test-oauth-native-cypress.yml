@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Continuous Integration with OAuth
+name: Continuous Integration with OAuth 1
 
 #on:
 #  push:
@@ -190,6 +190,7 @@ jobs:
 #        path: |
 #          ./e2e-tests/logs
 #          ./e2e-tests/cypress/visualRegression/diff
+
 
     - name: Run Cypress tests
       run: |
