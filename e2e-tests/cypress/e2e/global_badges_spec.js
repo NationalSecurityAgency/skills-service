@@ -785,152 +785,28 @@ describe('Global Badges Tests', () => {
     });
 
     it('Removing all skills should not cause published Global Badge to become disabled', () => {
-        cy.intercept('GET', `/supervisor/badges`)
-            .as('getGlobalBadges');
-        cy.intercept('PUT', `/supervisor/badges/ABadgeBadge`)
-            .as('postGlobalBadge');
-        cy.intercept('GET', `/supervisor/badges/id/ABadgeBadge/exists`)
-            .as('idExists');
-        cy.intercept('POST', '/supervisor/badges/name/exists')
-            .as('nameExists');
-        //proj/subj/skill1
-        cy.request('POST', '/app/projects/proj1', {
-            projectId: 'proj1',
-            name: 'proj1'
-        });
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: 'Subject 1'
-        });
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: `This is 1`,
-            type: 'Skill',
-            pointIncrement: 100,
-            numPerformToCompletion: 5,
-            pointIncrementInterval: 0,
-            numMaxOccurrencesIncrementInterval: -1,
-            version: 0,
-        });
-        //proj/subj/skill2
-        cy.request('POST', '/app/projects/proj2', {
-            projectId: 'proj2',
-            name: 'proj2'
-        });
-        cy.request('POST', '/admin/projects/proj2/subjects/subj1', {
-            projectId: 'proj2',
-            subjectId: 'subj1',
-            name: 'Subject 1'
-        });
-        cy.request('POST', `/admin/projects/proj2/subjects/subj1/skills/skill1`, {
-            projectId: 'proj2',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: `This is 1`,
-            type: 'Skill',
-            pointIncrement: 100,
-            numPerformToCompletion: 5,
-            pointIncrementInterval: 0,
-            numMaxOccurrencesIncrementInterval: -1,
-            version: 0,
-        });
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1)
 
-        cy.intercept('GET', '/supervisor/projects/proj2/levels')
-            .as('getLevels');
-        cy.intercept('GET', '/supervisor/badges/ABadgeBadge/projects/available*')
-            .as('getAvailableLevels');
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+        cy.assignProjectToGlobalBadge(1, 2, 5);
+        cy.enableGlobalBadge();
 
-        cy.visit('/administrator/');
-        cy.get('[data-cy="inception-button"]').contains('Level');
-
-        cy.clickNav('Global Badges');
-        cy.wait('@getGlobalBadges');
-
-        cy.clickButton('Badge');
-
-        cy.get('[data-cy="badgeName"]')
-            .type('A Badge', { delay: 100 })
-        cy.wait('@nameExists');
-        cy.clickSave();
-        cy.wait('@idExists');
-        cy.wait('@postGlobalBadge');
-
-        cy.contains('A Badge')
-            .should('exist');
-        cy.contains('Manage')
-            .click();
-        cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj2-skill1"]')
+        cy.visit('/administrator/globalBadges/globalBadge1');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
-                value: 'proj2'
-            }, {
-                colIndex: 1,
-                value: 'This is 1'
-            }, {
                 colIndex: 2,
                 value: 'skill1'
             }],
         ], 5);
 
-        cy.clickNav('Levels');
-        cy.wait('@getAvailableLevels');
-
-        cy.get('#project-selector')
-            .click()
-            .type('proj2');
-        cy.wait('@getAvailableLevels');
-        cy.get('[data-cy="proj2_option"]').click();
-
-        cy.get('#level-selector')
-            .click()
-            .type('5{enter}');
-
-        cy.contains('Add')
-            .click();
-        cy.validateTable(levelsTableSelector, [
-            [{
-                colIndex: 0,
-                value: 'proj2'
-            }, {
-                colIndex: 1,
-                value: '5'
-            }],
-        ], 5);
-
-        cy.contains('.router-link-active', 'Badges')
-            .click();
-        cy.wait('@getGlobalBadges');
-
-        cy.contains('A Badge')
-            .should('exist');
-
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Disabled')
-            .should('exist');
-        cy.get('[data-cy=goLive]')
-            .click();
-        cy.contains('Please Confirm!')
-            .should('exist');
-        cy.contains('Yes, Go Live!')
-            .click();
-        cy.wait('@getGlobalBadges');
-        cy.contains('A Badge')
-            .should('exist');
-        cy.get('[data-cy=badgeStatus]')
-            .contains('Status: Live')
-            .should('exist');
-        cy.get('[data-cy=goLive]')
-            .should('not.exist');
-
-        cy.contains('Manage')
-            .click();
         cy.get('[data-cy=deleteSkill_skill1]')
-            .click();
+             .click();
         cy.contains('YES, Delete It!')
             .click();
         cy.contains('No Skills Added Yet');
