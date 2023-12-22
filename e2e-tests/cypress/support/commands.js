@@ -1418,3 +1418,8 @@ Cypress.Commands.add('expireSkills', () => {
     cy.logout();
     cy.loginAsAdminUser();
 });
+
+Cypress.Commands.add('visitAdmin', () => {
+    cy.visit('/administrator');
+    cy.get('[data-cy="inception-button"]').contains('Level');
+});

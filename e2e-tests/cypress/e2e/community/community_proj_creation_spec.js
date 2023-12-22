@@ -35,6 +35,7 @@ describe('Community Project Creation Tests', () => {
 
     it('create restricted community project', () => {
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]').type('one')
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
@@ -60,6 +61,7 @@ describe('Community Project Creation Tests', () => {
             });
         })
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
         cy.get('[data-cy="userCommunityDocsLink"] a').contains( 'User Community Docs')
@@ -68,6 +70,8 @@ describe('Community Project Creation Tests', () => {
 
     it('create non-restricted community project', () => {
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]').type('one')
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
@@ -82,6 +86,7 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
 
@@ -103,6 +108,7 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
 
         cy.get('[data-cy="btn_edit-project"]').click()
@@ -125,6 +131,7 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true})
 
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
@@ -134,6 +141,7 @@ describe('Community Project Creation Tests', () => {
 
     it('community validator should be selected based on the community - projection creation', () => {
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]').type('one')
         cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky')
@@ -165,6 +173,7 @@ describe('Community Project Creation Tests', () => {
     it('community validator should be selected based on the community - edit existing project', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false, description: 'some text'})
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
 
@@ -201,6 +210,7 @@ describe('Community Project Creation Tests', () => {
     it('community validator should be selected based on the community - edit existing project from project page', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false, description: 'some text'})
         cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
 
@@ -237,6 +247,7 @@ describe('Community Project Creation Tests', () => {
     it('edit existing community project should use community validator', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true, description: 'some text '})
         cy.visit('/administrator/')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
 
@@ -258,6 +269,7 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true, description: 'some text '})
 
         cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
 
@@ -283,6 +295,7 @@ describe('Community Project Creation Tests', () => {
         cy.request('POST', `/admin/projects/proj1/users/${allDragonsUser}/roles/ROLE_PROJECT_APPROVER`);
 
         cy.visit('/administrator/')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
         cy.get('[data-cy="markdownEditorInput"]')
 
@@ -299,6 +312,7 @@ describe('Community Project Creation Tests', () => {
 
     it('attachments are not enabled on project creation when UC protection is available', () => {
         cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]').type('one')
         cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
@@ -322,6 +336,7 @@ describe('Community Project Creation Tests', () => {
             cy.logout();
             cy.login(allDragonsUser, vars.defaultPass);
             cy.visit('/administrator')
+            cy.get('[data-cy="inception-button"]').contains('Level');
             cy.get('[data-cy="newProjectButton"]').click()
             cy.get('[data-cy="restrictCommunityControls"]').should('not.exist');
             cy.get(`button.attachment-button`).should('exist');

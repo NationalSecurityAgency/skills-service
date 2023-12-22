@@ -45,6 +45,7 @@ describe('Projects Modal Management Tests', () => {
             .as('loadUserInfo');
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy=deleteProjBtn]')
             .eq(0)
             .click();
@@ -65,6 +66,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="noContent"]').contains('No Projects Yet');
         cy.get('[data-cy=newProjectButton]').should('be.enabled')
         cy.get('[data-cy=newProjectButton]')
@@ -92,6 +94,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
         cy.get('[data-cy="projectName"]')
@@ -128,6 +131,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
         cy.get('[data-cy=closeProjectButton]')
@@ -152,6 +156,7 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickButton('Project');
         cy.get('[data-cy="projectName"]')
             .type(providedName);
@@ -172,9 +177,9 @@ describe('Projects Modal Management Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.clickButton('Project');
-        ;
         cy.get('[data-cy="projectName"]')
             .type('InitValue');
         cy.getIdField()
@@ -196,6 +201,7 @@ describe('Projects Modal Management Tests', () => {
 
     it('focus should be returned to new project button', () => {
         cy.visit('/administrator');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy=newProjectButton]')
             .click();
         cy.contains('New Project').should('be.visible');
@@ -238,6 +244,7 @@ describe('Projects Modal Management Tests', () => {
             name: 'proj2'
         });
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         const proj1EditBtn = '[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]';
 
         cy.get(proj1EditBtn)
@@ -289,6 +296,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.visit('/administrator/projects/MyNewtestProject/');
         cy.wait('@loadProject');
+        cy.get('[data-cy="inception-button"]').contains('Level');
 
         cy.contains('Levels')
             .click();
@@ -373,57 +381,24 @@ describe('Projects Modal Management Tests', () => {
     });
 
     it('project users input field submits on enter', () => {
-        cy.request('POST', '/app/projects/my_project_123', {
-            projectId: 'my_project_123',
-            name: 'My Project 123'
-        });
-
-        cy.request('POST', '/admin/projects/my_project_123/subjects/subj1', {
-            projectId: 'my_project_123',
-            subjectId: 'subj1',
-            name: 'Subject 1'
-        });
-        cy.request('POST', `/admin/projects/my_project_123/subjects/subj1/skills/skill1`, {
-            projectId: 'my_project_123',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: `This is 1`,
-            type: 'Skill',
-            pointIncrement: 100,
-            numPerformToCompletion: 10,
-            pointIncrementInterval: 0,
-            numMaxOccurrencesIncrementInterval: -1,
-            version: 0,
-        });
-
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
         const now = dayjs();
-        cy.reportSkill('my_project_123', 1, 'user1@skills.org', now.subtract(1, 'year')
+        cy.reportSkill('proj1', 1, 'user1@skills.org', now.subtract(1, 'year')
             .format('YYYY-MM-DD HH:mm'), false);
-        cy.reportSkill('my_project_123', 1, 'user2@skills.org', now.subtract(1, 'year')
+        cy.reportSkill('proj1', 1, 'user2@skills.org', now.subtract(1, 'year')
             .format('YYYY-MM-DD HH:mm'), false);
-        cy.reportSkill('my_project_123', 1, 'user3@skills.org', now.subtract(1, 'year')
+        cy.reportSkill('proj1', 1, 'user3@skills.org', now.subtract(1, 'year')
             .format('YYYY-MM-DD HH:mm'), false);
         cy.reportSkill('my_project_123', 1, 'user4@skills.org', now.subtract(1, 'year')
             .format('YYYY-MM-DD HH:mm'), false);
 
-        cy.intercept('GET', '/admin/projects/my_project_123')
-            .as('loadProj');
-        cy.intercept('GET', '/api/projects/Inception/level')
-            .as('loadInception');
-        cy.intercept('GET', '/admin/projects/my_project_123/users**')
-            .as('loadUsers');
-        cy.visit('/administrator/projects/my_project_123');
-        cy.wait('@loadProj');
-        cy.wait('@loadInception');
-        cy.get('[data-cy=nav-Users]')
-            .click();
-        cy.wait('@loadUsers');
-        cy.get('[data-cy=usersTable_viewDetailsBtn]')
-            .should('have.length', 4);
+        cy.visit('/administrator/projects/proj1/users');
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '3');
+        cy.get('[data-cy=users-skillIdFilter]').should('be.visible')
         cy.get('[data-cy=users-skillIdFilter]')
             .type('user1{enter}');
-        cy.wait('@loadUsers');
-        cy.get('[data-cy=usersTable_viewDetailsBtn]')
-            .should('have.length', 1);
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1');
     });
 });

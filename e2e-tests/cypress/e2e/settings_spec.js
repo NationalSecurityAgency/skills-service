@@ -282,6 +282,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadConfig');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
@@ -328,6 +329,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getProjects')
         cy.get('#projectCards')
         cy.get('[data-cy="settings-button"] button')
@@ -399,6 +401,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getProjects')
         cy.get('#projectCards')
         cy.get('[data-cy=subPageHeader]')
@@ -546,6 +549,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getProjects')
         cy.get('#projectCards')
         cy.get('[data-cy=subPageHeader]')
@@ -606,6 +610,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getProjects')
         cy.get('#projectCards')
 
@@ -638,6 +643,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -749,6 +755,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -787,6 +794,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -844,6 +852,7 @@ describe('Settings Tests', () => {
             .as('loadSystemSettings');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -886,6 +895,7 @@ describe('Settings Tests', () => {
             .should('have.value', 'foo@skilltree.madeup');
 
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -931,6 +941,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -974,6 +985,7 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -1028,6 +1040,8 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -1078,6 +1092,8 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -1157,6 +1173,8 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
         cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadUserInfo');
         cy.wait('@getProjects')
         cy.get('#projectCards')
@@ -1624,6 +1642,7 @@ describe('Settings Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
+        cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Settings');
         cy.get('[data-cy="customLabelsSwitch"')
             .click({ force: true });

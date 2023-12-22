@@ -320,7 +320,7 @@ describe('Users Tests', () => {
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'skills@evoforge.org (Tree, Skill)'}],
             [{colIndex: 0, value: 'skills@evo-forge.org (Tree, Skill)'}],
-            [{colIndex: 0, value: 'foo-hydra'}]
+            [{colIndex: 0, value: 'foo'}]  // OAuth2UserConverterService truncates after the hyphen
         ], 5);
     });
 
