@@ -18,12 +18,12 @@ on:
   schedule:
     - cron: '0 5 * * *'
   workflow_dispatch:
-  push:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
+#  push:
+#    paths-ignore:
+#      - 'README.md'
+#      - '.github/workflows/build-and-test-postgres.yml'
+#      - '.github/workflows/publish-image-snapshot.yml'
+#      - '.gitlab-ci.yml'
 
 jobs:
   build-skills-service-for-ui-tests:
