@@ -65,7 +65,7 @@ echo "------------------------------------------------"
 testToRunStr=$(echo ${testsToRun[*]} | tr ' ' ',')
 echo "Will run [$testToRunStr]"
 
-  commandToRun="npm run cy:run -- --spec \"${testToRunStr}\" --env oauthMode=true"
+  commandToRun="npm run cy:run -- --spec \"${testToRunStr}\""
   echo "Running command [${commandToRun}]"
   eval $commandToRun
   commandStatusCode=$?
