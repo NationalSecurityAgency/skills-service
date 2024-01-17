@@ -90,7 +90,7 @@ const toggle = (event) => {
       <template #start>
         <div class="mx-3 mt-2">
           <Avatar icon="pi pi-user" class="bg-lime-900 text-white" />
-          <span data-cy="settingsButton-loggedInName" class="ms-1">{{ displayName }}</span>
+          <span data-cy="settingsButton-loggedInName" class="ml-1">{{ displayName }}</span>
         </div>
       </template>
     </Menu>

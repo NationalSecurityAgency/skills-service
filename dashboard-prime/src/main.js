@@ -18,7 +18,9 @@ import Message from 'primevue/message'
 import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
-import 'primevue/resources/themes/lara-light-green/theme.css'
+import Dropdown from 'primevue/dropdown';
+import 'primeflex/primeflex.css'
+// import 'primevue/resources/themes/lara-light-green/theme.css'
 
 const app = createApp(App)
 
@@ -37,5 +39,6 @@ app.component('Message', Message)
 app.component('Menu', Menu)
 app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
+app.component('Dropdown', Dropdown)
 
 app.mount('#app')

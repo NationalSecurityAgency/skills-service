@@ -76,7 +76,7 @@ const toggle = (event) => {
       <template #item="{ item, props }">
         <a :href="item.url" target="_blank" v-bind="props.action">
           <span :class="item.icon" />
-          <span class="ms-2">{{ item.label }}</span>
+          <span class="ml-2">{{ item.label }}</span>
         </a>
       </template>
     </Menu>
