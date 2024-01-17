@@ -1,7 +1,15 @@
-<script setup></script>
+<script setup>
+import Navigation from "@/components/utils/Navigation.vue";
+</script>
 
 <template>
-  <div>Admin home page</div>
+  <div>
+    <navigation
+        data-cy="navigationmenu"
+        role="navigation">
+    </navigation>
+
+  </div>
 </template>
 
 <style scoped></style>
