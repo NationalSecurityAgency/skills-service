@@ -1,7 +1,9 @@
 <script setup></script>
 
 <template>
-  <div>My Projects</div>
+  <h1 class="text-3xl font-bold underline">
+    No Projects Yet
+  </h1>
 </template>
 
 <style scoped></style>

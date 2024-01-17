@@ -65,8 +65,7 @@ const toggle = (event) => {
   <div class="d-inline">
     <Button
       icon="pi pi-question"
-      severity="primary"
-      rounded
+      severity="success"
       outlined
       raised
       @click="toggle"

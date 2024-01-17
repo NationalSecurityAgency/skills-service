@@ -4,11 +4,10 @@ import { useRoute } from 'vue-router'
 import SettingsButton from '@/components/header/SettingsButton.vue'
 import HelpButton from '@/components/header/HelpButton.vue'
 import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
+import { usePagePath } from '@/components/utils/UsePageLocation.js'
 
 const route = useRoute()
-const isAdminPage = computed(() => {
-  return route && route.meta && route.meta.requiresAuth && !route.meta.nonAdmin
-})
+const pathPath = usePagePath()
 </script>
 
 <template>
@@ -29,24 +28,26 @@ const isAdminPage = computed(() => {
     <!--      <span class="pl-1">An upgrade is currently in process. Please note that no changes will be permitted until the upgrade is complete.-->
     <!--      Any reported skills will be queued for application once the upgrade has completed.</span>-->
     <!--    </div>-->
-    <div class="py-3">
-      <div class="row">
-        <div class="col-sm">
-          <div class="text-center text-sm-start">
-            <router-link data-cy="skillTreeLogo" class="h2 text-primary ml-2" to="/">
+    <div class="">
+      <div class="flex mt-3">
+        <div class="flex-1">
+          <div class="flex">
+            <router-link data-cy="skillTreeLogo" class="" to="/">
               <img
+                class="mb-5"
                 ref="skillTreeLogo"
                 src="@/assets/img/skilltree_logo_v1.png"
                 alt="skilltree logo" />
             </router-link>
-            <span v-if="isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</span>
+            <div v-if="pathPath.isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</div>
           </div>
         </div>
-
-        <div class="col-sm-auto text-center text-sm-end pt-sm-2 mt-3 mt-sm-0">
-          <!--          <inception-button v-if="isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>-->
-          <settings-button data-cy="settings-button" />
-          <help-button data-cy="help-button" class="ms-2" />
+        <div class="flex-none">
+          <div class="flex flex-row">
+          <!--          <inception-button v-if="pathPath.isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>-->
+            <settings-button data-cy="settings-button" />
+            <help-button data-cy="help-button" class="ms-2" />
+          </div>
         </div>
       </div>
     </div>
@@ -55,6 +56,7 @@ const isAdminPage = computed(() => {
 </template>
 
 <style scoped>
+
 .skills-stamp {
   margin-left: 0.5rem;
 
@@ -65,15 +67,16 @@ const isAdminPage = computed(() => {
   border: 2px solid transparent;
   border-radius: 4px;
   display: inline-block;
-  padding: 5px 2px;
-  line-height: 22px;
-  font-size: 24px;
+  padding: 8px 2px 0px 2px;
+  line-height: 18px;
+  font-size: 18px;
   font-family: 'Black Ops One', cursive;
   text-transform: uppercase;
   text-align: center;
   opacity: 0.8;
-  width: 155px;
-  transform: rotate(-17deg);
+  width: 110px;
+  height: 40px;
+  transform: rotate(-15deg);
 }
 
 @media (max-width: 675px) {

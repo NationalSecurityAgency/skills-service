@@ -186,7 +186,7 @@ onMounted(() => {
 <template>
   <div role="presentation">
     <!--    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>-->
-    <div id="app" class="container-fluid">
+    <div id="app" class="px-3">
       <div v-if="isLoadingApp" class="row justify-content-md-center mt-5">
         <div class="col-auto">
           <ProgressSpinner />
@@ -194,7 +194,7 @@ onMounted(() => {
       </div>
 
       <div v-if="!isLoadingApp" class="m-0">
-        <div class="overall-container">
+        <div class="">
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
           <dashboard-header v-if="isAuthenticatedUser && !showUserAgreement" role="banner" />
           <div role="main">
@@ -213,9 +213,5 @@ onMounted(() => {
 </template>
 
 <style>
-@layer bootstrap, primevue;
-
-@import 'bootstrap/dist/css/bootstrap.min.css' layer(bootstrap);
-@import 'primevue/resources/themes/lara-light-green/theme.css';
 @import 'primeicons/primeicons.css';
 </style>

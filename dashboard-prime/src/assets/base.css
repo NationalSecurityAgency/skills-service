@@ -1,1 +1,11 @@
-/* color palette from <https://github.com/vuejs/theme> */
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+    @tailwind base;
+}
+
+@layer tailwind-utilities {
+    @tailwind components;
+    @tailwind utilities;
+}
+

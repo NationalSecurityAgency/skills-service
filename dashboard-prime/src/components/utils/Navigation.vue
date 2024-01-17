@@ -22,8 +22,8 @@ const items = ref([
 
 <template>
   <div class="mt-3" data-cy="nav">
-    <div class="row">
-      <div class="col-md-auto" data-cy="nav-col">
+    <div class="flex">
+      <div class="flex-none" data-cy="nav-col">
         <Menu :model="items">
           <template #start>
             <div class="px-3 h6 mt-2">
@@ -45,8 +45,8 @@ const items = ref([
         </Menu>
       </div>
 
-      <div class="col-md skills-menu-content" ref="content">
-        <div class="pb-4">
+      <div class="flex-1" ref="content">
+        <div class="pl-3">
           <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate"></router-view>
         </div>
       </div>

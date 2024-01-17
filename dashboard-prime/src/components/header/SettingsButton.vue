@@ -80,7 +80,6 @@ const toggle = (event) => {
     <Button
       icon="pi pi-user"
       severity="info"
-      rounded
       outlined
       raised
       @click="toggle"
@@ -90,7 +89,7 @@ const toggle = (event) => {
     <Menu ref="menu" id="user_settings_menu" :model="items" :popup="true">
       <template #start>
         <div class="mx-3 mt-2">
-          <Avatar icon="pi pi-user" class="bg-info text-white" />
+          <Avatar icon="pi pi-user" class="bg-lime-900 text-white" />
           <span data-cy="settingsButton-loggedInName" class="ms-1">{{ displayName }}</span>
         </div>
       </template>

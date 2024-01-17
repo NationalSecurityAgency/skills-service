@@ -18,6 +18,7 @@ import Message from 'primevue/message'
 import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
+import 'primevue/resources/themes/lara-light-green/theme.css'
 
 const app = createApp(App)
 
