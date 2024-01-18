@@ -5,6 +5,11 @@ import createAdminRoutes from './AdminRoutes.js'
 import createProgressAndRankingRoutes from './ProgressAndRankingRoutes.js'
 import GlobalSettings from '@/components/settings/GlobalSettings.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
+import Preferences from '@/components/settings/Preferences.vue';
+import SecuritySettings from '@/components/settings/SecuritySettings.vue';
+import EmailSettings from '@/components/settings/EmailSettings.vue';
+import SystemSettings from '@/components/settings/SystemSettings.vue';
+
 
 const routes = [
   {
@@ -51,6 +56,51 @@ const routes = [
             message: 'General Settings'
           }
         }
+      },{
+        name: 'Preferences',
+        path: 'preferences',
+        component: Preferences,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          reportSkillId: 'VisitMyPreferences',
+          announcer: {
+            message: 'My Preferences',
+          },
+        },
+      }, {
+        name: 'SecuritySettings',
+        path: 'security',
+        component: SecuritySettings,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Security Settings',
+          },
+        },
+      }, {
+        name: 'EmailSettings',
+        path: 'email',
+        component: EmailSettings,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Email Configuration Settings',
+          },
+        },
+      }, {
+        name: 'SystemSettings',
+        path: 'system',
+        component: SystemSettings,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'System Settings',
+          },
+        },
       }
     ]
   }

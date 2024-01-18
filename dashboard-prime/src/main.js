@@ -21,6 +21,7 @@ import Breadcrumb from 'primevue/breadcrumb'
 import Dropdown from 'primevue/dropdown';
 import 'primeflex/primeflex.css'
 // import 'primevue/resources/themes/lara-light-green/theme.css'
+import Tooltip from 'primevue/tooltip';
 
 const app = createApp(App)
 
@@ -40,5 +41,6 @@ app.component('Menu', Menu)
 app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
+app.directive('tooltip', Tooltip);
 
 app.mount('#app')
