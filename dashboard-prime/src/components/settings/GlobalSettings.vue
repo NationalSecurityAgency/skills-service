@@ -37,7 +37,6 @@ onMounted(() => {
 
 <template>
   <PageHeader :loading="false" :options="{title: 'Settings', icon: 'pi pi-cog skills-color-settings', subTitle: 'Dashboard settings'}" />
-
   <Navigation :nav-items="navItems"/>
 </template>
 

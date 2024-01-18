@@ -52,7 +52,7 @@ const individualStatCss = computed(() => {
 </script>
 
 <template>
-  <div class="mx-0 py-0 bg-white" data-cy="pageHeader">
+  <div class="mx-0 py-0" data-cy="pageHeader">
     <div class="px-1">
       <LoadingContainer :is-loading="loading">
         <div class="flex-auto">
