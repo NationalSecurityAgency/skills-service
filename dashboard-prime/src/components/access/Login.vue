@@ -76,25 +76,26 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <div class="container-fluid">
-    <div class="row justify-content-center text-center">
-      <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem">
-        <div class="mt-5">
+  <div class="">
+    <div class="text-center mt-8">
+        <div class="mt-5 justify-content-center">
           <logo1 />
         </div>
-        <div v-if="!oAuthOnly" class="card text-start">
-          <div class="card-body p-4 text-left">
+      <div class="grid ">
+        <div class="col-12 sm:col-8 sm:col-offset-2 md:col-6 md:col-offset-3 lg:col-4 lg:col-offset-4">
+        <Card v-if="!oAuthOnly" class="mt-3">
+          <template #content class="text-left">
             <form @submit="onSubmit">
               <Message v-if="loginFailed" severity="error">Invalid Username or Password</Message>
-              <div class="">
-                <label for="value" class="form-label">Email Address</label>
-                <span class="p-input-icon-left w-100">
+              <div class="field text-left">
+                <label for="username" class="">Email Address</label>
+                <span class="p-input-icon-left w-full">
                   <i class="pi pi-envelope" />
                   <InputText
                     id="username"
                     size="small"
                     placeholder="Enter email"
-                    class="form-control"
+                    class="w-full"
                     type="text"
                     v-model="username"
                     v-bind="usernameAttrs"
@@ -106,12 +107,10 @@ const onSubmit = handleSubmit((values) => {
                 <small class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
               </div>
 
-              <div class="form-group">
-                <div class="row">
-                  <div class="col">
-                    <label for="inputPassword" class="form-label">Password</label>
-                  </div>
-                  <div class="col text-end">
+              <div class="">
+                <div class="flex mb-2">
+                  <label for="inputPassword" class="flex">Password</label>
+                  <div class="flex-1 text-right">
                     <small class="text-muted">
                       <router-link data-cy="forgotPassword" to="/">Forgot Password?</router-link>
                       <!--                      <b-link tabindex="0" @click="forgotPassword" data-cy="forgotPassword"-->
@@ -120,13 +119,13 @@ const onSubmit = handleSubmit((values) => {
                     </small>
                   </div>
                 </div>
-                <span class="p-input-icon-left w-100">
+                <span class="p-input-icon-left w-full">
                   <i class="pi pi-key" />
                   <InputText
                     id="password"
                     size="small"
                     placeholder="Enter password"
-                    class="form-control"
+                    class="w-full"
                     type="password"
                     v-model="password"
                     v-bind="passwordAttrs"
@@ -138,8 +137,7 @@ const onSubmit = handleSubmit((values) => {
                 <small class="p-error" id="password-error">{{ errors.password || '&nbsp;' }}</small>
               </div>
 
-              <div class="row">
-                <div class="col text-end">
+              <div class="">
                   <Button
                     type="submit"
                     label="Login"
@@ -148,20 +146,21 @@ const onSubmit = handleSubmit((values) => {
                     :disabled="!meta.valid"
                     :loading="authenticating"
                     outlined />
-                </div>
               </div>
             </form>
 
             <Divider />
             <p class="text-center">
               <small
-                >Don't have a SkillTree account?
+              >Don't have a SkillTree account?
                 <router-link data-cy="signUpButton" to="/">Sign up</router-link>
                 <!--              <strong><b-link data-cy="signUpButton" @click="requestAccountPage">Sign up</b-link></strong>-->
               </small>
             </p>
-          </div>
+          </template>
+          </Card>
         </div>
+      </div>
 
         <!--          <div v-if="oAuthProviders && oAuthProviders.length > 0" class="card mt-3" data-cy="oAuthProviders">-->
         <!--            <div class="card-body">-->
@@ -179,7 +178,6 @@ const onSubmit = handleSubmit((values) => {
 
         <!--        </Form>-->
       </div>
-    </div>
   </div>
 </template>
 
