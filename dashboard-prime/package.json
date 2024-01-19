@@ -14,6 +14,7 @@
     "getDashboardVersion": "node ../scripts/getDashboardVersion.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.4",
     "@skilltree/skills-client-js": "3.5.0",
     "axios": "1.6.5",
     "dayjs": "1.11.10",

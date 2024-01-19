@@ -6,8 +6,8 @@ import SettingsService from './SettingsService.js';
 
 
 const navItems = ref([
-  { label: 'Profile', icon: 'fa-address-card skills-color-profile', route: '/settings' },
-  { label: 'Preferences', icon: 'pi pi-cog skills-color-preferences', route: '/settings/preferences' },
+  { name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' },
+  { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
 ]);
 
 let isRoot = false;
@@ -19,9 +19,9 @@ const loadSettings = () => {
         isRoot = response;
         if (isRoot) {
           navItems.value.push(
-              { label: 'Security', icon: 'fa-lock skills-color-security', route: '/settings/security' },
-              { label: 'Email', icon: 'fa-at skills-color-email', route: '/settings/email' },
-              { label: 'System', icon: 'fa-wrench skills-color-system', route: '/settings/system' },
+            { name: 'Security', iconClass: 'fa-lock skills-color-security', page: 'SecuritySettings' },
+            { name: 'Email', iconClass: 'fa-at skills-color-email', page: 'EmailSettings' },
+            { name: 'System', iconClass: 'fa-wrench skills-color-system', page: 'SystemSettings' },
           );
         }
       })

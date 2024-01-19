@@ -19,15 +19,17 @@ import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
 import Dropdown from 'primevue/dropdown';
-import 'primeflex/primeflex.css'
-// import 'primevue/resources/themes/lara-light-green/theme.css'
 import Tooltip from 'primevue/tooltip';
+import Ripple from 'primevue/ripple';
+import 'primeflex/primeflex.css'
+import '@fortawesome/fontawesome-free/css/all.css'
+// import 'primevue/resources/themes/lara-light-green/theme.css'
 
 const app = createApp(App)
 
 app.use(router)
 app.use(store)
-app.use(PrimeVue)
+app.use(PrimeVue, { ripple: true })
 app.use(ToastService)
 app.component('Button', Button)
 app.component('Card', Card)
@@ -42,5 +44,6 @@ app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
 app.directive('tooltip', Tooltip);
+app.directive('ripple', Ripple)
 
 app.mount('#app')
