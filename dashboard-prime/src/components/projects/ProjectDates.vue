@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router'
-// import SlimDateCell from '@/components/utils/table/SlimDateCell';
+import SlimDateCell from '@/components/utils/table/SlimDateCell.vue';
 import ProjectService from '@/components/projects/ProjectService';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
@@ -19,13 +19,13 @@ const doLoadDate = () => {
   if (props.loadLastReportedDate) {
     ProjectService.getLatestSkillEventForProject(route.params.projectId)
         .then((res) => {
-          lastReportedSkill = res.lastReportedSkillDate;
+          lastReportedSkill.value = res.lastReportedSkillDate;
         })
         .finally(() => {
-          isLoading = false;
+          isLoading.value = false;
         });
   } else {
-    isLoading = false;
+    isLoading.value = false;
   }
 };
 </script>
@@ -34,7 +34,7 @@ const doLoadDate = () => {
   <span>
     <span data-cy="projectCreated">
       <span class="text-secondary small font-italic">Created: </span>
-<!--      <slim-date-cell :value="created"/>-->
+      <SlimDateCell :value="created"/>
       <span v-if="loadLastReportedDate"
             class="text-secondary small mx-2 d-none d-md-inline">|</span>
     </span>
@@ -42,7 +42,7 @@ const doLoadDate = () => {
     <span v-if="loadLastReportedDate" data-cy="projectLastReportedSkill">
       <span class="text-secondary small font-italic">Last Reported Skill: </span>
       <SkillsSpinner v-if="isLoading" label="Loading..." small type="grow" variant="info"></SkillsSpinner>
-<!--      <slim-date-cell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true" data-cy="projectLastReportedSkillValue"/>-->
+      <SlimDateCell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true" data-cy="projectLastReportedSkillValue"/>
     </span>
   </span>
 </template>

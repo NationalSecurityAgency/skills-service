@@ -1,15 +1,20 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue';
+import { onMounted, computed, ref, nextTick } from 'vue';
+import { useStore } from 'vuex';
 import Badge from 'primevue/badge';
 import Avatar from 'primevue/avatar';
 import Card from 'primevue/card';
 import ProjectService from '@/components/projects/ProjectService';
+import SettingsService from '@/components/settings/SettingsService';
 import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue';
+import ProjectCardControls from '@/components/projects/ProjectCardControls.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil';
 import dayjs from "../../../../common-components/src/common/DayJsCustomizer.js";
 
 const props = defineProps(['project', 'disableSortControl'])
+const store = useStore();
+const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 
 // data items
 let isLoading = ref(false);
@@ -30,7 +35,7 @@ let copyProjectInfo = {
 };
 
 onMounted(() => {
-  pinned = projectInternal.pinned;
+  pinned.value = projectInternal.pinned;
   createCardOptions();
 });
 
@@ -60,54 +65,54 @@ const fromExpirationDate = () => {
       .to(dayjs(expirationDate));
 };
 const handleHidden = () => {
-  this.$nextTick(() => {
+  nextTick(() => {
     this.$refs.cardControls.focusOnEdit();
   });
 };
 const handleCopyModalIsHidden = () => {
-  this.$nextTick(() => {
+  nextTick(() => {
     if (this.$refs && this.$refs.cardControls) {
       this.$refs.cardControls.focusOnCopy();
     }
   });
 };
 const createCardOptions = () => {
-  stats = [{
+  stats.value = [{
     label: 'Subjects',
-    count: projectInternal.numSubjects,
+    count: projectInternal.value.numSubjects,
     icon: 'fas fa-cubes skills-color-subjects',
   }, {
     label: 'Skills',
-    count: projectInternal.numSkills,
+    count: projectInternal.value.numSkills,
     icon: 'fas fa-graduation-cap skills-color-skills',
     secondaryStats: [{
       label: 'reused',
-      count: projectInternal.numSkillsReused,
+      count: projectInternal.value.numSkillsReused,
       badgeVariant: 'info',
     }, {
       label: 'disabled',
-      count: projectInternal.numSkillsDisabled,
+      count: projectInternal.value.numSkillsDisabled,
       badgeVariant: 'warning',
     }],
   }, {
     label: 'Points',
-    count: projectInternal.totalPoints,
-    warn: (projectInternal.totalPoints + projectInternal.totalPointsReused) < minimumPoints,
+    count: projectInternal.value.totalPoints,
+    warn: (projectInternal.value.totalPoints + projectInternal.value.totalPointsReused) < minimumPoints.value,
     warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
     icon: 'far fa-arrow-alt-circle-up skills-color-points',
     secondaryStats: [{
       label: 'reused',
-      count: projectInternal.totalPointsReused,
+      count: projectInternal.value.totalPointsReused,
       badgeVariant: 'info',
     }],
   }, {
     label: 'Badges',
-    count: projectInternal.numBadges,
+    count: projectInternal.value.numBadges,
     icon: 'fas fa-award skills-color-badges',
   }];
 };
 const checkIfProjectBelongsToGlobalBadge = () => {
-  ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.projectId)
+  ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
       .then((res) => {
         if (res) {
           deleteProjectDisabled = true;
@@ -122,7 +127,7 @@ const doDeleteProject = () => {
           const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
           msgOk(msg, 'Unable to delete');
         } else {
-          this.$emit('project-deleted', deleteProjectInfo.project);
+          emit('project-deleted', deleteProjectInfo.project);
         }
       });
 };
@@ -138,50 +143,50 @@ const copyProject = () => {
   copyProjectInfo.showModal = true;
 };
 const projectCopied = (project) => {
-  this.$emit('copy-project', {
+  emit('copy-project', {
     originalProjectId: projectInternal.projectId,
     newProject: project,
   });
 };
 const projectSaved = (project) => {
-  isLoading = true;
+  isLoading.value = true;
   ProjectService.saveProject(project)
       .then((res) => {
-        projectInternal = res;
-        pinned = projectInternal.pinned;
+        projectInternal.value = res;
+        pinned.value = projectInternal.pinned;
         createCardOptions();
         this.$announcer.polite(`Project ${project.name} has been successfully edited`);
       })
       .finally(() => {
-        isLoading = false;
+        isLoading.value = false;
       });
 };
 const unpin = () => {
-  SettingsService.unpinProject(projectInternal.projectId)
+  SettingsService.unpinProject(projectInternal.value.projectId)
       .then(() => {
-        projectInternal.pinned = false;
-        pinned = false;
-        this.$emit('pin-removed', projectInternal);
+        projectInternal.value.pinned = false;
+        pinned.value = false;
+        emit('pin-removed', projectInternal);
       });
 };
 const keepIt = () => {
   cancellingExpiration = true;
-  ProjectService.cancelUnusedProjectDeletion(projectInternal.projectId)
+  ProjectService.cancelUnusedProjectDeletion(projectInternal.value.projectId)
       .then(() => {
-        projectInternal.expiring = false;
+        projectInternal.value.expiring = false;
       })
       .finally(() => {
         cancellingExpiration = false;
       });
 };
 const moveDown = () => {
-  this.$emit('sort-changed-requested', {
+  emit('sort-changed-requested', {
     projectId: project.projectId,
     direction: 'down',
   });
 };
 const moveUp = () => {
-  this.$emit('sort-changed-requested', {
+  emit('sort-changed-requested', {
     projectId: project.projectId,
     direction: 'up',
   });
@@ -192,14 +197,15 @@ const focusSortControl = () => {
 const handleDeleteCancelled = () => {
   this.$refs.cardControls.focusOnDelete();
 };
+
 </script>
 
 <template>
   <div data-cy="projectCard" class="h-100">
-    <Card :data-cy="`projectCard_${projectInternal.projectId}`">
+    <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="border-1 border-300">
       <template #content>
         <div class="grid mb-2">
-          <div class="col-md text-truncate">
+          <div class="col-8 text-truncate">
             <router-link
                 :to="{ label:'Subjects', params: { projectId: projectInternal.projectId, project: projectInternal }, route: '/'}"
                 class="text-green-800 no-underline mb-0 pb-0 preview-card-title" :title="`${projectInternal.name}`"
@@ -219,28 +225,28 @@ const handleDeleteCancelled = () => {
                 class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
             </div>
           </div>
-          <div class="col-md-auto mt-3 mt-md-0">
-<!--            <project-card-controls-->
-<!--                :class="{ 'mr-md-4': !disableSortControl}"-->
-<!--                ref="cardControls"-->
-<!--                :project="projectInternal"-->
-<!--                @edit-project="editProject"-->
-<!--                @copy-project="copyProject"-->
-<!--                @delete-project="deleteProject"-->
-<!--                @unpin-project="unpin"-->
-<!--                :read-only-project="isReadOnlyProj"-->
-<!--                :is-delete-disabled="deleteProjectDisabled"-->
-<!--                :delete-disabled-text="deleteProjectToolTip"/>-->
+          <div class="col-4">
+            <ProjectCardControls
+                :class="{ 'mr-md-4': !disableSortControl}"
+                ref="cardControls"
+                :project="projectInternal"
+                @edit-project="editProject"
+                @copy-project="copyProject"
+                @delete-project="deleteProject"
+                @unpin-project="unpin"
+                :read-only-project="isReadOnlyProj"
+                :is-delete-disabled="deleteProjectDisabled"
+                :delete-disabled-text="deleteProjectToolTip"/>
           </div>
         </div>
 
         <div class="grid text-center justify-content-center">
           <div v-for="(stat) in stats" :key="stat.label" class="col mt-1" style="min-width: 10rem;">
-            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border rounded stat-card h-100">
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 stat-card surface-100">
               <i :class="stat.icon"></i>
               <div class="uppercase text-muted count-label">{{ stat.label }}</div>
-              <strong class="text-2xl font-normal" data-cy="statNum">{{ stat.count | number }}</strong>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
+              <strong class="text-2xl font-normal" data-cy="statNum">{{ stat.count ? stat.count : '0' }}</strong>
+              <i v-if="stat.warn" class="fas fa-exclamation-circle text-yellow-400 ml-1"
                  style="font-size: 1.5rem;"
                  v-tooltip.hover="stat.warnMsg"
                  data-cy="warning"
@@ -250,7 +256,7 @@ const handleDeleteCancelled = () => {
               <div v-if="stat.secondaryStats">
                 <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
                   <div v-if="secCount.count > 0" style="font-size: 0.9rem">
-                    <Badge :variant="`${secCount.badgeVariant}`"
+                    <Badge :severity="`${secCount.badgeVariant}`"
                              :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
                       <span>{{ secCount.count }}</span>
                     </Badge>
@@ -346,7 +352,6 @@ const handleDeleteCancelled = () => {
 }
 
 .stat-card {
-  background-color: #f8f9fa;
   padding: 1rem;
 }
 

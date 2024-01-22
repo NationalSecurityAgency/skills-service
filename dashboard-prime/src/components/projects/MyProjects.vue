@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import ProjectService from '@/components/projects/ProjectService';
+import SettingsService from '@/components/settings/SettingsService';
 import MyProject from '@/components/projects/MyProject.vue';
 import EditProject from '@/components/projects/EditProject.vue'
 
@@ -15,8 +16,8 @@ onMounted(() => {
 })
 
 let isLoading = ref(false);
-let projects = reactive([]);
-let newProject = ref ({
+let projects = ref([]);
+let newProject = {
   show: false,
   isEdit: false,
   project: {
@@ -56,41 +57,41 @@ const useTableView = computed(() => {
 
 // Functions
 const handleHide = () => {
-  this.$nextTick(() => {
+  nextTick(() => {
     this.$refs.newProjButton.focus();
   });
 };
 const pinModalClosed = () => {
   showSearchProjectModal = false;
   loadProjects();
-  this.$nextTick(() => {
+  nextTick(() => {
     this.$refs.pinProjectsButton.focus();
   });
 };
 const projectUnpinned = (project) => {
   loadProjects().then(() => {
-    this.$nextTick(() => {
-      this.$announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`);
+    nextTick(() => {
+      // this.$announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`);
     });
   });
 };
 const loadProjects = () => {
-  isLoading = true;
+  isLoading.value = true;
   return ProjectService.getProjects()
       .then((response) => {
-        projects = response;
+        projects.value = response;
       })
       .finally(() => {
-        isLoading = false;
+        isLoading.value = false;
         // enableDropAndDrop();
       });
 };
 const projectRemoved = (project) => {
-  isLoading = true;
+  isLoading.value = true;
   ProjectService.deleteProject(project.projectId)
       .then(() => {
         loadProjects();
-        this.$announcer.polite(`Project ${project.name} has been deleted`);
+        // this.$announcer.polite(`Project ${project.name} has been deleted`);
       });
 };
 const copyProject = (projectInfo) => {
@@ -101,7 +102,7 @@ const copyProject = (projectInfo) => {
       .then(() => {
         copyProgressModal.copiedProjectId = projectInfo.newProject.projectId;
         copyProgressModal.isComplete = true;
-        this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
+        // this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
         SkillsReporter.reportSkill('CopyProject');
       });
 };
@@ -112,14 +113,14 @@ const loadProjectsAfterCopy = () => {
       });
 };
 const projectAdded = (project) => {
-  isLoading = true;
+  isLoading.value = true;
   return ProjectService.saveProject(project)
       .then(() => {
         const loadProjects = () => {
           SkillsReporter.reportSkill('CreateProject');
           loadProjects()
               .then(() => {
-                this.$nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
+                // nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
               });
         };
 
@@ -137,11 +138,11 @@ const projectEdited = (editedProject) => {
   ProjectService.saveProject(editedProject).then(() => {
     loadProjects().then(() => {
       this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
-      this.$nextTick(() => {
+      nextTick(() => {
         if (editedProject.isEdit) {
-          this.$announcer.polite(`Project ${editedProject.name} has been edited`);
+          // this.$announcer.polite(`Project ${editedProject.name} has been edited`);
         } else {
-          this.$announcer.polite(`Project ${editedProject.name} has been created`);
+          // this.$announcer.polite(`Project ${editedProject.name} has been created`);
         }
       });
     });
@@ -151,7 +152,7 @@ const enableDropAndDrop = () => {
   if (projects && projects.length > 0
       && store.getters.config && projects.length < store.getters.config.numProjectsForTableView) {
     const self = this;
-    this.$nextTick(() => {
+    nextTick(() => {
       const cards = document.getElementById('projectCards');
       // need to check for null because this logic is within nextTick method
       // an may actually run after the user moved onto another page
@@ -190,13 +191,13 @@ const updateSortAndReloadProjects = (updateInfo) => {
       .findIndex((item) => item.projectId === updateInfo.projectId);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
   if (newIndex >= 0 && (newIndex) < projects.length) {
-    isLoading = true;
+    isLoading.value = true;
     ProjectService.updateProjectDisplaySortOrder(updateInfo.projectId, newIndex)
         .finally(() => {
           loadProjects()
               .then(() => {
                 const foundRef = this.$refs[`proj${updateInfo.projectId}`];
-                this.$nextTick(() => {
+                nextTick(() => {
                   foundRef[0].focusSortControl();
                 });
               });
@@ -207,7 +208,7 @@ const isProgressAndRankingEnabled = () => {
   return store.getters.config.rankingAndProgressViewsEnabled === true || store.getters.config.rankingAndProgressViewsEnabled === 'true';
 };
 const focusOnProjectCard = (projectId) => {
-  this.$nextTick(() => {
+  nextTick(() => {
     const projCard = document.getElementById(`proj${projectId}`);
     if (projCard) {
       projCard.focus();
@@ -219,19 +220,18 @@ const focusOnProjectCard = (projectId) => {
 <template>
   <div>
     <SubPageHeader title="Projects" action="Project">
-      <Button v-if="isRootUser" outlined ref="pinProjectsButton"
-                @click="showSearchProjectModal=true"
-                aria-label="Pin projects to your Project page"
-                role="button"
-                size="small"
-                class="mr-2">
-        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
+      <Button v-if="isRootUser" ref="pinProjectsButton"
+              @click="showSearchProjectModal=true"
+              aria-label="Pin projects to your Project page"
+              size="small"
+              class="mr-2">
+        <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
       </Button>
-      <Button id="newProjectBtn" ref="newProjButton" @click="newProject.show = true"
-              outlined size="small"
-                :disabled="addProjectDisabled"
-                data-cy="newProjectButton" aria-label="Create new Project" role="button">
-        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+      <Button id="newProjectBtn" ref="newProjButton" @click="editNewProject()"
+              size="small"
+              :disabled="addProjectDisabled"
+              data-cy="newProjectButton" aria-label="Create new Project" role="button">
+        <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
       </Button>
     </SubPageHeader>
 
@@ -252,7 +252,7 @@ const focusOnProjectCard = (projectId) => {
       </div>
       <div v-else id="projectCards">
         <div v-for="project of projects" :key="project.projectId" class="mb-3"
-             :id="project.projectId"> 
+             :id="project.projectId">
 <!--          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">-->
 <!--            <template #overlay>-->
               <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
