@@ -21,7 +21,7 @@ const schema = yup.object({
 })
 
 const { values, defineField, errors, meta, handleSubmit } = useForm({
-  validationSchema: schema
+  validationSchema: schema,
 })
 
 const [username, usernameAttrs] = defineField('username')

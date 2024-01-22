@@ -6,6 +6,7 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import ProjectService from '@/components/projects/ProjectService';
 import MyProject from '@/components/projects/MyProject.vue';
+import EditProject from '@/components/projects/EditProject.vue'
 
 const store = useStore();
 
@@ -15,14 +16,14 @@ onMounted(() => {
 
 let isLoading = ref(false);
 let projects = reactive([]);
-let newProject = {
+let newProject = ref ({
   show: false,
   isEdit: false,
   project: {
     name: '',
     projectId: '',
   },
-};
+});
 let showSearchProjectModal = false;
 let sortOrder = {
   loading: false,
@@ -132,16 +133,6 @@ const projectAdded = (project) => {
         }
       });
 };
-const editNewProject = () => {
-  newProject = {
-    show: true,
-    isEdit: false,
-    project: {
-      name: '',
-      projectId: '',
-    },
-  };
-};
 const projectEdited = (editedProject) => {
   ProjectService.saveProject(editedProject).then(() => {
     loadProjects().then(() => {
@@ -228,19 +219,19 @@ const focusOnProjectCard = (projectId) => {
 <template>
   <div>
     <SubPageHeader title="Projects" action="Project">
-      <Button v-if="isRootUser" variant="outline-primary" ref="pinProjectsButton"
+      <Button v-if="isRootUser" outlined ref="pinProjectsButton"
                 @click="showSearchProjectModal=true"
                 aria-label="Pin projects to your Project page"
                 role="button"
-                size="sm"
+                size="small"
                 class="mr-2">
-        <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
+        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
       </Button>
-      <Button id="newProjectBtn" ref="newProjButton" @click="editNewProject()"
-                variant="outline-primary" size="sm"
+      <Button id="newProjectBtn" ref="newProjButton" @click="newProject.show = true"
+              outlined size="small"
                 :disabled="addProjectDisabled"
                 data-cy="newProjectButton" aria-label="Create new Project" role="button">
-        <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
       </Button>
     </SubPageHeader>
 
@@ -282,6 +273,8 @@ const focusOnProjectCard = (projectId) => {
         </div>
       </div>
     </LoadingContainer>
+
+    <edit-project v-model="newProject.show" :project="newProject.project"/>
   </div>
 </template>
 

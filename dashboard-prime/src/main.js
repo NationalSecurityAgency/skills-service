@@ -19,6 +19,7 @@ import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
 import Dropdown from 'primevue/dropdown';
+import Dialog from 'primevue/dialog';
 import Tooltip from 'primevue/tooltip';
 import Ripple from 'primevue/ripple';
 import 'primeflex/primeflex.css'
@@ -43,6 +44,7 @@ app.component('Menu', Menu)
 app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
+app.component('Dialog', Dialog)
 app.directive('tooltip', Tooltip);
 app.directive('ripple', Ripple)
 
