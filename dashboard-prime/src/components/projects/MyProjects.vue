@@ -24,7 +24,7 @@ let newProject = {
     name: '',
     projectId: '',
   },
-});
+};
 let showSearchProjectModal = false;
 let sortOrder = {
   loading: false,
