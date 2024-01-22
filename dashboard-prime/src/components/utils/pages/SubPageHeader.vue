@@ -1,13 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import {ref, nextTick, computed, watch} from 'vue';
 import { projConfig } from '@/components/projects/ProjConfig.js';
 import {useRoute, useRouter} from "vue-router";
 
+const emit = defineEmits(['add-action'])
 const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLabel', 'isLoading', 'marginBottom']);
 const router = useRouter()
 const route = useRoute()
 
 const config = projConfig();
+const actionButton = ref(null)
+const disabledInternal = ref(props.disabled);
 
 const isAdminProjectsPage = computed(() => {
   return route.path?.toLowerCase() === '/administrator/' || route.path?.toLowerCase() === '/administrator';
@@ -29,6 +32,22 @@ const isMetricsPage = computed(() => {
 const isReadOnlyProjUnderAdminUrl = computed(() => {
   return config.isReadOnlyProj && isAdminPage && !isAdminProjectsPage && !isMetricsPage;
 });
+
+watch(() => props.disabled, (newValue) => {
+  disabledInternal.value = newValue;
+});
+
+function addClicked() {
+  emit('add-action');
+}
+
+function focusOnActionBtn() {
+  nextTick(() => {
+    if (actionButton) {
+      actionButton.focus();
+    }
+  });
+}
 
 </script>
 
