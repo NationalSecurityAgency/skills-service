@@ -17,14 +17,14 @@ onMounted(() => {
 
 let isLoading = ref(false);
 let projects = ref([]);
-let newProject = {
+let newProject = ref({
   show: false,
   isEdit: false,
   project: {
     name: '',
     projectId: '',
   },
-};
+});
 let showSearchProjectModal = false;
 let sortOrder = {
   loading: false,
@@ -220,18 +220,19 @@ const focusOnProjectCard = (projectId) => {
 <template>
   <div>
     <SubPageHeader title="Projects" action="Project">
-      <Button v-if="isRootUser" ref="pinProjectsButton"
-              @click="showSearchProjectModal=true"
-              aria-label="Pin projects to your Project page"
-              size="small"
-              class="mr-2">
-        <span class="d-none d-sm-inline">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
+      <Button v-if="isRootUser" outlined ref="pinProjectsButton"
+                @click="showSearchProjectModal=true"
+                aria-label="Pin projects to your Project page"
+                role="button"
+                size="small"
+                class="mr-2">
+        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
       </Button>
-      <Button id="newProjectBtn" ref="newProjButton" @click="editNewProject()"
-              size="small"
-              :disabled="addProjectDisabled"
-              data-cy="newProjectButton" aria-label="Create new Project" role="button">
-        <span class="d-none d-sm-inline">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+      <Button id="newProjectBtn" ref="newProjButton" @click="newProject.show = true"
+              outlined size="small"
+                :disabled="addProjectDisabled"
+                data-cy="newProjectButton" aria-label="Create new Project" role="button">
+        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
       </Button>
     </SubPageHeader>
 

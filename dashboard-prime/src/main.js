@@ -20,8 +20,10 @@ import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
 import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
+import InputSwitch from 'primevue/inputswitch';
 import Tooltip from 'primevue/tooltip';
 import Ripple from 'primevue/ripple';
+import FocusTrap from 'primevue/focustrap';
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 // import 'primevue/resources/themes/lara-light-green/theme.css'
@@ -45,7 +47,9 @@ app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
 app.component('Dialog', Dialog)
+app.component('InputSwitch', InputSwitch)
 app.directive('tooltip', Tooltip);
 app.directive('ripple', Ripple)
+app.directive('focustrap', FocusTrap);
 
 app.mount('#app')
