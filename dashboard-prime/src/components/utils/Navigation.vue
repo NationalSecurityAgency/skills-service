@@ -1,26 +1,37 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import Listbox from 'primevue/listbox';
 
 const router = useRouter();
 const route = useRoute()
 const props = defineProps(['navItems']);
 const collapsed = ref(false)
+
+function getCollapsedFromLocalStorage() {
+  const storageCollapsed = localStorage.skillsNavCollapsed;
+  collapsed.value = storageCollapsed === 'true' ? Boolean(storageCollapsed) : false;
+}
+function flipCollapsed() {
+  collapsed.value = !collapsed.value;
+  localStorage.skillsNavCollapsed = collapsed.value;
+}
+onMounted(() => {
+  getCollapsedFromLocalStorage()
+})
 </script>
 
 <template>
   <div class="mt-3" data-cy="nav">
     <div class="flex">
       <div class="flex-none" data-cy="nav-col">
-        <div class="border-1 border-round-md surface-border font-medium">
+        <div class="border-1 border-round-md surface-border font-medium" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!collapsed" class="pt-3 px-3">Navigate</div>
-              <div class="flex-1 text-right">
+              <div class="flex-1" :class="{ 'text-right': !collapsed, 'text-center': collapsed}">
                 <Button size="small" text
                         v-ripple
                         data-cy="navCollapseOrExpand"
-                        @click="collapsed = !collapsed"
+                        @click="flipCollapsed"
                         :aria-label="collapsed ? 'Expand Navigation' : 'Collapse Navigation'"
                         :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'">
                   <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
@@ -34,20 +45,21 @@ const collapsed = ref(false)
                            v-slot="{ href, navigate, isActive, isExactActive }"
                            custom>
 <!--                v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"-->
-                <li class="p-1 py-3"
-                    :data-cy="`nav-${navItem.name}`"
-                    :class="{ 'bg-primary': isExactActive, 'pl-3': collapsed, 'pl-4': !collapsed, 'hover:bg-primary-300 hover:text-white': !isExactActive }">
-                  <a :href="href"
-                     @click="(e) => { navigate(e); }"
-                     :class="[isExactActive && 'text-white', navItem.isDisabled && 'disabled']"
-                     class="no-underline"
-                     :aria-current="isExactActive ? 'page' : false">
-                    <div class="" :class="{'mr-4': !collapsed}" :aria-label="`Navigate to ${navItem.name} page`">
+                <li>
+                  <Button link
+                          :disabled="navItem.isDisabled"
+                          :class="{ 'bg-primary': isExactActive }"
+                          class="no-underline w-full"
+                          @click="(e) => { navigate(e); }"
+                          :aria-label="`Navigate to ${navItem.name} page`"
+                          :aria-current="isExactActive ? 'page' : false"
+                          :data-cy="`nav-${navItem.name}`">
+                    <div class="" :class="{'mr-4': !collapsed}">
                       <i :class="navItem.iconClass" class="fas text-base mr-2"
-                         aria-hidden="true"/> <span v-if="!collapsed" class="font-medium">{{ navItem.name }}</span>
+                         aria-hidden="true" /> <span v-if="!collapsed" class="font-medium">{{ navItem.name }}</span>
                       <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-red-500 ml-1" />
                     </div>
-                  </a>
+                  </Button>
                 </li>
               </router-link>
             </ul>

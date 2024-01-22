@@ -7,6 +7,7 @@ import IconManagerService from '@/components/utils/iconPicker/IconManagerService
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import router from '@/router/index.js'
 import PageVisitService from '@/PageVisitService.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const store = useStore()
 const isSupervisor = ref(false)
@@ -187,12 +188,7 @@ onMounted(() => {
   <div role="presentation">
     <!--    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>-->
     <div id="app" class="px-3">
-      <div v-if="isLoadingApp" class="row justify-content-md-center mt-5">
-        <div class="col-auto">
-          <ProgressSpinner />
-        </div>
-      </div>
-
+      <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center"/>
       <div v-if="!isLoadingApp" class="m-0">
         <div class="">
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
