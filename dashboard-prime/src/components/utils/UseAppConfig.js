@@ -13,8 +13,19 @@ export const useAppConfig = () => {
   const docsHost = computed(() => {
     return store.getters.config.docsHost
   })
+
+  const minNameLength = store.getters.config.minNameLength;
+  const maxProjectNameLength = store.getters.config.maxProjectNameLength;
+  const nameValidationRegex = store.getters.config.nameValidationRegex;
+  const minIdLength = store.getters.config.minIdLength;
+  const maxIdLength = store.getters.config.maxIdLength;
   return {
     rankingAndProgressViewsEnabled,
-    docsHost
+    docsHost,
+    minNameLength,
+    maxProjectNameLength,
+    nameValidationRegex,
+    minIdLength,
+    maxIdLength
   }
 }

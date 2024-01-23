@@ -8,6 +8,7 @@ import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import router from '@/router/index.js'
 import PageVisitService from '@/PageVisitService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
 
 const store = useStore()
 const isSupervisor = ref(false)
@@ -167,8 +168,10 @@ const addNavGuards = () => {
   }
 }
 
+const customGlobalValidators = useCustomGlobalValidators()
 onMounted(() => {
   store.dispatch('loadConfigState').finally(() => {
+    customGlobalValidators.addValidators()
     store.dispatch('restoreSessionIfAvailable').finally(() => {
       addNavGuards()
       if (isAuthenticatedUser.value) {

@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import * as yup from 'yup'
+import { object, string } from 'yup'
 import { useForm } from 'vee-validate'
 import { useDebounceFn } from '@vueuse/core'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -8,6 +8,7 @@ import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
 import IdInput from '@/components/utils/inputForm/IdInput.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
+import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -17,38 +18,59 @@ const getTitle = () => {
   }
   return props.isEdit ? 'Editing Existing Project' : 'New Project'
 }
+const appConfig = useAppConfig()
+
 const loadingComponent = ref(false)
 const checkProjNameUnique = useDebounceFn((projName) => {
   if (!projName || projName.length === 0) {
     return true
   }
-  const origName = props.project.projectId
+  const origName = props.project.name
   if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
     return true
   }
-  return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => {
-    console.log(`recieved ${remoteRes}`)
-    return !remoteRes;
-  })
+  return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => !remoteRes)
+}, 500)
+const checkProjIdUnique = useDebounceFn((value) => {
+  if (!value || value.length === 0 || (props.isEdit && props.project.projectId === value)) {
+    return true;
+  }
+  return ProjectService.checkIfProjectIdExist(value)
+    .then((remoteRes) => !remoteRes);
+
 }, 500)
 
-const schema = yup.object({
-  'name': yup.string().required().min(5)
-    .test('uniquename', 'Project Name already exist', (value) => checkProjNameUnique(value))
-    .label('Project Name'),
-  'projectId': yup.string()
+const schema = object({
+  'name': string()
+    .trim()
     .required()
-    .min(5)
-    .label('Projet Id')
+    .min(appConfig.minNameLength)
+    .max(appConfig.maxProjectNameLength)
+    .nullValueNotAllowed()
+    .test('uniqueName', 'Project Name already exist', (value) => checkProjNameUnique(value))
+    .customNameValidator()
+    .label('Project Name'),
+  'projectId': string()
+    .required()
+    .min(appConfig.minIdLength)
+    .max(appConfig.maxIdLength)
+    .nullValueNotAllowed()
+    .test('uniqueId', 'Project ID already exist', (value) => checkProjIdUnique(value))
+    .label('Project Id')
 })
+
 const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
   validationSchema: schema,
   initialValues: props.project
 })
-const canEditProjectId = ref(false)
 
+const canEditProjectId = ref(false)
+function updateCanEditProjectId(newVal) {
+  canEditProjectId.value = newVal;
+}
 function updateProjectId(projName) {
   if (!props.isEdit && !canEditProjectId.value) {
+    console.log(canEditProjectId);
     const newProjId = InputSanitizer.removeSpecialChars(projName);
     setFieldValue('projectId', newProjId)
   }
@@ -86,6 +108,7 @@ const onSubmit = handleSubmit(values => {
 
       <id-input
         name="projectId"
+        @can-edit="updateCanEditProjectId"
         :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         @keydown-enter="handleSubmit"/>
 
