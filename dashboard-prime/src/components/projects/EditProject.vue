@@ -9,6 +9,7 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import IdInput from '@/components/utils/inputForm/IdInput.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import MarkdownEditor from '@/common-components/utilities/MarkdownEditor.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -56,7 +57,9 @@ const schema = object({
     .max(appConfig.maxIdLength)
     .nullValueNotAllowed()
     .test('uniqueId', 'Project ID already exist', (value) => checkProjIdUnique(value))
-    .label('Project Id')
+    .label('Project Id'),
+  'description': string()
+    .max(appConfig.maxIdLength)
 })
 
 const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
@@ -70,7 +73,6 @@ function updateCanEditProjectId(newVal) {
 }
 function updateProjectId(projName) {
   if (!props.isEdit && !canEditProjectId.value) {
-    console.log(canEditProjectId);
     const newProjId = InputSanitizer.removeSpecialChars(projName);
     setFieldValue('projectId', newProjId)
   }
@@ -102,6 +104,7 @@ const onSubmit = handleSubmit(values => {
 
       <skills-text-input
         :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
+        :is-required="true"
         name="name"
         @input="updateProjectId"
         @keydown-enter="handleSubmit" />
@@ -175,6 +178,11 @@ const onSubmit = handleSubmit(values => {
       <!--        </div>-->
       <!--      </div>-->
       <!--      <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>-->
+
+      <markdown-editor
+        class="mt-5"
+        name="description"/>
+
 
 
     <div class="text-right mt-5">
