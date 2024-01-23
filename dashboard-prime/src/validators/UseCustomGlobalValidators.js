@@ -3,8 +3,9 @@ import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 
 export const useCustomGlobalValidators = () => {
-  const appConfig = useAppConfig()
+
   function customNameValidator(message) {
+    const appConfig = useAppConfig()
     return this.test("noNo", message, function(value) {
       const { path, createError } = this;
       if (!appConfig.nameValidationRegex) {
@@ -24,6 +25,7 @@ export const useCustomGlobalValidators = () => {
   }
 
   const addValidators = () => {
+
     addMethod(string, "customNameValidator", customNameValidator);
     addMethod(string, "nullValueNotAllowed", nullValueNotAllowed);
   }
