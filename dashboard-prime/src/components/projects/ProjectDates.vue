@@ -38,7 +38,7 @@ const doLoadDate = () => {
       <span v-if="loadLastReportedDate"
             class="text-secondary small mx-2 d-none d-md-inline">|</span>
     </span>
-    <br v-if="loadLastReportedDate" class="d-md-none"/>
+<!--    <br v-if="loadLastReportedDate" class="d-md-none"/>-->
     <span v-if="loadLastReportedDate" data-cy="projectLastReportedSkill">
       <span class="text-secondary small font-italic">Last Reported Skill: </span>
       <SkillsSpinner v-if="isLoading" label="Loading..." small type="grow" variant="info"></SkillsSpinner>

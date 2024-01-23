@@ -139,7 +139,7 @@ const editProject = () => {
   showEditProjectModal = true;
 };
 const copyProject = () => {
-  copyProjectInfo.newProject = { userCommunity: project.userCommunity };
+  copyProjectInfo.newProject = { userCommunity: props.project.userCommunity };
   copyProjectInfo.showModal = true;
 };
 const projectCopied = (project) => {
@@ -207,7 +207,7 @@ const handleDeleteCancelled = () => {
         <div class="grid mb-2">
           <div class="col-8 text-truncate">
             <router-link
-                :to="{ label:'Subjects', params: { projectId: projectInternal.projectId, project: projectInternal }, route: '/'}"
+                :to="{ name:'Subjects', params: { projectId: projectInternal.projectId, project: projectInternal }}"
                 class="text-green-800 no-underline mb-0 pb-0 preview-card-title" :title="`${projectInternal.name}`"
                 :aria-label="`manage project ${projectInternal.name}`"
                 role="link"

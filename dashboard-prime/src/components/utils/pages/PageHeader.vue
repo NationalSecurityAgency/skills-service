@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import Badge from 'primevue/badge';
+import Card from 'primevue/card';
 import LoadingContainer from '../LoadingContainer.vue';
 
 const props = defineProps(['loading', 'options'])
@@ -9,28 +10,28 @@ const titleCss = computed(() => {
   const statCount = props.options?.stats ? props.options.stats.length : 0;
   return {
     pageHeaderTitle: true,
-    'text-center': true,
+    // 'text-center': true,
     'text-lg-left': true,
-    'col-lg-5': statCount > 2,
-    'col-xxxl-3': statCount > 2,
-    'col-lg-7': statCount === 2,
-    'col-xxxl-8': statCount === 2,
-    'col-lg-8': statCount < 2,
-    'col-xl-9': statCount < 2,
-    'col-xxxl-9': statCount < 2,
+    'lg:col-5': statCount > 2,
+    'xl:col-3': statCount > 2,
+    'lg:col-7': statCount === 2,
+    'xl:col-8': statCount === 2,
+    'lg:col-8': statCount < 2,
+    'xl:col-9': statCount < 2,
+    // 'xl:col-9': statCount < 2,
   };
 });
 
 const statcsCss = computed(() => {
   const statCount = props.options?.stats ? props.options.stats.length : 0;
   return {
-    'col-lg-7': statCount > 2,
-    'col-xxxl-9': statCount > 2,
-    'col-lg-5': statCount === 2,
-    'col-xxxl-4': statCount === 2,
-    'col-lg-4': statCount < 2,
-    'col-xl-3': statCount < 2,
-    'col-xxxl-3': statCount < 2,
+    'lg:col-7': statCount > 2,
+    'xl:col-9': statCount > 2,
+    'lg:col-5': statCount === 2,
+    'xl:col-4': statCount === 2,
+    'lg:col-4': statCount < 2,
+    'xl:col-3': statCount < 2,
+    // 'xl:col-3': statCount < 2,
 
   };
 });
@@ -38,14 +39,14 @@ const statcsCss = computed(() => {
 const individualStatCss = computed(() => {
   const statCount = props.options?.stats ? props.options.stats.length : 0;
   return {
-    'col-md-6': statCount >= 2,
-    'col-xl-4': statCount >= 2,
-    'col-xxxl-2': statCount >= 2,
-    'col-xl-6': statCount === 2,
-    'col-xxxl-6': statCount === 2,
-    'col-md-12': statCount < 2,
-    'col-xl-12': statCount < 2,
-    'col-xxxl-12': statCount < 2,
+    'md:col-6': statCount >= 2,
+    // 'xl:col-4': statCount >= 2,
+    'xl:col-2': statCount >= 2,
+    'xl:col-6': statCount === 2,
+    // 'xl:col-6': statCount === 2,
+    'md:col-12': statCount < 2,
+    'xl:col-12': statCount < 2,
+    // 'xl:col-12': statCount < 2,
     'mt-2': true,
   };
 });
@@ -64,15 +65,15 @@ const individualStatCss = computed(() => {
               <slot name="subSubTitle"></slot>
             </div>
             <div :class="statcsCss">
-              <div class="grid text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
+              <div class="flex text-center mt-4 mt-lg-0 justify-content-center lg:justify-content-end">
                 <div v-for="(stat) in options.stats" :key="stat.label" :class="individualStatCss" data-cy="pageHeaderStat">
-                  <div class="card h-100" >
-                    <div class="card-body">
-                      <div class="d-flex flex-row">
+                  <Card>
+                    <template #content>
+                      <div class="flex flex-row">
                         <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
-                          <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
+                          <div class="card-title uppercase text-muted mb-0 small">{{stat.label}}</div>
                           <div v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted"/>
-                          <span v-else class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count | number}}</span>
+                          <span v-else class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count }}</span>
                           <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning"
                                :aria-label="`Warning: ${stat.warnMsg}`"
@@ -98,8 +99,8 @@ const individualStatCss = computed(() => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </template>
+                  </Card>
                 </div>
               </div>
             </div>
@@ -114,5 +115,9 @@ const individualStatCss = computed(() => {
 <style scoped>
 .pageHeaderTitle {
   overflow-wrap: break-word;
+}
+
+.p-card .p-card-body {
+  padding: 0 !important;
 }
 </style>

@@ -9,6 +9,29 @@ import Preferences from '@/components/settings/Preferences.vue';
 import SecuritySettings from '@/components/settings/SecuritySettings.vue';
 import EmailSettings from '@/components/settings/EmailSettings.vue';
 import SystemSettings from '@/components/settings/SystemSettings.vue';
+import ProjectPage from '@/components/projects/ProjectPage.vue';
+import Subjects from '@/components/subjects/Subjects.vue';
+import Badges from '@/components/badges/Badges.vue';
+import Levels from '@/components/levels/Levels.vue';
+import FullDependencyGraph from '@/components/skills/dependencies/FullDependencyGraph.vue';
+import Users from '@/components/users/Users.vue';
+import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav.vue';
+import SelfReportStatusPage from '@/components/skills/selfReport/SelfReportStatusPage.vue';
+import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage.vue';
+import AccessSettings from '@/components/access/AccessSettings.vue';
+import ProjectSettings from '@/components/settings/ProjectSettings.vue';
+import UserActionsPage from '@/components/userActions/UserActionsPage.vue';
+import ExpirationHistory from '@/components/expiration/ExpirationHistory.vue';
+import EmailUsers from '@/components/projects/EmailUsers.vue';
+import ProjectErrorsPage from '@/components/projects/ProjectErrors.vue';
+import MetricsPageNav from '@/components/metrics/MetricsPageNav.vue';
+import ProjectMetrics from '@/components/metrics/ProjectMetrics.vue';
+import UsersAchievementsMetricPage from '@/components/metrics/projectAchievements/UsersAchievementsMetricPage.vue';
+import SubjectMetricsPage from '@/components/metrics/projectSubjects/SubjectMetricsPage.vue';
+import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue';
+import SkillsMetricsPage from '@/components/metrics/projectSkills/SkillsMetricsPage.vue';
+import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue';
+import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue';
 
 
 const routes = [
@@ -103,6 +126,232 @@ const routes = [
         },
       }
     ]
+  },
+  {
+    path: '/administrator/projects/:projectId',
+    component: ProjectPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Manage Project',
+      },
+    },
+    children: [{
+      name: 'Subjects',
+      path: '',
+      component: Subjects,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSubjects',
+        announcer: {
+          message: 'Project Subjects',
+        },
+      },
+    }, {
+      name: 'Badges',
+      path: 'badges',
+      component: Badges,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitBadges',
+        announcer: {
+          message: 'Project Badges',
+        },
+      },
+    }, {
+      name: 'ProjectLevels',
+      path: 'levels',
+      component: Levels,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectLevels',
+        announcer: {
+          message: 'Project Levels',
+        },
+      },
+    },  {
+      name: 'FullDependencyGraph',
+      path: 'learning-path',
+      component: FullDependencyGraph,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectDependencies',
+        announcer: {
+          message: 'Project Learning Path',
+        },
+      },
+    }, {
+      name: 'ProjectUsers',
+      path: 'users',
+      component: Users,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectUsers',
+        announcer: {
+          message: 'Project Users',
+        },
+      },
+    }, {
+      path: '/administrator/projects/:projectId/self-report',
+      component: SelfReportPageNav,
+      meta: { requiresAuth: true },
+      children: [{
+        component: SelfReportStatusPage,
+        name: 'SelfReport',
+        path: '',
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSelfReport',
+          announcer: {
+            message: 'Manage Project Skill Approval Requests',
+          },
+        },
+      }, {
+        component: SelfReportConfigurePage,
+        name: 'SelfReportConfigure',
+        path: 'configure',
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Self Approval Configuration Page',
+          },
+        },
+      }],
+    }, {
+      name: 'SkillsCatalog',
+      path: '/administrator/projects/:projectId/skills-catalog',
+      component: SkillsCatalog,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Project Skills Catalog',
+        },
+      },
+    }, {
+      name: 'ProjectAccess',
+      path: 'access',
+      component: AccessSettings,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectAccessManagement',
+        announcer: {
+          message: 'Manage Project Access',
+        },
+      },
+    }, {
+      name: 'ProjectSettings',
+      path: 'settings',
+      component: ProjectSettings,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectSettings',
+        announcer: {
+          message: 'Project Settings',
+        },
+      },
+    }, {
+      name: 'ProjectActivityHistory',
+      path: 'activityHistory',
+      component: UserActionsPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'User Activity History',
+        },
+      },
+    }, {
+      name: 'ExpirationHistory',
+      path: 'expirationHistory',
+      component: ExpirationHistory,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Skill Expiration History',
+        },
+      },
+    }, {
+      name: 'EmailUsers',
+      path: 'contact-users',
+      component: EmailUsers,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitContactUsers',
+        announcer: {
+          message: 'Contact Project Users',
+        },
+      },
+    }, {
+      name: 'ProjectErrorsPage',
+      path: 'issues',
+      component: ProjectErrorsPage,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitProjectErrors',
+        announcer: {
+          message: 'Project Errors',
+        },
+      },
+    }, {
+      path: '/administrator/projects/:projectId/metrics',
+      component: MetricsPageNav,
+      meta: { requiresAuth: true },
+      children: [{
+        name: 'ProjectMetrics',
+        path: '',
+        component: ProjectMetrics,
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectStats',
+          announcer: {
+            message: 'Project Metrics',
+          },
+        },
+      }, {
+        name: 'UsersAndLevelsMetrics',
+        path: 'achievements',
+        component: UsersAchievementsMetricPage,
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectUserAchievementMetrics',
+          announcer: {
+            message: 'Project User And Level Metrics',
+          },
+        },
+      }, {
+        name: 'SubjectMetricsPage',
+        path: 'subjects',
+        component: SubjectMetricsPage,
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectSubjectMetrics',
+          announcer: {
+            message: 'Project Subject Metrics',
+          },
+        },
+      }, {
+        name: 'SkillsMetricsPage',
+        path: 'skills',
+        component: SkillsMetricsPage,
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectSkillMetrics',
+          announcer: {
+            message: 'Project Skill Metrics',
+          },
+        },
+      }, {
+        name: 'UserTagMetrics',
+        path: 'userTag/:tagKey/:tagFilter',
+        component: UserTagMetrics,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Tag Metrics',
+          },
+        },
+      }],
+    }
+    ],
   }
 ]
 
