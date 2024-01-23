@@ -1,10 +1,11 @@
 <script setup>
 import {ref} from 'vue'
-import { useField } from 'vee-validate';
+// import { useField } from 'vee-validate';
 
 const model = defineModel()
 const props = defineProps({
   name: String,
+  error: String,
   label: String,
   isSkillId: {
     type: Boolean,
@@ -20,7 +21,7 @@ function notifyAboutEditStateChange(newValue) {
   emit('can-edit', newValue);
 }
 
-const { value, errorMessage } = useField(() => props.name);
+// const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
@@ -51,16 +52,16 @@ const { value, errorMessage } = useField(() => props.name);
       <InputText
         type="text"
         class="w-full"
-        :class="{ 'surface-300': !canEdit, 'p-invalid': errorMessage }"
+        :class="{ 'surface-300': !canEdit, 'p-invalid': error }"
         id="idInput" v-model="model"
         :disabled="!canEdit"
         aria-required="true"
-        :aria-invalid="errorMessage"
+        :aria-invalid="error"
         aria-errormessage="idError"
         aria-describedby="idError"
         data-cy="idInputValue" />
 <!--        @input="dataChanged"-->
-      <small role="alert" class="p-error" data-cy="idError" id="idError">{{ errorMessage }}</small>
+      <small role="alert" class="p-error" data-cy="idError" id="idError">{{ error }}</small>
 <!--    </ValidationProvider>-->
   </div>
 </template>

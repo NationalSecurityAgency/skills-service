@@ -50,7 +50,11 @@ const { values, defineField, errors, meta, handleSubmit } = useForm({
   initialValues: props.project
 })
 const [name, nameAttrs] = defineField('name')
-const [projectId, projectIdAttrs] = defineField('projectId')
+const [projectId, projectIdAttrs] = defineField('projectId', {
+  props: state => ({
+    error: state.errors[0],
+  }),
+})
 
 const canEditProjectId = ref(false)
 
@@ -117,6 +121,7 @@ const onSubmit = handleSubmit(values => {
         <id-input
           name="projectId"
           v-model="projectId"
+          v-bind="projectIdAttrs"
           :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         />
 <!--          additional-validation-rules="uniqueId"-->
