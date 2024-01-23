@@ -61,7 +61,7 @@ const performFormLogin = (values) => {
     })
 }
 const onSubmit = handleSubmit((values) => {
-  if (verifyEmailAddresses) {
+  if (verifyEmailAddresses.value) {
     AccessService.userEmailIsVerified(values.username).then((result) => {
       if (!result) {
         router.push({ name: 'RequestEmailVerification', params: { email: values.username } })
