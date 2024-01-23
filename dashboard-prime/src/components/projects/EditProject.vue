@@ -2,11 +2,12 @@
 import { ref } from 'vue'
 import * as yup from 'yup'
 import { useForm } from 'vee-validate'
+import { useDebounceFn } from '@vueuse/core'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
-import debounce from 'lodash.debounce'
 import IdInput from '@/components/utils/inputForm/IdInput.vue'
+import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -17,15 +18,7 @@ const getTitle = () => {
   return props.isEdit ? 'Editing Existing Project' : 'New Project'
 }
 const loadingComponent = ref(false)
-// const internalProject = ref({
-//   originalProjectId: props.project.projectId,
-//   projectId: props.project.projectId,
-//   isEdit: props.isEdit,
-//   description: '',
-//   ...props.project,
-// })
-
-const checkProjNameUnique = debounce((projName) => {
+const checkProjNameUnique = useDebounceFn((projName) => {
   if (!projName || projName.length === 0) {
     return true
   }
@@ -33,7 +26,10 @@ const checkProjNameUnique = debounce((projName) => {
   if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
     return true
   }
-  return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => !remoteRes)
+  return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => {
+    console.log(`recieved ${remoteRes}`)
+    return !remoteRes;
+  })
 }, 500)
 
 const schema = yup.object({
@@ -45,23 +41,17 @@ const schema = yup.object({
     .min(5)
     .label('Projet Id')
 })
-const { values, defineField, errors, meta, handleSubmit } = useForm({
+const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
   validationSchema: schema,
   initialValues: props.project
 })
-const [name, nameAttrs] = defineField('name')
-const [projectId, projectIdAttrs] = defineField('projectId', {
-  props: state => ({
-    error: state.errors[0],
-  }),
-})
-
 const canEditProjectId = ref(false)
 
-function updateProjectId() {
-  // if (!props.isEdit && !canEditProjectId) {
-  //   internalProject.projectId = InputSanitizer.removeSpecialChars(internalProject.name);
-  // }
+function updateProjectId(projName) {
+  if (!props.isEdit && !canEditProjectId.value) {
+    const newProjId = InputSanitizer.removeSpecialChars(projName);
+    setFieldValue('projectId', newProjId)
+  }
 }
 
 function close() {
@@ -87,50 +77,25 @@ const onSubmit = handleSubmit(values => {
 
     <div v-if="!loadingComponent" v-focustrap>
       <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
-<!--            <pre> {{ errors }}</pre>-->
-<!--      <pre>{{ meta }}</pre>-->
 
-      <div class="field text-left">
-        <label for="projectIdInput">* {{ isCopy ? 'New Project Name' : 'Project Name' }}</label>
-        <!--            <ValidationProvider rules="required|minNameLength|maxProjectNameLength|uniqueName|customNameValidator|nullValueNotAllowed"-->
-        <!--                                v-slot="{errors}"-->
-        <!--                                :debounce="250"-->
-        <!--                                name="Project Name">-->
-        <InputText
-          class="w-full"
-          type="text"
-          title="Name"
-          v-model="name"
-          v-bind="nameAttrs"
-          v-on:input="updateProjectId"
-          v-on:keydown.enter="handleSubmit(updateProject)"
-          data-cy="projectName"
-          autofocus
-          id="name"
-          :class="{ 'p-invalid': errors.name }"
-          :aria-invalid="errors.name ? null : true"
-          aria-errormessage="projectNameError"
-          aria-describedby="projectNameError" />
-        <small role="alert" class="p-error" data-cy="projectNameError"
-               id="projectNameError">{{ errors.name || '&nbsp;' }}</small>
-        <!--            <small class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>-->
-        <!--            </ValidationProvider>-->
-      </div>
+      <skills-text-input
+        :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
+        name="name"
+        @input="updateProjectId"
+        @keydown-enter="handleSubmit" />
 
-      <div class="">
-        <id-input
-          name="projectId"
-          v-model="projectId"
-          v-bind="projectIdAttrs"
-          :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
-        />
+      <id-input
+        name="projectId"
+        :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
+        @keydown-enter="handleSubmit"/>
+
+
 <!--          additional-validation-rules="uniqueId"-->
 <!--          @can-edit="canEditProjectId=$event"-->
 <!--          v-on:keydown.enter.native="handleSubmit(updateProject)"-->
 <!--          :next-focus-el="previousFocus"-->
 <!--          @shown="tooltipShowing=true"-->
 <!--          @hidden="tooltipShowing=false" />-->
-      </div>
 
       <!--      <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">-->
       <!--        <div v-if="isCopyAndCommunityProtected">-->

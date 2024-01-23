@@ -1,11 +1,9 @@
 <script setup>
 import {ref} from 'vue'
-// import { useField } from 'vee-validate';
+import { useField } from 'vee-validate';
 
-const model = defineModel()
 const props = defineProps({
   name: String,
-  error: String,
   label: String,
   isSkillId: {
     type: Boolean,
@@ -14,14 +12,13 @@ const props = defineProps({
   additionalValidationRules: [String],
   nextFocusEl: HTMLElement })
 
-const emit = defineEmits(['can-edit'])
+const emit = defineEmits(['can-edit', 'keydown-enter'])
 const canEdit = ref(false)
 function notifyAboutEditStateChange(newValue) {
-  console.log(newValue)
   emit('can-edit', newValue);
 }
 
-// const { value, errorMessage } = useField(() => props.name);
+const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
@@ -48,20 +45,21 @@ function notifyAboutEditStateChange(newValue) {
       </div>
       </div>
     </div>
-<!--    <ValidationProvider :rules="rules" v-slot="{ errors }" :debounce="500" :name="label" ref="idVp">-->
       <InputText
         type="text"
         class="w-full"
-        :class="{ 'surface-300': !canEdit, 'p-invalid': error }"
-        id="idInput" v-model="model"
+        :class="{ 'surface-300': !canEdit, 'p-invalid': errorMessage }"
+        id="idInput"
+        v-model="value"
+        @keydown.enter="emit('keydown-enter', $event.target.value)"
         :disabled="!canEdit"
         aria-required="true"
-        :aria-invalid="error"
+        :aria-invalid="errorMessage ? true : false"
         aria-errormessage="idError"
         aria-describedby="idError"
         data-cy="idInputValue" />
 <!--        @input="dataChanged"-->
-      <small role="alert" class="p-error" data-cy="idError" id="idError">{{ error }}</small>
+      <small role="alert" class="p-error" data-cy="idError" id="idError">{{ errorMessage }}</small>
 <!--    </ValidationProvider>-->
   </div>
 </template>
