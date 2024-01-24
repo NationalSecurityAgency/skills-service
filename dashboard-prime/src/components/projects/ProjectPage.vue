@@ -43,7 +43,7 @@ const navItems = computed(() => {
   ];
 
   if (!isReadOnlyProj) {
-    // items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
+    items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
     items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' });
   }
 
@@ -272,8 +272,7 @@ const setProject = (newProject) => {
         <span class="p-buttonset mr-2" v-if="!isReadOnlyProj">
           <Button @click="displayEditProject"
                     ref="editProjectButton"
-                    class="btn btn-outline-primary"
-                    variant="outline-primary"
+                    class="border-1 border-black-alpha-90"
                     size="small"
                     data-cy="btn_edit-project"
                     :aria-label="'edit Project '+project.projectId">
@@ -281,7 +280,7 @@ const setProject = (newProject) => {
           </Button>
           <Button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
                     data-cy="projectPreview" size="small"
-                    variant="outline-primary" :aria-label="'preview client display for project'+project.name">
+                   class="border-1 border-black-alpha-90" :aria-label="'preview client display for project'+project.name">
 <!--            v-skills="'PreviewProjectClientDisplay'" -->
             <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
           </Button>
@@ -290,7 +289,7 @@ const setProject = (newProject) => {
                     size="small"
                     @click="copyAndDisplayShareProjInfo"
                     data-cy="shareProjBtn"
-                    variant="outline-primary"
+                    class="border-1 border-black-alpha-90"
                     :aria-label="`Share ${project.name} with new users`">
 <!--            v-skills="'ShareProject'" -->
             <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>

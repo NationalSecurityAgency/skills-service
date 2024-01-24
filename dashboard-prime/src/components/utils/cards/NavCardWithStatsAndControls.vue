@@ -1,0 +1,171 @@
+<script setup>
+import { ref, defineEmits } from 'vue';
+import Badge from 'primevue/badge';
+import Card from 'primevue/card';
+
+const props = defineProps(['options', 'disableSortControl']);
+const emit = defineEmits(['sort-changed-requested']);
+
+let isReadOnlyProj = false;
+let overSortControl = ref(false);
+
+const moveDown = () => {
+    emit('sort-changed-requested', {
+      direction: 'down',
+    });
+};
+
+const moveUp = () => {
+    emit('sort-changed-requested', {
+      direction: 'up',
+    });
+};
+
+const focusSortControl = () => {
+  this.$refs.sortControl.focus();
+};
+</script>
+
+<template>
+  <Card>
+    <template #content>
+      <div class="flex mb-2 nav-cards-header">
+        <div class="col">
+          <div class="flex">
+<!--            <router-link v-if="options.icon" tag="a"-->
+<!--                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"-->
+<!--                         tabindex="-1" class="subject-icon-container">-->
+              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem; height: inherit; width: inherit;" aria-hidden="true">
+                <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
+              </div>
+<!--            </router-link>-->
+            <div class="media-body" style="min-width: 0px; margin-left: 8px;">
+              <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
+<!--                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">-->
+                  {{ options.title }}
+<!--                </router-link>-->
+                <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1"
+                   style="font-size: 1.5rem;"
+                   role="alert"
+                   :aria-label="`Warning: ${options.warnMsg}`"
+                   v-tooltip="options.warnMsg"/>
+              </div>
+              <div class="text-truncate text-secondary preview-card-subTitle" data-cy="subTitle">{{ options.subTitle }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3">
+        <slot name="underTitle"></slot>
+      </div>
+
+      <div class="flex text-center justify-content-center flex-grow-1">
+        <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
+          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 surface-100 p-3">
+            <i :class="stat.icon"></i>
+            <p class="uppercase text-muted count-label">{{ stat.label }}</p>
+            <strong class="h4" data-cy="statNum">{{ stat.count }}</strong>
+            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
+               style="font-size: 1.5rem;"
+               v-tooltip="stat.warnMsg"
+               role="alert"
+               :aria-label="`Warning: ${stat.warnMsg}`"
+               data-cy="warning"/>
+            <div v-if="stat.secondaryStats">
+              <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
+                <div v-if="secCount.count > 0" style="font-size: 0.9rem">
+                  <Badge :variant="`${secCount.badgeVariant}`"
+                           :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
+                    <span>{{ secCount.count }}</span>
+                  </Badge>
+                  <span class="text-left text-uppercase ml-1" style="font-size: 0.8rem">{{ secCount.label }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <slot name="footer"></slot>
+      </div>
+
+      <div v-if="!disableSortControl && !isReadOnlyProj"
+           ref="sortControl"
+           @mouseover="overSortControl = true"
+           @mouseleave="overSortControl = false"
+           @keyup.down="moveDown"
+           @keyup.up="moveUp"
+           @click.prevent.self
+           class="position-absolute text-secondary px-2 py-1 sort-control"
+           tabindex="0"
+           :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
+           role="button"
+           data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
+    </template>
+  </Card>
+</template>
+
+<style scoped>
+.preview-card-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.preview-card-subTitle {
+  max-width: 12rem;
+  font-size: 0.8rem;
+}
+
+.count-label {
+  font-size: 0.9rem;
+}
+
+.nav-cards-header i {
+  font-size: 1.8rem;
+  display: inline-block;
+}
+
+.stat-card {
+  background-color: #f8f9fa;
+  padding: 1rem;
+}
+
+.icon-link:hover {
+  border-color: black !important;
+}
+
+.sort-control {
+  font-size: 1.3rem !important;
+  color: #b3b3b3 !important;
+  top: 0rem;
+  right: 0rem;
+  border-bottom: 1px solid #e8e8e8;
+  border-left: 1px solid #e8e8e8;
+  background-color: #fbfbfb !important;
+  border-bottom-left-radius:.25rem!important
+}
+
+.sort-control:hover, .sort-control i:hover {
+  cursor: grab !important;
+  color: $info !important;
+  font-size: 1.5rem;
+}
+
+.subject-icon {
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  font-size: 42px !important;
+  line-height: 58px;
+}
+
+.subject-icon-container {
+  max-width:100px;
+  max-height:100px;
+  height:60px;
+  width: 60px;
+}
+</style>
