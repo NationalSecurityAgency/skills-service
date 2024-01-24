@@ -22,8 +22,8 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import ColumnGroup from 'primevue/columngroup';   // optional
-import Row from 'primevue/row';                   // optional
+// import ColumnGroup from 'primevue/columngroup';   // optional
+// import Row from 'primevue/row';                   // optional
 
 
 const emit = defineEmits(['focus-on-new-button'])
