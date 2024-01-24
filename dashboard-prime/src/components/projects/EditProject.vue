@@ -13,6 +13,7 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
+const emit = defineEmits(['project-saved'])
 const modalTitle = computed(() => {
   if (props.isCopy) {
     return 'Copy Project'
@@ -86,7 +87,13 @@ function close() {
 }
 
 const onSubmit = handleSubmit(values => {
-  console.log(JSON.stringify(values, null, 2))
+    // this.publishHidden({ updated: true });
+    const projToSave  = {...values,
+      name: InputSanitizer.sanitize(values.name),
+      projectId: InputSanitizer.sanitize(values.projectId)
+    }
+    emit('project-saved', projToSave);
+    close()
 })
 
 </script>
@@ -98,12 +105,6 @@ const onSubmit = handleSubmit(values => {
           :header="modalTitle"
           class="w-11 lg:w-10 xl:w-9"
   >
-<!--    <template #header>-->
-<!--      <div class="inline-flex align-items-center justify-content-center gap-2 text-xl">-->
-<!--        <i class="fas fa-cogs"></i>-->
-<!--        <span class="font-bold white-space-nowrap">{{ modalTitle }}</span>-->
-<!--      </div>-->
-<!--    </template>-->
     <skills-spinner :is-loading="loadingComponent" />
 
     <div v-if="!loadingComponent" v-focustrap>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
 import { RouterView, useRoute } from 'vue-router'
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
@@ -9,6 +9,7 @@ import router from '@/router/index.js'
 import PageVisitService from '@/PageVisitService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
+import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
 
 const store = useStore()
 const isSupervisor = ref(false)
@@ -45,6 +46,14 @@ const getLandingPage = () => {
   }
   return landingPage
 }
+
+const inceptionConfigurer = useInceptionConfigurer()
+watch(store.getters.userInfo, async (newUserInfo) => {
+  if (newUserInfo) {
+    inceptionConfigurer.configure()
+  }
+})
+
 
 const addNavGuards = () => {
   const beforeEachNavGuard = (to, from, next) => {
@@ -173,6 +182,7 @@ onMounted(() => {
   store.dispatch('loadConfigState').finally(() => {
     customGlobalValidators.addValidators()
     store.dispatch('restoreSessionIfAvailable').finally(() => {
+      inceptionConfigurer.configure()
       addNavGuards()
       if (isAuthenticatedUser.value) {
         store.dispatch('access/isSupervisor').then((result) => {

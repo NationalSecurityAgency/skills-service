@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
@@ -8,8 +9,10 @@ import ProjectService from '@/components/projects/ProjectService';
 import SettingsService from '@/components/settings/SettingsService';
 import MyProject from '@/components/projects/MyProject.vue';
 import EditProject from '@/components/projects/EditProject.vue'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const store = useStore();
+const announcer = useSkillsAnnouncer()
 
 onMounted(() => {
   loadProjects();
@@ -116,21 +119,21 @@ const projectAdded = (project) => {
   isLoading.value = true;
   return ProjectService.saveProject(project)
       .then(() => {
-        const loadProjects = () => {
+        const loadProjectsInternal = () => {
           SkillsReporter.reportSkill('CreateProject');
           loadProjects()
               .then(() => {
-                // nextTick(() => this.$announcer.polite(`Project ${project.name} has been created`));
+                announcer.polite(`Project ${project.name} has been created`);
               });
         };
 
         if (isRootUser) {
           SettingsService.pinProject(project.projectId)
               .then(() => {
-                loadProjects();
+                loadProjectsInternal();
               });
         } else {
-          loadProjects();
+          loadProjectsInternal();
         }
       });
 };
@@ -220,19 +223,21 @@ const focusOnProjectCard = (projectId) => {
 <template>
   <div>
     <SubPageHeader title="Projects" action="Project">
-      <Button v-if="isRootUser" outlined ref="pinProjectsButton"
-                @click="showSearchProjectModal=true"
-                aria-label="Pin projects to your Project page"
-                role="button"
-                size="small"
-                class="mr-2">
-        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true"/>
+      <Button v-if="isRootUser"
+              outlined
+              ref="pinProjectsButton"
+              @click="showSearchProjectModal=true"
+              aria-label="Pin projects to your Project page"
+              role="button"
+              size="small"
+              class="mr-2 bg-primary-reverse">
+        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true" />
       </Button>
       <Button id="newProjectBtn" ref="newProjButton" @click="newProject.show = true"
-              outlined size="small"
-                :disabled="addProjectDisabled"
-                data-cy="newProjectButton" aria-label="Create new Project" role="button">
-        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
+              outlined class="bg-primary-reverse" size="small"
+              :disabled="addProjectDisabled"
+              data-cy="newProjectButton" aria-label="Create new Project" role="button">
+        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true" />
       </Button>
     </SubPageHeader>
 
@@ -275,7 +280,10 @@ const focusOnProjectCard = (projectId) => {
       </div>
     </LoadingContainer>
 
-    <edit-project v-model="newProject.show" :project="newProject.project"/>
+    <edit-project
+      v-model="newProject.show"
+      :project="newProject.project"
+      @project-saved="projectAdded"/>
   </div>
 </template>
 
