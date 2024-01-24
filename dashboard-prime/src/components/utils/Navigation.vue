@@ -24,7 +24,7 @@ onMounted(() => {
   <div class="mt-3" data-cy="nav">
     <div class="flex">
       <div class="flex-none" data-cy="nav-col">
-        <div class="border-1 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
+        <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!collapsed" class="pt-3 px-3">Navigate</div>
               <div class="flex-1" :class="{ 'text-right': !collapsed, 'text-center': collapsed}">

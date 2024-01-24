@@ -9,11 +9,15 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import IdInput from '@/components/utils/inputForm/IdInput.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
 const emit = defineEmits(['project-saved'])
+const loadingComponent = ref(false)
+
 const modalTitle = computed(() => {
   if (props.isCopy) {
     return 'Copy Project'
@@ -22,7 +26,14 @@ const modalTitle = computed(() => {
 })
 const appConfig = useAppConfig()
 
-const loadingComponent = ref(false)
+
+const communityLabels = useCommunityLabels()
+const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.project.userCommunity);
+const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommunity)
+// if (props.isCopy && initialValueForEnableProtectedUserCommunity) {
+//   this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
+// }
+
 const checkProjNameUnique = useDebounceFn((projName) => {
   if (!projName || projName.length === 0) {
     return true
@@ -32,7 +43,7 @@ const checkProjNameUnique = useDebounceFn((projName) => {
     return true
   }
   return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => !remoteRes)
-}, 500)
+}, appConfig.formFieldDebounceInMs)
 const checkProjIdUnique = useDebounceFn((value) => {
   if (!value || value.length === 0 || (props.isEdit && props.project.projectId === value)) {
     return true;
@@ -40,7 +51,23 @@ const checkProjIdUnique = useDebounceFn((value) => {
   return ProjectService.checkIfProjectIdExist(value)
     .then((remoteRes) => !remoteRes);
 
-}, 500)
+}, appConfig.formFieldDebounceInMs)
+
+const customProjectDescriptionValidator = useDebounceFn((value, context) => {
+  if (!value || value.length === 0 || !appConfig.paragraphValidationRegex) {
+    return true
+  }
+
+  return DescriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value).then((result) => {
+    if (result.valid) {
+      return true
+    }
+    if (result.msg) {
+      return context.createError({ message: result.msg });
+    }
+    return context.createError({ message: "Field is invalid" });
+  })
+}, appConfig.formFieldDebounceInMs)
 
 const schema = object({
   'name': string()
@@ -61,7 +88,8 @@ const schema = object({
     .label('Project Id'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
-    .label('Project Description'),
+    .label('Project Description')
+    .test('customProjectDescriptionValidator', 'Project ID already exist', (value, context) => customProjectDescriptionValidator(value, context))
 })
 
 const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
@@ -116,13 +144,13 @@ const onSubmit = handleSubmit(values => {
         name="name"
         :autofocus="true"
         @input="updateProjectId"
-        @keydown-enter="handleSubmit" />
+        @keydown-enter="onSubmit" />
 
       <id-input
         name="projectId"
         @can-edit="updateCanEditProjectId"
         :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
-        @keydown-enter="handleSubmit"/>
+        @keydown-enter="onSubmit"/>
 
 
 <!--          additional-validation-rules="uniqueId"-->

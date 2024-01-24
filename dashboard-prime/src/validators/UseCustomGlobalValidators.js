@@ -1,23 +1,26 @@
 import CustomValidatorsService from '@/validators/CustomValidatorsService.js'
 import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useDebounceFn } from '@vueuse/core'
+import ProjectService from '@/components/projects/ProjectService.js'
 
 export const useCustomGlobalValidators = () => {
 
   function customNameValidator(message) {
     const appConfig = useAppConfig()
-    return this.test("noNo", message, function(value) {
-      const { path, createError } = this;
-      if (!appConfig.nameValidationRegex) {
+    const validateName = useDebounceFn((value, context) => {
+      if (!value || value.length === 0 || !appConfig.nameValidationRegex) {
         return true;
       }
       return CustomValidatorsService.validateName(value).then((result) => {
         if (!result.valid) {
-          return createError({ path, message: result.msg });
+          return context.createError({ message: result.msg });
         }
         return true;
       });
-    });
+    }, appConfig.formFieldDebounceInMs)
+
+    return this.test("customNameValidator", message, (value, context) => validateName(value, context));
   }
 
   function nullValueNotAllowed() {
