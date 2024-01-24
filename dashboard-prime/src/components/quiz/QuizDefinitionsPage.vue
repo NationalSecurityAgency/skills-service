@@ -49,7 +49,7 @@ function focusOnNewButton() {
                    aria-label="Create New Quiz or Survey"
                    @add-action="openNewTestModal">
     </SubPageHeader>
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' } }">
       <template #content>
         <QuizDefinitions ref="configuredTests" @focus-on-new-button="focusOnNewButton"/>
       </template>

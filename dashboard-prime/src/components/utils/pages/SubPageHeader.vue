@@ -59,11 +59,11 @@ function focusOnActionBtn() {
     <div class="col-6 pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
         <slot v-if="!isReadOnlyProjUnderAdminUrl">
-          <Button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
-                    :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
+          <Button ref="actionButton" v-if="action" type="button" size="small" outlined
+                    :disabled="disabledInternal"
                     v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
                     :data-cy="`btn_${title}`">
-            <span class="">{{ action }} </span> <i class="fas fa-plus-circle"/>
+            <span class="mr-1">{{ action }} </span> <i class="fas fa-plus-circle"/>
           </Button>
           <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1"
              style="pointer-events: all; font-size: 1.5rem;"
