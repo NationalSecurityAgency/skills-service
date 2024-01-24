@@ -19,6 +19,7 @@ import { useStore } from 'vuex';
 
 const store = useStore();
 const props = defineProps(['project', 'isDeleteDisabled', 'deleteDisabledText', 'readOnlyProject'])
+const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
 
 const isRootUser = computed(() => {
   return store.getters['access/isRoot'];
@@ -43,20 +44,20 @@ const focusOnDelete = () => {
         :to="{ name:'Subjects', params: { projectId: project.projectId, project: project }}"
         size="small" class="border-1 border-black-alpha-90 mr-2"
         :data-cy="'projCard_' + project.projectId + '_manageBtn'"
-        style="display: inline-block;"
         :aria-label="'manage project + project.name'">
-      <span v-if="readOnlyProject">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
+      <span v-if="readOnlyProject">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right ml-1" aria-hidden="true"/>
     </Button>
-    <Button v-if="isRootUser" class="border-1 border-black-alpha-90 mr-2" @click="$emit('unpin-project')" data-cy="unpin" size="small"
-              aria-label="'remove pin for project '+ project.name" style="display: inline-block;"
+    <Button v-if="isRootUser"
+            class="border-1 border-black-alpha-90 mr-2" @click="emit('unpin-project')" data-cy="unpin" size="small"
+              aria-label="'remove pin for project '+ project.name"
               :aria-pressed="project.pinned">
-      <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
+      <span class="d-none d-sm-inline mr-1">Unpin</span> <i class="fas fa-ban" aria-hidden="true"/>
     </Button>
       <span class="p-buttonset mr-2" v-if="!readOnlyProject">
         <Button ref="editBtn"
                 class="border-1 border-black-alpha-90"
                 size="small"
-                @click="$emit('edit-project')"
+                @click="emit('edit-project')"
                 title="Edit Project"
                 :aria-label="'Edit Project ' + project.name"
                 role="button"
@@ -65,7 +66,7 @@ const focusOnDelete = () => {
         <Button ref="copyBtn"
                 class="border-1 border-black-alpha-90"
                 size="small"
-                @click="$emit('copy-project')"
+                @click="emit('copy-project')"
                 title="Copy Project"
                 :aria-label="'Copy Project ' + project.name"
                 role="button"
@@ -75,7 +76,7 @@ const focusOnDelete = () => {
                   class="border-1 border-black-alpha-90"
                   ref="deleteBtn"
                   size="small"
-                  @click="$emit('delete-project')"
+                  @click="emit('delete-project')"
                   :disabled="isDeleteDisabled"
                   v-tooltip="deleteDisabledText"
                   title="Delete Project"

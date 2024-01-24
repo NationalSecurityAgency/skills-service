@@ -54,7 +54,7 @@ const checkProjIdUnique = useDebounceFn((value) => {
 }, appConfig.formFieldDebounceInMs)
 
 const customProjectDescriptionValidator = useDebounceFn((value, context) => {
-  if (!value || value.length === 0 || !appConfig.paragraphValidationRegex) {
+  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
 
@@ -89,10 +89,10 @@ const schema = object({
   'description': string()
     .max(appConfig.descriptionMaxLength)
     .label('Project Description')
-    .test('customProjectDescriptionValidator', 'Project ID already exist', (value, context) => customProjectDescriptionValidator(value, context))
+    .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
 
-const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
+const { values, errors, meta, handleSubmit, setFieldValue, isSubmitting } = useForm({
   validationSchema: schema,
   initialValues: props.project
 })
@@ -135,12 +135,13 @@ const onSubmit = handleSubmit(values => {
   >
     <skills-spinner :is-loading="loadingComponent" />
 
-    <div v-if="!loadingComponent" v-focustrap>
+      <div v-if="!loadingComponent" v-focustrap>
       <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
 
       <skills-text-input
         :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
         :is-required="true"
+        :disabled="isSubmitting"
         name="name"
         :autofocus="true"
         @input="updateProjectId"
@@ -148,6 +149,7 @@ const onSubmit = handleSubmit(values => {
 
       <id-input
         name="projectId"
+        :disabled="isSubmitting"
         @can-edit="updateCanEditProjectId"
         :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         @keydown-enter="onSubmit"/>
@@ -215,17 +217,18 @@ const onSubmit = handleSubmit(values => {
       <!--        </div>-->
       <!--      </div>-->
       <!--      <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>-->
+      <pre> {{ errors }}</pre>
 
       <markdown-editor
         class="mt-5"
+        :disabled="isSubmitting"
         name="description"/>
-
-
 
     <div class="text-right">
       <Button severity="warning"
               outlined size="small"
               class="float-right mr-2"
+              :disabled="isSubmitting"
               @click="close"
               data-cy="closeProjectButton">
         <span>Cancel</span><i class="far fa-times-circle ml-1" aria-hidden="true"></i>
@@ -234,9 +237,10 @@ const onSubmit = handleSubmit(values => {
               outlined size="small"
               class="float-right"
               @click="onSubmit"
-              :disabled="!meta.valid"
+              :disabled="!meta.valid || isSubmitting"
               data-cy="saveProjectButton">
-        <span>{{ isCopy ? 'Copy Project' : 'Save' }}</span><i class="far fa-save ml-1" aria-hidden="true"></i>
+        <span>{{ isCopy ? 'Copy Project' : 'Save' }}</span><i v-if="!isSubmitting" class="far fa-save ml-1" aria-hidden="true"></i>
+        <ProgressSpinner v-if="isSubmitting" style="width: 1rem; height: 1rem;" class="m-0 p-0"/>
       </Button>
     </div>
     </div>

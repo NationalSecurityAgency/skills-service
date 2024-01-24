@@ -54,7 +54,7 @@ function focusOnActionBtn() {
 <template>
   <div class="grid border-bottom py-2 text-center" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
     <div class="col-6 text-left">
-      <h1 class="text-2xl uppercase font-normal">{{ title }}</h1>
+      <div class="text-2xl uppercase font-normal">{{ title }}</div>
     </div>
     <div class="col-6 pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">

@@ -11,6 +11,7 @@ import ProjectCardControls from '@/components/projects/ProjectCardControls.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil';
 import dayjs from "../../../../common-components/src/common/DayJsCustomizer.js";
+import EditProject from '@/components/projects/EditProject.vue'
 
 const props = defineProps(['project', 'disableSortControl'])
 const store = useStore();
@@ -135,8 +136,8 @@ const deleteProject = () => {
   deleteProjectInfo.project = projectInternal;
   deleteProjectInfo.showDialog = true;
 };
-const editProject = () => {
-  showEditProjectModal = true;
+const onEditProject = () => {
+  showEditProjectModal.value = true;
 };
 const copyProject = () => {
   copyProjectInfo.newProject = { userCommunity: props.project.userCommunity };
@@ -230,7 +231,7 @@ const handleDeleteCancelled = () => {
                 :class="{ 'mr-md-4': !disableSortControl}"
                 ref="cardControls"
                 :project="projectInternal"
-                @edit-project="editProject"
+                @edit-project="onEditProject"
                 @copy-project="copyProject"
                 @delete-project="deleteProject"
                 @unpin-project="unpin"
@@ -297,6 +298,13 @@ const handleDeleteCancelled = () => {
            role="button"
            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </Card>
+
+    <edit-project
+      v-if="showEditProjectModal"
+      v-model="showEditProjectModal"
+      :id="`editProjectModal${projectInternal.projectId}`"
+      :project="projectInternal"
+      @project-saved="projectSaved"/>
 
 <!--    <edit-project id="editProjectModal" v-if="showEditProjectModal" v-model="showEditProjectModal"-->
 <!--                  :project="projectInternal" :is-edit="true"-->

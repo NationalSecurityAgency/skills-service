@@ -9,7 +9,7 @@ export const useCustomGlobalValidators = () => {
   function customNameValidator(message) {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
-      if (!value || value.length === 0 || !appConfig.nameValidationRegex) {
+      if (!value || value.trim().length === 0 || !appConfig.nameValidationRegex) {
         return true;
       }
       return CustomValidatorsService.validateName(value).then((result) => {
