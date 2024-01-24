@@ -9,7 +9,7 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import IdInput from '@/components/utils/inputForm/IdInput.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
-import MarkdownEditor from '@/common-components/utilities/MarkdownEditor.vue'
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
