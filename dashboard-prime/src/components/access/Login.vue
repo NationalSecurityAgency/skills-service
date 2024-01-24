@@ -100,6 +100,7 @@ const onSubmit = handleSubmit((values) => {
                     v-model="username"
                     v-bind="usernameAttrs"
                     :class="{ 'p-invalid': errors.username }"
+                    autocomplete="username"
                     :aria-invalid="errors.username ? null : true"
                     aria-describedby="username-error"
                     aria-errormessage="username-error" />
@@ -130,6 +131,7 @@ const onSubmit = handleSubmit((values) => {
                     v-model="password"
                     v-bind="passwordAttrs"
                     :class="{ 'p-invalid': errors.password }"
+                    autocomplete="current-password"
                     :aria-invalid="errors.password ? null : true"
                     aria-describedby="password-error"
                     aria-errormessage="password-error" />

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { object, string } from 'yup'
 import { useForm } from 'vee-validate'
 import { useDebounceFn } from '@vueuse/core'
@@ -13,12 +13,12 @@ import MarkdownEditor from '@/common-components/utilities/MarkdownEditor.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
-const getTitle = () => {
+const modalTitle = computed(() => {
   if (props.isCopy) {
     return 'Copy Project'
   }
   return props.isEdit ? 'Editing Existing Project' : 'New Project'
-}
+})
 const appConfig = useAppConfig()
 
 const loadingComponent = ref(false)
@@ -59,7 +59,8 @@ const schema = object({
     .test('uniqueId', 'Project ID already exist', (value) => checkProjIdUnique(value))
     .label('Project Id'),
   'description': string()
-    .max(appConfig.maxIdLength)
+    .max(appConfig.descriptionMaxLength)
+    .label('Project Description'),
 })
 
 const { values, errors, meta, handleSubmit, setFieldValue } = useForm({
@@ -94,9 +95,15 @@ const onSubmit = handleSubmit(values => {
   <Dialog modal
           v-model:visible="model"
           :maximizable="true"
-          :header="getTitle()"
+          :header="modalTitle"
           class="w-11 lg:w-10 xl:w-9"
   >
+<!--    <template #header>-->
+<!--      <div class="inline-flex align-items-center justify-content-center gap-2 text-xl">-->
+<!--        <i class="fas fa-cogs"></i>-->
+<!--        <span class="font-bold white-space-nowrap">{{ modalTitle }}</span>-->
+<!--      </div>-->
+<!--    </template>-->
     <skills-spinner :is-loading="loadingComponent" />
 
     <div v-if="!loadingComponent" v-focustrap>
@@ -106,6 +113,7 @@ const onSubmit = handleSubmit(values => {
         :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
         :is-required="true"
         name="name"
+        :autofocus="true"
         @input="updateProjectId"
         @keydown-enter="handleSubmit" />
 
@@ -185,7 +193,7 @@ const onSubmit = handleSubmit(values => {
 
 
 
-    <div class="text-right mt-5">
+    <div class="text-right">
       <Button severity="warning"
               outlined size="small"
               class="float-right mr-2"

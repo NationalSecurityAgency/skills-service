@@ -1,12 +1,16 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useField } from 'vee-validate'
+import { useStore } from 'vuex'
 import ToastUiEditor from '@/common-components/utilities/ToastUiEditor.vue'
-import fontSize from 'tui-editor-plugin-font-size';
+import fontSize from 'tui-editor-plugin-font-size'
 import { useCommonMarkdownOptions } from '@/common-components/utilities/UseCommonMarkdownOptions.js'
 import { useMarkdownAccessibilityFixes } from '@/common-components/utilities/UseMarkdownAccessibilityFixes'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer'
+import { useByteFormat } from '@/common-components/filter/UseByteFormat'
 import FileUploadService from '@/common-components/utilities/FileUploadService.js'
+
+const store = useStore()
 
 const props = defineProps({
   value: String,
@@ -85,7 +89,6 @@ const options = {
   placeholder: props.placeholder,
   toolbarItems,
   plugins: [fontSize]
-  // widgetRules: [this.emojiWidgetRule],
 }
 const announcer = useSkillsAnnouncer()
 const commonOptions = useCommonMarkdownOptions()
@@ -96,9 +99,10 @@ const { value, errorMessage } = useField(() => props.name)
 
 const emit = defineEmits(['input'])
 
+const toastuiEditor = ref(null)
+const fileInputRef = ref(null)
 const attachmentError = ref('')
 
-const toastuiEditor = ref(null)
 const moveCursorToStart = () => {
   return toastuiEditor.value.invoke('moveCursorToStart')
 }
@@ -113,6 +117,20 @@ const htmlText = () => {
 }
 const focusOnMarkdownEditor = () => {
   return toastuiEditor.value.invoke('focus')
+}
+const addFileLink = (linkUrl, linkText) => {
+  toastuiEditor.value.invoke('exec', 'addLink', { linkUrl, linkText })
+}
+
+onMounted(() => {
+  if (props.allowAttachments) {
+    toastuiEditor.value.invoke('addCommand', 'wysiwyg', 'attachFile', () => {
+      fileInputRef.value.click();
+    });
+  }
+})
+function onLoad() {
+  markdownAccessibilityFixes.fixAccessibilityIssues()
 }
 
 function onEditorChange() {
@@ -167,51 +185,55 @@ function handleFocus() {
   }
 }
 
+const allowedAttachmentFileTypes = store.getters.config.allowedAttachmentFileTypes
+const maxAttachmentSize = store.getters.config.maxAttachmentSize ? Number(store.getters.config.maxAttachmentSize) : 0;
+const attachmentWarningMessage = store.getters.config.attachmentWarningMessage
+const allowedAttachmentMimeTypes = store.getters.config.allowedAttachmentMimeTypes
+
+const hasNewAttachment = ref(false)
+const byteFormat = useByteFormat()
 function attachFile(event) {
-  // if (!this.allowAttachments) {
-  //   return;
-  // }
-  // const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files;
-  // if (files && files.length > 0) {
-  //   const file = [...files].find((el) => this.allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1));
-  //   event.preventDefault();
-  //   event.stopPropagation();
-  //   if (file) {
-  //     this.hasNewAttachment = true;
-  //     this.attachmentError = ''; // reset any previous error
-  //     if (file.size <= this.maxAttachmentSize) {
-  //       const data = new FormData();
-  //       data.append('file', file);
-  //       if (this.projectId) {
-  //         data.append('projectId', this.projectId);
-  //       }
-  //       if (this.quizId) {
-  //         data.append('quizId', this.quizId);
-  //       }
-  //       if (this.skillId) {
-  //         data.append('skillId', this.skillId);
-  //       }
-  //       FileUploadService.upload('/api/upload', data, (response) => {
-  //         this.$refs.toastuiEditor.invoke('exec', 'addLink', {
-  //           linkUrl: response.data.href,
-  //           linkText: response.data.filename,
-  //         });
-  //         this.$refs.fileInputRef.value = '';
-  //       }, (err) => {
-  //         const explanation = err?.response?.data?.explanation;
-  //         if (explanation) {
-  //           this.attachmentError = `Error uploading file [${file.name}] - ${err?.response?.data?.explanation}`;
-  //         } else {
-  //           this.attachmentError = `Error uploading file [${file.name}] - ${err?.message}`;
-  //         }
-  //       });
-  //     } else {
-  //       this.attachmentError = `Unable to upload attachment - File size [${this.prettyBytes(file.size)}] exceeds maximum file size [${this.prettyBytes(this.maxAttachmentSize)}]`;
-  //     }
-  //   } else {
-  //     this.attachmentError = `Unable to upload attachment - File type is not supported. Supported file types are [${this.allowedAttachmentFileTypes}]`;
-  //   }
-  // }
+  if (!props.allowAttachments) {
+    return
+  }
+  const files = event?.dataTransfer?.files ? event?.dataTransfer?.files : event?.target?.files
+  if (files && files.length > 0) {
+    const file = [...files].find((el) => allowedAttachmentMimeTypes.some((type) => el.type.indexOf(type) !== -1))
+    event.preventDefault()
+    event.stopPropagation()
+    if (file) {
+      hasNewAttachment.value = true
+      attachmentError.value = '' // reset any previous error
+      if (file.size <= maxAttachmentSize) {
+        const data = new FormData()
+        data.append('file', file)
+        if (props.projectId) {
+          data.append('projectId', props.projectId)
+        }
+        if (props.quizId) {
+          data.append('quizId', props.quizId)
+        }
+        if (props.skillId) {
+          data.append('skillId', props.skillId)
+        }
+        FileUploadService.upload('/api/upload', data, (response) => {
+          addFileLink(response.data.href, response.data.filename)
+          fileInputRef.value.value = ''
+        }, (err) => {
+          const explanation = err?.response?.data?.explanation
+          if (explanation) {
+            attachmentError.value = `Error uploading file [${file.name}] - ${err?.response?.data?.explanation}`
+          } else {
+            attachmentError.value = `Error uploading file [${file.name}] - ${err?.message}`
+          }
+        })
+      } else {
+        attachmentError.value = `Unable to upload attachment - File size [${byteFormat.prettyBytes(file.size)}] exceeds maximum file size [${byteFormat.prettyBytes(maxAttachmentSize)}]`
+      }
+    } else {
+      attachmentError.value = `Unable to upload attachment - File type is not supported. Supported file types are [${allowedAttachmentFileTypes}]`
+    }
+  }
 }
 </script>
 
@@ -235,33 +257,42 @@ function attachFile(event) {
                      @change="onEditorChange"
                      @keydown="handleTab"
                      @focus="handleFocus"
-                     @load="markdownAccessibilityFixes.fixAccessibilityIssues"/>
-        <div class="editor-help-footer border-1 surface-border border-round-bottom px-2 py-2">
-          <div class="flex text-xs">
-            <div class="">
-              Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
-            </div>
-            <div class="flex-1 text-right">
-              <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
-                 aria-label="SkillTree documentation of rich text editor features"
-                 :href="`${this.$store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`" target="_blank" style="display: inline-block">
-                <i class="far fa-question-circle editor-help-footer-help-icon"/>
-              </a>
-            </div>
-          </div>
-<!--          <div v-if="attachmentWarningMessage && hasNewAttachment" class="row">-->
-<!--            <div class="col">-->
-<!--              <span data-cy="attachmentWarningMessage" class="text-danger font-weight-bold" style="font-size: .9rem"><i class="fas fa-exclamation-triangle animate__bounceIn" aria-hidden="true"/> {{ attachmentWarningMessage }}</span>-->
-<!--            </div>-->
-<!--          </div>-->
+                     @load="onLoad" />
+    <div class="editor-help-footer border-1 surface-border border-round-bottom px-2 py-2">
+      <div class="flex text-xs">
+        <div class="">
+          Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
         </div>
+        <div class="flex-1 text-right">
+          <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
+             aria-label="SkillTree documentation of rich text editor features"
+             :href="`${store.getters.config.docsHost}/dashboard/user-guide/rich-text-editor.html`"
+             target="_blank">
+            <i class="far fa-question-circle editor-help-footer-help-icon" />
+          </a>
+        </div>
+      </div>
+      <div v-if="attachmentWarningMessage && hasNewAttachment"
+           class="p-error text-sm pt-2">
+        <i class="fas fa-exclamation-triangle" aria-hidden="true" /> {{ attachmentWarningMessage }}
+      </div>
+    </div>
+    <small role="alert" class="p-error" data-cy="projectDescriptionError">{{ errorMessage || '&nbsp;' }}</small>
 
-    <!--    <input @change="attachFile" type="file" ref="fileInputRef"-->
-    <!--           aria-label="ability to attach a file"-->
-    <!--           aria-errormessage="attachmentError"-->
-    <!--           :accept="allowedAttachmentFileTypes"-->
-    <!--           hidden/>-->
-    <!--    <small v-if="attachmentError" role="alert" class="form-text text-danger" data-cy="attachmentError" id="attachmentError">{{attachmentError}}</small>-->
+    <input @change="attachFile"
+           type="file"
+           ref="fileInputRef"
+           aria-label="ability to attach a file"
+           aria-errormessage="attachmentError"
+           :accept="allowedAttachmentFileTypes"
+           hidden />
+    <Message severity="error" v-if="attachmentError"
+             class="m-0"
+             @close="attachmentError = ''"
+             role="alert"
+             data-cy="attachmentError"
+             id="attachmentError">{{ attachmentError }}
+    </Message>
   </div>
 </template>
 
@@ -271,6 +302,7 @@ function attachFile(event) {
   background-color: #f7f9fc !important;
   color: #687278 !important;
 }
+
 .editor-help-footer-help-icon {
   font-size: 1rem;
 }
@@ -282,17 +314,21 @@ function attachFile(event) {
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
 }
+
 div.toastui-editor-ww-code-block:after {
   content: none !important;
 }
+
 .attachment-button {
   font-size: 1.1rem !important;
   color: #6c6c6c !important;
   background-image: none !important;
 }
+
 span.placeholder.ProseMirror-widget {
   color: #687278 !important;
 }
+
 div.toastui-editor-contents {
   font-size: 0.9rem !important;
 }
