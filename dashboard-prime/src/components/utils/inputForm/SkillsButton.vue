@@ -1,14 +1,7 @@
 <script setup>
 const props = defineProps({
-  label:{
-    type: String,
-    required: true,
-  },
+  label: String,
   icon: String,
-  iconAfterLabel: {
-    type: Boolean,
-    default: true,
-  },
   loading: {
     type: Boolean,
     default: false,
@@ -22,8 +15,7 @@ const props = defineProps({
 
 <template>
   <Button :disabled="disabled || loading">
-    <span v-if="iconAfterLabel">{{ label }}<i v-if="!loading" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i></span>
-    <span v-else><i v-if="!loading" class="mr-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>{{ label }}</span>
+    <span>{{ label }}</span><i v-if="!loading" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>
     <ProgressSpinner v-if="loading" style="width: 0.9rem; height: 0.9rem;" class="ml-1" />
   </Button>
 </template>

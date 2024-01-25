@@ -3,6 +3,7 @@ import Login from '@/components/access/Login.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
 import createProgressAndRankingRoutes from './ProgressAndRankingRoutes.js'
+import createQuizRoutes from "@/router/QuizRoutes.js";
 import GlobalSettings from '@/components/settings/GlobalSettings.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import Preferences from '@/components/settings/Preferences.vue';
@@ -487,6 +488,7 @@ const routes = [
 
 routes.push(createAdminRoutes())
 routes.push(createProgressAndRankingRoutes())
+routes.push(createQuizRoutes())
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

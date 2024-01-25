@@ -18,14 +18,13 @@ import {ref, onMounted, computed, nextTick} from 'vue'
 import QuizService from "@/components/quiz/QuizService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
-
-
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-// import ColumnGroup from 'primevue/columngroup';   // optional
-// import Row from 'primevue/row';                   // optional
+import StringHighlighter from "@/common-components/utilities/StringHighlighter.js";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
-
+const announcer = useSkillsAnnouncer()
 const emit = defineEmits(['focus-on-new-button'])
 const loading = ref(false);
 const filter = ref({
@@ -106,7 +105,7 @@ function loadData() {
 }
 function applyFilters() {
   if (!filter.value.name || filter.value.name.trim() === '') {
-    this.reset();
+    reset();
   } else {
     quizzes.value = quizzesPreFilter.value.filter((q) => q.name.toLowerCase()
         .includes(filter.value.name.trim().toLowerCase()))?.map((item) => {
@@ -151,8 +150,7 @@ function updateQuizDef(quizDef) {
         loading.value = false;
         handleEditQuizModalClose(quizDef);
         nextTick(() => {
-          console.log('announce quiz was saved!')
-          // this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
+          announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
         });
       });
 }
@@ -181,8 +179,7 @@ function deleteQuiz() {
         options.value.busy = false;
         emit('focus-on-new-button');
         nextTick(() => {
-          console.log('announce quiz was removed');
-          // this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
+          announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
         });
       });
 }
@@ -228,22 +225,24 @@ defineExpose({
                    data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>
       </div>
       <div class="flex gap-1 m-3">
-        <Button outlined
-                aria-label="Filter surveys and quizzes table"
-                @click="applyFilters"
-                data-cy="quizFilterBtn">
-          <i class="fa fa-filter" aria-hidden="true"/><span class="ml-1">Filter</span>
-        </Button>
-        <Button outlined
-                @click="reset"
-                aria-label="Reset surveys and quizzes filter"
-                data-cy="quizResetBtn">
-          <i class="fa fa-times" aria-hidden="true"/><span class="ml-1">Reset</span>
-        </Button>
+        <SkillsButton label="Filter"
+                      icon="fa fa-filter"
+                      outlined
+                      aria-label="Filter surveys and quizzes table"
+                      @click="applyFilters"
+                      data-cy="quizFilterBtn"/>
+        <SkillsButton label="Reset"
+                      icon="fa fa-times"
+                      outlined
+                      @click="reset"
+                      aria-label="Reset surveys and quizzes filter"
+                      data-cy="quizResetBtn"/>
       </div>
       <DataTable :value="quizzes" tableStyle="min-width: 50rem"
                  tableStoredStateId="quizDeffinitionsTable"
                  data-cy="quizDeffinitionsTable"
+                 :sort-field="options.sortBy"
+                 :sort-order="options.sortDesc ? -1 : 1"
                  show-gridlines
                  striped-rows>
 <!--        <Column field="name" sortable>-->
@@ -265,6 +264,53 @@ defineExpose({
         <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
           <template #header>
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+          </template>
+          <template #body="slotProps">
+            <div v-if="slotProps.field == 'name'" class="flex flex-row flex-wrap">
+                <div class="flex align-items-start justify-content-start">
+                  <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
+                               :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                               :aria-label="`Manage Quiz ${slotProps.data.name}`"
+                               tag="a">
+                    <span v-html="slotProps.data.nameHtml ? slotProps.data.nameHtml : slotProps.data.name" />
+                  </router-link>
+                </div>
+                <div class="flex flex-grow-1 align-items-start justify-content-end">
+                  <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
+                               :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                               :aria-label="`Manage Quiz ${slotProps.data.name}`">
+                    <SkillsButton label="Manage"
+                                  icon="fas fa-arrow-circle-right"
+                                  class="flex-shrink-1"
+                                  outlined
+                                  size="small"/>
+                  </router-link>
+                  <span class="p-buttonset ml-1">
+                    <SkillsButton @click="showUpdateModal(slotProps.data)"
+                                  icon="fas fa-edit"
+                                  outlined
+                                  :data-cy="`editQuizButton_${slotProps.data.quizId}`"
+                                  :aria-label="`Edit Quiz ${slotProps.data.name}`"
+                                  :ref="`edit_${slotProps.data.quizId}`"
+                                  title="Edit Quiz">
+                    </SkillsButton>
+                    <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
+                                  icon="text-warning fas fa-trash"
+                                  outlined
+                                  :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
+                                  :aria-label="'delete Quiz '+slotProps.data.name"
+                                  :ref="`delete_${slotProps.data.quizId}`"
+                                  title="Delete Quiz">
+                    </SkillsButton>
+                  </span>
+                </div>
+            </div>
+            <div v-else-if="slotProps.field === 'created'">
+              <DateCell :value="slotProps.data[col.key]" />
+            </div>
+            <div v-else>
+              {{ slotProps.data[col.key] }}
+            </div>
           </template>
         </Column>
       </DataTable>

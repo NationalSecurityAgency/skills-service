@@ -18,13 +18,13 @@ import { computed } from 'vue';
 import Badge from 'primevue/badge';
 import dayjs from '@/common-components/DayJsCustomizer';
 
-const props = defineProps(['value', 'fromStartOfDay', 'cssClass']);
+const props = defineProps(['value']);
 
-const fromNow = computed(() => {
-  if (props.fromStartOfDay) {
-    return dayjs().startOf('day').to(dayjs(props.value));
-  }
+const timeFromNow = computed(() => {
   return dayjs(props.value).startOf('seconds').fromNow();
+})
+const formattedDate = computed(() => {
+  return dayjs(props.value).format('YYYY-MM-DD HH:mm');
 })
 
 const isToday = (timestamp) => {
@@ -33,15 +33,15 @@ const isToday = (timestamp) => {
 </script>
 
 <template>
-    <span v-if="!value" class="text-primary">
-      <Badge severity="warning">Never</Badge>
-    </span>
-  <span v-else-if="isToday(value)" class="text-primary">
-      <Badge severity="info">Today</Badge>
-    </span>
-  <span v-else class="text-primary small">
-      {{ fromNow }}
-    </span>
+  <div>
+    <div>
+      <span>{{ formattedDate }}</span>
+      <Badge v-if="isToday(value)" severity="info" class="ml-2">Today</Badge>
+    </div>
+    <div class="font-light text-sm">
+      {{ timeFromNow }}
+    </div>
+  </div>
 </template>
 
 <style scoped>
