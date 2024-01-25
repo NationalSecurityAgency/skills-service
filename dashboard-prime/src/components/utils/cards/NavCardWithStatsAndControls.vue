@@ -27,7 +27,7 @@ const focusSortControl = () => {
 </script>
 
 <template>
-  <Card>
+  <Card class="relative">
     <template #content>
       <div class="flex mb-2 nav-cards-header">
         <div class="col">
@@ -98,7 +98,7 @@ const focusSortControl = () => {
            @keyup.down="moveDown"
            @keyup.up="moveUp"
            @click.prevent.self
-           class="position-absolute text-secondary px-2 py-1 sort-control"
+           class="absolute text-secondary px-2 py-1 sort-control"
            tabindex="0"
            :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
            role="button"

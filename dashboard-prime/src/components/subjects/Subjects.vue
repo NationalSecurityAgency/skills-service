@@ -3,7 +3,8 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { useStore, createNamespacedHelpers } from 'vuex'
 import { useRoute } from 'vue-router'
 import { SkillsReporter } from '@skilltree/skills-client-js';
-// import Sortable from 'sortablejs';
+import Sortable from 'sortablejs';
+import BlockUI from 'primevue/blockui';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
@@ -177,29 +178,29 @@ const handleFocus = () => {
 };
 
 const enableDropAndDrop = () => {
-  if (subjects && subjects.length > 0) {
-    const self = this;
+  if (subjects.value && subjects.value.length > 0) {
     nextTick(() => {
       const cards = document.getElementById('subjectCards');
-      // Sortable.create(cards, {
-      //   handle: '.sort-control',
-      //   animation: 150,
-      //   ghostClass: 'skills-sort-order-ghost-class',
-      //   onUpdate(event) {
-      //     self.sortOrderUpdate(event);
-      //   },
-      // });
+      Sortable.create(cards, {
+        handle: '.sort-control',
+        animation: 150,
+        ghostClass: 'skills-sort-order-ghost-class',
+        onUpdate(event) {
+          sortOrderUpdate(event);
+        },
+      });
     });
   }
 };
 
 const sortOrderUpdate = (updateEvent) => {
   const { id } = updateEvent.item;
-  sortOrder.loadingSubjectId = id;
-  sortOrder.loading = true;
-  SubjectsService.updateSubjectsDisplaySortOrder(projectId, id, updateEvent.newIndex)
+  sortOrder.value.loadingSubjectId = id;
+  sortOrder.value.loading = true;
+  SubjectsService.updateSubjectsDisplaySortOrder(projectId.value, id, updateEvent.newIndex)
       .finally(() => {
-        sortOrder.loading = false;
+        sortOrder.value.loading = false;
+        sortOrder.value.loadingSubjectId = '-1';
         SkillsReporter.reportSkill('ChangeSubjectDisplayOrder');
       });
 };
@@ -218,19 +219,20 @@ const sortOrderUpdate = (updateEvent) => {
           <div>
 <!--            <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4" class="h-100">-->
 <!--              <template #overlay>-->
-                <div class="text-center" :data-cy="`${subject.subjectId}_overlayShown`">
+            <BlockUI :blocked="sortOrder.loading">
+                <div class="absolute z-5 top-50 w-full text-center" :data-cy="`${subject.subjectId}_overlayShown`">
                   <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
-                    <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                    <skills-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                    <div class="text-info uppercase mb-1">Updating sort order!</div>
+                    <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
                   </div>
                 </div>
-<!--              </template>-->
 
               <subject :subject="subject"
                        :ref="`subj${subject.subjectId}`"
                        @subject-deleted="deleteSubject"
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        :disable-sort-control="subjects.length === 1"/>
+            </BlockUI>
 <!--            </b-overlay>-->
           </div>
         </div>
