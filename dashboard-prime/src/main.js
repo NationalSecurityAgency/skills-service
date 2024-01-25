@@ -25,6 +25,11 @@ import InputSwitch from 'primevue/inputswitch';
 import Tooltip from 'primevue/tooltip';
 import Ripple from 'primevue/ripple';
 import FocusTrap from 'primevue/focustrap';
+
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
+import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
+import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
+
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
@@ -51,6 +56,11 @@ app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
 app.component('Dialog', Dialog)
 app.component('InputSwitch', InputSwitch)
+
+app.component('SkillsButton', SkillsButton)
+app.component('SkillsTextInput', SkillsTextInput)
+app.component('SkillsIdInput', SkillsIdInput)
+
 app.directive('tooltip', Tooltip);
 app.directive('ripple', Ripple)
 app.directive('focustrap', FocusTrap);

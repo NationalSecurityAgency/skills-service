@@ -223,22 +223,29 @@ const focusOnProjectCard = (projectId) => {
 <template>
   <div>
     <SubPageHeader title="Projects" action="Project">
-      <Button v-if="isRootUser"
-              outlined
-              ref="pinProjectsButton"
-              @click="showSearchProjectModal=true"
-              aria-label="Pin projects to your Project page"
-              role="button"
-              size="small"
-              class="mr-2 bg-primary-reverse">
-        <span class="d-none d-sm-inline mr-1">Pin</span> <i class="fas fa-thumbtack" aria-hidden="true" />
-      </Button>
-      <Button id="newProjectBtn" ref="newProjButton" @click="newProject.show = true"
-              outlined class="bg-primary-reverse" size="small"
-              :disabled="addProjectDisabled"
-              data-cy="newProjectButton" aria-label="Create new Project" role="button">
-        <span class="d-none d-sm-inline  mr-1">Project</span> <i class="fas fa-plus-circle" aria-hidden="true" />
-      </Button>
+      <SkillsButton
+        v-if="isRootUser"
+        label="Pin"
+        icon="fas fa-thumbtack"
+        outlined
+        ref="pinProjectsButton"
+        @click="showSearchProjectModal=true"
+        aria-label="Pin projects to your Project page"
+        role="button"
+        size="small"
+        class="mr-2 bg-primary-reverse" />
+      <SkillsButton
+        label="Project"
+        icon="fas fa-plus-circle"
+        id="newProjectBtn"
+        ref="newProjButton"
+        @click="newProject.show = true"
+        outlined class="bg-primary-reverse"
+        size="small"
+        :disabled="addProjectDisabled"
+        data-cy="newProjectButton"
+        aria-label="Create new Project"
+        role="button" />
     </SubPageHeader>
 
     <LoadingContainer v-bind:is-loading="isLoading">

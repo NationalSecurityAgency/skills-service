@@ -6,8 +6,6 @@ import { useDebounceFn } from '@vueuse/core'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
-import IdInput from '@/components/utils/inputForm/IdInput.vue'
-import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -138,7 +136,7 @@ const onSubmit = handleSubmit(values => {
       <div v-if="!loadingComponent" v-focustrap>
       <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
 
-      <skills-text-input
+      <SkillsTextInput
         :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
         :is-required="true"
         :disabled="isSubmitting"
@@ -147,7 +145,7 @@ const onSubmit = handleSubmit(values => {
         @input="updateProjectId"
         @keydown-enter="onSubmit" />
 
-      <id-input
+      <SkillsIdInput
         name="projectId"
         :disabled="isSubmitting"
         @can-edit="updateCanEditProjectId"
@@ -217,31 +215,31 @@ const onSubmit = handleSubmit(values => {
       <!--        </div>-->
       <!--      </div>-->
       <!--      <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>-->
-      <pre> {{ errors }}</pre>
-
       <markdown-editor
         class="mt-5"
         :disabled="isSubmitting"
         name="description"/>
 
     <div class="text-right">
-      <Button severity="warning"
+      <SkillsButton
+              label="Cancel"
+              icon="far fa-times-circle"
+              severity="warning"
               outlined size="small"
               class="float-right mr-2"
               :disabled="isSubmitting"
               @click="close"
-              data-cy="closeProjectButton">
-        <span>Cancel</span><i class="far fa-times-circle ml-1" aria-hidden="true"></i>
-      </Button>
-      <Button severity="success"
+              data-cy="closeProjectButton" />
+      <SkillsButton
+              :label="`${isCopy ? 'Copy Project' : 'Save'}`"
+              icon="far fa-save"
+              severity="success"
               outlined size="small"
               class="float-right"
               @click="onSubmit"
               :disabled="!meta.valid || isSubmitting"
-              data-cy="saveProjectButton">
-        <span>{{ isCopy ? 'Copy Project' : 'Save' }}</span><i v-if="!isSubmitting" class="far fa-save ml-1" aria-hidden="true"></i>
-        <ProgressSpinner v-if="isSubmitting" style="width: 1rem; height: 1rem;" class="m-0 p-0"/>
-      </Button>
+              :loading="isSubmitting"
+              data-cy="saveProjectButton" />
     </div>
     </div>
   </Dialog>
