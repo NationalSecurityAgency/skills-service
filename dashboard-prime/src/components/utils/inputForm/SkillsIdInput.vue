@@ -19,6 +19,13 @@ function notifyAboutEditStateChange(newValue) {
 }
 
 const { value, errorMessage } = useField(() => props.name);
+
+const updateIdValue = (newValue) => {
+  value.value = newValue
+}
+defineExpose({
+  updateIdValue
+})
 </script>
 
 <template>

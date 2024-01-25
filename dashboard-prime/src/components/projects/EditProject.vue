@@ -10,6 +10,7 @@ import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
+import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -90,21 +91,10 @@ const schema = object({
     .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
 
-const { values, errors, meta, handleSubmit, setFieldValue, isSubmitting } = useForm({
+const { values, errors, meta, handleSubmit, isSubmitting } = useForm({
   validationSchema: schema,
   initialValues: props.project
 })
-
-const canEditProjectId = ref(false)
-function updateCanEditProjectId(newVal) {
-  canEditProjectId.value = newVal;
-}
-function updateProjectId(projName) {
-  if (!props.isEdit && !canEditProjectId.value) {
-    const newProjId = InputSanitizer.removeSpecialChars(projName);
-    setFieldValue('projectId', newProjId)
-  }
-}
 
 function close() {
   // this.clearComponentState(this.componentName);
@@ -136,29 +126,13 @@ const onSubmit = handleSubmit(values => {
       <div v-if="!loadingComponent" v-focustrap>
       <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
 
-      <SkillsTextInput
-        :label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
-        :is-required="true"
-        :disabled="isSubmitting"
-        name="name"
-        :autofocus="true"
-        @input="updateProjectId"
-        @keydown-enter="onSubmit" />
+        <SkillsNameAndIdInput
+          :name-label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
+          name-field-name="name"
+          :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
+          id-field-name="projectId"
+          @keydown-enter="onSubmit" />
 
-      <SkillsIdInput
-        name="projectId"
-        :disabled="isSubmitting"
-        @can-edit="updateCanEditProjectId"
-        :label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
-        @keydown-enter="onSubmit"/>
-
-
-<!--          additional-validation-rules="uniqueId"-->
-<!--          @can-edit="canEditProjectId=$event"-->
-<!--          v-on:keydown.enter.native="handleSubmit(updateProject)"-->
-<!--          :next-focus-el="previousFocus"-->
-<!--          @shown="tooltipShowing=true"-->
-<!--          @hidden="tooltipShowing=false" />-->
 
       <!--      <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">-->
       <!--        <div v-if="isCopyAndCommunityProtected">-->
