@@ -40,39 +40,44 @@ const focusOnDelete = () => {
 
 <template>
   <div class="flex justify-content-end">
-    <Button
+    <SkillsButton
         :to="{ name:'Subjects', params: { projectId: project.projectId, project: project }}"
         size="small" class="border-1 border-black-alpha-90 mr-2"
         :data-cy="'projCard_' + project.projectId + '_manageBtn'"
+        :label="readOnlyProject ? 'View' : 'Manage'"
+        icon="fas fa-arrow-circle-right ml-1"
         :aria-label="'manage project + project.name'">
-      <span v-if="readOnlyProject">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right ml-1" aria-hidden="true"/>
-    </Button>
-    <Button v-if="isRootUser"
+    </SkillsButton>
+    <SkillsButton v-if="isRootUser"
             class="border-1 border-black-alpha-90 mr-2" @click="emit('unpin-project')" data-cy="unpin" size="small"
               aria-label="'remove pin for project '+ project.name"
+              label="Unpin" icon="fas fa-ban"
               :aria-pressed="project.pinned">
       <span class="d-none d-sm-inline mr-1">Unpin</span> <i class="fas fa-ban" aria-hidden="true"/>
-    </Button>
+    </SkillsButton>
       <span class="p-buttonset mr-2" v-if="!readOnlyProject">
-        <Button ref="editBtn"
+        <SkillsButton ref="editBtn"
                 class="border-1 border-black-alpha-90"
                 size="small"
                 @click="emit('edit-project')"
                 title="Edit Project"
                 :aria-label="'Edit Project ' + project.name"
                 role="button"
-                data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></Button>
+                label="" icon="fas fa-edit"
+                data-cy="editProjBtn"></SkillsButton>
 
-        <Button ref="copyBtn"
+        <SkillsButton ref="copyBtn"
                 class="border-1 border-black-alpha-90"
                 size="small"
                 @click="emit('copy-project')"
                 title="Copy Project"
                 :aria-label="'Copy Project ' + project.name"
                 role="button"
-                data-cy="copyProjBtn"><i class="fas fa-copy" aria-hidden="true"/></Button>
+                icon="fas fa-copy"
+                label=""
+                data-cy="copyProjBtn"></SkillsButton>
 
-          <Button variant="outline-primary"
+          <SkillsButton variant="outline-primary"
                   class="border-1 border-black-alpha-90"
                   ref="deleteBtn"
                   size="small"
@@ -82,7 +87,9 @@ const focusOnDelete = () => {
                   title="Delete Project"
                   :aria-label="'Delete Project ' + project.name"
                   role="button"
-                  data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></Button>
+                  label=""
+                  icon="text-warning fas fa-trash"
+                  data-cy="deleteProjBtn"></SkillsButton>
       </span>
 
   </div>

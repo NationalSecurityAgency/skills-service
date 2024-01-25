@@ -250,12 +250,9 @@ const setProject = (newProject) => {
               fromExpirationDate()
             }}</b>.
           </span>
-        <Button @click="keepIt" data-cy="keepIt" size="small" variant="alert"
-                  :aria-label="'Keep Project '+ project.value.name">
-          <span class="d-none d-sm-inline">Keep It</span>
-          <SkillsSpinner v-if="cancellingExpiration" small style="font-size:1rem"/>
-          <i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
-        </Button>
+        <SkillsButton @click="keepIt" data-cy="keepIt" size="small" variant="alert"
+                  :aria-label="'Keep Project '+ project.value.name" label="Keep It" :icon="!cancellingExpiration ? 'fas fa-shield-alt' : ''">
+        </SkillsButton>
       </div>
       <template #subTitle v-if="project">
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
@@ -269,31 +266,30 @@ const setProject = (newProject) => {
           <i class="fas fa-fingerprint text-info" aria-hidden="true"/></span> <span class="font-italic text-muted">Project ID</span>: {{ project.projectId }}</div>
       </template>
       <template #subSubTitle v-if="project">
-        <span class="p-buttonset mr-2" v-if="!isReadOnlyProj">
-          <Button @click="displayEditProject"
+        <span class="p-SkillsButtonset mr-2" v-if="!isReadOnlyProj">
+          <SkillsButton @click="displayEditProject"
                     ref="editProjectButton"
                     class="border-1 border-black-alpha-90"
                     size="small"
                     data-cy="btn_edit-project"
+                    label="Edit" icon="fas fa-edit"
                     :aria-label="'edit Project '+project.projectId">
-            <span>Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-          </Button>
-          <Button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                    data-cy="projectPreview" size="small"
+          </SkillsButton>
+          <SkillsButton target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
+                    data-cy="projectPreview" size="small" label="Preview" icon="fas fa-eye"
                    class="border-1 border-black-alpha-90" :aria-label="'preview client display for project'+project.name">
 <!--            v-skills="'PreviewProjectClientDisplay'" -->
-            <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
-          </Button>
-          <Button v-if="isProjConfigDiscoverable"
+          </SkillsButton>
+          <SkillsButton v-if="isProjConfigDiscoverable"
                     ref="shareProjectButton"
                     size="small"
                     @click="copyAndDisplayShareProjInfo"
                     data-cy="shareProjBtn"
                     class="border-1 border-black-alpha-90"
+                    label="Share" icon="fas fa-share-alt"
                     :aria-label="`Share ${project.name} with new users`">
 <!--            v-skills="'ShareProject'" -->
-            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
-          </Button>
+          </SkillsButton>
         </span>
         <div data-cy="projectCreated">
           <i class="fas fa-clock text-success header-status-icon" aria-hidden="true" /> <ProjectDates :created="project.created" :load-last-reported-date="true"/>

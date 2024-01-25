@@ -34,33 +34,38 @@ const focusOnDelete = () => {
 <template>
   <div class="flex" :class="{ 'justify-content-center' : isReadOnlyProj }">
     <div class="col-auto">
-      <Button
+      <SkillsButton
           :to="options.navTo"
           class="border-1 border-black-alpha-90" size="small"
           :aria-label="`Manage ${options.type} ${options.name}`"
+          icon="fas fa-arrow-circle-right"
+          :label="isReadOnlyProj ? 'View' : 'Manage'"
           :data-cy="`manageBtn_${options.id}`">
-        <span v-if="isReadOnlyProj">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-      </Button>
+      </SkillsButton>
     </div>
 
     <div v-if="!isReadOnlyProj" class="col text-right">
       <span class="p-buttonset">
-        <Button v-if="options.showShare === true"
+        <SkillsButton v-if="options.showShare === true"
                 ref="shareBtn"
                 size="small"
+                label=""
+                :icon="shareBtnIcon"
                 class="border-1 border-black-alpha-90"
                 @click="handleShareClick"
-                :title="shareTitle"><i :class="shareBtnIcon" aria-hidden="true"/></Button>
-        <Button ref="editBtn"
+                :title="shareTitle"></SkillsButton>
+        <SkillsButton ref="editBtn"
                 size="small"
                 class="border-1 border-black-alpha-90"
                 @click="emit('edit')"
                 :title="`Edit ${options.type}`"
                 :aria-label="`Edit ${options.type} ${options.name}`"
                 role="button"
-                data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></Button>
+                label=""
+                icon="fas fa-edit"
+                data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></SkillsButton>
 
-          <Button variant="outline-primary"
+          <SkillsButton variant="outline-primary"
                   class="border-1 border-black-alpha-90"
                   v-tooltip="options.deleteDisabledText"
                   ref="deleteBtn"
@@ -70,7 +75,8 @@ const focusOnDelete = () => {
                   :title="`Delete ${options.type}`"
                   :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
                   role="button"
-                  data-cy="deleteBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></Button>
+                  label="" icon="text-warning fas fa-trash"
+                  data-cy="deleteBtn"></SkillsButton>
       </span>
     </div>
   </div>
