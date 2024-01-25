@@ -32,18 +32,18 @@ const focusSortControl = () => {
       <div class="flex mb-2 nav-cards-header">
         <div class="col">
           <div class="flex">
-<!--            <router-link v-if="options.icon" tag="a"-->
-<!--                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"-->
-<!--                         tabindex="-1" class="subject-icon-container">-->
+            <router-link v-if="options.icon" tag="a"
+                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
+                         tabindex="-1" class="subject-icon-container">
               <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem; height: inherit; width: inherit;" aria-hidden="true">
                 <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
               </div>
-<!--            </router-link>-->
+            </router-link>
             <div class="media-body" style="min-width: 0px; margin-left: 8px;">
-              <div class="text-truncate text-info mb-0 pb-0 preview-card-title">
-<!--                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink">-->
+              <div class="text-truncate text-info mb-0 pb-0 preview-card-title no-underline">
+                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink" class="no-underline">
                   {{ options.title }}
-<!--                </router-link>-->
+                </router-link>
                 <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1"
                    style="font-size: 1.5rem;"
                    role="alert"

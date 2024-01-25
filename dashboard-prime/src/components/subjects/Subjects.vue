@@ -12,6 +12,7 @@ import { projConfig } from '@/components/projects/ProjConfig.js';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Subject from './Subject.vue';
+import JumpToSkill from './JumpToSkill.vue';
 
 const announcer = useSkillsAnnouncer()
 const config = projConfig();
@@ -26,7 +27,7 @@ let subjects = ref([]);
 
 // const loadSubjects = () => store.dispatch('loadSubjects');
 
-watch('$route.params.projectId', function projectIdParamUpdated() {
+watch(route.params.projectId, function projectIdParamUpdated() {
   projectId.value = route.params.projectId;
   doLoadSubjects();
 });
@@ -210,7 +211,7 @@ const sortOrderUpdate = (updateEvent) => {
       <sub-page-header ref="subPageHeader" title="Subjects" :action="isReadOnlyProj ? null : 'Subject'" @add-action="openNewSubjectModal"
                        :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                        :aria-label="'new subject'"/>
-<!--      <jump-to-skill />-->
+      <jump-to-skill />
       <div v-if="subjects && subjects.length" class="flex align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3"
              style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">

@@ -32,7 +32,14 @@ import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue';
 import SkillsMetricsPage from '@/components/metrics/projectSkills/SkillsMetricsPage.vue';
 import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue';
 import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue';
-
+import AddSkillEvent from '@/components/skills/AddSkillEvent.vue';
+import VideoConfigPage from '@/components/video/VideoConfigPage.vue';
+import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue';
+import SkillPage from '@/components/skills/SkillPage.vue';
+import SkillOverview from '@//components/skills/SkillOverview.vue';
+import SubjectPage from '@/components/subjects/SubjectPage.vue';
+import Skills from '@/components/skills/Skills.vue';
+import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue';
 
 const routes = [
   {
@@ -350,7 +357,130 @@ const routes = [
           },
         },
       }],
-    }
+    },
+      {
+        path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId',
+        component: SkillPage,
+        meta: { requiresAuth: true },
+        children: [{
+          name: 'SkillOverview',
+          path: '',
+          component: SkillOverview,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSkillOverview',
+            announcer: {
+              message: 'Skill Overview',
+            },
+          },
+        }, {
+          name: 'SkillUsers',
+          path: 'users',
+          component: Users,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSkillUsers',
+            announcer: {
+              message: 'Skill Users',
+            },
+          },
+        }, {
+          name: 'ConfigureVideo',
+          path: 'configVideo',
+          component: VideoConfigPage,
+          meta: {
+            requiresAuth: true,
+            announcer: {
+              message: 'Configure Video',
+            },
+          },
+          props: true,
+        }, {
+          name: 'ConfigureExpiration',
+          path: 'configExpiration',
+          component: ExpirationConfigPage,
+          meta: {
+            requiresAuth: true,
+            announcer: {
+              message: 'Configure Expiration',
+            },
+          },
+          props: true,
+        }, {
+          name: 'AddSkillEvent',
+          path: 'addSkillEvent',
+          component: AddSkillEvent,
+          meta: {
+            requiresAuth: true,
+            breadcrumb: 'Add Skill Event',
+            announcer: {
+              message: 'Add Skill Event',
+            },
+          },
+          props: true,
+        }, {
+          name: 'SkillMetrics',
+          path: 'metrics',
+          component: SkillMetricsPage,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSkillStats',
+            announcer: {
+              message: 'Skill Metrics',
+            },
+          },
+        }],
+      },
+      {
+        path: '/administrator/projects/:projectId/subjects/:subjectId',
+        component: SubjectPage,
+        meta: { requiresAuth: true },
+        children: [{
+          name: 'SubjectSkills',
+          path: '',
+          component: Skills,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSkillsForASubject',
+            announcer: {
+              message: 'Subject Skills',
+            },
+          },
+        }, {
+          name: 'SubjectLevels',
+          path: 'levels',
+          component: Levels,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSubjectLevels',
+            announcer: {
+              message: 'Subject Levels',
+            },
+          },
+        }, {
+          name: 'SubjectUsers',
+          path: 'users',
+          component: Users,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSubjectUsers',
+            announcer: {
+              message: 'Subject Users',
+            },
+          },
+        }, {
+          name: 'SubjectMetrics',
+          path: 'metrics',
+          component: MetricsOnSubjectPage,
+          meta: {
+            requiresAuth: true,
+            reportSkillId: 'VisitSubjectMetrics',
+            announcer: {
+              message: 'Subject Metrics',
+            },
+          },
+        }],
+      },
     ],
   }
 ]
