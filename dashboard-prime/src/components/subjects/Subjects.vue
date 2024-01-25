@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, defineEmits, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { useStore, createNamespacedHelpers } from 'vuex'
 import { useRoute } from 'vue-router'
 import { SkillsReporter } from '@skilltree/skills-client-js';

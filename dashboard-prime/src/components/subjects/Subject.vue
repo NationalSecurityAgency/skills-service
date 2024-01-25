@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, defineEmits, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { useStore } from 'vuex';
 import Badge from 'primevue/badge';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'

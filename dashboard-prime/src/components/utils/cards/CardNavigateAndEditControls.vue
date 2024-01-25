@@ -1,5 +1,5 @@
 <script setup>
-import { computed, defineEmits } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps(['options']);
 const emit = defineEmits(['edit', 'delete', 'share', 'unshare']);

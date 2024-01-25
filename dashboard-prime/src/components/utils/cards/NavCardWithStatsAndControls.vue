@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import Badge from 'primevue/badge';
 import Card from 'primevue/card';
 
