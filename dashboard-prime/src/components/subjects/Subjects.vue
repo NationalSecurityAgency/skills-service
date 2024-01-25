@@ -217,8 +217,6 @@ const sortOrderUpdate = (updateEvent) => {
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3"
              style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
           <div>
-<!--            <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4" class="h-100">-->
-<!--              <template #overlay>-->
             <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-5 top-50 w-full text-center" :data-cy="`${subject.subjectId}_overlayShown`">
                   <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
@@ -233,7 +231,6 @@ const sortOrderUpdate = (updateEvent) => {
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        :disable-sort-control="subjects.length === 1"/>
             </BlockUI>
-<!--            </b-overlay>-->
           </div>
         </div>
       </div>
