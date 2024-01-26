@@ -22,6 +22,7 @@ import Breadcrumb from 'primevue/breadcrumb'
 import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
 import InputSwitch from 'primevue/inputswitch';
+import BlockUI from 'primevue/blockui';
 import Tooltip from 'primevue/tooltip';
 import Ripple from 'primevue/ripple';
 import FocusTrap from 'primevue/focustrap';
@@ -56,6 +57,7 @@ app.component('Breadcrumb', Breadcrumb)
 app.component('Dropdown', Dropdown)
 app.component('Dialog', Dialog)
 app.component('InputSwitch', InputSwitch)
+app.component('BlockUI', BlockUI)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

@@ -33,15 +33,15 @@ const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommu
 //   this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
 // }
 
-const checkProjNameUnique = useDebounceFn((projName) => {
-  if (!projName || projName.length === 0) {
+const checkProjNameUnique = useDebounceFn((value) => {
+  if (!value || value.length === 0) {
     return true
   }
   const origName = props.project.name
   if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
     return true
   }
-  return ProjectService.checkIfProjectNameExist(projName).then((remoteRes) => !remoteRes)
+  return ProjectService.checkIfProjectNameExist(value).then((remoteRes) => !remoteRes)
 }, appConfig.formFieldDebounceInMs)
 const checkProjIdUnique = useDebounceFn((value) => {
   if (!value || value.length === 0 || (props.isEdit && props.project.projectId === value)) {
@@ -126,11 +126,15 @@ const onSubmit = handleSubmit(values => {
       <div v-if="!loadingComponent" v-focustrap>
       <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
 
+        <pre>{{ isSubmitting }}</pre>
+
         <SkillsNameAndIdInput
           :name-label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
           name-field-name="name"
           :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
           id-field-name="projectId"
+          :disabled="isSubmitting"
+          :name-to-id-sync-enabled="!props.isEdit"
           @keydown-enter="onSubmit" />
 
 

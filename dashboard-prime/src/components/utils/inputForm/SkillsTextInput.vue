@@ -18,6 +18,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['input', 'keydown-enter'])
 
@@ -36,6 +40,7 @@ const { value, errorMessage } = useField(() => props.name);
       :data-cy="name"
       :autofocus="autofocus"
       :id="name"
+      :disabled="disabled"
       :class="{ 'p-invalid': errorMessage }"
       :aria-invalid="errorMessage ? null : true"
       :aria-errormessage="`${name}Error`"

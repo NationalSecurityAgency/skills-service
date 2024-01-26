@@ -3,14 +3,19 @@ import {ref} from 'vue'
 import { useField } from 'vee-validate';
 
 const props = defineProps({
-  name: String,
-  label: String,
-  isSkillId: {
-    type: Boolean,
-    default: false,
+  name: {
+    type: String,
+    required: true
   },
-  additionalValidationRules: [String],
-  nextFocusEl: HTMLElement })
+  label: {
+    type: String,
+    required: true
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+})
 
 const emit = defineEmits(['can-edit', 'keydown-enter'])
 const canEdit = ref(false)
@@ -36,7 +41,7 @@ defineExpose({
       <div class="flex justify-content-end align-items-center">
       <InputSwitch
         v-model="canEdit"
-        :disabled="canEdit"
+        :disabled="canEdit || disabled"
         class="mr-1"
         size="small"
         name="Enable Id"
@@ -59,7 +64,7 @@ defineExpose({
         id="idInput"
         v-model="value"
         @keydown.enter="emit('keydown-enter', $event.target.value)"
-        :disabled="!canEdit"
+        :disabled="!canEdit || disabled"
         aria-required="true"
         :aria-invalid="errorMessage ? true : false"
         aria-errormessage="idError"

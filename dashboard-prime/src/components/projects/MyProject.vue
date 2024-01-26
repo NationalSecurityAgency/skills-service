@@ -302,6 +302,7 @@ const handleDeleteCancelled = () => {
     <edit-project
       v-if="showEditProjectModal"
       v-model="showEditProjectModal"
+      :is-edit="true"
       :id="`editProjectModal${projectInternal.projectId}`"
       :project="projectInternal"
       @project-saved="projectSaved"/>

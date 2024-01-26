@@ -63,7 +63,11 @@ const props = defineProps({
   skillId: {
     type: String,
     default: null
-  }
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 
 //  build editor options
@@ -243,21 +247,23 @@ function attachFile(event) {
            class="mb-3"
            :class="`${labelClass}`"
            for="toastuiEditor" @click="focusOnMarkdownEditor">{{ label }}</label>
-    <toast-ui-editor id="toastuiEditor"
-                     :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
-                     class="markdown"
-                     data-cy="markdownEditorInput"
-                     ref="toastuiEditor"
-                     initialEditType="wysiwyg"
-                     previewStyle="tab"
-                     :initialValue="value"
-                     :options="editorOptions"
-                     :height="markdownHeight"
-                     @change="onEditorChange"
-                     @keydown="onKeydown"
-                     @focus="handleFocus"
-                     @load="onLoad" />
-    <div class="editor-help-footer border-1 surface-border border-round-bottom px-2 py-2">
+    <BlockUI :blocked="disabled">
+      <toast-ui-editor id="toastuiEditor"
+                       :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+                       class="markdown"
+                       data-cy="markdownEditorInput"
+                       ref="toastuiEditor"
+                       initialEditType="wysiwyg"
+                       previewStyle="tab"
+                       :initialValue="value"
+                       :options="editorOptions"
+                       :height="markdownHeight"
+                       :disabled="disabled"
+                       @change="onEditorChange"
+                       @keydown="onKeydown"
+                       @focus="handleFocus"
+                       @load="onLoad" />
+      <div class="editor-help-footer border-1 surface-border border-round-bottom px-2 py-2">
       <div class="flex text-xs">
         <div class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
@@ -276,6 +282,7 @@ function attachFile(event) {
         <i class="fas fa-exclamation-triangle" aria-hidden="true" /> {{ attachmentWarningMessage }}
       </div>
     </div>
+    </BlockUI>
     <small role="alert" class="p-error" data-cy="projectDescriptionError">{{ errorMessage || '&nbsp;' }}</small>
 
     <input @change="attachFile"
