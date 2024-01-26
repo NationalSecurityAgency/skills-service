@@ -245,6 +245,7 @@ const focusOnProjectCard = (projectId) => {
         :disabled="addProjectDisabled"
         data-cy="newProjectButton"
         aria-label="Create new Project"
+        :track-for-focus="true"
         role="button" />
     </SubPageHeader>
 
@@ -291,7 +292,8 @@ const focusOnProjectCard = (projectId) => {
       v-if="newProject.show"
       v-model="newProject.show"
       :project="newProject.project"
-      @project-saved="projectAdded"/>
+      @project-saved="projectAdded"
+      :enable-return-focus="true"/>
   </div>
 </template>
 

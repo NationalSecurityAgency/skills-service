@@ -2,6 +2,8 @@
 import { ref, useModel } from 'vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useForm } from 'vee-validate'
+import { useFocusState } from '@/stores/UseFocusState.js'
+
 const model = defineModel()
 const props = defineProps({
   header: String,
@@ -11,7 +13,11 @@ const props = defineProps({
     default: 'Save'
   },
   validationSchema: Object,
-  initialValues: Object
+  initialValues: Object,
+  enableReturnFocus: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['saved', 'cancelled'])
 const { values, errors, meta, handleSubmit, isSubmitting } = useForm({
@@ -22,8 +28,17 @@ const childBinding = ref({
   formState: meta,
   isSubmitting,
 })
+const focusState = useFocusState()
+const onUpdateVisible = (newVal) => {
+  if (!newVal) {
+    close()
+  }
+}
 const close =() => {
   model.value = false
+  if (props.enableReturnFocus) {
+    focusState.focusOnLastElement()
+  }
 }
 const onSubmit = handleSubmit(values => {
   emit('saved', values);
@@ -33,6 +48,7 @@ const onSubmit = handleSubmit(values => {
 
 <template>
   <Dialog modal
+          @update:visible="onUpdateVisible"
           :closable="!isSubmitting"
           :close-on-escape="!isSubmitting"
           v-model:visible="model"

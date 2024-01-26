@@ -1,6 +1,7 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import App from './App.vue'
@@ -36,11 +37,13 @@ import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@toast-ui/editor/dist/toastui-editor.css';
 // import 'primevue/resources/themes/lara-light-green/theme.css'
+const pinia = createPinia()
 
 const app = createApp(App)
 
 app.use(router)
 app.use(store)
+app.use(pinia)
 app.use(PrimeVue)
 app.use(ToastService)
 app.use(VueAnnouncer)

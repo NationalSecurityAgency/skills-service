@@ -311,7 +311,8 @@ const handleDeleteCancelled = () => {
       :is-edit="true"
       :id="`editProjectModal${projectInternal.projectId}`"
       :project="projectInternal"
-      @project-saved="projectSaved"/>
+      @project-saved="projectSaved"
+      :enable-return-focus="true"/>
 
 <!--    <edit-project id="editProjectModal" v-if="showEditProjectModal" v-model="showEditProjectModal"-->
 <!--                  :project="projectInternal" :is-edit="true"-->

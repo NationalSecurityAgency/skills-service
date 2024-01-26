@@ -66,6 +66,8 @@ const focusOnDelete = () => {
     </SkillsButton>
       <div class="p-buttonset mr-2 p-0 flex" v-if="!readOnlyProject">
         <SkillsButton
+          :id="`editPojBtn${project.projectId}`"
+          :track-for-focus="true"
           ref="editBtn"
           outlined
           severity="info"
