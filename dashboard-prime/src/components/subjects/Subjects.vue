@@ -22,15 +22,12 @@ const emit = defineEmits(['subjects-changed']);
 const store = useStore();
 const route = useRoute();
 const projects = createNamespacedHelpers('projects');
-const subjectsStore = createNamespacedHelpers('subjects');
-const subject = props.subject;
-let subjects = ref([]);
+
+let subjects = store.getters["subjects/subjects"];
 
 const subjRef = ref();
 const mainFocus = ref();
 const subPageHeader = ref();
-
-// const loadSubjects = () => store.dispatch('loadSubjects');
 
 watch(route.params.projectId, function projectIdParamUpdated() {
   projectId.value = route.params.projectId;
@@ -95,7 +92,7 @@ const openNewSubjectModal = () => {
 
 const doLoadSubjects = () => {
   return SubjectsService.getSubjects(route.params.projectId).then((res) => {
-    subjects.value = res;
+    subjects = res;
   }).finally(() => {
     isLoadingData.value = false;
     enableDropAndDrop();
@@ -117,7 +114,7 @@ const deleteSubject = (subject) => {
 };
 
 const updateSortAndReloadSubjects = (updateInfo) => {
-  const sortedSubjects = subjects.value.sort((a, b) => {
+  const sortedSubjects = subjects.sort((a, b) => {
     if (a.displayOrder > b.displayOrder) {
       return 1;
     }
@@ -128,7 +125,7 @@ const updateSortAndReloadSubjects = (updateInfo) => {
   });
   const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex >= 0 && (newIndex) < subjects.value.length) {
+  if (newIndex >= 0 && (newIndex) < subjects.length) {
     isLoadingData.value = true;
     const { projectId } = route.params;
     SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
@@ -137,7 +134,6 @@ const updateSortAndReloadSubjects = (updateInfo) => {
               .then(() => {
                 isLoadingData.value = false;
                 const foundRef = subjRef.value[updateInfo.id];
-                console.log(foundRef);
                 nextTick(() => {
                   foundRef[0].focusSortControl();
                 });
@@ -175,14 +171,13 @@ const handleFocus = () => {
   return new Promise((resolve) => {
     nextTick(() => {
       // this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
-      console.log(subPageHeader.value);
       resolve();
     });
   });
 };
 
 const enableDropAndDrop = () => {
-  if (subjects.value && subjects.value.length > 0) {
+  if (subjects && subjects.length > 0) {
     nextTick(() => {
       const cards = document.getElementById('subjectCards');
       Sortable.create(cards, {

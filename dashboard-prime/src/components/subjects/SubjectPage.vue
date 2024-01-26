@@ -12,7 +12,7 @@ const route = useRoute();
 const router = useRouter();
 const announcer = useSkillsAnnouncer();
 
-let subject = ref(store.getters["subjects/subject"]);
+let subject = store.getters["subjects/subject"];
 
 let isLoadingSubjects = ref(true);
 let projectId = ref('');
