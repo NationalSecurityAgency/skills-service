@@ -32,13 +32,9 @@ const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommu
 //   this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
 // }
 
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 const checkProjNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
     return true
-  }
-  if (props.isEdit) {
-    return sleep(100000)
   }
   const origName = props.project.name
   if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
@@ -93,7 +89,10 @@ const schema = object({
     .label('Project Description')
     .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
-
+const initialPojData = {
+  originalProjectId: props.project.projectId,
+  isEdit: props.isEdit,
+  ...props.project }
 
 const close = () => { model.value = false }
 
@@ -116,7 +115,7 @@ const onSubmit = (values) => {
     :loading="loadingComponent"
     :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
     :validation-schema="schema"
-    :initial-values="props.project"
+    :initial-values="initialPojData"
     @saved="onSubmit"
     @close="close"
   >

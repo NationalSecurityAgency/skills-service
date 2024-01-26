@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, computed, ref, nextTick } from 'vue';
 import { useStore } from 'vuex';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Badge from 'primevue/badge';
 import Avatar from 'primevue/avatar';
 import Card from 'primevue/card';
@@ -16,6 +17,7 @@ import EditProject from '@/components/projects/EditProject.vue'
 const props = defineProps(['project', 'disableSortControl'])
 const store = useStore();
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
+const announcer = useSkillsAnnouncer()
 
 // data items
 let isLoading = ref(false);
@@ -156,7 +158,7 @@ const projectSaved = (project) => {
         projectInternal.value = res;
         pinned.value = projectInternal.pinned;
         createCardOptions();
-        this.$announcer.polite(`Project ${project.name} has been successfully edited`);
+        announcer.polite(`Project ${project.name} has been successfully edited`);
       })
       .finally(() => {
         isLoading.value = false;
