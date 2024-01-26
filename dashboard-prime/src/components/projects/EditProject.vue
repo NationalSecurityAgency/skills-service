@@ -1,9 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { object, string } from 'yup'
-import { useForm } from 'vee-validate'
 import { useDebounceFn } from '@vueuse/core'
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
@@ -11,6 +9,7 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -27,15 +26,19 @@ const appConfig = useAppConfig()
 
 
 const communityLabels = useCommunityLabels()
-const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.project.userCommunity);
+const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.project.userCommunity)
 const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommunity)
 // if (props.isCopy && initialValueForEnableProtectedUserCommunity) {
 //   this.originalProject.enableProtectedUserCommunity = this.initialValueForEnableProtectedUserCommunity;
 // }
 
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 const checkProjNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
     return true
+  }
+  if (props.isEdit) {
+    return sleep(100000)
   }
   const origName = props.project.name
   if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
@@ -45,10 +48,10 @@ const checkProjNameUnique = useDebounceFn((value) => {
 }, appConfig.formFieldDebounceInMs)
 const checkProjIdUnique = useDebounceFn((value) => {
   if (!value || value.length === 0 || (props.isEdit && props.project.projectId === value)) {
-    return true;
+    return true
   }
   return ProjectService.checkIfProjectIdExist(value)
-    .then((remoteRes) => !remoteRes);
+    .then((remoteRes) => !remoteRes)
 
 }, appConfig.formFieldDebounceInMs)
 
@@ -62,9 +65,9 @@ const customProjectDescriptionValidator = useDebounceFn((value, context) => {
       return true
     }
     if (result.msg) {
-      return context.createError({ message: result.msg });
+      return context.createError({ message: result.msg })
     }
-    return context.createError({ message: "Field is invalid" });
+    return context.createError({ message: 'Field is invalid' })
   })
 }, appConfig.formFieldDebounceInMs)
 
@@ -91,52 +94,43 @@ const schema = object({
     .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
 
-const { values, errors, meta, handleSubmit, isSubmitting } = useForm({
-  validationSchema: schema,
-  initialValues: props.project
-})
 
-function close() {
-  // this.clearComponentState(this.componentName);
-  // this.hideModal(e);
-  model.value = false
+const close = () => { model.value = false }
+
+const onSubmit = (values) => {
+  const projToSave = {
+    ...values,
+    name: InputSanitizer.sanitize(values.name),
+    projectId: InputSanitizer.sanitize(values.projectId)
+  }
+  emit('project-saved', projToSave)
+  close()
 }
-
-const onSubmit = handleSubmit(values => {
-    // this.publishHidden({ updated: true });
-    const projToSave  = {...values,
-      name: InputSanitizer.sanitize(values.name),
-      projectId: InputSanitizer.sanitize(values.projectId)
-    }
-    emit('project-saved', projToSave);
-    close()
-})
 
 </script>
 
 <template>
-  <Dialog modal
-          v-model:visible="model"
-          :maximizable="true"
-          :header="modalTitle"
-          class="w-11 lg:w-10 xl:w-9"
+  <SkillsInputFormDialog
+    v-model="model"
+    :header="modalTitle"
+    :loading="loadingComponent"
+    :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
+    :validation-schema="schema"
+    :initial-values="props.project"
+    @saved="onSubmit"
+    @close="close"
   >
-    <skills-spinner :is-loading="loadingComponent" />
-
-      <div v-if="!loadingComponent" v-focustrap>
-      <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
-
-        <pre>{{ isSubmitting }}</pre>
-
-        <SkillsNameAndIdInput
-          :name-label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
-          name-field-name="name"
-          :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
-          id-field-name="projectId"
-          :disabled="isSubmitting"
-          :name-to-id-sync-enabled="!props.isEdit"
-          @keydown-enter="onSubmit" />
-
+    <template #default>
+      <SkillsNameAndIdInput
+        :name-label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
+        name-field-name="name"
+        :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
+        id-field-name="projectId"
+        :name-to-id-sync-enabled="!props.isEdit"
+        @keydown-enter="onSubmit" />
+      <markdown-editor
+        class="mt-5"
+        name="description" />
 
       <!--      <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">-->
       <!--        <div v-if="isCopyAndCommunityProtected">-->
@@ -193,34 +187,9 @@ const onSubmit = handleSubmit(values => {
       <!--        </div>-->
       <!--      </div>-->
       <!--      <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>-->
-      <markdown-editor
-        class="mt-5"
-        :disabled="isSubmitting"
-        name="description"/>
 
-    <div class="text-right">
-      <SkillsButton
-              label="Cancel"
-              icon="far fa-times-circle"
-              severity="warning"
-              outlined size="small"
-              class="float-right mr-2"
-              :disabled="isSubmitting"
-              @click="close"
-              data-cy="closeProjectButton" />
-      <SkillsButton
-              :label="`${isCopy ? 'Copy Project' : 'Save'}`"
-              icon="far fa-save"
-              severity="success"
-              outlined size="small"
-              class="float-right"
-              @click="onSubmit"
-              :disabled="!meta.valid || isSubmitting"
-              :loading="isSubmitting"
-              data-cy="saveProjectButton" />
-    </div>
-    </div>
-  </Dialog>
+    </template>
+  </SkillsInputFormDialog>
 </template>
 
 <style scoped>

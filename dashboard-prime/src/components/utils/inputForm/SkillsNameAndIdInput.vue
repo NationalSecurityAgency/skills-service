@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useIsSubmitting } from 'vee-validate';
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const props = defineProps({
@@ -42,6 +43,8 @@ function updateProjectId(projName) {
     skillsIdInput.value.updateIdValue(newProjId)
   }
 }
+
+const isSubmitting = useIsSubmitting();
 </script>
 
 <template>
@@ -49,7 +52,7 @@ function updateProjectId(projName) {
     <SkillsTextInput
       :label="nameLabel"
       :is-required="true"
-      :disabled="disabled"
+      :disabled="disabled || isSubmitting"
       :name="nameFieldName"
       :autofocus="true"
       @input="updateProjectId"
@@ -58,7 +61,7 @@ function updateProjectId(projName) {
     <SkillsIdInput
       ref="skillsIdInput"
       :name="idFieldName"
-      :disabled="disabled"
+      :disabled="disabled || isSubmitting"
       @can-edit="updateCanEditProjectId"
       :label="idLabel"
       @keydown-enter="emit('keydown-enter')" />
