@@ -39,58 +39,72 @@ const focusOnDelete = () => {
 </script>
 
 <template>
-  <div class="flex justify-content-end">
+  <div class="flex justify-content-end flex-wrap">
     <SkillsButton
         :to="{ name:'Subjects', params: { projectId: project.projectId, project: project }}"
-        size="small" class="border-1 border-black-alpha-90 mr-2"
+        size="small"
+        class="mr-2"
+        outlined
+        severity="info"
         :data-cy="'projCard_' + project.projectId + '_manageBtn'"
         :label="readOnlyProject ? 'View' : 'Manage'"
-        icon="fas fa-arrow-circle-right ml-1"
+        icon="fas fa-arrow-circle-right"
         :aria-label="'manage project + project.name'">
     </SkillsButton>
-    <SkillsButton v-if="isRootUser"
-            class="border-1 border-black-alpha-90 mr-2" @click="emit('unpin-project')" data-cy="unpin" size="small"
-              aria-label="'remove pin for project '+ project.name"
-              label="Unpin" icon="fas fa-ban"
-              :aria-pressed="project.pinned">
-      <span class="d-none d-sm-inline mr-1">Unpin</span> <i class="fas fa-ban" aria-hidden="true"/>
+    <SkillsButton
+      v-if="isRootUser"
+      outlined
+      severity="info"
+      @click="emit('unpin-project')"
+      data-cy="unpin"
+      size="small"
+      class="mr-2"
+      aria-label="'remove pin for project '+ project.name"
+      label="Unpin"
+      icon="fas fa-ban"
+      :aria-pressed="project.pinned">
     </SkillsButton>
-      <span class="p-buttonset mr-2" v-if="!readOnlyProject">
-        <SkillsButton ref="editBtn"
-                class="border-1 border-black-alpha-90"
-                size="small"
-                @click="emit('edit-project')"
-                title="Edit Project"
-                :aria-label="'Edit Project ' + project.name"
-                role="button"
-                label="" icon="fas fa-edit"
-                data-cy="editProjBtn"></SkillsButton>
+      <div class="p-buttonset mr-2 p-0 flex" v-if="!readOnlyProject">
+        <SkillsButton
+          ref="editBtn"
+          outlined
+          severity="info"
+          size="small"
+          @click="emit('edit-project')"
+          title="Edit Project"
+          :aria-label="'Edit Project ' + project.name"
+          role="button"
+          icon="fas fa-edit"
+          data-cy="editProjBtn" />
 
-        <SkillsButton ref="copyBtn"
-                class="border-1 border-black-alpha-90"
-                size="small"
-                @click="emit('copy-project')"
-                title="Copy Project"
-                :aria-label="'Copy Project ' + project.name"
-                role="button"
-                icon="fas fa-copy"
-                label=""
-                data-cy="copyProjBtn"></SkillsButton>
+        <SkillsButton
+          ref="copyBtn"
+          outlined
+          severity="info"
+          size="small"
+          @click="emit('copy-project')"
+          title="Copy Project"
+          :aria-label="'Copy Project ' + project.name"
+          role="button"
+          icon="fas fa-copy"
+          label=""
+          data-cy="copyProjBtn"/>
 
-          <SkillsButton variant="outline-primary"
-                  class="border-1 border-black-alpha-90"
-                  ref="deleteBtn"
-                  size="small"
-                  @click="emit('delete-project')"
-                  :disabled="isDeleteDisabled"
-                  v-tooltip="deleteDisabledText"
-                  title="Delete Project"
-                  :aria-label="'Delete Project ' + project.name"
-                  role="button"
-                  label=""
-                  icon="text-warning fas fa-trash"
-                  data-cy="deleteProjBtn"></SkillsButton>
-      </span>
+          <SkillsButton
+            outlined
+            severity="info"
+            ref="deleteBtn"
+            size="small"
+            class="p-text-secondary"
+            @click="emit('delete-project')"
+            :disabled="isDeleteDisabled"
+            v-tooltip="deleteDisabledText"
+            title="Delete Project"
+            :aria-label="'Delete Project ' + project.name"
+            role="button"
+            icon="text-warning fas fa-trash p-text-warning"
+            data-cy="deleteProjBtn" />
+      </div>
 
   </div>
 </template>

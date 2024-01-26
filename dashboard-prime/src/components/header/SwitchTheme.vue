@@ -1,29 +1,30 @@
 <script setup>
-import { ref, watch } from 'vue'
-import { usePrimeVue } from 'primevue/config';
-const availableThemes = [
-  { name: 'lara-dark-blue', code: 'ara-dark-blue' },
-  { name: 'lara-dark-amber', code: 'lara-dark-amber' },
-  { name: 'lara-dark-green', code: 'lara-dark-green' },
-  { name: 'lara-light-blue', code: 'lara-light-blue' },
-  { name: 'lara-light-green', code: 'lara-light-green' },
-]
-const currentTheme = ref({ name: 'lara-light-green', code: 'lara-light-green' })
-const PrimeVue = usePrimeVue();
+import { ref } from 'vue'
+import { usePrimeVue } from 'primevue/config'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
-watch(currentTheme, async (newTheme, oldTheme) => {
-  PrimeVue.changeTheme(oldTheme.code, newTheme.code, 'theme-link', () => {});
-})
+const PrimeVue = usePrimeVue()
+const themeHelper = useThemesHelper()
 
+const onChange = (newValue) => {
+  const newCss = newValue.value
+  const oldCss = themeHelper.themeOptions.find((i) => i.value !== newCss).value
+  PrimeVue.changeTheme(oldCss, newCss, 'theme-link')
+}
 </script>
 
 <template>
-  <Dropdown v-model="currentTheme"
-            :options="availableThemes"
-            optionLabel="name"
-            placeholder="Select Theme"
-            class="w-full md:w-14rem" />
-<!--  <Button @click="switchTheme">Switch</Button>-->
+  <SelectButton
+    v-model="themeHelper.currentTheme.value"
+    :options="themeHelper.themeOptions"
+    optionLabel="name"
+    dataKey="value"
+    @update:modelValue="onChange"
+    aria-label="Theme Switcher">
+    <template #option="slotProps">
+      <i :class="slotProps.option.icon" class="text-xl"></i>
+    </template>
+  </SelectButton>
 </template>
 
 <style scoped>

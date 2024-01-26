@@ -203,20 +203,24 @@ const handleDeleteCancelled = () => {
 
 <template>
   <div data-cy="projectCard" class="h-100">
-    <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="border-1 border-300">
-      <template #content>
-        <div class="grid mb-2">
-          <div class="col-8 text-truncate">
+    <Card :data-cy="`projectCard_${projectInternal.projectId}`">
+      <template #content class="p-0">
+        <div class="flex flex-wrap">
+          <div class="text-truncate">
             <router-link
                 :to="{ name:'Subjects', params: { projectId: projectInternal.projectId, project: projectInternal }}"
-                class="text-green-800 no-underline mb-0 pb-0 preview-card-title" :title="`${projectInternal.name}`"
+                class="no-underline mb-0 pb-0" :title="`${projectInternal.name}`"
                 :aria-label="`manage project ${projectInternal.name}`"
                 role="link"
                 :data-cy="`projCard_${projectInternal.projectId}_manageLink`">
-              <Avatar variant="info" icon="people-fill" class="uppercase avatar-link" aria-hidden="true" shape="circle">
+              <Avatar
+                class="uppercase"
+                size="large"
+                aria-hidden="true"
+                shape="circle">
                 {{ projectInternal.name.substring(0, 2) }}
               </Avatar>
-              {{ projectInternal.name }}
+              <span class="text-2xl font-bold ml-2">{{ projectInternal.name }}</span>
             </router-link>
             <div v-if="projectInternal.userCommunity" class="my-2" data-cy="userCommunity">
               <span class="border p-1 border-danger rounded"><i
@@ -226,7 +230,7 @@ const handleDeleteCancelled = () => {
                 class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
             </div>
           </div>
-          <div class="col-4">
+          <div class="flex-1">
             <ProjectCardControls
                 :class="{ 'mr-md-4': !disableSortControl}"
                 ref="cardControls"
@@ -241,7 +245,7 @@ const handleDeleteCancelled = () => {
           </div>
         </div>
 
-        <div class="grid text-center justify-content-center">
+        <div class="grid text-center justify-content-center mt-2">
           <div v-for="(stat) in stats" :key="stat.label" class="col mt-1" style="min-width: 10rem;">
             <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 stat-card surface-100">
               <i :class="stat.icon"></i>
@@ -342,11 +346,6 @@ const handleDeleteCancelled = () => {
   font-size: 0.9rem;
 }
 
-.preview-card-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-}
-
 .preview-card-subTitle {
   font-size: 0.8rem;
 }
@@ -355,10 +354,6 @@ const handleDeleteCancelled = () => {
   font-size: 0.9rem;
 }
 
-.avatar-link i {
-  font-size: 2.5rem;
-  display: inline-block;
-}
 
 .stat-card {
   padding: 1rem;

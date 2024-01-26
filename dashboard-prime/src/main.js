@@ -23,8 +23,9 @@ import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
 import InputSwitch from 'primevue/inputswitch';
 import BlockUI from 'primevue/blockui';
+import SelectButton from 'primevue/selectbutton';
+
 import Tooltip from 'primevue/tooltip';
-import Ripple from 'primevue/ripple';
 import FocusTrap from 'primevue/focustrap';
 
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
@@ -40,7 +41,7 @@ const app = createApp(App)
 
 app.use(router)
 app.use(store)
-app.use(PrimeVue, { ripple: true })
+app.use(PrimeVue)
 app.use(ToastService)
 app.use(VueAnnouncer)
 app.component('Button', Button)
@@ -58,13 +59,13 @@ app.component('Dropdown', Dropdown)
 app.component('Dialog', Dialog)
 app.component('InputSwitch', InputSwitch)
 app.component('BlockUI', BlockUI)
+app.component('SelectButton', SelectButton)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)
 app.component('SkillsIdInput', SkillsIdInput)
 
 app.directive('tooltip', Tooltip);
-app.directive('ripple', Ripple)
 app.directive('focustrap', FocusTrap);
 
 app.mount('#app')

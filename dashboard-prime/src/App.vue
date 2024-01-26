@@ -10,6 +10,7 @@ import PageVisitService from '@/PageVisitService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
 import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const store = useStore()
 const isSupervisor = ref(false)
@@ -30,8 +31,11 @@ const isLoadingApp = computed(() => {
   return store.getters.loadingConfig || store.getters.restoringSession
 })
 const showUserAgreement = computed(() => {
-  return store.getters.showUa
-})
+    return store.getters.showUa
+  })
+
+const themeHelper = useThemesHelper()
+themeHelper.configureDefaultThemeFileInHeadTag()
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
 const isAdminPage = (route) => route.path.startsWith('/administrator')
@@ -199,7 +203,7 @@ onMounted(() => {
 
 <template>
   <div role="presentation" class="surface-ground">
-<!--    <VueAnnouncer />-->
+    <!--    <VueAnnouncer />-->
 
     <!--    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>-->
     <div id="app" class="px-3">

@@ -29,7 +29,6 @@ onMounted(() => {
               <div v-if="!collapsed" class="pt-3 px-3">Navigate</div>
               <div class="flex-1" :class="{ 'text-right': !collapsed, 'text-center': collapsed}">
                 <Button size="small" text
-                        v-ripple
                         data-cy="navCollapseOrExpand"
                         @click="flipCollapsed"
                         :aria-label="collapsed ? 'Expand Navigation' : 'Collapse Navigation'"
