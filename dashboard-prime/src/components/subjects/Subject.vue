@@ -6,6 +6,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SubjectsService from '@/components/subjects/SubjectsService';
 import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue';
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import LoadingCard from '@/components/utils/LoadingCard.vue';
 
 const announcer = useSkillsAnnouncer()
@@ -13,6 +14,8 @@ const store = useStore();
 const emit = defineEmits(['sort-changed-requested', 'subject-deleted']);
 const props = defineProps(['subject', 'disableSortControl']);
 const subject = props.subject;
+
+const subjectCardControls = ref();
 
 let isLoading = ref(false);
 let showDeleteDialog = ref(false);
@@ -154,7 +157,7 @@ const hiddenEventHandler = (e) => {
 const handleFocus = () => {
   return new Promise((resolve) => {
     nextTick(() => {
-      this.$refs.subjectCardControls.focusOnEdit();
+      subjectCardControls.value.focusOnEdit();
       resolve();
     });
   });
@@ -162,7 +165,7 @@ const handleFocus = () => {
 
 const handleDeleteCancelled = () => {
   nextTick(() => {
-    this.$refs.subjectCardControls.focusOnDelete();
+    subjectCardControls.value.focusOnDelete();
   });
 };
 
@@ -204,14 +207,14 @@ watch(subject, async (newVal, oldVal) => {
 <!--    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"-->
 <!--                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>-->
 
-<!--    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject" @hidden="handleDeleteCancelled">-->
-<!--      <p>-->
-<!--        This will remove <span class="text-primary font-weight-bold">{{ subjectInternal.name}}</span>.-->
-<!--      </p>-->
-<!--      <div>-->
-<!--        Subject with id [{{subjectInternal.subjectId}}] will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.-->
-<!--      </div>-->
-<!--    </removal-validation>-->
+    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject" @hidden="handleDeleteCancelled" :value="showDeleteDialog">
+      <p>
+        This will remove <span class="text-primary font-bold">{{ subjectInternal.name}}</span>.
+      </p>
+      <div>
+        Subject with id [{{subjectInternal.subjectId}}] will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.
+      </div>
+    </removal-validation>
   </div>
 </template>
 

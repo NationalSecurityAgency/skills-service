@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps(['options']);
 const emit = defineEmits(['edit', 'delete', 'share', 'unshare']);
@@ -14,6 +14,9 @@ const shareTitle = computed(() => {
   return props.options?.shareEnabled === true ? `Share ${props.options?.type}` : `Unshare ${props.options?.type}`;
 });
 
+const editBtn = ref(null);
+const deleteBtn = ref(null);
+
 const handleShareClick = () => {
   let eventName = 'share';
   if (props.options.shareEnabled === false) {
@@ -23,12 +26,14 @@ const handleShareClick = () => {
 };
 
 const focusOnEdit = () => {
-  this.$refs.editBtn.focus();
+  // editBtn.value.focus();
 };
 
 const focusOnDelete = () => {
-  this.$refs.deleteBtn.focus();
+  // deleteBtn.value.focus();
 };
+
+defineExpose({focusOnDelete, focusOnEdit});
 </script>
 
 <template>
@@ -36,7 +41,7 @@ const focusOnDelete = () => {
     <div class="col-auto">
       <SkillsButton
           :to="options.navTo"
-          class="border-1 border-black-alpha-90" size="small"
+          size="small"
           :aria-label="`Manage ${options.type} ${options.name}`"
           icon="fas fa-arrow-circle-right"
           :label="isReadOnlyProj ? 'View' : 'Manage'"
@@ -51,12 +56,10 @@ const focusOnDelete = () => {
                 size="small"
                 label=""
                 :icon="shareBtnIcon"
-                class="border-1 border-black-alpha-90"
                 @click="handleShareClick"
                 :title="shareTitle"></SkillsButton>
         <SkillsButton ref="editBtn"
                 size="small"
-                class="border-1 border-black-alpha-90"
                 @click="emit('edit')"
                 :title="`Edit ${options.type}`"
                 :aria-label="`Edit ${options.type} ${options.name}`"
@@ -66,7 +69,6 @@ const focusOnDelete = () => {
                 data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></SkillsButton>
 
           <SkillsButton variant="outline-primary"
-                  class="border-1 border-black-alpha-90"
                   v-tooltip="options.deleteDisabledText"
                   ref="deleteBtn"
                   size="small"

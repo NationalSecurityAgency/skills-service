@@ -26,6 +26,10 @@ const subjectsStore = createNamespacedHelpers('subjects');
 const subject = props.subject;
 let subjects = ref([]);
 
+const subjRef = ref();
+const mainFocus = ref();
+const subPageHeader = ref();
+
 // const loadSubjects = () => store.dispatch('loadSubjects');
 
 watch(route.params.projectId, function projectIdParamUpdated() {
@@ -100,22 +104,20 @@ const doLoadSubjects = () => {
 
 const deleteSubject = (subject) => {
   isLoadingData.value = true;
-  SubjectsService.deleteSubject(subject)
-      .then(() => {
-        config.loadProjectDetailsState({ projectId: projectId });
-        loadSubjects({ projectId: route.params.projectId })
-            .then(() => {
-              isLoadingData.value = false;
-              emit('subjects-changed', subject.subjectId);
-              nextTick(() => {
-                announcer.polite(`Subject ${subject.name} has been deleted`);
-              });
-            });
+  SubjectsService.deleteSubject(subject).then(() => {
+    // loadProjectDetailsState({ projectId: projectId });
+    doLoadSubjects().then(() => {
+      isLoadingData.value = false;
+      emit('subjects-changed', subject.subjectId);
+      nextTick(() => {
+        announcer.polite(`Subject ${subject.name} has been deleted`);
       });
+    });
+  });
 };
 
 const updateSortAndReloadSubjects = (updateInfo) => {
-  const sortedSubjects = subjects.sort((a, b) => {
+  const sortedSubjects = subjects.value.sort((a, b) => {
     if (a.displayOrder > b.displayOrder) {
       return 1;
     }
@@ -126,7 +128,7 @@ const updateSortAndReloadSubjects = (updateInfo) => {
   });
   const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex >= 0 && (newIndex) < subjects.length) {
+  if (newIndex >= 0 && (newIndex) < subjects.value.length) {
     isLoadingData.value = true;
     const { projectId } = route.params;
     SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
@@ -134,7 +136,8 @@ const updateSortAndReloadSubjects = (updateInfo) => {
           doLoadSubjects()
               .then(() => {
                 isLoadingData.value = false;
-                const foundRef = this.$refs[`subj${updateInfo.id}`];
+                const foundRef = subjRef.value[updateInfo.id];
+                console.log(foundRef);
                 nextTick(() => {
                   foundRef[0].focusSortControl();
                 });
@@ -156,7 +159,7 @@ const subjectAdded = (subject) => {
                 });
               });
             });
-        loadProjectDetailsState({ projectId: projectId });
+        // loadProjectDetailsState({ projectId: projectId });
         emit('subjects-changed', subject.subjectId);
         SkillsReporter.reportSkill('CreateSubject');
       });
@@ -171,7 +174,8 @@ const handleHide = (e) => {
 const handleFocus = () => {
   return new Promise((resolve) => {
     nextTick(() => {
-      this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+      // this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
+      console.log(subPageHeader.value);
       resolve();
     });
   });
@@ -213,7 +217,7 @@ const sortOrderUpdate = (updateEvent) => {
                        :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                        :aria-label="'new subject'"/>
       <jump-to-skill />
-      <div v-if="subjects && subjects.length" class="flex align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
+      <div v-if="subjects && subjects.length" class="flex flex-wrap align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
         <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3"
              style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
           <div>
@@ -226,7 +230,7 @@ const sortOrderUpdate = (updateEvent) => {
                 </div>
 
               <subject :subject="subject"
-                       :ref="`subj${subject.subjectId}`"
+                       :ref="`(el) => (subjRef[subject.subjectId] = el)`"
                        @subject-deleted="deleteSubject"
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        :disable-sort-control="subjects.length === 1"/>
