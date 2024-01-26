@@ -89,7 +89,7 @@ const schema = object({
     .label('Project Description')
     .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
-const initialPojData = {
+const initialProjData = {
   originalProjectId: props.project.projectId,
   isEdit: props.isEdit,
   ...props.project }
@@ -115,7 +115,7 @@ const onSubmit = (values) => {
     :loading="loadingComponent"
     :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
     :validation-schema="schema"
-    :initial-values="initialPojData"
+    :initial-values="initialProjData"
     @saved="onSubmit"
     @close="close"
   >
