@@ -20,13 +20,14 @@ import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Badge from 'primevue/badge';
 import StringHighlighter from "@/common-components/utilities/StringHighlighter.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import EditQuiz from "@/components/quiz/testCreation/EditQuiz.vue";
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 
 const announcer = useSkillsAnnouncer()
-const emit = defineEmits(['focus-on-new-button'])
 const loading = ref(false);
 const filter = ref({
   name: '',
@@ -81,7 +82,6 @@ const editQuizInfo = ref({
       isEdit: false,
       quizDef: {},
 });
-const refs = ref({});  // keep track of dynamic refs
 
 const hasData = computed(() => {
   return quizzesPreFilter.value && quizzesPreFilter.value.length > 0;
@@ -149,7 +149,6 @@ function updateQuizDef(quizDef) {
       .finally(() => {
         options.value.busy = false;
         loading.value = false;
-        handleEditQuizModalClose(quizDef);
         nextTick(() => {
           announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
         });
@@ -178,27 +177,10 @@ function deleteQuiz() {
       })
       .finally(() => {
         options.value.busy = false;
-        emit('focus-on-new-button');
         nextTick(() => {
           announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
         });
       });
-}
-function handleEditQuizModalClose(quizDef) {
-  const isNewQuizDef = !quizDef.originalQuizId && !quizDef.isEdit;
-  if (isNewQuizDef) {
-    emit('focus-on-new-button');
-  } else {
-    focusOnRefId(`edit_${quizDef.quizId}`);
-  }
-}
-function focusOnRefId(refId) {
-  nextTick(() => {
-    const ref = this.$refs[refId];
-    if (ref) {
-      ref.focus();
-    }
-  });
 }
 const showUpdateModal = (quizDef, isEdit = true) => {
   editQuizInfo.value.quizDef = quizDef;
@@ -286,6 +268,8 @@ defineExpose({
                                   :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
                                   :aria-label="'delete Quiz '+slotProps.data.name"
                                   :ref="`delete_${slotProps.data.quizId}`"
+                                  :id="`delete_${slotProps.data.quizId}`"
+                                  :track-for-focus="true"
                                   title="Delete Quiz">
                     </SkillsButton>
                   </span>
@@ -309,6 +293,28 @@ defineExpose({
         :quiz="editQuizInfo.quizDef"
         @quiz-saved="updateQuizDef"
         :enable-return-focus="true"/>
+
+    <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
+                        :removal-not-available="deleteQuizInfo.disableDelete"
+                        :enable-return-focus="true"
+                        @do-remove="deleteQuiz">
+      <skills-spinner :is-loading="deleteQuizInfo.loadingDeleteCheck" class="my-4"/>
+      <div v-if="!deleteQuizInfo.loadingDeleteCheck">
+        <div v-if="deleteQuizInfo.disableDelete">
+          Cannot remove the quiz since it is currently assigned to <Badge>{{ deleteQuizInfo.numSkillsAssignedTo }}</Badge> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
+        </div>
+        <div v-if="!deleteQuizInfo.disableDelete">
+          <p>
+            This will remove <span
+              class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
+          </p>
+          <div>
+            Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
+            as well as users' achievements, stats and metrics. Proceed with caution!
+          </div>
+        </div>
+      </div>
+    </removal-validation>
 
   </div>
 </template>

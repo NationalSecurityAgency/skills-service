@@ -41,18 +41,6 @@ function addClicked() {
   emit('add-action');
 }
 
-function focusOnActionBtn() {
-  nextTick(() => {
-    if (actionButton) {
-      // actionButton.value.focus();
-    }
-  });
-}
-
-defineExpose({
-  focusOnActionBtn,
-})
-
 </script>
 
 <template>

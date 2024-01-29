@@ -20,13 +20,6 @@ import QuizDefinitions from '@/components/quiz/QuizDefinitions.vue';
 
 const configuredTests = ref(null)
 const quizDefPageSubPageHeader = ref(null)
-const showNewTestModal = ref(false)
-
-const newQuiz = ref({
-  show: false,
-  isEdit: false,
-  quiz: {},
-})
 function openNewTestModal() {
   configuredTests.value.showUpdateModal({
     name: '',
@@ -34,9 +27,6 @@ function openNewTestModal() {
     type: 'Quiz',
     description: '',
   }, false);
-}
-function focusOnNewButton() {
-  quizDefPageSubPageHeader.value.focusOnActionBtn();
 }
 </script>
 
@@ -50,7 +40,7 @@ function focusOnNewButton() {
     </SubPageHeader>
     <Card :pt="{ body: { class: 'p-0' } }">
       <template #content>
-        <QuizDefinitions ref="configuredTests" @focus-on-new-button="focusOnNewButton"/>
+        <QuizDefinitions ref="configuredTests"/>
       </template>
     </Card>
   </div>

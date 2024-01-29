@@ -2,14 +2,11 @@
 import { ref, watch, computed } from 'vue';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import {useFocusState} from "@/stores/UseFocusState.js";
 
-const emit = defineEmits(['hidden', 'do-remove', 'input']);
+const emit = defineEmits(['hidden', 'do-remove']);
 
 const props = defineProps({
-  value: {
-    type: Boolean,
-    required: true,
-  },
   validationText: {
     type: String,
     required: false,
@@ -19,33 +16,42 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false,
-  }
+  },
+  enableReturnFocus: {
+    type: Boolean,
+    default: false
+  },
 });
 
-let show = ref(props.value);
-let currentValidationText = ref('');
+const model = defineModel()
 
-watch(show, (newValue, oldValue) => {
-  emit('input', newValue);
-})
+let currentValidationText = ref('');
 
 const removeDisabled = computed(() => {
   return currentValidationText.value !== props.validationText;
 });
 
+const focusState = useFocusState()
 const publishHidden = (e) => {
-  show.value = false;
+  close()
   emit('hidden', { ...e });
 };
 
 const removeAction = () => {
-  show.value = false;
+  close()
   emit('do-remove');
 };
+
+const close =() => {
+  model.value = false
+  if (props.enableReturnFocus) {
+    focusState.focusOnLastElement()
+  }
+}
 </script>
 
 <template>
-  <Dialog v-model:visible="show" modal header="Removal Safety Check" @hide="publishHidden" :style="{ width: '40rem' }">
+  <Dialog v-model:visible="model" modal header="Removal Safety Check" @update:visible="publishHidden" :style="{ width: '40rem' }">
     <div class="px-2">
       <div data-cy="removalSafetyCheckMsg">
         <slot />
