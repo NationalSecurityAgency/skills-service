@@ -87,8 +87,7 @@ const schema = object({
 })
 const loadDescription = () => {
   return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
-    console.log('data', data)
-    return { 'description': data.description }
+    return { 'description': data.description || '' }
   })
 }
 const asyncLoadData = props.isEdit ? loadDescription : null

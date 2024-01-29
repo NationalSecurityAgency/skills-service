@@ -98,7 +98,7 @@ const initialProjData = {
 
 const loadDescription = () => {
   return ProjectService.loadDescription(props.project.projectId).then((data) => {
-    return { 'description': data.description }
+    return { 'description': data.description || '' }
   })
 }
 const asyncLoadData = props.isEdit ? loadDescription : null
