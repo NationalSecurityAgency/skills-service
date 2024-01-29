@@ -1,10 +1,11 @@
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 
+const isLoadingAsyncData = ref(true)
 const model = defineModel()
 const props = defineProps({
   id: {
@@ -22,11 +23,13 @@ const props = defineProps({
   enableReturnFocus: {
     type: Boolean,
     default: false
-  }
+  },
+  asyncLoadDataFunction: Function,
 })
 const emit = defineEmits(['saved', 'cancelled'])
 
-const { values, errors, meta, handleSubmit, isSubmitting, setFieldValue } = useForm({
+
+const { values, meta, handleSubmit, isSubmitting, setFieldValue } = useForm({
   validationSchema: props.validationSchema,
   initialValues: props.initialValues
 })
@@ -43,11 +46,23 @@ const onSubmit = handleSubmit(formValue => {
   close()
 })
 
-
-
 const isDialogLoading = computed(() => {
   return props.loading || inputFormResiliency.isInitializing
 })
+
+if (props.asyncLoadDataFunction) {
+  isLoadingAsyncData.value = true
+  props.asyncLoadDataFunction().then((res) => {
+    for (const [key, value] of Object.entries(res)) {
+      setFieldValue(key, value)
+    }
+  }).finally(() => {
+    isLoadingAsyncData.value = false
+  })
+} else {
+  isLoadingAsyncData.value = false
+}
+
 </script>
 
 <template>

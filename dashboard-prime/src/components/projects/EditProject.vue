@@ -14,7 +14,6 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
 const emit = defineEmits(['project-saved'])
-const loadingComponent = ref(false)
 
 let formId = 'newProjectDialog'
 let modalTitle = 'New Project'
@@ -26,7 +25,6 @@ if (props.isEdit) {
   modalTitle ='Copy Project'
 }
 const appConfig = useAppConfig()
-
 
 const communityLabels = useCommunityLabels()
 const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.project.userCommunity)
@@ -58,7 +56,6 @@ const customProjectDescriptionValidator = useDebounceFn((value, context) => {
   if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
-
   return DescriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value).then((result) => {
     if (result.valid) {
       return true
@@ -99,6 +96,13 @@ const initialProjData = {
   description: props.project.description || '',
 }
 
+const loadDescription = () => {
+  return ProjectService.loadDescription(props.project.projectId).then((data) => {
+    return { 'description': data.description }
+  })
+}
+const asyncLoadData = props.isEdit ? loadDescription : null
+
 const close = () => { model.value = false }
 
 const onSubmit = (values) => {
@@ -118,12 +122,12 @@ const onSubmit = (values) => {
     :id="formId"
     v-model="model"
     :header="modalTitle"
-    :loading="loadingComponent"
     :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
     :validation-schema="schema"
     :initial-values="initialProjData"
     @saved="onSubmit"
     @close="close"
+    :async-load-data-function="asyncLoadData"
   >
     <template #default>
       <SkillsNameAndIdInput
