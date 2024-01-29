@@ -32,6 +32,7 @@ import FocusTrap from 'primevue/focustrap';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
+import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -67,6 +68,7 @@ app.component('SelectButton', SelectButton)
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)
 app.component('SkillsIdInput', SkillsIdInput)
+app.component('SkillsDialog', SkillsDialog)
 
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);
