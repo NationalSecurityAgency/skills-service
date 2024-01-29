@@ -203,7 +203,7 @@ onMounted(() => {
 
 <template>
   <div role="presentation" class="surface-ground">
-    <!--    <VueAnnouncer />-->
+    <VueAnnouncer class="sr-only" />
 
     <!--    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>-->
     <div id="app" class="px-3">

@@ -1,3 +1,4 @@
+import * as emoji from 'node-emoji';
 export const useCommonMarkdownOptions = () => {
   const markdownOptions = {
     linkAttributes: {

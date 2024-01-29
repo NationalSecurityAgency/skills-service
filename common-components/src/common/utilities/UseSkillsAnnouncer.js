@@ -8,7 +8,12 @@ export const useSkillsAnnouncer = () => {
     nextTick(() => announcer.polite(msg))
   }
 
+  const assertive = (msg) => {
+    nextTick(() => announcer.assertive(msg))
+  }
+
   return {
-    polite
+    polite,
+    assertive
   }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useField } from 'vee-validate'
 import { useIsSubmitting } from 'vee-validate';
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
@@ -103,7 +103,9 @@ const markdownAccessibilityFixes = useMarkdownAccessibilityFixes()
 const editorOptions = Object.assign(commonOptions.markdownOptions, options)
 
 const { value, errorMessage } = useField(() => props.name)
-
+if (value === undefined || value == null) {
+  value.value =  ''
+}
 const toastuiEditor = ref(null)
 const fileInputRef = ref(null)
 const attachmentError = ref('')
@@ -125,6 +127,9 @@ const focusOnMarkdownEditor = () => {
 }
 const addFileLink = (linkUrl, linkText) => {
   toastuiEditor.value.invoke('exec', 'addLink', { linkUrl, linkText })
+}
+const setMarkdownText = (newText) => {
+  return toastuiEditor.value.invoke('setMarkdown', newText)
 }
 
 onMounted(() => {
@@ -241,6 +246,14 @@ function attachFile(event) {
 }
 
 const isSubmitting = useIsSubmitting();
+
+watch(value, (newValue, oldValue) =>{
+  console.log(`watching [${newValue}] <> [${markdownText()}]`)
+  if (newValue !== markdownText()) {
+    console.log(`setMarkdown`)
+    setMarkdownText(newValue)
+  }
+})
 </script>
 
 <template>

@@ -1,11 +1,17 @@
 <script setup>
-import { ref, useModel } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useForm } from 'vee-validate'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
+import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 
 const model = defineModel()
 const props = defineProps({
+  id:{
+    type: String,
+    required: true
+  },
   header: String,
   loading: Boolean,
   saveButtonLabel:{
@@ -20,7 +26,7 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['saved', 'cancelled'])
-const { values, errors, meta, handleSubmit, isSubmitting } = useForm({
+const { values, errors, meta, handleSubmit, isSubmitting, setFieldValue } = useForm({
   validationSchema: props.validationSchema,
   initialValues: props.initialValues
 })
@@ -34,15 +40,24 @@ const onUpdateVisible = (newVal) => {
     close()
   }
 }
+
+const inputFormResiliency = reactive(useInputFormResiliency())
+inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
+
 const close =() => {
   model.value = false
   if (props.enableReturnFocus) {
     focusState.focusOnLastElement()
   }
+  inputFormResiliency.discard(false)
 }
 const onSubmit = handleSubmit(values => {
   emit('saved', values);
   close()
+})
+
+const isDialogLoading = computed(() => {
+  return props.loading || inputFormResiliency.isInitializing
 })
 </script>
 
@@ -56,10 +71,12 @@ const onSubmit = handleSubmit(values => {
           :header="header"
           class="w-11 lg:w-10 xl:w-9"
   >
-    <skills-spinner :is-loading="loading" />
+    <skills-spinner :is-loading="isDialogLoading" />
 
-    <div v-if="!loading" v-focustrap>
-      <!--      <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />-->
+    <div v-if="!isDialogLoading" v-focustrap>
+     <form-reload-warning
+       v-if="inputFormResiliency.isRestoredFromStore"
+       @discard-changes="inputFormResiliency.discard"/>
 
       <slot></slot>
 

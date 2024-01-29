@@ -16,12 +16,15 @@ const props = defineProps(['project', 'isEdit', 'isCopy'])
 const emit = defineEmits(['project-saved'])
 const loadingComponent = ref(false)
 
-const modalTitle = computed(() => {
-  if (props.isCopy) {
-    return 'Copy Project'
-  }
-  return props.isEdit ? 'Editing Existing Project' : 'New Project'
-})
+let formId = 'newProjectDialog'
+let modalTitle = 'New Project'
+if (props.isEdit) {
+  formId = `editProjectDialog-${props.project.projectId}`
+  modalTitle = 'Editing Existing Project'
+} else if (props.isCopy) {
+  formId = `copyProjectDialog-${props.project.projectId}`
+  modalTitle ='Copy Project'
+}
 const appConfig = useAppConfig()
 
 
@@ -92,6 +95,7 @@ const schema = object({
 const initialProjData = {
   originalProjectId: props.project.projectId,
   isEdit: props.isEdit,
+  description: '',
   ...props.project }
 
 const close = () => { model.value = false }
@@ -110,6 +114,7 @@ const onSubmit = (values) => {
 
 <template>
   <SkillsInputFormDialog
+    :id="formId"
     v-model="model"
     :header="modalTitle"
     :loading="loadingComponent"
