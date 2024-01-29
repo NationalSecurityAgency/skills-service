@@ -95,8 +95,9 @@ const schema = object({
 const initialProjData = {
   originalProjectId: props.project.projectId,
   isEdit: props.isEdit,
-  description: '',
-  ...props.project }
+  ...props.project,
+  description: props.project.description || '',
+}
 
 const close = () => { model.value = false }
 

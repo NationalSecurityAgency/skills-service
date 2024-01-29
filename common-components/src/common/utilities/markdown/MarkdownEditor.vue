@@ -247,10 +247,8 @@ function attachFile(event) {
 
 const isSubmitting = useIsSubmitting();
 
-watch(value, (newValue, oldValue) =>{
-  console.log(`watching [${newValue}] <> [${markdownText()}]`)
+watch(value, (newValue) =>{
   if (newValue !== markdownText()) {
-    console.log(`setMarkdown`)
     setMarkdownText(newValue)
   }
 })

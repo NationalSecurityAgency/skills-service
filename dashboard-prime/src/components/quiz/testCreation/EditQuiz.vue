@@ -24,6 +24,7 @@ const loadingComponent = ref(false)
 const modalTitle = computed(() => {
   return props.isEdit ? 'Editing Existing Quiz' : 'New Quiz'
 })
+const modalId = props.isEdit ? `ediQuizDialog${props.quiz.quizId}` : 'newQuizDialog'
 const appConfig = useAppConfig()
 
 
@@ -87,7 +88,9 @@ const schema = object({
 const initialQuizData = {
   originalQuizId: props.quiz.quizId,
   isEdit: props.isEdit,
-  ...props.quiz }
+  ...props.quiz,
+  description: props.quiz.description || ''
+}
 
 const close = () => { model.value = false }
 
@@ -105,6 +108,7 @@ const onSubmit = (values) => {
 
 <template>
   <SkillsInputFormDialog
+      :id="modalId"
       v-model="model"
       :header="modalTitle"
       :loading="loadingComponent"

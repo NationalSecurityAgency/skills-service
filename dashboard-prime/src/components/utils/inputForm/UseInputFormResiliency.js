@@ -15,9 +15,7 @@ export const useInputFormResiliency = () => {
     indexedDb.load(componentName).then((objFromStorage) => {
       if (objFromStorage) {
         for (const [key, value] of Object.entries(objFromStorage)) {
-          console.log(`compare [${value}] !== [${modelObj[key]}]`)
           if (value !== modelObj[key]) {
-            console.log(`calling setFieldValueFunction(${key}, ${value})`)
             setFieldValueFunction(key, value)
             isRestoredFromStore.value = true
           }
@@ -33,7 +31,6 @@ export const useInputFormResiliency = () => {
     operationsContainer.setFieldValueFunction = setFieldValueFunction
     operationsContainer.originalModal = initialValues
     operationsContainer.currentReactiveModel = modelObj
-console.log(`init ${JSON.stringify(operationsContainer, null, 2)}`)
 
     loadFromStorageAndUpdateAsNeeded(componentName, modelObj, setFieldValueFunction)
 
@@ -47,7 +44,6 @@ console.log(`init ${JSON.stringify(operationsContainer, null, 2)}`)
     if (updateModel) {
       for (const [key, value] of Object.entries(operationsContainer.originalModal)) {
 
-        console.log(`discard [${value}] !== [${operationsContainer.currentReactiveModel[key]}]`)
         if (value !== operationsContainer.currentReactiveModel[key]) {
           operationsContainer.setFieldValueFunction(key, value)
           isRestoredFromStore.value = true
