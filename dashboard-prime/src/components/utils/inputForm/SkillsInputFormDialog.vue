@@ -29,9 +29,9 @@ const props = defineProps({
 const emit = defineEmits(['saved', 'cancelled'])
 
 
-const { values, meta, handleSubmit, isSubmitting, setFieldValue } = useForm({
+const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate } = useForm({
   validationSchema: props.validationSchema,
-  initialValues: props.initialValues
+  initialValues: props.initialValues,
 })
 
 const inputFormResiliency = reactive(useInputFormResiliency())
@@ -58,9 +58,11 @@ if (props.asyncLoadDataFunction) {
     }
   }).finally(() => {
     isLoadingAsyncData.value = false
+    validate()
   })
 } else {
   isLoadingAsyncData.value = false
+  validate()
 }
 
 </script>
