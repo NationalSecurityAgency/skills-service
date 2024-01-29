@@ -85,6 +85,13 @@ const schema = object({
       .label('Quiz Description')
       .test('customQuizDescriptionValidator', (value, context) => customQuizDescriptionValidator(value, context))
 })
+const loadDescription = () => {
+  return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
+    console.log('data', data)
+    return { 'description': data.description }
+  })
+}
+const asyncLoadData = props.isEdit ? loadDescription : null
 const initialQuizData = {
   originalQuizId: props.quiz.quizId,
   isEdit: props.isEdit,
@@ -114,6 +121,7 @@ const onSubmit = (values) => {
       :loading="loadingComponent"
       :validation-schema="schema"
       :initial-values="initialQuizData"
+      :async-load-data-function="asyncLoadData"
       @saved="onSubmit"
       @close="close"
   >
