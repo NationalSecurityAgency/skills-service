@@ -276,6 +276,7 @@ defineExpose({
                                   :data-cy="`editQuizButton_${slotProps.data.quizId}`"
                                   :aria-label="`Edit Quiz ${slotProps.data.name}`"
                                   :ref="`edit_${slotProps.data.quizId}`"
+                                  :id="`edit_${slotProps.data.quizId}`"
                                   :track-for-focus="true"
                                   title="Edit Quiz">
                     </SkillsButton>

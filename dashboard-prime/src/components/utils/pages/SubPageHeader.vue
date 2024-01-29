@@ -44,7 +44,7 @@ function addClicked() {
 function focusOnActionBtn() {
   nextTick(() => {
     if (actionButton) {
-      actionButton.value.focus();
+      // actionButton.value.focus();
     }
   });
 }
@@ -64,7 +64,9 @@ defineExpose({
       <div v-if="!isLoading">
         <slot v-if="!isReadOnlyProjUnderAdminUrl">
           <SkillsButton ref="actionButton" v-if="action" type="button" size="small" outlined
+                        id="actionButton"
                         :label="action"
+                        :track-for-focus="true"
                         icon="fas fa-plus-circle"
                         :disabled="disabledInternal"
                         v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
