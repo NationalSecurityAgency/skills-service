@@ -291,6 +291,7 @@ defineExpose({
         v-if="editQuizInfo.showDialog"
         v-model="editQuizInfo.showDialog"
         :quiz="editQuizInfo.quizDef"
+        :is-edit="editQuizInfo.isEdit"
         @quiz-saved="updateQuizDef"
         :enable-return-focus="true"/>
 
