@@ -41,6 +41,8 @@ import SkillOverview from '@//components/skills/SkillOverview.vue';
 import SubjectPage from '@/components/subjects/SubjectPage.vue';
 import Skills from '@/components/skills/Skills.vue';
 import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue';
+import BadgePage from '@/components/badges/BadgePage.vue';
+import BadgeSkills from '@/components/badges/BadgeSkills.vue';
 
 const routes = [
   {
@@ -479,6 +481,34 @@ const routes = [
         reportSkillId: 'VisitSubjectMetrics',
         announcer: {
           message: 'Subject Metrics',
+        },
+      },
+    }],
+  },
+  {
+    path: '/administrator/projects/:projectId/badges/:badgeId',
+    component: BadgePage,
+    meta: { requiresAuth: true },
+    children: [{
+      name: 'BadgeSkills',
+      path: '',
+      component: BadgeSkills,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSingleBadgePage',
+        announcer: {
+          message: 'Badge Skills',
+        },
+      },
+    }, {
+      name: 'BadgeUsers',
+      path: 'users',
+      component: Users,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitBadgeUsers',
+        announcer: {
+          message: 'Badge Users',
         },
       },
     }],
