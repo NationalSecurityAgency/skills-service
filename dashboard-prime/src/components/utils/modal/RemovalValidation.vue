@@ -1,8 +1,7 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
-import Dialog from 'primevue/dialog';
+import { ref, computed } from 'vue';
+import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
-import {useFocusState} from "@/stores/UseFocusState.js";
 
 const emit = defineEmits(['hidden', 'do-remove']);
 
@@ -31,7 +30,6 @@ const removeDisabled = computed(() => {
   return currentValidationText.value !== props.validationText;
 });
 
-const focusState = useFocusState()
 const publishHidden = (e) => {
   close()
   emit('hidden', { ...e });
@@ -44,20 +42,27 @@ const removeAction = () => {
 
 const close =() => {
   model.value = false
-  if (props.enableReturnFocus) {
-    focusState.focusOnLastElement()
-  }
 }
 </script>
 
 <template>
-  <Dialog v-model:visible="model" modal header="Removal Safety Check" @update:visible="publishHidden" :style="{ width: '40rem' }">
+  <SkillsDialog
+      v-model:visible="model"
+      header="Removal Safety Check"
+      cancel-button-severity="secondary"
+      ok-button-severity="danger"
+      :ok-button-icon="'fas fa-trash'"
+      ok-button-label="Yes, Do Remove!"
+      :ok-button-disabled="removeDisabled"
+      @on-ok="removeAction"
+      @on-cancel="publishHidden"
+      :style="{ width: '40rem !important' }">
     <div class="px-2">
       <div data-cy="removalSafetyCheckMsg">
         <slot />
       </div>
 
-      <div v-if="!removalNotAvailable" >
+      <div v-if="!removalNotAvailable" class="mb-4">
         <hr />
         <p
             :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
@@ -68,13 +73,7 @@ const close =() => {
                    aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase." />
       </div>
     </div>
-
-    <template #footer class="w-100">
-      <SkillsButton variant="secondary" size="small" class="float-right" @click="publishHidden" data-cy="closeRemovalSafetyCheck" icon="fas fa-times" label="Cancel" />
-      <SkillsButton v-if="!removalNotAvailable" severity="danger" size="small" class="float-right ml-2"
-                    @click="removeAction" data-cy="removeButton" :disabled="removeDisabled" icon="fas fa-trash" label="Yes, Do Remove!" />
-    </template>
-  </Dialog>
+  </SkillsDialog>
 </template>
 
 <style scoped></style>

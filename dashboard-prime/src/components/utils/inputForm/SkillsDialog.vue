@@ -18,6 +18,14 @@ const props = defineProps({
     type: String,
     default: 'far fa-save'
   },
+  okButtonSeverity: {
+    type: String,
+    default: 'success'
+  },
+  cancelButtonSeverity: {
+    type: String,
+    default: 'warning'
+  },
   okButtonDisabled: Boolean,
   enableReturnFocus: {
     type: Boolean,
@@ -69,7 +77,7 @@ const handleClose = () => {
         <SkillsButton
           label="Cancel"
           icon="far fa-times-circle"
-          severity="warning"
+          :severity="cancelButtonSeverity"
           outlined size="small"
           class="float-right mr-2"
           :disabled="submitting"
@@ -78,7 +86,7 @@ const handleClose = () => {
         <SkillsButton
           :label="okButtonLabel"
           :icon="okButtonIcon"
-          severity="success"
+          :severity="okButtonSeverity"
           outlined size="small"
           class="float-right"
           @click="onOk"
