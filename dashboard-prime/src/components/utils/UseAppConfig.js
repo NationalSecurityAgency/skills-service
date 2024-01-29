@@ -16,6 +16,7 @@ export const useAppConfig = () => {
 
   const minNameLength = store.getters.config.minNameLength;
   const maxProjectNameLength = store.getters.config.maxProjectNameLength;
+  const maxQuizNameLength = store.getters.config.maxQuizNameLength;
   const nameValidationRegex = store.getters.config.nameValidationRegex;
   const minIdLength = store.getters.config.minIdLength;
   const maxIdLength = store.getters.config.maxIdLength;
@@ -27,6 +28,7 @@ export const useAppConfig = () => {
     docsHost,
     minNameLength,
     maxProjectNameLength,
+    maxQuizNameLength,
     nameValidationRegex,
     minIdLength,
     maxIdLength,

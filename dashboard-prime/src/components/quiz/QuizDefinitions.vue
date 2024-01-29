@@ -23,6 +23,7 @@ import Column from 'primevue/column';
 import StringHighlighter from "@/common-components/utilities/StringHighlighter.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import EditQuiz from "@/components/quiz/testCreation/EditQuiz.vue";
 
 const announcer = useSkillsAnnouncer()
 const emit = defineEmits(['focus-on-new-button'])
@@ -122,7 +123,7 @@ function reset() {
   quizzes.value = quizzesPreFilter.value.map((q) => ({ ...q }));
 }
 function updateQuizDef(quizDef) {
-  if (!this.hasData) {
+  if (!hasData) {
     loading.value = true;
   }
   options.value.busy = true;
@@ -133,7 +134,7 @@ function updateQuizDef(quizDef) {
         if (isNewQuizDef) {
           quizzes.value.push(updatedQuizDef);
           quizzesPreFilter.value.push(updatedQuizDef);
-          options.value.pagination.totalRows = this.quizzesPreFilter.length;
+          options.value.pagination.totalRows = quizzesPreFilter.length;
         } else {
           const replaceUpdated = (q) => {
             if (q.quizId === quizDef.originalQuizId) {
@@ -200,7 +201,6 @@ function focusOnRefId(refId) {
   });
 }
 const showUpdateModal = (quizDef, isEdit = true) => {
-  console.log('showUpdateModal!', quizDef, isEdit);
   editQuizInfo.value.quizDef = quizDef;
   editQuizInfo.value.isEdit = isEdit;
   editQuizInfo.value.showDialog = true;
@@ -245,22 +245,6 @@ defineExpose({
                  :sort-order="options.sortDesc ? -1 : 1"
                  show-gridlines
                  striped-rows>
-<!--        <Column field="name" sortable>-->
-<!--          <template #header>-->
-<!--            <span><i class="fas fa-spell-check skills-color-subjects" aria-hidden="true"></i> Custom Name</span>-->
-<!--          </template>-->
-<!--        </Column>-->
-<!--        <Column field="type" sortable>-->
-<!--          <template #header>-->
-<!--            <span><i class="fas fa-sliders-h text-success" aria-hidden="true"></i> Type</span>-->
-<!--          </template>-->
-<!--        </Column>-->
-<!--        <Column field="created" sortable>-->
-<!--          <template #header>-->
-<!--            <span><i class="fas fa-clock text-warning" aria-hidden="true"></i> Created On</span>-->
-<!--          </template>-->
-<!--        </Column>-->
-
         <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
           <template #header>
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
@@ -292,6 +276,7 @@ defineExpose({
                                   :data-cy="`editQuizButton_${slotProps.data.quizId}`"
                                   :aria-label="`Edit Quiz ${slotProps.data.name}`"
                                   :ref="`edit_${slotProps.data.quizId}`"
+                                  :track-for-focus="true"
                                   title="Edit Quiz">
                     </SkillsButton>
                     <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
@@ -315,6 +300,14 @@ defineExpose({
         </Column>
       </DataTable>
     </div>
+
+
+    <edit-quiz
+        v-if="editQuizInfo.showDialog"
+        v-model="editQuizInfo.showDialog"
+        :quiz="editQuizInfo.quizDef"
+        @quiz-saved="updateQuizDef"
+        :enable-return-focus="true"/>
 
   </div>
 </template>

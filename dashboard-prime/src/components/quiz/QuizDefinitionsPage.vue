@@ -28,7 +28,6 @@ const newQuiz = ref({
   quiz: {},
 })
 function openNewTestModal() {
-  console.log('openNewTestModal3', configuredTests.value);
   configuredTests.value.showUpdateModal({
     name: '',
     testId: '',
@@ -37,7 +36,7 @@ function openNewTestModal() {
   }, false);
 }
 function focusOnNewButton() {
-  quizDefPageSubPageHeader.focusOnActionBtn();
+  quizDefPageSubPageHeader.value.focusOnActionBtn();
 }
 </script>
 

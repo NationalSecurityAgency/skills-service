@@ -44,10 +44,14 @@ function addClicked() {
 function focusOnActionBtn() {
   nextTick(() => {
     if (actionButton) {
-      actionButton.focus();
+      actionButton.value.focus();
     }
   });
 }
+
+defineExpose({
+  focusOnActionBtn,
+})
 
 </script>
 
