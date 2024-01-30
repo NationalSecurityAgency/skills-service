@@ -204,13 +204,15 @@ const handleDeleteCancelled = () => {
 <!--                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>-->
       </template>
     </nav-card-with-stats-and-controls>
-    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteBadge" @hidden="handleDeleteCancelled" :value="showDeleteDialog">
-      <p>
-        This will remove <span class="text-primary font-weight-bold">{{badgeInternal.name}}</span>.
-      </p>
-      <div>
-        Badge with id {{badgeInternal.badgeId}} will be removed. Deletion can not be undone.
-      </div>
+    <removal-validation
+      v-if="showDeleteDialog"
+      v-model="showDeleteDialog"
+      :item-name="badgeInternal.name"
+      item-type="badge"
+      @do-remove="doDeleteBadge"
+      @hidden="handleDeleteCancelled"
+      :value="showDeleteDialog">
+      Badge with id {{badgeInternal.badgeId}} will be removed. Deletion <b>cannot</b> be undone.
     </removal-validation>
   </div>
 </template>

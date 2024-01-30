@@ -94,7 +94,7 @@ const projectRemoved = (project) => {
   ProjectService.deleteProject(project.projectId)
       .then(() => {
         loadProjects();
-        // this.$announcer.polite(`Project ${project.name} has been deleted`);
+        announcer.polite(`Project ${project.name} has been deleted`);
       });
 };
 const copyProject = (projectInfo) => {

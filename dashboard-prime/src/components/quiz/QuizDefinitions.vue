@@ -295,26 +295,22 @@ defineExpose({
         @quiz-saved="updateQuizDef"
         :enable-return-focus="true"/>
 
-    <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
-                        :removal-not-available="deleteQuizInfo.disableDelete"
-                        :enable-return-focus="true"
-                        @do-remove="deleteQuiz">
-      <skills-spinner :is-loading="deleteQuizInfo.loadingDeleteCheck" class="my-4"/>
-      <div v-if="!deleteQuizInfo.loadingDeleteCheck">
+    <removal-validation
+      v-if="deleteQuizInfo.showDialog"
+      :item-name="deleteQuizInfo.quizDef.name"
+      item-type="quiz/survey"
+      v-model="deleteQuizInfo.showDialog"
+      :loading="deleteQuizInfo.loadingDeleteCheck"
+      :removal-not-available="deleteQuizInfo.disableDelete"
+      :enable-return-focus="true"
+      @do-remove="deleteQuiz">
         <div v-if="deleteQuizInfo.disableDelete">
           Cannot remove the quiz since it is currently assigned to <Badge>{{ deleteQuizInfo.numSkillsAssignedTo }}</Badge> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
         </div>
         <div v-if="!deleteQuizInfo.disableDelete">
-          <p>
-            This will remove <span
-              class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
-          </p>
-          <div>
             Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
             as well as users' achievements, stats and metrics. Proceed with caution!
-          </div>
         </div>
-      </div>
     </removal-validation>
 
   </div>

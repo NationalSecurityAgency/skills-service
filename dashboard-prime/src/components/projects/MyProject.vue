@@ -13,6 +13,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil';
 import dayjs from "@/common-components/DayJsCustomizer.js";
 import EditProject from '@/components/projects/EditProject.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 
 const props = defineProps(['project', 'disableSortControl'])
 const store = useStore();
@@ -24,14 +25,11 @@ let isLoading = ref(false);
 let pinned = ref(false);
 let projectInternal = ref({ ...props.project });
 let stats = ref([]);
-let showEditProjectModal = ref(false);
+const showEditProjectModal = ref(false);
 let deleteProjectDisabled = ref(false);
 let deleteProjectToolTip = ref('');
 let cancellingExpiration = ref(false);
-let deleteProjectInfo = {
-  showDialog: false,
-  project: {},
-};
+const showDeleteValidation = ref(false)
 let copyProjectInfo = {
   showModal: false,
   newProject: {},
@@ -66,18 +64,6 @@ const fromExpirationDate = () => {
   return dayjs()
       .startOf('day')
       .to(dayjs(expirationDate));
-};
-const handleHidden = () => {
-  nextTick(() => {
-    this.$refs.cardControls.focusOnEdit();
-  });
-};
-const handleCopyModalIsHidden = () => {
-  nextTick(() => {
-    if (this.$refs && this.$refs.cardControls) {
-      this.$refs.cardControls.focusOnCopy();
-    }
-  });
 };
 const createCardOptions = () => {
   stats.value = [{
@@ -124,19 +110,15 @@ const checkIfProjectBelongsToGlobalBadge = () => {
       });
 };
 const doDeleteProject = () => {
-  ProjectService.checkIfProjectBelongsToGlobalBadge(deleteProjectInfo.project.projectId)
+  ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
       .then((belongsToGlobal) => {
         if (belongsToGlobal) {
           const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
           msgOk(msg, 'Unable to delete');
         } else {
-          emit('project-deleted', deleteProjectInfo.project);
+          emit('project-deleted', projectInternal.value);
         }
       });
-};
-const deleteProject = () => {
-  deleteProjectInfo.project = projectInternal;
-  deleteProjectInfo.showDialog = true;
 };
 const onEditProject = () => {
   showEditProjectModal.value = true;
@@ -197,9 +179,6 @@ const moveUp = () => {
 const focusSortControl = () => {
   this.$refs.sortControl.focus();
 };
-const handleDeleteCancelled = () => {
-  this.$refs.cardControls.focusOnDelete();
-};
 
 </script>
 
@@ -239,7 +218,7 @@ const handleDeleteCancelled = () => {
                 :project="projectInternal"
                 @edit-project="onEditProject"
                 @copy-project="copyProject"
-                @delete-project="deleteProject"
+                @delete-project="showDeleteValidation = true"
                 @unpin-project="unpin"
                 :read-only-project="isReadOnlyProj"
                 :is-delete-disabled="deleteProjectDisabled"
@@ -325,17 +304,15 @@ const handleDeleteCancelled = () => {
 <!--                  @project-saved="projectCopied"-->
 <!--                  @hidden="handleCopyModalIsHidden"/>-->
 
-<!--    <removal-validation v-if="deleteProjectInfo.showDialog" v-model="deleteProjectInfo.showDialog"-->
-<!--                        @do-remove="doDeleteProject" @hidden="handleDeleteCancelled">-->
-<!--      <p>-->
-<!--        This will remove <span-->
-<!--          class="text-primary font-weight-bold">{{ deleteProjectInfo.project.name }}</span>.-->
-<!--      </p>-->
-<!--      <div>-->
-<!--        Deletion can not be undone and permanently removes all skill subject definitions, skill-->
-<!--        definitions and users' performed skills for this Project.-->
-<!--      </div>-->
-<!--    </removal-validation>-->
+    <removal-validation
+      v-if="showDeleteValidation"
+      v-model="showDeleteValidation"
+      :item-name="projectInternal.name"
+      item-type="project"
+      @do-remove="doDeleteProject">
+        Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
+        definitions and users' performed skills for this Project.
+    </removal-validation>
   </div>
 </template>
 

@@ -72,7 +72,7 @@ const focusOnDelete = () => {
           outlined
           severity="info"
           size="small"
-          @click="emit('edit-project')"
+          @click="emit('edit-project', $event.target.value)"
           title="Edit Project"
           :aria-label="'Edit Project ' + project.name"
           role="button"
@@ -80,11 +80,13 @@ const focusOnDelete = () => {
           data-cy="editProjBtn" />
 
         <SkillsButton
+          :id="`copyPojBtn${project.projectId}`"
           ref="copyBtn"
           outlined
           severity="info"
+          :track-for-focus="true"
           size="small"
-          @click="emit('copy-project')"
+          @click="emit('copy-project', $event.target.value)"
           title="Copy Project"
           :aria-label="'Copy Project ' + project.name"
           role="button"
@@ -93,12 +95,14 @@ const focusOnDelete = () => {
           data-cy="copyProjBtn"/>
 
           <SkillsButton
+            :id="`deletePojBtn${project.projectId}`"
             outlined
             severity="info"
             ref="deleteBtn"
             size="small"
+            :track-for-focus="true"
             class="p-text-secondary"
-            @click="emit('delete-project')"
+            @click="emit('delete-project', $event.target.value)"
             :disabled="isDeleteDisabled"
             v-tooltip="deleteDisabledText"
             title="Delete Project"

@@ -2,10 +2,19 @@
 import { ref, computed } from 'vue';
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const emit = defineEmits(['hidden', 'do-remove']);
 
 const props = defineProps({
+  itemName: {
+    type: String,
+    required: true,
+  },
+  itemType: {
+    type: String,
+    required: true,
+  },
   validationText: {
     type: String,
     required: false,
@@ -17,6 +26,10 @@ const props = defineProps({
     default: false,
   },
   enableReturnFocus: {
+    type: Boolean,
+    default: false
+  },
+  loading: {
     type: Boolean,
     default: false
   },
@@ -47,6 +60,7 @@ const close =() => {
 
 <template>
   <SkillsDialog
+      :maximizable="false"
       v-model:visible="model"
       header="Removal Safety Check"
       cancel-button-severity="secondary"
@@ -56,14 +70,21 @@ const close =() => {
       :ok-button-disabled="removeDisabled"
       @on-ok="removeAction"
       @on-cancel="publishHidden"
+      :enable-return-focus="true"
       :style="{ width: '40rem !important' }">
-    <div class="px-2">
+    <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
+    <div v-if="!loading" class="px-2">
       <div data-cy="removalSafetyCheckMsg">
-        <slot />
+        <div>
+          This will remove <span
+          class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
+        </div>
+        <Message severity="warn" :closable="false">
+          <slot />
+        </Message>
       </div>
 
       <div v-if="!removalNotAvailable" class="mb-4">
-        <hr />
         <p
             :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
           Please type <span class="font-italic font-bold text-primary">{{ validationText }}</span> to permanently

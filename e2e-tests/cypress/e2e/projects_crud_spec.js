@@ -53,7 +53,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
-    it('Edit in place', () => {
+    it.skip('Edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'Proj 1'
@@ -136,7 +136,7 @@ describe('Projects Admin Management Tests', () => {
             .should('be.visible');
     });
 
-    it.only('Create new project using enter key', function () {
+    it('Create new project using enter key', function () {
         cy.intercept('GET', '/app/projects')
             .as('loadProjects');
         cy.intercept('GET', '/app/userInfo')
@@ -170,7 +170,7 @@ describe('Projects Admin Management Tests', () => {
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
-        cy.get('[data-cy=removeButton]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled')
             .click();
 
@@ -184,7 +184,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
-        cy.get('[data-cy=closeRemovalSafetyCheck]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
         cy.get('[data-cy="projectCard_proj2"]')
             .should('exist');

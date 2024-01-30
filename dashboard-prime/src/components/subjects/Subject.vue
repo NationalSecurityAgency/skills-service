@@ -207,13 +207,15 @@ watch(subject, async (newVal, oldVal) => {
 <!--    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"-->
 <!--                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>-->
 
-    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="doDeleteSubject" @hidden="handleDeleteCancelled" :value="showDeleteDialog">
-      <p>
-        This will remove <span class="text-primary font-bold">{{ subjectInternal.name}}</span>.
-      </p>
-      <div>
-        Subject with id [{{subjectInternal.subjectId}}] will be removed. Deletion can not be undone and permanently removes its skill definitions and users' performed skills.
-      </div>
+    <removal-validation
+      v-if="showDeleteDialog"
+      v-model="showDeleteDialog"
+      :item-name="subjectInternal.name"
+      item-type="subject"
+      @do-remove="doDeleteSubject"
+      @hidden="handleDeleteCancelled"
+      :value="showDeleteDialog">
+      Subject with id [{{subjectInternal.subjectId}}] will be removed. Deletion <b>cannot</b> be undone and permanently removes its skill definitions and users' performed skills.
     </removal-validation>
   </div>
 </template>
