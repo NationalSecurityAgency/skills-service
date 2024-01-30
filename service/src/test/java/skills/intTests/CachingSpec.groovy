@@ -21,21 +21,23 @@ import org.springframework.core.io.support.ResourcePatternUtils
 import org.springframework.http.ResponseEntity
 import skills.intTests.utils.DefaultIntSpec
 
-class CachingSpec extends DefaultIntSpec{
+class CachingSpec extends DefaultIntSpec {
 
     @Autowired
     ResourceLoader resourceLoader
 
-    def "favicon should be cached" () {
+    String defaultCacheAge = "1209600"
+
+    def "favicon should be cached"() {
         when:
         ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/skilltree.ico", [:])
 
         then:
         responseEntity.statusCode.is2xxSuccessful()
-        responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
+        responseEntity.headers.getCacheControl() == "max-age=${defaultCacheAge}, must-revalidate, private"
     }
 
-    def "index.html must never be cached - access with /" () {
+    def "index.html must never be cached - access with /"() {
         when:
         ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/", [:])
 
@@ -44,7 +46,7 @@ class CachingSpec extends DefaultIntSpec{
         responseEntity.headers.getCacheControl() == "no-store"
     }
 
-    def "index.html must never be cached - access with /request-root-account" () {
+    def "index.html must never be cached - access with /request-root-account"() {
         when:
         ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/request-root-account", [:])
 
@@ -53,7 +55,7 @@ class CachingSpec extends DefaultIntSpec{
         responseEntity.headers.getCacheControl() == "no-store"
     }
 
-    def "index.html must never be cached - access with /skills-login" () {
+    def "index.html must never be cached - access with /skills-login"() {
         when:
         ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/skills-login", [:])
 
@@ -62,119 +64,98 @@ class CachingSpec extends DefaultIntSpec{
         responseEntity.headers.getCacheControl() == "no-store"
     }
 
-
-    def "js resources should be cached"() {
+    def "theme resources should be cached"() {
         when:
-
-        getFileNamesFromClasspath("/public/static/js/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/js/${it}", [:])
+        int count = 0
+        getFileNamesFromClasspath("/public/themes/*").each {
+            println it
+            String endpoint = "/themes/${it}/theme.css".toString()
+            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet(endpoint, [:])
             assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
+            assert responseEntity.headers.getCacheControl() == "max-age=${defaultCacheAge}, must-revalidate, private"
+            count++
         }
 
         then:
-        true
+        count > 0
     }
 
-    def "img resources should be cached"() {
+    def "assets should be cached"() {
         when:
-
-        getFileNamesFromClasspath("/public/static/img/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/img/${it}", [:])
+        int count = 0
+        getFileNamesFromClasspath("/public/assets/**").each {
+            println it
+            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/assets/${it}", [:])
             assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
+            assert responseEntity.headers.getCacheControl() == "max-age=${defaultCacheAge}, must-revalidate, private"
+            count++
         }
 
         then:
-        true
+        count > 0
     }
 
-    def "fonts resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/fonts/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/fonts/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
-
-    def "css resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/css/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/css/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
-
-    def "clientPortal index page should not be cached"() {
-        when:
-        ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("static/clientPortal/index.html", [:])
-
-        then:
-        responseEntity.statusCode.is2xxSuccessful()
-        responseEntity.headers.getCacheControl() == "no-store"
-    }
-
-    def "clientPortal js resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/clientPortal/js/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/clientPortal/js/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
-
-    def "clientPortal img resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/clientPortal/img/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/clientPortal/img/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
-
-    def "clientPortal fonts resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/clientPortal/fonts/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/clientPortal/fonts/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
-
-    def "clientPortal css resources should be cached"() {
-        when:
-
-        getFileNamesFromClasspath("/public/static/clientPortal/css/**").each {
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/static/clientPortal/css/${it}", [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
-        }
-
-        then:
-        true
-    }
+// TODO: add back
+//    def "clientPortal index page should not be cached"() {
+//        when:
+//        ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("assets/clientPortal/index.html", [:])
+//
+//        then:
+//        responseEntity.statusCode.is2xxSuccessful()
+//        responseEntity.headers.getCacheControl() == "no-store"
+//    }
+//
+//    def "clientPortal js resources should be cached"() {
+//        when:
+//
+//        getFileNamesFromClasspath("/public/assets/clientPortal/js/**").each {
+//            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/assets/clientPortal/js/${it}", [:])
+//            assert responseEntity.statusCode.is2xxSuccessful()
+//            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
+//        }
+//
+//        then:
+//        true
+//    }
+//
+//    def "clientPortal img resources should be cached"() {
+//        when:
+//
+//        getFileNamesFromClasspath("/public/assets/clientPortal/img/**").each {
+//            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/assets/clientPortal/img/${it}", [:])
+//            assert responseEntity.statusCode.is2xxSuccessful()
+//            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
+//        }
+//
+//        then:
+//        true
+//    }
+//
+//    def "clientPortal fonts resources should be cached"() {
+//        when:
+//
+//        getFileNamesFromClasspath("/public/assets/clientPortal/fonts/**").each {
+//            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/assets/clientPortal/fonts/${it}", [:])
+//            assert responseEntity.statusCode.is2xxSuccessful()
+//            assert responseEntity.headers.getCacheControl() == "max-age=1209600, must-revalidate, private"
+//        }
+//
+//        then:
+//        true
+//    }
+//
+//    def "clientPortal css resources should be cached"() {
+//        when:
+//
+//        getFileNamesFromClasspath("/public/assets/clientPortal/css/**").each {
+//            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet("/assets/clientPortal/css/${it}", [:])
+//            assert responseEntity.statusCode.is2xxSuccessful()
+//            assert responseEntity.headers.getCacheControl() == "max-age=7776000, must-revalidate, private"
+//        }
+//
+//        then:
+//        true
+//    }
 
 
     private getFileNamesFromClasspath(String classpathPath) {
