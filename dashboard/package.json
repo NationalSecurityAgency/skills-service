@@ -12,7 +12,7 @@
     "licenseHeaderCheck": "license-check-and-add check -f '../license-add/license-add-config.json'",
     "licenseHeaderAdd": "license-check-and-add add -f ../license-add/license-add-config.json",
     "licenseCheck": "npm run licenseHeaderCheck && npm run licenseDepCheck",
-    "build": "npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build",
+    "build": "npm run setup:common && npm run licenseCheck && npm run test:unit && vue-cli-service build && npm run getDashboardVersion",
     "deploy": "npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
     "lint": "vue-cli-service lint",
     "test:e2e": "vue-cli-service test:e2e",
