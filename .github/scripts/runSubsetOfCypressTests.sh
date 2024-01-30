@@ -72,7 +72,7 @@ echo "Will run [$testToRunStr]"
 
   commandToRun="npm run cy:run -- --spec \"${testToRunStr}\""
   echo "Running command [${commandToRun}]"
-#  eval $commandToRun
+  eval $commandToRun
   commandStatusCode=$?
   if [ $commandStatusCode -ne 0 ];
   then
