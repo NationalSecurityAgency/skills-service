@@ -225,6 +225,7 @@ defineExpose({
                  data-cy="quizDeffinitionsTable"
                  :sort-field="options.sortBy"
                  :sort-order="options.sortDesc ? -1 : 1"
+                 paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
                  show-gridlines
                  striped-rows>
         <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
