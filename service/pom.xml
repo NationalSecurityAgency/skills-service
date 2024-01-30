@@ -450,30 +450,30 @@
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/dashboard/dist</directory>
+                                    <directory>${project.parent.basedir}/dashboard-prime/dist</directory>
                                 </resource>
                             </resources>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>copy Vue.js client-display content</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/src/main/resources/public/static/clientPortal</outputDirectory>
-                            <overwrite>true</overwrite>
-                            <resources>
-                                <resource>
-                                    <directory>${project.parent.basedir}/client-display/dist</directory>
-                                    <includes>
-                                        <include>/*/</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>copy Vue.js client-display content</id>-->
+<!--                        <phase>generate-resources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-resources</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${basedir}/src/main/resources/public/static/clientPortal</outputDirectory>-->
+<!--                            <overwrite>true</overwrite>-->
+<!--                            <resources>-->
+<!--                                <resource>-->
+<!--                                    <directory>${project.parent.basedir}/client-display/dist</directory>-->
+<!--                                    <includes>-->
+<!--                                        <include>/*/</include>-->
+<!--                                    </includes>-->
+<!--                                </resource>-->
+<!--                            </resources>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
 

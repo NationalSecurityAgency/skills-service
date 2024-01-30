@@ -124,7 +124,7 @@
                             <executable>npm</executable>
                             <arguments>
                                 <argument>run</argument>
-                                <argument>deploy</argument>
+                                <argument>build</argument>
                             </arguments>
                             <workingDirectory>${basedir}</workingDirectory>
                         </configuration>
