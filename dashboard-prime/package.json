@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npm run setup:common",
     "dev": "vite",
-    "build": "npm install && npm run setup:common && npm run licenseCheck && vite build",
+    "build": "npm install && npm run setup:common && npm run licenseCheck && npm run getDashboardVersion && vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
