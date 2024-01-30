@@ -9,8 +9,8 @@
     <packaging>pom</packaging>
     <version>2.13.0-SNAPSHOT</version>
     <modules>
-        <module>dashboard</module>
-        <module>client-display</module>
+        <module>dashboard-prime</module>
+<!--        <module>client-display</module>-->
         <module>service</module>
     </modules>
     <properties>

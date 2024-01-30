@@ -127,7 +127,7 @@ const projectAdded = (project) => {
               });
         };
 
-        if (isRootUser) {
+        if (isRootUser.value) {
           SettingsService.pinProject(project.projectId)
               .then(() => {
                 loadProjectsInternal();

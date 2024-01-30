@@ -1,6 +1,6 @@
 import { nextTick, ref } from 'vue'
 import { useCommonMarkdownOptions } from './UseCommonMarkdownOptions'
-import { useSkillsAnnouncer } from '../../../../../common-components/src/common/utilities/UseSkillsAnnouncer.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 export const useMarkdownAccessibilityFixes = () => {
 

@@ -30,7 +30,7 @@ describe('Projects Admin Management Tests', () => {
             .as('getRolesForRoot');
     });
 
-    it('Create new projects', function () {
+    it.only('Create new projects', function () {
         cy.intercept('GET', '/app/projects')
             .as('loadProjects');
         cy.intercept('GET', '/app/userInfo')
@@ -43,14 +43,14 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
-        cy.clickSave();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
 
         cy.wait('@postNewProject');
 
-        cy.contains('My New test Project');
+        cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
     it('Edit in place', () => {

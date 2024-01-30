@@ -67,8 +67,9 @@ const customProjectDescriptionValidator = useDebounceFn((value, context) => {
   })
 }, appConfig.formFieldDebounceInMs)
 
+
 const schema = object({
-  'name': string()
+  'projectName': string()
     .trim()
     .required()
     .min(appConfig.minNameLength)
@@ -91,7 +92,6 @@ const schema = object({
 })
 const initialProjData = {
   originalProjectId: props.project.projectId,
-  isEdit: props.isEdit,
   ...props.project,
   description: props.project.description || '',
 }
@@ -108,7 +108,8 @@ const close = () => { model.value = false }
 const onSubmit = (values) => {
   const projToSave = {
     ...values,
-    name: InputSanitizer.sanitize(values.name),
+    isEdit: props.isEdit,
+    name: InputSanitizer.sanitize(values.projectName),
     projectId: InputSanitizer.sanitize(values.projectId)
   }
   emit('project-saved', projToSave)
@@ -132,7 +133,7 @@ const onSubmit = (values) => {
     <template #default>
       <SkillsNameAndIdInput
         :name-label="`${isCopy ? 'New Project Name' : 'Project Name'}`"
-        name-field-name="name"
+        name-field-name="projectName"
         :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         id-field-name="projectId"
         :name-to-id-sync-enabled="!props.isEdit"

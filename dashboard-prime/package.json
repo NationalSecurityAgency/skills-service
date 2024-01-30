@@ -4,14 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "preinstall": "npm run setup:common",
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run setup:common && npm run licenseCheck && vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "setup:common": "npx symlink-dir ../common-components/src/common src/common-components",
-    "getDashboardVersion": "node ../scripts/getDashboardVersion.js"
+    "getDashboardVersion": "node ../scripts/getDashboardVersion.js",
+    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseCheck": "npm run licenseDepCheck",
+    "deploy": "npm install && npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.4",
@@ -44,6 +48,7 @@
     "eslint": "8.56.0",
     "eslint-plugin-vue": "9.20.0",
     "jsdom": "23.2.0",
+    "license-checker": "25.0.1",
     "prettier": "3.2.1",
     "symlink-dir": "5.2.1",
     "vite": "5.0.11",

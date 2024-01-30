@@ -7,7 +7,7 @@ import Navigation from '@/components/utils/Navigation.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import ProjectService from '@/components/projects/ProjectService';
 import ProjectDates from '@/components/projects/ProjectDates.vue';
-import dayjs from "../../../../common-components/src/common/DayJsCustomizer.js";
+import dayjs from "@/common-components/DayJsCustomizer.js";
 
 // const props = defineProps(['project'])
 const store = useStore();

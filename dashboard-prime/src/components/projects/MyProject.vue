@@ -11,7 +11,7 @@ import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue';
 import ProjectCardControls from '@/components/projects/ProjectCardControls.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil';
-import dayjs from "../../../../common-components/src/common/DayJsCustomizer.js";
+import dayjs from "@/common-components/DayJsCustomizer.js";
 import EditProject from '@/components/projects/EditProject.vue'
 
 const props = defineProps(['project', 'disableSortControl'])
