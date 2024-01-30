@@ -15,7 +15,7 @@
     "getDashboardVersion": "node ../scripts/getDashboardVersion.js",
     "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;BSD-2-Clause;BSD-3-Clause;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseCheck": "npm run licenseDepCheck",
-    "deploy": "npm install && npm run build && rm -rf ../service/src/main/resources/public/static/js && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/"
+    "deploy": "npm install && npm run build && rm -rf ../service/src/main/resources/public/assets && rm -rf ../service/src/main/resources/public/themes && cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.4",
