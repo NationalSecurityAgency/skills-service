@@ -30,7 +30,7 @@ describe('Projects Admin Management Tests', () => {
             .as('getRolesForRoot');
     });
 
-    it.only('Create new projects', function () {
+    it('Create new projects', function () {
         cy.intercept('GET', '/app/projects')
             .as('loadProjects');
         cy.intercept('GET', '/app/userInfo')
@@ -136,7 +136,7 @@ describe('Projects Admin Management Tests', () => {
             .should('be.visible');
     });
 
-    it('Create new project using enter key', function () {
+    it.only('Create new project using enter key', function () {
         cy.intercept('GET', '/app/projects')
             .as('loadProjects');
         cy.intercept('GET', '/app/userInfo')
@@ -149,7 +149,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
         cy.get('[data-cy="projectName"]')
@@ -157,7 +157,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.wait('@postNewProject');
 
-        cy.contains('My New test Project');
+        cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
     it('delete project', () => {

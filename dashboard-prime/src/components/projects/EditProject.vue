@@ -136,8 +136,7 @@ const onSubmit = (values) => {
         name-field-name="projectName"
         :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         id-field-name="projectId"
-        :name-to-id-sync-enabled="!props.isEdit"
-        @keydown-enter="onSubmit" />
+        :name-to-id-sync-enabled="!props.isEdit" />
       <markdown-editor
         class="mt-5"
         name="description" />

@@ -1,9 +1,10 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, provide } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
+
 
 const isLoadingAsyncData = ref(true)
 const model = defineModel()
@@ -45,6 +46,8 @@ const onSubmit = handleSubmit(formValue => {
   emit('saved', formValue)
   close()
 })
+
+provide('doSubmitForm', onSubmit)
 
 const isDialogLoading = computed(() => {
   return props.loading || inputFormResiliency.isInitializing

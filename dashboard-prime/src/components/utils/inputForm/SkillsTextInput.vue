@@ -1,4 +1,5 @@
 <script setup>
+import { inject } from 'vue'
 import { useField } from 'vee-validate'
 
 const props = defineProps({
@@ -26,17 +27,24 @@ const props = defineProps({
 const emit = defineEmits(['input', 'keydown-enter'])
 
 const { value, errorMessage } = useField(() => props.name);
+const doSubmitForm = inject('doSubmitForm', null)
+const onEnter = (event) => {
+  if (doSubmitForm) {
+    doSubmitForm()
+  }
+  emit('keydown-enter', event.target.value)
+}
 </script>
 
 <template>
   <div class="field text-left">
-    <label for="projectIdInput"><span v-if="isRequired">*</span> {{ label }}</label>
+    <label for="projectIdInput"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputText
       class="w-full"
       type="text"
       v-model="value"
       @input="emit('input', $event.target.value)"
-      @keydown.enter="emit('keydown-enter', $event.target.value)"
+      @keydown.enter="onEnter"
       :data-cy="name"
       :autofocus="autofocus"
       :id="name"
