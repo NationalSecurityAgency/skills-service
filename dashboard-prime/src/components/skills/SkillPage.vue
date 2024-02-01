@@ -1,3 +1,18 @@
+/*
+Copyright 2020 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -9,6 +24,7 @@ import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
 import { useSkillsState } from '@/stores/UseSkillsState.js'
+import ShowMore from '@/components/skills/selfReport/ShowMore.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -168,7 +184,7 @@ const getSkillId = (skill) => {
           </Badge>
         </div>
         <div class="h5 text-muted" data-cy="skillId">
-<!--          <show-more :limit="54" :text="getSkillId(skill)"></show-more>-->
+          <show-more :limit="54" :text="getSkillId(skill)"></show-more>
         </div>
         <div class="h5 text-muted" v-if="skillsState.skill && skillsState.skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-tooltip="`Name: ${ skillsState.skill.groupName }`">{{ skillsState.skill.groupId }}</span>
