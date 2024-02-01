@@ -21,6 +21,7 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Badge from 'primevue/badge';
+import { FilterMatchMode } from 'primevue/api';
 import StringHighlighter from "@/common-components/utilities/StringHighlighter.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -84,7 +85,7 @@ const editQuizInfo = ref({
 });
 
 const hasData = computed(() => {
-  return quizzesPreFilter.value && quizzesPreFilter.value.length > 0;
+  return quizzes.value && quizzes.value.length > 0;
 });
 
 onMounted(() => {
@@ -104,23 +105,44 @@ function loadData() {
         loading.value = false;
       });
 }
-function applyFilters() {
-  if (!filter.value.name || filter.value.name.trim() === '') {
-    reset();
-  } else {
-    quizzes.value = quizzesPreFilter.value.filter((q) => q.name.toLowerCase()
-        .includes(filter.value.name.trim().toLowerCase()))?.map((item) => {
-      const nameHtml = StringHighlighter.highlight(item.name, filter.value.name);
-      return {
-        nameHtml,
-        ...item,
-      };
-    });
+
+const filters = ref()
+const initFilters = () => {
+  filters.value = {
+    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
   }
 }
-function reset() {
-  filter.value.name = '';
-  quizzes.value = quizzesPreFilter.value.map((q) => ({ ...q }));
+initFilters();
+
+const clearFilter = () => {
+  initFilters();
+};
+// function applyFilters() {
+//   if (!filter.value.name || filter.value.name.trim() === '') {
+//     reset();
+//   } else {
+//     quizzes.value = quizzesPreFilter.value.filter((q) => q.name.toLowerCase()
+//         .includes(filter.value.name.trim().toLowerCase()))?.map((item) => {
+//       const nameHtml = StringHighlighter.highlight(item.name, filter.value.name);
+//       return {
+//         nameHtml,
+//         ...item,
+//       };
+//     });
+//   }
+// }
+// function reset() {
+//   filter.value.name = '';
+//   quizzes.value = quizzesPreFilter.value.map((q) => ({ ...q }));
+// }
+function highlightValue(value) {
+  const filterValue = filters.value['global'].value;
+  if (filterValue && filterValue.trim().length > 0) {
+    const highlighted = StringHighlighter.highlight(value, filterValue);
+    return highlighted || value;
+  } else {
+    return value;
+  }
 }
 function updateQuizDef(quizDef) {
   if (!hasData) {
@@ -133,7 +155,7 @@ function updateQuizDef(quizDef) {
         // presence of the originalQuizId indicates edit operation
         if (isNewQuizDef) {
           quizzes.value.push(updatedQuizDef);
-          quizzesPreFilter.value.push(updatedQuizDef);
+          // quizzesPreFilter.value.push(updatedQuizDef);
           options.value.pagination.totalRows = quizzesPreFilter.length;
         } else {
           const replaceUpdated = (q) => {
@@ -143,7 +165,7 @@ function updateQuizDef(quizDef) {
             return q;
           };
           quizzes.value = quizzes.value.map(replaceUpdated);
-          quizzesPreFilter.value = quizzesPreFilter.value.map(replaceUpdated);
+          // quizzesPreFilter.value = quizzesPreFilter.value.map(replaceUpdated);
         }
       })
       .finally(() => {
@@ -173,7 +195,7 @@ function deleteQuiz() {
   QuizService.deleteQuizId(quizDef.quizId)
       .then(() => {
         quizzes.value = quizzes.value.filter((q) => q.quizId !== quizDef.quizId);
-        quizzesPreFilter.value = quizzesPreFilter.value.filter((q) => q.quizId !== quizDef.quizId);
+        // quizzesPreFilter.value = quizzesPreFilter.value.filter((q) => q.quizId !== quizDef.quizId);
       })
       .finally(() => {
         options.value.busy = false;
@@ -202,32 +224,64 @@ defineExpose({
                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
                 data-cy="noQuizzesYet"/>
     <div v-if="!loading && hasData">
-      <div class="flex mx-3">
-        <InputText class="flex flex-grow-1" type="text" v-model="filter.name" v-on:keyup.enter="applyFilters"
-                   data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>
-      </div>
-      <div class="flex gap-1 m-3">
-        <SkillsButton label="Filter"
-                      icon="fa fa-filter"
-                      outlined
-                      aria-label="Filter surveys and quizzes table"
-                      @click="applyFilters"
-                      data-cy="quizFilterBtn"/>
-        <SkillsButton label="Reset"
-                      icon="fa fa-times"
-                      outlined
-                      @click="reset"
-                      aria-label="Reset surveys and quizzes filter"
-                      data-cy="quizResetBtn"/>
-      </div>
+<!--      <div class="flex mx-3">-->
+<!--        <InputText class="flex flex-grow-1" type="text" v-model="filter.name" v-on:keyup.enter="applyFilters"-->
+<!--                   data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>-->
+<!--      </div>-->
+<!--      <div class="flex gap-1 m-3">-->
+<!--        <SkillsButton label="Filter"-->
+<!--                      icon="fa fa-filter"-->
+<!--                      outlined-->
+<!--                      aria-label="Filter surveys and quizzes table"-->
+<!--                      @click="applyFilters"-->
+<!--                      data-cy="quizFilterBtn"/>-->
+<!--        <SkillsButton label="Reset"-->
+<!--                      icon="fa fa-times"-->
+<!--                      outlined-->
+<!--                      @click="reset"-->
+<!--                      aria-label="Reset surveys and quizzes filter"-->
+<!--                      data-cy="quizResetBtn"/>-->
+<!--      </div>-->
       <DataTable :value="quizzes" tableStyle="min-width: 50rem"
-                 tableStoredStateId="quizDeffinitionsTable"
-                 data-cy="quizDeffinitionsTable"
+                 data-cy="quizDefinitionsTable"
+                 stateStorage="local" stateKey="quizDefinitionsTable"
+                 v-model:filters="filters"
+                 :globalFilterFields="['name', 'type']"
                  :sort-field="options.sortBy"
                  :sort-order="options.sortDesc ? -1 : 1"
                  paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
                  show-gridlines
                  striped-rows>
+        <template #header>
+          <div class="flex gap-1">
+            <span class="p-input-icon-left flex flex-grow-1">
+              <i class="pi pi-search"/>
+              <InputText class="flex flex-grow-1" v-model="filters['global'].value" placeholder="Quiz/Survey Search"/>
+            </span>
+            <SkillsButton class="flex flex-grow-none"
+                          label="Reset"
+                          icon="fa fa-times"
+                          outlined
+                          @click="clearFilter"
+                          aria-label="Reset surveys and quizzes filter"
+                          data-cy="quizResetBtn"/>
+          </div>
+        </template>
+
+        <template #empty>
+          <div class="flex justify-content-center flex-wrap">
+            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex align-items-center justify-content-center">No Quiz or Survey Definitions.  Click
+            <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                          label="Reset"
+                          link
+                          size="small"
+                          @click="clearFilter"
+                          aria-label="Reset surveys and quizzes filter"
+                          data-cy="quizResetBtn"/> to clear the existing filter.
+              </span>
+          </div>
+        </template>
         <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
           <template #header>
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
@@ -239,7 +293,9 @@ defineExpose({
                                :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
                                :aria-label="`Manage Quiz ${slotProps.data.name}`"
                                tag="a">
-                    <span v-html="slotProps.data.nameHtml ? slotProps.data.nameHtml : slotProps.data.name" />
+<!--                    <span v-html="slotProps.data.nameHtml ? slotProps.data.nameHtml : slotProps.data.name" />-->
+                    <span v-html="highlightValue(slotProps.data.name)" />
+
                   </router-link>
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
@@ -275,6 +331,9 @@ defineExpose({
                     </SkillsButton>
                   </span>
                 </div>
+            </div>
+            <div v-else-if="slotProps.field === 'type'">
+              <span v-html="highlightValue(slotProps.data[col.key])" />
             </div>
             <div v-else-if="slotProps.field === 'created'">
               <DateCell :value="slotProps.data[col.key]" />

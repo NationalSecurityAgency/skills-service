@@ -38,7 +38,7 @@ function openNewTestModal() {
                    aria-label="Create New Quiz or Survey"
                    @add-action="openNewTestModal">
     </SubPageHeader>
-    <Card :pt="{ body: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <QuizDefinitions ref="configuredTests"/>
       </template>

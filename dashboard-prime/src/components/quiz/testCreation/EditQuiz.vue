@@ -9,6 +9,7 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -80,6 +81,10 @@ const schema = object({
       .nullValueNotAllowed()
       .test('uniqueId', 'Quiz ID already exist', (value) => checkQuizIdUnique(value))
       .label('Quiz Id'),
+  'type': string()
+      .required()
+      .nullValueNotAllowed()
+      .label('Type'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .label('Quiz Description')
@@ -93,11 +98,8 @@ const loadDescription = () => {
 const asyncLoadData = props.isEdit ? loadDescription : null
 const initialQuizData = {
   originalQuizId: props.quiz.quizId,
-  isEdit: props.isEdit,
   ...props.quiz,
-  description: props.quiz.description || ''
 }
-
 const close = () => { model.value = false }
 
 const onSubmit = (values) => {
@@ -109,7 +111,6 @@ const onSubmit = (values) => {
   emit('quiz-saved', quizToSave)
   close()
 }
-
 </script>
 
 <template>
@@ -132,6 +133,15 @@ const onSubmit = (values) => {
           id-field-name="quizId"
           :name-to-id-sync-enabled="!props.isEdit"
           @keydown-enter="onSubmit" />
+
+      <SkillsDropDown
+          label="Type"
+          name="type"
+          :isRequire="true"
+          :disabled="isEdit"
+          :options="['Quiz', 'Survey', null]" />
+        <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
+
       <markdown-editor
           class="mt-5"
           name="description" />
