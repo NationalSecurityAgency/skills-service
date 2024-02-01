@@ -30,11 +30,7 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 
 const announcer = useSkillsAnnouncer()
 const loading = ref(false);
-const filter = ref({
-  name: '',
-});
 const quizzes = ref([]);
-const quizzesPreFilter = ref([]);
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   busy: false,
@@ -97,7 +93,6 @@ function loadData() {
   QuizService.getQuizDefs()
       .then((res) => {
         quizzes.value = res.map((q) => ({ ...q }));
-        quizzesPreFilter.value = res.map((q) => ({ ...q }));
         options.value.pagination.totalRows = quizzes.value.length;
       })
       .finally(() => {
@@ -117,24 +112,6 @@ initFilters();
 const clearFilter = () => {
   initFilters();
 };
-// function applyFilters() {
-//   if (!filter.value.name || filter.value.name.trim() === '') {
-//     reset();
-//   } else {
-//     quizzes.value = quizzesPreFilter.value.filter((q) => q.name.toLowerCase()
-//         .includes(filter.value.name.trim().toLowerCase()))?.map((item) => {
-//       const nameHtml = StringHighlighter.highlight(item.name, filter.value.name);
-//       return {
-//         nameHtml,
-//         ...item,
-//       };
-//     });
-//   }
-// }
-// function reset() {
-//   filter.value.name = '';
-//   quizzes.value = quizzesPreFilter.value.map((q) => ({ ...q }));
-// }
 function highlightValue(value) {
   const filterValue = filters.value['global'].value;
   if (filterValue && filterValue.trim().length > 0) {
@@ -155,8 +132,6 @@ function updateQuizDef(quizDef) {
         // presence of the originalQuizId indicates edit operation
         if (isNewQuizDef) {
           quizzes.value.push(updatedQuizDef);
-          // quizzesPreFilter.value.push(updatedQuizDef);
-          options.value.pagination.totalRows = quizzesPreFilter.length;
         } else {
           const replaceUpdated = (q) => {
             if (q.quizId === quizDef.originalQuizId) {
@@ -165,7 +140,6 @@ function updateQuizDef(quizDef) {
             return q;
           };
           quizzes.value = quizzes.value.map(replaceUpdated);
-          // quizzesPreFilter.value = quizzesPreFilter.value.map(replaceUpdated);
         }
       })
       .finally(() => {
@@ -195,7 +169,6 @@ function deleteQuiz() {
   QuizService.deleteQuizId(quizDef.quizId)
       .then(() => {
         quizzes.value = quizzes.value.filter((q) => q.quizId !== quizDef.quizId);
-        // quizzesPreFilter.value = quizzesPreFilter.value.filter((q) => q.quizId !== quizDef.quizId);
       })
       .finally(() => {
         options.value.busy = false;
@@ -224,24 +197,6 @@ defineExpose({
                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
                 data-cy="noQuizzesYet"/>
     <div v-if="!loading && hasData">
-<!--      <div class="flex mx-3">-->
-<!--        <InputText class="flex flex-grow-1" type="text" v-model="filter.name" v-on:keyup.enter="applyFilters"-->
-<!--                   data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>-->
-<!--      </div>-->
-<!--      <div class="flex gap-1 m-3">-->
-<!--        <SkillsButton label="Filter"-->
-<!--                      icon="fa fa-filter"-->
-<!--                      outlined-->
-<!--                      aria-label="Filter surveys and quizzes table"-->
-<!--                      @click="applyFilters"-->
-<!--                      data-cy="quizFilterBtn"/>-->
-<!--        <SkillsButton label="Reset"-->
-<!--                      icon="fa fa-times"-->
-<!--                      outlined-->
-<!--                      @click="reset"-->
-<!--                      aria-label="Reset surveys and quizzes filter"-->
-<!--                      data-cy="quizResetBtn"/>-->
-<!--      </div>-->
       <DataTable :value="quizzes" tableStyle="min-width: 50rem"
                  data-cy="quizDefinitionsTable"
                  stateStorage="local" stateKey="quizDefinitionsTable"
@@ -293,9 +248,7 @@ defineExpose({
                                :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
                                :aria-label="`Manage Quiz ${slotProps.data.name}`"
                                tag="a">
-<!--                    <span v-html="slotProps.data.nameHtml ? slotProps.data.nameHtml : slotProps.data.name" />-->
                     <span v-html="highlightValue(slotProps.data.name)" />
-
                   </router-link>
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">

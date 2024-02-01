@@ -139,7 +139,7 @@ const onSubmit = (values) => {
           name="type"
           :isRequire="true"
           :disabled="isEdit"
-          :options="['Quiz', 'Survey', null]" />
+          :options="['Quiz', 'Survey']" />
         <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
 
       <markdown-editor
