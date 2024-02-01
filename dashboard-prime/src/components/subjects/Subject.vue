@@ -8,6 +8,7 @@ import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithSta
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import LoadingCard from '@/components/utils/LoadingCard.vue';
+import EditSubject from '@/components/subjects/EditSubject.vue';
 
 const announcer = useSkillsAnnouncer()
 const store = useStore();
@@ -204,8 +205,8 @@ watch(subject, async (newVal, oldVal) => {
       </template>
     </nav-card-with-stats-and-controls>
 
-<!--    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"-->
-<!--                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>-->
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
+                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
 
     <removal-validation
       v-if="showDeleteDialog"

@@ -14,6 +14,7 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Subject from './Subject.vue';
 import JumpToSkill from './JumpToSkill.vue';
+import EditSubject from '@/components/subjects/EditSubject.vue';
 
 const announcer = useSkillsAnnouncer()
 const config = projConfig();
@@ -242,9 +243,9 @@ const sortOrderUpdate = (updateEvent) => {
                    title="No Subjects Yet" message="Subjects are a way to group and organize skill definitions within a gameified training profile."></no-content2>
     </loading-container>
 
-<!--    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal"-->
-<!--                  :subject="emptyNewSubject" @subject-saved="subjectAdded"-->
-<!--                  @hidden="handleHide"/>-->
+    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal"
+                  :subject="emptyNewSubject" @subject-saved="subjectAdded"
+                  @hidden="handleHide"/>
   </div>
 </template>
 

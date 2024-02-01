@@ -6,6 +6,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import SubjectsService from '@/components/subjects/SubjectsService';
+import EditSubject from '@/components/subjects/EditSubject.vue';
 
 const store = useStore();
 const route = useRoute();
@@ -164,10 +165,10 @@ const handleHideSubjectEdit = () => {
     <navigation v-if="!isLoadingData" :nav-items="navItems">
     </navigation>
 
-<!--    <edit-subject v-if="showEditSubject" v-model="showEditSubject"-->
-<!--                  :subject="subject" @subject-saved="subjectEdited"-->
-<!--                  :is-edit="true"-->
-<!--                  @hidden="handleHideSubjectEdit"/>-->
+    <edit-subject v-if="showEditSubject" v-model="showEditSubject"
+                  :subject="subject" @subject-saved="subjectEdited"
+                  :is-edit="true"
+                  @hidden="handleHideSubjectEdit"/>
   </div>
 </template>
 
