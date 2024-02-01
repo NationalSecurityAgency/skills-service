@@ -36,7 +36,6 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate } = us
 })
 
 const inputFormResiliency = reactive(useInputFormResiliency())
-inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
 
 const skillsDialog = ref(null)
 const close = () => {
@@ -61,13 +60,18 @@ if (props.asyncLoadDataFunction) {
     for (const [key, value] of Object.entries(res)) {
       setFieldValue(key, value)
     }
+    inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
   }).finally(() => {
     isLoadingAsyncData.value = false
     validate()
   })
 } else {
   isLoadingAsyncData.value = false
-  validate()
+  inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue).then((isRestoredFromStore) => {
+    if(isRestoredFromStore) {
+      validate()
+    }
+  })
 }
 
 </script>

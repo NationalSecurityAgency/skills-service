@@ -12,7 +12,7 @@ export const useInputFormResiliency = () => {
     currentReactiveModel: null
   }
   const loadFromStorageAndUpdateAsNeeded = (componentName, modelObj, setFieldValueFunction) => {
-    indexedDb.load(componentName).then((objFromStorage) => {
+    return indexedDb.load(componentName).then((objFromStorage) => {
       if (objFromStorage) {
         for (const [key, value] of Object.entries(objFromStorage)) {
           if (value !== modelObj[key]) {
@@ -32,11 +32,12 @@ export const useInputFormResiliency = () => {
     operationsContainer.originalModal = initialValues
     operationsContainer.currentReactiveModel = modelObj
 
-    loadFromStorageAndUpdateAsNeeded(componentName, modelObj, setFieldValueFunction)
-
-    watch(modelObj, (newValue) => {
-      const rawObj = toRaw(newValue)
-      indexedDb.save(componentName, rawObj)
+    return loadFromStorageAndUpdateAsNeeded(componentName, modelObj, setFieldValueFunction).then(()=> {
+      watch(modelObj, (newValue) => {
+        const rawObj = toRaw(newValue)
+        indexedDb.save(componentName, rawObj)
+      })
+      return isRestoredFromStore.value
     })
   }
 
