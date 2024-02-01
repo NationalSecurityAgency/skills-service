@@ -1,123 +1,80 @@
 <script setup>
-import { computed } from 'vue';
-import Badge from 'primevue/badge';
-import Card from 'primevue/card';
-import LoadingContainer from '../LoadingContainer.vue';
+import SkillsSpinner from '@/common-components/utilities/SkillsSpinner.vue'
 
 const props = defineProps(['loading', 'options'])
 
-const titleCss = computed(() => {
-  const statCount = props.options?.stats ? props.options.stats.length : 0;
-  return {
-    pageHeaderTitle: true,
-    // 'text-center': true,
-    'text-lg-left': true,
-    'lg:col-5': statCount > 2,
-    'xl:col-3': statCount > 2,
-    'lg:col-7': statCount === 2,
-    'xl:col-8': statCount === 2,
-    'lg:col-8': statCount < 2,
-    'xl:col-9': statCount < 2,
-    // 'xl:col-9': statCount < 2,
-  };
-});
-
-const statcsCss = computed(() => {
-  const statCount = props.options?.stats ? props.options.stats.length : 0;
-  return {
-    'lg:col-7': statCount > 2,
-    'xl:col-9': statCount > 2,
-    'lg:col-5': statCount === 2,
-    'xl:col-4': statCount === 2,
-    'lg:col-4': statCount < 2,
-    'xl:col-3': statCount < 2,
-    // 'xl:col-3': statCount < 2,
-
-  };
-});
-
-const individualStatCss = computed(() => {
-  const statCount = props.options?.stats ? props.options.stats.length : 0;
-  return {
-    'md:col-6': statCount >= 2,
-    // 'xl:col-4': statCount >= 2,
-    'xl:col-2': statCount >= 2,
-    'xl:col-6': statCount === 2,
-    // 'xl:col-6': statCount === 2,
-    'md:col-12': statCount < 2,
-    'xl:col-12': statCount < 2,
-    // 'xl:col-12': statCount < 2,
-    'mt-2': true,
-  };
-});
 </script>
 
 <template>
-  <div class="mx-0 py-0" data-cy="pageHeader">
-    <div class="px-1">
-      <LoadingContainer :is-loading="loading">
-        <div class="flex-auto">
-          <slot name="banner"></slot>
-          <div class="grid">
-            <div :class="titleCss">
-              <div class="text-3xl"><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></div>
-              <slot name="subTitle"><div class="text-xl text-500">{{ options.subTitle }}</div></slot>
-              <slot name="subSubTitle"></slot>
-            </div>
-            <div :class="statcsCss">
-              <div class="flex text-center mt-4 mt-lg-0 justify-content-center lg:justify-content-end">
-                <div v-for="(stat) in options.stats" :key="stat.label" :class="individualStatCss" data-cy="pageHeaderStat">
-                  <Card>
-                    <template #content>
-                      <div class="flex flex-row">
-                        <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
-                          <div class="card-title uppercase text-muted mb-0 small">{{stat.label}}</div>
-                          <div v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted"/>
-                          <span v-else class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count }}</span>
-                          <span v-if="stat.warnMsg" class="ml-1">
+  <div data-cy="pageHeader">
+    <skills-spinner v-if="loading" :is-loading="loading" />
+    <div v-if="!loading" class="flex py-1 px-1 w-full">
+      <slot name="banner"></slot>
+      <div class="flex w-full flex-wrap">
+        <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
+          <div class="text-2xl">
+            <i v-if="options.icon" class="mr-2" :class="options.icon" />
+            <span data-cy="title">{{ options.title }}</span>
+            <slot name="right-of-header"></slot>
+          </div>
+          <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">
+            <slot name="subTitle">
+              <div class="text-xl">{{ options.subTitle }}</div>
+            </slot>
+          </div>
+          <slot name="subSubTitle" data-cy="subSubTitle"></slot>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-content-center lg:justify-content-end flex-wrap">
+            <div v-for="(stat) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto">
+              <Card class="ml-3 mt-2">
+                <template #content>
+                  <div class="flex">
+                    <div class="" :data-cy="`pageHeaderStat_${stat.label}`">
+                      <div class="uppercase text-color-secondary">{{ stat.label }}</div>
+                      <div class="font-bold text-xl">
+                        <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
+                        <span v-else data-cy="statValue">{{ stat.count }}</span>
+                      </div>
+
+                      <span v-if="stat.warnMsg" class="ml-1">
                             <i class="fa fa-exclamation-circle text-warning"
                                :aria-label="`Warning: ${stat.warnMsg}`"
                                role="alert"
                                v-tooltip="stat.warnMsg" />
                           </span>
-                        </div>
-                        <div class="">
-                          <i :class="stat.icon" style="font-size: 2.2rem;"></i>
-                        </div>
+                    </div>
+                    <div class="ml-3 flex-1 text-right">
+                      <i :class="stat.icon" style="font-size: 2.2rem;"></i>
+                    </div>
+                  </div>
+                  <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted"
+                       v-html="stat.secondaryPreformatted"
+                       :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
+                  <div v-if="stat.secondaryStats">
+                    <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
+                      <div v-if="secCount.count > 0" style="font-size: 0.9rem"
+                           class="text-left">
+                        <Badge :severity="`${secCount.badgeVariant}`" value="{{ secCount.count }}"
+                               :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
+                          <span></span>
+                        </Badge>
+                        <span class="text-left text-secondary text-uppercase ml-1"
+                              style="font-size: 0.8rem">{{ secCount.label }}</span>
                       </div>
-                      <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted" v-html="stat.secondaryPreformatted" :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
-                      <div v-if="stat.secondaryStats">
-                        <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
-                          <div v-if="secCount.count > 0" style="font-size: 0.9rem"
-                               class="text-left">
-                            <Badge :severity="`${secCount.badgeVariant}`" value="{{ secCount.count }}"
-                                     :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
-                              <span></span>
-                            </Badge>
-                            <span class="text-left text-secondary text-uppercase ml-1"
-                                  style="font-size: 0.8rem">{{ secCount.label }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-                  </Card>
-                </div>
-              </div>
+                    </div>
+                  </div>
+                </template>
+              </Card>
             </div>
           </div>
-          <slot name="footer"></slot>
         </div>
-      </LoadingContainer>
+      </div>
+      <slot name="footer"/>
     </div>
   </div>
 </template>
 
 <style scoped>
-.pageHeaderTitle {
-  overflow-wrap: break-word;
-}
 
-.p-card .p-card-body {
-  padding: 0 !important;
-}
 </style>

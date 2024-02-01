@@ -22,7 +22,7 @@ export const useAppConfig = () => {
   const maxIdLength = store.getters.config.maxIdLength;
   const descriptionMaxLength = store.getters.config.descriptionMaxLength
   const paragraphValidationRegex = store.getters.config.paragraphValidationRegex
-  const formFieldDebounceInMs = store.getters.config.formFieldDebounceInMs || 750
+  const formFieldDebounceInMs = store.getters.config.formFieldDebounceInMs || 400
   return {
     rankingAndProgressViewsEnabled,
     docsHost,

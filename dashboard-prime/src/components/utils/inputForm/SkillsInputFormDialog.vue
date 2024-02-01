@@ -38,7 +38,9 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate } = us
 const inputFormResiliency = reactive(useInputFormResiliency())
 inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
 
+const skillsDialog = ref(null)
 const close = () => {
+  skillsDialog.value.handleClose()
   model.value = false
   inputFormResiliency.discard(false)
 }
@@ -72,6 +74,7 @@ if (props.asyncLoadDataFunction) {
 
 <template>
   <SkillsDialog
+    ref="skillsDialog"
     v-model="model"
     :header="header"
     :loading="isDialogLoading"

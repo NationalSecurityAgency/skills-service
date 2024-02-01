@@ -1,5 +1,6 @@
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import MyProgressPage from '@/components/myProgress/MyProgressPage.vue'
+import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue'
 
 const createProgressAndRankingRoutes = () => {
   return {
@@ -24,7 +25,18 @@ const createProgressAndRankingRoutes = () => {
             message: 'My Progress'
           }
         }
-      }
+      }, {
+        name: 'MyProjectSkills',
+        path: 'projects/:projectId',
+        component: MyProjectSkillsPage,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Progress Project',
+          },
+        },
+      },
     ]
   }
 }

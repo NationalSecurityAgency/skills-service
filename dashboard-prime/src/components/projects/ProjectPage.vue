@@ -1,17 +1,20 @@
 <script setup>
 import { ref, computed, nextTick, onMounted } from 'vue';
 import { useStore, createNamespacedHelpers } from 'vuex';
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import ProjectService from '@/components/projects/ProjectService';
 import ProjectDates from '@/components/projects/ProjectDates.vue';
 import dayjs from "@/common-components/DayJsCustomizer.js";
+import EditProject from '@/components/projects/EditProject.vue'
 
 // const props = defineProps(['project'])
 const store = useStore();
+const router = useRouter()
 const route = useRoute();
+const announcer = useSkillsAnnouncer()
 const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
 let isLoadingData = ref(true);
@@ -177,9 +180,6 @@ const copyAndDisplayShareProjInfo = () => {
 const fromExpirationDate = () => {
   return dayjs().startOf('day').to(dayjs(expirationDate));
 };
-const displayEditProject = () => {
-  editProject = true;
-};
 const loadProjects = () => {
   isLoadingData.value = true;
   if (route.params.project) {
@@ -192,34 +192,17 @@ const loadProjects = () => {
         });
   }
 };
-const editProjectHidden = () => {
-  editProject = false;
-  nextTick(() => {
-    const ref = this.$refs.editProjectButton;
-    if (ref) {
-      ref.focus();
-    }
-  });
-};
-const focusOnShareButton = () => {
-  nextTick(() => {
-    const ref = this.$refs.shareProjectButton;
-    if (ref) {
-      ref.focus();
-    }
-  });
-};
 const projectSaved = (updatedProject) => {
   ProjectService.saveProject(updatedProject).then((resp) => {
     const origProjId = project.value.projectId;
     setProject(resp);
     if (resp.projectId !== origProjId) {
-      this.$router.replace({ name: route.name, params: { ...route.params, projectId: resp.projectId } });
+      router.replace({ name: route.name, params: { ...route.params, projectId: resp.projectId } });
       projectId = resp.projectId;
     }
     store.dispatch('loadProjConfigState', { projectId: resp.projectId, updateLoadingVar: false });
     nextTick(() => {
-      // this.$announcer.polite(`Project ${updatedproject.value.name} has been edited`);
+      announcer.polite(`Project ${updatedProject.name} has been edited`);
     });
   });
 };
@@ -262,37 +245,60 @@ const setProject = (newProject) => {
             class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
             class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
         </div>
-        <div class="h6"><span class="border p-1 border-info rounded mr-1 mb-2">
-          <i class="fas fa-fingerprint text-info" aria-hidden="true"/></span> <span class="font-italic text-muted">Project ID</span>: {{ project.projectId }}</div>
+        <div class="">
+          <span class="border-1 border-round px-1 mr-2">
+           <i class="fas fa-fingerprint" aria-hidden="true"/>
+          </span>
+            <span class="font-italic text-color-secondary">Project ID</span>: {{ project.projectId }}
+        </div>
       </template>
       <template #subSubTitle v-if="project">
-        <span class="p-SkillsButtonset mr-2" v-if="!isReadOnlyProj">
-          <SkillsButton @click="displayEditProject"
-                    ref="editProjectButton"
-                    class="border-1 border-black-alpha-90"
-                    size="small"
-                    data-cy="btn_edit-project"
-                    label="Edit" icon="fas fa-edit"
-                    :aria-label="'edit Project '+project.projectId">
+        <div v-if="!isReadOnlyProj">
+          <SkillsButton
+            id="editProjectBtn"
+            @click="editProject = true"
+            ref="editProjectButton"
+            size="small"
+            outlined
+            severity="info"
+            :track-for-focus="true"
+            data-cy="btn_edit-project"
+            label="Edit"
+            icon="fas fa-edit"
+            :aria-label="`edit Project ${project.name}`">
           </SkillsButton>
-          <SkillsButton target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                    data-cy="projectPreview" size="small" label="Preview" icon="fas fa-eye"
-                   class="border-1 border-black-alpha-90" :aria-label="'preview client display for project'+project.name">
-<!--            v-skills="'PreviewProjectClientDisplay'" -->
-          </SkillsButton>
-          <SkillsButton v-if="isProjConfigDiscoverable"
-                    ref="shareProjectButton"
-                    size="small"
-                    @click="copyAndDisplayShareProjInfo"
-                    data-cy="shareProjBtn"
-                    class="border-1 border-black-alpha-90"
-                    label="Share" icon="fas fa-share-alt"
-                    :aria-label="`Share ${project.name} with new users`">
-<!--            v-skills="'ShareProject'" -->
-          </SkillsButton>
-        </span>
-        <div data-cy="projectCreated">
-          <i class="fas fa-clock text-success header-status-icon" aria-hidden="true" /> <ProjectDates :created="project.created" :load-last-reported-date="true"/>
+          <router-link
+            class="ml-1"
+            data-cy="projectPreview"
+            :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
+            target="_blank" rel="noopener">
+            <SkillsButton
+              target="_blank"
+              v-if="project"
+              outlined
+              severity="info"
+
+              size="small"
+              label="Preview"
+              icon="fas fa-eye"
+              :aria-label="`preview client display for project ${project.name}`">
+              <!--            v-skills="'PreviewProjectClientDisplay'" -->
+            </SkillsButton>
+          </router-link>
+<!--          <SkillsButton v-if="isProjConfigDiscoverable"-->
+<!--                    ref="shareProjectButton"-->
+<!--                    size="small"-->
+<!--                    @click="copyAndDisplayShareProjInfo"-->
+<!--                    data-cy="shareProjBtn"-->
+<!--                    class="border-1 border-black-alpha-90"-->
+<!--                    label="Share" icon="fas fa-share-alt"-->
+<!--                    :aria-label="`Share ${project.name} with new users`">-->
+<!--&lt;!&ndash;            v-skills="'ShareProject'" &ndash;&gt;-->
+<!--          </SkillsButton>-->
+        </div>
+        <div data-cy="projectCreated" class="mt-3">
+          <i class="fas fa-clock text-success mr-1" aria-hidden="true" />
+          <ProjectDates :created="project.created" :load-last-reported-date="true"/>
         </div>
 <!--        <div v-if="userProjRole">-->
 <!--          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>-->
@@ -305,6 +311,15 @@ const setProject = (newProject) => {
 
     <Navigation v-if="!isLoading" :nav-items="navItems">
     </Navigation>
+
+    <edit-project
+      v-if="editProject"
+      v-model="editProject"
+      :is-edit="true"
+      :id="`editProjectModal${project.projectId}`"
+      :project="project"
+      @project-saved="projectSaved"
+      :enable-return-focus="true"/>
 
 <!--    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"-->
 <!--                  @project-saved="projectSaved" @hidden="editProjectHidden"/>-->

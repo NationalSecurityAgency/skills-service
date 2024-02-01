@@ -29,10 +29,14 @@ const subjRef = ref();
 const mainFocus = ref();
 const subPageHeader = ref();
 
-watch(route.params.projectId, function projectIdParamUpdated() {
-  projectId.value = route.params.projectId;
-  doLoadSubjects();
-});
+watch(
+  () => route.params.projectId,
+  async newId => {
+    projectId.value = newId;
+    doLoadSubjects();
+  }
+)
+
 
 let isReadOnlyProj = false;
 

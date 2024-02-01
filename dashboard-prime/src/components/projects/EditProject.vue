@@ -93,6 +93,7 @@ const schema = object({
 const initialProjData = {
   originalProjectId: props.project.projectId,
   ...props.project,
+  projectName: props.project.name,
   description: props.project.description || '',
 }
 
