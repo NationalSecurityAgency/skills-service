@@ -1,0 +1,26 @@
+<script setup>
+defineProps({
+  label: String,
+  icon: String,
+  value: {
+    type: String,
+    required: false
+  },
+  valueCss: {
+    type: String,
+    default: 'text-color'
+  },
+})
+</script>
+
+<template>
+  <div :data-cy="`breadcrumb-${value}`">
+    <span v-if="icon" :class="[icon, 'text-color']" aria-hidden="true" />
+    <span v-if="label" class="text-color-secondary mr-1">{{ label }}:</span>
+    <span class="font-semibold" :class="valueCss">{{ value }}</span>
+  </div>
+</template>
+
+<style scoped>
+
+</style>

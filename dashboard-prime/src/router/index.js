@@ -390,7 +390,7 @@ const routes = [
       },
     }, {
       name: 'ConfigureVideo',
-      path: 'configVideo',
+      path: 'config-video',
       component: VideoConfigPage,
       meta: {
         requiresAuth: true,
@@ -401,7 +401,7 @@ const routes = [
       props: true,
     }, {
       name: 'ConfigureExpiration',
-      path: 'configExpiration',
+      path: 'config-expiration',
       component: ExpirationConfigPage,
       meta: {
         requiresAuth: true,

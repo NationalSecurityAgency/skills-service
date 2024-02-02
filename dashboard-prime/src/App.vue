@@ -11,8 +11,10 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
 import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 
 const store = useStore()
+const clientDisplayPath = useClientDisplayPath()
 const isSupervisor = ref(false)
 const activeProjectId = computed(() => {
   return store.state.projectId
@@ -52,7 +54,7 @@ const getLandingPage = () => {
 }
 
 const inceptionConfigurer = useInceptionConfigurer()
-watch(store.getters.userInfo, async (newUserInfo) => {
+watch(() => store.getters.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
   }
@@ -63,7 +65,7 @@ const addNavGuards = () => {
   const beforeEachNavGuard = (to, from, next) => {
     if (to.query) {
       const { skillsClientDisplayPath } = to.query
-      store.commit('skillsClientDisplayPath', {
+      clientDisplayPath.setClientPathInfo({
         path: skillsClientDisplayPath,
         fromDashboard: true
       })

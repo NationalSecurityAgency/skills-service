@@ -25,6 +25,9 @@ import Dialog from 'primevue/dialog';
 import InputSwitch from 'primevue/inputswitch';
 import BlockUI from 'primevue/blockui';
 import SelectButton from 'primevue/selectbutton';
+import Badge from 'primevue/badge';
+import BadgeDirective from 'primevue/badgedirective';
+
 
 import Tooltip from 'primevue/tooltip';
 import FocusTrap from 'primevue/focustrap';
@@ -64,6 +67,8 @@ app.component('Dialog', Dialog)
 app.component('InputSwitch', InputSwitch)
 app.component('BlockUI', BlockUI)
 app.component('SelectButton', SelectButton)
+app.component('Badge', Badge)
+
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)
@@ -72,5 +77,6 @@ app.component('SkillsDialog', SkillsDialog)
 
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);
+app.directive('badge', BadgeDirective);
 
 app.mount('#app')

@@ -101,9 +101,8 @@ describe('Projects Admin Management Tests', () => {
         cy.contains('ID: editedProjectId')
             .should('be.visible');
 
-        // TODO: PUT THAT BACK IN TO TEST BREADCRUMB
-        // cy.get('[data-cy=breadcrumb-editedProjectId]')
-        //     .should('be.visible');
+        cy.get('[data-cy=breadcrumb-editedProjectId]')
+            .should('be.visible');
         cy.get('[data-cy="projectPreview"]')
             .should('have.attr', 'href')
             .and('include', '/projects/editedProjectId');

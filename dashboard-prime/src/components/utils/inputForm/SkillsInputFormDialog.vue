@@ -25,14 +25,14 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  asyncLoadDataFunction: Function,
+  asyncLoadDataFunction: Function
 })
 const emit = defineEmits(['saved', 'cancelled'])
 
 
 const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate } = useForm({
   validationSchema: props.validationSchema,
-  initialValues: props.initialValues,
+  initialValues: props.initialValues
 })
 
 const inputFormResiliency = reactive(useInputFormResiliency())
@@ -63,15 +63,21 @@ if (props.asyncLoadDataFunction) {
     inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
   }).finally(() => {
     isLoadingAsyncData.value = false
-    validate()
+    validateIfNotEmpty()
   })
 } else {
   isLoadingAsyncData.value = false
-  inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue).then((isRestoredFromStore) => {
-    if(isRestoredFromStore) {
-      validate()
-    }
-  })
+  inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
+    .then(() => {
+      validateIfNotEmpty()
+    })
+}
+
+const validateIfNotEmpty = () => {
+  const foundNonEmpty = Object.values(values).find((value) => value)
+  if (foundNonEmpty) {
+    validate()
+  }
 }
 
 </script>

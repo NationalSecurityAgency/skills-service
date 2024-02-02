@@ -1,5 +1,5 @@
 <script setup>
-import SkillsSpinner from '@/common-components/utilities/SkillsSpinner.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const props = defineProps(['loading', 'options'])
 

@@ -1,21 +1,258 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
+import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import SettingsService from '@/components/settings/SettingsService.js'
+import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
 
-const home = ref({
-  icon: 'pi pi-home'
+const route = useRoute()
+const clientDisplayPath = useClientDisplayPath()
+const appConfig = useAppConfig()
+const items = ref([])
+
+
+const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global']
+const keysToExcludeFromPath = []
+
+const build = () => {
+  handleCustomLabels().then(() => {
+    buildBreadcrumb()
+  })
+}
+onMounted(() => {
+  build()
 })
-const items = ref([
-  { label: 'Electronics' },
-  { label: 'Computer' },
-  { label: 'Accessories' },
-  { label: 'Keyboard' },
-  { label: 'Wireless' }
-])
+watch(
+  () => route.path,
+  async () => {
+    build()
+  }
+)
+
+const projectDisplayName = ref('Project')
+const subjectDisplayName = ref('Subject')
+const groupDisplayName = ref('Group')
+const skillDisplayName = ref('Skill')
+const currentProjectId = ref('')
+const handleCustomLabels = () => {
+  return new Promise((resolve) => {
+    const isProgressAndRankingsProject = route.name === 'MyProjectSkills'
+    if (isProgressAndRankingsProject) {
+      const currentProjectIdParam = route.params.projectId
+      if (currentProjectId.value !== currentProjectIdParam) {
+        SettingsService.getClientDisplayConfig(currentProjectId).then((response) => {
+          projectDisplayName.value = response.projectDisplayName
+          subjectDisplayName.value = response.subjectDisplayName
+          groupDisplayName.value = response.groupDisplayName
+          skillDisplayName.value = response.skillDisplayName
+          currentProjectId.value = currentProjectIdParam
+          resolve()
+        })
+      } else {
+        resolve()
+      }
+    } else {
+      projectDisplayName.value = 'Project'
+      subjectDisplayName.value = 'Subject'
+      groupDisplayName.value = 'Group'
+      skillDisplayName.value = 'Skill'
+      currentProjectId.value = ''
+      resolve()
+    }
+  })
+}
+const projectAndRankingPathItem = 'progress-and-rankings';
+const adminHomePageItem = 'administrator'
+const adminHomePageName = 'Projects'
+const settingsHomePageItem = 'settings'
+const buildPathInfo = () => {
+  return {
+    path: route.path,
+    pathParts: route.path.replace(/^\/+|\/+$/g, '').split('/'),
+    clientDisplayPathParts: clientDisplayPath.clientPathInfo.path?.replace(/^\/+|\/+$/g, '')?.split('/'),
+    hasSkillsClientDisplayPath: clientDisplayPath.clientPathInfo && clientDisplayPath.clientPathInfo.path
+  }
+}
+let pathInfo = buildPathInfo()
+
+const buildBreadcrumb = () => {
+  pathInfo = buildPathInfo()
+
+  const newItems = []
+  let res = pathInfo.pathParts
+  if (pathInfo.hasSkillsClientDisplayPath) {
+    res = [...res, ...pathInfo.clientDisplayPathParts]
+  }
+  let key = null
+
+  if (typeof route.meta.breadcrumb === 'function') {
+    items.value = route.meta.breadcrumb(route)
+    return
+  }
+
+  const lastItemInPathCustomName = route.meta.breadcrumb
+
+  let ignoreNext = false
+  res.forEach((item, index) => {
+    let value = item === adminHomePageItem ? adminHomePageName : item
+    if (value) {
+      if (!ignoreNext && item !== 'global') {
+        // treat crossProject as a special case
+        if (value === 'crossProject') {
+          ignoreNext = true
+          key = 'Dependency'
+          return
+        }
+        // treat userTag as a special case
+        if (value === 'userTag') {
+          ignoreNext = true
+          key = res[index + 1]
+          return
+        }
+        if (value === projectAndRankingPathItem && !appConfig.rankingAndProgressViewsEnabled) {
+          return
+        }
+        if (index === pathInfo.pathParts.length - 1 && lastItemInPathCustomName) {
+          key = null
+          value = lastItemInPathCustomName
+        }
+
+        if (key) {
+          if (!shouldExcludeKey(key)) {
+            newItems.push(buildResItem(key, value, res, index))
+          }
+          key = null
+        } else {
+          // must exclude items in the path because each page with navigation
+          // doesn't have a sub-route in the url, for example:
+          // '/projects/projectId' will conceptually map to '/projects/projectId/subjects'
+          // but there is no '/project/projectId/subjects' route configured so when parsing something like
+          // '/projects/projectId/subjects/subjectId/stats we must end up with:
+          //    'projects / project:projectId / subject:subjectId / stats'
+          // notice that 'subjects' is missing
+          if (!shouldExcludeValue(value) && !isQuizzesValueUnderProgressAndRanking(value, res)) {
+            newItems.push(buildResItem(key, value, res, index))
+          }
+          if (value !== 'Projects' && value !== projectAndRankingPathItem && value !== lastItemInPathCustomName) {
+            key = value
+          }
+        }
+      } else {
+        ignoreNext = false
+      }
+    }
+  })
+
+  newItems[newItems.length-1].isLast = true
+  items.value = newItems
+}
+const buildResItem = (key, item, res, index) => {
+  const decodedItem = decodeURIComponent(item)
+  return {
+    icon: index === 0 ? getIcon(decodedItem) : null,
+    label: key ? prepKey(key) : null,
+    value: !key ? capitalize(hyphenToCamelCase(decodedItem)) : decodedItem,
+    url: getUrl(res, index + 1),
+    isLast: false,
+  }
+}
+const getIcon = (value) => {
+  let icon = null
+  if (value === adminHomePageName){
+    icon = 'fas fa-cogs'
+  }
+  if (value === settingsHomePageItem) {
+    icon = 'fas fa-wrench'
+  }
+  if (value === projectAndRankingPathItem) {
+    icon = 'fas fa-chart-bar'
+  }
+
+  return icon ? `${icon} mr-1` : null
+}
+const getUrl = (arr, endIndex) => {
+  const dashboardUrlSize = pathInfo.pathParts.length
+  let url = `/${arr.slice(0, Math.min(endIndex, dashboardUrlSize)).join('/')}/`
+  if (pathInfo.hasSkillsClientDisplayPath && endIndex >= dashboardUrlSize) {
+    const skillsClientDisplayPath = (endIndex > dashboardUrlSize) ? `/${arr.slice(dashboardUrlSize, endIndex).join('/')}` : '/'
+    const queryParams = new URLSearchParams(window.location.search)
+    queryParams.set('skillsClientDisplayPath', skillsClientDisplayPath)
+    url += `?${queryParams.toString()}`
+  }
+  return url
+}
+const prepKey = (key) => {
+  let res = key
+  if (key.endsWith('zes')) {
+    res = key.substring(0, key.length - 3)
+  } else {
+    res = key.endsWith('s') ? key.substring(0, key.length - 1) : key
+  }
+
+  return capitalize(substituteCustomLabels(res))
+}
+const substituteCustomLabels = (label) => {
+  if (label.toLowerCase() === 'project') {
+    return projectDisplayName.value
+  }
+  if (label.toLowerCase() === 'subject') {
+    return subjectDisplayName.value
+  }
+  if (label.toLowerCase() === 'group') {
+    return groupDisplayName.value
+  }
+  if (label.toLowerCase() === 'skill') {
+    return skillDisplayName.value
+  }
+  return label
+}
+const hyphenToCamelCase = (value) => {
+  return value.replace(/-([a-z])/g, (g) => ` ${g[1].toUpperCase()}`)
+}
+const capitalize = (value) => {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+const shouldExcludeValue = (item) => {
+  return idsToExcludeFromPath.some((searchForMe) => item === searchForMe)
+}
+const shouldExcludeKey = (key) => {
+  return keysToExcludeFromPath.some((searchForMe) => key === searchForMe)
+}
+const isQuizzesValueUnderProgressAndRanking = (value, items) => {
+  const isQuizzes = value === 'quizzes'
+  return isQuizzes && items.includes('progress-and-rankings')
+}
+
+
 </script>
 
 <template>
   <div class="card">
-    <Breadcrumb :home="home" :model="items" />
+<!--    <pre>{{ items }}</pre>-->
+    <Breadcrumb :model="items" data-cy="breadcrumb-bar">
+      <template #item="{ item, props }">
+        <router-link
+          v-if="!item.isLast"
+          v-slot="{ href, navigate }"
+          :to="item.url"
+          custom>
+          <a :href="href" v-bind="props.action" @click="navigate">
+            <skills-breadcrumb-item
+              :icon="item.icon"
+              :label="item.label"
+              :value="item.value"
+              value-css="text-primary" />
+          </a>
+        </router-link>
+        <div v-else>
+          <skills-breadcrumb-item
+            :icon="item.icon"
+            :label="item.label"
+            :value="item.value" />
+        </div>
+      </template>
+    </Breadcrumb>
   </div>
 </template>
 
