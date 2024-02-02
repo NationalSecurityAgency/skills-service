@@ -1,6 +1,6 @@
 <script setup>
 import {ref, nextTick, computed, watch} from 'vue';
-import { projConfig } from '@/components/projects/ProjConfig.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 import {useRoute, useRouter} from "vue-router";
 
 const emit = defineEmits(['add-action'])
@@ -8,7 +8,7 @@ const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLa
 const router = useRouter()
 const route = useRoute()
 
-const config = projConfig();
+const config = useProjConfig();
 const actionButton = ref(null)
 const disabledInternal = ref(props.disabled);
 

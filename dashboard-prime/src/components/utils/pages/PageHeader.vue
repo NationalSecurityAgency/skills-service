@@ -6,7 +6,7 @@ const props = defineProps(['loading', 'options'])
 </script>
 
 <template>
-  <div data-cy="pageHeader">
+  <div data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
     <skills-spinner v-if="loading" :is-loading="loading" />
     <div v-if="!loading" class="flex py-1 px-1 w-full">
       <slot name="banner"></slot>

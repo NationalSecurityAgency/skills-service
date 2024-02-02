@@ -17,6 +17,7 @@ limitations under the License.
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import Badge from 'primevue/badge';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsService from '@/components/skills/SkillsService';
@@ -30,13 +31,13 @@ const route = useRoute();
 const router = useRouter();
 const store = useStore();
 const announcer = useSkillsAnnouncer();
+const subjectState = useSubjectsState()
 
 let isLoadingData = ref(true);
 let subjectId = ref('');
 let headerOptions = ref({});
 let showEdit = ref(false);
 
-let subject = ref(store.getters["subjects/subject"]);
 // let skill = ref(store.getters["skills/skill"]);
 
 const skillsState = useSkillsState();
@@ -46,20 +47,18 @@ onMounted(() => {
 });
 
 const isLoading = computed(() => {
-  return isLoadingData.value; // || isLoadingProjConfig;
+  return isLoadingData.value || subjectState.isLoadingSubject; // || isLoadingProjConfig;
 });
 
-const navItems = computed(() => {
-  if (isLoadingData.value) {
-    return [];
-  }
+const navItems = ref([])
+const buildNavItems = () => {
   const items = [];
   items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
   items.push({ name: 'Video', iconClass: 'fa-video skills-color-video', page: 'ConfigureVideo' });
   items.push({ name: 'Expiration', iconClass: 'fa-hourglass-end skills-color-expiration', page: 'ConfigureExpiration' });
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
   const isReadOnlyNonSr = (skillsState.skill.readOnly === true && !skillsState.skill.selfReportType);
-  const addEventDisabled = subject.totalPoints < store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
+  const addEventDisabled = subjectState.subject.totalPoints < store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
 
   let msg = addEventDisabled ? `Subject needs at least ${store.getters.config.minimumSubjectPoints} points before events can be added` : '';
   const disabledDueToGroupBeingDisabled = skillsState.skill.groupId && !skillsState.skill.enabled;
@@ -76,7 +75,7 @@ const navItems = computed(() => {
   }
   items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' });
   return items;
-});
+}
 
 const isImported = computed(() => {
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0;
@@ -97,15 +96,17 @@ const loadData = () => {
     skillId: route.params.skillId,
   }).then(() => {
     headerOptions.value = buildHeaderOptions(skillsState.skill);
-    if (subject.value) {
+    if (subjectState.subject.value) {
       isLoadingData.value = false;
+      navItems.value = buildNavItems()
     } else {
-      store.dispatch('subjects/loadSubjectDetailsState', {
+      subjectState.loadSubjectDetailsState({
         projectId,
         subjectId,
       }).then(() => {
         // subject = store.getters["subjects/subject"];
         isLoadingData.value = false;
+        navItems.value = buildNavItems()
       });
     }
   });

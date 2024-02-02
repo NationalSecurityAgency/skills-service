@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView } from 'vue-router'
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
@@ -12,8 +12,10 @@ import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidator
 import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const store = useStore()
+const projConfig = useProjConfig()
 const clientDisplayPath = useClientDisplayPath()
 const isSupervisor = ref(false)
 const activeProjectId = computed(() => {
@@ -107,7 +109,7 @@ const addNavGuards = () => {
         if (isActiveProjectIdChange(to, from)) {
           store.commit('currentProjectId', to.params.projectId)
           if (isAdminPage(to) && to.params.projectId) {
-            store.dispatch('loadProjConfigState', { projectId: to.params.projectId })
+            projConfig.loadProjConfigState({ projectId: to.params.projectId })
           }
         }
         if (

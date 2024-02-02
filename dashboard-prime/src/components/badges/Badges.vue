@@ -10,12 +10,11 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import {projConfig} from "@/components/projects/ProjConfig.js";
 import BadgesService from '@/components/badges/BadgesService';
 import Badge from '@/components/badges/Badge.vue';
 
 const announcer = useSkillsAnnouncer()
-// const config = projConfig();
+// const config = useProjConfig();
 // const props = defineProps(['subject']);
 const emit = defineEmits(['badge-deleted', 'badges-changed']);
 const store = useStore();

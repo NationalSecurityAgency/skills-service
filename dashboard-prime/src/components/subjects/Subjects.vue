@@ -9,7 +9,7 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SubjectsService from '@/components/subjects/SubjectsService';
-import { projConfig } from '@/components/projects/ProjConfig.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Subject from './Subject.vue';
@@ -17,7 +17,7 @@ import JumpToSkill from './JumpToSkill.vue';
 import EditSubject from '@/components/subjects/EditSubject.vue';
 
 const announcer = useSkillsAnnouncer()
-const config = projConfig();
+const config = useProjConfig();
 const props = defineProps(['subject']);
 const emit = defineEmits(['subjects-changed']);
 const store = useStore();

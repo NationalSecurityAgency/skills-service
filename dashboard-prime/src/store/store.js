@@ -16,11 +16,9 @@
 import { createStore } from 'vuex'
 import auth from './modules/auth'
 import users from './modules/users'
-import subjects from './modules/subjects'
 import projects from './modules/projects'
 import badges from './modules/badges'
 import config from './modules/config'
-import projConfig from './modules/projConfig'
 import libVersion from './modules/libVersion'
 import access from './modules/access'
 import skills from './modules/skills'
@@ -63,11 +61,9 @@ export default createStore({
   modules: {
     auth,
     users,
-    subjects,
     projects,
     badges,
     config,
-    projConfig,
     libVersion,
     access,
     skills,

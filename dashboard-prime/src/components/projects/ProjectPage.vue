@@ -3,6 +3,7 @@ import { ref, computed, nextTick, onMounted } from 'vue';
 import { useStore, createNamespacedHelpers } from 'vuex';
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import ProjectService from '@/components/projects/ProjectService';
@@ -14,6 +15,7 @@ import EditProject from '@/components/projects/EditProject.vue'
 const store = useStore();
 const router = useRouter()
 const route = useRoute();
+const projConfig = useProjConfig()
 const announcer = useSkillsAnnouncer()
 const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -200,7 +202,7 @@ const projectSaved = (updatedProject) => {
       router.replace({ name: route.name, params: { ...route.params, projectId: resp.projectId } });
       projectId = resp.projectId;
     }
-    store.dispatch('loadProjConfigState', { projectId: resp.projectId, updateLoadingVar: false });
+    projConfig.loadProjConfigState({ projectId: resp.projectId, updateLoadingVar: false })
     nextTick(() => {
       announcer.polite(`Project ${updatedProject.name} has been edited`);
     });

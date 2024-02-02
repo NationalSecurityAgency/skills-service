@@ -1,19 +1,17 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import Badge from 'primevue/badge';
-import Card from 'primevue/card';
-import InputGroup from 'primevue/inputgroup';
-import InputGroupAddon from 'primevue/inputgroupaddon';
-import InputText from 'primevue/inputtext';
-import LoadingContainer from '@/components/utils/LoadingContainer.vue';
-import SkillsService from '@/components/skills/SkillsService';
-import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
-import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue';
-import TimeWindowUtil from '@/components/skills/TimeWindowUtil.js';
-// import { useProjConfig } from '@/stores/UseProjConfig.js';
-import { projConfig } from '@/components/projects/ProjConfig.js';
+import { computed, onMounted, ref } from 'vue'
+import Badge from 'primevue/badge'
+import Card from 'primevue/card'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import LoadingContainer from '@/components/utils/LoadingContainer.vue'
+import SkillsService from '@/components/skills/SkillsService'
+import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
+import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
+import TimeWindowUtil from '@/components/skills/TimeWindowUtil.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
-const config = projConfig();
+const config = useProjConfig();
 
 const props = defineProps({
   projectId: {

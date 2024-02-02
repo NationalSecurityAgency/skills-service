@@ -160,7 +160,7 @@ const buildResItem = (key, item, res, index) => {
 const getIcon = (value) => {
   let icon = null
   if (value === adminHomePageName){
-    icon = 'fas fa-cogs'
+    icon = 'fas fa-tasks'
   }
   if (value === settingsHomePageItem) {
     icon = 'fas fa-wrench'
@@ -169,7 +169,7 @@ const getIcon = (value) => {
     icon = 'fas fa-chart-bar'
   }
 
-  return icon ? `${icon} mr-1` : null
+  return icon
 }
 const getUrl = (arr, endIndex) => {
   const dashboardUrlSize = pathInfo.pathParts.length

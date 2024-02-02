@@ -4,14 +4,14 @@ import InlineHelp from '@/components/utils/InlineHelp.vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import {useField} from "vee-validate";
-import { projConfig } from '@/components/projects/ProjConfig.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const props = defineProps({
   name: String,
   nextFocusEl: HTMLElement,
 });
 const emit = defineEmits(['shown', 'hidden']);
-const config = projConfig();
+const config = useProjConfig();
 
 let internalValue = ref(props.name);
 const projConfigRootHelpUrl = config.projConfigRootHelpUrl;

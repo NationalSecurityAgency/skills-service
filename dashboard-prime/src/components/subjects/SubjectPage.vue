@@ -1,8 +1,10 @@
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { ref, shallowRef, onMounted, computed, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import SubjectsService from '@/components/subjects/SubjectsService';
@@ -12,15 +14,13 @@ const store = useStore();
 const route = useRoute();
 const router = useRouter();
 const announcer = useSkillsAnnouncer();
+const projConfig = useProjConfig()
+const subjectState = useSubjectsState()
 
-let subject = store.getters["subjects/subject"];
-
-let isLoadingSubjects = ref(true);
 let projectId = ref('');
 let subjectId = ref('');
 let showEditSubject = ref(false);
 
-let isLoadingProjConfig = false;
 let isReadOnlyProj = false;
 
 onMounted(() => {
@@ -30,7 +30,7 @@ onMounted(() => {
 });
 
 const isLoadingData = computed(() => {
-  return isLoadingSubjects.value || isLoadingProjConfig;
+  return subjectState.isLoadingSubject.value || projConfig.loadingProjConfig.value;
 });
 
 const navItems = computed(() => {
@@ -47,10 +47,10 @@ const navItems = computed(() => {
   return items;
 });
 
-const headerOptions = computed(() => {
-  if (!subject) {
-    return {};
-  }
+const headerOptions = shallowRef({})
+
+const buildHeaderOptions = () => {
+  const subject = subjectState.subject
   return {
     icon: 'fas fa-cubes skills-color-subjects',
     title: `SUBJECT: ${subject.name}`,
@@ -86,7 +86,7 @@ const headerOptions = computed(() => {
       }],
     }],
   };
-});
+};
 
 const minimumPoints = computed(() => {
   return store.getters.config.minimumSubjectPoints;
@@ -99,13 +99,15 @@ const minimumPoints = computed(() => {
 // });
 
 const loadSubject = () => {
-  isLoadingSubjects.value = true;
   if (route.params.subject) {
-    store.dispatch('subjects/setSubject', route.params.subject);
-    isLoadingSubjects.value = false;
+    // store.dispatch('subjects/setSubject', route.params.subject);
+    subjectState.setSubject(route.params.subject)
+    headerOptions.value = buildHeaderOptions()
   } else {
-    store.dispatch('subjects/loadSubjectDetailsState', { projectId: projectId.value, subjectId: subjectId.value }).finally(() => {
-      isLoadingSubjects.value = false;
+    console.log('dispapaching loading subject')
+    subjectState.loadSubjectDetailsState({ projectId: projectId.value, subjectId: subjectId.value })
+      .finally(() => {
+      headerOptions.value = buildHeaderOptions()
     });
   }
 };
@@ -146,20 +148,22 @@ const handleHideSubjectEdit = () => {
 <template>
   <div>
     <page-header :loading="isLoadingData" :options="headerOptions">
-      <div slot="subSubTitle" v-if="subject && !isReadOnlyProj">
-        <SkillsButton @click="displayEditSubject"
-                  ref="editSubjectButton"
-                  class="btn btn-outline-primary mr-1"
-                  size="small"
-                  variant="outline-primary"
-                  data-cy="btn_edit-subject"
-                  :aria-label="'edit Subject '+subject.subjectId">
-          <span class="">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-        </SkillsButton>
-      </div>
-      <div slot="footer">
+      <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
+        <SkillsButton
+          @click="displayEditSubject"
+          ref="editSubjectButton"
+          label="Edit"
+          icon="fas fa-edit"
+          outlined
+          class="btn btn-outline-primary mr-1"
+          size="small"
+          severity="info"
+          data-cy="btn_edit-subject"
+          :aria-label="`edit Subject ${subjectState.subject.name}`" />
+      </template>
+      <template #footer>
 <!--        <import-finalize-alert />-->
-      </div>
+      </template>
     </page-header>
 
     <navigation v-if="!isLoadingData" :nav-items="navItems">

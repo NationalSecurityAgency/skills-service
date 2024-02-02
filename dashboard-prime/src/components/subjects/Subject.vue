@@ -170,12 +170,14 @@ const handleDeleteCancelled = () => {
   });
 };
 
-watch(subject, async (newVal, oldVal) => {
-  if (newVal) {
-    subjectInternal.value = newVal;
-    buildCardOptions();
-  }
-});
+watch(
+  () => props.subject,
+  async (newVal) => {
+    if (newVal) {
+      subjectInternal.value = newVal
+      buildCardOptions()
+    }
+  })
 
 </script>
 
