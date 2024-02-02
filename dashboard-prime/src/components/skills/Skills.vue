@@ -1,10 +1,15 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import NoContent2 from '@/components/utils/NoContent2.vue'
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
+import { useRoute } from 'vue-router'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SkillsTable from '@/components/skills/SkillsTable.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+
 
 const projConfig = useProjConfig()
+const route = useRoute()
 const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
   return false
@@ -27,6 +32,11 @@ const newGroup = () => {
   //   },
   // };
 }
+
+const skillState = useSubjectSkillsState()
+onMounted(() => {
+  skillState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+})
 
 const newSkill = () => {
   // this.editSkillInfo = {
@@ -96,17 +106,22 @@ const newSkill = () => {
           outlined
           class="bg-primary-reverse ml-1"
           :aria-disabled="addSkillDisabled"
-          :disabled="addSkillDisabled"/>
+          :disabled="addSkillDisabled" />
       </div>
     </sub-page-header>
 
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-        <no-content2
-          title="No Skills Yet"
-          class="my-5"
-          message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework." />
+        <skills-spinner :is-loading="skillState.loadingSubjectSkills" />
+        <div v-if="!skillState.loadingSubjectSkills">
+          <skills-table v-if="skillState.hasSkills" />
+          <no-content2
+            v-if="!skillState.hasSkills"
+            title="No Skills Yet"
+            class="my-5"
+            message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework." />
+        </div>
       </template>
     </Card>
 

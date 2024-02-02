@@ -22,11 +22,11 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Badge from 'primevue/badge';
 import { FilterMatchMode } from 'primevue/api';
-import StringHighlighter from "@/common-components/utilities/StringHighlighter.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import EditQuiz from "@/components/quiz/testCreation/EditQuiz.vue";
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 
 const announcer = useSkillsAnnouncer()
 const loading = ref(false);
@@ -101,26 +101,13 @@ function loadData() {
       });
 }
 
-const filters = ref()
-const initFilters = () => {
-  filters.value = {
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-  }
-}
-initFilters();
+const filters = ref({
+  global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+})
 
 const clearFilter = () => {
-  initFilters();
+  filters.value.global.value = null
 };
-function highlightValue(value) {
-  const filterValue = filters.value['global'].value;
-  if (filterValue && filterValue.trim().length > 0) {
-    const highlighted = StringHighlighter.highlight(value, filterValue);
-    return highlighted || value;
-  } else {
-    return value;
-  }
-}
 function updateQuizDef(quizDef) {
   if (!hasData) {
     loading.value = true;
@@ -248,7 +235,7 @@ defineExpose({
                                :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
                                :aria-label="`Manage Quiz ${slotProps.data.name}`"
                                tag="a">
-                    <span v-html="highlightValue(slotProps.data.name)" />
+                    <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
                   </router-link>
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
@@ -286,7 +273,7 @@ defineExpose({
                 </div>
             </div>
             <div v-else-if="slotProps.field === 'type'">
-              <span v-html="highlightValue(slotProps.data[col.key])" />
+              <highlighted-value :value="slotProps.data[col.key]" :filter="filters.global.value" />
             </div>
             <div v-else-if="slotProps.field === 'created'">
               <DateCell :value="slotProps.data[col.key]" />

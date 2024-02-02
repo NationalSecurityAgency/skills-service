@@ -22,7 +22,6 @@ import config from './modules/config'
 import libVersion from './modules/libVersion'
 import access from './modules/access'
 import skills from './modules/skills'
-import subjectSkills from './modules/subjectSkills'
 import myProgress from './modules/myProgress'
 import finalizeInfo from './modules/finalizeInfo'
 import quiz from './modules/quiz'
@@ -67,7 +66,6 @@ export default createStore({
     libVersion,
     access,
     skills,
-    subjectSkills,
     myProgress,
     finalizeInfo,
     quiz,

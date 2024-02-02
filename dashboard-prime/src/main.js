@@ -26,6 +26,7 @@ import InputSwitch from 'primevue/inputswitch';
 import BlockUI from 'primevue/blockui';
 import SelectButton from 'primevue/selectbutton';
 import Badge from 'primevue/badge';
+import MultiSelect from 'primevue/multiselect'
 import BadgeDirective from 'primevue/badgedirective';
 
 
@@ -36,6 +37,7 @@ import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -68,7 +70,8 @@ app.component('InputSwitch', InputSwitch)
 app.component('BlockUI', BlockUI)
 app.component('SelectButton', SelectButton)
 app.component('Badge', Badge)
-
+app.component('SkillsSpinner', SkillsSpinner)
+app.component('MultiSelect', MultiSelect)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)
