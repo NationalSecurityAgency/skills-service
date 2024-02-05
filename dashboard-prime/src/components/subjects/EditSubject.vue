@@ -133,8 +133,15 @@ const schema = {
       .label('Subject ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
-      .label('Subject Description')
-      // .test('customDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
+      .label('Subject Description'),
+  'helpUrl': string()
+      .test('help_url', 'Help URL must use http://, https://, or be a relative url.', (value) => {
+        if (!value) {
+          return true;
+        }
+        return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
+      })
+  // .test('customDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 };
 
 const initialSubjData = {
@@ -165,8 +172,8 @@ const asyncLoadData = () => { return; };
 <!--            <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"-->
 <!--                         class="mr-3"></icon-picker>-->
 
-        <SkillsTextInput label="Subject Name" name="name" :is-required="true" :autofocus="true" @input="updateSubjectId" @keydown-enter="updateSubject" />
-        <SkillsIdInput ref="subjectIdInput" name="subjectId" @can-edit="canAutoGenerateId=!$event" label="Subject ID" @keydown-enter="updateSubject" />
+        <SkillsTextInput label="Subject Name" name="name" :is-required="true" :autofocus="true" @input="updateSubjectId" @keydown-enter="emit('keydown-enter')" data-cy="subjectNameInput" />
+        <SkillsIdInput ref="subjectIdInput" name="subjectId" @can-edit="canAutoGenerateId=!$event" label="Subject ID" @keydown-enter="emit('keydown-enter')" />
 
         <markdown-editor class="mt-5" name="description" />
 <!--          <div class="mt-3">-->
@@ -184,7 +191,7 @@ const asyncLoadData = () => { return; };
           <help-url-input class="mt-3"
                           :next-focus-el="previousFocus"
                           name="helpUrl"
-                          @keydown-enter="updateSubject" />
+                          @keydown-enter="emit('keydown-enter')" />
 
         </div>
         <div v-else>

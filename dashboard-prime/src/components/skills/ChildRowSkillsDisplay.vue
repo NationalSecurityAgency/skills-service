@@ -102,7 +102,7 @@ const helpUrl = computed(() => {
   }
   const rootHelpUrlSetting = rootHelpUrl;
   if (rootHelpUrlSetting) {
-    return `${rootHelpUrlSetting}${skillInfo.value.helpUrl}`;
+    return `${rootHelpUrlSetting.value}${skillInfo.value.helpUrl}`;
   }
   return skillInfo.value.helpUrl;
 });
@@ -222,12 +222,10 @@ const loadSkills = () => {
       </InputGroupAddon>
       <div class="p-inputtext p-component">
         <a v-if="skillInfo.helpUrl" :href="helpUrl" target="_blank" rel="noopener" class="skill-url" data-cy="skillOverviewHelpUrl">
-          <span v-if="rootHelpUrl" class="border rounded pt-1 pl-1 pb-1 root-help-url"
+          <span v-if="rootHelpUrl" class="surface-200 border-50 border-x-2 border-round"
                 aria-label="Root Help URL was configured in the project's settings."
-                v-tooltip="'Root Help URL was configured in the project\'s settings.'">
-            <i class="fas fa-cogs"></i> {{ rootHelpUrl }}
-          </span>
-          {{ skillInfo.helpUrl }}
+                v-tooltip.top="'Root Help URL was configured in the project\'s settings.'">
+            <i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}
         </a>
       </div>
     </InputGroup>

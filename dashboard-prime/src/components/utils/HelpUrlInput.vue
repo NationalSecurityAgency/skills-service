@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import InlineHelp from '@/components/utils/InlineHelp.vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import {useField} from "vee-validate";
+import { useRoute } from 'vue-router';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const props = defineProps({
@@ -11,10 +12,18 @@ const props = defineProps({
   nextFocusEl: HTMLElement,
 });
 const emit = defineEmits(['shown', 'hidden']);
+const route = useRoute();
 const config = useProjConfig();
 
 let internalValue = ref(props.name);
 const projConfigRootHelpUrl = config.projConfigRootHelpUrl;
+
+onMounted(() => {
+  // config.loadProjConfigState({ projectId: route.params.projectId }).then(() => {
+  //   console.log(config.projConfig);
+  //   console.log(config.projConfigRootHelpUrl);
+  // })
+})
 
 const overrideRootHelpUrl = computed(() => {
   return projConfigRootHelpUrl && internalValue.value && (internalValue.value.startsWith('http://') || internalValue.value.startsWith('https://'));
@@ -49,7 +58,7 @@ const { value, errorMessage } = useField(() => props.name);
 <template>
   <div class="form-group">
     <label for="skillHelpUrl">Help URL/Path
-      <inline-help v-if="$route.params.projectId"
+      <inline-help v-if="route.params.projectId"
                    target-id="helpUrlHelp"
                    :next-focus-el="nextFocusEl"
                    @shown="tooltipShown"
@@ -67,8 +76,13 @@ const { value, errorMessage } = useField(() => props.name);
               v-tooltip.top="`Root Help URL was configured in the project's settings. URLs starting with http(s) will not use Root Help URL.`"
               @keydown.esc="handleEscape">{{ rootHelpUrl }}</span>
       </InputGroupAddon>
-      <InputText v-model="value"></InputText>
+      <InputText v-model="value" data-cy="skillHelpUrl" id="skillHelpUrl"></InputText>
     </InputGroup>
+    <small
+        role="alert"
+        class="p-error"
+        :data-cy="`${name}Error`"
+        :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
 <!--    -->
 
 <!--    <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"-->

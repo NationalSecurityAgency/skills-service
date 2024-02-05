@@ -1,8 +1,707 @@
 <script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
+import Card from 'primevue/card';
+import InputSwitch from 'primevue/inputswitch';
+import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import InlineHelp from '@/components/utils/InlineHelp.vue';
+import LoadingContainer from '@/components/utils/LoadingContainer.vue';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SettingService from '@/components/settings/SettingsService';
+import { SkillsReporter } from '@skilltree/skills-client-js'
+
+const announcer = useSkillsAnnouncer();
+const route = useRoute();
+const store = useStore();
+
+const publicNotDiscoverable = 'pnd';
+const discoverableProgressAndRanking = 'dpr';
+const privateInviteOnly = 'pio';
+
+onMounted(() => {
+  loadSettings();
+})
+
+let isLoading = ref(true);
+let showCustomLabelsConfigToggle = ref(false);
+let selfReport = ref({
+  enabled: false,
+  justificationRequired: false,
+  selected: 'Approval',
+  options: [
+    // { text: 'Approval Queue (reviewed by project admins first)', value: 'Approval', disabled: true },
+    { text: 'Honor System (applied right away)', value: 'HonorSystem', disabled: true },
+  ],
+});
+let settings = ref({
+  projectVisibility: {
+    value: 'pnd',
+        setting: 'synthetic.project_visibility',
+        lastLoadedValue: 'pnd',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  productionModeEnabled: {
+    value: 'false',
+        setting: 'production.mode.enabled',
+        lastLoadedValue: 'false',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  inviteOnlyProject: {
+    value: 'false',
+        setting: 'invite_only',
+        lastLoadedValue: 'false',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  levelPointsEnabled: {
+    value: 'false',
+        setting: 'level.points.enabled',
+        lastLoadedValue: 'false',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  selfReportType: {
+    value: '',
+        setting: 'selfReport.type',
+        lastLoadedValue: '',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  selfReportJustificationRequired: {
+    value: 'false',
+        setting: 'selfReport.justificationRequired',
+        lastLoadedValue: 'false',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  helpUrlHost: {
+    value: '',
+        setting: 'help.url.root',
+        lastLoadedValue: '',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  rankAndLeaderboardOptOut: {
+    value: false,
+        setting: 'project-admins_rank_and_leaderboard_optOut',
+        lastLoadedValue: false,
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  groupDescriptions: {
+    value: false,
+        setting: 'group-descriptions',
+        lastLoadedValue: false,
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  projectDisplayName: {
+    value: 'Project',
+        setting: 'project.displayName',
+        lastLoadedValue: 'Project',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  subjectDisplayName: {
+    value: 'Subject',
+        setting: 'subject.displayName',
+        lastLoadedValue: 'Subject',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  groupDisplayName: {
+    value: 'Group',
+        setting: 'group.displayName',
+        lastLoadedValue: 'Group',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  skillDisplayName: {
+    value: 'Skill',
+        setting: 'skill.displayName',
+        lastLoadedValue: 'Skill',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  levelDisplayName: {
+    value: 'Level',
+        setting: 'level.displayName',
+        lastLoadedValue: 'Level',
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+  hideProjectDescription: {
+    value: false,
+        setting: 'show_project_description_everywhere',
+        lastLoadedValue: false,
+        dirty: false,
+        projectId: route.params.projectId,
+  },
+});
+let errMsg = ref(null);
+let showSavedMsg = ref(false);
+
+// computed
+const isDirty = computed(() => {
+  const foundDirty = Object.values(settings.value).find((item) => item.dirty);
+  return !!foundDirty;
+});
+
+const isProgressAndRankingEnabled = computed(() => {
+  return store.getters.config.rankingAndProgressViewsEnabled === true || store.getters.config.rankingAndProgressViewsEnabled === 'true';
+});
+
+const approvalSelected = computed(() => {
+  return selfReport.value.selected === 'Approval';
+});
+
+const shouldShowCustomLabelsConfig = computed(() => {
+  return showCustomLabelsConfigToggle.value
+      || settings.value.projectDisplayName.value !== 'Project' || settings.value.projectDisplayName.dirty
+      || settings.value.subjectDisplayName.value !== 'Subject' || settings.value.subjectDisplayName.dirty
+      || settings.value.groupDisplayName.value !== 'Group' || settings.value.groupDisplayName.dirty
+      || settings.value.skillDisplayName.value !== 'Skill' || settings.value.skillDisplayName.dirty
+      || settings.value.levelDisplayName.value !== 'Level' || settings.value.levelDisplayName.dirty;
+});
+
+const showCustomLabelsConfigLabel = computed(() => {
+  return formatToggleLabel(showCustomLabelsConfigToggle.value);
+});
+
+const selfReportingEnabledLabel = computed(() => {
+  return formatToggleLabel(selfReport.value.enabled);
+});
+
+const groupDescriptionsLabel = computed(() => {
+  return formatToggleLabel(settings.value.groupDescriptions.value);
+});
+
+const rankOptOutLabel = computed(() => {
+  return formatToggleLabel(settings.value.rankAndLeaderboardOptOut.value);
+});
+
+const usePointsForLevelsLabel = computed(() => {
+  return formatToggleLabel(settings.value.levelPointsEnabled.value);
+});
+
+const projectVisibilityOptions = computed(() => {
+  const opts = [
+    { value: publicNotDiscoverable, text: 'Not in the Project Catalog' },
+  ];
+  if (isProgressAndRankingEnabled) {
+    opts.push({ value: discoverableProgressAndRanking, text: 'Add to the Project Catalog' });
+  }
+  opts.push({ value: privateInviteOnly, text: 'Private Invite Only' });
+  return opts;
+});
+
+const projectVisibilityHelpMsg = computed(() => {
+  if (isProgressAndRankingEnabled) {
+    return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+        + '<b>Add to the Project Catalog</b> projects can be accessed directly and can be found in the Project Catalog. <br/><br/>'
+        + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite. ';
+  }
+  return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+      + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite.';
+});
+
+// functions
+const updateApprovalType = ((disabled) => {
+  selfReport.value.options = selfReport.value.options.map((item) => {
+    const copy = { ...item };
+    copy.disabled = disabled;
+    return copy;
+  });
+});
+
+const formatToggleLabel = ((value) => {
+  if (value === true || value === 'true') {
+    return 'Enabled';
+  }
+  return 'Disabled';
+});
+
+const selfReportingControl = ((checked) => {
+  updateApprovalType(!checked);
+  if (checked) {
+    settings.value.selfReportType.value = selfReport.value.selected;
+  } else {
+    settings.value.selfReportType.value = '';
+  }
+  settings.value.selfReportType.dirty = `${settings.value.selfReportType.value}` !== `${settings.value.selfReportType.lastLoadedValue}`;
+});
+
+const productionModeEnabledChanged = ((value) => {
+  settings.value.productionModeEnabled.dirty = `${value}` !== `${settings.value.productionModeEnabled.lastLoadedValue}`;
+});
+
+const rankAndLeaderboardOptOutChanged = ((value) => {
+  settings.value.rankAndLeaderboardOptOut.dirty = `${value}` !== `${settings.value.rankAndLeaderboardOptOut.lastLoadedValue}`;
+});
+
+const groupDescriptionsChanged = ((value) => {
+  settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
+});
+
+const inviteOnlyProjectChanged = ((value) => {
+  settings.value.inviteOnlyProject.dirty = `${value}` !== `${settings.value.inviteOnlyProject.lastLoadedValue}`;
+});
+
+const selfReportingTypeChanged = ((value) => {
+  settings.value.selfReportType.value = value;
+  settings.value.selfReportType.dirty = `${settings.value.selfReportType.value}` !== `${settings.value.selfReportType.lastLoadedValue}`;
+});
+
+const justificationRequiredChanged = ((value) => {
+  settings.value.selfReportJustificationRequired.dirty = `${value}` !== `${settings.value.selfReportJustificationRequired.lastLoadedValue}`;
+});
+
+const levelPointsEnabledChanged = ((value) => {
+  settings.value.levelPointsEnabled.dirty = `${value}` !== `${settings.value.levelPointsEnabled.lastLoadedValue}`;
+});
+
+const helpUrlHostChanged = ((value) => {
+  settings.value.helpUrlHost.dirty = `${value}` !== `${settings.value.helpUrlHost.lastLoadedValue}`;
+});
+
+const projectDisplayNameChanged = ((value) => {
+  settings.value.projectDisplayName.dirty = `${value}` !== `${settings.value.projectDisplayName.lastLoadedValue}`;
+});
+
+const subjectDisplayNameChanged = ((value) => {
+  settings.value.subjectDisplayName.dirty = `${value}` !== `${settings.value.subjectDisplayName.lastLoadedValue}`;
+});
+
+const groupDisplayNameChanged = ((value) => {
+  settings.value.groupDisplayName.dirty = `${value}` !== `${settings.value.groupDisplayName.lastLoadedValue}`;
+});
+
+const skillDisplayNameChanged = ((value) => {
+  settings.value.skillDisplayName.dirty = `${value}` !== `${settings.value.skillDisplayName.lastLoadedValue}`;
+});
+
+const levelDisplayNameChanged = ((value) => {
+  settings.value.levelDisplayName.dirty = `${value}` !== `${settings.value.levelDisplayName.lastLoadedValue}`;
+});
+
+const hideProjectDescriptionChanged = ((value) => {
+  settings.value.hideProjectDescription.dirty = `${value}` !== `${settings.value.hideProjectDescription.lastLoadedValue}`;
+});
+
+const projectVisibilityChanged = ((value) => {
+  const dirty = `${value}` !== `${settings.value.projectVisibility.lastLoadedValue}`;
+  settings.value.projectVisibility.dirty = dirty;
+  if (dirty) {
+    if (value === publicNotDiscoverable) {
+      settings.value.inviteOnlyProject.value = 'false';
+      settings.value.productionModeEnabled.value = 'false';
+    } else if (value === privateInviteOnly) {
+      settings.value.inviteOnlyProject.value = 'true';
+      settings.value.productionModeEnabled.value = 'false';
+      msgOk('Changing this Project to Invite Only '
+          + 'will restrict access to the training profile and '
+          + 'skill reporting to only invited users.', 'Changing to Invite Only', 'Ok', { size: 'mg' });
+    } else if (value === discoverableProgressAndRanking) {
+      settings.value.inviteOnlyProject.value = 'false';
+      settings.value.productionModeEnabled.value = 'true';
+    }
+  } else {
+    settings.value.inviteOnlyProject.value = settings.value.inviteOnlyProject.lastLoadedValue;
+    settings.value.productionModeEnabled.value = settings.value.productionModeEnabled.lastLoadedValue;
+  }
+  inviteOnlyProjectChanged(settings.value.inviteOnlyProject.value);
+  productionModeEnabledChanged(settings.value.productionModeEnabled.value);
+});
+
+const loadSettings = (() => {
+  SettingService.getSettingsForProject(route.params.projectId)
+      .then((response) => {
+        if (response) {
+          setSyntheticSetting(response);
+          const entries = Object.entries(settings.value);
+          entries.forEach((entry) => {
+            const [key, value] = entry;
+            const found = response.find((item) => item.setting === value.setting);
+            if (found) {
+              settings.value[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+
+              // special handling of self reporting as it's not just a simple key-value prop control
+              if (found.setting === settings.value.selfReportType.setting) {
+                selfReport.value.enabled = true;
+                selfReport.value.selected = settings.value.selfReportType.value;
+                updateApprovalType(false);
+              }
+            }
+          });
+        }
+        showCustomLabelsConfigToggle.value = shouldShowCustomLabelsConfig;
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+});
+
+const setSyntheticSetting = ((settingsResponse) => {
+  const productionMode = settingsResponse.find((setting) => setting.setting === 'production.mode.enabled');
+  const inviteOnly = settingsResponse.find((setting) => setting.setting === 'invite_only');
+
+  let selectedValue = publicNotDiscoverable;
+  if (inviteOnly?.value === 'true') {
+    selectedValue = privateInviteOnly;
+  } else if (productionMode?.value === 'true') {
+    selectedValue = discoverableProgressAndRanking;
+  }
+  settings.value.projectVisibility.lastLoadedValue = selectedValue;
+  settings.value.projectVisibility.value = selectedValue;
+  settings.value.projectVisibility.dirty = false;
+});
+
+const save = (() => {
+  // $refs.observer.validate()
+  //     .then((res1) => {
+  //       if (!res1) {
+  //         errMsg.value = 'Form did NOT pass validation, please fix and try to Save again';
+  //       } else {
+          const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty && !item.setting.startsWith('synthetic.'));
+          if (dirtyChanges) {
+            isLoading.value = true;
+            SettingService.checkSettingsValidity(route.params.projectId, dirtyChanges)
+                .then((res) => {
+                  if (res.valid) {
+                    saveSettings(dirtyChanges);
+                  } else {
+                    errMsg.value = res.explanation;
+                    isLoading.value = false;
+                  }
+                });
+          }
+      //   }
+      // });
+});
+
+const saveSettings = ((dirtyChanges) => {
+  SettingService.saveSettings(route.params.projectId, dirtyChanges)
+      .then(() => {
+        showSavedMsg.value = true;
+        announcer.polite('Project Settings have been successfully saved');
+        setTimeout(() => {
+          showSavedMsg.value = false;
+        }, 4000);
+        const entries = Object.entries(settings.value);
+        entries.forEach((entry) => {
+          const [key, value] = entry;
+          settings.value[key] = Object.assign(value, {
+            dirty: false,
+            lastLoadedValue: value.value,
+          });
+          if (value.setting === settings.value.helpUrlHost.setting && value.value && value.value.length > 0) {
+            SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
+          }
+        });
+        store.dispatch('loadProjConfigState', { projectId: route.params.projectId, updateLoadingVar: false });
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+});
 </script>
 
 <template>
-  <div>Project Settings</div>
+  <div>
+    <sub-page-header title="Project Settings"/>
+    <Card>
+      <template #content>
+        <loading-container :is-loading="isLoading">
+          <div class="flex flex-row" data-cy="projectVisibility">
+            <div class="md:col-5 xl:col-3 text-secondary" id="projectVisibilityLabel">
+              Project Discoverability: <inline-help target-id="projectVisibilityHelp" :html-msg="projectVisibilityHelpMsg" />
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <Dropdown v-model="settings.projectVisibility.value"
+                        :options="projectVisibilityOptions"
+                        @change="projectVisibilityChanged"
+                        aria-labelledby="projectVisibilityLabel"
+                        optionLabel="text" optionValue="value"
+                        data-cy="projectVisibilitySelector" required/>
+            </div>
+          </div>
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="hideProjectDescriptionLabel">
+              Project Description:
+              <inline-help
+                  target-id="hideProjectDescriptionHelp"
+                  msg="Determines whether a project description is displayed only in the Progress and Rankings Manage My Projects page, or everywhere that the project is displayed"/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <Dropdown v-model="settings.hideProjectDescription.value"
+                        :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Project Description in Manage My Projects'}]"
+                        optionLabel="label" optionValue="value"
+                        @change="hideProjectDescriptionChanged"
+                        aria-labelledby="hideProjectDescriptionLabel"
+                        data-cy="showProjectDescriptionSelector" />
+            </div>
+          </div>
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="pointsForLevelsLabel">
+              Use Points For Levels:
+              <inline-help
+                  target-id="pointsForLevelsHelp"
+                  msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <InputSwitch v-model="settings.levelPointsEnabled.value" v-on:input="levelPointsEnabledChanged" name="check-button" aria-labelledby="pointsForLevelsLabel" data-cy="usePointsForLevelsSwitch" /> {{ usePointsForLevelsLabel }}
+            </div>
+          </div>
+
+  <!--        <ValidationProvider rules="root_help_url|customUrlValidator" v-slot="{errors}"-->
+  <!--                            name="Root Help Url">-->
+            <div class="flex flex-row">
+              <div class="md:col-5 xl:col-3 text-secondary" id="rootHelpUrlLabel">
+                Root Help Url:
+                <inline-help
+                    target-id="rootHelpUrlHelp"
+                    msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
+              </div>
+              <div class="md:col-7 xl:col-9">
+                <InputText v-model="settings.helpUrlHost.value" data-cy="rootHelpUrlInput" id="skillHelpUrl" placeholder="http://www.HelpArticlesHost.com" v-on:input="helpUrlHostChanged"></InputText>
+  <!--              <b-form-input v-model="settings.helpUrlHost.value"-->
+  <!--                            placeholder="http://www.HelpArticlesHost.com"-->
+  <!--                            data-cy="rootHelpUrlInput"-->
+  <!--                            v-on:input="helpUrlHostChanged"-->
+  <!--                            aria-describedby="rootHelpUrlError"-->
+  <!--                            aria-errormessage="rootHelpUrlError"-->
+  <!--                            aria-labelledby="rootHelpUrlLabel">-->
+  <!--              </b-form-input>-->
+              </div>
+            </div>
+  <!--        </ValidationProvider>-->
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="selfReportLabel">
+              Self Report Default:
+              <inline-help
+                  target-id="selfReportSwitchHelp"
+                  msg="Will serve as a default when creating new skills."/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <InputSwitch v-model="selfReport.enabled"
+                               name="check-button"
+                               v-on:input="selfReportingControl"
+                               aria-labelledby="selfReportLabel"
+                               data-cy="selfReportSwitch" />{{ selfReportingEnabledLabel }}
+
+              <Card class="mt-1">
+                <template #content>
+  <!--              <b-form-group  label="Approval Type:" v-slot="{ ariaDescribedby }">-->
+  <!--                <b-form-radio-group-->
+  <!--                    id="self-reporting-type"-->
+  <!--                    v-model="selfReport.selected"-->
+  <!--                    :options="selfReport.options"-->
+  <!--                    v-on:input="selfReportingTypeChanged"-->
+  <!--                    :aria-describedby="ariaDescribedby"-->
+  <!--                    name="Self Reporting Options"-->
+  <!--                    data-cy="selfReportTypeSelector"-->
+  <!--                    stacked-->
+  <!--                >-->
+  <!--                  <template #first>-->
+                      <div class="flex">
+                        <RadioButton class="mr-2" inputId="approval" value="Approval" v-model="selfReport.selected" :disabled="!selfReport.enabled" />
+                        <label for="approval">Approval Queue (reviewed by project admins first)</label>
+                        <span class="text-muted mr-3 ml-2">|</span>
+                        <label for="self-report-checkbox" class="m-0">
+                          <Checkbox data-cy="justificationRequiredCheckbox" id="justification-required-checkbox" :binary="true"
+                                           class="d-inline mr-2" v-model="settings.selfReportJustificationRequired.value"
+                                           :disabled="!approvalSelected || !selfReport.enabled" @input="justificationRequiredChanged"/>
+                          <span class="font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span><inline-help
+                            msg="Check to require users to submit a justification when self-reporting this skill"
+                            target-id="justificationRequired"/>
+                        </label>
+                      </div>
+                      <div class="flex mt-2">
+                        <RadioButton class="mr-2" inputId="honorSystem" value="HonorSystem" v-model="selfReport.selected" :disabled="!selfReport.enabled" />
+                        <label for="honorSystem">Honor System (applied right away)</label>
+                      </div>
+  <!--                  </template>-->
+  <!--                </b-form-radio-group>-->
+  <!--              </b-form-group>-->
+                </template>
+              </Card>
+            </div>
+          </div>
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
+              Rank Opt-Out for ALL Admins:
+              <inline-help
+                  target-id="rankAndLeaderboardOptOutHelp"
+                  msg="Change to true and all of the project's admins will not be shown on the Leaderboard or assigned a rank"/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
+                               name="check-button"
+                               v-on:input="rankAndLeaderboardOptOutChanged"
+                               aria-labelledby="rankAndLeaderboardOptOutLabel"
+                               data-cy="rankAndLeaderboardOptOutSwitch"/> {{ rankOptOutLabel }}
+            </div>
+          </div>
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="customLabelsLabel">
+              Custom Labels:
+              <inline-help
+                  target-id="customLabelsSwitchHelp"
+                  msg="Enabling allows for setting custom labels in the Skills Display component"/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <InputSwitch v-model="showCustomLabelsConfigToggle"
+                               name="check-button"
+                               aria-labelledby="customLabelsLabel"
+                               data-cy="customLabelsSwitch"/>{{ showCustomLabelsConfigLabel }}
+  <!--            </b-form-checkbox>-->
+
+  <!--            <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">-->
+                <Card class="mt-1" :visible="shouldShowCustomLabelsConfig">
+                  <template #content>
+  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
+  <!--                                    name="Project Display Text">-->
+                    <div class="flex flex-row">
+                      <div class="md:col-5 xl:col-3 text-secondary" id="projectDisplayTextLabel">
+                        Project Display Text:
+                        <inline-help
+                            target-id="projectDisplayTextHelp"
+                            msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="md:col-7 xl:col-9">
+                        <InputText v-model="settings.projectDisplayName.value"
+                                      data-cy="projectDisplayTextInput"
+                                      v-on:input="projectDisplayNameChanged"
+                                      aria-labelledby="projectDisplayTextLabel" />
+                      </div>
+                    </div>
+  <!--                </ValidationProvider>-->
+  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
+  <!--                                    name="Subject Display Text">-->
+                    <div class="flex flex-row">
+                      <div class="md:col-5 xl:col-3 text-secondary" id="subjectDisplayTextLabel">
+                        Subject Display Text:
+                        <inline-help
+                            target-id="subjectDisplayTextHelp"
+                            msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="md:col-7 xl:col-9">
+                        <InputText v-model="settings.subjectDisplayName.value"
+                                      data-cy="subjectDisplayTextInput"
+                                      v-on:input="subjectDisplayNameChanged"
+                                      aria-labelledby="subjectDisplayTextLabel" />
+                      </div>
+                    </div>
+  <!--                </ValidationProvider>-->
+  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
+  <!--                                    name="Group Display Text">-->
+                    <div class="flex flex-row">
+                      <div class="md:col-5 xl:col-3 text-secondary" id="groupDisplayTextLabel">
+                        Group Display Text:
+                        <inline-help
+                            target-id="groupDisplayTextHelp"
+                            msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="md:col-7 xl:col-9">
+                        <InputText v-model="settings.groupDisplayName.value"
+                                      data-cy="groupDisplayTextInput"
+                                      v-on:input="groupDisplayNameChanged"
+                                      aria-labelledby="groupDisplayTextLabel" />
+                      </div>
+                    </div>
+  <!--                </ValidationProvider>-->
+
+  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
+  <!--                                    name="Skill Display Text">-->
+                    <div class="flex flex-row">
+                      <div class="md:col-5 xl:col-3 text-secondary" id="skillDisplayTextLabel">
+                        Skill Display Text:
+                        <inline-help
+                            target-id="skillDisplayTextHelp"
+                            msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="md:col-7 xl:col-9">
+                        <InputText v-model="settings.skillDisplayName.value"
+                                      data-cy="skillDisplayTextInput"
+                                      v-on:input="skillDisplayNameChanged"
+                                      aria-labelledby="skillDisplayTextLabel" />
+                      </div>
+                    </div>
+  <!--                </ValidationProvider>-->
+  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
+  <!--                                    name="Level Display Text">-->
+                    <div class="flex flex-row">
+                      <div class="md:col-5 xl:col-3 text-secondary" id="levelDisplayTextLabel">
+                        Level Display Text:
+                        <inline-help
+                            target-id="levelDisplayTextHelp"
+                            msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                      </div>
+                      <div class="md:col-7 xl:col-9">
+                        <InputText v-model="settings.levelDisplayName.value"
+                                      data-cy="levelDisplayTextInput"
+                                      v-on:input="levelDisplayNameChanged"
+                                      aria-labelledby="levelDisplayTextLabel" />
+                      </div>
+                    </div>
+                  </template>
+  <!--                </ValidationProvider>-->
+                </Card>
+  <!--            </b-collapse>-->
+            </div>
+          </div>
+
+          <div class="flex flex-row">
+            <div class="md:col-5 xl:col-3 text-secondary" id="groupDescriptions">
+              Always Show Group Descriptions:
+              <inline-help
+                  target-id="groupDescriptionsHelp"
+                  msg="Toggle this setting to always show the group's descriptions in this project"/>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <InputSwitch v-model="settings.groupDescriptions.value"
+                               name="check-button"
+                               v-on:input="groupDescriptionsChanged"
+                               aria-labelledby="groupDescriptionsLabel"
+                               data-cy="groupDescriptionsSwitch"/> {{ groupDescriptionsLabel }}
+            </div>
+          </div>
+
+          <hr/>
+
+          <p v-if="errMsg" class="text-center text-danger" role="alert">***{{ errMsg }}***</p>
+
+          <div class="flex flex-row">
+            <div class="col">
+              <SkillsButton variant="outline-success" @click="save" :disabled="!isDirty" data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
+              </SkillsButton>
+
+              <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
+                  <i class="fa fa-exclamation-circle"
+                     aria-label="Settings have been changed, do not forget to save"
+                     v-tooltip="'Settings have been changed, do not forget to save'"/> Unsaved Changes
+                </span>
+              <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
+                  <i class="fa fa-check" />
+                  Settings Updated!
+                </span>
+            </div>
+          </div>
+        </loading-container>
+      </template>
+    </Card>
+
+  </div>
 </template>
 
 <style scoped></style>
