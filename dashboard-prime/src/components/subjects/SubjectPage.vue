@@ -104,7 +104,6 @@ const loadSubject = () => {
     subjectState.setSubject(route.params.subject)
     headerOptions.value = buildHeaderOptions()
   } else {
-    console.log('dispapaching loading subject')
     subjectState.loadSubjectDetailsState({ projectId: projectId.value, subjectId: subjectId.value })
       .finally(() => {
       headerOptions.value = buildHeaderOptions()

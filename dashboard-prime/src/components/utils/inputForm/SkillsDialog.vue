@@ -52,7 +52,6 @@ const onOk = (event) => {
 }
 
 const handleClose = () => {
-  console.log(`handleClose enableReturnFocus=[${props.enableReturnFocus}]`)
   if (props.enableReturnFocus) {
     focusState.focusOnLastElement()
   }

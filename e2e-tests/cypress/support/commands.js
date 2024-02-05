@@ -1218,7 +1218,7 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
             const nextPage = (i / pageSize) + 1;
             const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
             cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
-            cy.get(tableSelector).get('[data-cy=skillsBTablePaging]').contains(nextPage).click();
+            cy.get(tableSelector).get(`[data-pc-name="paginator"] [aria-label="Page ${nextPage}"]`).click();
             cy.get(tableSelector).contains('Loading...').should('not.exist')
             cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
         }

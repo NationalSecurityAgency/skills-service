@@ -69,7 +69,7 @@ export default {
       .get(
         `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`
       )
-      .then((response) => response.data)
+      .then((response) => response.data.map((item) => this.enhanceWithTimeWindow(item)))
   },
   getProjectSkills(
     projectId,
