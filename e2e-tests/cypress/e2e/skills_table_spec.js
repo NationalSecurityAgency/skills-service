@@ -38,7 +38,7 @@ describe('Skills Table Tests', () => {
     cy.clickSave()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: skillName }, { colIndex: 1, value: 1 }]
+      [{ colIndex: 2, value: skillName }, { colIndex: 3, value: 1 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
 
@@ -47,7 +47,7 @@ describe('Skills Table Tests', () => {
     cy.contains('No Skills Yet')
   })
 
-  it.skip('cancelling delete confirmation should return focus to delete button', () => {
+  it('cancelling delete confirmation should return focus to delete button', () => {
     const numSkills = 3
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
@@ -67,7 +67,7 @@ describe('Skills Table Tests', () => {
 
     cy.get('[data-cy=deleteSkillButton_skill2]').click()
     cy.contains('Removal Safety Check').should('exist')
-    cy.get('[data-cy=closeRemovalSafetyCheck]').click()
+    cy.get('[data-cy=closeDialogBtn]').click()
     cy.contains('Removal Safety Check').should('not.exist')
     cy.wait(200)
     cy.get('[data-cy=deleteSkillButton_skill2]').should('have.focus')
@@ -97,9 +97,9 @@ describe('Skills Table Tests', () => {
     cy.contains('Display Order').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Very Great Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 2' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 3' }, { colIndex: 1, value: 3 }]
+      [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 3' }, { colIndex: 3, value: 3 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
@@ -117,10 +117,10 @@ describe('Skills Table Tests', () => {
     cy.wait('@saveSkill')
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Very Great Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 2' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 3' }, { colIndex: 1, value: 3 }],
-      [{ colIndex: 0, value: 'Copy of Very Great Skill # 2' }, { colIndex: 1, value: 4 }]
+      [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 3' }, { colIndex: 3, value: 3 }],
+      [{ colIndex: 2, value: 'Copy of Very Great Skill # 2' }, { colIndex: 3, value: 4 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 4)
   })
@@ -148,9 +148,9 @@ describe('Skills Table Tests', () => {
     cy.contains('Display Order').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Very Great Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 2' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 3' }, { colIndex: 1, value: 3 }]
+      [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 3' }, { colIndex: 3, value: 3 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
@@ -161,9 +161,9 @@ describe('Skills Table Tests', () => {
     cy.wait('@saveSkill')
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Very Great Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: otherSkillName }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Very Great Skill # 3' }, { colIndex: 1, value: 3 }]
+      [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: otherSkillName }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Very Great Skill # 3' }, { colIndex: 3, value: 3 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
   })
@@ -368,7 +368,7 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Disabled Test' }, { colIndex: 3, value: 'Disabled' }]
+      [{ colIndex: 2, value: 'Disabled Test' }, { colIndex: 3, value: 'Disabled' }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
   })
@@ -499,19 +499,31 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="skillsTable-skillFilter"]').should('not.have.value', 's')
   })
 
-  it.skip('change display order and validate that manage skill navigation still works', () => {
+  it('enabling reorder clears search', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+    cy.get('[data-cy="skillsTable-skillFilter"]').type('s')
+    cy.get('[data-cy="skillsTable-skillFilter"]').should('have.value', 's')
+    cy.get('[data-cy="enableDisplayOrderSort"]').click();
+    cy.get('[data-cy="skillsTable-skillFilter"]').should('not.have.value', 's')
+  })
+
+  it('change display order and validate that manage skill navigation still works', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get('[data-cy="enableDisplayOrderSort"]').click()
     cy.get('[data-cy="orderMoveUp_skill3"]').click()
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Very Great Skill 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Very Great Skill 3' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Very Great Skill 2' }, { colIndex: 1, value: 3 }]
+      [{ colIndex: 2, value: 'Very Great Skill 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill 3' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Very Great Skill 2' }, { colIndex: 3, value: 3 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
@@ -519,7 +531,7 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="pageHeader"]').contains('ID: skill3')
   })
 
-  it.skip('change display order with the last item on the current page', () => {
+  it('change display order with the last item on the current page', () => {
     const numSkills = 12
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`
@@ -537,26 +549,26 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get('[data-cy="enableDisplayOrderSort"]').click()
     cy.get('[data-cy="orderMoveDown_skill10"]').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Skill # 2' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Skill # 3' }, { colIndex: 1, value: 3 }],
-      [{ colIndex: 0, value: 'Skill # 4' }, { colIndex: 1, value: 4 }],
-      [{ colIndex: 0, value: 'Skill # 5' }, { colIndex: 1, value: 5 }],
-      [{ colIndex: 0, value: 'Skill # 6' }, { colIndex: 1, value: 6 }],
-      [{ colIndex: 0, value: 'Skill # 7' }, { colIndex: 1, value: 7 }],
-      [{ colIndex: 0, value: 'Skill # 8' }, { colIndex: 1, value: 8 }],
-      [{ colIndex: 0, value: 'Skill # 9' }, { colIndex: 1, value: 9 }],
-      [{ colIndex: 0, value: 'Skill # 11' }, { colIndex: 1, value: 10 }],
-      [{ colIndex: 0, value: 'Skill # 10' }, { colIndex: 1, value: 11 }],
-      [{ colIndex: 0, value: 'Skill # 12' }, { colIndex: 1, value: 12 }]
+      [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Skill # 3' }, { colIndex: 3, value: 3 }],
+      [{ colIndex: 2, value: 'Skill # 4' }, { colIndex: 3, value: 4 }],
+      [{ colIndex: 2, value: 'Skill # 5' }, { colIndex: 3, value: 5 }],
+      [{ colIndex: 2, value: 'Skill # 6' }, { colIndex: 3, value: 6 }],
+      [{ colIndex: 2, value: 'Skill # 7' }, { colIndex: 3, value: 7 }],
+      [{ colIndex: 2, value: 'Skill # 8' }, { colIndex: 3, value: 8 }],
+      [{ colIndex: 2, value: 'Skill # 9' }, { colIndex: 3, value: 9 }],
+      [{ colIndex: 2, value: 'Skill # 11' }, { colIndex: 3, value: 10 }],
+      [{ colIndex: 2, value: 'Skill # 10' }, { colIndex: 3, value: 11 }],
+      [{ colIndex: 2, value: 'Skill # 12' }, { colIndex: 3, value: 12 }]
     ], 10)
   })
 
-  it.skip('filter by skill name and skill id', () => {
+  it('filter by skill name', () => {
     const numSkills = 12
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`
@@ -570,7 +582,6 @@ describe('Skills Table Tests', () => {
         version: skillsCounter
       })
     }
-
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
@@ -578,54 +589,39 @@ describe('Skills Table Tests', () => {
 
     // look for the name
     cy.get('[data-cy="skillsTable-skillFilter"]').type('# 1')
-    cy.get('[data-cy="users-filterBtn"]').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Skill # 10' }, { colIndex: 1, value: 10 }],
-      [{ colIndex: 0, value: 'Skill # 11' }, { colIndex: 1, value: 11 }],
-      [{ colIndex: 0, value: 'Skill # 12' }, { colIndex: 1, value: 12 }]
+      [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Skill # 10' }, { colIndex: 3, value: 10 }],
+      [{ colIndex: 2, value: 'Skill # 11' }, { colIndex: 3, value: 11 }],
+      [{ colIndex: 2, value: 'Skill # 12' }, { colIndex: 3, value: 12 }]
     ], 10, false, null, false)
-    cy.get(`${tableSelector} tbody tr`).should('have.length', 4)
 
     cy.get('[data-cy="skillsTable-skillFilter"]').type('2')
-    cy.get('[data-cy="users-filterBtn"]').click()
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 12' }, { colIndex: 1, value: 12 }]
+      [{ colIndex: 2, value: 'Skill # 12' }, { colIndex: 3, value: 12 }]
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
 
-    cy.get('[data-cy="users-resetBtn"]').click()
+    cy.get('[data-cy="filterResetBtn"]').click()
     cy.get('[data-cy=skillsBTableTotalRows]').contains(12)
 
     // should be case insensitive
     cy.get('[data-cy="skillsTable-skillFilter"]').type('sKiLl # 5')
-    cy.get('[data-cy="users-filterBtn"]').click()
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 5' }, { colIndex: 1, value: 5 }]
+      [{ colIndex: 2, value: 'Skill # 5' }, { colIndex: 3, value: 5 }]
     ], 10, false, null, false)
-    cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
 
     // filter all records
     cy.get('[data-cy="skillsTable-skillFilter"]').type('a')
-    cy.get('[data-cy="users-filterBtn"]').click()
-    cy.contains('There are no records to show')
+    cy.get(tableSelector).contains(`No Skills Found`)
 
-    // reset list by clearing filter
-    cy.get('[data-cy="skillsTable-skillFilter"]').clear()
-    cy.get('[data-cy="users-filterBtn"]').click()
+    // reset list by clearing filter when there are no results
+    cy.get('[data-cy="skillResetBtnNoFilterRes"]').click()
     cy.get('[data-cy=skillsBTableTotalRows]').contains(12)
-
-    // filter by skill id
-    cy.get('[data-cy="skillsTable-skillFilter"]').type('SkIlL6')
-    cy.get('[data-cy="users-filterBtn"]').click()
-    cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 6' }, { colIndex: 1, value: 6 }]
-    ], 10, false, null, false)
-    cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
   })
 
-  it.skip('paging controls should be present and work when results greater than smallest page size', () => {
+  it('paging controls should be present and work when results greater than smallest page size', () => {
     const numSkills = 12
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`
@@ -640,30 +636,29 @@ describe('Skills Table Tests', () => {
       })
     }
 
-
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     cy.get(`${tableSelector} th`).contains('Display Order').click()
 
     // look for the name
     cy.validateTable(tableSelector, [
-      [{ colIndex: 0, value: 'Skill # 1' }, { colIndex: 1, value: 1 }],
-      [{ colIndex: 0, value: 'Skill # 2' }, { colIndex: 1, value: 2 }],
-      [{ colIndex: 0, value: 'Skill # 3' }, { colIndex: 1, value: 3 }],
-      [{ colIndex: 0, value: 'Skill # 4' }, { colIndex: 1, value: 4 }],
-      [{ colIndex: 0, value: 'Skill # 5' }, { colIndex: 1, value: 5 }],
-      [{ colIndex: 0, value: 'Skill # 6' }, { colIndex: 1, value: 6 }],
-      [{ colIndex: 0, value: 'Skill # 7' }, { colIndex: 1, value: 7 }],
-      [{ colIndex: 0, value: 'Skill # 8' }, { colIndex: 1, value: 8 }],
-      [{ colIndex: 0, value: 'Skill # 9' }, { colIndex: 1, value: 9 }],
-      [{ colIndex: 0, value: 'Skill # 10' }, { colIndex: 1, value: 10 }],
-      [{ colIndex: 0, value: 'Skill # 11' }, { colIndex: 1, value: 11 }],
-      [{ colIndex: 0, value: 'Skill # 12' }, { colIndex: 1, value: 12 }]
+      [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Skill # 3' }, { colIndex: 3, value: 3 }],
+      [{ colIndex: 2, value: 'Skill # 4' }, { colIndex: 3, value: 4 }],
+      [{ colIndex: 2, value: 'Skill # 5' }, { colIndex: 3, value: 5 }],
+      [{ colIndex: 2, value: 'Skill # 6' }, { colIndex: 3, value: 6 }],
+      [{ colIndex: 2, value: 'Skill # 7' }, { colIndex: 3, value: 7 }],
+      [{ colIndex: 2, value: 'Skill # 8' }, { colIndex: 3, value: 8 }],
+      [{ colIndex: 2, value: 'Skill # 9' }, { colIndex: 3, value: 9 }],
+      [{ colIndex: 2, value: 'Skill # 10' }, { colIndex: 3, value: 10 }],
+      [{ colIndex: 2, value: 'Skill # 11' }, { colIndex: 3, value: 11 }],
+      [{ colIndex: 2, value: 'Skill # 12' }, { colIndex: 3, value: 12 }]
     ], 10, false, 12)
 
   })
 
-  it.skip('expand details', () => {
+  it('expand details', () => {
     const numSkills = 3
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`
@@ -678,25 +673,26 @@ describe('Skills Table Tests', () => {
       })
     }
 
-
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="expandDetailsBtn_skill2"]').click()
+    cy.get(`${tableSelector} th`).contains('Skill').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('Minimum Time Window between occurrences')
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('300 Points')
 
-    cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
+    // cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('Time Window N/A')
 
-    cy.get('[data-cy="expandDetailsBtn_skill2"]').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist')
 
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
-    cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist')
   })
 
-  it.skip('navigate to skill details page', () => {
+  it('navigate to skill details page', () => {
     const numSkills = 3
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`

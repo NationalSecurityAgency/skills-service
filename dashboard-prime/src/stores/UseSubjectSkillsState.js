@@ -21,8 +21,10 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
     return !loadingSubjectSkills.value && subjectSkills.value.length > 0
   })
 
-  function loadSubjectSkills(projectId, subjectId) {
-    setLoadingSubjectSkills(true)
+  function loadSubjectSkills(projectId, subjectId, updateLoadingFlag = true) {
+    if (updateLoadingFlag) {
+      setLoadingSubjectSkills(true)
+    }
     return new Promise((resolve, reject) => {
       SkillsService.getSubjectSkills(projectId, subjectId)
         .then((loadedSkills) => {
@@ -39,7 +41,9 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
         })
         .catch((error) => reject(error))
         .finally(() => {
-          setLoadingSubjectSkills(false)
+          if (updateLoadingFlag) {
+            setLoadingSubjectSkills(false)
+          }
         })
     })
   }

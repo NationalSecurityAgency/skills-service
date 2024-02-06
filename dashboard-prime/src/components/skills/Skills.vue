@@ -113,13 +113,16 @@ const newSkill = () => {
 
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-        <skills-spinner :is-loading="skillState.loadingSubjectSkills" />
+        <skills-spinner
+          v-if="skillState.loadingSubjectSkills"
+          :is-loading="skillState.loadingSubjectSkills"
+          class="py-8" />
         <div v-if="!skillState.loadingSubjectSkills">
           <skills-table v-if="skillState.hasSkills" />
           <no-content2
             v-if="!skillState.hasSkills"
             title="No Skills Yet"
-            class="my-5"
+            class="py-8"
             message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework." />
         </div>
       </template>

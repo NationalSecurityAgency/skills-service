@@ -7,16 +7,20 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
 import { useStorage } from '@vueuse/core'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue'
 import SelfReportTableCell from '@/components/skills/skillsTableCells/SelfReportTableCell.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import SkillsService from '@/components/skills/SkillsService.js'
 
 const skillsState = useSubjectSkillsState()
 const projConfig = useProjConfig()
 const route = useRoute()
+const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const subjectId = computed(() => {
   return route.params.subjectId;
@@ -147,8 +151,25 @@ const copySkill = (skillToCopy) => {
 
 
 const deleteButtonsDisabled = ref(false)
+const deleteSkillInfo = ref({
+  show: false,
+  skill: {},
+})
 const deleteSkill = (skillToDelete) => {
-
+  deleteSkillInfo.value.skill = skillToDelete
+  deleteSkillInfo.value.show = true
+}
+const doDeleteSkill = () => {
+  options.value.busy = true;
+  const skill = deleteSkillInfo.value.skill
+  SkillsService.deleteSkill(skill)
+    .then(() => {
+      skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
+        .then(() => {
+          options.value.busy = false;
+          announcer.polite(`Removed ${skill.name} skill`)
+        })
+    })
 }
 
 const skillsActionsMenu = ref(false)
@@ -198,6 +219,7 @@ const skillsTable = ref(null)
 <template>
   <div>
     <DataTable
+      :loading="options.busy"
       ref="skillsTable"
       :value="skillsState.subjectSkills"
       :reorderableColumns="true"
@@ -232,8 +254,8 @@ const skillsTable = ref(null)
                         icon="fa fa-times"
                         outlined
                         @click="clearFilter"
-                        aria-label="Reset surveys and quizzes filter"
-                        data-cy="quizResetBtn" />
+                        aria-label="Reset skills filter"
+                        data-cy="filterResetBtn" />
         </div>
         <div class="mt-4">
           <div class="mt-2 flex">
@@ -288,6 +310,7 @@ const skillsTable = ref(null)
             <div class="flex-1 ">
               <router-link
                 class="no-underline"
+                :data-cy="`manageSkillLink_${slotProps.data.skillId}`"
                 :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
               >
                 <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
@@ -304,6 +327,7 @@ const skillsTable = ref(null)
                     size="small"
                     outlined
                     severity="info"
+                    :track-for-focus="true"
                     :aria-label="`Manage skill ${slotProps.data.name}`"
                     :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"
                   />
@@ -332,6 +356,7 @@ const skillsTable = ref(null)
                     :aria-label="'copy Skill '+slotProps.data.name"
                     :ref="'copy_'+slotProps.data.skillId"
                     :disabled="addSkillDisabled"
+                    :track-for-focus="true"
                     title="Copy Skill" />
                   <!--                  v-skills="'CopySkill'" -->
                   <SkillsButton
@@ -345,6 +370,7 @@ const skillsTable = ref(null)
                     size="small"
                     outlined
                     severity="info"
+                    :track-for-focus="true"
                     :class="{'delete-btn-border-fix' : !slotProps.data.reusedSkill }"
                     :disabled="deleteButtonsDisabled" />
                 </div>
@@ -416,7 +442,30 @@ const skillsTable = ref(null)
         <!--        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>-->
       </template>
 
+      <template #empty>
+        <div class="flex justify-content-center flex-wrap">
+          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+          <span class="flex align-items-center justify-content-center">No Skills Found.
+            <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                          label="Reset"
+                          link
+                          size="small"
+                          @click="clearFilter"
+                          aria-label="Reset surveys and quizzes filter"
+                          data-cy="skillResetBtnNoFilterRes"/> to clear the existing filter.
+              </span>
+        </div>
+      </template>
     </DataTable>
+
+    <removal-validation
+      v-if="deleteSkillInfo.show"
+      v-model="deleteSkillInfo.show"
+      :item-name="deleteSkillInfo.skill.name"
+      item-type="project"
+      @do-remove="doDeleteSkill">
+      Deletion <b>cannot</b> be undone
+    </removal-validation>
   </div>
 </template>
 
