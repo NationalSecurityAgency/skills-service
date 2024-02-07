@@ -52,6 +52,7 @@ const newSkill = () => {
       projectId: route.params.projectId,
       subjectId: route.params.subjectId,
       type: 'Skill',
+      version: 0
     },
     show: true,
     isEdit: false,

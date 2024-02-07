@@ -1,16 +1,36 @@
 <script setup>
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { object, string } from 'yup'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+import TotalPointsField from '@/components/skills/inputForm/TotalPointsField.vue'
+import TimeWindowInput from '@/components/skills/inputForm/TimeWindowInput.vue'
 
 const show = defineModel()
+const route = useRoute()
 const props = defineProps({
   skill: Object,
   isEdit: Boolean,
   isCopy: Boolean
 })
 const appConfig = useAppConfig()
+
+const latestSkillVersion = ref(0)
+const maxSkillVersion = ref(1)
+
+const asyncLoadData = () => {
+  return SkillsService.getLatestSkillVersion(route.params.projectId)
+    .then((latestVersion) => {
+      latestSkillVersion.value = latestVersion
+      maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
+      return {
+        version: latestVersion
+      }
+    })
+}
 
 const formId = props.isEdit ? `editSkillDialog-${props.skill.projectId}-${props.skill.skillId}` : 'newSkillDialog'
 let modalTitle = 'New Skill'
@@ -43,9 +63,16 @@ const schema = object({
     .label('Version')
 })
 const initialSkillData = {
-  originalSkillId: props.skill.skillId,
+  skillId: '',
+  originalSkillId: props.skill.skillId || '',
+  version: 0,
+  pointIncrement: 100,
+  numPerformToCompletion: 1,
+  pointIncrementIntervalHrs: 8,
+  pointIncrementIntervalMins: 0,
+  numPointIncrementMaxOccurrences: 1,
   ...props.skill,
-  skillName: props.skill.name,
+  skillName: props.skill.name || '',
   description: props.skill.description || ''
 }
 
@@ -61,6 +88,7 @@ const close = () => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="show"
+    :async-load-data-function="asyncLoadData"
     :header="modalTitle"
     saveButtonLabel="Save"
     :validation-schema="schema"
@@ -79,14 +107,35 @@ const close = () => {
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 
-      <div class="">
-        <SkillsNumberInput
-          class="ml-3"
-          label="Version"
-          name="version" />
-      </div>
+      <SkillsNumberInput
+        showButtons
+        :min="latestSkillVersion"
+        :max="maxSkillVersion"
+        class="ml-3"
+        label="Version"
+        name="version" />
     </div>
 
+    <div class="flex">
+      <SkillsNumberInput
+        class="flex-1"
+        :min="0"
+        :is-required="true"
+        label="Point Increment"
+        name="pointIncrement" />
+
+      <SkillsNumberInput
+        class="flex-1 ml-2"
+        showButtons
+        :min="0"
+        :is-required="true"
+        label="Occurrences to Completion"
+        name="numPerformToCompletion" />
+
+      <total-points-field class="ml-2" />
+    </div>
+
+    <time-window-input class="mb-3"/>
   </SkillsInputFormDialog>
 </template>
 

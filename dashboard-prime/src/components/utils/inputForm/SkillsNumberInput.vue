@@ -1,7 +1,6 @@
 <script setup>
-
+import { computed, inject, useAttrs } from 'vue'
 import { useField } from 'vee-validate'
-import { inject } from 'vue'
 
 const props = defineProps({
   name: {
@@ -35,20 +34,31 @@ const onEnter = (event) => {
   }
   emit('keydown-enter', event.target.value)
 }
+
+const filterAttrs = ['class'];
+const attrs = useAttrs()
+const inputNumFallthroughAttrs = computed(() =>{
+  return Object.fromEntries(
+    Object.entries(attrs).filter(
+      ([key])=> !filterAttrs.includes(key)
+    )
+  );
+})
 </script>
 
 <template>
   <div class="field">
-    <label for="projectIdInput" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
+    <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputNumber
       inputClass="w-3rem"
-      :min="0"
+      class="w-full"
+      v-bind="inputNumFallthroughAttrs"
       v-model="value"
-      @input="emit('input', $event.target.value)"
       @keydown.enter="onEnter"
       :data-cy="name"
       :autofocus="autofocus"
       :id="name"
+      :inputId="`input${name}`"
       :disabled="disabled"
       :class="{ 'p-invalid': errorMessage }"
       :aria-invalid="errorMessage ? null : true"

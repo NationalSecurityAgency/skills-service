@@ -38,7 +38,7 @@ const onEnter = (event) => {
 
 <template>
   <div class="field text-left">
-    <label for="projectIdInput"><span v-if="isRequired">*</span> {{ label }} </label>
+    <label :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputText
       class="w-full"
       type="text"

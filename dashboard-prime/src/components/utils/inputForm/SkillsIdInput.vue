@@ -58,7 +58,6 @@ defineExpose({
         <div style="width: 3.3rem !important;">
           <InputSwitch
             v-model="canEdit"
-            class=""
             style="height:1rem !important;"
             size="small"
             name="Enable Id"
@@ -86,7 +85,6 @@ defineExpose({
     </InputGroup>
     <!--        @input="dataChanged"-->
     <small role="alert" class="p-error" data-cy="idError" id="idError">{{ errorMessage }}</small>
-    <!--    </ValidationProvider>-->
   </div>
 </template>
 

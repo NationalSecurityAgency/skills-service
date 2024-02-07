@@ -30,6 +30,10 @@ import MultiSelect from 'primevue/multiselect'
 import InputNumber from 'primevue/inputnumber'
 import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
+import Fieldset from 'primevue/fieldset';
+
 import BadgeDirective from 'primevue/badgedirective';
 
 
@@ -79,6 +83,9 @@ app.component('MultiSelect', MultiSelect)
 app.component('Tag', Tag)
 app.component('DataTable', DataTable)
 app.component('InputNumber', InputNumber)
+app.component('InputGroup', InputGroup)
+app.component('InputGroupAddon', InputGroupAddon)
+app.component('Fieldset', Fieldset)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

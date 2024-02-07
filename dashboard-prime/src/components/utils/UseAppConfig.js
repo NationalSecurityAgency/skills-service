@@ -25,6 +25,7 @@ export const useAppConfig = () => {
   const formFieldDebounceInMs = store.getters.config.formFieldDebounceInMs || 400
   const maxSubjectNameLength = store.getters.config.maxSubjectNameLength;
   const maxCustomLabelLength = store.getters.config.maxCustomLabelLength;
+  const maxSkillVersion = store.getters.config.maxSkillVersion
   return {
     rankingAndProgressViewsEnabled,
     docsHost,
@@ -39,5 +40,6 @@ export const useAppConfig = () => {
     paragraphValidationRegex,
     maxSubjectNameLength,
     maxCustomLabelLength
+    maxSkillVersion
   }
 }
