@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import InlineHelp from '@/components/utils/InlineHelp.vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
@@ -14,20 +14,12 @@ const props = defineProps({
 const emit = defineEmits(['shown', 'hidden']);
 const route = useRoute();
 const config = useProjConfig();
+const { value, errorMessage } = useField(() => props.name);
 
-let internalValue = ref(props.name);
 const projConfigRootHelpUrl = config.projConfigRootHelpUrl;
 
-onMounted(() => {
-  // config.loadProjConfigState({ projectId: route.params.projectId });
-  //.then(() => {
-  //   console.log(config.projConfig);
-  //   console.log(config.projConfigRootHelpUrl);
-  // })
-})
-
 const overrideRootHelpUrl = computed(() => {
-  return projConfigRootHelpUrl && internalValue.value && (internalValue.value.startsWith('http://') || internalValue.value.startsWith('https://'));
+  return projConfigRootHelpUrl && value.value && (value.value.startsWith('http://') || value.value.startsWith('https://'));
 });
 
 const rootHelpUrl = computed(() => {
@@ -53,7 +45,6 @@ const handleEscape = () => {
   props.nextFocusEl?.focus();
 };
 
-const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
@@ -70,7 +61,7 @@ const { value, errorMessage } = useField(() => props.name);
     <InputGroup>
       <InputGroupAddon v-if="projConfigRootHelpUrl">
         <i class="fas fa-cogs mr-1"></i>
-        <span class="text-primary" :class="{ 'stikethrough' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
+        <span class="text-primary" :class="{ 'line-through' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
               id="rootHelpUrlHelp"
               :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
               tabindex="0"

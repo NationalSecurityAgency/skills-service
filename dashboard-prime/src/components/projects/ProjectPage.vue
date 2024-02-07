@@ -68,7 +68,7 @@ const navItems = computed(() => {
 });
 
 const headerOptions = computed(() => {
-  if (!project) { // || !projConfig
+  if (!project || !projConfig) {
     return {};
   }
   let visibilityLabel = 'Project Catalog';
@@ -184,15 +184,17 @@ const fromExpirationDate = () => {
 };
 const loadProjects = () => {
   isLoadingData.value = true;
-  if (route.params.project) {
-    setProject(route.params.project);
-    isLoadingData.value = false;
-  } else {
-    loadProjectDetailsState({ projectId: route.params.projectId })
-        .finally(() => {
-          isLoadingData.value = false;
-        });
-  }
+  projConfig.loadProjConfigState({ projectId: route.params.projectId }).finally(() => {
+    if (route.params.project) {
+      setProject(route.params.project);
+      isLoadingData.value = false;
+    } else {
+      loadProjectDetailsState({ projectId: route.params.projectId })
+          .finally(() => {
+            isLoadingData.value = false;
+          });
+    }
+  });
 };
 const projectSaved = (updatedProject) => {
   ProjectService.saveProject(updatedProject).then((resp) => {
