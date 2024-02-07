@@ -35,7 +35,7 @@ describe('Project Settings Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.be.checked');
+            .should('not.have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -44,10 +44,10 @@ describe('Project Settings Tests', () => {
             .should('be.disabled');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .check({ force: true });
+            .click({ force: true });
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('be.checked');
+            .should('have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -56,10 +56,10 @@ describe('Project Settings Tests', () => {
             .should('be.enabled');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .uncheck({ force: true });
+            .click({ force: true });
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.be.checked');
+            .should('not.have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -68,10 +68,10 @@ describe('Project Settings Tests', () => {
             .should('be.disabled');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .check({ force: true });
+            .click({ force: true });
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('be.checked');
+            .should('have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -91,7 +91,7 @@ describe('Project Settings Tests', () => {
         // refresh
         cy.visit('/administrator/projects/proj1/settings');
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('be.checked');
+            .should('have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -100,10 +100,10 @@ describe('Project Settings Tests', () => {
             .should('be.disabled');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .uncheck({ force: true });
+            .click({ force: true });
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.be.checked');
+            .should('not.have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -112,9 +112,9 @@ describe('Project Settings Tests', () => {
             .should('be.enabled');
 
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .check({ force: true });
+            .click({ force: true });
         cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('be.checked');
+            .should('have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -128,20 +128,20 @@ describe('Project Settings Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
 
         cy.get('[data-cy="customLabelsSwitch"')
-            .should('not.be.checked');
+            .should('not.have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="customLabelsSwitch"')
             .click({ force: true });
         cy.get('[data-cy="customLabelsSwitch"')
-            .should('be.checked');
-        cy.get('[data-cy="projectDisplayTextInput"]')
+            .should('have.class', 'p-inputswitch-checked');
+        cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Project');
-        cy.get('[data-cy="subjectDisplayTextInput"]')
+        cy.get('[data-cy="subjectDisplayNameTextInput"]')
             .should('have.value', 'Subject');
-        cy.get('[data-cy="groupDisplayTextInput"]')
+        cy.get('[data-cy="groupDisplayNameTextInput"]')
             .should('have.value', 'Group');
-        cy.get('[data-cy="skillDisplayTextInput"]')
+        cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', 'Skill');
-        cy.get('[data-cy="levelDisplayTextInput"]')
+        cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Level');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
@@ -150,31 +150,31 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy=projectDisplayTextInput]')
+        cy.get('[data-cy=projectDisplayNameTextInput]')
             .clear()
             .type('Work Role');
-        cy.get('[data-cy=subjectDisplayTextInput]')
+        cy.get('[data-cy=subjectDisplayNameTextInput]')
             .clear()
             .type('Competency');
-        cy.get('[data-cy=groupDisplayTextInput]')
+        cy.get('[data-cy=groupDisplayNameTextInput]')
             .clear()
             .type('KSA');
-        cy.get('[data-cy=skillDisplayTextInput]')
+        cy.get('[data-cy=skillDisplayNameTextInput]')
             .clear()
             .type('Course');
-        cy.get('[data-cy=levelDisplayTextInput]')
+        cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear()
             .type('Stage');
 
-        cy.get('[data-cy="projectDisplayTextInput"]')
+        cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Work Role');
-        cy.get('[data-cy="subjectDisplayTextInput"]')
+        cy.get('[data-cy="subjectDisplayNameTextInput"]')
             .should('have.value', 'Competency');
-        cy.get('[data-cy="groupDisplayTextInput"]')
+        cy.get('[data-cy="groupDisplayNameTextInput"]')
             .should('have.value', 'KSA');
-        cy.get('[data-cy="skillDisplayTextInput"]')
+        cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', 'Course');
-        cy.get('[data-cy="levelDisplayTextInput"]')
+        cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Stage');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
@@ -196,16 +196,16 @@ describe('Project Settings Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
 
         cy.get('[data-cy="customLabelsSwitch"')
-            .should('be.checked');
-        cy.get('[data-cy="projectDisplayTextInput"]')
+            .should('have.class', 'p-inputswitch-checked');
+        cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Work Role');
-        cy.get('[data-cy="subjectDisplayTextInput"]')
+        cy.get('[data-cy="subjectDisplayNameTextInput"]')
             .should('have.value', 'Competency');
-        cy.get('[data-cy="groupDisplayTextInput"]')
+        cy.get('[data-cy="groupDisplayNameTextInput"]')
             .should('have.value', 'KSA');
-        cy.get('[data-cy="skillDisplayTextInput"]')
+        cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', 'Course');
-        cy.get('[data-cy="levelDisplayTextInput"]')
+        cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Stage');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
@@ -215,26 +215,26 @@ describe('Project Settings Tests', () => {
             .should('be.disabled');
 
         // set back to default
-        cy.get('[data-cy=projectDisplayTextInput]')
+        cy.get('[data-cy=projectDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=subjectDisplayTextInput]')
+        cy.get('[data-cy=subjectDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=groupDisplayTextInput]')
+        cy.get('[data-cy=groupDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=skillDisplayTextInput]')
+        cy.get('[data-cy=skillDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=levelDisplayTextInput]')
+        cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear();
 
-        cy.get('[data-cy="projectDisplayTextInput"]')
+        cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', '');
-        cy.get('[data-cy="subjectDisplayTextInput"]')
+        cy.get('[data-cy="subjectDisplayNameTextInput"]')
             .should('have.value', '');
-        cy.get('[data-cy="groupDisplayTextInput"]')
+        cy.get('[data-cy="groupDisplayNameTextInput"]')
             .should('have.value', '');
-        cy.get('[data-cy="skillDisplayTextInput"]')
+        cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', '');
-        cy.get('[data-cy="levelDisplayTextInput"]')
+        cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', '');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
@@ -256,20 +256,20 @@ describe('Project Settings Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
 
         cy.get('[data-cy="customLabelsSwitch"')
-            .should('not.be.checked');
+            .should('not.have.class', 'p-inputswitch-checked');
         cy.get('[data-cy="customLabelsSwitch"')
             .click({ force: true });
         cy.get('[data-cy="customLabelsSwitch"')
-            .should('be.checked');
-        cy.get('[data-cy="projectDisplayTextInput"]')
+            .should('have.class', 'p-inputswitch-checked');
+        cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Project');
-        cy.get('[data-cy="subjectDisplayTextInput"]')
+        cy.get('[data-cy="subjectDisplayNameTextInput"]')
             .should('have.value', 'Subject');
-        cy.get('[data-cy="groupDisplayTextInput"]')
+        cy.get('[data-cy="groupDisplayNameTextInput"]')
             .should('have.value', 'Group');
-        cy.get('[data-cy="skillDisplayTextInput"]')
+        cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', 'Skill');
-        cy.get('[data-cy="levelDisplayTextInput"]')
+        cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Level');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
@@ -278,73 +278,73 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy=projectDisplayTextInput]')
+        cy.get('[data-cy=projectDisplayNameTextInput]')
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
-        cy.get('[data-cy=projectDisplayTextError]')
-            .contains('Project Display Text cannot exceed 50 characters.')
+        cy.get('[data-cy=projectDisplayNameError]')
+            .contains('Project Display Text must be at most 50 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy=projectDisplayTextInput]')
+        cy.get('[data-cy=projectDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=projectDisplayTextError]')
+        cy.get('[data-cy=projectDisplayNameError]')
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy=subjectDisplayTextInput]')
+        cy.get('[data-cy=subjectDisplayNameTextInput]')
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
-        cy.get('[data-cy=subjectDisplayTextError]')
-            .contains('Subject Display Text cannot exceed 50 characters.')
+        cy.get('[data-cy=subjectDisplayNameError]')
+            .contains('Subject Display Text must be at most 50 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy=subjectDisplayTextInput]')
+        cy.get('[data-cy=subjectDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=subjectDisplayTextError]')
+        cy.get('[data-cy=subjectDisplayNameError]')
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy=groupDisplayTextInput]')
+        cy.get('[data-cy=groupDisplayNameTextInput]')
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
-        cy.get('[data-cy=groupDisplayTextError]')
-            .contains('Group Display Text cannot exceed 50 characters.')
+        cy.get('[data-cy=groupDisplayNameError]')
+            .contains('Group Display Text must be at most 50 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy=groupDisplayTextInput]')
+        cy.get('[data-cy=groupDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=groupDisplayTextError]')
+        cy.get('[data-cy=groupDisplayNameError]')
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy=skillDisplayTextInput]')
+        cy.get('[data-cy=skillDisplayNameTextInput]')
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
-        cy.get('[data-cy=skillDisplayTextError]')
-            .contains('Skill Display Text cannot exceed 50 characters.')
+        cy.get('[data-cy=skillDisplayNameError]')
+            .contains('Skill Display Text must be at most 50 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy=skillDisplayTextInput]')
+        cy.get('[data-cy=skillDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=skillDisplayTextError]')
+        cy.get('[data-cy=skillDisplayNameError]')
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy=levelDisplayTextInput]')
+        cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
-        cy.get('[data-cy=levelDisplayTextError]')
-            .contains('Level Display Text cannot exceed 50 characters.')
+        cy.get('[data-cy=levelDisplayNameError]')
+            .contains('Level Display Text must be at most 50 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy=levelDisplayTextInput]')
+        cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear();
-        cy.get('[data-cy=levelDisplayTextError]')
+        cy.get('[data-cy=levelDisplayNameError]')
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
