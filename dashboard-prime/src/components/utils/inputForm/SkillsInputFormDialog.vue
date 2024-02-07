@@ -74,7 +74,7 @@ if (props.asyncLoadDataFunction) {
 }
 
 const validateIfNotEmpty = () => {
-  const foundNonEmpty = Object.values(values).find((value) => value)
+  const foundNonEmpty = Object.entries(values).find(([key, value]) => value && props.initialValues[key] !== value);
   if (foundNonEmpty) {
     validate()
   }
