@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
 import Card from 'primevue/card';
 import InputSwitch from 'primevue/inputswitch';
 import RadioButton from 'primevue/radiobutton';
@@ -12,14 +14,37 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SettingService from '@/components/settings/SettingsService';
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useAppConfig } from '@/components/utils/UseAppConfig.js';
+import SkillsSettingTextInput from "@/components/settings/SkillsSettingTextInput.vue";
 
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const store = useStore();
+const appConfig = useAppConfig()
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
 const privateInviteOnly = 'pio';
+
+const schema = yup.object({
+  helpUrlHost: yup.string().max(appConfig.maxCustomLabelLength).label('Root Help Url'),
+  projectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Project Display Text'),
+  subjectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Subject Display Text'),
+  groupDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Group Display Text'),
+  skillDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Skill Display Text'),
+  levelDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Level Display Text'),
+});
+
+const { values, defineField, errors, meta, handleSubmit, setFieldValue } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    levelDisplayName: 'Level',
+    skillDisplayName: 'Skill',
+    groupDisplayName: 'Group',
+    subjectDisplayName: 'Subject',
+    projectDisplayName: 'Project',
+  }
+});
 
 onMounted(() => {
   loadSettings();
@@ -39,108 +64,108 @@ let selfReport = ref({
 let settings = ref({
   projectVisibility: {
     value: 'pnd',
-        setting: 'synthetic.project_visibility',
-        lastLoadedValue: 'pnd',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'synthetic.project_visibility',
+    lastLoadedValue: 'pnd',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   productionModeEnabled: {
     value: 'false',
-        setting: 'production.mode.enabled',
-        lastLoadedValue: 'false',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'production.mode.enabled',
+    lastLoadedValue: 'false',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   inviteOnlyProject: {
     value: 'false',
-        setting: 'invite_only',
-        lastLoadedValue: 'false',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'invite_only',
+    lastLoadedValue: 'false',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   levelPointsEnabled: {
     value: 'false',
-        setting: 'level.points.enabled',
-        lastLoadedValue: 'false',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'level.points.enabled',
+    lastLoadedValue: 'false',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   selfReportType: {
     value: '',
-        setting: 'selfReport.type',
-        lastLoadedValue: '',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'selfReport.type',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   selfReportJustificationRequired: {
     value: 'false',
-        setting: 'selfReport.justificationRequired',
-        lastLoadedValue: 'false',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'selfReport.justificationRequired',
+    lastLoadedValue: 'false',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   helpUrlHost: {
     value: '',
-        setting: 'help.url.root',
-        lastLoadedValue: '',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'help.url.root',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   rankAndLeaderboardOptOut: {
     value: false,
-        setting: 'project-admins_rank_and_leaderboard_optOut',
-        lastLoadedValue: false,
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'project-admins_rank_and_leaderboard_optOut',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
   },
   groupDescriptions: {
     value: false,
-        setting: 'group-descriptions',
-        lastLoadedValue: false,
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'group-descriptions',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
   },
   projectDisplayName: {
     value: 'Project',
-        setting: 'project.displayName',
-        lastLoadedValue: 'Project',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'project.displayName',
+    lastLoadedValue: 'Project',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   subjectDisplayName: {
     value: 'Subject',
-        setting: 'subject.displayName',
-        lastLoadedValue: 'Subject',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'subject.displayName',
+    lastLoadedValue: 'Subject',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   groupDisplayName: {
     value: 'Group',
-        setting: 'group.displayName',
-        lastLoadedValue: 'Group',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'group.displayName',
+    lastLoadedValue: 'Group',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   skillDisplayName: {
     value: 'Skill',
-        setting: 'skill.displayName',
-        lastLoadedValue: 'Skill',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'skill.displayName',
+    lastLoadedValue: 'Skill',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   levelDisplayName: {
     value: 'Level',
-        setting: 'level.displayName',
-        lastLoadedValue: 'Level',
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'level.displayName',
+    lastLoadedValue: 'Level',
+    dirty: false,
+    projectId: route.params.projectId,
   },
   hideProjectDescription: {
     value: false,
-        setting: 'show_project_description_everywhere',
-        lastLoadedValue: false,
-        dirty: false,
-        projectId: route.params.projectId,
+    setting: 'show_project_description_everywhere',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
   },
 });
 let errMsg = ref(null);
@@ -265,28 +290,10 @@ const levelPointsEnabledChanged = ((value) => {
   settings.value.levelPointsEnabled.dirty = `${value}` !== `${settings.value.levelPointsEnabled.lastLoadedValue}`;
 });
 
-const helpUrlHostChanged = ((value) => {
-  settings.value.helpUrlHost.dirty = `${value}` !== `${settings.value.helpUrlHost.lastLoadedValue}`;
-});
-
-const projectDisplayNameChanged = ((value) => {
-  settings.value.projectDisplayName.dirty = `${value}` !== `${settings.value.projectDisplayName.lastLoadedValue}`;
-});
-
-const subjectDisplayNameChanged = ((value) => {
-  settings.value.subjectDisplayName.dirty = `${value}` !== `${settings.value.subjectDisplayName.lastLoadedValue}`;
-});
-
-const groupDisplayNameChanged = ((value) => {
-  settings.value.groupDisplayName.dirty = `${value}` !== `${settings.value.groupDisplayName.lastLoadedValue}`;
-});
-
-const skillDisplayNameChanged = ((value) => {
-  settings.value.skillDisplayName.dirty = `${value}` !== `${settings.value.skillDisplayName.lastLoadedValue}`;
-});
-
-const levelDisplayNameChanged = ((value) => {
-  settings.value.levelDisplayName.dirty = `${value}` !== `${settings.value.levelDisplayName.lastLoadedValue}`;
+const updateSettingsField = ((value) => {
+  const [field, val] = value;
+  settings.value[field].value = val;
+  settings.value[field].dirty = `${val}` !== `${settings.value.projectDisplayName.lastLoadedValue}`;
 });
 
 const hideProjectDescriptionChanged = ((value) => {
@@ -327,8 +334,12 @@ const loadSettings = (() => {
           entries.forEach((entry) => {
             const [key, value] = entry;
             const found = response.find((item) => item.setting === value.setting);
+
             if (found) {
+              found.value = (found.value === 'true' || found.value === true) ? true : found.value;
               settings.value[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+
+              setFieldValue(key, found.value);
 
               // special handling of self reporting as it's not just a simple key-value prop control
               if (found.setting === settings.value.selfReportType.setting) {
@@ -339,7 +350,7 @@ const loadSettings = (() => {
             }
           });
         }
-        showCustomLabelsConfigToggle.value = shouldShowCustomLabelsConfig;
+        showCustomLabelsConfigToggle.value = shouldShowCustomLabelsConfig.value;
       })
       .finally(() => {
         isLoading.value = false;
@@ -369,14 +380,14 @@ const save = (() => {
   //       } else {
           const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty && !item.setting.startsWith('synthetic.'));
           if (dirtyChanges) {
-            isLoading.value = true;
+            // isLoading.value = true;
             SettingService.checkSettingsValidity(route.params.projectId, dirtyChanges)
                 .then((res) => {
                   if (res.valid) {
                     saveSettings(dirtyChanges);
                   } else {
                     errMsg.value = res.explanation;
-                    isLoading.value = false;
+                    // isLoading.value = false;
                   }
                 });
           }
@@ -403,10 +414,10 @@ const saveSettings = ((dirtyChanges) => {
             SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
           }
         });
-        store.dispatch('loadProjConfigState', { projectId: route.params.projectId, updateLoadingVar: false });
+        // store.dispatch('loadProjConfigState', { projectId: route.params.projectId, updateLoadingVar: false });
       })
       .finally(() => {
-        isLoading.value = false;
+        // isLoading.value = false;
       });
 });
 </script>
@@ -427,6 +438,7 @@ const saveSettings = ((dirtyChanges) => {
                         @change="projectVisibilityChanged"
                         aria-labelledby="projectVisibilityLabel"
                         optionLabel="text" optionValue="value"
+                        class="w-full"
                         data-cy="projectVisibilitySelector" required/>
             </div>
           </div>
@@ -444,6 +456,7 @@ const saveSettings = ((dirtyChanges) => {
                         optionLabel="label" optionValue="value"
                         @change="hideProjectDescriptionChanged"
                         aria-labelledby="hideProjectDescriptionLabel"
+                        class="w-full"
                         data-cy="showProjectDescriptionSelector" />
             </div>
           </div>
@@ -462,26 +475,11 @@ const saveSettings = ((dirtyChanges) => {
 
   <!--        <ValidationProvider rules="root_help_url|customUrlValidator" v-slot="{errors}"-->
   <!--                            name="Root Help Url">-->
-            <div class="flex flex-row">
-              <div class="md:col-5 xl:col-3 text-secondary" id="rootHelpUrlLabel">
-                Root Help Url:
-                <inline-help
-                    target-id="rootHelpUrlHelp"
-                    msg="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root."/>
-              </div>
-              <div class="md:col-7 xl:col-9">
-                <InputText v-model="settings.helpUrlHost.value" data-cy="rootHelpUrlInput" id="skillHelpUrl" placeholder="http://www.HelpArticlesHost.com" v-on:input="helpUrlHostChanged"></InputText>
-  <!--              <b-form-input v-model="settings.helpUrlHost.value"-->
-  <!--                            placeholder="http://www.HelpArticlesHost.com"-->
-  <!--                            data-cy="rootHelpUrlInput"-->
-  <!--                            v-on:input="helpUrlHostChanged"-->
-  <!--                            aria-describedby="rootHelpUrlError"-->
-  <!--                            aria-errormessage="rootHelpUrlError"-->
-  <!--                            aria-labelledby="rootHelpUrlLabel">-->
-  <!--              </b-form-input>-->
-              </div>
-            </div>
-  <!--        </ValidationProvider>-->
+          <SkillsSettingTextInput name="helpUrlHost"
+                                  label="Root Help Url"
+                                  @input="updateSettingsField"
+                                  placeholder="http://www.HelpArticlesHost.com"
+                                  help-message="Optional root for Skills' 'Help Url' parameter. When configured 'Help Url' can use relative path to this root." />
 
           <div class="flex flex-row">
             <div class="md:col-5 xl:col-3 text-secondary" id="selfReportLabel">
@@ -545,10 +543,10 @@ const saveSettings = ((dirtyChanges) => {
             </div>
             <div class="md:col-7 xl:col-9">
               <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
-                               name="check-button"
-                               v-on:input="rankAndLeaderboardOptOutChanged"
-                               aria-labelledby="rankAndLeaderboardOptOutLabel"
-                               data-cy="rankAndLeaderboardOptOutSwitch"/> {{ rankOptOutLabel }}
+                           name="check-button"
+                           v-on:input="rankAndLeaderboardOptOutChanged"
+                           aria-labelledby="rankAndLeaderboardOptOutLabel"
+                           data-cy="rankAndLeaderboardOptOutSwitch"/> {{ rankOptOutLabel }}
             </div>
           </div>
 
@@ -567,95 +565,30 @@ const saveSettings = ((dirtyChanges) => {
   <!--            </b-form-checkbox>-->
 
   <!--            <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">-->
-                <Card class="mt-1" :visible="shouldShowCustomLabelsConfig">
+                <Card class="mt-1" v-if="shouldShowCustomLabelsConfig">
                   <template #content>
-  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
-  <!--                                    name="Project Display Text">-->
-                    <div class="flex flex-row">
-                      <div class="md:col-5 xl:col-3 text-secondary" id="projectDisplayTextLabel">
-                        Project Display Text:
-                        <inline-help
-                            target-id="projectDisplayTextHelp"
-                            msg='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                      </div>
-                      <div class="md:col-7 xl:col-9">
-                        <InputText v-model="settings.projectDisplayName.value"
-                                      data-cy="projectDisplayTextInput"
-                                      v-on:input="projectDisplayNameChanged"
-                                      aria-labelledby="projectDisplayTextLabel" />
-                      </div>
-                    </div>
-  <!--                </ValidationProvider>-->
-  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
-  <!--                                    name="Subject Display Text">-->
-                    <div class="flex flex-row">
-                      <div class="md:col-5 xl:col-3 text-secondary" id="subjectDisplayTextLabel">
-                        Subject Display Text:
-                        <inline-help
-                            target-id="subjectDisplayTextHelp"
-                            msg='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                      </div>
-                      <div class="md:col-7 xl:col-9">
-                        <InputText v-model="settings.subjectDisplayName.value"
-                                      data-cy="subjectDisplayTextInput"
-                                      v-on:input="subjectDisplayNameChanged"
-                                      aria-labelledby="subjectDisplayTextLabel" />
-                      </div>
-                    </div>
-  <!--                </ValidationProvider>-->
-  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
-  <!--                                    name="Group Display Text">-->
-                    <div class="flex flex-row">
-                      <div class="md:col-5 xl:col-3 text-secondary" id="groupDisplayTextLabel">
-                        Group Display Text:
-                        <inline-help
-                            target-id="groupDisplayTextHelp"
-                            msg='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                      </div>
-                      <div class="md:col-7 xl:col-9">
-                        <InputText v-model="settings.groupDisplayName.value"
-                                      data-cy="groupDisplayTextInput"
-                                      v-on:input="groupDisplayNameChanged"
-                                      aria-labelledby="groupDisplayTextLabel" />
-                      </div>
-                    </div>
-  <!--                </ValidationProvider>-->
-
-  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
-  <!--                                    name="Skill Display Text">-->
-                    <div class="flex flex-row">
-                      <div class="md:col-5 xl:col-3 text-secondary" id="skillDisplayTextLabel">
-                        Skill Display Text:
-                        <inline-help
-                            target-id="skillDisplayTextHelp"
-                            msg='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                      </div>
-                      <div class="md:col-7 xl:col-9">
-                        <InputText v-model="settings.skillDisplayName.value"
-                                      data-cy="skillDisplayTextInput"
-                                      v-on:input="skillDisplayNameChanged"
-                                      aria-labelledby="skillDisplayTextLabel" />
-                      </div>
-                    </div>
-  <!--                </ValidationProvider>-->
-  <!--                <ValidationProvider rules="maxCustomLabelLength" v-slot="{errors}"-->
-  <!--                                    name="Level Display Text">-->
-                    <div class="flex flex-row">
-                      <div class="md:col-5 xl:col-3 text-secondary" id="levelDisplayTextLabel">
-                        Level Display Text:
-                        <inline-help
-                            target-id="levelDisplayTextHelp"
-                            msg='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                      </div>
-                      <div class="md:col-7 xl:col-9">
-                        <InputText v-model="settings.levelDisplayName.value"
-                                      data-cy="levelDisplayTextInput"
-                                      v-on:input="levelDisplayNameChanged"
-                                      aria-labelledby="levelDisplayTextLabel" />
-                      </div>
-                    </div>
+                    <SkillsSettingTextInput name="projectDisplayName"
+                                            label="Project Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                    <SkillsSettingTextInput name="subjectDisplayName"
+                                            label="Subject Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                    <SkillsSettingTextInput name="groupDisplayName"
+                                            label="Group Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                    <SkillsSettingTextInput name="skillDisplayName"
+                                            label="Skill Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                    <SkillsSettingTextInput name="levelDisplayName"
+                                            label="Level Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+<!--                    projectDisplayNameChanged-->
                   </template>
-  <!--                </ValidationProvider>-->
                 </Card>
   <!--            </b-collapse>-->
             </div>
@@ -683,7 +616,7 @@ const saveSettings = ((dirtyChanges) => {
 
           <div class="flex flex-row">
             <div class="col">
-              <SkillsButton variant="outline-success" @click="save" :disabled="!isDirty" data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
+              <SkillsButton variant="outline-success" @click="save" :disabled="!meta.valid || !isDirty" data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
               </SkillsButton>
 
               <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">

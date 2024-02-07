@@ -19,7 +19,8 @@ let internalValue = ref(props.name);
 const projConfigRootHelpUrl = config.projConfigRootHelpUrl;
 
 onMounted(() => {
-  // config.loadProjConfigState({ projectId: route.params.projectId }).then(() => {
+  // config.loadProjConfigState({ projectId: route.params.projectId });
+  //.then(() => {
   //   console.log(config.projConfig);
   //   console.log(config.projConfigRootHelpUrl);
   // })
