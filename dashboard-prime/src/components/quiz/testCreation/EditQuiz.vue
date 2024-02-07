@@ -135,14 +135,16 @@ const onSubmit = (values) => {
           :name-to-id-sync-enabled="!isEdit"
           @keydown-enter="onSubmit" />
 
-      <SkillsDropDown
-          label="Type"
-          name="type"
-          data-cy="quizTypeSelector"
-          :isRequire="true"
-          :disabled="isEdit"
-          :options="['Quiz', 'Survey']" />
-        <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
+      <div data-cy="quizTypeSection">
+        <SkillsDropDown
+            label="Type"
+            name="type"
+            data-cy="quizTypeSelector"
+            :isRequire="true"
+            :disabled="isEdit"
+            :options="['Quiz', 'Survey']" />
+          <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
+      </div>
 
       <markdown-editor
           id="quizDescription"

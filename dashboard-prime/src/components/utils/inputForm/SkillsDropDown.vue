@@ -27,16 +27,19 @@ const props = defineProps({
     default: false
   },
 })
+defineOptions({
+  inheritAttrs: false
+})
 const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
-  <div class="field text-left">
+  <div class="field text-left mb-0">
     <label :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
     <Dropdown v-model="value"
               :options="options"
               class="w-full"
-              :data-cy="name"
+              :data-cy="$attrs['data-cy']"
               :autofocus="autofocus"
               :id="name"
               :disabled="disabled"

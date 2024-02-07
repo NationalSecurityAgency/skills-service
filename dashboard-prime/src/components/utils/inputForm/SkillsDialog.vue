@@ -27,6 +27,10 @@ const props = defineProps({
     default: 'warning'
   },
   okButtonDisabled: Boolean,
+  showOkButton: {
+    type: Boolean,
+    default: true,
+  },
   enableReturnFocus: {
     type: Boolean,
     default: false
@@ -87,6 +91,7 @@ defineExpose({
           @click="onCancel"
           data-cy="closeDialogBtn" />
         <SkillsButton
+          v-if="showOkButton"
           :label="okButtonLabel"
           :icon="okButtonIcon"
           :severity="okButtonSeverity"

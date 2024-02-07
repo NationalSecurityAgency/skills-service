@@ -68,6 +68,7 @@ const close =() => {
       :ok-button-icon="'fas fa-trash'"
       ok-button-label="Yes, Do Remove!"
       :ok-button-disabled="removeDisabled"
+      :show-ok-button="!removalNotAvailable"
       @on-ok="removeAction"
       @on-cancel="publishHidden"
       :enable-return-focus="true"
@@ -75,7 +76,7 @@ const close =() => {
     <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
     <div v-if="!loading" class="px-2">
       <div data-cy="removalSafetyCheckMsg">
-        <div>
+        <div v-if="!removalNotAvailable">
           This will remove <span
           class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
         </div>

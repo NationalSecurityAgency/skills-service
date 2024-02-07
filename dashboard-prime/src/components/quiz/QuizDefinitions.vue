@@ -309,7 +309,7 @@ defineExpose({
     <removal-validation
       v-if="deleteQuizInfo.showDialog"
       :item-name="deleteQuizInfo.quizDef.name"
-      item-type="quiz/survey"
+      :item-type="deleteQuizInfo.quizDef.type"
       v-model="deleteQuizInfo.showDialog"
       :loading="deleteQuizInfo.loadingDeleteCheck"
       :removal-not-available="deleteQuizInfo.disableDelete"
