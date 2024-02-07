@@ -39,7 +39,7 @@ export const useAppConfig = () => {
     formFieldDebounceInMs,
     paragraphValidationRegex,
     maxSubjectNameLength,
-    maxCustomLabelLength
+    maxCustomLabelLength,
     maxSkillVersion
   }
 }
