@@ -47,9 +47,7 @@ const navItems = computed(() => {
   return items;
 });
 
-const headerOptions = shallowRef({})
-
-const buildHeaderOptions = () => {
+const headerOptions = computed(() => {
   const subject = subjectState.subject
   return {
     icon: 'fas fa-cubes skills-color-subjects',
@@ -86,7 +84,7 @@ const buildHeaderOptions = () => {
       }],
     }],
   };
-};
+});
 
 const minimumPoints = computed(() => {
   return store.getters.config.minimumSubjectPoints;
@@ -102,12 +100,8 @@ const loadSubject = () => {
   if (route.params.subject) {
     // store.dispatch('subjects/setSubject', route.params.subject);
     subjectState.setSubject(route.params.subject)
-    headerOptions.value = buildHeaderOptions()
   } else {
-    subjectState.loadSubjectDetailsState({ projectId: projectId.value, subjectId: subjectId.value })
-      .finally(() => {
-      headerOptions.value = buildHeaderOptions()
-    });
+    subjectState.loadSubjectDetailsState(projectId.value, subjectId.value);
   }
 };
 

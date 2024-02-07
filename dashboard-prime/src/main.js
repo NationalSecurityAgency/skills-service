@@ -27,6 +27,7 @@ import BlockUI from 'primevue/blockui';
 import SelectButton from 'primevue/selectbutton';
 import Badge from 'primevue/badge';
 import MultiSelect from 'primevue/multiselect'
+import Tag from 'primevue/tag';
 import BadgeDirective from 'primevue/badgedirective';
 
 
@@ -72,6 +73,7 @@ app.component('SelectButton', SelectButton)
 app.component('Badge', Badge)
 app.component('SkillsSpinner', SkillsSpinner)
 app.component('MultiSelect', MultiSelect)
+app.component('Tag', Tag)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

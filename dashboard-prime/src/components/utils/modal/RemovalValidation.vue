@@ -80,7 +80,7 @@ const close =() => {
           class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
         </div>
         <Message severity="warn" :closable="false">
-          <slot />
+          <div class="pl-2"><slot /></div>
         </Message>
       </div>
 

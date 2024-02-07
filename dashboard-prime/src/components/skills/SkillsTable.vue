@@ -1,5 +1,6 @@
 <script setup>
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useRoute } from 'vue-router'
 import { computed, ref } from 'vue'
 import { FilterMatchMode } from 'primevue/api'
@@ -14,10 +15,11 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue'
 import SelfReportTableCell from '@/components/skills/skillsTableCells/SelfReportTableCell.vue'
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
+import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.vue'
 
 const skillsState = useSubjectSkillsState()
+const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -167,6 +169,7 @@ const doDeleteSkill = () => {
       skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
         .then(() => {
           options.value.busy = false;
+          subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
           announcer.polite(`Removed ${skill.name} skill`)
         })
     })
@@ -458,14 +461,11 @@ const skillsTable = ref(null)
       </template>
     </DataTable>
 
-    <removal-validation
+    <skill-removal-validation
       v-if="deleteSkillInfo.show"
       v-model="deleteSkillInfo.show"
-      :item-name="deleteSkillInfo.skill.name"
-      item-type="project"
-      @do-remove="doDeleteSkill">
-      Deletion <b>cannot</b> be undone
-    </removal-validation>
+      :skill="deleteSkillInfo.skill"
+      @do-remove="doDeleteSkill" />
   </div>
 </template>
 

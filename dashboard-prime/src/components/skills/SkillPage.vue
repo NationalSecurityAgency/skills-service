@@ -100,10 +100,7 @@ const loadData = () => {
       isLoadingData.value = false;
       navItems.value = buildNavItems()
     } else {
-      subjectState.loadSubjectDetailsState({
-        projectId,
-        subjectId,
-      }).then(() => {
+      subjectState.loadSubjectDetailsState(projectId, subjectId).then(() => {
         // subject = store.getters["subjects/subject"];
         isLoadingData.value = false;
         navItems.value = buildNavItems()

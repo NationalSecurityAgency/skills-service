@@ -6,10 +6,10 @@ export const useSubjectsState = defineStore('subjectsState', () => {
   const subject = ref({})
   const isLoadingSubject = ref(false)
 
-  function loadSubjectDetailsState(payload) {
+  function loadSubjectDetailsState(projectId, subjectId) {
     isLoadingSubject.value = true
     return new Promise((resolve, reject) => {
-      SubjectsService.getSubjectDetails(payload.projectId, payload.subjectId)
+      SubjectsService.getSubjectDetails(projectId, subjectId)
         .then((response) => {
           subject.value = response
           resolve(response)

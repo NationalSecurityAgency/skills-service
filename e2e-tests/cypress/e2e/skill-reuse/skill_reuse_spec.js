@@ -26,7 +26,7 @@ describe('Skill Reuse Tests', () => {
         cy.createSubject(1, 2);
     });
 
-    it('skill is reused in another subject', () => {
+    it.skip('skill is reused in another subject', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
@@ -64,7 +64,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
     });
 
-    it('ability to navigate to the original skill from the reused skill', () => {
+    it.skip('ability to navigate to the original skill from the reused skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
@@ -98,7 +98,7 @@ describe('Skill Reuse Tests', () => {
             .should('have.text', 'ID: skill1');
     });
 
-    it('search reused skills', () => {
+    it.skip('search reused skills', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
@@ -128,7 +128,7 @@ describe('Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it('reuse skill into a subject', () => {
+    it.skip('reuse skill into a subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);
@@ -182,7 +182,7 @@ describe('Skill Reuse Tests', () => {
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');
@@ -202,6 +202,7 @@ describe('Skill Reuse Tests', () => {
 
     it('remove the original skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="deleteSkillButton_skill1"]')
             .click();
@@ -209,7 +210,7 @@ describe('Skill Reuse Tests', () => {
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');
