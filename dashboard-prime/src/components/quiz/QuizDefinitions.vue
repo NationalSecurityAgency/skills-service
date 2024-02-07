@@ -18,9 +18,7 @@ import {ref, onMounted, computed, nextTick} from 'vue'
 import QuizService from "@/components/quiz/QuizService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
-import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import Badge from 'primevue/badge';
 import { FilterMatchMode } from 'primevue/api';
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -80,6 +78,8 @@ const editQuizInfo = ref({
       quizDef: {},
 });
 
+const totalRows = ref(0)
+
 const hasData = computed(() => {
   return quizzes.value && quizzes.value.length > 0;
 });
@@ -94,6 +94,7 @@ function loadData() {
       .then((res) => {
         quizzes.value = res.map((q) => ({ ...q }));
         options.value.pagination.totalRows = quizzes.value.length;
+        totalRows.value = quizzes.value.length;
       })
       .finally(() => {
         options.value.busy = false;
@@ -107,7 +108,10 @@ const filters = ref({
 
 const clearFilter = () => {
   filters.value.global.value = null
-};
+}
+const onFilter = (filterEvent) => {
+  totalRows.value = filterEvent.filteredValue.length
+}
 function updateQuizDef(quizDef) {
   if (!hasData) {
     loading.value = true;
@@ -188,7 +192,8 @@ defineExpose({
                  data-cy="quizDefinitionsTable"
                  stateStorage="local" stateKey="quizDefinitionsTable"
                  v-model:filters="filters"
-                 :globalFilterFields="['name', 'type']"
+                 :globalFilterFields="['name']"
+                 @filter="onFilter"
                  :sort-field="options.sortBy"
                  :sort-order="options.sortDesc ? -1 : 1"
                  paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
@@ -198,7 +203,10 @@ defineExpose({
           <div class="flex gap-1">
             <span class="p-input-icon-left flex flex-grow-1">
               <i class="pi pi-search"/>
-              <InputText class="flex flex-grow-1" v-model="filters['global'].value" placeholder="Quiz/Survey Search"/>
+              <InputText class="flex flex-grow-1"
+                         v-model="filters['global'].value"
+                         data-cy="quizNameFilter"
+                         placeholder="Quiz/Survey Search"/>
             </span>
             <SkillsButton class="flex flex-grow-none"
                           label="Reset"
@@ -208,6 +216,10 @@ defineExpose({
                           aria-label="Reset surveys and quizzes filter"
                           data-cy="quizResetBtn"/>
           </div>
+        </template>
+
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
         </template>
 
         <template #empty>
@@ -304,7 +316,7 @@ defineExpose({
       :enable-return-focus="true"
       @do-remove="deleteQuiz">
         <div v-if="deleteQuizInfo.disableDelete">
-          Cannot remove the quiz since it is currently assigned to <Badge>{{ deleteQuizInfo.numSkillsAssignedTo }}</Badge> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
+          Cannot remove the quiz since it is currently assigned to <Tag>{{ deleteQuizInfo.numSkillsAssignedTo }}</Tag> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
         </div>
         <div v-if="!deleteQuizInfo.disableDelete">
             Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions

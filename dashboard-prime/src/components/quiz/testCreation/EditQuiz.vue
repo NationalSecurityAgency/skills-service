@@ -23,7 +23,7 @@ const emit = defineEmits(['quiz-saved'])
 const loadingComponent = ref(false)
 
 const modalTitle = computed(() => {
-  return props.isEdit ? 'Editing Existing Quiz' : 'New Quiz'
+  return props.isEdit ? 'Editing Existing Quiz/Survey' : 'New Quiz/Survey'
 })
 const modalId = props.isEdit ? `ediQuizDialog${props.quiz.quizId}` : 'newQuizDialog'
 const appConfig = useAppConfig()
@@ -58,36 +58,36 @@ const customQuizDescriptionValidator = useDebounceFn((value, context) => {
       return true
     }
     if (result.msg) {
-      return context.createError({ message: result.msg })
+      return context.createError({ message: `Quiz/Survey Description - ${result.msg}` })
     }
-    return context.createError({ message: 'Field is invalid' })
+    return context.createError({ message: 'Quiz/Survey Description is invalid' })
   })
 }, appConfig.formFieldDebounceInMs)
 
 const schema = object({
-  'name': string()
+  'quizName': string()
       .trim()
       .required()
       .min(appConfig.minNameLength)
       .max(appConfig.maxQuizNameLength)
       .nullValueNotAllowed()
-      .test('uniqueName', 'Quiz Name already exist', (value) => checkQuizNameUnique(value))
+      .test('uniqueName', 'The value for the Quiz/Survey Name is already taken', (value) => checkQuizNameUnique(value))
       .customNameValidator()
-      .label('Quiz Name'),
+      .label('Quiz/Survey Name'),
   'quizId': string()
       .required()
       .min(appConfig.minIdLength)
       .max(appConfig.maxIdLength)
       .nullValueNotAllowed()
-      .test('uniqueId', 'Quiz ID already exist', (value) => checkQuizIdUnique(value))
-      .label('Quiz Id'),
+      .test('uniqueId', 'The value for the Quiz/Survey ID is already taken', (value) => checkQuizIdUnique(value))
+      .label('Quiz/Survey ID'),
   'type': string()
       .required()
       .nullValueNotAllowed()
       .label('Type'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
-      .label('Quiz Description')
+      .label('Description')
       .test('customQuizDescriptionValidator', (value, context) => customQuizDescriptionValidator(value, context))
 })
 const loadDescription = () => {
@@ -99,13 +99,14 @@ const asyncLoadData = props.isEdit ? loadDescription : null
 const initialQuizData = {
   originalQuizId: props.quiz.quizId,
   ...props.quiz,
+  quizName: props.quiz.name,
 }
 const close = () => { model.value = false }
 
 const onSubmit = (values) => {
   const quizToSave = {
     ...values,
-    name: InputSanitizer.sanitize(values.name),
+    name: InputSanitizer.sanitize(values.quizName),
     quizId: InputSanitizer.sanitize(values.quizId),
   }
   emit('quiz-saved', quizToSave)
@@ -128,21 +129,25 @@ const onSubmit = (values) => {
     <template #default>
       <SkillsNameAndIdInput
           name-label="Name"
-          name-field-name="name"
+          name-field-name="quizName"
           id-label="Quiz/Survey ID"
           id-field-name="quizId"
-          :name-to-id-sync-enabled="!props.isEdit"
+          :name-to-id-sync-enabled="!isEdit"
           @keydown-enter="onSubmit" />
 
       <SkillsDropDown
           label="Type"
           name="type"
+          data-cy="quizTypeSelector"
           :isRequire="true"
           :disabled="isEdit"
           :options="['Quiz', 'Survey']" />
         <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
 
       <markdown-editor
+          id="quizDescription"
+          :quiz-id="isEdit ? quiz.quizId : null"
+          data-cy="quizDescription"
           class="mt-5"
           name="description" />
 

@@ -20,24 +20,24 @@ dayjs.extend(utcPlugin);
 
 describe('Quiz CRUD Tests', () => {
 
-    const quizTableSelector = '[data-cy="quizDeffinitionsTable"]';
+    const quizTableSelector = '[data-cy="quizDefinitionsTable"]';
     beforeEach(() => {
 
     });
 
-    it('create a quiz and a survey', function () {
+    it.only('create a quiz and a survey', function () {
         cy.visit('/administrator/quizzes/')
         cy.get('[data-cy="noQuizzesYet"]')
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
         cy.get('[data-cy="quizName"]').type('My First Quiz')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
 
         cy.get('[data-cy="quizDescription"]').type('Some cool Description')
 
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
         cy.validateTable(quizTableSelector, [
@@ -52,8 +52,10 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
         cy.get('[data-cy="quizName"]').type('My First Survey')
-        cy.get('[data-cy="quizTypeSelector"]').select('Survey')
-        cy.get('[data-cy="saveQuizButton"]').click()
+        // cy.get('[data-cy="quizTypeSelector"]').select('Survey')
+        cy.get('[data-cy="quizTypeSelector"]').click()
+        cy.get('div.p-dropdown-panel').find('ul li').contains('Survey').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
         cy.validateTable(quizTableSelector, [
@@ -94,123 +96,123 @@ describe('Quiz CRUD Tests', () => {
         ], 5);
     });
 
-    it('Quiz Modal Validation: Name', function () {
+    it.only('Quiz Modal Validation: Name', function () {
         cy.createSurveyDef(1, { name: 'Already Exist' });
 
         cy.visit('/administrator/quizzes/')
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         // name is not taken
         cy.get('[data-cy="quizName"]').type('Already Exist')
-        cy.get('[data-cy="quizNameError"]').contains('The value for the Quiz Name is already taken')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="quizNameError"]').contains('The value for the Quiz/Survey Name is already taken')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         // min 3 chars
         cy.get('[data-cy="quizName"]').clear().type('ab')
-        cy.get('[data-cy="quizNameError"]').contains('Quiz Name cannot be less than 3 characters')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="quizNameError"]').contains('Quiz/Survey Name must be at least 3 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="quizName"]').type('c')
-        cy.get('[data-cy="quizNameError"]').should('not.be.visible')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="quizNameError"]').invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // max 75 chars
         const longName = new Array(75).join('A');
         cy.get('[data-cy="quizName"]').clear().fill(longName)
         cy.get('[data-cy="quizName"]').type('AA')
-        cy.get('[data-cy="quizNameError"]').contains('Quiz Name cannot exceed 75 characters')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="quizNameError"]').contains('Quiz/Survey Name must be at most 75 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="quizName"]').type('{backspace}')
-        cy.get('[data-cy="quizNameError"]').should('not.be.visible')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="quizNameError"]').invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // required field
         cy.get('[data-cy="quizName"]').clear()
-        cy.get('[data-cy="quizNameError"]').contains('Quiz Name is required')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="quizNameError"]').contains('Quiz/Survey Name is a required field')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         
         // custom validators
         cy.get('[data-cy="quizName"]')
           .type('{selectall}(A) Updated Quiz/Survey Name');
         cy.get('[data-cy="quizNameError"]')
-          .contains('Quiz Name - names may not contain (A)');
-        cy.get('[data-cy="saveQuizButton"]')
+          .contains('names may not contain (A)');
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.disabled');
 
         cy.get('[data-cy="quizName"]')
           .type('{selectall}(B) A Updated Quiz/Survey Name');
         cy.get('[data-cy="quizNameError"]')
-          .should('not.be.visible');
-        cy.get('[data-cy="saveQuizButton"]')
+          .invoke('text').invoke('trim').should('equal', '');
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled');
     });
 
-    it('Quiz Modal Validation: Quiz Id', function () {
+    it.only('Quiz Modal Validation: Quiz Id', function () {
         cy.createSurveyDef(1);
 
         cy.visit('/administrator/quizzes/')
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="quizName"]').type('Good')
-        cy.get('[data-cy="quizNameError"]').should('not.be.visible')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="quizNameError"]').invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // id is not taken
         cy.get('[data-cy="enableIdInput"]').click({force: true})
-        cy.get('[data-cy="idError"]').should('not.be.visible')
+        cy.get('[data-cy="idError"]').invoke('text').invoke('trim').should('equal', '')
         cy.get('[data-cy="idInputValue"]').clear().type('quiz1');
         cy.get('[data-cy="idError"]').contains('The value for the Quiz/Survey ID is already taken')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         // at least 3 chars
         cy.get('[data-cy="idInputValue"]').clear().type('ab');
-        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID cannot be less than 3 characters')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID must be at least 3 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="idInputValue"]').type('c');
-        cy.get('[data-cy="idError"]').should('not.be.visible')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="idError"]').invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // no more than 100 chars
         const longId = new Array(100).join('A');
         cy.get('[data-cy="idInputValue"]').clear().fill(longId);
         cy.get('[data-cy="idInputValue"]').type('bb');
-        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID cannot exceed 100 characters')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID must be at most 100 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         // required field
         cy.get('[data-cy="idInputValue"]').clear()
-        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID is required')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="idError"]').contains('Quiz/Survey ID is a required field')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
 
-    it('Quiz Modal Validation: description', function () {
+    it.only('Quiz Modal Validation: description', function () {
         cy.createSurveyDef(1);
 
         cy.visit('/administrator/quizzes/')
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="quizName"]').type('Good')
-        cy.get('[data-cy="quizNameError"]').should('not.be.visible')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="quizNameError"]').invoke('text').invoke('trim').should('equal', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // custom description validation
         cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="quizDescription"]').type('a jabberwocky b');
-        cy.get('[data-cy="quizDescriptionError"]').contains('Quiz/Survey Description - paragraphs may not contain jabberwocky')
-        cy.get('[data-cy="saveQuizButton"]').should('be.disabled')
+        cy.get('[data-cy="descriptionError"]').contains('Quiz/Survey Description - paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
     });
 
-    it('quiz name search / filtering', function () {
+    it.only('quiz name search / filtering', function () {
         cy.createSurveyDef(1, { name: 'a Quiz 1' });
         cy.createQuizDef(2, { name: 'b Survey 1' });
         cy.createSurveyDef(3, { name: 'c Quiz 2' });
@@ -226,14 +228,14 @@ describe('Quiz CRUD Tests', () => {
             .contains('Name')
             .click();
 
-        cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 6)
+        cy.get(`${quizTableSelector}`).find('[data-cy="skillsBTableTotalRows"]').should('have.text', 6)
         cy.get('[data-cy="quizNameFilter"]').type('3')
-        cy.get('[data-cy="quizFilterBtn"]').click();
+        // cy.get('[data-cy="quizFilterBtn"]').click();
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 2)
 
-        cy.get(`${quizTableSelector} [aria-rowindex="1"] [data-cy="managesQuizLink_quiz5"]`)
-        cy.get(`${quizTableSelector} [aria-rowindex="2"] [data-cy="managesQuizLink_quiz6"]`)
-        cy.get(`${quizTableSelector} [aria-rowindex="3"]`).should('not.exist')
+        cy.get(`${quizTableSelector} [data-p-index="0"] [data-cy="managesQuizLink_quiz5"]`)
+        cy.get(`${quizTableSelector} [data-p-index="1"] [data-cy="managesQuizLink_quiz6"]`)
+        cy.get(`${quizTableSelector} [data-p-index="3"]`).should('not.exist')
 
         cy.get('[data-cy="quizResetBtn"]').click()
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 6)
@@ -242,10 +244,10 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 3)
 
-        cy.get(`${quizTableSelector} [aria-rowindex="1"] [data-cy="managesQuizLink_quiz2"]`)
-        cy.get(`${quizTableSelector} [aria-rowindex="2"] [data-cy="managesQuizLink_quiz4"]`)
-        cy.get(`${quizTableSelector} [aria-rowindex="3"] [data-cy="managesQuizLink_quiz6"]`)
-        cy.get(`${quizTableSelector} [aria-rowindex="4"]`).should('not.exist')
+        cy.get(`${quizTableSelector} [data-p-index="0"] [data-cy="managesQuizLink_quiz2"]`)
+        cy.get(`${quizTableSelector} [data-p-index="1"] [data-cy="managesQuizLink_quiz4"]`)
+        cy.get(`${quizTableSelector} [data-p-index="2"] [data-cy="managesQuizLink_quiz6"]`)
+        cy.get(`${quizTableSelector} [data-p-index="3"]`).should('not.exist')
 
         cy.get('[data-cy="quizNameFilter"]').type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{enter}')
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 6)
@@ -266,10 +268,10 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizName"]').type('A')
         cy.get('[data-cy="quizDescription"]').type('A')
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
-        cy.get(`${quizTableSelector} [aria-rowindex="1"]`).contains('This is quiz 1A')
+        cy.get(`${quizTableSelector} [data-p-index="1"]`).contains('This is quiz 1A')
         cy.get('[data-cy="editQuizButton_quiz1"]').should('have.focus')
 
         cy.visit('/administrator/quizzes/')
@@ -299,7 +301,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="idInputValue"]').type('A');
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="managesQuizLink_quiz2"]').should('not.exist')
@@ -329,7 +331,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizName"]').type('A')
         cy.get('[data-cy="quizDescription"]').type('A')
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="pageHeader"]').contains('This is quiz 1A')
@@ -358,7 +360,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="enableIdInput"]').click({force: true})
         cy.get('[data-cy="idInputValue"]').type('A');
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="pageHeader"]').contains('This is quiz 1')
@@ -385,7 +387,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').type(providedName, { delay: 100 })
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
 
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         // id is not derived from name during edit
@@ -467,13 +469,13 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="noQuizzesYet"]')
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
         cy.get('[data-cy="closeQuizButton"]').click()
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
 
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.modal-title').contains('New Quiz/Survey')
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
 
         cy.get('.modal-header [aria-label="Close"]').click()
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
@@ -494,7 +496,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
         cy.get('button.quote').click({force: true})
-        cy.get('[data-cy="saveQuizButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.visit('/administrator/quizzes/quiz1')
         cy.get('[data-cy="editQuizButton"]').click()
