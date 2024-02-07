@@ -6,6 +6,7 @@ import { useRoute } from 'vue-router'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
+import EditSkill from '@/components/skills/EditSkill.vue'
 
 
 const projConfig = useProjConfig()
@@ -38,17 +39,24 @@ onMounted(() => {
   skillState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
 })
 
+const newSkillInfo = ref({
+  skill: {},
+  show: false,
+  isEdit: false,
+  isCopy: false,
+  version: 1
+})
 const newSkill = () => {
-  // this.editSkillInfo = {
-  //   skill: {
-  //     projectId: this.projectId,
-  //     subjectId: this.subject.subjectId,
-  //     type: 'Skill',
-  //   },
-  //   show: true,
-  //   isEdit: false,
-  //   isCopy: false,
-  // };
+  newSkillInfo.value = {
+    skill: {
+      projectId: route.params.projectId,
+      subjectId: route.params.subjectId,
+      type: 'Skill',
+    },
+    show: true,
+    isEdit: false,
+    isCopy: false,
+  };
 }
 
 </script>
@@ -105,6 +113,7 @@ const newSkill = () => {
           data-cy="newSkillButton"
           outlined
           class="bg-primary-reverse ml-1"
+          :track-for-focus="true"
           :aria-disabled="addSkillDisabled"
           :disabled="addSkillDisabled" />
       </div>
@@ -128,6 +137,11 @@ const newSkill = () => {
       </template>
     </Card>
 
+    <edit-skill
+      v-if="newSkillInfo.show"
+      v-model="newSkillInfo.show"
+      :skill="newSkillInfo.skill"
+    />
   </div>
 </template>
 

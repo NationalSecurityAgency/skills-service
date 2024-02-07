@@ -10,6 +10,7 @@ import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatt
 import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import DataTable from 'primevue/datatable'
+import EditSkill from '@/components/skills/EditSkill.vue'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -25,7 +26,7 @@ const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const subjectId = computed(() => {
-  return route.params.subjectId;
+  return route.params.subjectId
 })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
@@ -144,8 +145,25 @@ const onColumnSort = () => {
 
 const addSkillDisabled = ref(false)
 
-const editSkill = (skillToEdit) => {
-
+const editSkillInfo = ref({ skill: {}, show: false, isEdit: false })
+const editGroupInfo = ref({ group: {}, show: false, isEdit: false })
+const editImportedSkillInfo = ref({ skill: {}, show: false })
+const editSkill = (itemToEdit) => {
+  // this.currentlyFocusedSkillId = itemToEdit.skillId;
+  if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
+    editImportedSkillInfo.value = {
+      show: true,
+      skill: itemToEdit
+    }
+  } else if (itemToEdit.isGroupType) {
+    editGroupInfo.value = {
+      isEdit: true,
+      show: true,
+      group: itemToEdit
+    }
+  } else {
+    editSkillInfo.value = { skill: itemToEdit, show: true, isEdit: true }
+  }
 }
 const copySkill = (skillToCopy) => {
 
@@ -155,20 +173,20 @@ const copySkill = (skillToCopy) => {
 const deleteButtonsDisabled = ref(false)
 const deleteSkillInfo = ref({
   show: false,
-  skill: {},
+  skill: {}
 })
 const deleteSkill = (skillToDelete) => {
   deleteSkillInfo.value.skill = skillToDelete
   deleteSkillInfo.value.show = true
 }
 const doDeleteSkill = () => {
-  options.value.busy = true;
+  options.value.busy = true
   const skill = deleteSkillInfo.value.skill
   SkillsService.deleteSkill(skill)
     .then(() => {
       skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
         .then(() => {
-          options.value.busy = false;
+          options.value.busy = false
           subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
           announcer.polite(`Removed ${skill.name} skill`)
         })
@@ -271,7 +289,7 @@ const skillsTable = ref(null)
                 optionLabel="label"
                 @update:modelValue="onToggle"
                 placeholder="Optional Fields"
-                data-cy="skillsTable-additionalColumns"/>
+                data-cy="skillsTable-additionalColumns" />
             </div>
             <div class="align-items-center flex">
               <label for="sortEnabledSwitch" class="ml-3 mr-1">Reorder:</label>
@@ -338,6 +356,7 @@ const skillsTable = ref(null)
 
                 <div v-if="!projConfig.isReadOnlyProj" class="p-buttonset ml-2">
                   <SkillsButton
+                    :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
                     icon="fas fa-edit"
                     @click="editSkill(slotProps.data)"
@@ -349,6 +368,7 @@ const skillsTable = ref(null)
                     :ref="`edit_${slotProps.data.skillId}`"
                     title="Edit Skill" />
                   <SkillsButton
+                    :id="`copySkillButton_${slotProps.data.skillId}`"
                     v-if="slotProps.data.type === 'Skill' && !slotProps.data.isCatalogImportedSkills"
                     icon="fas fa-copy"
                     @click="copySkill(slotProps.data)"
@@ -414,10 +434,10 @@ const skillsTable = ref(null)
           <div v-else-if="slotProps.field === 'timeWindow'">
             <div v-if="slotProps.data.isSkillType">
               <div class="text-lg">
-              {{ timeWindowFormatter.timeWindowTitle(slotProps.data) }}
+                {{ timeWindowFormatter.timeWindowTitle(slotProps.data) }}
               </div>
               <div class="text-sm mt-1">
-                {{timeWindowFormatter.timeWindowDescription(slotProps.data)}}
+                {{ timeWindowFormatter.timeWindowDescription(slotProps.data) }}
               </div>
             </div>
             <div v-if="slotProps.data.isGroupType" class="text-secondary">
@@ -447,7 +467,8 @@ const skillsTable = ref(null)
 
       <template #empty>
         <div class="flex justify-content-center flex-wrap">
-          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
+             aria-hidden="true"></i>
           <span class="flex align-items-center justify-content-center">No Skills Found.
             <SkillsButton class="flex flex align-items-center justify-content-center px-1"
                           label="Reset"
@@ -455,11 +476,20 @@ const skillsTable = ref(null)
                           size="small"
                           @click="clearFilter"
                           aria-label="Reset surveys and quizzes filter"
-                          data-cy="skillResetBtnNoFilterRes"/> to clear the existing filter.
+                          data-cy="skillResetBtnNoFilterRes" /> to clear the existing filter.
               </span>
         </div>
       </template>
     </DataTable>
+
+    <edit-skill
+      v-if="editSkillInfo.show"
+      v-model="editSkillInfo.show"
+      :skill="editSkillInfo.skill"
+    />
+
+    <!--    <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"-->
+    <!--                  @project-saved="projectAdded" @hidden="handleHide" :is-edit="newProject.isEdit"/>-->
 
     <skill-removal-validation
       v-if="deleteSkillInfo.show"

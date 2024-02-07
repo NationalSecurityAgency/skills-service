@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { useIsSubmitting } from 'vee-validate';
+import { useIsSubmitting } from 'vee-validate'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const props = defineProps({
@@ -27,16 +27,22 @@ const props = defineProps({
   nameToIdSyncEnabled: {
     type: Boolean,
     default: true
+  },
+  isInline: {
+    type: Boolean,
+    default: false
   }
 })
 const emit = defineEmits(['keydown-enter'])
 
 const canEditProjectId = ref(false)
+
 function updateCanEditProjectId(newVal) {
   canEditProjectId.value = newVal
 }
 
 const skillsIdInput = ref(null)
+
 function updateProjectId(projName) {
   if (props.nameToIdSyncEnabled && !canEditProjectId.value) {
     const newProjId = InputSanitizer.removeSpecialChars(projName)
@@ -44,27 +50,31 @@ function updateProjectId(projName) {
   }
 }
 
-const isSubmitting = useIsSubmitting();
+const isSubmitting = useIsSubmitting()
 </script>
 
 <template>
-  <div>
-    <SkillsTextInput
-      :label="nameLabel"
-      :is-required="true"
-      :disabled="disabled || isSubmitting"
-      :name="nameFieldName"
-      :autofocus="true"
-      @input="updateProjectId"
-      @keydown-enter="emit('keydown-enter')" />
-
-    <SkillsIdInput
-      ref="skillsIdInput"
-      :name="idFieldName"
-      :disabled="disabled || isSubmitting"
-      @can-edit="updateCanEditProjectId"
-      :label="idLabel"
-      @keydown-enter="emit('keydown-enter')" />
+  <div :class="{ 'flex' : isInline }">
+    <div :class="{ 'mr-1 flex-1' : isInline }">
+      <SkillsTextInput
+        class=""
+        :label="nameLabel"
+        :is-required="true"
+        :disabled="disabled || isSubmitting"
+        :name="nameFieldName"
+        :autofocus="true"
+        @input="updateProjectId"
+        @keydown-enter="emit('keydown-enter')" />
+    </div>
+    <div :class="{ 'ml-1' : isInline }">
+      <SkillsIdInput
+        ref="skillsIdInput"
+        :name="idFieldName"
+        :disabled="disabled || isSubmitting"
+        @can-edit="updateCanEditProjectId"
+        :label="idLabel"
+        @keydown-enter="emit('keydown-enter')" />
+    </div>
   </div>
 </template>
 

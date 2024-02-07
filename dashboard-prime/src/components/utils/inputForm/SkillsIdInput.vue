@@ -1,6 +1,9 @@
 <script setup>
 import { ref, inject } from 'vue'
 import { useField } from 'vee-validate'
+import InputGroup from 'primevue/inputgroup';
+import InputGroupAddon from 'primevue/inputgroupaddon';
+
 
 const props = defineProps({
   name: {
@@ -22,6 +25,12 @@ const canEdit = ref(false)
 
 function notifyAboutEditStateChange(newValue) {
   emit('can-edit', newValue)
+  // if (newValue) {
+  //   const element = document.getElementById('idInput');
+  //   if (element) {
+  //     element.focus()
+  //   }
+  // }
 }
 
 const { value, errorMessage } = useField(() => props.name)
@@ -43,33 +52,28 @@ defineExpose({
 
 <template>
   <div class="field">
-    <div class="flex mb-2">
-      <label for="idInput">* {{ label }}</label>
-      <div class="flex-1 text-right justify-content-center align-items-center" data-cy="idInputEnableControl">
-        <div class="flex justify-content-end align-items-center">
+    <label for="idInput">* {{ label }}</label>
+    <InputGroup>
+      <InputGroupAddon>
+        <div style="width: 3.3rem !important;">
           <InputSwitch
             v-model="canEdit"
-            :disabled="canEdit || disabled"
-            class="mr-1"
+            class=""
+            style="height:1rem !important;"
             size="small"
             name="Enable Id"
             aria-label="Enable ID input to override auto-generated value."
             data-cy="enableIdInput"
             @input="notifyAboutEditStateChange" />
-          <!--        <i class="fas fa-question-circle mr-1 text-xl"-->
-          <!--           id="idInputHelp"-->
-          <!--           aria-label="Enable ID input to override auto-generated value."-->
-          <!--           role="tooltip"-->
-          <!--           tabindex="0"-->
-          <!--           v-tooltip="'Enable to override auto-generated value.'" />-->
         </div>
-      </div>
-    </div>
+      </InputGroupAddon>
     <InputText
+      autofocus
       type="text"
       class="w-full"
       :class="{ 'surface-300': !canEdit, 'p-invalid': errorMessage }"
       id="idInput"
+      ref="idInput"
       v-model="value"
       @keydown.enter="onEnter"
       :disabled="!canEdit || disabled"
@@ -78,6 +82,8 @@ defineExpose({
       aria-errormessage="idError"
       aria-describedby="idError"
       data-cy="idInputValue" />
+
+    </InputGroup>
     <!--        @input="dataChanged"-->
     <small role="alert" class="p-error" data-cy="idError" id="idError">{{ errorMessage }}</small>
     <!--    </ValidationProvider>-->

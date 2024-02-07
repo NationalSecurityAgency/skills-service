@@ -27,6 +27,7 @@ import BlockUI from 'primevue/blockui';
 import SelectButton from 'primevue/selectbutton';
 import Badge from 'primevue/badge';
 import MultiSelect from 'primevue/multiselect'
+import InputNumber from 'primevue/inputnumber'
 import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
 import BadgeDirective from 'primevue/badgedirective';
@@ -40,6 +41,7 @@ import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -76,11 +78,13 @@ app.component('SkillsSpinner', SkillsSpinner)
 app.component('MultiSelect', MultiSelect)
 app.component('Tag', Tag)
 app.component('DataTable', DataTable)
+app.component('InputNumber', InputNumber)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)
 app.component('SkillsIdInput', SkillsIdInput)
 app.component('SkillsDialog', SkillsDialog)
+app.component('SkillsNumberInput', SkillsNumberInput)
 
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);
