@@ -97,23 +97,33 @@ const loadDescription = () => {
 }
 const asyncLoadData = props.isEdit ? loadDescription : null
 const initialQuizData = {
-  originalQuizId: props.quiz.quizId,
-  quizId: props.quiz.quizId,
-  quizName: props.quiz.name,
-  type: props.quiz.type,
-  // description: props.quiz.description || '',
+  quizId: props.quiz.quizId || '',
+  quizName: props.quiz.name || '',
+  type: props.quiz.type || '',
+  description: props.quiz.description || '',
 }
 const close = () => { model.value = false }
 
-const onSubmit = (values) => {
+const saveQuiz = (values) => {
   const quizToSave = {
     ...values,
+    originalQuizId: props.quiz.quizId,
     name: InputSanitizer.sanitize(values.quizName),
     quizId: InputSanitizer.sanitize(values.quizId),
   }
-  emit('quiz-saved', quizToSave)
+  return QuizService.updateQuizDef(quizToSave)
+    .then((updatedQuizDef) => {
+      return {
+        ...updatedQuizDef,
+        originalQuizId: props.quiz.quizId,
+      }
+    })
+}
+const onSavedQuiz = (savedQuiz) => {
+  emit('quiz-saved', savedQuiz)
   close()
 }
+
 </script>
 
 <template>
@@ -125,7 +135,8 @@ const onSubmit = (values) => {
       :validation-schema="schema"
       :initial-values="initialQuizData"
       :async-load-data-function="asyncLoadData"
-      @saved="onSubmit"
+      :save-data-function="saveQuiz"
+      @saved="onSavedQuiz"
       @close="close"
   >
     <template #default>
@@ -134,8 +145,7 @@ const onSubmit = (values) => {
           name-field-name="quizName"
           id-label="Quiz/Survey ID"
           id-field-name="quizId"
-          :name-to-id-sync-enabled="!isEdit"
-          @keydown-enter="onSubmit" />
+          :name-to-id-sync-enabled="!isEdit" />
 
       <div data-cy="quizTypeSection">
         <SkillsDropDown

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, provide } from 'vue'
 import { useStore } from 'vuex';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
@@ -18,29 +18,26 @@ onMounted(() => {
   loadProjects();
 })
 
-let isLoading = ref(false);
-let projects = ref([]);
-let newProject = ref({
+const isLoading = ref(false);
+const projects = ref([]);
+const newProject = ref({
   show: false,
   isEdit: false,
-  project: {
-    name: '',
-    projectId: '',
-  },
+  project: {},
 });
-let showSearchProjectModal = false;
-let sortOrder = {
+const showSearchProjectModal = false;
+const sortOrder = {
   loading: false,
   loadingProjectId: '-1',
 };
-let copyProgressModal = {
+const copyProgressModal = {
   show: false,
   isComplete: false,
   copiedProjectId: '',
 };
 
 const addProjectDisabled = computed(() => {
-  return projects && store.getters.config && projects.length >= store.getters.config.maxProjectsPerAdmin && !store.getters['access/isRoot'];
+  return projects.value && store.getters.config && projects.value.length >= store.getters.config.maxProjectsPerAdmin && !store.getters['access/isRoot'];
 });
 
 const addProjectsDisabledMsg = computed(() => {
@@ -55,15 +52,10 @@ const isRootUser = computed(() => {
 });
 
 const useTableView = computed(() => {
-  return projects && store.getters.config && projects.length >= store.getters.config.numProjectsForTableView;
+  return projects.value && store.getters.config && projects.value.length >= store.getters.config.numProjectsForTableView;
 });
 
 // Functions
-const handleHide = () => {
-  nextTick(() => {
-    this.$refs.newProjButton.focus();
-  });
-};
 const pinModalClosed = () => {
   showSearchProjectModal = false;
   loadProjects();
@@ -115,27 +107,24 @@ const loadProjectsAfterCopy = () => {
         focusOnProjectCard(copyProgressModal.copiedProjectId);
       });
 };
-const projectAdded = (project) => {
-  isLoading.value = true;
-  return ProjectService.saveProject(project)
-      .then(() => {
-        const loadProjectsInternal = () => {
-          SkillsReporter.reportSkill('CreateProject');
-          loadProjects()
-              .then(() => {
-                announcer.polite(`Project ${project.name} has been created`);
-              });
-        };
 
-        if (isRootUser.value) {
-          SettingsService.pinProject(project.projectId)
-              .then(() => {
-                loadProjectsInternal();
-              });
-        } else {
-          loadProjectsInternal();
-        }
-      });
+
+const openProjectModal = (project = {}, isEdit = false) => {
+  newProject.value.isEdit = isEdit
+  newProject.value.project = project
+  newProject.value.show = true;
+};
+provide('createOrUpdateProject', openProjectModal)
+
+const projectAdded = (project) => {
+  const existingIndex = projects.value.findIndex((item) => item.projectId === project.originalProjectId)
+  if (existingIndex >= 0) {
+    projects.value.splice(existingIndex, 1, project)
+  } else {
+    projects.value.push(project)
+    SkillsReporter.reportSkill('CreateProject');
+  }
+  announcer.polite(`Project ${project.name} has been created`);
 };
 const projectEdited = (editedProject) => {
   ProjectService.saveProject(editedProject).then(() => {

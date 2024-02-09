@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useField } from 'vee-validate'
-import { useIsSubmitting } from 'vee-validate';
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 
 import fontSize from 'tui-editor-plugin-font-size'
@@ -245,8 +244,6 @@ function attachFile(event) {
   }
 }
 
-const isSubmitting = useIsSubmitting();
-
 watch(value, (newValue) =>{
   if (newValue !== markdownText()) {
     setMarkdownText(newValue)
@@ -261,7 +258,7 @@ watch(value, (newValue) =>{
            class="mb-3"
            :class="`${labelClass}`"
            for="toastuiEditor" @click="focusOnMarkdownEditor">{{ label }}</label>
-    <BlockUI :blocked="disabled || isSubmitting">
+    <BlockUI :blocked="disabled">
       <toast-ui-editor id="toastuiEditor"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
                        class="markdown"

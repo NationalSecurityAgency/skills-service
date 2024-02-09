@@ -1,7 +1,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 
-const props = defineProps(['options']);
+const props = defineProps({
+  options:Object,
+  buttonIdSuffix: {
+    type: String,
+    required: true,
+  },
+})
 const emit = defineEmits(['edit', 'delete', 'share', 'unshare']);
 
 let isReadOnlyProj = false;
@@ -51,34 +57,42 @@ defineExpose({focusOnDelete, focusOnEdit});
 
     <div v-if="!isReadOnlyProj" class="col text-right">
       <span class="p-buttonset">
-        <SkillsButton v-if="options.showShare === true"
-                ref="shareBtn"
-                size="small"
-                label=""
-                :icon="shareBtnIcon"
-                @click="handleShareClick"
-                :title="shareTitle"></SkillsButton>
-        <SkillsButton ref="editBtn"
-                size="small"
-                @click="emit('edit')"
-                :title="`Edit ${options.type}`"
-                :aria-label="`Edit ${options.type} ${options.name}`"
-                role="button"
-                label=""
-                icon="fas fa-edit"
-                data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></SkillsButton>
+        <SkillsButton
+          v-if="options.showShare === true"
+          :id="`shareBtn${buttonIdSuffix}`"
+          ref="shareBtn"
+          size="small"
+          label=""
+          :icon="shareBtnIcon"
+          @click="handleShareClick"
+          :title="shareTitle" />
+        <SkillsButton
+          :id="`editBtn${buttonIdSuffix}`"
+          ref="editBtn"
+          icon="fas fa-edit"
+          size="small"
+          @click="emit('edit')"
+          :track-for-focus="true"
+          :title="`Edit ${options.type}`"
+          :aria-label="`Edit ${options.type} ${options.name}`"
+          role="button"
+          label=""
+          data-cy="editBtn" />
 
-          <SkillsButton variant="outline-primary"
-                  v-tooltip="options.deleteDisabledText"
-                  ref="deleteBtn"
-                  size="small"
-                  @click="emit('delete')"
-                  :disabled="options.isDeleteDisabled"
-                  :title="`Delete ${options.type}`"
-                  :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
-                  role="button"
-                  label="" icon="text-warning fas fa-trash"
-                  data-cy="deleteBtn"></SkillsButton>
+          <SkillsButton
+            :id="`deleteBtn${buttonIdSuffix}`"
+            variant="outline-primary"
+            v-tooltip="options.deleteDisabledText"
+            ref="deleteBtn"
+            size="small"
+            @click="emit('delete')"
+            :disabled="options.isDeleteDisabled"
+            :title="`Delete ${options.type}`"
+            :track-for-focus="true"
+            :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
+            role="button"
+            label="" icon="text-warning fas fa-trash"
+            data-cy="deleteBtn"></SkillsButton>
       </span>
     </div>
   </div>

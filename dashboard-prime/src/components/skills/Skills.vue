@@ -1,16 +1,20 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, provide } from 'vue'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useRoute } from 'vue-router'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
-
+import SkillsService from '@/components/skills/SkillsService.js'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const projConfig = useProjConfig()
 const route = useRoute()
+const skillsState = useSubjectSkillsState()
+const announcer = useSkillsAnnouncer()
 const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
   return false
@@ -34,9 +38,9 @@ const newGroup = () => {
   // };
 }
 
-const skillState = useSubjectSkillsState()
+
 onMounted(() => {
-  skillState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+  skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
 })
 
 const newSkillInfo = ref({
@@ -46,18 +50,46 @@ const newSkillInfo = ref({
   isCopy: false,
   version: 1
 })
-const newSkill = () => {
+const createOrUpdateSkill = (skill = {}, isEdit = false) => {
   newSkillInfo.value = {
-    skill: {
-      projectId: route.params.projectId,
-      subjectId: route.params.subjectId,
-      type: 'Skill',
-      version: 0
-    },
+    skill,
+    isEdit,
     show: true,
-    isEdit: false,
-    isCopy: false,
-  };
+    isCopy: false
+  }
+}
+provide('createOrUpdateSkill', createOrUpdateSkill)
+
+const reportSkills = (createdSkill) => {
+  if (createdSkill.pointIncrementInterval <= 0) {
+    SkillsReporter.reportSkill('CreateSkillDisabledTimeWindow')
+  }
+  if (createdSkill.numMaxOccurrencesIncrementInterval > 1) {
+    SkillsReporter.reportSkill('CreateSkillMaxOccurrencesWithinTimeWindow')
+  }
+  if (createdSkill.helpUrl) {
+    SkillsReporter.reportSkill('CreateSkillHelpUrl')
+  }
+}
+
+const skillCreatedOrUpdated = (skill) => {
+  const item1Index = skillsState.subjectSkills.findIndex((item) => item.skillId === skill.originalSkillId)
+  const createdSkill = ({
+    ...skill,
+    subjectId: route.params.subjectId
+  })
+  if (item1Index >= 0) {
+    skillsState.subjectSkills.splice(item1Index, 1, createdSkill)
+  } else {
+    skillsState.subjectSkills.push(createdSkill)
+    SkillsReporter.reportSkill('CreateSkill')
+  }
+  // attribute based skills should report on new or update operation
+  reportSkills(createdSkill)
+
+  const msg = skill.type === 'SkillGroup' ? `Group ${skill.name} has been saved` : `Skill ${skill.name} has been saved`
+  announcer.polite(msg)
+  return createdSkill
 }
 
 </script>
@@ -106,7 +138,7 @@ const newSkill = () => {
           ref="newSkillButton"
           label="Skill"
           icon="fas fa-plus-circle"
-          @click="newSkill"
+          @click="createOrUpdateSkill"
           variant="outline-primary"
           size="small"
           aria-label="new skill"
@@ -124,17 +156,15 @@ const newSkill = () => {
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <skills-spinner
-          v-if="skillState.loadingSubjectSkills"
-          :is-loading="skillState.loadingSubjectSkills"
-          class="py-8" />
-        <div v-if="!skillState.loadingSubjectSkills">
-          <skills-table v-if="skillState.hasSkills" />
-          <no-content2
-            v-if="!skillState.hasSkills"
-            title="No Skills Yet"
-            class="py-8"
-            message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework." />
-        </div>
+          v-if="skillsState.loadingSubjectSkills && !skillsState.hasSkills "
+          :is-loading="skillsState.loadingSubjectSkills"
+          extraClass="py-8 my-0 h-23rem" />
+        <skills-table v-if="skillsState.hasSkills" />
+        <no-content2
+          v-if="!skillsState.loadingSubjectSkills && !skillsState.hasSkills"
+          title="No Skills Yet"
+          class="py-8"
+          message="Projects are composed of Subjects which are made of Skills and a single skill defines a training unit within the gamification framework." />
       </template>
     </Card>
 
@@ -142,6 +172,8 @@ const newSkill = () => {
       v-if="newSkillInfo.show"
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
+      :is-edit="newSkillInfo.isEdit"
+      @skill-saved="skillCreatedOrUpdated"
     />
   </div>
 </template>

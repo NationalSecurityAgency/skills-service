@@ -2,7 +2,6 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
 import SkillsService from '@/components/skills/SkillsService.js'
-import dayjs from '@/common-components/DayJsCustomizer'
 
 export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   const subjectSkills = ref([])
@@ -18,7 +17,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   }
 
   const hasSkills = computed(() => {
-    return !loadingSubjectSkills.value && subjectSkills.value.length > 0
+    return subjectSkills.value.length > 0
   })
 
   function loadSubjectSkills(projectId, subjectId, updateLoadingFlag = true) {
@@ -30,11 +29,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
         .then((loadedSkills) => {
           const updatedSkills = loadedSkills.map((loadedSkill) => ({
             ...loadedSkill,
-            created: dayjs(loadedSkill.created),
             subjectId: route.params.subjectId,
-            isGroupType: loadedSkill.type === 'SkillsGroup',
-            isSkillType: loadedSkill.type === 'Skill',
-            selfReportingType: (loadedSkill.type === 'Skill' && !loadedSkill.selfReportingType) ? 'Disabled' : loadedSkill.selfReportingType,
           }))
           setSubjectSkills(updatedSkills)
           resolve(updatedSkills)
@@ -51,6 +46,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   return {
     subjectSkills,
     loadingSubjectSkills,
+    setLoadingSubjectSkills,
     loadSubjectSkills,
     hasSkills
   }

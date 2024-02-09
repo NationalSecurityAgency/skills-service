@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import axios from 'axios'
+import dayjs from '@/common-components/DayJsCustomizer'
 
 const enrichSkillObjWithRequiredAtts = (skill) => {
   const copy = { ...skill }
@@ -31,6 +32,26 @@ const enrichSkillObjWithRequiredAtts = (skill) => {
 }
 
 export default {
+  addMetaToSkillObj(skill) {
+    const isCatalogImportedSkills = skill.copiedFromProjectId !== null && skill.copiedFromProjectId !== undefined && skill.copiedFromProjectId !== '';
+    let catalogType = isCatalogImportedSkills ? 'imported' : null;
+    if (skill.sharedToCatalog) {
+      catalogType = 'exported';
+    }
+    const isCatalogSkill = isCatalogImportedSkills || skill.sharedToCatalog;
+
+    return this.enhanceWithTimeWindow({
+      ...skill,
+      isGroupType: skill.type === 'SkillsGroup',
+      isSkillType: skill.type === 'Skill',
+      created: dayjs(skill.created),
+      selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
+      subjectId: this.subjectId,
+      isCatalogSkill,
+      isCatalogImportedSkills,
+      catalogType,
+    });
+  },
   getSkillDetails(projectId, subjectId, skillId) {
     return axios
       .get(
@@ -39,7 +60,7 @@ export default {
       .then((response) => {
         const skill = response.data
         skill.subjectId = subjectId
-        return this.enhanceWithTimeWindow(skill)
+        return this.addMetaToSkillObj(skill)
       })
   },
   getSkillInfo(projectId, skillId) {
@@ -69,7 +90,7 @@ export default {
       .get(
         `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`
       )
-      .then((response) => response.data.map((item) => this.enhanceWithTimeWindow(item)))
+      .then((response) => response.data.map((item) => this.addMetaToSkillObj(item)))
   },
   getProjectSkills(
     projectId,

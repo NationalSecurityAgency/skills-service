@@ -27,12 +27,12 @@ const justificationRequired = ref(false)
 <template>
   <div class="flex">
     <div>
-      <Checkbox
+      <SkillsCheckboxInput
         @input="onEnabledChanged"
         :binary="true"
         v-model="enabled"
         inputId="selfReport"
-        name="selfReport"
+        name="selfReportEnabled"
         :value="true" />
       <label for="selfReport" class="ml-2"> Self Reporting </label>
     </div>
@@ -41,24 +41,24 @@ const justificationRequired = ref(false)
       <div class="flex flex-column gap-3">
         <div v-for="category in categories" :key="category.key" class="flex align-items-center">
 
-          <RadioButton v-model="selfReportType"
+          <SkillsRadioButtonInput v-model="selfReportType"
                        @update:modelValue="onTypeCanged"
                        :disabled="!enabled || category.disabled"
                        :inputId="category.key"
                        severity="info"
-                       name="Self Report Type"
+                       name="selfReportingType"
                        :value="category.key" />
           <label :for="category.key" class="ml-2">
             <span>{{ category.name }}</span>
             <span v-if="category.key === 'Approval'" class="ml-2">
               |
-               <Checkbox
+               <SkillsCheckboxInput
                  class="ml-2"
                  :binary="true"
                  :disabled="!enabled || selfReportType !== 'Approval'"
                  v-model="justificationRequired"
                  inputId="selfReportJustificationRequired"
-                 name="Self Report Justification Required"
+                 name="justificationRequired"
                  :value="true" />
                 <label for="selfReportJustificationRequired" class="ml-2 font-italic">Justification Required</label>
             </span>

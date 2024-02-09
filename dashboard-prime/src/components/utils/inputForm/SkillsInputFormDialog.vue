@@ -4,6 +4,7 @@ import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 
 const isLoadingAsyncData = ref(true)
@@ -25,7 +26,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  asyncLoadDataFunction: Function
+  asyncLoadDataFunction: Function,
+  saveDataFunction: {
+    type: Function,
+    required: true
+  }
 })
 const emit = defineEmits(['saved', 'cancelled'])
 
@@ -41,11 +46,17 @@ const skillsDialog = ref(null)
 const close = () => {
   skillsDialog.value.handleClose()
   model.value = false
-  inputFormResiliency.discard(false)
+  inputFormResiliency.stop()
 }
+const isSaving = ref(false)
 const onSubmit = handleSubmit(formValue => {
-  emit('saved', formValue)
-  close()
+  isSaving.value = true
+  props.saveDataFunction(formValue).then((res) => {
+    inputFormResiliency.stop()
+    emit('saved', res)
+    close()
+    isSaving.value = false
+  })
 })
 
 provide('doSubmitForm', onSubmit)
@@ -74,11 +85,12 @@ if (props.asyncLoadDataFunction) {
 }
 
 const validateIfNotEmpty = () => {
-  const foundNonEmpty = Object.entries(values).find(([key, value]) => value && props.initialValues[key] !== value);
+  const foundNonEmpty = Object.entries(values).find(([key, value]) => value && props.initialValues[key] !== value)
   if (foundNonEmpty) {
     validate()
   }
 }
+
 
 </script>
 
@@ -100,11 +112,37 @@ const validateIfNotEmpty = () => {
       v-if="inputFormResiliency.isRestoredFromStore"
       @discard-changes="inputFormResiliency.discard" />
 
+    <div class="loading-indicator" v-if="isSaving || isSubmitting">
+      <skills-spinner :is-loading="true"/>
+    </div>
 
     <slot></slot>
   </SkillsDialog>
 </template>
 
 <style scoped>
+.loading-indicator {
+  position: fixed;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: show;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
 
+/* Transparent Overlay */
+.loading-indicator:before {
+  content: '';
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(222, 217, 217, 0.53);
+}
 </style>

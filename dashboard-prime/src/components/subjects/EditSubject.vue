@@ -1,12 +1,14 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import {string} from "yup";
+import {useRoute} from 'vue-router'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import SubjectsService from '@/components/subjects/SubjectsService';
 import InputSanitizer from '@/components/utils/InputSanitizer';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue';
+import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
 import IconManager from '@/components/utils/iconPicker/IconManager.vue';
 
@@ -18,13 +20,12 @@ const props = defineProps({
 });
 const appConfig = useAppConfig()
 const emit = defineEmits(['hidden', 'subject-saved']);
-
-const subjectIdInput = ref(null)
+const route = useRoute()
 
 let formId = 'newSubjectDialog'
 let modalTitle = 'New Subject'
 if (props.isEdit) {
-  formId = `editSubjectDialog-${props.subject.projectId}-${props.subject.subjectId}`
+  formId = `editSubjectDialog-${route.params.projectId}-${props.subject.subjectId}`
   modalTitle = 'Editing Existing Subject'
 }
 
@@ -49,41 +50,8 @@ const title = computed(() => {
   return props.isEdit ? 'Editing Existing Subject' : 'New Subject';
 });
 
-const discardChanges = (reload = false) => {
-  if (reload) {
-    restoredFromStorage = false;
-    // loadComponent();
-  }
-};
-
 
 const close = () => { model.value = false }
-
-const updateSubject = (values) => {
-  console.log(values);
-  const subjToSave = {
-    ...values,
-    isEdit: props.isEdit,
-    name: InputSanitizer.sanitize(values.name),
-    subjectId: InputSanitizer.sanitize(values.subjectId)
-  }
-
-  emit('subject-saved', subjToSave);
-  close()
-};
-
-const updateSubjectId = (value) => {
-  if (!props.isEdit && canAutoGenerateId) {
-    let id = InputSanitizer.removeSpecialChars(value);
-    // Subjects, skills and badges can not have same id under a project
-    // by default append Subject to avoid id collision with other entities,
-    // user can always override in edit mode
-    if (id) {
-      id = `${id}Subject`;
-    }
-    subjectIdInput.value.updateIdValue(id);
-  }
-};
 
 const onSelectedIcon = (selectedIcon) => {
   console.log(selectedIcon);
@@ -99,14 +67,14 @@ const checkSubjectNameUnique = (value) => {
   if (value === props.subject.name) {
     return true;
   }
-  return SubjectsService.subjectWithNameExists(props.subject.projectId, value);
+  return SubjectsService.subjectWithNameExists(route.params.projectId, value);
 }
 
 const checkSubjectIdUnique = (value) => {
   if (value === props.subject.subjectId) {
     return true;
   }
-  return SubjectsService.subjectWithIdExists(props.subject.projectId, value);
+  return SubjectsService.subjectWithIdExists(route.params.projectId, value);
 }
 
 const validateHelpUrl = (value) => {
@@ -117,7 +85,7 @@ const validateHelpUrl = (value) => {
 }
 
 const schema = {
-  'name': string()
+  'subjectName': string()
       .trim()
       .required()
       .min(appConfig.minNameLength)
@@ -150,13 +118,34 @@ const schema = {
 };
 
 const initialSubjData = {
-  subjectId: props.subject.subjectId,
-  name: props.subject.name,
-  helpUrl: props.subject.helpUrl,
-  description: props.subject.description,
-  originalSubjectId: props.subject.subjectId,
-  ...props.subject,
+  projectId: route.params.projectId,
+  subjectId: props.subject.subjectId || '',
+  subjectName: props.subject.name || '',
+  helpUrl: props.subject.helpUrl || '',
+  description: props.subject.description || '',
+  iconClass: props.subject.iconClass || '',
 };
+
+const updateSubject = (values) => {
+  const subjToSave = {
+    ...values,
+    originalSubjectId: props.subject.subjectId,
+    projectId: route.params.projectId,
+    isEdit: props.isEdit,
+    name: InputSanitizer.sanitize(values.subjectName),
+    subjectId: InputSanitizer.sanitize(values.subjectId)
+  }
+  return SubjectsService.saveSubject(subjToSave).then((subjRes) => {
+    return {
+      ...subjRes,
+      originalSubjectId: props.subject.subjectId,
+    }
+  })
+};
+const onSubjecdtSaved = (subject) =>{
+  emit('subject-saved', subject);
+  close()
+}
 const asyncLoadData = () => { return; };
 
 </script>
@@ -169,7 +158,9 @@ const asyncLoadData = () => { return; };
       saveButtonLabel="Save"
       :validation-schema="schema"
       :initial-values="initialSubjData"
-      @saved="updateSubject"
+      :save-data-function="updateSubject"
+      :enable-return-focus="true"
+      @saved="onSubjecdtSaved"
       @close="close">
     <template #default>
 
@@ -177,8 +168,13 @@ const asyncLoadData = () => { return; };
         <icon-picker :startIcon="subject.iconClass" @select-icon="toggleIconDisplay(true)"
                      class="mr-3"></icon-picker>
 
-        <SkillsTextInput label="Subject Name" name="name" :is-required="true" :autofocus="true" @input="updateSubjectId" @keydown-enter="emit('keydown-enter')" data-cy="subjectNameInput" />
-        <SkillsIdInput ref="subjectIdInput" name="subjectId" @can-edit="canAutoGenerateId=!$event" label="Subject ID" @keydown-enter="emit('keydown-enter')" />
+        <SkillsNameAndIdInput
+          name-label="Subject Name"
+          name-field-name="subjectName"
+          id-label="Subject ID"
+          id-field-name="subjectId"
+          id-suffix="Subject"
+          :name-to-id-sync-enabled="!props.isEdit" />
 
         <markdown-editor class="mt-5" name="description" />
 <!--          <div class="mt-3">-->

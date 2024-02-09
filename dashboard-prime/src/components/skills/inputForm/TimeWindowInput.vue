@@ -17,12 +17,12 @@ const enabled = ref(false)
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
     <div class="flex align-items-center mb-2">
-      <Checkbox
+      <SkillsCheckboxInput
         class="mb-2"
         :binary="true"
         v-model="enabled"
         inputId="timeWindowEnabled"
-        name="Time Window"
+        name="timeWindowEnabled"
         :value="true" />
       <label for="timeWindowEnabled" class="ml-2 font-italic">Time Window Enabled</label>
     </div>
@@ -50,7 +50,7 @@ const enabled = ref(false)
         showButtons
         :disabled="!enabled"
         label="Window's Max Occurrences"
-        name="numPointIncrementMaxOccurrences" />
+        name="numMaxOccurrencesIncrementInterval" />
 
     </div>
   </Fieldset>

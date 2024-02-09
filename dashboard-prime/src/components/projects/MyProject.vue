@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed, ref, nextTick } from 'vue';
+import { onMounted, computed, ref, nextTick, inject } from 'vue'
 import { useStore } from 'vuex';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Badge from 'primevue/badge';
@@ -120,9 +120,7 @@ const doDeleteProject = () => {
         }
       });
 };
-const onEditProject = () => {
-  showEditProjectModal.value = true;
-};
+
 const copyProject = () => {
   copyProjectInfo.newProject = { userCommunity: props.project.userCommunity };
   copyProjectInfo.showModal = true;
@@ -133,19 +131,9 @@ const projectCopied = (project) => {
     newProject: project,
   });
 };
-const projectSaved = (project) => {
-  isLoading.value = true;
-  ProjectService.saveProject(project)
-      .then((res) => {
-        projectInternal.value = res;
-        pinned.value = projectInternal.pinned;
-        createCardOptions();
-        announcer.polite(`Project ${project.name} has been successfully edited`);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
-};
+
+const createOrUpdateProject = inject('createOrUpdateProject')
+
 const unpin = () => {
   SettingsService.unpinProject(projectInternal.value.projectId)
       .then(() => {
@@ -175,9 +163,6 @@ const moveUp = () => {
     projectId: project.projectId,
     direction: 'up',
   });
-};
-const focusSortControl = () => {
-  this.$refs.sortControl.focus();
 };
 
 </script>
@@ -216,7 +201,7 @@ const focusSortControl = () => {
                 :class="{ 'mr-md-4': !disableSortControl}"
                 ref="cardControls"
                 :project="projectInternal"
-                @edit-project="onEditProject"
+                @edit-project="createOrUpdateProject(project, true)"
                 @copy-project="copyProject"
                 @delete-project="showDeleteValidation = true"
                 @unpin-project="unpin"

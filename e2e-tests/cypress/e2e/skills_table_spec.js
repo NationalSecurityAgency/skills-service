@@ -28,7 +28,7 @@ describe('Skills Table Tests', () => {
     })
   })
 
-  it.skip('create first skill then remove it', () => {
+  it('create first skill then remove it', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.contains('No Skills Yet')
 
@@ -125,7 +125,7 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 4)
   })
 
-  it.skip('edit existing skill', () => {
+  it('edit existing skill', () => {
 
     cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2').as('saveSkill')
 

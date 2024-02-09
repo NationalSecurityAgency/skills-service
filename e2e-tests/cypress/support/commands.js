@@ -561,8 +561,8 @@ Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
 Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
     cy.contains('Delete Action CANNOT be undone');
     cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-    cy.get('[data-cy="removeButton"]').click();
-    cy.get('[data-cy="removeButton"]').should('not.exist')
+    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 });
 
 Cypress.Commands.add("discardChanges", () => {

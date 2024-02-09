@@ -2,7 +2,7 @@
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { FilterMatchMode } from 'primevue/api'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
@@ -30,7 +30,6 @@ const subjectId = computed(() => {
 })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
-  busy: false,
   bordered: true,
   outlined: true,
   stacked: 'md',
@@ -148,23 +147,25 @@ const addSkillDisabled = ref(false)
 const editSkillInfo = ref({ skill: {}, show: false, isEdit: false })
 const editGroupInfo = ref({ group: {}, show: false, isEdit: false })
 const editImportedSkillInfo = ref({ skill: {}, show: false })
-const editSkill = (itemToEdit) => {
-  // this.currentlyFocusedSkillId = itemToEdit.skillId;
-  if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
-    editImportedSkillInfo.value = {
-      show: true,
-      skill: itemToEdit
-    }
-  } else if (itemToEdit.isGroupType) {
-    editGroupInfo.value = {
-      isEdit: true,
-      show: true,
-      group: itemToEdit
-    }
-  } else {
-    editSkillInfo.value = { skill: itemToEdit, show: true, isEdit: true }
-  }
-}
+
+const createOrUpdateSkill = inject('createOrUpdateSkill')
+// const editSkill = (itemToEdit) => {
+//   // this.currentlyFocusedSkillId = itemToEdit.skillId;
+//   if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
+//     editImportedSkillInfo.value = {
+//       show: true,
+//       skill: itemToEdit
+//     }
+//   } else if (itemToEdit.isGroupType) {
+//     editGroupInfo.value = {
+//       isEdit: true,
+//       show: true,
+//       group: itemToEdit
+//     }
+//   } else {
+//     editSkillInfo.value = { skill: itemToEdit, show: true, isEdit: true }
+//   }
+// }
 const copySkill = (skillToCopy) => {
 
 }
@@ -180,16 +181,21 @@ const deleteSkill = (skillToDelete) => {
   deleteSkillInfo.value.show = true
 }
 const doDeleteSkill = () => {
-  options.value.busy = true
+  skillsState.setLoadingSubjectSkills(true)
   const skill = deleteSkillInfo.value.skill
   SkillsService.deleteSkill(skill)
     .then(() => {
-      skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
-        .then(() => {
-          options.value.busy = false
-          subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
-          announcer.polite(`Removed ${skill.name} skill`)
-        })
+      const itemIndex = skillsState.subjectSkills.findIndex((item) => item.skillId === skill.skillId)
+      skillsState.subjectSkills.splice(itemIndex, 1)
+      announcer.polite(`Removed ${skill.name} skill`)
+      subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
+      skillsState.setLoadingSubjectSkills(false)
+      // skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
+      //   .then(() => {
+      //     skillsState.setLoadingSubjectSkills(false)
+      //     subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
+      //     announcer.polite(`Removed ${skill.name} skill`)
+      //   })
     })
 }
 
@@ -240,7 +246,7 @@ const skillsTable = ref(null)
 <template>
   <div>
     <DataTable
-      :loading="options.busy"
+      :loading="skillsState.loadingSubjectSkills"
       ref="skillsTable"
       :value="skillsState.subjectSkills"
       :reorderableColumns="true"
@@ -348,7 +354,6 @@ const skillsTable = ref(null)
                     size="small"
                     outlined
                     severity="info"
-                    :track-for-focus="true"
                     :aria-label="`Manage skill ${slotProps.data.name}`"
                     :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"
                   />
@@ -359,7 +364,7 @@ const skillsTable = ref(null)
                     :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
                     icon="fas fa-edit"
-                    @click="editSkill(slotProps.data)"
+                    @click="createOrUpdateSkill(slotProps.data, true)"
                     size="small"
                     outlined
                     severity="info"

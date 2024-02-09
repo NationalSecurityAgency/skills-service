@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, provide } from 'vue'
 import { useStore, createNamespacedHelpers } from 'vuex'
 import { useRoute } from 'vue-router'
 import { SkillsReporter } from '@skilltree/skills-client-js';
@@ -24,7 +24,8 @@ const store = useStore();
 const route = useRoute();
 const projects = createNamespacedHelpers('projects');
 
-let subjects = store.getters["subjects/subjects"];
+const subjects = ref([])
+  // store.getters["subjects/subjects"];
 
 const subjRef = ref();
 const mainFocus = ref();
@@ -42,7 +43,7 @@ watch(
 let isReadOnlyProj = false;
 
 let isLoadingData = ref(true);
-let displayNewSubjectModal = ref(false);
+
 let projectId = ref(null);
 let sortOrder = ref({
   loading: false,
@@ -63,18 +64,8 @@ const isLoading = computed(() => {
   return isLoadingData.value //|| config.isLoadingProjConfig;
 });
 
-const emptyNewSubject = computed(() => {
-  return {
-    projectId: route.params.projectId,
-    name: '',
-    subjectId: '',
-    description: '',
-    iconClass: 'fas fa-book',
-  };
-});
-
 const addSubjectDisabled = computed(() => {
-  return subjects && store.getters.config && subjects.length >= store.getters.config.maxSubjectsPerProject;
+  return subjects.value && store.getters.config && subjects.value.length >= store.getters.config.maxSubjectsPerProject;
 });
 
 const addSubjectsDisabledMsg = computed(() => {
@@ -91,13 +82,22 @@ const addSubjectsDisabledMsg = computed(() => {
 // ...subjectsStore.mapActions([
 //   'loadSubjects',
 // ]),
-const openNewSubjectModal = () => {
-  displayNewSubjectModal.value = true;
+
+const subjectDialogInfo = ref({
+  show: false,
+  isEdit: false,
+  subject: {}
+});
+const openNewSubjectModal = (subject = {}, isEdit = false) => {
+  subjectDialogInfo.value.isEdit = isEdit
+  subjectDialogInfo.value.subject = subject
+  subjectDialogInfo.value.show = true;
 };
+provide('createOrUpdateSubject', openNewSubjectModal)
 
 const doLoadSubjects = () => {
   return SubjectsService.getSubjects(route.params.projectId).then((res) => {
-    subjects = res;
+    subjects.value = res;
   }).finally(() => {
     isLoadingData.value = false;
     enableDropAndDrop();
@@ -110,16 +110,14 @@ const deleteSubject = (subject) => {
     // loadProjectDetailsState({ projectId: projectId });
     doLoadSubjects().then(() => {
       isLoadingData.value = false;
-      emit('subjects-changed', subject.subjectId);
-      nextTick(() => {
-        announcer.polite(`Subject ${subject.name} has been deleted`);
-      });
+      emit('subjects-changed', subject.subjectId)
+      announcer.polite(`Subject ${subject.name} has been deleted`)
     });
   });
 };
 
 const updateSortAndReloadSubjects = (updateInfo) => {
-  const sortedSubjects = subjects.sort((a, b) => {
+  const sortedSubjects = subjects.value.sort((a, b) => {
     if (a.displayOrder > b.displayOrder) {
       return 1;
     }
@@ -130,7 +128,7 @@ const updateSortAndReloadSubjects = (updateInfo) => {
   });
   const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex >= 0 && (newIndex) < subjects.length) {
+  if (newIndex >= 0 && (newIndex) < subjects.value.length) {
     isLoadingData.value = true;
     const { projectId } = route.params;
     SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
@@ -148,22 +146,14 @@ const updateSortAndReloadSubjects = (updateInfo) => {
 };
 
 const subjectAdded = (subject) => {
-  displayNewSubjectModal.value = false;
-  isLoadingData.value = true;
-  SubjectsService.saveSubject(subject)
-      .then(() => {
-        doLoadSubjects()
-            .then(() => {
-              handleFocus().then(() => {
-                nextTick(() => {
-                  announcer.polite(`Subject ${subject.name} has been saved`);
-                });
-              });
-            });
-        // loadProjectDetailsState({ projectId: projectId });
-        emit('subjects-changed', subject.subjectId);
-        SkillsReporter.reportSkill('CreateSubject');
-      });
+  const existingIndex = subjects.value.findIndex((item) => item.subjectId === subject.originalSubjectId)
+  if (existingIndex >= 0) {
+    subjects.value.splice(existingIndex, 1, subject)
+  } else {
+    subjects.value.push(subject)
+    SkillsReporter.reportSkill('CreateSubject');
+  }
+  announcer.polite(`Subject ${subject.name} has been saved`);
 };
 
 const handleHide = (e) => {
@@ -182,7 +172,7 @@ const handleFocus = () => {
 };
 
 const enableDropAndDrop = () => {
-  if (subjects && subjects.length > 0) {
+  if (subjects.value && subjects.value.length > 0) {
     nextTick(() => {
       const cards = document.getElementById('subjectCards');
       Sortable.create(cards, {
@@ -243,9 +233,13 @@ const sortOrderUpdate = (updateEvent) => {
                    title="No Subjects Yet" message="Subjects are a way to group and organize skill definitions within a gameified training profile."></no-content2>
     </loading-container>
 
-    <edit-subject v-if="displayNewSubjectModal" v-model="displayNewSubjectModal"
-                  :subject="emptyNewSubject" @subject-saved="subjectAdded"
-                  @hidden="handleHide"/>
+    <edit-subject
+      v-if="subjectDialogInfo.show"
+      v-model="subjectDialogInfo.show"
+      :is-edit="subjectDialogInfo.isEdit"
+      :subject="subjectDialogInfo.subject"
+      @subject-saved="subjectAdded"
+      @hidden="handleHide" />
   </div>
 </template>
 

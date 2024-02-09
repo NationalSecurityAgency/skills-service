@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, inject } from 'vue'
 import { useStore } from 'vuex';
 import Badge from 'primevue/badge';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -8,7 +8,6 @@ import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithSta
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import LoadingCard from '@/components/utils/LoadingCard.vue';
-import EditSubject from '@/components/subjects/EditSubject.vue';
 
 const announcer = useSkillsAnnouncer()
 const store = useStore();
@@ -20,7 +19,6 @@ const subjectCardControls = ref();
 
 let isLoading = ref(false);
 let showDeleteDialog = ref(false);
-let showEditSubject = ref(false);
 let cardOptions = ref({ controls: {} });
 let subjectInternal = ref({ ...subject });
 let deleteSubjectDisabled = ref(false);
@@ -127,48 +125,6 @@ const sortRequested = (info) => {
   emit('sort-changed-requested', withId);
 };
 
-const focusSortControl = () => {
-  this.$refs.navCardWithStatsAndControls.focusSortControl();
-};
-
-const subjectSaved = (subject) => {
-  isLoading.value = true;
-  SubjectsService.saveSubject(subject)
-      .then(() => {
-        subjectInternal.value = subject;
-        buildCardOptions();
-        isLoading.value = false;
-        handleFocus().then(() => {
-          nextTick(() => {
-            announcer.polite(`Subject ${subject.name} has been saved`);
-          });
-        });
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
-};
-
-const hiddenEventHandler = (e) => {
-  if (!e || !e.update) {
-    handleFocus();
-  }
-};
-
-const handleFocus = () => {
-  return new Promise((resolve) => {
-    nextTick(() => {
-      subjectCardControls.value.focusOnEdit();
-      resolve();
-    });
-  });
-};
-
-const handleDeleteCancelled = () => {
-  nextTick(() => {
-    subjectCardControls.value.focusOnDelete();
-  });
-};
 
 watch(
   () => props.subject,
@@ -178,6 +134,8 @@ watch(
       buildCardOptions()
     }
   })
+
+const createOrUpdateSubject = inject('createOrUpdateSubject')
 
 </script>
 
@@ -193,7 +151,8 @@ watch(
         <card-navigate-and-edit-controls
             ref="subjectCardControls"
             :options="cardOptions.controls"
-            @edit="showEditSubject=true"
+            :button-id-suffix="subjectInternal.subjectId"
+            @edit="createOrUpdateSubject(props.subject, true)"
             @delete="deleteSubject"
             @share="shareSubject"
             @unshare="unshareSubject"
@@ -207,8 +166,6 @@ watch(
       </template>
     </nav-card-with-stats-and-controls>
 
-    <edit-subject v-if="showEditSubject" v-model="showEditSubject" :id="subjectInternal.subjectId"
-                  :subject="subjectInternal" :is-edit="true" @subject-saved="subjectSaved" @hidden="hiddenEventHandler"/>
 
     <removal-validation
       v-if="showDeleteDialog"

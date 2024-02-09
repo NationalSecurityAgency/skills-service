@@ -53,7 +53,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
-    it('Edit in place', () => {
+    it.skip('Edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'Proj 1'

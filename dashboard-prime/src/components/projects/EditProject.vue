@@ -10,10 +10,13 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useStore } from 'vuex'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
 const emit = defineEmits(['project-saved'])
+const store = useStore();
 
 let formId = 'newProjectDialog'
 let modalTitle = 'New Project'
@@ -91,9 +94,8 @@ const schema = object({
     .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
 const initialProjData = {
-  originalProjectId: props.project.projectId,
-  ...props.project,
-  projectName: props.project.name,
+  projectId: props.project.projectId || '',
+  projectName: props.project.name || '',
   description: props.project.description || '',
 }
 
@@ -106,14 +108,31 @@ const asyncLoadData = props.isEdit ? loadDescription : null
 
 const close = () => { model.value = false }
 
-const onSubmit = (values) => {
+const isRootUser = computed(() => {
+  return store.getters['access/isRoot'];
+});
+const saveProject = (values) => {
   const projToSave = {
     ...values,
+    originalProjectId: props.project.projectId,
     isEdit: props.isEdit,
     name: InputSanitizer.sanitize(values.projectName),
     projectId: InputSanitizer.sanitize(values.projectId)
   }
-  emit('project-saved', projToSave)
+  return ProjectService.saveProject(projToSave)
+    .then((projRes) => {
+      if (!props.isEdit && isRootUser.value) {
+        SettingsService.pinProject(projToSave.projectId)
+          .then(() => {
+            return {  ...projRes, originalProjectId: props.project.projectId }
+          })
+      }
+      return {  ...projRes, originalProjectId: props.project.projectId }
+    })
+}
+
+const onSavedProject = (savedProj) => {
+  emit('project-saved', savedProj)
   close()
 }
 
@@ -127,9 +146,10 @@ const onSubmit = (values) => {
     :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
     :validation-schema="schema"
     :initial-values="initialProjData"
-    @saved="onSubmit"
+    @saved="onSavedProject"
     @close="close"
     :async-load-data-function="asyncLoadData"
+    :save-data-function="saveProject"
   >
     <template #default>
       <SkillsNameAndIdInput

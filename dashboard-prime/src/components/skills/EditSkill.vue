@@ -11,6 +11,7 @@ import TimeWindowInput from '@/components/skills/inputForm/TimeWindowInput.vue'
 import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingTypeInput.vue'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const show = defineModel()
 const route = useRoute()
@@ -19,6 +20,7 @@ const props = defineProps({
   isEdit: Boolean,
   isCopy: Boolean
 })
+const emit = defineEmits(['skill-saved'])
 const appConfig = useAppConfig()
 
 const latestSkillVersion = ref(0)
@@ -65,23 +67,48 @@ const schema = object({
     .required()
     .label('Version')
 })
+const selfReportingType = props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null
 const initialSkillData = {
-  skillId: '',
-  originalSkillId: props.skill.skillId || '',
-  version: 0,
-  pointIncrement: 100,
-  numPerformToCompletion: 1,
-  pointIncrementIntervalHrs: 8,
-  pointIncrementIntervalMins: 0,
-  numPointIncrementMaxOccurrences: 1,
-  ...props.skill,
+  skillId: props.skill.skillId || '',
   skillName: props.skill.name || '',
+  originalSkillId: props.skill.skillId || '',
+  version: props.skill.verison || 0,
+  pointIncrement: props.skill.pointIncrement || 100,
+  numPerformToCompletion: props.skill.numPerformToCompletion || 1,
+  pointIncrementIntervalHrs: props.skill.pointIncrement || 8,
+  pointIncrementIntervalMins: props.skill.pointIncrement || 0,
+  numMaxOccurrencesIncrementInterval: props.skill.pointIncrement || 1,
+  numPointIncrementMaxOccurrences: props.skill.pointIncrement || 1,
+  selfReportingType,
+  selfReportingEnabled: selfReportingType !== null,
   description: props.skill.description || ''
 }
 
-const updateSkills = () => {
-
+const saveSkill = (values) => {
+  const skilltoSave = {
+    ...values,
+    type: 'Skill',
+    subjectId: route.params.subjectId,
+    projectId: route.params.projectId,
+    isEdit: props.isEdit,
+    name: InputSanitizer.sanitize(values.skillName),
+    skillId: InputSanitizer.sanitize(values.skillId),
+    pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0
+  }
+  return SkillsService.saveSkill(skilltoSave)
+    .then((skillRes) => {
+      return {
+        ...skillRes,
+        originalSkillId: props.skill.skillId,
+      }
+    })
+  // close()
 }
+
+const onSkillSaved = (skill) => {
+  emit('skill-saved', skill)
+}
+
 const close = () => {
 
 }
@@ -92,12 +119,13 @@ const close = () => {
     :id="formId"
     v-model="show"
     :async-load-data-function="asyncLoadData"
+    :save-data-function="saveSkill"
     :header="modalTitle"
     saveButtonLabel="Save"
     :validation-schema="schema"
     :initial-values="initialSkillData"
     :enable-return-focus="true"
-    @saved="updateSkills"
+    @saved="onSkillSaved"
     @close="close">
     <div class="flex">
       <div class="flex-1">
@@ -107,6 +135,7 @@ const close = () => {
           :id-label="`${props.isCopy ? 'New Skill ID' : 'Skill ID'}`"
           id-field-name="skillId"
           :is-inline="true"
+          id-suffix="Skill"
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 

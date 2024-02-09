@@ -31,6 +31,10 @@ const props = defineProps({
   isInline: {
     type: Boolean,
     default: false
+  },
+  idSuffix: {
+    type: String,
+    default: ''
   }
 })
 const emit = defineEmits(['keydown-enter'])
@@ -43,10 +47,10 @@ function updateCanEditProjectId(newVal) {
 
 const skillsIdInput = ref(null)
 
-function updateProjectId(projName) {
+function updateIdBasedOnName(name) {
   if (props.nameToIdSyncEnabled && !canEditProjectId.value) {
-    const newProjId = InputSanitizer.removeSpecialChars(projName)
-    skillsIdInput.value.updateIdValue(newProjId)
+    const newId = InputSanitizer.removeSpecialChars(name)
+    skillsIdInput.value.updateIdValue(`${newId}${props.idSuffix}`)
   }
 }
 
@@ -63,7 +67,7 @@ const isSubmitting = useIsSubmitting()
         :disabled="disabled || isSubmitting"
         :name="nameFieldName"
         :autofocus="true"
-        @input="updateProjectId"
+        @input="updateIdBasedOnName"
         @keydown-enter="emit('keydown-enter')" />
     </div>
     <div :class="{ 'ml-1' : isInline }">

@@ -25,6 +25,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const announcer = useSkillsAnnouncer()
 const loading = ref(false);
@@ -113,33 +114,13 @@ const onFilter = (filterEvent) => {
   totalRows.value = filterEvent.filteredValue.length
 }
 function updateQuizDef(quizDef) {
-  if (!hasData) {
-    loading.value = true;
+  const existingIndex = quizzes.value.findIndex((item) => item.quizId === quizDef.originalQuizId)
+  if (existingIndex >= 0) {
+    quizzes.value.splice(existingIndex, 1, quizDef)
+  } else {
+    quizzes.value.push(quizDef)
   }
-  options.value.busy = true;
-  const isNewQuizDef = !quizDef.originalQuizId;
-  QuizService.updateQuizDef(quizDef)
-      .then((updatedQuizDef) => {
-        // presence of the originalQuizId indicates edit operation
-        if (isNewQuizDef) {
-          quizzes.value.push(updatedQuizDef);
-        } else {
-          const replaceUpdated = (q) => {
-            if (q.quizId === quizDef.originalQuizId) {
-              return updatedQuizDef;
-            }
-            return q;
-          };
-          quizzes.value = quizzes.value.map(replaceUpdated);
-        }
-      })
-      .finally(() => {
-        options.value.busy = false;
-        loading.value = false;
-        nextTick(() => {
-          announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
-        });
-      });
+  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
 }
 function showDeleteWarningModal(quizDef) {
   deleteQuizInfo.value.quizDef = quizDef;

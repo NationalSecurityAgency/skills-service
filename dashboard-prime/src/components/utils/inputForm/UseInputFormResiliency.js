@@ -26,6 +26,7 @@ export const useInputFormResiliency = () => {
     })
   }
 
+  const watcherContainer = { unwatch: null }
   const init = (componentName, modelObj, initialValues, setFieldValueFunction) => {
     operationsContainer.componentName = componentName
     operationsContainer.setFieldValueFunction = setFieldValueFunction
@@ -33,7 +34,7 @@ export const useInputFormResiliency = () => {
     operationsContainer.currentReactiveModel = modelObj
 
     return loadFromStorageAndUpdateAsNeeded(componentName, modelObj, setFieldValueFunction).then(()=> {
-      watch(modelObj, (newValue) => {
+      watcherContainer.unwatch = watch(modelObj, (newValue) => {
         const rawObj = toRaw(newValue)
         indexedDb.save(componentName, rawObj)
       })
@@ -50,7 +51,14 @@ export const useInputFormResiliency = () => {
           isRestoredFromStore.value = true
         }
       }
+    }
+    indexedDb.clear(operationsContainer.componentName)
   }
+
+  const stop = () => {
+    if (watcherContainer.unwatch){
+      watcherContainer.unwatch()
+    }
     indexedDb.clear(operationsContainer.componentName)
   }
 
@@ -58,6 +66,7 @@ export const useInputFormResiliency = () => {
     init,
     discard,
     isRestoredFromStore,
-    isInitializing
+    isInitializing,
+    stop
   }
 }
