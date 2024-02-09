@@ -35,6 +35,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon';
 import Fieldset from 'primevue/fieldset';
 import ToggleButton from 'primevue/togglebutton';
 import RadioButton from 'primevue/radiobutton';
+import Checkbox from 'primevue/checkbox';
 
 
 import BadgeDirective from 'primevue/badgedirective';
@@ -91,6 +92,7 @@ app.component('InputGroupAddon', InputGroupAddon)
 app.component('Fieldset', Fieldset)
 app.component('ToggleButton', ToggleButton)
 app.component('RadioButton', RadioButton)
+app.component('Checkbox', Checkbox)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

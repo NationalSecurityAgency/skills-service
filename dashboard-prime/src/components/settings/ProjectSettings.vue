@@ -15,12 +15,14 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SettingService from '@/components/settings/SettingsService';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from "@/components/settings/SkillsSettingTextInput.vue";
 
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const store = useStore();
 const appConfig = useAppConfig()
+const projConfig = useProjConfig()
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
@@ -414,7 +416,7 @@ const saveSettings = ((dirtyChanges) => {
             SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
           }
         });
-        // store.dispatch('loadProjConfigState', { projectId: route.params.projectId, updateLoadingVar: false });
+        projConfig.loadProjConfigState({ projectId: route.params.projectId, updateLoadingVar: false })
       })
       .finally(() => {
         // isLoading.value = false;

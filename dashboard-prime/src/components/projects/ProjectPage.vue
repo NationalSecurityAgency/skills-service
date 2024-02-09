@@ -1,14 +1,14 @@
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue';
-import { useStore, createNamespacedHelpers } from 'vuex';
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { createNamespacedHelpers, useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue';
-import Navigation from '@/components/utils/Navigation.vue';
-import ProjectService from '@/components/projects/ProjectService';
-import ProjectDates from '@/components/projects/ProjectDates.vue';
-import dayjs from "@/common-components/DayJsCustomizer.js";
+import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import Navigation from '@/components/utils/Navigation.vue'
+import ProjectService from '@/components/projects/ProjectService'
+import ProjectDates from '@/components/projects/ProjectDates.vue'
+import dayjs from '@/common-components/DayJsCustomizer.js'
 import EditProject from '@/components/projects/EditProject.vue'
 
 // const props = defineProps(['project'])
@@ -183,19 +183,17 @@ const fromExpirationDate = () => {
   return dayjs().startOf('day').to(dayjs(expirationDate));
 };
 const loadProjects = () => {
-  isLoadingData.value = true;
-  projConfig.loadProjConfigState({ projectId: route.params.projectId }).finally(() => {
-    if (route.params.project) {
-      setProject(route.params.project);
-      isLoadingData.value = false;
-    } else {
-      loadProjectDetailsState({ projectId: route.params.projectId })
-          .finally(() => {
-            isLoadingData.value = false;
-          });
-    }
-  });
-};
+  isLoadingData.value = true
+  if (route.params.project) {
+    setProject(route.params.project)
+    isLoadingData.value = false
+  } else {
+    loadProjectDetailsState({ projectId: route.params.projectId })
+      .finally(() => {
+        isLoadingData.value = false
+      })
+  }
+}
 const projectSaved = (updatedProject) => {
   ProjectService.saveProject(updatedProject).then((resp) => {
     const origProjId = project.value.projectId;

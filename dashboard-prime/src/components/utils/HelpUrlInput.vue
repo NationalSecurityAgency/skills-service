@@ -1,18 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
-import InlineHelp from '@/components/utils/InlineHelp.vue';
+import { computed } from 'vue';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import {useField} from "vee-validate";
-import { useRoute } from 'vue-router';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const props = defineProps({
   name: String,
   nextFocusEl: HTMLElement,
 });
-const emit = defineEmits(['shown', 'hidden']);
-const route = useRoute();
 const config = useProjConfig();
 const { value, errorMessage } = useField(() => props.name);
 
@@ -32,31 +28,15 @@ const rootHelpUrl = computed(() => {
   return projConfigRootHelpUrl;
 });
 
-const tooltipShown = (e) => {
-  emit('shown', e);
-};
-
-const tooltipHidden = (e) => {
-  emit('hidden', e);
-};
 
 const handleEscape = () => {
-  document.activeElement.blur();
-  props.nextFocusEl?.focus();
 };
 
 </script>
 
 <template>
-  <div class="form-group">
-    <label for="skillHelpUrl">Help URL/Path
-      <inline-help v-if="route.params.projectId"
-                   target-id="helpUrlHelp"
-                   :next-focus-el="nextFocusEl"
-                   @shown="tooltipShown"
-                   @hidden="tooltipHidden"
-                   msg="If project level 'Root Help Url' is specified then this path will be relative to 'Root Help Url'"/>
-    </label>
+  <div class="field">
+    <label for="skillHelpUrl">Help URL/Path</label>
 
     <InputGroup>
       <InputGroupAddon v-if="projConfigRootHelpUrl">
@@ -65,7 +45,6 @@ const handleEscape = () => {
               id="rootHelpUrlHelp"
               :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
               tabindex="0"
-              v-tooltip.top="`Root Help URL was configured in the project's settings. URLs starting with http(s) will not use Root Help URL.`"
               @keydown.esc="handleEscape">{{ rootHelpUrl }}</span>
       </InputGroupAddon>
       <InputText v-model="value" data-cy="skillHelpUrl" id="skillHelpUrl"></InputText>
@@ -75,36 +54,6 @@ const handleEscape = () => {
         class="p-error"
         :data-cy="`${name}Error`"
         :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
-<!--    -->
-
-<!--    <ValidationProvider rules="help_url|customUrlValidator" v-slot="{errors}"-->
-<!--                        name="Help URL/Path">-->
-<!--      <b-input-group>-->
-<!--        <template #prepend v-if="projConfigRootHelpUrl">-->
-<!--          <b-input-group-text><i class="fas fa-cogs mr-1"></i>-->
-<!--            <span class="text-primary" :class="{ 'stikethrough' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"-->
-<!--                  id="rootHelpUrlHelp"-->
-<!--                  :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"-->
-<!--                  tabindex="0"-->
-<!--                  @keydown.esc="handleEscape">{{ rootHelpUrl }}</span>-->
-
-<!--            <b-tooltip target="rootHelpUrlHelp"-->
-<!--                       title="Root Help URL was configured in the project's settings. URLs starting with http(s) will not use Root Help URL."-->
-<!--                       @shown="tooltipShown"-->
-<!--                       @hidden="tooltipHidden"/>-->
-
-<!--          </b-input-group-text>-->
-<!--        </template>-->
-<!--        <b-form-input-->
-<!--            id="skillHelpUrl"-->
-<!--            v-model="internalValue" data-cy="skillHelpUrl"-->
-<!--            aria-describedby="skillHelpUrlError"-->
-<!--            aria-errormessage="skillHelpUrlError"-->
-<!--            :aria-invalid="(errors && errors.length > 0)"></b-form-input>-->
-<!--      </b-input-group>-->
-<!--      <small role="alert" class="form-text text-danger" id="skillHelpUrlError"-->
-<!--             data-cy="skillHelpUrlError">{{ errors[0] }}</small>-->
-<!--    </ValidationProvider>-->
   </div>
 </template>
 

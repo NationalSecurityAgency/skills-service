@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { object, string } from 'yup'
@@ -9,6 +9,8 @@ import SkillsService from '@/components/skills/SkillsService.js'
 import TotalPointsField from '@/components/skills/inputForm/TotalPointsField.vue'
 import TimeWindowInput from '@/components/skills/inputForm/TimeWindowInput.vue'
 import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingTypeInput.vue'
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 
 const show = defineModel()
 const route = useRoute()
@@ -138,7 +140,14 @@ const close = () => {
 
     <time-window-input class="mb-3"/>
 
-    <self-reporting-type-input />
+    <self-reporting-type-input class="mt-5"/>
+
+    <markdown-editor
+      class="mt-5"
+      name="description" />
+
+    <help-url-input class="mt-3"
+                    name="helpUrl" />
 
   </SkillsInputFormDialog>
 </template>

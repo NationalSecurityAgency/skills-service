@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useStore } from 'vuex'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
@@ -15,6 +15,7 @@ import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const store = useStore()
+const route = useRoute()
 const projConfig = useProjConfig()
 const clientDisplayPath = useClientDisplayPath()
 const isSupervisor = ref(false)
@@ -186,9 +187,13 @@ const addNavGuards = () => {
 }
 
 const customGlobalValidators = useCustomGlobalValidators()
+
 onMounted(() => {
   store.dispatch('loadConfigState').finally(() => {
     customGlobalValidators.addValidators()
+    if (isAdminPage(route) && route.params.projectId) {
+      projConfig.loadProjConfigState({ projectId: route.params.projectId })
+    }
     store.dispatch('restoreSessionIfAvailable').finally(() => {
       inceptionConfigurer.configure()
       addNavGuards()
@@ -197,6 +202,7 @@ onMounted(() => {
           isSupervisor.value = result
           addCustomIconCSS()
         })
+
         store.dispatch('access/isRoot')
         store.dispatch('loadEmailEnabled')
       }

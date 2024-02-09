@@ -17,13 +17,14 @@ const enabled = ref(false)
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
     <div class="flex align-items-center mb-2">
-      <ToggleButton
+      <Checkbox
+        class="mb-2"
+        :binary="true"
         v-model="enabled"
-        onIcon="fas fa-check"
-        offIcon="fas fa-times"
-        class="w-full sm:w-10rem py-1 px-3"
-        onLabel="Enabled"
-        offLabel="Disabled" />
+        inputId="timeWindowEnabled"
+        name="Time Window"
+        :value="true" />
+      <label for="timeWindowEnabled" class="ml-2 font-italic">Time Window Enabled</label>
     </div>
     <div class="flex m-0">
       <SkillsNumberInput
