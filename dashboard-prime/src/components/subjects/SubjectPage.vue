@@ -112,7 +112,7 @@ const displayEditSubject = () => {
 const subjectEdited = (subject) => {
   SubjectsService.saveSubject(subject).then((resp) => {
     const origId = subject.subjectId;
-    store.dispatch('subjects/setSubject', resp);
+    // store.dispatch('subject/setSubject', resp);
     if (resp.subjectId !== origId) {
       router.replace({ name: route.name, params: { ...route.params, subjectId: resp.subjectId } });
     }
@@ -163,7 +163,7 @@ const handleHideSubjectEdit = () => {
     </navigation>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject"
-                  :subject="subject" @subject-saved="subjectEdited"
+                  :subject="subjectState.subject" @subject-saved="subjectEdited"
                   :is-edit="true"
                   @hidden="handleHideSubjectEdit"/>
   </div>

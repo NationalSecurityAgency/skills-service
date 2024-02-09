@@ -7,6 +7,8 @@ import SubjectsService from '@/components/subjects/SubjectsService';
 import InputSanitizer from '@/components/utils/InputSanitizer';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue';
+import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
+import IconManager from '@/components/utils/iconPicker/IconManager.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -58,6 +60,7 @@ const discardChanges = (reload = false) => {
 const close = () => { model.value = false }
 
 const updateSubject = (values) => {
+  console.log(values);
   const subjToSave = {
     ...values,
     isEdit: props.isEdit,
@@ -83,12 +86,13 @@ const updateSubjectId = (value) => {
 };
 
 const onSelectedIcon = (selectedIcon) => {
-  // subjectInternal.iconClass = `${selectedIcon.css}`;
-  displayIconManager = false;
+  console.log(selectedIcon);
+  // value.iconClass = `${selectedIcon.css}`;
+  displayIconManager.value = false;
 };
 
 const toggleIconDisplay = (shouldDisplay) => {
-  displayIconManager = shouldDisplay;
+  displayIconManager.value = shouldDisplay;
 };
 
 const checkSubjectNameUnique = (value) => {
@@ -134,6 +138,7 @@ const schema = {
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .label('Subject Description'),
+  'iconClass': string().required(),
   'helpUrl': string()
       .test('help_url', 'Help URL must use http://, https://, or be a relative url.', (value) => {
         if (!value) {
@@ -169,8 +174,8 @@ const asyncLoadData = () => { return; };
     <template #default>
 
       <div v-if="displayIconManager === false">
-<!--            <icon-picker :startIcon="subjectInternal.iconClass" @select-icon="toggleIconDisplay(true)"-->
-<!--                         class="mr-3"></icon-picker>-->
+        <icon-picker :startIcon="subject.iconClass" @select-icon="toggleIconDisplay(true)"
+                     class="mr-3"></icon-picker>
 
         <SkillsTextInput label="Subject Name" name="name" :is-required="true" :autofocus="true" @input="updateSubjectId" @keydown-enter="emit('keydown-enter')" data-cy="subjectNameInput" />
         <SkillsIdInput ref="subjectIdInput" name="subjectId" @can-edit="canAutoGenerateId=!$event" label="Subject ID" @keydown-enter="emit('keydown-enter')" />
@@ -195,7 +200,7 @@ const asyncLoadData = () => { return; };
 
         </div>
         <div v-else>
-<!--          <icon-manager @selected-icon="onSelectedIcon"></icon-manager>-->
+          <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
           <div class="text-right mr-2">
             <SkillsButton variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</SkillsButton>
           </div>
