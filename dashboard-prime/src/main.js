@@ -33,6 +33,9 @@ import DataTable from 'primevue/datatable';
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Fieldset from 'primevue/fieldset';
+import ToggleButton from 'primevue/togglebutton';
+import RadioButton from 'primevue/radiobutton';
+
 
 import BadgeDirective from 'primevue/badgedirective';
 
@@ -86,6 +89,8 @@ app.component('InputNumber', InputNumber)
 app.component('InputGroup', InputGroup)
 app.component('InputGroupAddon', InputGroupAddon)
 app.component('Fieldset', Fieldset)
+app.component('ToggleButton', ToggleButton)
+app.component('RadioButton', RadioButton)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

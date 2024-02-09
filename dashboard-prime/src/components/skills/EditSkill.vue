@@ -8,6 +8,7 @@ import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdIn
 import SkillsService from '@/components/skills/SkillsService.js'
 import TotalPointsField from '@/components/skills/inputForm/TotalPointsField.vue'
 import TimeWindowInput from '@/components/skills/inputForm/TimeWindowInput.vue'
+import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingTypeInput.vue'
 
 const show = defineModel()
 const route = useRoute()
@@ -136,6 +137,9 @@ const close = () => {
     </div>
 
     <time-window-input class="mb-3"/>
+
+    <self-reporting-type-input />
+
   </SkillsInputFormDialog>
 </template>
 

@@ -1,10 +1,12 @@
 <script setup>
 import { useStorage } from '@vueuse/core'
+import { ref } from 'vue'
 
 const timeWindowCollapsed = useStorage('editSkillTimeWindowCollapsed', true)
 const updateCollapsed = (newState) => {
   timeWindowCollapsed.value = newState
 }
+const enabled = ref(false)
 </script>
 
 <template>
@@ -14,11 +16,21 @@ const updateCollapsed = (newState) => {
     :toggleable="true"
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
+    <div class="flex align-items-center mb-2">
+      <ToggleButton
+        v-model="enabled"
+        onIcon="fas fa-check"
+        offIcon="fas fa-times"
+        class="w-full sm:w-10rem py-1 px-3"
+        onLabel="Enabled"
+        offLabel="Disabled" />
+    </div>
     <div class="flex m-0">
       <SkillsNumberInput
         class="flex-1"
         :min="0"
         showButtons
+        :disabled="!enabled"
         label="Hours"
         name="pointIncrementIntervalHrs" />
 
@@ -27,6 +39,7 @@ const updateCollapsed = (newState) => {
         showButtons
         :min="0"
         :max="60"
+        :disabled="!enabled"
         label="Minutes"
         name="pointIncrementIntervalMins" />
 
@@ -34,6 +47,7 @@ const updateCollapsed = (newState) => {
         class="flex-1"
         :min="0"
         showButtons
+        :disabled="!enabled"
         label="Window's Max Occurrences"
         name="numPointIncrementMaxOccurrences" />
 
