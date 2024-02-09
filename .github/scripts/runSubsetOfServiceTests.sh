@@ -82,12 +82,12 @@ if (( ${#integrationTests[@]} != 0 )); then
 fi
 
 if  [ "$cachingSpec" == 'yes' ]; then
-    echo 'Found CachingSpec. Building client-display...'
+    echo 'Found CachingSpec. Building dashboard & client-display...'
     cd ../dashboard-prime
     npm run deploy
-    cd ../client-display
-    npm install
-    npm run deploy
+#    cd ../client-display
+#    npm install
+#    npm run deploy
     cd ../service
 fi
 
