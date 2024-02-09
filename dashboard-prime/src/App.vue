@@ -13,10 +13,12 @@ import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigure
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useQuizConfig } from '@/stores/UseQuizConfig.js';
 
 const store = useStore()
 const route = useRoute()
 const projConfig = useProjConfig()
+const quizConfig = useQuizConfig()
 const clientDisplayPath = useClientDisplayPath()
 const isSupervisor = ref(false)
 const activeProjectId = computed(() => {
@@ -118,7 +120,7 @@ const addNavGuards = () => {
           to.params.quizId &&
           to.params.quizId !== from.params.quizId
         ) {
-          store.dispatch('loadQuizConfigState', { quizId: to.params.quizId })
+          quizConfig.loadQuizConfigState({ quizId: to.params.quizId })
         }
         if (to.matched.some((record) => record.meta.requiresAuth)) {
           // this route requires auth, check if logged in if not, redirect to login page.

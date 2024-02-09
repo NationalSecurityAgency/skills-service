@@ -1,6 +1,7 @@
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import MyProgressPage from '@/components/myProgress/MyProgressPage.vue'
 import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue'
+import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 
 const createProgressAndRankingRoutes = () => {
   return {
@@ -34,6 +35,17 @@ const createProgressAndRankingRoutes = () => {
           nonAdmin: true,
           announcer: {
             message: 'My Progress Project',
+          },
+        },
+      }, {
+        name: 'QuizRun',
+        path: 'quizzes/:quizId',
+        component: QuizRun,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Test Run',
           },
         },
       },

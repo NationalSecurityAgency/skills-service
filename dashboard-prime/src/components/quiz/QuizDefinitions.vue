@@ -15,14 +15,14 @@ limitations under the License.
 */
 <script setup>
 import {ref, onMounted, computed, nextTick} from 'vue'
-import QuizService from "@/components/quiz/QuizService.js";
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
-import NoContent2 from "@/components/utils/NoContent2.vue";
+import QuizService from '@/components/quiz/QuizService.js';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import NoContent2 from '@/components/utils/NoContent2.vue';
 import Column from 'primevue/column';
 import { FilterMatchMode } from 'primevue/api';
-import DateCell from "@/components/utils/table/DateCell.vue";
+import DateCell from '@/components/utils/table/DateCell.vue';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import EditQuiz from "@/components/quiz/testCreation/EditQuiz.vue";
+import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 

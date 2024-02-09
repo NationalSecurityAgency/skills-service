@@ -283,7 +283,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
     });
 
-    it.skip('edit existing quiz\'s id', function () {
+    it('edit existing quiz\'s id', function () {
         cy.createQuizDef(1);
         cy.createSurveyDef(2);
 
@@ -317,7 +317,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="managesQuizBtn_quiz2A"]')
     });
 
-    it.skip('edit quiz on the quiz page', function () {
+    it('edit quiz on the quiz page', function () {
         cy.createQuizDef(1);
 
         cy.visit('/administrator/quizzes/quiz1')
@@ -325,8 +325,8 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
         cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
-        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
         cy.get('[data-cy="quizName"]').type('A')
@@ -342,11 +342,11 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1A')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
         cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!A')
-        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
     });
 
-    it.skip('edit quiz id on the quiz page', function () {
+    it('edit quiz id on the quiz page', function () {
         cy.createQuizDef(1);
 
         cy.visit('/administrator/quizzes/quiz1')
@@ -354,8 +354,8 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
         cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
-        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
         cy.get('[data-cy="enableIdInput"]').click({force: true})
@@ -373,8 +373,8 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1A')
         cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
-        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
     });
 
     it('quiz id is derived from name', function () {
@@ -482,7 +482,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should("have.focus")
     });
 
-    it.skip('edit quiz description with block quotes on the quiz page', function () {
+    it('edit quiz description with block quotes on the quiz page', function () {
         // ignore warning 'TextSelection endpoint not pointing into a node with inline content (blockQuote)'
         Cypress.env('ignoreConsoleWarnings', true);
         cy.createQuizDef(1);
@@ -492,8 +492,8 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
         cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
-        cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-        cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+        cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+        cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
         cy.get('button.quote').click({force: true})

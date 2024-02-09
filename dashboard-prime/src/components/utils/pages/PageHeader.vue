@@ -26,8 +26,8 @@ const props = defineProps(['loading', 'options'])
         </div>
         <div class="flex-1">
           <div class="flex justify-content-center lg:justify-content-end flex-wrap">
-            <div v-for="(stat) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto">
-              <Card class="ml-3 mt-2">
+            <div v-for="(stat) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto mb-1">
+              <Card class="ml-3 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
                 <template #content>
                   <div class="flex">
                     <div class="" :data-cy="`pageHeaderStat_${stat.label}`">

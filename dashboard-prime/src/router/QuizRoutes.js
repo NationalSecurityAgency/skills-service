@@ -5,7 +5,6 @@ import QuizSettings from '@/components/quiz/QuizSettings.vue';
 import QuizSkillsPage from '@/components/quiz/QuizSkillsPage.vue';
 import QuizRunsHistoryPage from '@/components/quiz/runsHistory/QuizRunsHistoryPage.vue';
 import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage.vue';
-// import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage.vue';
 import UserActionsPage from "@/components/userActions/UserActionsPage.vue";
 

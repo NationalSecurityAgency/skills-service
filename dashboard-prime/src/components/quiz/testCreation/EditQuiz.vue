@@ -98,8 +98,10 @@ const loadDescription = () => {
 const asyncLoadData = props.isEdit ? loadDescription : null
 const initialQuizData = {
   originalQuizId: props.quiz.quizId,
-  ...props.quiz,
+  quizId: props.quiz.quizId,
   quizName: props.quiz.name,
+  type: props.quiz.type,
+  // description: props.quiz.description || '',
 }
 const close = () => { model.value = false }
 
