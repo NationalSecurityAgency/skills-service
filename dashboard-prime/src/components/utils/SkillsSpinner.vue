@@ -1,6 +1,4 @@
 <script setup>
-import ProgressSpinner from 'primevue/progressspinner';
-
 defineProps({
   isLoading: {
     type: Boolean,

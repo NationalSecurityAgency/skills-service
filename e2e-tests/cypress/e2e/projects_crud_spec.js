@@ -53,7 +53,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
-    it.skip('Edit in place', () => {
+    it('Edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'Proj 1'
@@ -113,10 +113,9 @@ describe('Projects Admin Management Tests', () => {
                     .to
                     .eq('/administrator/projects/editedProjectId');
             });
+        cy.get('[data-cy=btn_edit-project]').should('be.focused')
 
         // TODO: put back
-        // cy.contains('Subject 1')
-        //     .should('be.visible');
         // cy.get('[data-cy="manageBtn_subj1"]')
         //     .click();
         // cy.contains('SUBJECT: Subject 1')

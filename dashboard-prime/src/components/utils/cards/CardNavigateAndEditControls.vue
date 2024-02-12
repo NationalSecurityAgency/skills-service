@@ -1,57 +1,57 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
-  options:Object,
+  options: Object,
+  to: Object,
   buttonIdSuffix: {
     type: String,
-    required: true,
-  },
+    required: true
+  }
 })
-const emit = defineEmits(['edit', 'delete', 'share', 'unshare']);
+const emit = defineEmits(['edit', 'delete', 'share', 'unshare'])
+const router = useRouter()
 
-let isReadOnlyProj = false;
+let isReadOnlyProj = false
 
 const shareBtnIcon = computed(() => {
-  return props.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash';
-});
+  return props.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash'
+})
 
 const shareTitle = computed(() => {
-  return props.options?.shareEnabled === true ? `Share ${props.options?.type}` : `Unshare ${props.options?.type}`;
-});
+  return props.options?.shareEnabled === true ? `Share ${props.options?.type}` : `Unshare ${props.options?.type}`
+})
 
-const editBtn = ref(null);
-const deleteBtn = ref(null);
+const editBtn = ref(null)
+const deleteBtn = ref(null)
 
 const handleShareClick = () => {
-  let eventName = 'share';
+  let eventName = 'share'
   if (props.options.shareEnabled === false) {
-    eventName = 'unshare';
+    eventName = 'unshare'
   }
-  emit(eventName);
-};
+  emit(eventName)
+}
 
-const focusOnEdit = () => {
-  // editBtn.value.focus();
-};
+const handleManageClick = () => {
+  if (props.to) {
+    router.push(props.to)
+  }
+}
 
-const focusOnDelete = () => {
-  // deleteBtn.value.focus();
-};
-
-defineExpose({focusOnDelete, focusOnEdit});
 </script>
 
 <template>
   <div class="flex" :class="{ 'justify-content-center' : isReadOnlyProj }">
     <div class="col-auto">
       <SkillsButton
-          :to="options.navTo"
-          size="small"
-          :aria-label="`Manage ${options.type} ${options.name}`"
-          icon="fas fa-arrow-circle-right"
-          :label="isReadOnlyProj ? 'View' : 'Manage'"
-          :data-cy="`manageBtn_${options.id}`">
+        size="small"
+        @click="handleManageClick"
+        :aria-label="`Manage ${options.type} ${options.name}`"
+        icon="fas fa-arrow-circle-right"
+        :label="isReadOnlyProj ? 'View' : 'Manage'"
+        :data-cy="`manageBtn_${options.id}`">
       </SkillsButton>
     </div>
 

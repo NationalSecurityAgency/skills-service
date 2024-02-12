@@ -10,6 +10,7 @@ import SettingsService from '@/components/settings/SettingsService';
 import MyProject from '@/components/projects/MyProject.vue';
 import EditProject from '@/components/projects/EditProject.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 
 const store = useStore();
 const announcer = useSkillsAnnouncer()
@@ -49,10 +50,6 @@ const addProjectsDisabledMsg = computed(() => {
 
 const isRootUser = computed(() => {
   return store.getters['access/isRoot'];
-});
-
-const useTableView = computed(() => {
-  return projects.value && store.getters.config && projects.value.length >= store.getters.config.numProjectsForTableView;
 });
 
 // Functions
@@ -207,6 +204,10 @@ const focusOnProjectCard = (projectId) => {
     }
   });
 };
+
+const hasData = computed(() => {
+  return !isLoading.value && projects.value && projects.value.length > 0
+})
 </script>
 
 <template>
@@ -238,45 +239,42 @@ const focusOnProjectCard = (projectId) => {
         role="button" />
     </SubPageHeader>
 
-    <LoadingContainer v-bind:is-loading="isLoading">
-      <div v-if="addProjectDisabled" class="alert alert-warning" data-cy="addProjectDisabled">
-        <i class="fas fa-exclamation-circle"/> Cannot create or copy projects -
-        {{ addProjectsDisabledMsg }}
-      </div>
+<!--    <div v-if="addProjectDisabled" class="alert alert-warning" data-cy="addProjectDisabled">-->
+<!--      <i class="fas fa-exclamation-circle"/> Cannot create or copy projects - -->
+<!--      {{ addProjectsDisabledMsg }}-->
+<!--    </div>-->
 
-      <div v-if="useTableView">
-<!--        <projects-table ref="projectsTable" :projects="projects" @project-deleted="projectRemoved"-->
-<!--                        @copy-project="copyProject"-->
-<!--                        :copy-project-disabled="addProjectDisabled"-->
-<!--                        @project-edited="projectEdited"-->
-<!--                        @pin-removed="projectUnpinned">-->
+    <SkillsSpinner :is-loading="isLoading" class="my-5" />
 
-<!--        </projects-table>-->
-      </div>
-      <div v-else id="projectCards">
-        <div v-for="project of projects" :key="project.projectId" class="mb-3"
-             :id="project.projectId">
-<!--          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">-->
-<!--            <template #overlay>-->
-              <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
-                <div v-if="project.projectId===sortOrder.loadingProjectId"
-                     data-cy="updatingSortMsg">
-                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                  <SkillsSpinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-                </div>
-              </div>
-<!--            </template>-->
-            <MyProject :id="`proj${project.projectId}`" tabindex="-1"
-                        :project="project" :disable-sort-control="projects.length === 1"
-                        :ref="`proj${project.projectId}`"
-                        @sort-changed-requested="updateSortAndReloadProjects"
-                        @copy-project="copyProject"
-                        v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned"/>
-<!--          </b-overlay>-->
+    <div v-if="hasData" id="projectCards">
+      <div v-for="project of projects" :key="project.projectId" class="mb-3"
+           :id="project.projectId">
+        <!--          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">-->
+        <!--            <template #overlay>-->
+        <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
+          <div v-if="project.projectId===sortOrder.loadingProjectId"
+               data-cy="updatingSortMsg">
+            <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+            <SkillsSpinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info" />
+          </div>
         </div>
+        <!--            </template>-->
+        <MyProject :id="`proj${project.projectId}`" tabindex="-1"
+                   :project="project" :disable-sort-control="projects.length === 1"
+                   :ref="`proj${project.projectId}`"
+                   @sort-changed-requested="updateSortAndReloadProjects"
+                   @copy-project="copyProject"
+                   v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned" />
+        <!--          </b-overlay>-->
       </div>
-    </LoadingContainer>
+    </div>
 
+    <NoContent2
+      v-if="!hasData"
+      title="No Projects Yet..."
+      class="my-5"
+      message="A Project represents a gamified training profile that consists of skills divided into subjects. Create as many Projects as you need."
+      data-cy="noProjectsYet" />
     <edit-project
       v-if="newProject.show"
       v-model="newProject.show"

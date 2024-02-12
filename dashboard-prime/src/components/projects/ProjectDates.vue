@@ -8,8 +8,8 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 const props = defineProps(['created', 'loadLastReportedDate']);
 const route = useRoute();
 
-let isLoading = ref(true);
-let lastReportedSkill = ref(null);
+const isLoading = ref(true);
+const lastReportedSkill = ref(null);
 
 onMounted(() => {
   doLoadDate();
@@ -41,7 +41,10 @@ const doLoadDate = () => {
 <!--    <br v-if="loadLastReportedDate" class="d-md-none"/>-->
     <span v-if="loadLastReportedDate" data-cy="projectLastReportedSkill">
       <span class="text-color-secondary small font-italic">Last Reported Skill: </span>
-      <SkillsSpinner v-if="isLoading" label="Loading..." small type="grow" variant="info"></SkillsSpinner>
+      <ProgressSpinner
+        v-if="isLoading"
+        aria-label="Loading"
+        class="ml-1 w-1rem h-1rem" />
       <SlimDateCell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true" data-cy="projectLastReportedSkillValue"/>
     </span>
   </span>

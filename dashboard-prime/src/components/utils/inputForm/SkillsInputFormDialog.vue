@@ -35,7 +35,7 @@ const props = defineProps({
 const emit = defineEmits(['saved', 'cancelled'])
 
 
-const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate } = useForm({
+const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors } = useForm({
   validationSchema: props.validationSchema,
   initialValues: props.initialValues
 })
@@ -108,6 +108,7 @@ const validateIfNotEmpty = () => {
     :ok-button-disabled="!meta.valid || isSubmitting"
     :enable-return-focus="enableReturnFocus"
   >
+    {{ errors }}
     <form-reload-warning
       v-if="inputFormResiliency.isRestoredFromStore"
       @discard-changes="inputFormResiliency.discard" />

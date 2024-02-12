@@ -19,13 +19,12 @@ const projConfig = useProjConfig()
 const announcer = useSkillsAnnouncer()
 const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
-let isLoadingData = ref(true);
-let cancellingExpiration = ref(false);
-let editProject = ref(false);
-let shareProjModal = ref(false);
-let shareUrl = ref('');
-let project = ref({});
-let projectId = '';
+const isLoadingData = ref(true);
+const cancellingExpiration = ref(false);
+const editProject = ref(false);
+const shareProjModal = ref(false);
+const shareUrl = ref('');
+const project = ref({});
 let isReadOnlyProj = false;
 
 // ...mapGetters([
@@ -68,7 +67,7 @@ const navItems = computed(() => {
 });
 
 const headerOptions = computed(() => {
-  if (!project || !projConfig) {
+  if (!project.value || !projConfig) {
     return {};
   }
   let visibilityLabel = 'Project Catalog';
@@ -195,25 +194,22 @@ const loadProjects = () => {
   }
 }
 const projectSaved = (updatedProject) => {
-  ProjectService.saveProject(updatedProject).then((resp) => {
     const origProjId = project.value.projectId;
-    setProject(resp);
-    if (resp.projectId !== origProjId) {
-      router.replace({ name: route.name, params: { ...route.params, projectId: resp.projectId } });
-      projectId = resp.projectId;
+    setProject(updatedProject);
+    if (updatedProject.projectId !== origProjId) {
+      router.replace({ name: route.name, params: { ...route.params, projectId: updatedProject.projectId } })
+        .then(() =>{
+          // projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
+        });
     }
-    projConfig.loadProjConfigState({ projectId: resp.projectId, updateLoadingVar: false })
-    nextTick(() => {
-      announcer.polite(`Project ${updatedProject.name} has been edited`);
-    });
-  });
+    announcer.polite(`Project ${updatedProject.name} has been edited`);
 };
 const keepIt = () => {
-  cancellingExpiration = true;
+  cancellingExpiration.value = true;
   ProjectService.cancelUnusedProjectDeletion(route.params.projectId).then(() => {
     loadProjects();
   }).finally(() => {
-    cancellingExpiration = false;
+    cancellingExpiration.value= false;
   });
 };
 
@@ -320,8 +316,8 @@ const setProject = (newProject) => {
       :is-edit="true"
       :id="`editProjectModal${project.projectId}`"
       :project="project"
-      @project-saved="projectSaved"
-      :enable-return-focus="true"/>
+      :enable-return-focus="true"
+      @project-saved="projectSaved"/>
 
 <!--    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"-->
 <!--                  @project-saved="projectSaved" @hidden="editProjectHidden"/>-->

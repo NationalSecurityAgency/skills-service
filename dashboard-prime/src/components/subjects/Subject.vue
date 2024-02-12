@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch, inject } from 'vue'
+import { ref, computed, onMounted, nextTick, watch, inject, toRaw } from 'vue'
 import { useStore } from 'vuex';
 import Badge from 'primevue/badge';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -84,7 +84,7 @@ const buildCardOptions = () => {
 };
 
 const buildManageNavLink = () => {
-  return { name: 'SubjectSkills', params: { projectId: subjectInternal.value.projectId, subjectId: subjectInternal.value.subjectId, subject: subjectInternal.value } };
+  return { name: 'SubjectSkills', params: { projectId: props.subject.projectId, subjectId: props.subject.subjectId } };
 };
 
 const deleteSubject = () => {
@@ -150,6 +150,7 @@ const createOrUpdateSubject = inject('createOrUpdateSubject')
       <template #underTitle>
         <card-navigate-and-edit-controls
             ref="subjectCardControls"
+            :to="buildManageNavLink()"
             :options="cardOptions.controls"
             :button-id-suffix="subjectInternal.subjectId"
             @edit="createOrUpdateSubject(props.subject, true)"

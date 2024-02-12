@@ -1,63 +1,60 @@
 <script setup>
-import { ref, shallowRef, onMounted, computed, watch, nextTick } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue';
-import Navigation from '@/components/utils/Navigation.vue';
-import SubjectsService from '@/components/subjects/SubjectsService';
-import EditSubject from '@/components/subjects/EditSubject.vue';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import Navigation from '@/components/utils/Navigation.vue'
+import EditSubject from '@/components/subjects/EditSubject.vue'
 
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
-const announcer = useSkillsAnnouncer();
+const store = useStore()
+const route = useRoute()
+const router = useRouter()
+const announcer = useSkillsAnnouncer()
 const projConfig = useProjConfig()
 const subjectState = useSubjectsState()
+const focusState = useFocusState()
 
-let projectId = ref('');
-let subjectId = ref('');
-let showEditSubject = ref(false);
+let showEditSubject = ref(false)
 
-let isReadOnlyProj = false;
+let isReadOnlyProj = false
 
 onMounted(() => {
-  projectId.value = route.params.projectId;
-  subjectId.value = route.params.subjectId;
-  loadSubject();
-});
+  loadSubject()
+})
 
 const isLoadingData = computed(() => {
-  return subjectState.isLoadingSubject.value || projConfig.loadingProjConfig.value;
-});
+  return subjectState.isLoadingSubject.value || projConfig.loadingProjConfig.value
+})
 
 const navItems = computed(() => {
   const items = [
-    { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' },
-  ];
+    { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' }
+  ]
 
   if (!isReadOnlyProj) {
-    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' });
+    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' })
   }
-  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' });
-  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics' });
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' })
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics' })
 
-  return items;
-});
+  return items
+})
 
 const headerOptions = computed(() => {
   const subject = subjectState.subject
   return {
     icon: 'fas fa-cubes skills-color-subjects',
     title: `SUBJECT: ${subject.name}`,
-    subTitle: `ID: ${subjectId.value}`,
+    subTitle: `ID: ${subject.subjectId}`,
     stats: [{
       label: 'Groups',
       count: subject.numGroups,
       disabledCount: subject.numGroupsDisabled,
-      icon: 'fas fa-layer-group skills-color-groups',
+      icon: 'fas fa-layer-group skills-color-groups'
     }, {
       label: 'Skills',
       count: subject.numSkills,
@@ -65,12 +62,12 @@ const headerOptions = computed(() => {
       secondaryStats: [{
         label: 'reused',
         count: subject.numSkillsReused,
-        badgeVariant: 'info',
+        badgeVariant: 'info'
       }, {
         label: 'disabled',
         count: subject.numSkillsDisabled,
-        badgeVariant: 'warning',
-      }],
+        badgeVariant: 'warning'
+      }]
     }, {
       label: 'Points',
       count: subject.totalPoints,
@@ -80,15 +77,15 @@ const headerOptions = computed(() => {
       secondaryStats: [{
         label: 'reused',
         count: subject.totalPointsReused,
-        badgeVariant: 'info',
-      }],
-    }],
-  };
-});
+        badgeVariant: 'info'
+      }]
+    }]
+  }
+})
 
 const minimumPoints = computed(() => {
-  return store.getters.config.minimumSubjectPoints;
-});
+  return store.getters.config.minimumSubjectPoints
+})
 
 // watch(subject, (newVal, oldVal) => {
 //   if (newVal && newVal.subjectId !== subjectId.value) {
@@ -97,45 +94,26 @@ const minimumPoints = computed(() => {
 // });
 
 const loadSubject = () => {
-  if (route.params.subject) {
-    // store.dispatch('subjects/setSubject', route.params.subject);
-    subjectState.setSubject(route.params.subject)
-  } else {
-    subjectState.loadSubjectDetailsState(projectId.value, subjectId.value);
-  }
-};
+  subjectState.loadSubjectDetailsState(route.params.projectId, route.params.subjectId)
+}
 
 const displayEditSubject = () => {
-  showEditSubject.value = true;
-};
+  showEditSubject.value = true
+}
 
-const subjectEdited = (subject) => {
-  SubjectsService.saveSubject(subject).then((resp) => {
-    const origId = subject.subjectId;
-    // store.dispatch('subject/setSubject', resp);
-    if (resp.subjectId !== origId) {
-      router.replace({ name: route.name, params: { ...route.params, subjectId: resp.subjectId } });
-    }
-    nextTick(() => {
-      announcer.polite(`Subject ${subject.name} has been edited`);
-    });
-  });
-};
+const subjectEdited = (updatedSubject) => {
+  // store.dispatch('subject/setSubject', resp);
+  if (updatedSubject.subjectId !== subjectState.subject.subjectId) {
+    router.replace({ name: route.name, params: { ...route.params, subjectId: updatedSubject.subjectId } })
+      .then(() => focusState.focusOnLastElement())
+  } else {
+    focusState.focusOnLastElement()
+  }
+  subjectState.subject.subjectId = updatedSubject.subjectId
+  subjectState.subject.name = updatedSubject.name
+  announcer.polite(`Subject ${updatedSubject.name} has been edited`)
+}
 
-const handleHideSubjectEdit = () => {
-  showEditSubject.value = false;
-  // if the id is edited, the route is reloaded which causes the focus to be moved to the container element
-  // as such, if we want the edit button receive focus after the id has been altered, we need to double
-  // the nextTick wait.
-  nextTick(() => {
-    nextTick(() => {
-      // const ref = this.$refs?.editSubjectButton;
-      // if (ref) {
-      //   ref.focus();
-      // }
-    });
-  });
-};
 </script>
 
 <template>
@@ -143,6 +121,7 @@ const handleHideSubjectEdit = () => {
     <page-header :loading="isLoadingData" :options="headerOptions">
       <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
         <SkillsButton
+          id="editSubjectBtn"
           @click="displayEditSubject"
           ref="editSubjectButton"
           label="Edit"
@@ -150,12 +129,13 @@ const handleHideSubjectEdit = () => {
           outlined
           class="btn btn-outline-primary mr-1"
           size="small"
+          :track-for-focus="true"
           severity="info"
           data-cy="btn_edit-subject"
           :aria-label="`edit Subject ${subjectState.subject.name}`" />
       </template>
       <template #footer>
-<!--        <import-finalize-alert />-->
+        <!--        <import-finalize-alert />-->
       </template>
     </page-header>
 
@@ -164,8 +144,7 @@ const handleHideSubjectEdit = () => {
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject"
                   :subject="subjectState.subject" @subject-saved="subjectEdited"
-                  :is-edit="true"
-                  @hidden="handleHideSubjectEdit"/>
+                  :is-edit="true" />
   </div>
 </template>
 

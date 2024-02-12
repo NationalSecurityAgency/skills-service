@@ -64,14 +64,14 @@ const toggleIconDisplay = (shouldDisplay) => {
 };
 
 const checkSubjectNameUnique = (value) => {
-  if (value === props.subject.name) {
+  if (!value || value === props.subject.name) {
     return true;
   }
   return SubjectsService.subjectWithNameExists(route.params.projectId, value);
 }
 
 const checkSubjectIdUnique = (value) => {
-  if (value === props.subject.subjectId) {
+  if (!value || value === props.subject.subjectId) {
     return true;
   }
   return SubjectsService.subjectWithIdExists(route.params.projectId, value);
@@ -123,7 +123,7 @@ const initialSubjData = {
   subjectName: props.subject.name || '',
   helpUrl: props.subject.helpUrl || '',
   description: props.subject.description || '',
-  iconClass: props.subject.iconClass || '',
+  iconClass: props.subject.iconClass || 'fas fa-book',
 };
 
 const updateSubject = (values) => {
