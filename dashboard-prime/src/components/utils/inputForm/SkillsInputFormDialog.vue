@@ -108,7 +108,6 @@ const validateIfNotEmpty = () => {
     :ok-button-disabled="!meta.valid || isSubmitting"
     :enable-return-focus="enableReturnFocus"
   >
-    {{ errors }}
     <form-reload-warning
       v-if="inputFormResiliency.isRestoredFromStore"
       @discard-changes="inputFormResiliency.discard" />

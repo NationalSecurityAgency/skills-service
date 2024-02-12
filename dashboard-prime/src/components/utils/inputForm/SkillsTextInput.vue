@@ -57,7 +57,7 @@ const onEnter = (event) => {
         role="alert"
         class="p-error"
         :data-cy="`${name}Error`"
-        :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
+        :id="`${name}Error`">{{ errorMessage || '' }}</small>
   </div>
 </template>
 

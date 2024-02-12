@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import { object, string } from 'yup'
+import { object, string, number } from 'yup'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
@@ -12,6 +12,7 @@ import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingT
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import { useDebounceFn } from '@vueuse/core'
 
 const show = defineModel()
 const route = useRoute()
@@ -46,12 +47,26 @@ if (props.isCopy) {
   modalTitle = 'Copy Skill'
 }
 
+const checkProjNameUnique = useDebounceFn((value) => {
+  if (!value || value.length === 0) {
+    return true
+  }
+  const origName = props.skill.name
+  if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
+    return true
+  }
+  return SkillsService.skillWithNameExists(route.params.projectId, value).then((remoteRes) => remoteRes)
+}, appConfig.formFieldDebounceInMs)
+
 const schema = object({
   'skillName': string()
     .trim()
     .required()
+    .min(appConfig.minNameLength)
+    .max(appConfig.maxSkillNameLength)
     .nullValueNotAllowed()
     .customNameValidator()
+    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => checkProjNameUnique(value))
     .label('Skill Name'),
   'skillId': string()
     .required()
@@ -62,8 +77,22 @@ const schema = object({
   'description': string()
     .max(appConfig.descriptionMaxLength)
     .label('Skill Description'),
-  'version': string()
-    .trim()
+  'pointIncrement': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxPointIncrement)
+    .label('Point Increment'),
+  'numPerformToCompletion': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxPointIncrement)
+    .label('Point Increment'),
+  'pointIncrementIntervalHrs': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxPointIncrement)
+    .label('Point Increment'),
+  'version': number()
     .required()
     .label('Version')
 })
@@ -75,10 +104,10 @@ const initialSkillData = {
   version: props.skill.verison || 0,
   pointIncrement: props.skill.pointIncrement || 100,
   numPerformToCompletion: props.skill.numPerformToCompletion || 1,
-  pointIncrementIntervalHrs: props.skill.pointIncrement || 8,
-  pointIncrementIntervalMins: props.skill.pointIncrement || 0,
-  numMaxOccurrencesIncrementInterval: props.skill.pointIncrement || 1,
-  numPointIncrementMaxOccurrences: props.skill.pointIncrement || 1,
+  pointIncrementIntervalHrs: props.skill.pointIncrementIntervalHrs || 8,
+  pointIncrementIntervalMins: props.skill.pointIncrementIntervalMins || 0,
+  numMaxOccurrencesIncrementInterval: props.skill.numMaxOccurrencesIncrementInterval || 1,
+  numPointIncrementMaxOccurrences: props.skill.numPointIncrementMaxOccurrences || 1,
   selfReportingType,
   selfReportingEnabled: selfReportingType !== null,
   description: props.skill.description || ''
@@ -143,6 +172,7 @@ const close = () => {
         showButtons
         :min="latestSkillVersion"
         :max="maxSkillVersion"
+        data-cy="skillVersion"
         class="ml-3"
         label="Version"
         name="version" />
@@ -151,7 +181,8 @@ const close = () => {
     <div class="flex">
       <SkillsNumberInput
         class="flex-1"
-        :min="0"
+        :min="1"
+        :max="appConfig.maxPointIncrement"
         :is-required="true"
         label="Point Increment"
         name="pointIncrement" />
@@ -160,6 +191,7 @@ const close = () => {
         class="flex-1 ml-2"
         showButtons
         :min="0"
+        :max="appConfig.maxNumPerformToCompletion"
         :is-required="true"
         label="Occurrences to Completion"
         name="numPerformToCompletion" />
@@ -167,7 +199,9 @@ const close = () => {
       <total-points-field class="ml-2" />
     </div>
 
-    <time-window-input class="mb-3"/>
+    <time-window-input
+      :time-window-enabled-default="skill.timeWindowEnabled"
+      class="mb-3"/>
 
     <self-reporting-type-input class="mt-5"/>
 

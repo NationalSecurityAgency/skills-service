@@ -19,10 +19,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
 })
 const emit = defineEmits(['input', 'keydown-enter'])
 
@@ -52,6 +48,7 @@ const inputNumFallthroughAttrs = computed(() =>{
     <InputNumber
       inputClass="w-3rem"
       class="w-full"
+      type="number"
       v-bind="inputNumFallthroughAttrs"
       v-model="value"
       @keydown.enter="onEnter"
@@ -59,7 +56,6 @@ const inputNumFallthroughAttrs = computed(() =>{
       :autofocus="autofocus"
       :id="name"
       :inputId="`input${name}`"
-      :disabled="disabled"
       :class="{ 'p-invalid': errorMessage }"
       :aria-invalid="errorMessage ? null : true"
       :aria-errormessage="`${name}Error`"
@@ -68,7 +64,7 @@ const inputNumFallthroughAttrs = computed(() =>{
       role="alert"
       class="p-error block"
       :data-cy="`${name}Error`"
-      :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
+      :id="`${name}Error`">{{ errorMessage || '' }}</small>
   </div>
 </template>
 

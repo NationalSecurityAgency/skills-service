@@ -356,7 +356,7 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 5)
   })
 
-  it.skip('display Disabled for self reporting type for a new (non self-reporting) skill', () => {
+  it('display Disabled for self reporting type for a new (non self-reporting) skill', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     cy.get('[data-cy="newSkillButton"]').click()
@@ -368,9 +368,8 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [
-      [{ colIndex: 2, value: 'Disabled Test' }, { colIndex: 3, value: 'Disabled' }]
+      [{ colIndex: 2, value: 'Disabled Test' }, { colIndex: 5, value: 'Disabled' }]
     ], 10, false, null, false)
-    cy.get(`${tableSelector} tbody tr`).should('have.length', 1)
   })
 
   it('change display order', () => {

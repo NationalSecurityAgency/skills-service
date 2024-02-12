@@ -4,6 +4,10 @@ import { useStore } from 'vuex'
 export const useAppConfig = () => {
   const store = useStore()
 
+  const toNumOr0 = (strNum) => {
+    return strNum ? Number(strNum) : 0
+  }
+
   const rankingAndProgressViewsEnabled = computed(() => {
     return (
       store.getters.config.rankingAndProgressViewsEnabled === true ||
@@ -26,6 +30,12 @@ export const useAppConfig = () => {
   const maxSubjectNameLength = store.getters.config.maxSubjectNameLength;
   const maxCustomLabelLength = store.getters.config.maxCustomLabelLength;
   const maxSkillVersion = store.getters.config.maxSkillVersion
+  const maxSkillNameLength = store.getters.config.maxSkillNameLength
+  const maxPointIncrement = toNumOr0(store.getters.config.maxPointIncrement)
+  const maxNumPerformToCompletion = toNumOr0(store.getters.config.maxNumPerformToCompletion)
+  const maxNumPointIncrementMaxOccurrences = toNumOr0(store.getters.config.maxNumPointIncrementMaxOccurrences)
+  const maxTimeWindowInMinutes = toNumOr0(store.getters.config.maxTimeWindowInMinutes)
+  const maxTimeWindowInHrs = maxTimeWindowInMinutes / 60
   return {
     rankingAndProgressViewsEnabled,
     docsHost,
@@ -40,6 +50,11 @@ export const useAppConfig = () => {
     paragraphValidationRegex,
     maxSubjectNameLength,
     maxCustomLabelLength,
-    maxSkillVersion
+    maxSkillVersion,
+    maxSkillNameLength,
+    maxPointIncrement,
+    maxNumPerformToCompletion,
+    maxNumPointIncrementMaxOccurrences,
+    maxTimeWindowInHrs
   }
 }

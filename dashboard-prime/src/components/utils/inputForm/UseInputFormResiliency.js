@@ -12,6 +12,7 @@ export const useInputFormResiliency = () => {
     currentReactiveModel: null
   }
   const loadFromStorageAndUpdateAsNeeded = (componentName, modelObj, setFieldValueFunction) => {
+    isInitializing.value = true
     return indexedDb.load(componentName).then((objFromStorage) => {
       if (objFromStorage) {
         for (const [key, value] of Object.entries(objFromStorage)) {
