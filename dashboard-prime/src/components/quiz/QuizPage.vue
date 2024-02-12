@@ -4,8 +4,8 @@ import { computed, onMounted, ref, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useFocusState } from '@/stores/UseFocusState.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import QuizService from '@/components/quiz/QuizService.js';
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
@@ -16,6 +16,7 @@ const router = useRouter()
 const route = useRoute()
 const quizSummaryState = useQuizSummaryState()
 const quizConfig = useQuizConfig()
+const focusState = useFocusState()
 
 onMounted(() => {
   quizConfig.loadQuizConfigState({ quizId: route.params.quizId })
@@ -81,22 +82,20 @@ function updateEditQuizInfo(quizSummary) {
 }
 
 function updateQuizDef(quizDef) {
-  QuizService.updateQuizDef(quizDef)
-      .then(() => {
-        const origId = route.params.quizId;
-        if (quizDef.quizId !== origId) {
-          editQuizInfo.value.quizDef.quizId = quizDef.quizId;
-          router.replace({name: route.name, params: {...route.params, quizId: quizDef.quizId}})
-              .then(() => {
-                quizSummaryState.loadQuizSummary(quizDef.quizId).then((quizSummary) => updateEditQuizInfo(quizSummary));
-              });
-        } else {
-          quizSummaryState.loadQuizSummary(route.params.quizId).then((quizSummary) => updateEditQuizInfo(quizSummary));
-        }
-        nextTick(() => {
-          announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
-        });
-      });
+  const origId = route.params.quizId
+  if (quizDef.quizId !== origId) {
+    editQuizInfo.value.quizDef.quizId = quizDef.quizId
+    router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
+      .then(() =>{
+        focusState.focusOnLastElement()
+      })
+  } else {
+    focusState.focusOnLastElement()
+  }
+  updateEditQuizInfo(quizDef)
+  quizSummaryState.quizSummary.name = quizDef.name
+  quizSummaryState.quizSummary.quizId = quizDef.quizId
+  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
 }
 </script>
 
@@ -146,8 +145,7 @@ function updateQuizDef(quizDef) {
         v-model="editQuizInfo.showDialog"
         :quiz="editQuizInfo.quizDef"
         :is-edit="editQuizInfo.isEdit"
-        @quiz-saved="updateQuizDef"
-        :enable-return-focus="true"/>
+        @quiz-saved="updateQuizDef" />
 
     <Navigation v-if="!isLoading" :nav-items="navItems">
     </Navigation>
