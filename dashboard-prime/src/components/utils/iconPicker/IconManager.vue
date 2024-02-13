@@ -347,7 +347,7 @@ const selectIcon = (icon, iconCss, iconPack) => {
 </script>
 
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div>
+    <div style="width: 50rem;">
       <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder"
              @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name">
       <Card>

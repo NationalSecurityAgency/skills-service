@@ -11,6 +11,7 @@ import HelpUrlInput from '@/components/utils/HelpUrlInput.vue';
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
 import IconManager from '@/components/utils/iconPicker/IconManager.vue';
+import OverlayPanel from 'primevue/overlaypanel';
 
 const model = defineModel()
 const props = defineProps({
@@ -21,6 +22,9 @@ const props = defineProps({
 const appConfig = useAppConfig()
 const emit = defineEmits(['hidden', 'subject-saved']);
 const route = useRoute()
+
+// const subjectId = defineModel('subjectId');
+// const subjectName = defineModel('subjectName');
 
 let formId = 'newSubjectDialog'
 let modalTitle = 'New Subject'
@@ -54,13 +58,14 @@ const title = computed(() => {
 const close = () => { model.value = false }
 
 const onSelectedIcon = (selectedIcon) => {
-  console.log(selectedIcon);
-  // value.iconClass = `${selectedIcon.css}`;
   displayIconManager.value = false;
+  currentIcon.value = selectedIcon.css;
+  op.value.hide();
 };
 
-const toggleIconDisplay = (shouldDisplay) => {
-  displayIconManager.value = shouldDisplay;
+const toggleIconDisplay = (event) => {
+  // displayIconManager.value = shouldDisplay;
+  op.value.toggle(event);
 };
 
 const checkSubjectNameUnique = (value) => {
@@ -126,9 +131,14 @@ const initialSubjData = {
   iconClass: props.subject.iconClass || 'fas fa-book',
 };
 
+let currentIcon = ref((props.subject.iconClass || 'fas fa-book'));
+let op = ref();
+
 const updateSubject = (values) => {
+  console.log(values);
   const subjToSave = {
     ...values,
+    // iconClass: currentIcon,
     originalSubjectId: props.subject.subjectId,
     projectId: route.params.projectId,
     isEdit: props.isEdit,
@@ -142,7 +152,7 @@ const updateSubject = (values) => {
     }
   })
 };
-const onSubjecdtSaved = (subject) =>{
+const onSubjectSaved = (subject) =>{
   emit('subject-saved', subject);
   close()
 }
@@ -160,13 +170,27 @@ const asyncLoadData = () => { return; };
       :initial-values="initialSubjData"
       :save-data-function="updateSubject"
       :enable-return-focus="true"
-      @saved="onSubjecdtSaved"
+      @saved="onSubjectSaved"
       @close="close">
     <template #default>
 
-      <div v-if="displayIconManager === false">
-        <icon-picker :startIcon="subject.iconClass" @select-icon="toggleIconDisplay(true)"
-                     class="mr-3"></icon-picker>
+<!--      <div v-if="displayIconManager === false">-->
+<!--        <icon-picker :startIcon="currentIcon" @select-icon="toggleIconDisplay"-->
+<!--                     class="mr-3"></icon-picker>-->
+
+      <button class="icon-button"
+              @click="toggleIconDisplay"
+              id="iconPicker"
+              @keypress.enter="toggleIconDisplay"
+              role="button"
+              aria-roledescription="icon selector button"
+              aria-label="icon selector"
+              tabindex="0"
+              data-cy="iconPicker">
+        <div class="text-primary" style="min-height: 4rem;">
+          <i :class="[currentIcon]" />
+        </div>
+      </button>
 
         <SkillsNameAndIdInput
           name-label="Subject Name"
@@ -194,15 +218,32 @@ const asyncLoadData = () => { return; };
                           name="helpUrl"
                           @keydown-enter="emit('keydown-enter')" />
 
-        </div>
-        <div v-else>
+<!--        </div>-->
+<!--        <div v-else>-->
+      <OverlayPanel ref="op" appendTo="body">
           <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
           <div class="text-right mr-2">
-            <SkillsButton variant="secondary" @click="toggleIconDisplay(false)" class="mt-4">Cancel Icon Selection</SkillsButton>
+            <SkillsButton variant="secondary" @click="toggleIconDisplay" class="mt-4">Cancel Icon Selection</SkillsButton>
           </div>
-        </div>
+      </OverlayPanel>
+<!--        </div>-->
     </template>
   </SkillsInputFormDialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+i {
+  font-size: 3rem;
+}
+
+.icon-button {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25em;
+  background-color: #fff;
+}
+
+.icon-button:disabled {
+  background-color: lightgrey;
+  cursor: none;
+}
+</style>
