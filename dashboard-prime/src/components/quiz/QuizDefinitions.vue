@@ -144,9 +144,7 @@ function deleteQuiz() {
       })
       .finally(() => {
         options.value.busy = false;
-        nextTick(() => {
-          announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
-        });
+        announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
       });
 }
 const showUpdateModal = (quizDef, isEdit = true) => {
