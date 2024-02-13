@@ -76,6 +76,7 @@ const schema = object({
     .label('Skill Id'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
+    .customDescriptionValidator()
     .label('Skill Description'),
   'pointIncrement': number()
     .required()
@@ -86,12 +87,37 @@ const schema = object({
     .required()
     .min(1)
     .max(appConfig.maxPointIncrement)
-    .label('Point Increment'),
+    .test(
+      'moreThanWindowOccurrences',
+      ({ label }) => `${label} must be >= Window's Max Occurrences`,
+      async (value, testContext) => testContext.parent.numPointIncrementMaxOccurrences <= value
+    )
+    .label('Occurrences'),
   'pointIncrementIntervalHrs': number()
     .required()
     .min(1)
     .max(appConfig.maxPointIncrement)
-    .label('Point Increment'),
+    .when('pointIncrementIntervalMins', {
+      is: 0,
+      then: (schema) => schema.min(1),
+      otherwise: (schema) => schema.min(0),
+    })
+    .label('Hours'),
+  'pointIncrementIntervalMins': number()
+    .required()
+    .min(1)
+    .max(60)
+    .label('Minutes'),
+  'numPointIncrementMaxOccurrences': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxNumPointIncrementMaxOccurrences)
+    .test(
+      'lessThanTotalOccurrences',
+      ({ label }) => `${label} must be <= total Occurrences to Completion`,
+      async (value, testContext) => testContext.parent.numPerformToCompletion >= value
+    )
+    .label('Max Occurrences'),
   'version': number()
     .required()
     .label('Version')
@@ -171,7 +197,6 @@ const close = () => {
       <SkillsNumberInput
         showButtons
         :min="latestSkillVersion"
-        :max="maxSkillVersion"
         data-cy="skillVersion"
         class="ml-3"
         label="Version"
@@ -182,7 +207,6 @@ const close = () => {
       <SkillsNumberInput
         class="flex-1"
         :min="1"
-        :max="appConfig.maxPointIncrement"
         :is-required="true"
         label="Point Increment"
         name="pointIncrement" />
@@ -191,7 +215,6 @@ const close = () => {
         class="flex-1 ml-2"
         showButtons
         :min="0"
-        :max="appConfig.maxNumPerformToCompletion"
         :is-required="true"
         label="Occurrences to Completion"
         name="numPerformToCompletion" />

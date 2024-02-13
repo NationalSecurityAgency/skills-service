@@ -18,7 +18,7 @@ const props = defineProps({
   autofocus: {
     type: Boolean,
     default: false
-  },
+  }
 })
 const emit = defineEmits(['input', 'keydown-enter'])
 
@@ -31,15 +31,18 @@ const onEnter = (event) => {
   emit('keydown-enter', event.target.value)
 }
 
-const filterAttrs = ['class'];
+const filterAttrs = ['class']
 const attrs = useAttrs()
-const inputNumFallthroughAttrs = computed(() =>{
+const inputNumFallthroughAttrs = computed(() => {
   return Object.fromEntries(
     Object.entries(attrs).filter(
-      ([key])=> !filterAttrs.includes(key)
+      ([key]) => !filterAttrs.includes(key)
     )
-  );
+  )
 })
+const handleOnInput = (event) => {
+  value.value = event.value
+}
 </script>
 
 <template>
@@ -52,6 +55,7 @@ const inputNumFallthroughAttrs = computed(() =>{
       v-bind="inputNumFallthroughAttrs"
       v-model="value"
       @keydown.enter="onEnter"
+      @input="handleOnInput"
       :data-cy="name"
       :autofocus="autofocus"
       :id="name"

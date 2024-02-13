@@ -55,6 +55,6 @@ export const useAppConfig = () => {
     maxPointIncrement,
     maxNumPerformToCompletion,
     maxNumPointIncrementMaxOccurrences,
-    maxTimeWindowInHrs
+    maxTimeWindowInHrs,
   }
 }

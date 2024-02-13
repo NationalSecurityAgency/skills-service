@@ -37,8 +37,6 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
     <div class="flex m-0">
       <SkillsNumberInput
         class="flex-1"
-        :min="0"
-        :max="appConfig.maxTimeWindowInHrs"
         showButtons
         :disabled="!timeWindowEnabled"
         label="Hours"
@@ -56,7 +54,6 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
       <SkillsNumberInput
         class="flex-1"
         :min="1"
-        :max="appConfig.maxNumPointIncrementMaxOccurrences"
         showButtons
         :disabled="!timeWindowEnabled"
         label="Window's Max Occurrences"
