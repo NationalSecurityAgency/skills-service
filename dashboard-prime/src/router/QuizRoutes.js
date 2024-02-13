@@ -15,7 +15,7 @@ const createQuizRoutes = () => {
     meta: {
       requiresAuth: true,
       announcer: {
-        message: 'Manage Test',
+        message: 'Manage Quiz',
       },
     },
     children: [{
@@ -25,7 +25,7 @@ const createQuizRoutes = () => {
       meta: {
         requiresAuth: true,
         announcer: {
-          message: 'Test or Survey',
+          message: 'Quiz or Survey',
         },
       },
     }, {
