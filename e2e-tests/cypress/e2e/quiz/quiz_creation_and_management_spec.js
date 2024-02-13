@@ -483,6 +483,7 @@ describe('Quiz CRUD Tests', () => {
     });
 
     it('edit quiz description with block quotes on the quiz page', function () {
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1').as('saveQuiz');
         // ignore warning 'TextSelection endpoint not pointing into a node with inline content (blockQuote)'
         Cypress.env('ignoreConsoleWarnings', true);
         cy.createQuizDef(1);
@@ -498,6 +499,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('button.quote').click({force: true})
         cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz')
 
         cy.visit('/administrator/quizzes/quiz1')
         cy.get('[data-cy="editQuizButton"]').click()
