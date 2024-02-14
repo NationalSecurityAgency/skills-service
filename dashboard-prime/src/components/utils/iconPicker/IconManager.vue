@@ -18,7 +18,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
-import Card from 'primevue/card';
+import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
 import fontAwesomeIconsCanonical from './font-awesome-index';
@@ -41,7 +41,6 @@ const props = defineProps(
             height: 100,
           };
         },
-        // validator: validateIconDimensions,
       },
       minCustomIconDimensions: {
         type: Object,
@@ -51,7 +50,6 @@ const props = defineProps(
             height: 48,
           };
         },
-        // validator: validateIconDimensions,
       },
     },
 )
@@ -59,8 +57,8 @@ const props = defineProps(
 onMounted(() => {
   IconManagerService.getIconIndex(route.params.projectId).then((response) => {
     if (response) {
-      definitiveCustomIconList = response.slice();
-      customIconList = response;
+      iconPacks.value[2].icons = response;
+      iconPacks.value[2].defaultIcons = response.slice();
     }
   });
 
@@ -86,17 +84,11 @@ onMounted(() => {
   // });
 });
 
-const faIconList = fontAwesomeIconsCanonical.icons.slice();
-const matIconList = materialIconsCanonical.icons.slice();
-let customIconList = [];
-
 const xsAndSmaller = '(max-width: 575.98px)';
 const smAndUp = '(min-width: 576px) and (max-width: 767.98px)';
 const mdAndUp = '(min-width: 768px) and (max-width: 991.98px)';
 const lgAndUp = '(min-width: 992px) and (max-width: 1199.98px)';
 const xlAndUp = '(min-width: 1200px)';
-
-let definitiveCustomIconList = [];
 
 let rowLength = 6;
 let acceptType = 'image/*';
@@ -106,30 +98,33 @@ let selectedIconPack = '';
 let activePack = ref(fontAwesomeIconsCanonical.iconPack);
 let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
-// let customIconList;
 let disableCustomUpload = false;
-// let rowItemComponent = IconRow;
 let currentCustomIconFile = null;
 
 let active = ref(0);
-const iconPacks = [
+
+const iconPacks = ref([
   {
     packName: fontAwesomeIcons.iconPack,
     headerIcon: 'fab fa-font-awesome-flag',
     icons: groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength),
-
+    defaultIcons: fontAwesomeIconsCanonical.icons.slice(),
   },
   {
     packName: materialIcons.iconPack,
     headerIcon: 'fas fa-file-alt',
     icons: groupIntoRows(materialIconsCanonical.icons, rowLength), //materialIcons.icons,
+    defaultIcons: materialIconsCanonical.icons.slice(),
   },
-  // {
-  //   packName: 'Custom',
-  //   headerIcon: 'fas fa-wrench',
-  //   icons: []
-  // }
-];
+  {
+    packName: 'Custom',
+    headerIcon: 'fas fa-wrench',
+    icons: [],
+    defaultIcons: [],
+  }
+]);
+
+let filterCriteria = ref('');
 
 function groupIntoRows(array, rl) {
   const result = [];
@@ -147,7 +142,6 @@ function groupIntoRows(array, rl) {
   if(row.length > 0) {
     result.push(row);
   }
-  result.push([]);
 
   return result;
 }
@@ -159,16 +153,12 @@ const searchPlaceholder = computed(() => {
 
 // methods
 const getIcon = (event, iconPack) => {
-  // selected = event.icon;
-  // selectedCss = event.cssClass;
-  // selectedIconPack = iconPack;
-
   selectIcon(event.icon, event.cssClass, iconPack);
 };
 
-const onChange = (tabIndex) => {
-  activePack.value = iconPacks[active.value].packName;
-  // filter(value);
+const onChange = () => {
+  activePack.value = iconPacks.value[active.value].packName;
+  filter();
 };
 
 const selectIcon = (icon, iconCss, iconPack) => {
@@ -181,37 +171,22 @@ const selectIcon = (icon, iconCss, iconPack) => {
   emit('selected-icon', result);
 };
 
-// const uploadUrl = computed(() => {
-//   let uploadUrl = `/admin/projects/${encodeURIComponent(route.params.projectId)}/icons/upload`;
-//   if (!route.params.projectId) {
-//     uploadUrl = '/supervisor/icons/upload';
-//   }
-//   return uploadUrl;
-// });
-//
-// const validateIconDimensions = (dimensions) => {
-//   const { width, height } = dimensions;
-//   let isValid = true;
-//
-//   if (!width || !height) {
-//     isValid = false;
-//   }
-//
-//   if (isValid) {
-//     isValid = width / height === 1;
-//   }
-//
-//   return isValid;
-// };
-//
-// const isValidCustomIconDimensions = (vm, width, height) => {
-//   let isValid = width / height === 1;
-//   if (isValid) {
-//     isValid = vm.minCustomIconDimensions.width <= width && vm.minCustomIconDimensions.height <= height;
-//     isValid = isValid && vm.maxCustomIconDimensions.width >= width && vm.maxCustomIconDimensions.height >= height;
-//   }
-//   return isValid;
-// };
+const uploadUrl = computed(() => {
+  let uploadUrl = `/admin/projects/${encodeURIComponent(route.params.projectId)}/icons/upload`;
+  if (!route.params.projectId) {
+    uploadUrl = '/supervisor/icons/upload';
+  }
+  return uploadUrl;
+});
+
+const isValidCustomIconDimensions = (width, height) => {
+  let isValid = width === height;
+  if (isValid) {
+    isValid = props.minCustomIconDimensions.width <= width && props.minCustomIconDimensions.height <= height;
+    isValid = isValid && props.maxCustomIconDimensions.width >= width && props.maxCustomIconDimensions.height >= height;
+  }
+  return isValid;
+};
 
 // extend('image', {
 //   ...image,
@@ -269,145 +244,110 @@ const selectIcon = (icon, iconCss, iconPack) => {
 //   },
 // });
 
-// beforeDestroy() {
-//   enquire.unregister(xsAndSmaller);
-//   enquire.unregister(smAndUp);
-//   enquire.unregister(mdAndUp);
-//   enquire.unregister(lgAndUp);
-//   enquire.unregister(xlAndUp);
-//   resetIcons();
-// },
+const filter = () => {
+  const value = filterCriteria.value.trim();
+  // const iconPack = activePack;
+  const regex = new RegExp(value, 'gi');
+  const filter = (icon) => icon.name.match(regex);
 
-// const filter: debounce(function filterIcons(val) {
-//   const value = val.trim();
-//   const iconPack = activePack;
-//   const regex = new RegExp(value, 'gi');
-//   const filter = (icon) => icon.name.match(regex);
-//
-//   if (iconPack === fontAwesomeIconsCanonical.iconPack) {
-//     const filtered = value.length === 0 ? groupIntoRows(faIconList, rowLength) : groupIntoRows(faIconList.filter(filter), rowLength);
-//     fontAwesomeIcons.icons = filtered;
-//   } else if (iconPack === materialIconsCanonical.iconPack) {
-//     const filtered = value.length === 0 ? groupIntoRows(matIconList, rowLength) : groupIntoRows(matIconList.filter(filter), rowLength);
-//     materialIcons.icons = filtered;
-//   } else if (iconPack === 'Custom Icons') {
-//     const filtered = value.length === 0 ? definitiveCustomIconList : definitiveCustomIconList.filter(filter);
-//     customIconList = filtered;
-//   }
-// }, 250),
+  const currentPack = iconPacks.value[active.value];
+  currentPack.icons = value?.length === 0 ? groupIntoRows(currentPack.defaultIcons, rowLength) : groupIntoRows(currentPack.defaultIcons.filter(filter), rowLength);
+};
 
-// const handleUploadedIcon = (response) => {
-//   IconManagerService.addCustomIconCSS(response.cssDefinition);
-//   const newIcon = { name: response.name, cssClass: response.cssClassName };
-//   definitiveCustomIconList.push(newIcon);
-//   customIconList = definitiveCustomIconList;
-//   selectIcon(response.name, response.cssClassName, 'custom-icon');
-// }
-//
-// const deleteIcon = (iconName, projectId) => {
-//   IconManagerService.deleteIcon(iconName, projectId).then(() => {
-//     definitiveCustomIconList = definitiveCustomIconList.filter((element) => element.filename !== iconName);
-//     customIconList = definitiveCustomIconList;
-//   });
-// };
+const handleUploadedIcon = (response) => {
+  IconManagerService.addCustomIconCSS(response.cssDefinition);
+  const newIcon = { name: response.name, cssClass: response.cssClassName };
+  iconPacks.value[2].defaultIcons.push(newIcon);
+  iconPacks.value[2].icons = iconPacks.value[2].defaultIcons;
+  selectIcon(response.name, response.cssClassName, 'custom-icon');
+}
 
+const deleteIcon = (iconName, projectId) => {
+  IconManagerService.deleteIcon(iconName, projectId).then(() => {
+    iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
+    iconPacks.value[2].icons = iconPacks.value[2].defaultIcons;
+  });
+};
 
+let uploader = ref();
+const beforeUpload = (upload) => {
+  const customIcon = new Image();
+  customIcon.src = upload.files[0].objectURL; //window.URL.createObjectURL(upload.files[0]);
+  customIcon.onload = () => {
+    const width = customIcon.naturalWidth;
+    const height = customIcon.naturalHeight;
+    const isValid = isValidCustomIconDimensions(width, height);
+    window.URL.revokeObjectURL(customIcon.src);
 
-// const customIconUploadRequest = (customIcon) => {
-//   $refs.validationProvider.validate(customIcon).then((res) => {
-//     if (res && res.valid) {
-//       disableCustomUpload = true;
-//       const data = new FormData();
-//       data.append('customIcon', customIcon);
-//       FileUploadService.upload(uploadUrl, data, (response) => {
-//         handleUploadedIcon(response.data);
-//         // successToast('Success!', 'File successfully uploaded');
-//         disableCustomUpload = false;
-//       }, () => {
-//         // errorToast('Error!', 'Encountered error when uploading icon');
-//         disableCustomUpload = false;
-//       });
-//     }
-//   });
-// };
-
-// const resetIcons = () => {
-//   if ($refs.iconFilterInput.value.length > 0) {
-//     setTimeout(() => {
-//       fontAwesomeIcons.icons = groupIntoRows(faIconList, rowLength);
-//       materialIcons.icons = groupIntoRows(matIconList, rowLength);
-//       customIconList = definitiveCustomIconList;
-//       if ($refs.iconFilterInput) {
-//         $refs.iconFilterInput.value = '';
-//       }
-//     }, 100);
-//   }
-// };
-
+    if (isValid) {
+      const data = new FormData();
+      data.append('customIcon', upload.files[0]);
+      FileUploadService.upload(uploadUrl.value, data, (response) => {
+        handleUploadedIcon(response.data);
+      }, () => {
+      });
+    } else {
+      console.log('Invalid icon size');
+    }
+  };
+}
 </script>
 
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div style="width: 50rem;">
-      <input type="text" class="form-control mb-3" :placeholder="searchPlaceholder"
-             @keyup="filter($event.target.value)" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name">
-      <Card>
-        <template #content>
-          <TabView content-class="mt-3" @tab-change="onChange" v-model:activeIndex="active">
-            <TabPanel v-for="pack in iconPacks" :key="pack.packName">
+    <div style="width: 70rem;">
+        <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
+               @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
+
+        <TabView content-class="mt-3" @tab-change="onChange" v-model:activeIndex="active">
+          <TabPanel v-for="pack in iconPacks" :key="pack.packName">
               <template #header>
                 <i :class="pack.headerIcon"></i> {{ pack.packName }}
               </template>
-              <span v-if="pack.icons.length === 0 && activePack === pack.packName">No icons matched your search</span>
-              <VirtualScroller v-if="activePack === pack.packName" :items="pack.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px;" data-cy="fontAwesomeVirtualList">
+              <span v-if="pack.icons?.length === 0 && activePack === pack.packName && filterCriteria?.length > 0">No icons matched your search</span>
+              <VirtualScroller v-if="activePack === pack.packName && pack.packName !== 'Custom' && pack.icons?.length > 0" :items="pack.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px;" data-cy="fontAwesomeVirtualList">
                 <template v-slot:item="{ item, options }">
                   <IconRow :item="item" :options="options" @icon-selected="getIcon($event, fontAwesomeIcons.iconPack)" />
                 </template>
               </VirtualScroller>
-            </TabPanel>
-
-<!--            <TabPanel>-->
-<!--              <template #header>-->
-<!--                <i class="fas fa-wrench"></i> Custom-->
-<!--              </template>-->
-<!--              <div data-cy="customIconUpload">-->
-<!--    &lt;!&ndash;            <ValidationProvider vid="customIcon" ref="validationProvider" name="Custom Icon" v-slot="{ errors }" rules="image|imageDimensions|duplicateFilename">&ndash;&gt;-->
-<!--    &lt;!&ndash;              <b-form-file&ndash;&gt;-->
-<!--    &lt;!&ndash;                  v-model="currentCustomIconFile"&ndash;&gt;-->
-<!--    &lt;!&ndash;                  placeholder="Drag your file here to upload"&ndash;&gt;-->
-<!--    &lt;!&ndash;                  @input="customIconUploadRequest" />&ndash;&gt;-->
-<!--                <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>-->
-
-<!--    &lt;!&ndash;            <b-alert show variant="danger" v-show="errors[0]" class="text-center" data-cy="customIconErr">&ndash;&gt;-->
-<!--    &lt;!&ndash;              <i class="fas fa-exclamation-circle"/> {{ errors[0] }} <i class="fas fa-exclamation-circle"/>&ndash;&gt;-->
-<!--    &lt;!&ndash;            </b-alert>&ndash;&gt;-->
-<!--    &lt;!&ndash;          </ValidationProvider>&ndash;&gt;-->
-
-<!--                <div class="row text-info justify-content-center mt-4">-->
-<!--                <div class="col-4 mb-4" v-for="{cssClassname, filename} in customIconList" :key="cssClassname">-->
-<!--                  <div class="icon-item">-->
-<!--                    <a-->
-<!--                      href="#"-->
-<!--                      @click.stop.prevent="getIcon({name, cssClassname}, 'Custom Icons')"-->
-<!--                      :class="`item ${selectedCss === cssClassname ? 'selected' : ''}`">-->
-<!--                      <span class="icon is-large text-info">-->
-<!--                        <i :class="cssClassname"></i>-->
-<!--                      </span>-->
-<!--                    </a>-->
-<!--                    <br/>-->
-<!--                    <span class="iconName">-->
-<!--                      <a class="delete-icon" ref="#" @click="deleteIcon(filename, route.params.projectId)">-->
-<!--                        <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>-->
-<!--                      </a>-->
-<!--                      <span>{{ filename }}</span>-->
-<!--                    </span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--              </div>-->
-<!--            </TabPanel>-->
-          </TabView>
-        </template>
-      </Card>
+              <FileUpload ref="uploader" @select="beforeUpload" v-if="pack.packName === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
+                <template #header="{ chooseCallback }">
+                  <div class="flex flex-wrap justify-content-between align-items-center flex-1 gap-2">
+                    <div class="flex gap-2">
+                      <Button @click="chooseCallback()">Browse</Button>
+                      <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
+                    </div>
+                  </div>
+                </template>
+                <template #content>
+                  <p>Drag and drop files to here to upload.</p>
+                  <div v-if="iconPacks[2].icons.length > 0">
+                    <div class="flex flex-wrap p-0 sm:p-5 gap-5">
+                      <div v-for="(icons) of iconPacks[2].icons">
+                        <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
+                          <div class="icon-item">
+                            <a href="#"
+                                @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
+                                :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
+                              <span class="icon is-large text-info">
+                                <i :class="file.cssClassname"></i>
+                              </span>
+                            </a>
+                            <br/>
+                            <span class="iconName">
+                              <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
+                                <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
+                              </a>
+                              <span>{{ file.filename }}</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </FileUpload>
+          </TabPanel>
+        </TabView>
     </div>
 </template>
 
@@ -449,7 +389,6 @@ const selectIcon = (icon, iconCss, iconPack) => {
 
   .delete-icon {
     left: 0;
-    visibility: hidden;
   }
 
   .is-tiny {
@@ -457,16 +396,5 @@ const selectIcon = (icon, iconCss, iconPack) => {
     width: .5rem;
     font-size:.5rem;
     padding-right: .5rem;
-  }
-
-  .icon-item:hover .delete-icon {
-    z-index: 1000;
-    display: inline-block;
-    visibility: visible;
-  }
-
-  .virtual-container {
-    height: 320px;
-    overflow-y: auto;
   }
 </style>

@@ -52,7 +52,6 @@ export default {
   },
   refreshCustomIconCss(projectId, isSupervisor) {
     const existingStyles = createCustomIconStyleElementIfNotExist()
-
     CustomIconService.getCustomIconCss(projectId, isSupervisor).then((response) => {
       if (response) {
         existingStyles.innerText = response

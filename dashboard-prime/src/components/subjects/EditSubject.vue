@@ -9,7 +9,6 @@ import InputSanitizer from '@/components/utils/InputSanitizer';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue';
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
-import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
 import IconManager from '@/components/utils/iconPicker/IconManager.vue';
 import OverlayPanel from 'primevue/overlaypanel';
 
@@ -23,9 +22,6 @@ const appConfig = useAppConfig()
 const emit = defineEmits(['hidden', 'subject-saved']);
 const route = useRoute()
 
-// const subjectId = defineModel('subjectId');
-// const subjectName = defineModel('subjectName');
-
 let formId = 'newSubjectDialog'
 let modalTitle = 'New Subject'
 if (props.isEdit) {
@@ -34,12 +30,9 @@ if (props.isEdit) {
 }
 
 let canAutoGenerateId = ref(true);
-let displayIconManager = ref(false);
-let tooltipShowing = ref(false);
 let restoredFromStorage = ref(false);
 let currentFocus = ref(null);
 let previousFocus = ref(null);
-let helpUrl = ref('');
 
 onMounted(() => {
   document.addEventListener('focusin', trackFocus);
@@ -58,13 +51,11 @@ const title = computed(() => {
 const close = () => { model.value = false }
 
 const onSelectedIcon = (selectedIcon) => {
-  displayIconManager.value = false;
   currentIcon.value = selectedIcon.css;
   op.value.hide();
 };
 
 const toggleIconDisplay = (event) => {
-  // displayIconManager.value = shouldDisplay;
   op.value.toggle(event);
 };
 
@@ -80,13 +71,6 @@ const checkSubjectIdUnique = (value) => {
     return true;
   }
   return SubjectsService.subjectWithIdExists(route.params.projectId, value);
-}
-
-const validateHelpUrl = (value) => {
-  if (!value) {
-    return true;
-  }
-  return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
 }
 
 const schema = {
@@ -112,7 +96,6 @@ const schema = {
       .max(appConfig.descriptionMaxLength)
       .customDescriptionValidator('Subject Description')
       .label('Subject Description'),
-  'iconClass': string().required(),
   'helpUrl': string()
       .test('help_url', 'Help URL must use http://, https://, or be a relative url.', (value) => {
         if (!value) {
@@ -136,10 +119,9 @@ let currentIcon = ref((props.subject.iconClass || 'fas fa-book'));
 let op = ref();
 
 const updateSubject = (values) => {
-  console.log(values);
   const subjToSave = {
     ...values,
-    // iconClass: currentIcon,
+    iconClass: currentIcon.value,
     originalSubjectId: props.subject.subjectId,
     projectId: route.params.projectId,
     isEdit: props.isEdit,
@@ -174,11 +156,6 @@ const asyncLoadData = () => { return; };
       @saved="onSubjectSaved"
       @close="close">
     <template #default>
-
-<!--      <div v-if="displayIconManager === false">-->
-<!--        <icon-picker :startIcon="currentIcon" @select-icon="toggleIconDisplay"-->
-<!--                     class="mr-3"></icon-picker>-->
-
       <button class="icon-button"
               @click="toggleIconDisplay"
               id="iconPicker"
@@ -193,15 +170,15 @@ const asyncLoadData = () => { return; };
         </div>
       </button>
 
-        <SkillsNameAndIdInput
-          name-label="Subject Name"
-          name-field-name="subjectName"
-          id-label="Subject ID"
-          id-field-name="subjectId"
-          id-suffix="Subject"
-          :name-to-id-sync-enabled="!props.isEdit" />
+      <SkillsNameAndIdInput
+        name-label="Subject Name"
+        name-field-name="subjectName"
+        id-label="Subject ID"
+        id-field-name="subjectId"
+        id-suffix="Subject"
+        :name-to-id-sync-enabled="!props.isEdit" />
 
-        <markdown-editor class="mt-5" name="description" />
+      <markdown-editor class="mt-5" name="description" />
 <!--          <div class="mt-3">-->
 <!--            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">-->
 <!--              <markdown-editor v-model="subjectInternal.description"-->
@@ -214,20 +191,14 @@ const asyncLoadData = () => { return; };
 <!--            </ValidationProvider>-->
 <!--          </div>-->
 
-          <help-url-input class="mt-3"
-                          :next-focus-el="previousFocus"
-                          name="helpUrl"
-                          @keydown-enter="emit('keydown-enter')" />
+      <help-url-input class="mt-3"
+                      :next-focus-el="previousFocus"
+                      name="helpUrl"
+                      @keydown-enter="emit('keydown-enter')" />
 
-<!--        </div>-->
-<!--        <div v-else>-->
-      <OverlayPanel ref="op" appendTo="body">
-          <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
-          <div class="text-right mr-2">
-            <SkillsButton variant="secondary" @click="toggleIconDisplay" class="mt-4">Cancel Icon Selection</SkillsButton>
-          </div>
+      <OverlayPanel ref="op" :show-close-icon="true">
+        <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
       </OverlayPanel>
-<!--        </div>-->
     </template>
   </SkillsInputFormDialog>
 </template>
