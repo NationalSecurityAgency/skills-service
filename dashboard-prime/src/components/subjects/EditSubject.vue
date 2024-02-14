@@ -110,6 +110,7 @@ const schema = {
       .label('Subject ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
+      .customDescriptionValidator('Subject Description')
       .label('Subject Description'),
   'iconClass': string().required(),
   'helpUrl': string()

@@ -48,22 +48,6 @@ const checkQuizIdUnique = useDebounceFn((value) => {
 
 }, appConfig.formFieldDebounceInMs)
 
-const customQuizDescriptionValidator = useDebounceFn((value, context) => {
-  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
-    return true
-  }
-
-  return DescriptionValidatorService.validateDescription(value, false).then((result) => {
-    if (result.valid) {
-      return true
-    }
-    if (result.msg) {
-      return context.createError({ message: `Quiz/Survey Description - ${result.msg}` })
-    }
-    return context.createError({ message: 'Quiz/Survey Description is invalid' })
-  })
-}, appConfig.formFieldDebounceInMs)
-
 const schema = object({
   'quizName': string()
       .trim()
@@ -87,8 +71,8 @@ const schema = object({
       .label('Type'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
+      .customDescriptionValidator('Quiz/Survey Description', false)
       .label('Description')
-      .test('customQuizDescriptionValidator', (value, context) => customQuizDescriptionValidator(value, context))
 })
 const loadDescription = () => {
   return QuizService.getQuizDef(props.quiz.quizId).then((data) => {

@@ -55,22 +55,6 @@ const checkProjIdUnique = useDebounceFn((value) => {
 
 }, appConfig.formFieldDebounceInMs)
 
-const customProjectDescriptionValidator = useDebounceFn((value, context) => {
-  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
-    return true
-  }
-  return DescriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value).then((result) => {
-    if (result.valid) {
-      return true
-    }
-    if (result.msg) {
-      return context.createError({ message: result.msg })
-    }
-    return context.createError({ message: 'Field is invalid' })
-  })
-}, appConfig.formFieldDebounceInMs)
-
-
 const schema = object({
   'projectName': string()
     .trim()
@@ -90,8 +74,8 @@ const schema = object({
     .label('Project Id'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
+    .customDescriptionValidator('Project Description', false, enableProtectedUserCommunity.value)
     .label('Project Description')
-    .test('customProjectDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
 })
 const initialProjData = {
   projectId: props.project.projectId || '',

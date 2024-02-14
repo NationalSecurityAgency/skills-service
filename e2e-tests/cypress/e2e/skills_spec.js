@@ -45,9 +45,9 @@ describe('Skills Tests', () => {
 
     // name causes id to be too long
     const msg = 'Skill ID cannot exceed 100 characters.';
+    // 96 becuase 'Skill' is appended to id
     const validNameButInvalidId = Array(96).fill('a').join('');
-    cy.get('[data-cy=skillName]').click();
-    cy.get('[data-cy=skillName]').fill(validNameButInvalidId);
+    cy.get('[data-cy=skillName]').type(validNameButInvalidId);
     cy.get('[data-cy=idError]').should('be.visible');
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
     cy.get('[data-cy=skillName]').type('{backspace}');
@@ -108,75 +108,83 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillName]').type('{selectall}Skill123');
     cy.get('[data-cy=skillNameError]').should('not.be.visible');
 
-    cy.get('[data-cy=skillVersion] [data-pc-section="input"]').should('have.value', 0)
-    cy.get('[data-cy=skillVersion] [data-pc-section="decrementbutton"]').should('have.class', 'p-disabled')
-    cy.get('[data-cy=skillVersion] [data-pc-section="incrementbutton"]').should('not.have.class', 'p-disabled').click()
-    cy.get('[data-cy=skillVersion] [data-pc-section="input"]').should('have.value', 1)
-    cy.get('[data-cy=skillVersion] [data-pc-section="decrementbutton"]').should('not.have.class', 'p-disabled')
-    cy.get('[data-cy=skillVersion] [data-pc-section="incrementbutton"]').should('have.class', 'p-disabled')
+    cy.get('[data-cy=skillVersion]').type('{selectall}1000');
+    cy.get('[data-cy=versionError]').contains('Version must be less than or equal to 999').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=skillVersion]').type('{selectall}2');
+    cy.get('[data-cy=versionError]').contains('Version 0 is the latest; max supported version is 1 (latest + 1)').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=skillVersion]').type('{selectall}1');
+    cy.get('[data-cy=versionError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
 
-    // TODO: uncomment
-    // cy.get('[data-cy="pointIncrement"]').type('{selectall}11111111111');
-    // cy.get('[data-cy=pointIncrementError]').contains('Point Increment must be less than or equal to 10000').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
-    // cy.get('[data-cy=pointIncrementError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    //
-    // cy.get('[data-cy=numPerformToCompletion]').type('{selectall}-5');
-    // cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion may only contain numeric characters.').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
-    // cy.get('[data-cy=skillOccurrencesError]').contains('Occurrences to Completion cannot exceed 10000.').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowCheckbox').click({force: true});
-    // cy.get('[data-cy=maxOccurrences]').type('{selectall}{del}');
-    // cy.get('[data-cy=skillMaxOccurrencesError]').contains('Window\'s Max Occurrences is required').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=maxOccurrences]').type('{selectall}5')
-    // cy.get('[data-cy=numPerformToCompletion]').type('{selectall}3');
-    // cy.get('[data-cy=skillOccurrencesError]').contains('Must be more than or equals to \'Max Occurrences Within Window\' field').should('be.visible');
-    // cy.get('[data-cy=skillMaxOccurrencesError]').contains('Must be less than or equals to \'Occurrences to Completion\' field');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=maxOccurrences]').type('{selectall}2');
-    // cy.get('[data-cy=skillOccurrencesError]').should('not.be.visible');
-    // cy.get('[data-cy=skillMaxOccurrencesError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    // cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1200');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    // cy.get('[data-cy=maxOccurrences]').type('{selectall}1000')
-    // cy.get('[data-cy=skillMaxOccurrencesError]').contains('Window\'s Max Occurrences cannot exceed 999.');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=maxOccurrences]').type('{selectall}999')
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    //
-    // cy.get('[data-cy=timeWindowHours]').type('{selectall}0');
-    // cy.get('[data-cy=skillHoursError]').contains('Hours must be > 0 if Minutes = 0');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowMinutes]').type('{selectall}90');
-    // cy.get('[data-cy=skillHoursError]').should('not.be.visible');
-    // cy.get('[data-cy=skillMinutesError]').should('be.visible');
-    // cy.get('[data-cy=skillMinutesError]').contains('Minutes must be 59 or less');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowMinutes]').type('{selectall}0');
-    // cy.get('[data-cy=skillMinutesError]').contains('Minutes must be > 0 if Hours = 0');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowHours]').type('{selectall}1');
-    // cy.get('[data-cy=skillHoursError]').should('not.be.visible');
-    // cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    //
-    // cy.get('[data-cy=timeWindowHours]').type('{selectall}721');
-    // cy.get('[data-cy=skillHoursError]').contains('Time Window must be less then 720 hours');
-    // cy.get('[data-cy=skillMinutesError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowHours]').type('{selectall}0');
-    // cy.get('[data-cy=timeWindowMinutes]').type('{selectall}43201');
-    // cy.get('[data-cy=skillMinutesError').contains('Minutes must be 59 or less');
-    // cy.get('[data-cy=skillHoursError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=timeWindowMinutes]').type('{selectall}59');
-    //
+
+    cy.get('[data-cy="pointIncrement"]').type('{selectall}11111111111');
+    cy.get('[data-cy=pointIncrementError]').contains('Point Increment must be less than or equal to 10000').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
+    cy.get('[data-cy=pointIncrementError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+
+    cy.get('[data-cy=numPerformToCompletion]').type('{selectall}{del}');
+    cy.get('[data-cy=numPerformToCompletionError]').contains('Occurrences is a required field').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1000000');
+    cy.get('[data-cy=numPerformToCompletionError]').contains('Occurrences must be less than or equal to 10000').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy=timeWindowCheckbox').click({force: true});
+    cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}{del}');
+    cy.get('[data-cy=numPointIncrementMaxOccurrencesError]').contains('Occurrences is a required field').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}5')
+    cy.get('[data-cy=numPerformToCompletion]').type('{selectall}3');
+    cy.get('[data-cy=numPerformToCompletionError]')
+      .contains('Occurrences must be >= Window\'s Max Occurrences').should('be.visible')
+    cy.get('[data-cy=numPointIncrementMaxOccurrencesError]')
+      .contains('Max Occurrences must be <= total Occurrences to Completion').should('be.visible')
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}2');
+    cy.get('[data-cy=numPerformToCompletionError]').should('not.be.visible');
+    cy.get('[data-cy=numPointIncrementMaxOccurrencesError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+    cy.get('[data-cy=numPerformToCompletion]').type('{selectall}1200');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+    cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}1000')
+    cy.get('[data-cy=numPointIncrementMaxOccurrencesError]').contains('Max Occurrences must be less than or equal to 999');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}999')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+
+    cy.get('[data-cy=pointIncrementIntervalHrs]').type('{selectall}0');
+    cy.get('[data-cy=pointIncrementIntervalHrsError]').contains('Hours must be > 0 if Minutes = 0');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}90');
+    cy.get('[data-cy=pointIncrementIntervalHrsError]').should('not.be.visible');
+    cy.get('[data-cy=pointIncrementIntervalMinsError]')
+      .contains('Minutes must be less than or equal to 60')
+      .should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}0');
+    cy.get('[data-cy=pointIncrementIntervalMinsError]').contains('Minutes must be > 0 if Hours = 0');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=pointIncrementIntervalHrs]').type('{selectall}1');
+    cy.get('[data-cy=pointIncrementIntervalHrsError]').should('not.be.visible');
+    cy.get('[data-cy=pointIncrementIntervalMinsError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+
+    cy.get('[data-cy=pointIncrementIntervalHrs]').type('{selectall}721');
+    cy.get('[data-cy=pointIncrementIntervalHrsError]').contains('Hours must be less than or equal to 720');
+    cy.get('[data-cy=pointIncrementIntervalMinsError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=pointIncrementIntervalHrs]').type('{selectall}0');
+    cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}43201');
+    cy.get('[data-cy=pointIncrementIntervalMinsError').contains('Minutes must be less than or equal to 60');
+    cy.get('[data-cy=pointIncrementIntervalHrsError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59');
+
     // //helpUrl
     // cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
     // cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
@@ -921,7 +929,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillOverviewTotalpoints]').contains('10 repetitions to Completion').should('be.visible');
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click();
     cy.get('[data-cy=timeWindowCheckbox]').click({force: true});
-    cy.get('[data-cy=timeWindowMinutes]').type('{selectall}59');
+    cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59');
     cy.get('[data-cy=saveDialogBtn]').click();
     cy.wait('@afterIdEdit');
     cy.contains('8 Hours 59 Minutes').should('be.visible');

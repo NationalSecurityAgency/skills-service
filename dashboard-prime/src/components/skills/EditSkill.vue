@@ -76,7 +76,7 @@ const schema = object({
     .label('Skill Id'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
-    .customDescriptionValidator()
+    .customDescriptionValidator('Skill Description')
     .label('Skill Description'),
   'pointIncrement': number()
     .required()
@@ -95,18 +95,23 @@ const schema = object({
     .label('Occurrences'),
   'pointIncrementIntervalHrs': number()
     .required()
-    .min(1)
-    .max(appConfig.maxPointIncrement)
-    .when('pointIncrementIntervalMins', {
-      is: 0,
-      then: (schema) => schema.min(1),
-      otherwise: (schema) => schema.min(0),
-    })
+    .min(0)
+    .max(appConfig.maxTimeWindowInHrs)
+    .test(
+      'mustHaveHoursIfMinsAre0',
+      'Hours must be > 0 if Minutes = 0',
+      async (value, testContext) => testContext.parent.pointIncrementIntervalMins > 0 || value > 0
+    )
     .label('Hours'),
   'pointIncrementIntervalMins': number()
     .required()
-    .min(1)
+    .min(0)
     .max(60)
+    .test(
+      'mustHaveMinsIfHoursAre0',
+      'Minutes must be > 0 if Hours = 0',
+      async (value, testContext) => testContext.parent.pointIncrementIntervalHrs > 0 || value > 0
+    )
     .label('Minutes'),
   'numPointIncrementMaxOccurrences': number()
     .required()
@@ -120,6 +125,13 @@ const schema = object({
     .label('Max Occurrences'),
   'version': number()
     .required()
+    .min(0)
+    .max(appConfig.maxSkillVersion)
+    .test(
+      'maxNextVersion',
+      ({ label }) => `${label} ${latestSkillVersion.value} is the latest; max supported version is 1 (latest + 1)`,
+      async (value) => (latestSkillVersion.value + 1) >= value
+    )
     .label('Version')
 })
 const selfReportingType = props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null
@@ -194,13 +206,15 @@ const close = () => {
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 
-      <SkillsNumberInput
-        showButtons
-        :min="latestSkillVersion"
-        data-cy="skillVersion"
-        class="ml-3"
-        label="Version"
-        name="version" />
+      <div class="max-w-10rem">
+        <SkillsNumberInput
+          showButtons
+          :min="latestSkillVersion"
+          data-cy="skillVersion"
+          class="ml-3"
+          label="Version"
+          name="version" />
+      </div>
     </div>
 
     <div class="flex">

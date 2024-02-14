@@ -22,6 +22,7 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
     legend="Time Window"
     :pt="{ toggler: { class: 'py-2 px-4' }, content: { class: 'p-0' }, toggleableContent: { class: 'p-0' }, root: { class: 'pt-3' } }"
     :toggleable="true"
+    data-cy="timeWindowInput"
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
     <div class="flex align-items-center mb-2">
@@ -31,6 +32,7 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         v-model="timeWindowEnabled"
         inputId="timeWindowEnabled"
         name="timeWindowEnabled"
+        data-cy="timeWindowCheckbox"
         :value="true" />
       <label for="timeWindowEnabled" class="ml-2 font-italic">Time Window Enabled</label>
     </div>
@@ -46,7 +48,6 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         class="flex-1 mx-3"
         showButtons
         :min="0"
-        :max="60"
         :disabled="!timeWindowEnabled"
         label="Minutes"
         name="pointIncrementIntervalMins" />
@@ -56,6 +57,7 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         :min="1"
         showButtons
         :disabled="!timeWindowEnabled"
+        data-cy="maxOccurrences"
         label="Window's Max Occurrences"
         name="numPointIncrementMaxOccurrences" />
 
