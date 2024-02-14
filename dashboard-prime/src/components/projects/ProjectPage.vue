@@ -172,9 +172,9 @@ const loadProjectDetailsState = (payload) => {
 
 const copyAndDisplayShareProjInfo = () => {
   const host = window.location.origin;
-  shareUrl = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`;
+  shareUrl.value = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`;
   navigator.clipboard.writeText(shareUrl).then(() => {
-    shareProjModal = true;
+    shareProjModal.value = true;
   });
 };
 

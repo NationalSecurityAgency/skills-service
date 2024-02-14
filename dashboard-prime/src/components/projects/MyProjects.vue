@@ -26,7 +26,7 @@ const newProject = ref({
   isEdit: false,
   project: {},
 });
-const showSearchProjectModal = false;
+const showSearchProjectModal = ref(false);
 const sortOrder = {
   loading: false,
   loadingProjectId: '-1',
