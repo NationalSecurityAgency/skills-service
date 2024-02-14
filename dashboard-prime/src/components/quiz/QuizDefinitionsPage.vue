@@ -33,6 +33,7 @@ function openNewTestModal() {
 <template>
   <div>
     <SubPageHeader ref="quizDefPageSubPageHeader"
+                   size="small"
                    title="Quizzes And Surveys"
                    action="Quiz/Survey"
                    aria-label="Create New Quiz or Survey"
