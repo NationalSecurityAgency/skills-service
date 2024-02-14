@@ -54,7 +54,7 @@ const isRootUser = computed(() => {
 
 // Functions
 const pinModalClosed = () => {
-  showSearchProjectModal = false;
+  showSearchProjectModal.value = false;
   loadProjects();
   nextTick(() => {
     this.$refs.pinProjectsButton.focus();
