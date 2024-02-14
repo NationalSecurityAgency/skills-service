@@ -132,7 +132,10 @@ const schema = object({
       ({ label }) => `${label} ${latestSkillVersion.value} is the latest; max supported version is 1 (latest + 1)`,
       async (value) => (latestSkillVersion.value + 1) >= value
     )
-    .label('Version')
+    .label('Version'),
+  'helpUrl': string()
+    .urlValidator()
+    .label('Help URL'),
 })
 const selfReportingType = props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null
 const initialSkillData = {

@@ -6,11 +6,10 @@ export const useSkillsState = defineStore('skillsState',  () => {
   const skill = ref(null);
   const loadingSkill = ref(false);
 
-  function loadSkill(payload) {
+  function loadSkill(projectId, subjectId, skillId) {
     loadingSkill.value = true;
     return new Promise((resolve, reject) => {
-      SkillsService.getSkillDetails(payload.projectId, payload.subjectId, payload.skillId).then((response) => {
-        const subjectId = { payload }
+      SkillsService.getSkillDetails(projectId, subjectId, skillId).then((response) => {
         skill.value = Object.assign(response, { subjectId });
         resolve(response)
       }).catch((error) => reject(error)).finally(() => {

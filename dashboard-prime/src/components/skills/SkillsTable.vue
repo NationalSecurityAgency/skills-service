@@ -461,7 +461,8 @@ const skillsTable = ref(null)
       <template #expansion="slotProps">
         <child-row-skills-display
           :skill="slotProps.data"
-          :project-id="route.params.projectId" />
+          :reload-skill-async="true"
+        />
       </template>
       <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>

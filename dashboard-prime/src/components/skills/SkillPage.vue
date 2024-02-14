@@ -90,11 +90,8 @@ const displayEdit = () => {
 const loadData = () => {
   isLoadingData.value = true;
   const { projectId, subjectId } = route.params;
-  skillsState.loadSkill({
-    projectId: route.params.projectId,
-    subjectId: route.params.subjectId,
-    skillId: route.params.skillId,
-  }).then(() => {
+  skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
+    .then(() => {
     headerOptions.value = buildHeaderOptions(skillsState.skill);
     if (subjectState.subject.value) {
       isLoadingData.value = false;

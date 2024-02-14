@@ -97,13 +97,8 @@ const schema = {
       .customDescriptionValidator('Subject Description')
       .label('Subject Description'),
   'helpUrl': string()
-      .test('help_url', 'Help URL must use http://, https://, or be a relative url.', (value) => {
-        if (!value) {
-          return true;
-        }
-        return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
-      })
-  // .test('customDescriptionValidator', (value, context) => customProjectDescriptionValidator(value, context))
+    .urlValidator()
+    .label('Help URL'),
 };
 
 const initialSubjData = {

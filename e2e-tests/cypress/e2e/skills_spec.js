@@ -73,7 +73,6 @@ describe('Skills Tests', () => {
   it('validation', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
     cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-    cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
     cy.intercept({
       method: 'GET',
       url: '/admin/projects/proj1/subjects/subj1'
@@ -117,7 +116,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillVersion]').type('{selectall}1');
     cy.get('[data-cy=versionError]').should('not.be.visible');
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-
 
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11111111111');
     cy.get('[data-cy=pointIncrementError]').contains('Point Increment must be less than or equal to 10000').should('be.visible');
@@ -184,75 +182,69 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=pointIncrementIntervalHrsError]').should('not.be.visible');
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
     cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59');
-
-    // //helpUrl
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
-    // cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
-    // cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
-    // cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
-    // cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
-    // cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-    //
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('https://');
-    // cy.wait('@customUrlValidation');
-    // cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    //
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('https://---??..??##');
-    // cy.wait('@customUrlValidation');
-    // cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-    // // trailing space should work now
-    // cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
-    // cy.wait('@customUrlValidation');
-    // cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
-    // cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
-
   });
 
-  it.skip('edit number of occurrences', () => {
+  it('help url validation', () => {
+    cy.intercept('POST', '/api/validation/url').as('customUrlValidation');
+    cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="newSkillButton"]').click();
+
+    cy.get('[data-cy=skillName]').type('name')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+
+    cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
+    cy.get('[data-cy=skillHelpUrlError]')
+      .should('be.visible')
+      .contains('Help URL/Path must start with \"/\" or');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    cy.get('[data-cy=skillHelpUrl]').clear().type('/foo?p1=v1&p2=v2');
+    cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+    cy.get('[data-cy=skillHelpUrl]').clear().type('http://foo.bar?p1=v1&p2=v2');
+    cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+    cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2');
+    cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+
+    cy.get('[data-cy=skillHelpUrl]').clear().type('https://');
+    cy.wait('@customUrlValidation');
+    cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+
+    cy.get('[data-cy=skillHelpUrl]').clear().type('https://---??..??##');
+    cy.wait('@customUrlValidation');
+    cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+    // trailing space should work now
+    cy.get('[data-cy=skillHelpUrl]').clear().type('https://foo.bar?p1=v1&p2=v2 ');
+    cy.wait('@customUrlValidation');
+    cy.get('[data-cy=skillHelpUrlError]').should('not.be.visible');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
+  })
+
+  it('edit number of occurrences', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill');
     cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill');
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/proj1/subjects/subj1'
-    }).as('loadSubject');
 
-    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"]';
-    const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_Skill1Skill"]';
+    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-section="input"]';
     cy.visit('/administrator/projects/proj1/subjects/subj1');
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
+    cy.get('[data-cy=skillName]').type('Skill 1')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
-    cy.wait('@loadSubject');
-
-        cy.get('[data-cy="newSkillButton"]').click();
-        cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
-        cy.get('#skillName').type('Skill 1')
-
-    cy.clickSave()
-    cy.wait('@postNewSkill');
-
-
-    cy.get(selectorSkillsRowToggle).click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points');
 
     cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
-    cy.wait('@getSkill')
-
     cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
     cy.get(selectorOccurrencesToCompletion).type('{backspace}10')
     cy.get(selectorOccurrencesToCompletion).should('have.value', '10')
 
-    cy.clickSave()
-    cy.wait('@postNewSkill');
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
-    cy.get(selectorSkillsRowToggle).click()
+    // cy.get(selectorSkillsRowToggle).click()
     cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('1,000 Points')
   });
 

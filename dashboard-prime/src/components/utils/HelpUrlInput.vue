@@ -52,8 +52,8 @@ const handleEscape = () => {
     <small
         role="alert"
         class="p-error"
-        :data-cy="`${name}Error`"
-        :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
+        data-cy="skillHelpUrlError"
+        :id="`${name}Error`">{{ errorMessage || '' }}</small>
   </div>
 </template>
 

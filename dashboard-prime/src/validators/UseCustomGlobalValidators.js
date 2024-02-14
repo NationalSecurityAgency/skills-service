@@ -43,17 +43,38 @@ export const useCustomGlobalValidators = () => {
     return this.test("customDescriptionValidator", null, (value, context) => validateName(value, context));
   }
 
-
-
   function nullValueNotAllowed() {
     return this.test('nullValueNotAllowed', 'Null value is not allowed', (value) => !value || value.trim().toLowerCase() !== 'null');
   }
 
-  const addValidators = () => {
+  function urlValidator(fieldName = 'Help URL/Path') {
+    const appConfig = useAppConfig()
+    const validateName = useDebounceFn((value, context) => {
+      if (!value || value.trim().length === 0) {
+        return true;
+      }
 
+      const properStart = value.startsWith('http') || value.startsWith('https') || value.startsWith('/')
+      if (!properStart) {
+        return context.createError({ message:`${fieldName} must start with "/" or "http(s)`})
+      }
+
+      return CustomValidatorsService.validateUrl(value).then((result) => {
+        if (!result.valid) {
+          return context.createError({ message: result.msg });
+        }
+        return true;
+      });
+    }, appConfig.formFieldDebounceInMs)
+
+    return this.test("urlValidator", null, (value, context) => validateName(value, context));
+  }
+
+  const addValidators = () => {
     addMethod(string, "customNameValidator", customNameValidator);
     addMethod(string, "nullValueNotAllowed", nullValueNotAllowed);
     addMethod(string, 'customDescriptionValidator', customDescriptionValidator)
+    addMethod(string, 'urlValidator', urlValidator)
   }
 
   return {

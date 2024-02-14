@@ -1,11 +1,12 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import Badge from 'primevue/badge'
 import Card from 'primevue/card'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import SkillsService from '@/components/skills/SkillsService'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
@@ -13,50 +14,39 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
+const numberFormat = useNumberFormat()
 const props = defineProps({
-  projectId: {
-    type: String
-  },
-  subjectId: {
-    type: String
-  },
-  parentSkillId: {
-    type: String
-  },
   skill: {
-    type: Object
+    type: Object,
+    required: true
   },
-  // increment this counter to force component to reload data from the server
-  refreshCounter: {
-    type: Number,
-    default: 0
-  }
+  reloadSkillAsync: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-let loading = ref({
-  skills: true
-})
+let loading = ref(true)
 let skillInfo = ref({})
 
 onMounted(() => {
-  loadSkills()
+  loadSkill()
 })
-//
-// refreshCounter() {
-//   this.loadSkills();
-// },
-// skill(val) {
-//   this.skillInfo = val;
-// },
+
+if (props.reloadSkillAsync) {
+
+  watch(() => props.skill,
+    () => {
+      loadSkill()
+    },
+    { deep: true })
+
+}
 
 // computed
-const isLoading = computed(() => {
-  return loading.skills // || config.isLoadingProjConfig.value;
-})
-
-const skillId = computed(() => {
-  return SkillReuseIdUtil.removeTag(skillInfo.value.skillId)
-})
+// const skillId = computed(() => {
+//   return SkillReuseIdUtil.removeTag(skillInfo.value.skillId)
+// })
 
 const totalPoints = computed(() => {
   return skillInfo.value.totalPoints
@@ -120,25 +110,25 @@ const isDisabled = computed(() => {
 })
 
 // methods
-const loadSkills = () => {
-  loading.skills = true
-  if (props.skill) {
+const loadSkill = () => {
+  loading.value = true
+  if (!props.reloadSkillAsync) {
     skillInfo.value = props.skill
-    loading.value.skills = false
+    loading.value = false
   } else {
-    SkillsService.getSkillDetails(props.projectId, props.subjectId, props.parentSkillId)
+    SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
       .then((response) => {
         skillInfo.value = response
       })
       .finally(() => {
-        loading.value.skills = false
+        loading.value = false
       })
   }
 }
 </script>
 
 <template>
-  <loading-container class="child-row" v-bind:is-loading="isLoading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
+  <loading-container class="child-row" v-bind:is-loading="loading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
     <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
       This skill was <b>imported</b> from the
       <Badge class=""><i class="fas fa-book"></i> CATALOG</Badge>
@@ -164,13 +154,13 @@ const loadSkills = () => {
     <div class="sm:flex">
       <div class="flex-1 sm:mr-2 mb-2">
         <media-info-card
-          :title="`${totalPoints} Points`"
+          :title="`${numberFormat.pretty(totalPoints)} Points`"
           class="h-full"
           icon-class="fas fa-calculator text-success"
           data-cy="skillOverviewTotalpoints">
-          <strong>{{ skillInfo.pointIncrement }}</strong> points <i
-          class="fa fa-times text-muted" aria-hidden="true" />
-          <strong> {{ skillInfo.numPerformToCompletion }}</strong> repetition<span
+          <strong>{{ numberFormat.pretty(skillInfo.pointIncrement) }}</strong> points <i
+          class="fa fa-times text-muted mr-2" aria-hidden="true" />
+          <strong> {{ numberFormat.pretty(skillInfo.numPerformToCompletion) }}</strong> repetition<span
           v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
