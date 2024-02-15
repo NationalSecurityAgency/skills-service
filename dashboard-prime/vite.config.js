@@ -40,13 +40,17 @@ export default defineConfig({
       '^/supervisor/': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
-      '^/skills-websocket/' : proxyConf,
       '^/resetPassword$' : proxyConf,
       '^/performPasswordReset$' : proxyConf,
       '^/isFeatureSupported$' : proxyConf,
       '^/resendEmailVerification/' : proxyConf,
       '^/verifyEmail$' : proxyConf,
       '^/userEmailIsVerified/' : proxyConf,
+      '^/skills-websocket/info' : proxyConf,
+      '^/skills-websocket/.*/websocket$' : {
+        target: 'ws://localhost:8080',
+        ws: true,
+      },
     },
   }
 })
