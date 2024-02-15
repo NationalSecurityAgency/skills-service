@@ -20,12 +20,12 @@ import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
+import enquire from 'enquire.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
 import fontAwesomeIconsCanonical from './font-awesome-index';
 import materialIconsCanonical from './material-index';
 import IconManagerService from './IconManagerService.js';
 import IconRow from './IconRow.vue';
-import GroupedIcons from './GroupedIcons.js';
 
 const route = useRoute();
 const emit = defineEmits(['selected-icon']);
@@ -62,26 +62,29 @@ onMounted(() => {
     }
   });
 
-  // enquire.register(xsAndSmaller, () => {
-  //   rowLength = 2;
-  //   groupRows();
-  // });
-  // enquire.register(smAndUp, () => {
-  //   rowLength = 3;
-  //   groupRows();
-  // });
-  // enquire.register(mdAndUp, () => {
-  //   rowLength = 3;
-  //   groupRows();
-  // });
-  // enquire.register(lgAndUp, () => {
-  //   rowLength = 5;
-  //   groupRows();
-  // });
-  // enquire.register(xlAndUp, () => {
-  //   rowLength = 6;
-  //   groupRows();
-  // });
+  enquire.register(xsAndSmaller, () => {
+    rowLength = 2;
+    modalWidth.value = "25rem";
+  });
+  enquire.register(smAndUp, () => {
+    rowLength = 3;
+    modalWidth.value = "30rem";
+  });
+  enquire.register(mdAndUp, () => {
+    rowLength = 3;
+    modalWidth.value = "40rem";
+  });
+  enquire.register(lgAndUp, () => {
+    rowLength = 5;
+    modalWidth.value = "60rem";
+  });
+  enquire.register(xlAndUp, () => {
+    rowLength = 6;
+    modalWidth.value = "70rem";
+  });
+
+  iconPacks.value[0].icons = groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength);
+  iconPacks.value[1].icons = groupIntoRows(materialIconsCanonical.icons, rowLength);
 });
 
 const xsAndSmaller = '(max-width: 575.98px)';
@@ -90,6 +93,7 @@ const mdAndUp = '(min-width: 768px) and (max-width: 991.98px)';
 const lgAndUp = '(min-width: 992px) and (max-width: 1199.98px)';
 const xlAndUp = '(min-width: 1200px)';
 
+let modalWidth = ref("70rem");
 let rowLength = 6;
 let acceptType = 'image/*';
 let selected = '';
@@ -246,7 +250,6 @@ const isValidCustomIconDimensions = (width, height) => {
 
 const filter = () => {
   const value = filterCriteria.value.trim();
-  // const iconPack = activePack;
   const regex = new RegExp(value, 'gi');
   const filter = (icon) => icon.name.match(regex);
 
@@ -272,7 +275,7 @@ const deleteIcon = (iconName, projectId) => {
 let uploader = ref();
 const beforeUpload = (upload) => {
   const customIcon = new Image();
-  customIcon.src = upload.files[0].objectURL; //window.URL.createObjectURL(upload.files[0]);
+  customIcon.src = upload.files[0].objectURL;
   customIcon.onload = () => {
     const width = customIcon.naturalWidth;
     const height = customIcon.naturalHeight;
@@ -294,7 +297,7 @@ const beforeUpload = (upload) => {
 </script>
 
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div style="width: 70rem;">
+    <div :style="{ width: modalWidth }">
         <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
                @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
 
@@ -304,7 +307,7 @@ const beforeUpload = (upload) => {
                 <i :class="pack.headerIcon"></i> {{ pack.packName }}
               </template>
               <span v-if="pack.icons?.length === 0 && activePack === pack.packName && filterCriteria?.length > 0">No icons matched your search</span>
-              <VirtualScroller v-if="activePack === pack.packName && pack.packName !== 'Custom' && pack.icons?.length > 0" :items="pack.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px;" data-cy="fontAwesomeVirtualList">
+              <VirtualScroller v-if="activePack === pack.packName && pack.packName !== 'Custom' && pack.icons?.length > 0" :items="pack.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px; width: 100%;" data-cy="virtualIconList">
                 <template v-slot:item="{ item, options }">
                   <IconRow :item="item" :options="options" @icon-selected="getIcon($event, fontAwesomeIcons.iconPack)" />
                 </template>

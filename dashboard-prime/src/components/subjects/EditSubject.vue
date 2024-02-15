@@ -151,7 +151,7 @@ const asyncLoadData = () => { return; };
       @saved="onSubjectSaved"
       @close="close">
     <template #default>
-      <button class="icon-button"
+      <button class="icon-button surface-border border-round-sm"
               @click="toggleIconDisplay"
               id="iconPicker"
               @keypress.enter="toggleIconDisplay"
@@ -204,9 +204,10 @@ i {
 }
 
 .icon-button {
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 0.25em;
-  background-color: #fff;
+  cursor: pointer;
+  height: 100px;
+  width: 100px;
+  background-color: transparent;
 }
 
 .icon-button:disabled {

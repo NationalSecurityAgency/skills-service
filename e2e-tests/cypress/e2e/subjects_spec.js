@@ -54,7 +54,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type(providedName);
+        cy.get('[data-cy="subjectName"]').type(providedName);
         cy.wait('@nameExists');
         cy.getIdField().should('have.value', expectedId);
 
@@ -74,7 +74,7 @@ describe('Subjects Tests', () => {
     cy.wait('@loadSubjects');
     cy.get('[data-cy="btn_Subjects"]').click();
 
-    cy.get('[data-cy="subjectNameInput"]').type(providedName);
+    cy.get('[data-cy="subjectName"]').type(providedName);
     cy.wait('@nameExists');
 
     cy.clickSave();
@@ -94,11 +94,11 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type(providedName);
+        cy.get('[data-cy="subjectName"]').type(providedName);
         cy.wait('@nameExists');
         cy.getIdField().should('have.value', expectedId);
 
-        cy.get('[data-cy="subjectNameInput"]').type('{enter}');
+        cy.get('[data-cy="subjectName"]').type('{enter}');
         cy.wait('@postNewSubject');
 
         cy.contains('ID: Lotsofspecial')
@@ -111,7 +111,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
 
         cy.get('[data-cy=btn_Subjects]').focus().realPress("Enter");
-        cy.get('[data-cy="subjectNameInput"]').should('have.value', '');
+        cy.get('[data-cy="subjectName"]').should('have.value', '');
         cy.get('#nameError').should('have.value', '');
         cy.get('[data-cy=closeDialogBtn]').click();
         cy.get('[data-cy="titleLink"]').should('not.exist');
@@ -128,11 +128,11 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type(providedName);
+        cy.get('[data-cy="subjectName"]').type(providedName);
         cy.wait('@nameExists');
         cy.getIdField().should('have.value', expectedId);
 
-        cy.get('[data-cy="subjectNameInput"]').type('{enter}');
+        cy.get('[data-cy="subjectName"]').type('{enter}');
         cy.wait('@postNewSubject');
 
         cy.contains('ID: test')
@@ -140,7 +140,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=editBtn]').focus();
         cy.realPress("Enter");
 
-        cy.get('[data-cy="subjectNameInput"]').contains('have.value', 'test');
+        cy.get('[data-cy="subjectName"]').contains('have.value', 'test');
         cy.get('#nameError').should('have.value', '');
         cy.get('[data-cy=closeDialogBtn]').click();
         cy.contains('test');
@@ -175,12 +175,12 @@ describe('Subjects Tests', () => {
         // name causes id to be too long
         const msg = 'Subject ID must be at most 50 characters';
         const validNameButInvalidId = Array(44).fill('a').join('');
-        cy.get('[data-cy="subjectNameInput"]').click();
-        // cy.get('[data-cy="subjectNameInput"]').invoke('val', validNameButInvalidId).trigger('input');
-        cy.get('[data-cy="subjectNameInput"]').type(validNameButInvalidId);
+        cy.get('[data-cy="subjectName"]').click();
+        // cy.get('[data-cy="subjectName"]').invoke('val', validNameButInvalidId).trigger('input');
+        cy.get('[data-cy="subjectName"]').type(validNameButInvalidId);
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
-        cy.get('[data-cy="subjectNameInput"]').type('{backspace}');
+        cy.get('[data-cy="subjectName"]').type('{backspace}');
         cy.get('[data-cy=idError]').should('be.empty');
         cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
     });
@@ -194,7 +194,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
         //helpUrl
-        cy.get('[data-cy=subjectNameInput]').type('A Subject');
+        cy.get('[data-cy=subjectName]').type('A Subject');
         cy.get('[data-cy=skillHelpUrl]').clear().type('javascript:alert("uh oh");');
         cy.get('[data-cy=skillHelpUrlError]').should('be.visible');
         cy.get('[data-cy=skillHelpUrlError]').should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
@@ -232,12 +232,12 @@ describe('Subjects Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
-        cy.get('a.nav-link').contains('Font Awesome Free').click();
+        cy.get('[data-cy="iconPicker"]').click();
+        cy.get('.p-tabview-nav-link').contains('Font Awesome Free').click();
         cy.wait(1500);
-        cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
-        cy.get('[data-cy=fontAwesomeVirtualList]').scrollTo(0,540);
-        cy.get('div[role=group] .icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
+        // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
+        cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
+        cy.get('.icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
@@ -258,12 +258,12 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
-        cy.get('a.nav-link').contains('Material').click();
+        cy.get('[data-cy="iconPicker"]').click();
+        cy.get('.p-tabview-nav-link').contains('Material').click();
         cy.wait(2500);
-        cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
-        cy.get('[data-cy=materialVirtualList]').scrollTo(0,540);
-        cy.get('div[role=group] .icon-item>a:visible',{timeout:1000}).last().then(($el)=> {
+        // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
+        cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
+        cy.get('.icon-item>a:visible',{timeout:1000}).last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({ force: true });
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
@@ -284,22 +284,22 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
         //filter should persist between tab changes
-        cy.get('a.nav-link').contains('Material').click();
+        cy.get('.p-tabview-nav-link').contains('Material').click();
         cy.get('.mi.mi-directions-run').should('be.visible');
 
-        cy.get('a.nav-link').contains('Font Awesome Free').click();
+        cy.get('.p-tabview-nav-link').contains('Font Awesome Free').click();
         cy.get('.fas.fa-running').should('be.visible');
 
         //filter should not persist when icon manager is re-opened
-        cy.contains('Cancel Icon Selection').click();
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.get('.p-overlaypanel-close-icon').click();
+        cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').should('have.value', '');
         cy.get('i.fas.fa-ad').should('be.visible');
-        cy.get('a.nav-link').contains('Material').click();
+        cy.get('.p-tabview-nav-link').contains('Material').click();
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
@@ -323,9 +323,9 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('a.nav-link').contains('Custom').click();
+        cy.get('.p-tabview-nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
         cy.get('input[type=file]').attachFile(filename);
@@ -350,10 +350,10 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.get('[data-cy="iconPicker"]').click();
         cy.wait('@getCustomIcons')
 
-        cy.get('a.nav-link').contains('Custom').click();
+        cy.get('.p-tabview-nav-link').contains('Custom').click();
         cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
         cy.wait(2000)
 
@@ -379,9 +379,9 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
-        cy.get('div.modal-content .text-primary i.fa-question-circle').click();
+        cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('a.nav-link').contains('Custom').click();
+        cy.get('.p-tabview-nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
         cy.get('input[type=file]').attachFile(filename);
@@ -411,7 +411,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
 
         cy.get('[data-cy="btn_Subjects"]').click();
-        cy.get('[data-cy=subjectNameInput]').type('foobarbaz');
+        cy.get('[data-cy=subjectName]').type('foobarbaz');
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.get('[data-cy="btn_Subjects"]').should('have.focus');
     });
@@ -449,7 +449,7 @@ describe('Subjects Tests', () => {
         cy.visit('/administrator/projects/proj1');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
-        cy.get('[data-cy=subjectNameInput]').should('be.visible');
+        cy.get('[data-cy=subjectName]').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('be.enabled')
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
@@ -460,7 +460,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
-        cy.get('[data-cy=subjectNameInput]').type('test 123');
+        cy.get('[data-cy=subjectName]').type('test 123');
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSubject');
         cy.wait('@loadSubject');
@@ -480,7 +480,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
 
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
-        cy.get('[data-cy=subjectNameInput]').type('test 123');
+        cy.get('[data-cy=subjectName]').type('test 123');
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSubject2');
         cy.wait('@loadSubject2');
@@ -590,7 +590,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type('Great Name');
+        cy.get('[data-cy="subjectName"]').type('Great Name');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         //
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
@@ -608,21 +608,21 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubjects');
         cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type('Great Name');
+        cy.get('[data-cy="subjectName"]').type('Great Name');
 
         cy.get('[data-cy="subjectNameError"]')
           .should('not.be.visible');
         cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled');
 
-        cy.get('input[data-cy=subjectNameInput]')
+        cy.get('input[data-cy=subjectName]')
           .type('{selectall}(A) Updated Subject Name');
         cy.get('[data-cy="subjectNameError"]')
           .contains('Subject Name - names may not contain (A)');
         cy.get('[data-cy="saveDialogBtn"]')
           .should('be.disabled');
 
-        cy.get('input[data-cy=subjectNameInput]')
+        cy.get('input[data-cy=subjectName]')
           .type('{selectall}(B) A Updated Subject Name');
         cy.get('[data-cy="subjectNameError"]')
           .should('not.be.visible');
@@ -657,7 +657,7 @@ describe('Subjects Tests', () => {
         cy.wait('@loadSubject1');
         cy.contains('SUBJECT: Subject 1').should('be.visible');
         cy.get('[data-cy=btn_edit-subject]').click();
-        cy.get('input[data-cy=subjectNameInput]').type('{selectall}Edited Subject Name');
+        cy.get('input[data-cy=subjectName]').type('{selectall}Edited Subject Name');
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSubject1');
         cy.contains('Editing Existing Subject').should('not.exist');
@@ -684,7 +684,7 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy=editSkillButton_skill1]').click();
         cy.get('input[data-cy=skillName]').type('{selectall}Edited Skill Name');
-        cy.get('[data-cy=saveSkillButton]').click();
+        cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSkill');
         cy.contains('Edited Skill Name').should('be.visible');
 
@@ -933,7 +933,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
-        const textDecorationMatch = 'line-through solid rgb(38, 70, 83)';
+        const textDecorationMatch = 'line-through solid rgb(16, 185, 129)';
 
         // strike-through when url starts with http:// or https://
         cy.get('[data-cy="skillHelpUrl"]').type('https:/');
@@ -992,7 +992,7 @@ describe('Subjects Tests', () => {
 
         cy.clickNav('Settings');
         cy.wait('@loadSettings');
-        cy.get('[data-cy="rootHelpUrlInput"]').type('https://someCoolWebsite.com/');
+        cy.get('[data-cy="helpUrlHostTextInput"]').type('https://someCoolWebsite.com/');
         cy.get('[data-cy="saveSettingsBtn"]').click();
         cy.wait('@saveSettings');
         cy.wait('@loadSettings');
@@ -1007,7 +1007,7 @@ describe('Subjects Tests', () => {
     it('subject modal allows Help Url to have spaces', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="btn_Subjects"]').click();
-        cy.get('[data-cy="subjectNameInput"]').type('subj1')
+        cy.get('[data-cy="subjectName"]').type('subj1')
         cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
         cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -1039,7 +1039,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]').click();
 
         cy.get('[data-cy="breadcrumb-Projects"]').click();
-        cy.get('[data-cy="projCard_proj2_manageBtn"]').click();
+        cy.get('[data-cy="projCard_proj2_manageLink"]').click();
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://veryDifferentUrl.com')
     });
@@ -1078,13 +1078,13 @@ describe('Subjects Tests', () => {
         cy.createSubject(1, 3);
 
         cy.visit('/administrator/projects/proj1');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 1', 'Subject 2', 'Subject 3']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 1', 'Subject 2', 'Subject 3']);
 
         // move down
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
             .tab()
             .type('{downArrow}');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 1', 'Subject 3']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 1', 'Subject 3']);
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
@@ -1092,7 +1092,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
             .tab()
             .type('{downArrow}');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
@@ -1100,13 +1100,13 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
             .tab()
             .type('{downArrow}');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // refresh and validate
         cy.visit('/administrator/projects/proj1');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]')
             .should('not.have.focus');
 
@@ -1114,7 +1114,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
             .tab()
             .type('{upArrow}');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
@@ -1122,7 +1122,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
             .tab()
             .type('{upArrow}');
-        cy.validateElementsOrder('[data-cy="subjectCard"] [data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
+        cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
         cy.get('[data-cy="subjectCard-subj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
     });

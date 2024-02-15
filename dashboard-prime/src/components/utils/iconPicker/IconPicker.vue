@@ -77,7 +77,6 @@ const close = () => {
   .icon-button {
     border: 1px solid rgba(0, 0, 0, 0.125);
     border-radius: 0.25em;
-    background-color: #fff;
   }
 
   .icon-button:disabled {
