@@ -23,7 +23,7 @@ describe('Subjects Tests', () => {
         })
     });
 
-    it.skip('Close level dialog', () => {
+    it('Close level dialog', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -39,8 +39,8 @@ describe('Subjects Tests', () => {
 
         cy.contains('Levels').click();
         cy.contains('Add Next').click();
-        cy.get('[data-cy=cancelLevel]').click();
-        cy.get('[data-cy=cancelLevel]').should('not.exist');
+        cy.get('[data-cy=closeDialogBtn]').click();
+        cy.get('[data-cy=closeDialogBtn]').should('not.exist');
     });
 
     it('create subject with special chars', () => {
@@ -509,7 +509,7 @@ describe('Subjects Tests', () => {
 
         cy.contains('Levels').click();
         cy.get('[data-cy=addLevel]').click();
-        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=closeDialogBtn]').click();
         cy.get('[data-cy=addLevel]').should('have.focus');
 
         // cy.get('[data-cy=addLevel]').click();
@@ -517,11 +517,11 @@ describe('Subjects Tests', () => {
         // cy.get('[data-cy=addLevel]').should('have.focus');
 
         cy.get('[data-cy=addLevel]').click();
-        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[aria-label=Close]').click();
         cy.get('[data-cy=addLevel]').should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(0).click();
-        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=closeDialogBtn]').click();
         cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         // cy.get('[data-cy=editLevelButton]').eq(0).click();
@@ -529,7 +529,7 @@ describe('Subjects Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(0).click();
-        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[aria-label=Close]').click();
         cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         // cy.get('[data-cy=editLevelButton]').eq(0).click();
@@ -540,7 +540,7 @@ describe('Subjects Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(3).click();
-        cy.get('[data-cy=cancelLevel]').click();
+        cy.get('[data-cy=closeDialogBtn]').click();
         cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
         // cy.get('[data-cy=editLevelButton]').eq(3).click();
@@ -548,7 +548,7 @@ describe('Subjects Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
         cy.get('[data-cy=editLevelButton]').eq(3).click();
-        cy.get('[aria-label=Close]').filter('.text-light').click();
+        cy.get('[aria-label=Close]').click();
         cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
 
         // cy.get('[data-cy=editLevelButton]').eq(3).click();

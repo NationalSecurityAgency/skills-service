@@ -64,7 +64,7 @@ onMounted(() => {
 let loading = ref(true);
 let currentlyFocusedLevelId = ref('');
 let displayLevelModal = ref(false);
-let isEdit = false;
+let isEdit = ref(false);
 let levelsAsPoints = ref(false);
 let levelToEdit = { iconClass: 'fas fa-user-ninja' };
 let levels = ref([]);
@@ -97,7 +97,7 @@ const bounds = computed(() => {
   };
 
   if (levels.value) {
-    if (isEdit) {
+    if (isEdit.value) {
       const existingIdx = levels.value.findIndex((level) => levelToEdit.level === level.level);
       const byIndex = new Map(levels.value.map((level, index) => [index, level]));
 
@@ -226,7 +226,7 @@ const getLastItemLevel = () => {
 };
 
 const editLevel = (existingLevel) => {
-  isEdit = !!existingLevel;
+  isEdit.value = !!existingLevel;
 
   if (existingLevel) {
     levelToEdit = { ...existingLevel };
@@ -320,7 +320,7 @@ const handleFocus = (e) => {
           </span>
 <!--          <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>-->
           <span id="add-button">
-            <SkillsButton @click="editLevel()" ref="addLevel" :disabled="reachedMaxLevels"
+            <SkillsButton @click="editLevel()" ref="addLevel" :disabled="reachedMaxLevels" :track-for-focus="true" id="addLevel"
                       size="small" data-cy="addLevel" icon="fas fa-plus-circle" label="Add Next">
 <!--              <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" aria-hidden="true"/>-->
             </SkillsButton>
@@ -358,23 +358,23 @@ const handleFocus = (e) => {
           </Column>
           <Column field="edit" header="Edit">
             <template #body="slotProps">
-              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" />
+              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" id="editLevelButton" />
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
     <ConfirmDialog id="confirm" />
-<!--    <new-level v-if="displayLevelModal && levels"-->
-<!--               v-model="displayLevelModal"-->
-<!--               @new-level="doCreateNewLevel"-->
-<!--               @edited-level="doEditLevel"-->
-<!--               :boundaries="bounds"-->
-<!--               :level="levelToEdit"-->
-<!--               :level-as-points="levelsAsPoints"-->
-<!--               :is-edit="isEdit"-->
-<!--               :all-levels="levels"-->
-<!--               @hidden="handleHidden"></new-level>-->
+    <new-level v-if="displayLevelModal && levels"
+               v-model="displayLevelModal"
+               @new-level="doCreateNewLevel"
+               @edited-level="doEditLevel"
+               :boundaries="bounds"
+               :level="levelToEdit"
+               :level-as-points="levelsAsPoints"
+               :is-edit="isEdit"
+               :all-levels="levels"
+               @hidden="handleHidden"></new-level>
   </div>
 </template>
 

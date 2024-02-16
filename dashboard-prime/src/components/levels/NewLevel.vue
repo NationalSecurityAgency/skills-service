@@ -16,9 +16,7 @@ const saveLevel = () => {
 
 };
 
-const cancel = () => {
-
-}
+const close = () => { model.value = false }
 
 </script>
 
@@ -33,7 +31,7 @@ const cancel = () => {
       ok-button-label="Save"
       :ok-button-disabled="isDisabled"
       @on-ok="saveLevel"
-      @on-cancel="cancel"
+      @on-cancel="close"
       :enable-return-focus="true"
       :style="{ width: '40rem !important' }">
 
