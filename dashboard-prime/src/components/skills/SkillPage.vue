@@ -105,8 +105,7 @@ const loadData = () => {
 };
 
 const skillEdited = (editedSkill) => {
-  const origId = editedSkill.skillId
-
+  const origId = skillsState.skill.skillId
   skillsState.skill = { ...editedSkill, subjectId: route.params.subjectId }
 
   if (origId !== skillsState.skill.skillId) {

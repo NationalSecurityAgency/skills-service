@@ -11,6 +11,7 @@ import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
@@ -20,6 +21,10 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  loadSkillAsync: {
+    type: Boolean,
+    default: false
+  }
 })
 
 let loading = ref(true)
@@ -105,10 +110,11 @@ const isDisabled = computed(() => {
 // methods
 const loadSkill = () => {
   loading.value = true
-  if (!props.reloadSkillAsync) {
+  if (!props.loadSkillAsync) {
     skillInfo.value = props.skill
     loading.value = false
   } else {
+    console.log(`async load: skillId=${props.skill.skillId}`)
     SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
       .then((response) => {
         skillInfo.value = response
@@ -205,10 +211,14 @@ const loadSkill = () => {
         Description
       </template>
       <template #content>
-        <!--        <markdown-text v-if="description" :text="description" data-cy="skillOverviewDescription"/>-->
-        <!--        <p v-else class="text-muted">-->
-        <!--          Not Specified-->
-        <!--        </p>-->
+        <markdown-text
+          v-if="description"
+          :text="description"
+          :instance-id="skill.skillId"
+          data-cy="skillOverviewDescription" />
+        <p v-else class="text-muted">
+          Not Specified
+        </p>
       </template>
     </Card>
 

@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
+import { useFieldValue } from 'vee-validate'
 
 const approvalKey = 'Approval'
 const videoKey = 'Video'
@@ -11,9 +12,9 @@ const categories = ref([
   { name: 'Quiz/Survey', key: 'Quiz' },
   { name: 'Video', key: videoKey, disabled: true }
 ])
-const selfReportType = ref('')
+const setFieldValue = inject('setFieldValue')
 const onEnabledChanged = (newVal) => {
-  selfReportType.value = newVal ? categories.value[0].key : ''
+  setFieldValue('selfReportingType',  newVal ? categories.value[0].key : '')
 }
 const onTypeCanged = (newType) => {
   if (newType !== approvalKey) {
@@ -22,6 +23,7 @@ const onTypeCanged = (newType) => {
 }
 
 const justificationRequired = ref(false)
+const selfReportingType = useFieldValue('selfReportingType');
 </script>
 
 <template>
@@ -33,6 +35,7 @@ const justificationRequired = ref(false)
         v-model="enabled"
         inputId="selfReport"
         name="selfReportEnabled"
+        data-cy=selfReportEnableCheckbox
         :value="true" />
       <label for="selfReport" class="ml-2"> Self Reporting </label>
     </div>
@@ -41,13 +44,14 @@ const justificationRequired = ref(false)
       <div class="flex flex-column gap-3">
         <div v-for="category in categories" :key="category.key" class="flex align-items-center">
 
-          <SkillsRadioButtonInput v-model="selfReportType"
-                       @update:modelValue="onTypeCanged"
-                       :disabled="!enabled || category.disabled"
-                       :inputId="category.key"
-                       severity="info"
-                       name="selfReportingType"
-                       :value="category.key" />
+          <SkillsRadioButtonInput
+            @update:modelValue="onTypeCanged"
+            :disabled="!enabled || category.disabled"
+            :inputId="category.key"
+            severity="info"
+            name="selfReportingType"
+            data-cy="selfReportTypeSelector"
+            :value="category.key" />
           <label :for="category.key" class="ml-2">
             <span>{{ category.name }}</span>
             <span v-if="category.key === 'Approval'" class="ml-2">
@@ -55,7 +59,7 @@ const justificationRequired = ref(false)
                <SkillsCheckboxInput
                  class="ml-2"
                  :binary="true"
-                 :disabled="!enabled || selfReportType !== 'Approval'"
+                 :disabled="!enabled || selfReportingType !== 'Approval'"
                  v-model="justificationRequired"
                  inputId="selfReportJustificationRequired"
                  name="justificationRequired"

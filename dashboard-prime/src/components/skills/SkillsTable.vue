@@ -460,7 +460,10 @@ const skillsTable = ref(null)
       </Column>
 
       <template #expansion="slotProps">
-        <child-row-skills-display :skill="slotProps.data" />
+        <child-row-skills-display
+          :id="`childRow-${slotProps.data.skillId}`"
+          :key="`childRow-${slotProps.data.skillId}`"
+          :skill="slotProps.data" :load-skill-async="true" />
       </template>
       <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>

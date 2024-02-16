@@ -10,8 +10,8 @@ const props = defineProps({
     default: '300px',
   },
   instanceId: {
-    type: Number,
-    default: 1
+    type: String,
+    default: '1'
   }
 })
 

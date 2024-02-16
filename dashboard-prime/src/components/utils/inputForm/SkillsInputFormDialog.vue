@@ -64,6 +64,7 @@ const onSubmit = handleSubmit(formValue => {
 })
 
 provide('doSubmitForm', onSubmit)
+provide('setFieldValue', setFieldValue)
 
 const isDialogLoading = computed(() => {
   return props.loading || inputFormResiliency.isInitializing
