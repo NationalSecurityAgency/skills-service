@@ -6,7 +6,7 @@ import DescriptionValidatorService from '@/common-components/validators/Descript
 
 export const useCustomGlobalValidators = () => {
 
-  function customNameValidator(message) {
+  function customNameValidator(fieldName = '') {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.nameValidationRegex) {
@@ -14,13 +14,13 @@ export const useCustomGlobalValidators = () => {
       }
       return CustomValidatorsService.validateName(value).then((result) => {
         if (!result.valid) {
-          return context.createError({ message: result.msg });
+          return context.createError({ message: `${fieldName ? `${fieldName} - ` : ''}${result.msg}` });
         }
         return true;
       });
     }, appConfig.formFieldDebounceInMs)
 
-    return this.test("customNameValidator", message, (value, context) => validateName(value, context));
+    return this.test("customNameValidator", null, (value, context) => validateName(value, context));
   }
 
   function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null) {
@@ -50,7 +50,9 @@ export const useCustomGlobalValidators = () => {
   function urlValidator(fieldName = 'Help URL/Path') {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
+      console.log(`value is ${value}`)
       if (!value || value.trim().length === 0) {
+        console.log('returned true')
         return true;
       }
 
@@ -70,11 +72,16 @@ export const useCustomGlobalValidators = () => {
     return this.test("urlValidator", null, (value, context) => validateName(value, context));
   }
 
+  function idValidator() {
+    return this.matches(/^\w+$/, (fieldProps) => `${fieldProps.label} may only contain alpha-numeric characters`)
+  }
+
   const addValidators = () => {
     addMethod(string, "customNameValidator", customNameValidator);
     addMethod(string, "nullValueNotAllowed", nullValueNotAllowed);
     addMethod(string, 'customDescriptionValidator', customDescriptionValidator)
     addMethod(string, 'urlValidator', urlValidator)
+    addMethod(string, 'idValidator', idValidator)
   }
 
   return {

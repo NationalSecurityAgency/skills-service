@@ -63,6 +63,7 @@ const schema = object({
       .min(appConfig.minIdLength)
       .max(appConfig.maxIdLength)
       .nullValueNotAllowed()
+      .idValidator()
       .test('uniqueId', 'The value for the Quiz/Survey ID is already taken', (value) => checkQuizIdUnique(value))
       .label('Quiz/Survey ID'),
   'type': string()

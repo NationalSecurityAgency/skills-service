@@ -4,7 +4,7 @@ import SkillsService from '@/components/skills/SkillsService'
 
 export const useSkillsState = defineStore('skillsState',  () => {
   const skill = ref(null);
-  const loadingSkill = ref(false);
+  const loadingSkill = ref(true);
 
   function loadSkill(projectId, subjectId, skillId) {
     loadingSkill.value = true;

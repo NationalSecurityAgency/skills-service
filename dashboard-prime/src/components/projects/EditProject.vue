@@ -69,9 +69,10 @@ const schema = object({
     .required()
     .min(appConfig.minIdLength)
     .max(appConfig.maxIdLength)
+    .idValidator()
     .nullValueNotAllowed()
     .test('uniqueId', 'Project ID already exist', (value) => checkProjIdUnique(value))
-    .label('Project Id'),
+    .label('Project ID'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
     .customDescriptionValidator('Project Description', false, enableProtectedUserCommunity.value)

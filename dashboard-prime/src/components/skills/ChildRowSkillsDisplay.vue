@@ -20,10 +20,6 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  reloadSkillAsync: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 let loading = ref(true)
@@ -33,15 +29,12 @@ onMounted(() => {
   loadSkill()
 })
 
-if (props.reloadSkillAsync) {
 
-  watch(() => props.skill,
-    () => {
-      loadSkill()
-    },
-    { deep: true })
-
-}
+watch(() => props.skill,
+  () => {
+    loadSkill()
+  },
+  { deep: true })
 
 // computed
 // const skillId = computed(() => {
@@ -77,11 +70,11 @@ const selfReportingTitle = computed(() => {
 })
 
 const rootHelpUrl = computed(() => {
-  if (!config.projConfigRootHelpUrl.value || skillInfo.value?.helpUrl?.toLowerCase()?.startsWith('http')) {
+  if (!config.projConfigRootHelpUrl || skillInfo.value?.helpUrl?.toLowerCase()?.startsWith('http')) {
     return null
   }
-  if (config.projConfigRootHelpUrl.value.endsWith('/')) {
-    return config.projConfigRootHelpUrl.value.substring(0, config.projConfigRootHelpUrl.value.length - 1)
+  if (config.projConfigRootHelpUrl.endsWith('/')) {
+    return config.projConfigRootHelpUrl.substring(0, config.projConfigRootHelpUrl.length - 1)
   }
   return config.projConfigRootHelpUrl.value
 })

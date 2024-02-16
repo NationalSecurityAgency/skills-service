@@ -89,6 +89,7 @@ const schema = {
       .min(appConfig.minIdLength)
       .max(appConfig.maxIdLength)
       .nullValueNotAllowed()
+      .idValidator()
       .test('uniqueName', 'Subject ID is already taken', (value) => checkSubjectIdUnique(value))
       .customNameValidator()
       .label('Subject ID'),

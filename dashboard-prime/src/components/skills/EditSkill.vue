@@ -28,14 +28,29 @@ const latestSkillVersion = ref(0)
 const maxSkillVersion = ref(1)
 
 const asyncLoadData = () => {
-  return SkillsService.getLatestSkillVersion(route.params.projectId)
-    .then((latestVersion) => {
-      latestSkillVersion.value = latestVersion
-      maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
-      return {
-        version: latestVersion
-      }
-    })
+  const loadSkillDetails = () => {
+    if (props.isEdit) {
+      return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
+        .then((resSkill) => {
+          return { ...resSkill, 'description': resSkill.description || '' }
+        })
+    }
+
+    return Promise.resolve({})
+  }
+
+  return loadSkillDetails().then((skillRes) => {
+    return SkillsService.getLatestSkillVersion(route.params.projectId)
+      .then((latestVersion) => {
+        latestSkillVersion.value = latestVersion
+        maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
+        return {
+          ...skillRes,
+          skipTheseAttrsWhenValidatingOnInit: ['version'],
+          version: latestVersion
+        }
+      })
+  })
 }
 
 const formId = props.isEdit ? `editSkillDialog-${props.skill.projectId}-${props.skill.skillId}` : 'newSkillDialog'
@@ -47,7 +62,7 @@ if (props.isCopy) {
   modalTitle = 'Copy Skill'
 }
 
-const checkProjNameUnique = useDebounceFn((value) => {
+const checkSkillNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
     return true
   }
@@ -57,7 +72,14 @@ const checkProjNameUnique = useDebounceFn((value) => {
   }
   return SkillsService.skillWithNameExists(route.params.projectId, value).then((remoteRes) => remoteRes)
 }, appConfig.formFieldDebounceInMs)
+const checkSkillIdUnique = useDebounceFn((value) => {
+  if (!value || value.length === 0 || (props.isEdit && props.skill.skillId === value)) {
+    return true
+  }
+  return SkillsService.skillWithIdExists(route.params.projectId, value)
+    .then((remoteRes) => remoteRes)
 
+}, appConfig.formFieldDebounceInMs)
 const schema = object({
   'skillName': string()
     .trim()
@@ -65,15 +87,17 @@ const schema = object({
     .min(appConfig.minNameLength)
     .max(appConfig.maxSkillNameLength)
     .nullValueNotAllowed()
-    .customNameValidator()
-    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => checkProjNameUnique(value))
+    .customNameValidator('Skill Name')
+    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => checkSkillNameUnique(value))
     .label('Skill Name'),
   'skillId': string()
     .required()
     .min(appConfig.minIdLength)
     .max(appConfig.maxIdLength)
     .nullValueNotAllowed()
-    .label('Skill Id'),
+    .matches(/^[\w%]+$/, (fieldProps) => `${fieldProps.label} may only contain alpha-numeric, underscore or percent characters`)
+    .test('uniqueId', 'The value for the Skill ID is already taken', (value) => checkSkillIdUnique(value))
+    .label('Skill ID'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
     .customDescriptionValidator('Skill Description')
@@ -135,6 +159,7 @@ const schema = object({
     .label('Version'),
   'helpUrl': string()
     .urlValidator()
+    .nullable()
     .label('Help URL'),
 })
 const selfReportingType = props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null
@@ -163,7 +188,8 @@ const saveSkill = (values) => {
     isEdit: props.isEdit,
     name: InputSanitizer.sanitize(values.skillName),
     skillId: InputSanitizer.sanitize(values.skillId),
-    pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0
+    pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0,
+    selfReportingType: values.selfReportingType && values.selfReportingType !== 'Disabled' ? values.selfReportingType : null,
   }
   return SkillsService.saveSkill(skilltoSave)
     .then((skillRes) => {

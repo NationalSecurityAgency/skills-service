@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, ref, provide } from 'vue'
+import { reactive, computed, ref, provide, toRaw } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
@@ -30,7 +30,11 @@ const props = defineProps({
   saveDataFunction: {
     type: Function,
     required: true
-  }
+  },
+  isEdit: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['saved', 'cancelled'])
 
@@ -72,9 +76,11 @@ if (props.asyncLoadDataFunction) {
       setFieldValue(key, value)
     }
     inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
+      .then(() => {
+        validateIfNotEmpty()
+      })
   }).finally(() => {
     isLoadingAsyncData.value = false
-    validateIfNotEmpty()
   })
 } else {
   isLoadingAsyncData.value = false
@@ -85,7 +91,12 @@ if (props.asyncLoadDataFunction) {
 }
 
 const validateIfNotEmpty = () => {
-  const foundNonEmpty = Object.entries(values).find(([key, value]) => value && props.initialValues[key] !== value)
+  const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
+  const foundNonEmpty = Object.entries(values)
+    .find(([key, value]) =>
+      key !== 'skipTheseAttrsWhenValidatingOnInit'
+      && !skipAttrs.includes(key)
+      && value && props.initialValues[key] !== value)
   if (foundNonEmpty) {
     validate()
   }

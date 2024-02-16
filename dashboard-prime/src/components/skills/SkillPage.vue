@@ -25,15 +25,17 @@ import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
 import { useSkillsState } from '@/stores/UseSkillsState.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 import ShowMore from '@/components/skills/selfReport/ShowMore.vue';
+import EditSkill from '@/components/skills/EditSkill.vue'
 
 const route = useRoute();
 const router = useRouter();
 const store = useStore();
 const announcer = useSkillsAnnouncer();
 const subjectState = useSubjectsState()
+const projConfig = useProjConfig()
 
-let isLoadingData = ref(true);
 let subjectId = ref('');
 let headerOptions = ref({});
 let showEdit = ref(false);
@@ -47,7 +49,7 @@ onMounted(() => {
 });
 
 const isLoading = computed(() => {
-  return isLoadingData.value || subjectState.isLoadingSubject; // || isLoadingProjConfig;
+  return subjectState.isLoadingSubject || projConfig.isReadOnlyProj || skillsState.loadingSkill
 });
 
 const navItems = ref([])
@@ -88,114 +90,84 @@ const displayEdit = () => {
 };
 
 const loadData = () => {
-  isLoadingData.value = true;
   const { projectId, subjectId } = route.params;
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
-    headerOptions.value = buildHeaderOptions(skillsState.skill);
+    headerOptions.value = buildHeaderOptions();
     if (subjectState.subject.value) {
-      isLoadingData.value = false;
       navItems.value = buildNavItems()
     } else {
       subjectState.loadSubjectDetailsState(projectId, subjectId).then(() => {
-        // subject = store.getters["subjects/subject"];
-        isLoadingData.value = false;
         navItems.value = buildNavItems()
       });
     }
   });
 };
 
-const skillEdited = (editedSkil) => {
-  isLoadingData.value = true;
-  SkillsService.saveSkill(editedSkil).then((res) => {
-    const origId = skill.skillId;
-    const edited = Object.assign(res, { subjectId: route.params.subjectId });
-    skillsState.skill = edited;
-    if (origId !== skillsState.skill.skillId) {
-      router.replace({ name: route.name, params: { ...route.params, skillId: skillsState.skill.skillId } });
-    }
-    headerOptions.value = buildHeaderOptions(res);
-  }).then(() => {
-    nextTick(() => announcer.polite(`Skill ${editedSkil.name} has been edited`));
-  })
-      .catch((err) => {
-        if (err && err.response && err.response.data.errorCode === 'MaxSkillsThreshold') {
-          // msgOk(err.response.data.explanation, 'Maximum Skills Reached');
-        } else if (err?.response?.data?.errorCode === 'DbUpgradeInProgress') {
-          router.push({ name: 'DbUpgradeInProgressPage' });
-        } else {
-          throw err;
-        }
-      })
-      .finally(() => {
-        isLoadingData.value = false;
-        handleFocus();
-      });
-};
+const skillEdited = (editedSkill) => {
+  const origId = editedSkill.skillId
 
-const handleHide = (e) => {
-  showEdit.value = false;
-  if (!e?.saved) {
-    handleFocus();
+  skillsState.skill = { ...editedSkill, subjectId: route.params.subjectId }
+
+  if (origId !== skillsState.skill.skillId) {
+    router.replace({ name: route.name, params: { ...route.params, skillId: skillsState.skill.skillId } })
   }
-};
+  headerOptions.value = buildHeaderOptions()
+  announcer.polite(`Skill ${editedSkill.name} has been edited`)
+}
 
-const handleFocus = () => {
-  nextTick(() => {
-    // const ref = $refs.editSkillInPlaceBtn;
-    // if (ref) {
-    //   ref.focus();
-    // }
-  });
-};
-
-const buildHeaderOptions = (skill) => {
-  const skillId = skill?.skillId ? SkillReuseIdUtil.removeTag(skill.skillId) : '';
+const buildHeaderOptions = () => {
+  const skillId = skillsState.skill?.skillId ? SkillReuseIdUtil.removeTag(skillsState.skill.skillId) : '';
   return {
     icon: 'fas fa-graduation-cap skills-color-skills',
-    title: `SKILL: ${skill?.name}`,
-    subTitle: `ID: ${skillId} | GROUP ID: ${skill?.groupId}`,
+    title: `SKILL: ${skillsState.skill?.name}`,
+    subTitle: `ID: ${skillId} | GROUP ID: ${skillsState.skill?.groupId}`,
     stats: [{
       label: 'Points',
-      count: skill?.totalPoints,
+      count: skillsState.skill?.totalPoints,
       icon: 'far fa-arrow-alt-circle-up skills-color-points',
     }],
   };
 };
 
-const getSkillId = (skill) => {
-  return skill ? `ID: ${SkillReuseIdUtil.removeTag(skill.skillId)}` : 'Loading...';
-};
+const skillId = computed(() => {
+  return skillsState.skill ? `ID: ${SkillReuseIdUtil.removeTag(skillsState.skill.skillId)}` : 'Loading...';
+});
 </script>
 
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="subTitle" v-if="skillsState.skill">
+      <template #subTitle v-if="skillsState.skill">
         <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`">
           <Badge variant="info">
             <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
           </Badge>
         </div>
         <div class="h5 text-muted" data-cy="skillId">
-          <show-more :limit="54" :text="getSkillId(skill)"></show-more>
+          <show-more :limit="54" :text="skillId"></show-more>
         </div>
         <div class="h5 text-muted" v-if="skillsState.skill && skillsState.skill.groupId">
           <span style="font-size: 1rem">Group ID:</span> <span v-tooltip="`Name: ${ skillsState.skill.groupName }`">{{ skillsState.skill.groupId }}</span>
         </div>
-      </div>
-      <div slot="subSubTitle" v-if="!isImported">
-        <div class="p-buttonset">
-          <SkillsButton v-if="skillsState.skill && projConfig && !isReadOnlyProj" @click="displayEdit"
-                    size="small" label="Edit" icon="fas fa-edit"
-                    variant="outline-primary" :data-cy="`editSkillButton_${route.params.skillId}`"
-                    :aria-label="'edit Skill '+skillsState.skill.name" ref="editSkillInPlaceBtn">
-          </SkillsButton>
-        </div>
-      </div>
-      <div slot="right-of-header" v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)"
-           class="d-inline h5">
+      </template>
+      <template #subSubTitle v-if="!isImported">
+        <SkillsButton
+          id="edidSkillBtn"
+          v-if="skillsState.skill && !projConfig.isReadOnlyProj"
+          @click="displayEdit"
+          size="small"
+          outlined
+          severity="info"
+          label="Edit"
+          icon="fas fa-edit"
+          :track-for-focus="true"
+          :data-cy="`editSkillButton_${route.params.skillId}`"
+          :aria-label="'edit Skill '+skillsState.skill.name"
+          ref="editSkillInPlaceBtn" />
+      </template>
+      <template #right-of-header
+                v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)">
         <Badge v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
             class="fas fa-book"></i> EXPORTED
         </Badge>
@@ -204,12 +176,17 @@ const getSkillId = (skill) => {
           <span v-else><i class="fas fa-book"></i> IMPORTED</span>
         </Badge>
         <Badge v-if="!skillsState.skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</Badge>
-      </div>
+      </template>
     </page-header>
     <navigation :nav-items="navItems">
     </navigation>
-<!--    <edit-skill v-if="showEdit" v-model="showEdit" :skillId="skill.skillId" :is-copy="false" :is-edit="true"-->
-<!--                :project-id="route.params.projectId" :subject-id="route.params.subjectId" @skill-saved="skillEdited" @hidden="handleHide"/>-->
+
+    <edit-skill
+      v-if="showEdit"
+      v-model="showEdit"
+      :skill="skillsState.skill"
+      :is-edit="true"
+      @skill-saved="skillEdited" />
   </div>
 </template>
 

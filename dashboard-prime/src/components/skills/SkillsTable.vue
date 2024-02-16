@@ -368,6 +368,7 @@ const skillsTable = ref(null)
                     size="small"
                     outlined
                     severity="info"
+                    :track-for-focus="true"
                     :data-cy="`editSkillButton_${slotProps.data.skillId}`"
                     :aria-label="'edit Skill '+slotProps.data.name"
                     :ref="`edit_${slotProps.data.skillId}`"
@@ -380,11 +381,11 @@ const skillsTable = ref(null)
                     size="small"
                     outlined
                     severity="info"
+                    :track-for-focus="true"
                     :data-cy="`copySkillButton_${slotProps.data.skillId}`"
                     :aria-label="'copy Skill '+slotProps.data.name"
                     :ref="'copy_'+slotProps.data.skillId"
                     :disabled="addSkillDisabled"
-                    :track-for-focus="true"
                     title="Copy Skill" />
                   <!--                  v-skills="'CopySkill'" -->
                   <SkillsButton
@@ -459,10 +460,7 @@ const skillsTable = ref(null)
       </Column>
 
       <template #expansion="slotProps">
-        <child-row-skills-display
-          :skill="slotProps.data"
-          :reload-skill-async="true"
-        />
+        <child-row-skills-display :skill="slotProps.data" />
       </template>
       <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>

@@ -942,7 +942,7 @@ Cypress.Commands.add("clickManageSubject", (subjId) => {
 
 
 Cypress.Commands.add("getIdField", () => {
-    return cy.get("#idInput");
+    return cy.get('[data-cy="idInputValue"]');
 });
 
 
@@ -970,8 +970,9 @@ Cypress.Commands.add('get$', (selector) => {
 });
 
 Cypress.Commands.add('resetDb', () => {
+    // TODO: hopefully `npm version` is not needed anymore and can be removed
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
-    cy.exec('npm version', {failOnNonZeroExit: false})
+    // cy.exec('npm version', {failOnNonZeroExit: false})
     cy.exec('npm run backend:resetDb')
     cy.log('reset postgres db')
 });
