@@ -58,7 +58,7 @@ export const useCustomGlobalValidators = () => {
 
       const properStart = value.startsWith('http') || value.startsWith('https') || value.startsWith('/')
       if (!properStart) {
-        return context.createError({ message:`${fieldName} must start with "/" or "http(s)`})
+        return context.createError({ message:`${fieldName} must start with "/" or "http(s)"`})
       }
 
       return CustomValidatorsService.validateUrl(value).then((result) => {
