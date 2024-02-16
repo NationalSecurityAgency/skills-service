@@ -36,6 +36,8 @@ import Fieldset from 'primevue/fieldset';
 import ToggleButton from 'primevue/togglebutton';
 import RadioButton from 'primevue/radiobutton';
 import Checkbox from 'primevue/checkbox';
+import ConfirmationService from 'primevue/confirmationservice';
+
 
 
 import BadgeDirective from 'primevue/badgedirective';
@@ -67,6 +69,7 @@ app.use(pinia)
 app.use(PrimeVue)
 app.use(ToastService)
 app.use(VueAnnouncer)
+app.use(ConfirmationService)
 app.component('Button', Button)
 app.component('Card', Card)
 app.component('Panel', Panel)
