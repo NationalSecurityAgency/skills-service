@@ -49,7 +49,7 @@ const handleOnInput = (event) => {
   <div class="field">
     <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputNumber
-      inputClass="w-3rem"
+      inputClass="sm:w-3rem"
       class="w-full"
       type="number"
       v-bind="inputNumFallthroughAttrs"

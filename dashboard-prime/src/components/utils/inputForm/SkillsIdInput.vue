@@ -51,7 +51,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="field">
+  <div class="field w-full">
     <label for="idInput">* {{ label }}</label>
     <InputGroup>
       <InputGroupAddon>

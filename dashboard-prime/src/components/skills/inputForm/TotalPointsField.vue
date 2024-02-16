@@ -11,7 +11,7 @@ const totalPoints = computed(() => {
 </script>
 
 <template>
-  <div class="field ml-2">
+  <div class="field w-full lg:w-auto">
     <label for="totalPoints">Total Points</label>
     <InputGroup>
       <InputGroupAddon><i class="fas fa-equals"></i></InputGroupAddon>

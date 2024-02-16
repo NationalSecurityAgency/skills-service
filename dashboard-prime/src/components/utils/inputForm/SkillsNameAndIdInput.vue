@@ -58,10 +58,11 @@ const isSubmitting = useIsSubmitting()
 </script>
 
 <template>
-  <div :class="{ 'flex' : isInline }">
-    <div :class="{ 'mr-1 flex-1' : isInline }">
+  <div :class="{ 'flex flex-wrap md:flex-nowrap' : isInline }">
+    <div :class="{ 'md:mr-1 flex-1' : isInline }">
       <SkillsTextInput
         class=""
+        style="min-width: 16rem;"
         :label="nameLabel"
         :is-required="true"
         :disabled="disabled || isSubmitting"
@@ -70,9 +71,10 @@ const isSubmitting = useIsSubmitting()
         @input="updateIdBasedOnName"
         @keydown-enter="emit('keydown-enter')" />
     </div>
-    <div :class="{ 'ml-1' : isInline }">
+    <div :class="{ 'md:ml-1 w-full md:w-min lg:w-auto' : isInline }" class="">
       <SkillsIdInput
         ref="skillsIdInput"
+        style="min-width: 14rem;"
         :name="idFieldName"
         :disabled="disabled || isSubmitting"
         @can-edit="updateCanEditProjectId"

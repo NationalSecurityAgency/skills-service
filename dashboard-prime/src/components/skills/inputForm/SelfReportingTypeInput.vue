@@ -27,8 +27,8 @@ const selfReportingType = useFieldValue('selfReportingType');
 </script>
 
 <template>
-  <div class="flex">
-    <div>
+  <div class="flex flex-wrap md:flex-no-wrap">
+    <div class="w-min-10rem mt-4 w-full md:w-auto">
       <SkillsCheckboxInput
         @input="onEnabledChanged"
         :binary="true"
@@ -40,7 +40,7 @@ const selfReportingType = useFieldValue('selfReportingType');
       <label for="selfReport" class="ml-2"> Self Reporting </label>
     </div>
 
-    <div class="card flex ml-4">
+    <div class="card flex sm:ml-4 mt-4">
       <div class="flex flex-column gap-3">
         <div v-for="category in categories" :key="category.key" class="flex align-items-center">
 
@@ -52,9 +52,9 @@ const selfReportingType = useFieldValue('selfReportingType');
             name="selfReportingType"
             data-cy="selfReportTypeSelector"
             :value="category.key" />
-          <label :for="category.key" class="ml-2">
+          <label :for="category.key" class="ml-2 flex">
             <span>{{ category.name }}</span>
-            <span v-if="category.key === 'Approval'" class="ml-2">
+            <div v-if="category.key === 'Approval'" class="ml-2">
               |
                <SkillsCheckboxInput
                  class="ml-2"
@@ -64,8 +64,10 @@ const selfReportingType = useFieldValue('selfReportingType');
                  inputId="selfReportJustificationRequired"
                  name="justificationRequired"
                  :value="true" />
-                <label for="selfReportJustificationRequired" class="ml-2 font-italic">Justification Required</label>
-            </span>
+                <label
+                  for="selfReportJustificationRequired"
+                  class="ml-2 font-italic">Justification Required</label>
+            </div>
             <span v-if="category.key === 'Video'" class="ml-2 font-italic">(Please create skill and configure video settings first)</span>
           </label>
         </div>

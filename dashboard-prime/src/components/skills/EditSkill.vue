@@ -223,7 +223,7 @@ const close = () => {
     :enable-return-focus="true"
     @saved="onSkillSaved"
     @close="close">
-    <div class="flex">
+    <div class="flex flex-wrap">
       <div class="flex-1">
         <SkillsNameAndIdInput
           :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
@@ -235,41 +235,42 @@ const close = () => {
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 
-      <div class="max-w-10rem">
+      <div class="lg:max-w-10rem lg:ml-3 w-full">
         <SkillsNumberInput
           showButtons
           :min="latestSkillVersion"
           data-cy="skillVersion"
-          class="ml-3"
           label="Version"
           name="version" />
       </div>
     </div>
 
-    <div class="flex">
+    <div class="flex flex-wrap lg:flex-no-wrap">
       <SkillsNumberInput
         class="flex-1"
+        style="min-width: 14rem;"
         :min="1"
         :is-required="true"
         label="Point Increment"
         name="pointIncrement" />
 
       <SkillsNumberInput
-        class="flex-1 ml-2"
+        class="flex-1 sm:ml-2"
+        style="min-width: 16rem;"
         showButtons
         :min="0"
         :is-required="true"
         label="Occurrences to Completion"
         name="numPerformToCompletion" />
 
-      <total-points-field class="ml-2" />
+      <total-points-field class="lg:ml-2" />
     </div>
 
     <time-window-input
       :time-window-enabled-default="skill.timeWindowEnabled"
       class="mb-3"/>
 
-    <self-reporting-type-input class="mt-5"/>
+    <self-reporting-type-input class="mt-1"/>
 
     <markdown-editor
       class="mt-5"

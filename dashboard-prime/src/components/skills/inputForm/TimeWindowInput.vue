@@ -20,12 +20,12 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
 <template>
   <Fieldset
     legend="Time Window"
-    :pt="{ toggler: { class: 'py-2 px-4' }, content: { class: 'p-0' }, toggleableContent: { class: 'p-0' }, root: { class: 'pt-3' } }"
+    :pt="{ toggler: { class: 'py-2 px-3' }, content: { class: 'p-0' }, toggleableContent: { class: 'p-0' }, root: { class: 'm-0' } }"
     :toggleable="true"
     data-cy="timeWindowInput"
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
-    <div class="flex align-items-center mb-2">
+    <div class="flex align-items-center mb-2 mt-3 mx-2">
       <SkillsCheckboxInput
         class="mb-2"
         :binary="true"
@@ -36,16 +36,18 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         :value="true" />
       <label for="timeWindowEnabled" class="ml-2 font-italic">Time Window Enabled</label>
     </div>
-    <div class="flex m-0">
+    <div class="flex m-0 flex-wrap">
       <SkillsNumberInput
-        class="flex-1"
+        class="flex-1 mx-2"
+        style="min-width: 14rem"
         showButtons
         :disabled="!timeWindowEnabled"
         label="Hours"
         name="pointIncrementIntervalHrs" />
 
       <SkillsNumberInput
-        class="flex-1 mx-3"
+        class="flex-1 mx-2"
+        style="min-width: 14rem"
         showButtons
         :min="0"
         :disabled="!timeWindowEnabled"
@@ -53,7 +55,8 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         name="pointIncrementIntervalMins" />
 
       <SkillsNumberInput
-        class="flex-1"
+        class="flex-1 mx-2"
+        style="min-width: 16rem"
         :min="1"
         showButtons
         :disabled="!timeWindowEnabled"

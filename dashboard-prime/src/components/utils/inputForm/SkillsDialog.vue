@@ -73,7 +73,7 @@ defineExpose({
           v-model:visible="model"
           :maximizable="true"
           :header="header"
-          class="w-11 lg:w-10 xl:w-9"
+          class="w-11 xl:w-10"
   >
     <skills-spinner :is-loading="loading" />
 
