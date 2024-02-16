@@ -28,10 +28,6 @@ const rootHelpUrl = computed(() => {
   return projConfigRootHelpUrl;
 });
 
-
-const handleEscape = () => {
-};
-
 </script>
 
 <template>
@@ -40,12 +36,13 @@ const handleEscape = () => {
 
     <InputGroup>
       <InputGroupAddon v-if="projConfigRootHelpUrl">
-        <i class="fas fa-cogs mr-1"></i>
-        <span class="text-primary" :class="{ 'line-through' : overrideRootHelpUrl}" data-cy="rootHelpUrlSetting"
+        <i class="fas fa-cogs mr-1" aria-hidden="true"></i>
+        <span class="text-primary"
+              :class="{ 'line-through' : overrideRootHelpUrl}"
+              data-cy="rootHelpUrlSetting"
               id="rootHelpUrlHelp"
               :aria-label="`Root Help URL was configured in the project's settings. Root Help URL is ${rootHelpUrl}. URLs starting with http or https will not use Root Help URL.`"
-              tabindex="0"
-              @keydown.esc="handleEscape">{{ rootHelpUrl }}</span>
+              >{{ rootHelpUrl }}</span>
       </InputGroupAddon>
       <InputText v-model="value" data-cy="skillHelpUrl" id="skillHelpUrl"></InputText>
     </InputGroup>

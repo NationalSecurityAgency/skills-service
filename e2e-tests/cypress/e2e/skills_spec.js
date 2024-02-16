@@ -975,7 +975,7 @@ describe('Skills Tests', () => {
 
   })
 
-  it.skip('skill modal allows Help Url to have spaces', () => {
+  it('skill modal allows Help Url to have spaces', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.get('[data-cy="newSkillButton"]').click()
     cy.get('[data-cy="skillName"]').type('skill1')
@@ -985,11 +985,11 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="editSkillButton_skill1Skill"]').click()
     cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
     cy.get('[data-cy="closeDialogBtn"]').click()
-    cy.get('[data-cy="expandDetailsBtn_skill1Skill"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
     cy.get('[data-cy="childRowDisplay_skill1Skill"] [data-cy="skillOverviewHelpUrl"]').contains('https://someCoolWebsite.com/some%20url%20with%20spaces')
   })
 
-  it.skip('append "Root Help URL" to the "Help Url" if configured', () => {
+  it('append "Root Help URL" to the "Help Url" if configured', () => {
     cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
       projectId: 'proj1',
       setting: 'help.url.root',
@@ -1000,11 +1000,11 @@ describe('Skills Tests', () => {
 
     const runHelpUrlValidation = () => {
       cy.visit('/administrator/projects/proj1/subjects/subj1')
-      cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
+      cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
       cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
       cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
 
-      cy.get('[data-cy="expandDetailsBtn_skill2"]').click()
+      cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
       cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
       cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
 
@@ -1037,7 +1037,7 @@ describe('Skills Tests', () => {
     runHelpUrlValidation()
   })
 
-  it.skip('skill modal shows Root Help Url when configured', () => {
+  it('skill modal shows Root Help Url when configured', () => {
     cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
       projectId: 'proj1',
       setting: 'help.url.root',
@@ -1050,7 +1050,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click()
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
-    const textDecorationMatch = 'line-through solid rgb(38, 70, 83)'
+    const textDecorationMatch = 'line-through solid rgb(16, 185, 129)'
 
     // strike-through when url starts with http:// or https://
     cy.get('[data-cy="skillHelpUrl"]').type('https:/')
@@ -1091,7 +1091,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist')
   })
 
-  it.skip('skill help url with %20 in host retains %20 on edit', () => {
+  it('skill help url with %20 in host retains %20 on edit', () => {
     cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/dummy`, {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -1289,7 +1289,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.enabled')
   })
 
-  it.skip('deleting a skill causes subject skill count to be updated', () => {
+  it('deleting a skill causes subject skill count to be updated', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
@@ -1303,7 +1303,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '5')
     cy.get('[data-cy=deleteSkillButton_skill5]').click()
     cy.get('[data-cy=currentValidationText]').type('Delete Me')
-    cy.get('[data-cy=removeButton]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4')
   })
@@ -1350,7 +1350,7 @@ describe('Skills Tests', () => {
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more')
   })
 
-  it.skip('edit skill with version greater than 1', () => {
+  it('edit skill with version greater than 1', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2, { version: 1 })
     cy.createSkill(1, 1, 3, { version: 2 })
@@ -1365,7 +1365,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
   })
 
-  it.skip('edit skill - run validation on load in case validation improved and existing values fail to validate', () => {
+  it('edit skill - run validation on load in case validation improved and existing values fail to validate', () => {
     cy.intercept('POST', '/api/validation/description*', {
       valid: false,
       msg: 'Mocked up validation failure'

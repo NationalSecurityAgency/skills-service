@@ -81,16 +81,16 @@ const rootHelpUrl = computed(() => {
   if (config.projConfigRootHelpUrl.endsWith('/')) {
     return config.projConfigRootHelpUrl.substring(0, config.projConfigRootHelpUrl.length - 1)
   }
-  return config.projConfigRootHelpUrl.value
+  return config.projConfigRootHelpUrl
 })
 
 const helpUrl = computed(() => {
   if (!skillInfo.value?.helpUrl) {
     return null
   }
-  const rootHelpUrlSetting = rootHelpUrl
+  const rootHelpUrlSetting = rootHelpUrl.value
   if (rootHelpUrlSetting) {
-    return `${rootHelpUrlSetting.value}${skillInfo.value.helpUrl}`;
+    return `${rootHelpUrlSetting}${skillInfo.value.helpUrl}`;
   }
   return skillInfo.value.helpUrl
 })
@@ -114,7 +114,6 @@ const loadSkill = () => {
     skillInfo.value = props.skill
     loading.value = false
   } else {
-    console.log(`async load: skillId=${props.skill.skillId}`)
     SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
       .then((response) => {
         skillInfo.value = response
@@ -224,15 +223,17 @@ const loadSkill = () => {
 
     <InputGroup class="mt-3">
       <InputGroupAddon>
-        <div class="input-group-text"><i class="fas fa-link mr-1"></i> Help URL:</div>
+        <div class="input-group-text"><i class="fas fa-link mr-1" aria-hidden="true"/> Help URL:</div>
       </InputGroupAddon>
       <div class="p-inputtext p-component">
         <a v-if="skillInfo.helpUrl" :href="helpUrl" target="_blank" rel="noopener" class="skill-url" data-cy="skillOverviewHelpUrl">
           <span v-if="rootHelpUrl" class="surface-200 border-50 border-x-2 border-round"
-                aria-label="Root Help URL was configured in the project's settings."
-                v-tooltip.top="'Root Help URL was configured in the project\'s settings.'">
+                aria-label="Root Help URL was configured in the project's settings.">
             <i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}
         </a>
+        <div class="mt-1 text-xs">
+          ** Root Help URL was configured in the project's settings.
+        </div>
       </div>
     </InputGroup>
 
