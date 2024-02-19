@@ -241,44 +241,6 @@ const editLevel = (existingLevel) => {
   displayLevelModal.value = true;
 };
 
-const doCreateNewLevel = (nextLevelObj) => {
-  table.value.options.busy = true;
-  if (route.params.subjectId) {
-    LevelService.createNewLevelForSubject(route.params.projectId, route.params.subjectId, nextLevelObj)
-        .then(() => {
-          loadLevels().then(() => {
-            nextTick(() => announcer.polite('New Level has been created'));
-          });
-        });
-  } else {
-    LevelService.createNewLevelForProject(route.params.projectId, nextLevelObj)
-        .then(() => {
-          loadLevels().then(() => {
-            nextTick(() => announcer.polite('New Level has been created'));
-          });
-        });
-  }
-};
-
-const doEditLevel = (editedLevelObj) => {
-  table.value.options.busy = true;
-  if (route.params.subjectId) {
-    LevelService.editLevelForSubject(route.params.projectId, route.params.subjectId, editedLevelObj)
-        .then(() => {
-          loadLevels().then(() => {
-            nextTick(() => announcer.polite(`Level ${editedLevelObj.level} has been saved`));
-          });
-        });
-  } else {
-    LevelService.editLevelForProject(route.params.projectId, editedLevelObj)
-        .then(() => {
-          loadLevels().then(() => {
-            nextTick(() => announcer.polite(`Level ${editedLevelObj.level} has been saved`));
-          });
-        });
-  }
-};
-
 const handleHidden = (e) => {
   if (!e || !e.saved) {
     handleFocus(e);
@@ -367,8 +329,7 @@ const handleFocus = (e) => {
     <ConfirmDialog id="confirm" />
     <new-level v-if="displayLevelModal && levels"
                v-model="displayLevelModal"
-               @new-level="doCreateNewLevel"
-               @edited-level="doEditLevel"
+               @load-levels="loadLevels"
                :boundaries="bounds"
                :level="levelToEdit"
                :level-as-points="levelsAsPoints"

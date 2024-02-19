@@ -1,6 +1,12 @@
 <script setup>
-import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
+import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
+import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
+import {number} from "yup";
+import LevelService from "@/components/levels/LevelService.js";
+import {nextTick} from "vue";
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const props = defineProps({
   levelAsPoints: Boolean,
   level: Object,
@@ -10,30 +16,172 @@ const props = defineProps({
   allLevels: Array,
 });
 
+const emit = defineEmits(['load-levels']);
+
 const model = defineModel()
 const isDisabled = false;
-const saveLevel = () => {
-
+const saveLevel = (values) => {
+  if (props.isEdit === true) {
+    return doEditLevel({
+      percent: values.percent,
+      pointsFrom: values.pointsFrom,
+      pointsTo: values.pointsTo,
+      id: values.level,
+      level: values.level,
+    });
+  } else {
+    return doCreateNewLevel({
+      percent: values.percent,
+      points: values.points,
+    });
+  }
 };
 
-const close = () => { model.value = false }
+const doCreateNewLevel = (nextLevelObj) => {
+  if (route.params.subjectId) {
+    return LevelService.createNewLevelForSubject(route.params.projectId, route.params.subjectId, nextLevelObj)
+  } else {
+    return LevelService.createNewLevelForProject(route.params.projectId, nextLevelObj)
+  }
+};
+
+const doEditLevel = (editedLevelObj) => {
+  if (route.params.subjectId) {
+    return LevelService.editLevelForSubject(route.params.projectId, route.params.subjectId, editedLevelObj)
+  } else {
+    return LevelService.editLevelForProject(route.params.projectId, editedLevelObj)
+  }
+};
+
+const saved = () => {
+  const msg = props.isEdit ? `Level ${props.level} has been saved` : 'New Level has been created';
+  // announcer.polite(msg);
+  emit('load-levels');
+  close();
+}
+const close = () => {
+  model.value = false
+}
+let formId = props.isEdit ? 'editLevelDialog' : 'newLevelDialog';
+const modalTitle = props.isEdit ? 'Edit Level' : 'New Level';
+
+const initialLevelData = {
+  level: props.level.level,
+  percent: props.level.percent,
+  pointsFrom: props.level.pointsFrom,
+  pointsTo: props.level.pointsTo,
+  points: props.level.points,
+};
+
+const boundsValidator = (value) => {
+  const gte = (value, compareTo) => value >= compareTo;
+  const lte = (value, compareTo) => value <= compareTo;
+  const gt = (value, compareTo) => value > compareTo;
+  const lt = (value, compareTo) => value < compareTo;
+
+  let valid = true;
+  if (props.boundaries) {
+    let previousValid = true;
+    let nextValid = true;
+    let gtOp = props.levelAsPoints ? gte : gt;
+    const ltOp = props.levelAsPoints ? lte : lt;
+
+    if (props.boundaries.previous !== null) {
+      if (props.boundaries.next === null) {
+        // use gt regardless of points configuration if it's the last level
+        gtOp = gt;
+      }
+      previousValid = gtOp(value, props.boundaries.previous);
+    }
+    if (props.boundaries.next !== null) {
+      nextValid = ltOp(value, props.boundaries.next);
+    }
+
+    valid = nextValid && previousValid;
+  }
+  return valid;
+}
+
+// levelAsPoints
+
+let schema = {};
+
+if (props.isEdit) {
+  schema = {
+    'level': number().required().min(1).label('Level'),
+  }
+  if (props.levelAsPoints) {
+    schema = {
+      ...schema,
+      'pointsFrom': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points From'),
+      'pointsTo': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points To'),
+    }
+  } else {
+    schema = {
+      ...schema,
+      'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
+    }
+  }
+} else {
+  if (props.levelAsPoints) {
+    schema = {
+      ...schema,
+      'points': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points'),
+    }
+  } else {
+    schema = {
+      ...schema,
+      'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
+    }
+  }
+}
 
 </script>
 
 <template>
-  <SkillsDialog
-      :maximizable="false"
-      v-model:visible="model"
-      :header="isEdit ? 'Edit Level' : 'New Level'"
-      cancel-button-severity="secondary"
-      ok-button-severity="danger"
-      :ok-button-icon="'fas fa-trash'"
-      ok-button-label="Save"
-      :ok-button-disabled="isDisabled"
-      @on-ok="saveLevel"
-      @on-cancel="close"
-      :enable-return-focus="true"
+  <SkillsInputFormDialog
+      :id="formId"
+      v-model="model"
+      :header="modalTitle"
+      saveButtonLabel="Save"
+      @saved="saved"
+      @close="close"
+      :validation-schema="schema"
+      :save-data-function="saveLevel"
+      :initial-values="initialLevelData"
       :style="{ width: '40rem !important' }">
 
-  </SkillsDialog>
+    <template #default>
+      <template v-if="isEdit">
+        <div class="w-full">
+          <SkillsNumberInput isRequired :min="1" data-cy="levelInput" label="Level" name="level" disabled />
+        </div>
+        <template v-if="!levelAsPoints">
+          <div class="w-full">
+            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" data-cy="percentInput" label="Percent" name="percent" />
+          </div>
+        </template>
+        <template v-else>
+          <div class="w-full">
+            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsFromInput" label="Points From" name="pointsFrom" />
+          </div>
+          <div class="w-full">
+            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsToInput" label="Points To" name="pointsTo" />
+          </div>
+        </template>
+      </template>
+      <template v-else>
+        <template v-if="!levelAsPoints">
+          <div class="w-full">
+            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" data-cy="percentInput" label="Percent" name="percent" />
+          </div>
+        </template>
+        <template v-else>
+          <div class="w-full">
+            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsInput" label="Points" name="points" />
+          </div>
+        </template>
+      </template>
+    </template>
+  </SkillsInputFormDialog>
 </template>
