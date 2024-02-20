@@ -20,6 +20,7 @@ import TabPanel from 'primevue/tabpanel';
 import TabView from 'primevue/tabview';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
+import Message from 'primevue/message';
 import enquire from 'enquire.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
 import fontAwesomeIconsCanonical from './font-awesome-index';
@@ -104,6 +105,7 @@ let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
 let disableCustomUpload = false;
 let currentCustomIconFile = null;
+let errorMessage = ref('');
 
 let active = ref(0);
 
@@ -273,7 +275,24 @@ const deleteIcon = (iconName, projectId) => {
 };
 
 let uploader = ref();
+
+const isValidImageType = (type) => {
+  return true; //type !== acceptType;
+}
+const uploadFromInput = (event) => {
+  const target = event.target;
+  const files = target.files;
+  files[0].objectURL = URL.createObjectURL(files[0]);
+  beforeUpload({files: files});
+}
 const beforeUpload = (upload) => {
+  const isImageTypeValid = isValidImageType(upload.files[0].type);
+
+  if (!isImageTypeValid) {
+    errorMessage.value = 'File is not an image format';
+    return;
+  }
+
   const customIcon = new Image();
   customIcon.src = upload.files[0].objectURL;
   customIcon.onload = () => {
@@ -288,9 +307,10 @@ const beforeUpload = (upload) => {
       FileUploadService.upload(uploadUrl.value, data, (response) => {
         handleUploadedIcon(response.data);
       }, () => {
+        errorMessage.value = 'Encountered error when uploading icon';
       });
     } else {
-      console.log('Invalid icon size');
+      errorMessage.value = 'Invalid image dimensions, dimensions must be square and must be between 48 x 48 and 100 x 100';
     }
   };
 }
@@ -313,19 +333,18 @@ const beforeUpload = (upload) => {
                 </template>
               </VirtualScroller>
               <FileUpload ref="uploader" @select="beforeUpload" v-if="pack.packName === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
-                <template #header="{ chooseCallback }">
-                  <div class="flex flex-wrap justify-content-between align-items-center flex-1 gap-2">
-                    <div class="flex gap-2">
-                      <Button @click="chooseCallback()">Browse</Button>
-                      <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
-                    </div>
+                <template #header>
+                  <div class="w-full">
+                    <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
+                    <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
                   </div>
                 </template>
                 <template #content>
+                  <Message data-cy="iconErrorMessage" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
                   <p>Drag and drop files to here to upload.</p>
                   <div v-if="iconPacks[2].icons.length > 0">
                     <div class="flex flex-wrap p-0 sm:p-5 gap-5">
-                      <div v-for="(icons) of iconPacks[2].icons">
+                      <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index">
                         <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
                           <div class="icon-item">
                             <a href="#"

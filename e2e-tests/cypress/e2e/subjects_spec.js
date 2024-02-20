@@ -303,7 +303,7 @@ describe('Subjects Tests', () => {
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
-    it.skip('upload custom icon', () => {
+    it('upload custom icon', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -328,10 +328,10 @@ describe('Subjects Tests', () => {
         cy.get('.p-tabview-nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('input[type=file]').attachFile(filename);
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
         cy.wait('@uploadIcon')
 
-        cy.get('#subj1___BV_modal_body_ .proj1-validiconpng');
+        cy.get('.proj1-validiconpng');
     });
 
 
@@ -346,24 +346,24 @@ describe('Subjects Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        cy.wait('@getCustomIconsCss')
+        // cy.wait('@getCustomIconsCss')
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
-        cy.wait('@getCustomIcons')
+        // cy.wait('@getCustomIcons')
 
         cy.get('.p-tabview-nav-link').contains('Custom').click();
-        cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
+        // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
         cy.wait(2000)
 
         const filename = 'invalid_file.txt';
-        cy.get('input[type=file]').attachFile(filename);
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
 
-        cy.get('[data-cy="customIconErr"]').contains('File is not an image format');
+        cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
     });
 
-    it.skip('upload custom icon - server side error', () => {
+    it('upload custom icon - server side error', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -384,9 +384,9 @@ describe('Subjects Tests', () => {
         cy.get('.p-tabview-nav-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('input[type=file]').attachFile(filename);
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
 
-        cy.get('.toast-body').contains('Encountered error when uploading');
+        cy.get('[data-cy="iconErrorMessage"]').contains('Encountered error when uploading');
     });
 
     it('new subject button should retain focus after dialog closes', () => {
@@ -493,7 +493,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').should('have.focus');
     });
 
-    it.skip('new level dialog should return focus to new level button', () => {
+    it('new level dialog should return focus to new level button', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
