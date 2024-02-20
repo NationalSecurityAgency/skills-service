@@ -144,6 +144,7 @@ if (props.isEdit) {
       v-model="model"
       :header="modalTitle"
       saveButtonLabel="Save"
+      :enable-return-focus="true"
       @saved="saved"
       @close="close"
       :validation-schema="schema"

@@ -195,6 +195,12 @@ const confirmAndRemoveLastItem = () => {
             });
           }).catch((error) => {
             if (error?.response?.data) {
+              confirm.require({
+                message: error.response.data.explanation,
+                header: 'Unable to delete',
+                rejectClass: 'hidden',
+                acceptLabel: 'OK',
+              });
               // msgOk(error.response.data.explanation, 'Unable to delete');
             } else {
               // eslint-disable-next-line
@@ -298,9 +304,11 @@ const handleFocus = (e) => {
           <Column field="level" header="Level">
             <template #body="slotProps">
               {{ slotProps.data.level }}
-              <i v-if="slotProps.data.achievable === false" class="icon-warning fa fa-exclamation-circle text-warning"
-                 aria-label="Level is unachievable. Insufficient available points in project."
-                 v-tooltip="'Level is unachievable. Insufficient available points in project.'"/>
+              <span v-if="slotProps.data.achievable === false" class="icon-warning text-sm">
+                <i class="fa fa-exclamation-circle text-warning"
+                   aria-label="Level is unachievable. Insufficient available points in project."
+                   v-tooltip="'Level is unachievable. Insufficient available points in project.'"/> Level is unachievable. Insufficient available points in project.
+              </span>
             </template>
           </Column>
           <Column field="percent" header="Percent">
@@ -320,7 +328,7 @@ const handleFocus = (e) => {
           </Column>
           <Column field="edit" header="Edit">
             <template #body="slotProps">
-              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" id="editLevelButton" />
+              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" />
             </template>
           </Column>
         </DataTable>
