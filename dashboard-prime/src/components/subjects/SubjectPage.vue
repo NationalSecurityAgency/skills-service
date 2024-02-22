@@ -20,7 +20,7 @@ const focusState = useFocusState()
 
 let showEditSubject = ref(false)
 
-let isReadOnlyProj = false
+let isReadOnlyProj = projConfig.isReadOnlyProj;
 
 onMounted(() => {
   loadSubject()

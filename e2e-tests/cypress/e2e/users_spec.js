@@ -439,7 +439,7 @@ describe('Users Tests', () => {
         cy.contains("ID: usera@skills.org");
     });
 
-    it.skip('view users from badge and skill', () => {
+    it('view users from badge and skill', () => {
         cy.intercept('users')
             .as('getUsers');
 
@@ -567,7 +567,7 @@ describe('Users Tests', () => {
         ], 5);
     });
 
-    it.skip('users with various progress', () => {
+    it('users with various progress', () => {
         cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
         cy.createSubject(1, 2)
         cy.createSkill(1, 2, 1,  { pointIncrement: '777', numPerformToCompletion: '6', pointIncrementInterval: 0 })

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import { SkillsReporter } from '@skilltree/skills-client-js';
@@ -12,9 +12,10 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import BadgesService from '@/components/badges/BadgesService';
 import Badge from '@/components/badges/Badge.vue';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const announcer = useSkillsAnnouncer()
-// const config = useProjConfig();
+const projConfig = useProjConfig();
 // const props = defineProps(['subject']);
 const emit = defineEmits(['badge-deleted', 'badges-changed']);
 const store = useStore();
