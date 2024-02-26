@@ -149,8 +149,8 @@ const loadSkill = () => {
       <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not
       finalized yet.
     </div>
-    <div class="sm:flex">
-      <div class="flex-1 sm:mr-2 mb-2">
+    <div class="md:flex">
+      <div class="flex-1 md:mr-2 mb-2">
         <media-info-card
           :title="`${numberFormat.pretty(totalPoints)} Points`"
           class="h-full"
@@ -172,8 +172,8 @@ const loadSkill = () => {
         </media-info-card>
       </div>
     </div>
-    <div class="sm:flex">
-      <div class="flex-1 sm:mr-2 mb-2">
+    <div class="md:flex">
+      <div class="flex-1 md:mr-2 mb-2">
         <media-info-card
           :title="`Version # ${skillInfo.version}`"
           class="h-full"
@@ -226,14 +226,17 @@ const loadSkill = () => {
         <div class="input-group-text"><i class="fas fa-link mr-1" aria-hidden="true"/> Help URL:</div>
       </InputGroupAddon>
       <div class="p-inputtext p-component">
-        <a v-if="skillInfo.helpUrl" :href="helpUrl" target="_blank" rel="noopener" class="skill-url" data-cy="skillOverviewHelpUrl">
-          <span v-if="rootHelpUrl" class="surface-200 border-50 border-x-2 border-round"
-                aria-label="Root Help URL was configured in the project's settings.">
-            <i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}
-        </a>
-        <div class="mt-1 text-xs">
-          ** Root Help URL was configured in the project's settings.
+        <div v-if="helpUrl">
+          <a :href="helpUrl" target="_blank" rel="noopener" class="skill-url" data-cy="skillOverviewHelpUrl">
+            <span v-if="rootHelpUrl" class="surface-200 border-50 border-x-2 border-round"
+                  aria-label="Root Help URL was configured in the project's settings.">
+              <i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}
+          </a>
+          <div v-if="rootHelpUrl" class="mt-1 text-xs">
+            ** Root Help URL was configured in the project's settings.
+          </div>
         </div>
+        <div v-else>Not Specified</div>
       </div>
     </InputGroup>
 

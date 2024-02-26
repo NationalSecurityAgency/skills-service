@@ -18,12 +18,36 @@ function flipCollapsed() {
 onMounted(() => {
   getCollapsedFromLocalStorage()
 })
+
+const navOnSmallScreen = (changeEvent) => {
+  router.push({ name: changeEvent.value.page })
+}
 </script>
 
 <template>
   <div class="mt-3" data-cy="nav">
+    <div class="sticky top-0 z-5 mb-3 md:hidden">
+      <Dropdown
+        :options="navItems"
+        @change="navOnSmallScreen"
+        optionLabel="name"
+        placeholder="Navigation"
+        class="w-full md:w-14rem">
+        <template #option="slotProps">
+          <div class="flex align-items-center">
+            <i :class="slotProps.option.iconClass" class="fas text-base mr-2 w-2rem" aria-hidden="true" />
+            <div>{{ slotProps.option.name }}</div>
+          </div>
+        </template>
+        <template #value>
+          <i class="fas fa-bars mr-2" aria-hidden="true"></i>
+          <span class="uppercase">Navigation</span>
+        </template>
+      </Dropdown>
+    </div>
+
     <div class="flex">
-      <div class="flex-none" data-cy="nav-col">
+      <div class="flex-none hidden md:flex" data-cy="nav-col">
         <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!collapsed" class="pt-3 px-3">Navigate</div>
@@ -66,7 +90,7 @@ onMounted(() => {
       </div>
 
       <div class="flex-1" ref="content">
-        <div class="pl-3">
+        <div class="md:pl-3">
           <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate"></router-view>
         </div>
       </div>

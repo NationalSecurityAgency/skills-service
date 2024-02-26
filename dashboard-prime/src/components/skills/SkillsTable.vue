@@ -328,13 +328,16 @@ const skillsTable = ref(null)
 
       <Column expander style="width: 2rem" />
       <Column selectionMode="multiple" headerStyle="width: 1rem"></Column>
-      <Column v-for="col of displayedColumns" :key="col.key" :field="col.key" :sortable="col.sortable">
+      <Column v-for="col of displayedColumns"
+              :key="col.key"
+              :field="col.key"
+              :sortable="col.sortable">
         <template #header>
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field == 'name'" class="flex flex-row flex-wrap align-items-center">
-            <div class="flex-1 ">
+          <div v-if="slotProps.field == 'name'" class="flex flex-wrap align-items-center w-min-20rem">
+            <div class="flex-1 w-min-10rem">
               <router-link
                 class="no-underline"
                 :data-cy="`manageSkillLink_${slotProps.data.skillId}`"
@@ -406,7 +409,7 @@ const skillsTable = ref(null)
               </div>
             </div>
           </div>
-          <div v-else-if="slotProps.field === 'displayOrder'" class="max-w-23rem">
+          <div v-else-if="slotProps.field === 'displayOrder'" class="w-min-9rem">
             <div class="flex align-items-center">
               <div class="flex-1">
                 {{ slotProps.data[col.key] }}

@@ -30,8 +30,8 @@ const pathPath = usePagePath()
     <!--      Any reported skills will be queued for application once the upgrade has completed.</span>-->
     <!--    </div>-->
     <div class="">
-      <div class="flex mt-3">
-        <div class="flex-1">
+      <div class="flex flex-wrap mt-3 justify-content-center mb-3">
+        <div class="flex-1 justify-content-center">
           <div class="flex">
             <router-link data-cy="skillTreeLogo" class="" to="/">
               <img
