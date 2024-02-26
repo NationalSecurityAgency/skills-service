@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref, onMounted, computed, nextTick} from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import QuizService from '@/components/quiz/QuizService.js';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import NoContent2 from '@/components/utils/NoContent2.vue';

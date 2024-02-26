@@ -9,7 +9,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true,
+    required: false,
   },
   isRequired: {
     type: Boolean,
@@ -22,6 +22,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  placeholder: {
+    type: String,
+    default: ''
   },
 })
 const emit = defineEmits(['input', 'keydown-enter'])
@@ -49,6 +53,7 @@ const onEnter = (event) => {
       :autofocus="autofocus"
       :id="name"
       :disabled="disabled"
+      :placeholder="placeholder"
       :class="{ 'p-invalid': errorMessage }"
       :aria-invalid="errorMessage ? null : true"
       :aria-errormessage="`${name}Error`"

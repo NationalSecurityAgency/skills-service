@@ -3,6 +3,9 @@ import { ref, computed } from 'vue';
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useFocusState } from '@/stores/UseFocusState.js'
+
+const focusState = useFocusState()
 
 const emit = defineEmits(['hidden', 'do-remove']);
 
@@ -29,6 +32,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  focusOnCloseId: {
+    type: String,
+    required: true,
+  },
   loading: {
     type: Boolean,
     default: false
@@ -49,6 +56,9 @@ const publishHidden = (e) => {
 };
 
 const removeAction = () => {
+  if (Boolean(props.focusOnCloseId)) {
+    focusState.setElementId(props.focusOnCloseId);
+  }
   close()
   emit('do-remove');
 };
@@ -61,7 +71,7 @@ const close =() => {
 <template>
   <SkillsDialog
       :maximizable="false"
-      v-model:visible="model"
+      v-model="model"
       header="Removal Safety Check"
       cancel-button-severity="secondary"
       ok-button-severity="danger"
@@ -71,7 +81,7 @@ const close =() => {
       :show-ok-button="!removalNotAvailable"
       @on-ok="removeAction"
       @on-cancel="publishHidden"
-      :enable-return-focus="true"
+      :enable-return-focus="enableReturnFocus || Boolean(focusOnCloseId)"
       :style="{ width: '40rem !important' }">
     <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
     <div v-if="!loading" class="px-2">

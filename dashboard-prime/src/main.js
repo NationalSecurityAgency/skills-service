@@ -36,6 +36,8 @@ import Fieldset from 'primevue/fieldset';
 import ToggleButton from 'primevue/togglebutton';
 import RadioButton from 'primevue/radiobutton';
 import Checkbox from 'primevue/checkbox';
+import Rating from 'primevue/rating';
+import Textarea from 'primevue/textarea';
 import ConfirmationService from 'primevue/confirmationservice';
 
 
@@ -98,6 +100,8 @@ app.component('Fieldset', Fieldset)
 app.component('ToggleButton', ToggleButton)
 app.component('RadioButton', RadioButton)
 app.component('Checkbox', Checkbox)
+app.component('Rating', Rating)
+app.component('Textarea', Textarea)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

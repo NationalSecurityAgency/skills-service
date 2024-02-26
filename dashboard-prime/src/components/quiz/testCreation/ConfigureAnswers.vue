@@ -1,0 +1,85 @@
+<script setup>
+import { computed } from 'vue'
+import { useFieldArray } from "vee-validate";
+import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
+import { useAppConfig } from '@/components/utils/UseAppConfig.js';
+
+const model = defineModel()
+const props = defineProps({
+  quizType: {
+    type: String,
+    required: true,
+  }
+})
+const { remove, insert, push, fields } = useFieldArray('answers');
+const appConfig = useAppConfig()
+const isQuizType = computed(() => {
+  return props.quizType === 'Quiz';
+})
+const maxAnswersAllowed = computed(() => {
+  return appConfig.maxAnswersPerQuizQuestion;
+})
+const noMoreAnswers = computed(() => {
+  return fields.value && fields.value.length >= maxAnswersAllowed.value
+})
+const twoOrLessQuestions = computed(() => {
+  return !fields.value && fields.value.length <= 2
+})
+
+function addNewAnswer(index) {
+  const initialValue = {
+    id: null,
+    answer: '',
+    isCorrect: false,
+  };
+  insert(index + 1, initialValue)
+}
+function removeAnswer(index) {
+  remove(index)
+}
+</script>
+
+<template>
+  <div v-if="model && model.length > 0">
+    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap align-items-baseline gap-0 mt-2" :data-cy="`answer-${index}`">
+      <SelectCorrectAnswer
+          v-if="isQuizType"
+          :id="`answers[${index}].isCorrect`"
+          :answer-number="index+1"
+          :name="`answers[${index}].isCorrect`"
+          v-model="answer.value.isCorrect"
+          class="flex flex-initial mr-2"/>
+      <SkillsTextInput
+          class="flex flex-1"
+          placeholder="Enter an answer"
+          v-model="answer.value.answer"
+          :initialValue="answer.value.answer"
+          :data-cy="`answer_${index}`"
+          :id="`answer_${index}`"
+          :name="`answers[${index}].answer`"/>
+
+      <span class="p-buttonset ml-1">
+            <SkillsButton
+                :disabled="noMoreAnswers"
+                :aria-label="`Add New Answer at index ${index}`"
+                data-cy="addNewAnswer"
+                outlined
+                icon="fas fa-plus"
+                @click="addNewAnswer(index)">
+            </SkillsButton>
+            <SkillsButton
+                :disabled="twoOrLessQuestions"
+                :aria-label="`Delete Answer at index ${index}`"
+                data-cy="removeAnswer"
+                outlined
+                icon="fas fa-minus"
+                @click="removeAnswer(index)">
+            </SkillsButton>
+      </span>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+
+</style>

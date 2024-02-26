@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, ref, provide, toRaw } from 'vue'
+import { reactive, computed, ref, provide, toRaw, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
@@ -36,8 +36,7 @@ const props = defineProps({
     default: false
   },
 })
-const emit = defineEmits(['saved', 'cancelled'])
-
+const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
 const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors } = useForm({
   validationSchema: props.validationSchema,
@@ -68,6 +67,13 @@ provide('setFieldValue', setFieldValue)
 
 const isDialogLoading = computed(() => {
   return props.loading || inputFormResiliency.isInitializing
+})
+
+watch(() => meta.value.dirty, (newValue) => {
+  emit('isDirty', newValue)
+})
+watch(() => errors.value, (newValue) => {
+  emit('errors', newValue)
 })
 
 if (props.asyncLoadDataFunction) {

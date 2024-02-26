@@ -8,7 +8,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true,
+    required: false,
   },
   options: {
     type: Object,
@@ -34,19 +34,26 @@ const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
-  <div class="field text-left mb-0">
-    <label :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
+  <div class="m-0 p-0">
+    <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
     <Dropdown v-model="value"
               :options="options"
               class="w-full"
-              :data-cy="$attrs['data-cy']"
+              v-bind="$attrs"
               :autofocus="autofocus"
               :id="name"
               :disabled="disabled"
               :class="{ 'p-invalid': errorMessage }"
               :aria-invalid="errorMessage ? null : true"
               :aria-errormessage="`${name}Error`"
-              :aria-describedby="`${name}Error`" />
+              :aria-describedby="`${name}Error`">
+      <template #value="slotProps">
+        <slot name="value" :value="slotProps.value"></slot>
+      </template>
+      <template #option="slotProps">
+        <slot name="option" :option="slotProps.option"></slot>
+      </template>
+    </Dropdown>
     <small
         role="alert"
         class="p-error"

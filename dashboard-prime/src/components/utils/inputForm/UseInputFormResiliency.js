@@ -1,4 +1,4 @@
-import { toRaw, watch, ref } from 'vue'
+import { isProxy, ref, toRaw, watch } from 'vue'
 import { useIndexedDB } from '@/components/utils/storage/UseIndexedDB.js'
 
 export const useInputFormResiliency = () => {
@@ -36,11 +36,26 @@ export const useInputFormResiliency = () => {
 
     return loadFromStorageAndUpdateAsNeeded(componentName, modelObj, setFieldValueFunction).then(()=> {
       watcherContainer.unwatch = watch(modelObj, (newValue) => {
-        const rawObj = toRaw(newValue)
+        const rawObj = convertToRaw(newValue)
         indexedDb.save(componentName, rawObj)
       })
       return isRestoredFromStore.value
     })
+  }
+
+  const convertToRaw = (newValue) => {
+    if (isProxy(newValue)) {
+      const rawObj = toRaw(newValue)
+      for (const [key, value] of Object.entries(rawObj)) {
+        if (Array.isArray(value)) {
+          rawObj[key] = value.map((item) => convertToRaw(item))
+        } else {
+          rawObj[key] = convertToRaw(value)
+        }
+      }
+      return rawObj
+    }
+    return newValue;
   }
 
   const discard = (updateModel = true) => {

@@ -18,10 +18,10 @@ import { ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import QuizDefinitions from '@/components/quiz/QuizDefinitions.vue';
 
-const configuredTests = ref(null)
+const quizDefinitionsRef = ref(null)
 const quizDefPageSubPageHeader = ref(null)
 function openNewTestModal() {
-  configuredTests.value.showUpdateModal({
+  quizDefinitionsRef.value.showUpdateModal({
     name: '',
     testId: '',
     type: 'Quiz',
@@ -41,7 +41,7 @@ function openNewTestModal() {
     </SubPageHeader>
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-        <QuizDefinitions ref="configuredTests"/>
+        <QuizDefinitions ref="quizDefinitionsRef"/>
       </template>
     </Card>
   </div>

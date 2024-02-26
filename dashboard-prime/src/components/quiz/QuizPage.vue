@@ -19,10 +19,13 @@ const quizConfig = useQuizConfig()
 const focusState = useFocusState()
 
 onMounted(() => {
-  quizConfig.loadQuizConfigState({ quizId: route.params.quizId })
-  quizSummaryState.loadQuizSummary(route.params.quizId).then((quizSummary) => {
-    updateEditQuizInfo(quizSummary)
-  })
+  if (!quizSummaryState.quizSummary || quizSummaryState.quizSummary.quizId !== route.params.quizId) {
+    quizSummaryState.loadQuizSummary(route.params.quizId).then((quizSummary) => {
+      updateEditQuizInfo(quizSummary)
+    })
+  } else {
+    updateEditQuizInfo(quizSummaryState.quizSummary)
+  }
 })
 
 const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig)
@@ -104,35 +107,35 @@ function updateQuizDef(quizDef) {
     <PageHeader :loading="isLoading" :options="headerOptions">
       <template #subSubTitle v-if="quizSummaryState.quizSummary">
         <div v-if="!quizConfig.isReadOnlyQuiz">
-          <SkillsButton
-              id="editQuizButton"
-              @click="editQuizInfo.showDialog = true"
-              ref="editQuizButton"
-              size="small"
-              outlined
-              severity="info"
-              :track-for-focus="true"
-              data-cy="editQuizButton"
-              label="Edit"
-              icon="fas fa-edit"
-              :aria-label="`edit Quiz ${quizSummaryState.quizSummary.name}`">
-          </SkillsButton>
-          <router-link
-              class="ml-1"
-              data-cy="quizPreview"
-              :to="{ name:'QuizRun', params: { quizId: quizSummaryState.quizSummary.quizId } }"
-              target="_blank" rel="noopener">
             <SkillsButton
-                target="_blank"
-                v-if="quizSummaryState.quizSummary"
+                id="editQuizButton"
+                @click="editQuizInfo.showDialog = true"
+                ref="editQuizButton"
+                size="small"
                 outlined
                 severity="info"
-                size="small"
-                label="Preview"
-                icon="fas fa-eye"
-                :aria-label="`Preview Quiz ${quizSummaryState.quizSummary.name}`">
+                :track-for-focus="true"
+                data-cy="editQuizButton"
+                label="Edit"
+                icon="fas fa-edit"
+                :aria-label="`edit Quiz ${quizSummaryState.quizSummary.name}`">
             </SkillsButton>
-          </router-link>
+            <router-link
+                class="ml-1"
+                data-cy="quizPreview"
+                :to="{ name:'QuizRun', params: { quizId: quizSummaryState.quizSummary.quizId } }"
+                target="_blank" rel="noopener">
+              <SkillsButton
+                  target="_blank"
+                  v-if="quizSummaryState.quizSummary"
+                  outlined
+                  severity="info"
+                  size="small"
+                  label="Preview"
+                  icon="fas fa-eye"
+                  :aria-label="`Preview Quiz ${quizSummaryState.quizSummary.name}`">
+              </SkillsButton>
+            </router-link>
           <div class="mt-2" v-if="!isLoading">
             <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userRoleForDisplay }}</span>
           </div>
@@ -140,7 +143,7 @@ function updateQuizDef(quizDef) {
       </template>
     </PageHeader>
 
-    <edit-quiz
+    <EditQuiz
         v-if="editQuizInfo.showDialog"
         v-model="editQuizInfo.showDialog"
         :quiz="editQuizInfo.quizDef"
