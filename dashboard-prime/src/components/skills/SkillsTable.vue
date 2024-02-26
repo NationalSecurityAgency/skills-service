@@ -10,7 +10,6 @@ import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatt
 import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import DataTable from 'primevue/datatable'
-import EditSkill from '@/components/skills/EditSkill.vue'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -144,7 +143,6 @@ const onColumnSort = () => {
 
 const addSkillDisabled = ref(false)
 
-const editSkillInfo = ref({ skill: {}, show: false, isEdit: false })
 const editGroupInfo = ref({ group: {}, show: false, isEdit: false })
 const editImportedSkillInfo = ref({ skill: {}, show: false })
 
@@ -166,9 +164,6 @@ const createOrUpdateSkill = inject('createOrUpdateSkill')
 //     editSkillInfo.value = { skill: itemToEdit, show: true, isEdit: true }
 //   }
 // }
-const copySkill = (skillToCopy) => {
-
-}
 
 
 const deleteButtonsDisabled = ref(false)
@@ -380,7 +375,7 @@ const skillsTable = ref(null)
                     :id="`copySkillButton_${slotProps.data.skillId}`"
                     v-if="slotProps.data.type === 'Skill' && !slotProps.data.isCatalogImportedSkills"
                     icon="fas fa-copy"
-                    @click="copySkill(slotProps.data)"
+                    @click="createOrUpdateSkill(slotProps.data, false, true)"
                     size="small"
                     outlined
                     severity="info"
@@ -491,15 +486,6 @@ const skillsTable = ref(null)
         </div>
       </template>
     </DataTable>
-
-    <edit-skill
-      v-if="editSkillInfo.show"
-      v-model="editSkillInfo.show"
-      :skill="editSkillInfo.skill"
-    />
-
-    <!--    <edit-project v-if="newProject.show" v-model="newProject.show" :project="newProject.project"-->
-    <!--                  @project-saved="projectAdded" @hidden="handleHide" :is-edit="newProject.isEdit"/>-->
 
     <skill-removal-validation
       v-if="deleteSkillInfo.show"

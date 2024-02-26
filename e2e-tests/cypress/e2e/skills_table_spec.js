@@ -73,7 +73,7 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy=deleteSkillButton_skill2]').should('have.focus')
   })
 
-  it.skip('copy existing skill', () => {
+  it('copy existing skill', () => {
     cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/copy_of_skill2').as('saveSkill')
     cy.intercept('POST', '/api/validation/description*').as('validateDescription')
 
@@ -108,12 +108,12 @@ describe('Skills Table Tests', () => {
     cy.get(`${makdownDivSelector}`).should('have.text', 'generic description')
     cy.get('[data-cy=skillName]').should('have.value', 'Copy of Very Great Skill # 2')
     cy.get('#idInput').should('have.value', 'copy_of_skill2')
-    cy.get('[data-cy=numPerformToCompletion]').should('have.value', '1')
-    cy.get('[data-cy=skillPointIncrement]').should('have.value', '150')
+    cy.get('[data-cy=numPerformToCompletion] [data-pc-name="inputtext"]').should('have.value', '1')
+    cy.get('[data-cy=pointIncrement] [data-pc-name="inputtext"]').should('have.value', '150')
     cy.get(makdownDivSelector).type('{selectall}copy description edit')
     cy.wait('@validateDescription')
     cy.get('[data-cy=numPerformToCompletion]').type('5')
-    cy.clickSave()
+    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
     cy.wait('@saveSkill')
 
     cy.validateTable(tableSelector, [

@@ -29,10 +29,15 @@ const maxSkillVersion = ref(1)
 
 const asyncLoadData = () => {
   const loadSkillDetails = () => {
-    if (props.isEdit) {
+    if (props.isEdit || props.isCopy) {
       return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
         .then((resSkill) => {
-          return { ...resSkill, 'description': resSkill.description || '' }
+          return {
+            ...resSkill,
+            'description': resSkill.description || '',
+            skillName: props.isCopy ? `Copy of ${resSkill.name}` : resSkill.name,
+            skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
+          }
         })
     }
 
@@ -195,7 +200,7 @@ const saveSkill = (values) => {
     .then((skillRes) => {
       return {
         ...skillRes,
-        originalSkillId: props.skill.skillId,
+        originalSkillId: !props.isCopy ? props.skill.skillId : null,
       }
     })
   // close()

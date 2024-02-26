@@ -50,12 +50,12 @@ const newSkillInfo = ref({
   isCopy: false,
   version: 1
 })
-const createOrUpdateSkill = (skill = {}, isEdit = false) => {
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false) => {
   newSkillInfo.value = {
     skill,
     isEdit,
     show: true,
-    isCopy: false
+    isCopy
   }
 }
 provide('createOrUpdateSkill', createOrUpdateSkill)
@@ -173,6 +173,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
       :is-edit="newSkillInfo.isEdit"
+      :is-copy="newSkillInfo.isCopy"
       @skill-saved="skillCreatedOrUpdated"
     />
   </div>
