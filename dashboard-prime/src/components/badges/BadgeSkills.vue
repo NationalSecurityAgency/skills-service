@@ -2,9 +2,11 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Card from 'primevue/card';
+import Column from 'primevue/column';
+import ConfirmDialog from 'primevue/confirmdialog';
+import {useConfirm} from "primevue/useconfirm";
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
-import SkillsTable from '@/components/skills/SkillsTable.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useBadgeState } from '@/stores/UseBadgeState.js';
 import SkillsService from '@/components/skills/SkillsService.js';
@@ -12,28 +14,34 @@ import BadgesService from '@/components/badges/BadgesService.js';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { storeToRefs } from 'pinia';
 
+const confirm = useConfirm();
 const projConf = useProjConfig();
 const badgeState = useBadgeState();
+const { badge } = storeToRefs(badgeState);
 const route = useRoute();
 const emit = defineEmits(['skills-changed']);
 
 let loading = ref({
   availableSkills: true,
-      badgeSkills: true,
-      skillOp: false,
-      badgeInfo: false,
+  badgeSkills: true,
+  skillOp: false,
+  badgeInfo: false,
 });
 
 let badgeSkills = ref([]);
 let availableSkills = ref([]);
 let projectId = ref(null);
 let badgeId = ref(null);
-let badge = ref(null);
+// let badge = ref(null);
 let learningPathViolationErr = ref({
   show: false,
   skillName: '',
 });
+let nameQuery = ref(null);
+let hideManageButton = ref(false);
+let isReadOnly = ref(false);
 
 onMounted(() => {
   projectId.value = route.params.projectId;
@@ -62,7 +70,7 @@ const loadAssignedBadgeSkills = () => {
 };
 
 const loadAvailableBadgeSkills = () => {
-  SkillsService.getProjectSkills(projectId.value, null, false, true)
+  SkillsService.getProjectSkills(projectId.value, nameQuery.value, false, true)
       .then((loadedSkills) => {
         const badgeSkillIds = badgeSkills.value.map((item) => item.skillId);
         availableSkills.value = loadedSkills.filter((item) => !badgeSkillIds.includes(item.skillId));
@@ -72,19 +80,23 @@ const loadAvailableBadgeSkills = () => {
 
 const loadBadgeInfo = () => {
   BadgesService.getBadge(projectId.value, badgeId.value)
-      .then((badge) => {
-        badge.value = badge;
+      .then((retrievedBadge) => {
+        badge.value = retrievedBadge;
         loading.value.badgeInfo = false;
       });
 };
 
 const deleteSkill = (skill) => {
   const msg = `Are you sure you want to remove Skill "${skill.name}" from Badge "${badge.value.name}"?`;
-  // msgConfirm(msg, 'WARNING: Remove Required Skill').then((res) => {
-  //   if (res) {
+  confirm.require({
+    message: msg,
+    header: 'WARNING: Remove Required Skill',
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel',
+    accept: () => {
       skillDeleted(skill);
-    // }
-  // });
+    }
+  });
 };
 
 const skillDeleted = (deletedItem) => {
@@ -93,23 +105,25 @@ const skillDeleted = (deletedItem) => {
       .then(() => {
         badgeSkills.value = badgeSkills.value.filter((entry) => entry.skillId !== deletedItem.skillId);
         availableSkills.value.unshift(deletedItem);
-        badgeState.loadBadgeDetailsState({ projectId: projectId.value, badgeId: badgeId.value });
+        badgeState.loadBadgeDetailsState(projectId.value, badgeId.value);
         loading.value.skillOp = false;
-        emit('skills-changed', deletedItem);
+        badge.value = badgeState.badge.value;
       });
 };
 
 const skillAdded = (newItem) => {
-  console.log(newItem);
   loading.value.skillOp = true;
   SkillsService.assignSkillToBadge(projectId.value, badgeId.value, newItem.skillId)
       .then(() => {
         badgeSkills.value.push(newItem);
+        console.log(newItem.skillId);
+        console.log(availableSkills.value);
         availableSkills.value = availableSkills.value.filter((item) => item.skillId !== newItem.skillId);
+        console.log(availableSkills.value);
         badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
         loading.value.skillOp = false;
-        emit('skills-changed', newItem);
         SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
+        nameQuery.value = null;
       }).catch((e) => {
     if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
       loading.value.skillOp = false;
@@ -124,6 +138,11 @@ const skillAdded = (newItem) => {
     }
   });
 };
+
+const filterSkills = (searchQuery) => {
+  nameQuery.value = searchQuery;
+  loadAvailableBadgeSkills();
+}
 </script>
 
 <template>
@@ -137,6 +156,7 @@ const skillAdded = (newItem) => {
                            v-if="!projConf.isReadOnlyProj"
                            class="search-and-nav border rounded"
                            v-on:added="skillAdded"
+                           @search-change="filterSkills"
                            select-label="Select skill(s)"
                            :onlySingleSelectedValue="true">
           </skills-selector>
@@ -146,16 +166,37 @@ const skillAdded = (newItem) => {
             Adding this skill would result in a <b>circular/infinite learning path</b>.
   <!--          Please visit project's <b-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</b-link> page to review.-->
           </div>
-
-  <!--        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" class="mt-2"-->
+            <!--        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" class="mt-2"-->
   <!--                             :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>-->
 
           <div v-if="badgeSkills && badgeSkills.length > 0">
-            Skills exist
+            <DataTable :value="badgeSkills" paginator :rows="5" :totalRecords="badgeSkills.length" :rowsPerPageOptions="[5, 10, 15, 20]" >
+              <Column header="Skill Name" field="name" style="width: 40%;" sortable>
+                <template #body="slotProps">
+                  <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.skillId" :to="{ name:'SkillOverview',
+                    params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                               class="btn btn-sm btn-outline-hc ml-2"
+                               :data-cy="`manage_${slotProps.data.skillId}`">
+                    {{ slotProps.data.name }}
+                  </router-link>
+                </template>
+              </Column>
+              <Column header="Skill ID" field="skillId" sortable></Column>
+              <Column header="Total Points" field="totalPoints" sortable></Column>
+              <Column header="Delete">
+                <template #body="slotProps">
+                  <SkillsButton v-if="!projConf.isReadOnlyProj" v-on:click="deleteSkill(slotProps.data)" size="small"
+                          :data-cy="`deleteSkill_${slotProps.data.skillId}`" icon="fas fa-trash" label="Delete"
+                          :aria-label="`remove dependency on ${slotProps.data.skillId}`">
+                  </SkillsButton>
+                </template>
+              </Column>
+            </DataTable>
           </div>
           <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
+        <ConfirmDialog id="confirm" />
       </template>
     </Card>
   </div>

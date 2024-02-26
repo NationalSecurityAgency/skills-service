@@ -1,17 +1,18 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import BadgesService from '@/components/badges/BadgesService';
 import { useBadgeState } from '@/stores/UseBadgeState.js';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
 const projConfig = useProjConfig();
 const badgeState = useBadgeState();
-
+const { badge } = storeToRefs(badgeState);
 const isReadOnlyProj = projConfig.isReadOnlyProj;
 
 const navItems = [
@@ -19,7 +20,6 @@ const navItems = [
   {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'BadgeUsers'},
 ];
 
-let badge = ref();
 let isLoading = ref(false);
 let projectId = ref(route.params.projectId);
 let badgeId = ref(route.params.badgeId);
@@ -136,6 +136,7 @@ const toDate = (value) => {
   }
   return dateVal;
 };
+
 </script>
 
 <template>
