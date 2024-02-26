@@ -148,9 +148,10 @@ const moveQuestion = (changeIndexBy) => {
 
 </template>
 
-<style lang="scss" scoped>
-// TODO: figure scss and theming
-//@import "@/assets/custom";
+
+<!--TODO: figure scss and theming-->
+<!--@import "@/assets/custom";-->
+<style lang="css" scoped>
 
 .sort-control i {
   padding: 0.4rem;
