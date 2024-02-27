@@ -68,7 +68,6 @@ watch(() => store.getters.userInfo, async (newUserInfo) => {
 
 const addNavGuards = () => {
   const beforeEachNavGuard = (to, from, next) => {
-    console.log(`nav-guard. path starts with /admin/quizzes [${to.path.startsWith('/administrator/quizzes/')}], to quizId [${to.params.quizId}], from quizId [${from.params.quizId}]`)
     if (to.query) {
       const { skillsClientDisplayPath } = to.query
       clientDisplayPath.setClientPathInfo({
