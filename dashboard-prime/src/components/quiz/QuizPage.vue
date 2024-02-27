@@ -150,7 +150,7 @@ function updateQuizDef(quizDef) {
         :is-edit="editQuizInfo.isEdit"
         @quiz-saved="updateQuizDef" />
 
-    <Navigation v-if="!isLoading" :nav-items="navItems">
+    <Navigation :nav-items="navItems">
     </Navigation>
 
   </div>

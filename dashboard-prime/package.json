@@ -27,6 +27,7 @@
     "@vueuse/core": "10.7.2",
     "axios": "1.6.5",
     "dayjs": "1.11.10",
+    "deep-equal": "2.2.3",
     "dompurify": "3.0.8",
     "enquire.js": "2.1.6",
     "idb-keyval": "6.2.1",

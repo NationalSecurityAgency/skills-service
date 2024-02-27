@@ -49,7 +49,7 @@ const moveQuestion = (changeIndexBy) => {
 
 <template>
   <div class="border-1 border-300" data-cy="questionDisplayCard">
-    <div class="flex flex-row flex-wrap gap-0 mb-3">
+    <div class="flex flex-row flex-wrap gap-0 mb-3" :data-cy="`questionDisplayCard-${questionNum}`">
       <div class="flex flex-initial align-items-start">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"

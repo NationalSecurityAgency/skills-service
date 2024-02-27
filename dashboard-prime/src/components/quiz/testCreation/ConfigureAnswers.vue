@@ -22,8 +22,8 @@ const maxAnswersAllowed = computed(() => {
 const noMoreAnswers = computed(() => {
   return fields.value && fields.value.length >= maxAnswersAllowed.value
 })
-const twoOrLessQuestions = computed(() => {
-  return !fields.value && fields.value.length <= 2
+const twoOrLessAnswers = computed(() => {
+  return !fields.value || fields.value.length <= 2
 })
 
 function addNewAnswer(index) {
@@ -54,7 +54,7 @@ function removeAnswer(index) {
           placeholder="Enter an answer"
           v-model="answer.value.answer"
           :initialValue="answer.value.answer"
-          :data-cy="`answer_${index}`"
+          data-cy="answerText"
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
@@ -68,7 +68,7 @@ function removeAnswer(index) {
                 @click="addNewAnswer(index)">
             </SkillsButton>
             <SkillsButton
-                :disabled="twoOrLessQuestions"
+                :disabled="twoOrLessAnswers"
                 :aria-label="`Delete Answer at index ${index}`"
                 data-cy="removeAnswer"
                 outlined

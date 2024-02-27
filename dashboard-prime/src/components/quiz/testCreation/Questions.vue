@@ -32,6 +32,7 @@ const editQuestionInfo = ref({
   showDialog: false,
   isEdit: true,
   questionDef: {},
+  initiatedBtnId: null,
 })
 const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig || loadingQuestions.value);
 const hasData = computed(() => questions.value && questions.value.length > 0)
@@ -84,7 +85,7 @@ function sortOrderUpdate(updateEvent) {
       });
 }
 
-function openNewQuestionModal() {
+function openNewQuestionModal(initiatedBtnId) {
   editQuestionInfo.value.questionDef = {
     id: null,
     question: '',
@@ -102,6 +103,7 @@ function openNewQuestionModal() {
   };
   editQuestionInfo.value.isEdit =  false;
   editQuestionInfo.value.showDialog = true;
+  editQuestionInfo.initiatedBtnId = initiatedBtnId;
 }
 function questionDefSaved(questionDef) {
   try {
@@ -125,12 +127,16 @@ function questionDefSaved(questionDef) {
   } finally {
     announcer.polite('Question was successfully updated.');
     operationInProgress.value = false;
+    if (!questionDef.isEdit) {
+      handleNewQuestionBtnFocus()
+    }
   }
 }
 function initiatedEditQuestionDef(questionDef) {
   editQuestionInfo.value.questionDef = { ...questionDef, quizId: route.params.quizId, quizType: quizType.value };
   editQuestionInfo.value.isEdit =  true;
   editQuestionInfo.value.showDialog = true;
+  editQuestionInfo.initiatedBtnId = null;
 }
 
 function deleteQuestion(questionDef) {
@@ -173,7 +179,7 @@ function handleKeySortRequest(sortRequestInfo) {
   }
 }
 function handleNewQuestionBtnFocus() {
-  focusState.setElementId('btn_Questions');
+  focusState.setElementId(editQuestionInfo.initiatedBtnId ? editQuestionInfo.initiatedBtnId : 'btn_Questions');
   focusState.focusOnLastElement()
 }
 </script>
@@ -203,7 +209,7 @@ function handleNewQuestionBtnFocus() {
         <template #content>
           <div>
             <SkillsSpinner :is-loading="isLoading" class="my-5"/>
-            <div v-if="!isLoading">
+            <div>
               <NoContent2 v-if="!hasData"
                           title="No Questions Yet..."
                           class="mt-5"
@@ -242,7 +248,7 @@ function handleNewQuestionBtnFocus() {
                           icon="fas fa-plus-circle"
                           outlined
                           size="small"
-                          data-cy="btn_Questions"
+                          data-cy="newQuestionOnBottomBtn"
                           aria-label="Create new Question"
                           ref="newQuestionOnBottomBtn"
                           id="newQuestionOnBottomBtn"
@@ -256,6 +262,7 @@ function handleNewQuestionBtnFocus() {
 
     <!-- Edit Question Modal -->
     <edit-question
+        data-cy="editQuestionModal"
         v-if="editQuestionInfo.showDialog"
         v-model="editQuestionInfo.showDialog"
         :question-def="editQuestionInfo.questionDef"

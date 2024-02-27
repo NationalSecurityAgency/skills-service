@@ -2,6 +2,7 @@
 import { reactive, computed, ref, provide, toRaw, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
+import deepEqual from 'deep-equal';
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -103,12 +104,11 @@ const validateIfNotEmpty = () => {
     .find(([key, value]) =>
       key !== 'skipTheseAttrsWhenValidatingOnInit'
       && !skipAttrs.includes(key)
-      && value && props.initialValues[key] !== value)
+      && value && !deepEqual((props.initialValues[key]), (value)))
   if (foundNonEmpty) {
     validate()
   }
 }
-
 
 </script>
 
