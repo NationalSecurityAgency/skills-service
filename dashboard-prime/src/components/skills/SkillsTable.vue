@@ -1,13 +1,13 @@
 <script setup>
+import { computed, inject, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStorage } from '@vueuse/core'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
-import { useRoute } from 'vue-router'
-import { computed, inject, ref } from 'vue'
 import { FilterMatchMode } from 'primevue/api'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
-import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
@@ -17,6 +17,11 @@ import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue
 import SelfReportTableCell from '@/components/skills/skillsTableCells/SelfReportTableCell.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.vue'
+import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay.vue'
+
+const props = defineProps({
+  groupId: String,
+})
 
 const skillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
@@ -27,6 +32,11 @@ const timeWindowFormatter = useTimeWindowFormatter()
 const subjectId = computed(() => {
   return route.params.subjectId
 })
+const tableId = props.groupId || route.params.subjectId
+const pagination = {
+  pageSize: 10,
+  possiblePageSizes: [10, 20, 50, 100]
+}
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   bordered: true,
@@ -44,14 +54,14 @@ const options = ref({
     },
     {
       key: 'displayOrder',
-      label: 'Display Order',
+      label: 'Display',
       sortable: true,
       imageClass: 'far fa-eye',
       isSticky: true
     },
     {
       key: 'created',
-      label: 'Created On',
+      label: 'Created',
       sortable: true,
       imageClass: 'fas fa-clock',
       isSticky: true
@@ -93,13 +103,6 @@ const options = ref({
       imageClass: 'fas fa-code-branch'
     }
   ],
-  pagination: {
-    server: false,
-    currentPage: 1,
-    totalRows: 0,
-    pageSize: 5,
-    possiblePageSizes: [5, 10, 15, 20]
-  }
 })
 
 const additionalColumns = ref(options.value.fields.filter((f) => !f.isSticky))
@@ -111,7 +114,23 @@ const onToggle = (currentSelection) => {
   displayedColumns.value = options.value.fields.filter((f) => additionalSelectedColumnKeys.value.includes(f.key) || f.isSticky)
 }
 
-const totalRows = ref(skillsState.subjectSkills.length)
+const tableSkills = computed(() => {
+  if (props.groupId) {
+    return skillsState.getGroupSkills(props.groupId)
+  }
+  return skillsState.subjectSkills
+})
+
+const filteredCount = ref(-1)
+const totalRows = computed(() => {
+  if (filteredCount.value > 0) {
+    return filteredCount.value
+  }
+  if (props.groupId) {
+    return skillsState.getGroupSkills(props.groupId).length
+  }
+  return skillsState.subjectSkills.length
+})
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 })
@@ -119,19 +138,22 @@ const clearFilter = () => {
   filters.value.global.value = null
 }
 const onFilter = (filterEvent) => {
-  totalRows.value = filterEvent.filteredValue.length
+  filteredCount.value = filterEvent.filteredValue.length
   if (filterEvent.filters?.global?.value) {
     reorderEnable.value = false
   }
 }
 
-const selectedSkills = ref([])
+const selectedRows = ref([])
+const selectedSkills = computed(() => {
+  return selectedRows.value.filter((row) => row.isSkillType)
+})
 
 const subjSkillsDisplayOrder = useSubjSkillsDisplayOrder()
 const reorderEnable = ref(false)
 const onReorderSwitchChanged = (enabled) => {
   if (enabled) {
-    subjSkillsDisplayOrder.disableFirstAndLastButtons()
+    subjSkillsDisplayOrder.disableFirstAndLastButtons(props.groupId)
     options.value.sortBy = 'displayOrder'
     options.value.sortOrder = 1
     clearFilter()
@@ -143,28 +165,9 @@ const onColumnSort = () => {
 
 const addSkillDisabled = ref(false)
 
-const editGroupInfo = ref({ group: {}, show: false, isEdit: false })
 const editImportedSkillInfo = ref({ skill: {}, show: false })
 
 const createOrUpdateSkill = inject('createOrUpdateSkill')
-// const editSkill = (itemToEdit) => {
-//   // this.currentlyFocusedSkillId = itemToEdit.skillId;
-//   if (itemToEdit.isCatalogSkill && itemToEdit.catalogType === 'imported') {
-//     editImportedSkillInfo.value = {
-//       show: true,
-//       skill: itemToEdit
-//     }
-//   } else if (itemToEdit.isGroupType) {
-//     editGroupInfo.value = {
-//       isEdit: true,
-//       show: true,
-//       group: itemToEdit
-//     }
-//   } else {
-//     editSkillInfo.value = { skill: itemToEdit, show: true, isEdit: true }
-//   }
-// }
-
 
 const deleteButtonsDisabled = ref(false)
 const deleteSkillInfo = ref({
@@ -180,17 +183,22 @@ const doDeleteSkill = () => {
   const skill = deleteSkillInfo.value.skill
   SkillsService.deleteSkill(skill)
     .then(() => {
-      const itemIndex = skillsState.subjectSkills.findIndex((item) => item.skillId === skill.skillId)
-      skillsState.subjectSkills.splice(itemIndex, 1)
+      const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
+      const itemIndex = skills.findIndex((item) => item.skillId === skill.skillId)
+      skills.splice(itemIndex, 1)
+      skills.sort((a,b) => a.displayOrder - b.displayOrder)
+      for (let i = 0; i < skills.length; i++) {
+        skills[i].displayOrder = i+1
+      }
+      if (skill.groupId) {
+        skillsState.setGroupSkills(skill.groupId, skills)
+        const parentGroup = skillsState.subjectSkills.find((item) => item.skillId = skill.groupId)
+        parentGroup.totalPoints -= skill.totalPoints
+        parentGroup.numSkillsInGroup -= 1
+      }
       announcer.polite(`Removed ${skill.name} skill`)
       subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
       skillsState.setLoadingSubjectSkills(false)
-      // skillsState.loadSubjectSkills(skill.projectId, skill.subjectId, false)
-      //   .then(() => {
-      //     skillsState.setLoadingSubjectSkills(false)
-      //     subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
-      //     announcer.polite(`Removed ${skill.name} skill`)
-      //   })
     })
 }
 
@@ -232,33 +240,38 @@ const actionsMenu = ref([
 const expandedRows = ref([])
 
 
-const skillsTable = ref(null)
+// const skillsTable = ref(null)
 // const exportCSV = () => {
 //   skillsTable.value.exportCSV();
 // };
+
+const disableRow = (row) => {
+  return row.isGroupType ? 'remove-checkbox' : '';
+}
 </script>
 
 <template>
   <div>
     <DataTable
+      :id="tableId"
       :loading="skillsState.loadingSubjectSkills"
-      ref="skillsTable"
-      :value="skillsState.subjectSkills"
+      :value="tableSkills"
       :reorderableColumns="true"
       v-model:expandedRows="expandedRows"
-      v-model:selection="selectedSkills"
+      v-model:selection="selectedRows"
       v-model:filters="filters"
       v-model:sort-field="options.sortBy"
       v-model:sort-order="options.sortOrder"
       @filter="onFilter"
       @sort="onColumnSort"
-      paginator
-      :rows="10"
-      :rowsPerPageOptions="[10, 20, 50, 100]"
+      :paginator="totalRows >= pagination.pageSize"
+      :rows="pagination.pageSize"
+      :rowsPerPageOptions="pagination.possiblePageSizes"
       stateStorage="local"
       stateKey="subjectSkillsTable"
       :globalFilterFields="['name']"
       :exportFilename="`skilltree-${subjectId}-skills`"
+      :row-class="disableRow"
       data-cy="skillsTable">
 
       <template #header>
@@ -322,7 +335,11 @@ const skillsTable = ref(null)
       </template>
 
       <Column expander style="width: 2rem" />
-      <Column selectionMode="multiple" headerStyle="width: 1rem"></Column>
+      <Column selectionMode="multiple">
+<!--        <template #rowcheckboxicon>-->
+<!--          <i  class="fas fa-layer-group" />-->
+<!--        </template>-->
+      </Column>
       <Column v-for="col of displayedColumns"
               :key="col.key"
               :field="col.key"
@@ -332,13 +349,24 @@ const skillsTable = ref(null)
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field == 'name'" class="flex flex-wrap align-items-center w-min-20rem">
-            <div class="flex-1 w-min-10rem">
+            <div v-if="slotProps.data.isGroupType" class="flex-1">
+              <div>
+                <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Group</span>
+              </div>
+              <highlighted-value
+                class="text-lg"
+                :value="slotProps.data.name"
+                :filter="filters.global.value" />
+            </div>
+            <div v-if="!slotProps.data.isGroupType" class="flex-1 w-min-10rem">
               <router-link
-                class="no-underline"
+                class=""
                 :data-cy="`manageSkillLink_${slotProps.data.skillId}`"
                 :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
               >
-                <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
+                <highlighted-value
+                  class="text-lg"
+                  :value="slotProps.data.name" :filter="filters.global.value" />
               </router-link>
             </div>
             <div class="flex-none">
@@ -346,23 +374,24 @@ const skillsTable = ref(null)
                 <router-link
                   :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
                 >
-                  <SkillsButton
-                    :label="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'View' : 'Manage'"
-                    :icon="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'fas fa-eye' : 'fas fa-arrow-circle-right'"
-                    size="small"
-                    outlined
-                    severity="info"
-                    :aria-label="`Manage skill ${slotProps.data.name}`"
-                    :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"
-                  />
+<!--                  <SkillsButton-->
+<!--                    v-if="!slotProps.data.isGroupType"-->
+<!--                    :label="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'View' : 'Manage'"-->
+<!--                    :icon="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'fas fa-eye' : 'fas fa-arrow-circle-right'"-->
+<!--                    size="small"-->
+<!--                    outlined-->
+<!--                    severity="info"-->
+<!--                    :aria-label="`Manage skill ${slotProps.data.name}`"-->
+<!--                    :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"-->
+<!--                  />-->
                 </router-link>
 
-                <div v-if="!projConfig.isReadOnlyProj" class="p-buttonset ml-2">
+                <div v-if="!projConfig.isReadOnlyProj" class="p-buttonset mt-2">
                   <SkillsButton
                     :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
                     icon="fas fa-edit"
-                    @click="createOrUpdateSkill(slotProps.data, true)"
+                    @click="createOrUpdateSkill(slotProps.data, true, false, slotProps.data.groupId)"
                     size="small"
                     outlined
                     severity="info"
@@ -375,7 +404,7 @@ const skillsTable = ref(null)
                     :id="`copySkillButton_${slotProps.data.skillId}`"
                     v-if="slotProps.data.type === 'Skill' && !slotProps.data.isCatalogImportedSkills"
                     icon="fas fa-copy"
-                    @click="createOrUpdateSkill(slotProps.data, false, true)"
+                    @click="createOrUpdateSkill(slotProps.data, false, true, slotProps.data.groupId)"
                     size="small"
                     outlined
                     severity="info"
@@ -451,6 +480,13 @@ const skillsTable = ref(null)
           <div v-else-if="slotProps.field === 'selfReportingType'">
             <self-report-table-cell :skill="slotProps.data" />
           </div>
+          <div v-else-if="slotProps.field === 'totalPoints'">
+            <div :data-cy="`totalPointsCell_${slotProps.data.skillId}`">
+              <div class="text-lg">{{ slotProps.data.totalPoints }}</div>
+              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">{{ slotProps.data.pointIncrement  }} pts x {{ slotProps.data.numPerformToCompletion }} repetitions</div>
+              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag> skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : ''}}</div>
+            </div>
+          </div>
           <div v-else>
             {{ slotProps.data[col.key] }}
           </div>
@@ -458,16 +494,27 @@ const skillsTable = ref(null)
       </Column>
 
       <template #expansion="slotProps">
+        <child-row-skill-group-display
+          v-if="slotProps.data.isGroupType"
+          :id="`childRow-${slotProps.data.skillId}`"
+          :key="`childRow-${slotProps.data.skillId}`"
+          :skill="slotProps.data"
+          class="ml-4"
+        />
         <child-row-skills-display
+          v-if="slotProps.data.isSkillType"
           :id="`childRow-${slotProps.data.skillId}`"
           :key="`childRow-${slotProps.data.skillId}`"
           :skill="slotProps.data" :load-skill-async="true" />
       </template>
       <template #paginatorstart>
-        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+<!--        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>-->
       </template>
       <template #paginatorend>
         <!--        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>-->
+      </template>
+      <template #footer>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
       </template>
 
       <template #empty>
@@ -495,6 +542,8 @@ const skillsTable = ref(null)
   </div>
 </template>
 
-<style scoped>
-
+<style>
+.remove-checkbox .p-checkbox {
+  visibility: hidden !important;
+}
 </style>

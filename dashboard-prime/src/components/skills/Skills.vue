@@ -10,6 +10,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 
 const projConfig = useProjConfig()
 const route = useRoute()
@@ -26,18 +27,19 @@ const addSkillDisabled = computed(() => {
 })
 
 const showImportDialog = ref(false)
-const newGroup = () => {
-  // this.editGroupInfo = {
-  //   isEdit: false,
-  //   show: true,
-  //   group: {
-  //     projectId: this.projectId,
-  //     subjectId: this.subject.subjectId,
-  //     type: 'SkillsGroup',
-  //   },
-  // };
+const editGroup = ref({
+  skill: {},
+  show: false,
+  isEdit: false,
+})
+const createOrUpdateGroup = (skill = {}, isEdit = false) => {
+  editGroup.value = {
+    skill,
+    isEdit,
+    show: true,
+  }
 }
-
+provide('createOrUpdateGroup', createOrUpdateGroup)
 
 onMounted(() => {
   skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
@@ -48,14 +50,21 @@ const newSkillInfo = ref({
   show: false,
   isEdit: false,
   isCopy: false,
+  groupId: null,
   version: 1
 })
-const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false) => {
-  newSkillInfo.value = {
-    skill,
-    isEdit,
-    show: true,
-    isCopy
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null) => {
+  console.log(skill)
+  if (skill.isGroupType) {
+    createOrUpdateGroup(skill, isEdit)
+  } else {
+    newSkillInfo.value = {
+      skill,
+      isEdit,
+      show: true,
+      isCopy,
+      groupId
+    }
   }
 }
 provide('createOrUpdateSkill', createOrUpdateSkill)
@@ -73,16 +82,29 @@ const reportSkills = (createdSkill) => {
 }
 
 const skillCreatedOrUpdated = (skill) => {
-  const item1Index = skillsState.subjectSkills.findIndex((item) => item.skillId === skill.originalSkillId)
+  const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
+  const item1Index = skills.findIndex((item) => item.skillId === skill.originalSkillId)
   const createdSkill = ({
     ...skill,
     subjectId: route.params.subjectId
   })
   if (item1Index >= 0) {
-    skillsState.subjectSkills.splice(item1Index, 1, createdSkill)
+    skills.splice(item1Index, 1, createdSkill)
   } else {
-    skillsState.subjectSkills.push(createdSkill)
+    skills.push(createdSkill)
     SkillsReporter.reportSkill('CreateSkill')
+  }
+  if (skill.groupId) {
+    skillsState.setGroupSkills(skill.groupId, skills)
+    const parentGroup = skillsState.subjectSkills.find((item) => item.skillId = skill.groupId)
+    const groupSkills = skillsState.getGroupSkills(skill.groupId)
+    parentGroup.totalPoints = groupSkills
+      .map((item) => item.totalPoints)
+      .reduce((accumulator, currentValue) => {
+        return accumulator + currentValue
+      }, 0)
+
+    parentGroup.numSkillsInGroup = groupSkills.length
   }
   // attribute based skills should report on new or update operation
   reportSkills(createdSkill)
@@ -124,7 +146,7 @@ const skillCreatedOrUpdated = (skill) => {
           ref="newGroupButton"
           label="Group"
           icon="fas fa-plus-circle"
-          @click="newGroup"
+          @click="createOrUpdateGroup"
           size="small"
           outlined
           class="bg-primary-reverse ml-1"
@@ -174,8 +196,17 @@ const skillCreatedOrUpdated = (skill) => {
       :skill="newSkillInfo.skill"
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
+      :group-id="newSkillInfo.groupId"
       @skill-saved="skillCreatedOrUpdated"
     />
+
+    <edit-skill-group
+      v-if="editGroup.show"
+      v-model="editGroup.show"
+      :skill="editGroup.skill"
+      :is-edit="editGroup.isEdit"
+      @skill-saved="skillCreatedOrUpdated"
+      />
   </div>
 </template>
 

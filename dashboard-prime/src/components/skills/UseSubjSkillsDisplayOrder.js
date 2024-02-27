@@ -20,25 +20,35 @@ export const useSubjSkillsDisplayOrder = () => {
   }
 
   const moveDisplayOrder = (row, actionToSubmit, displayIndexIncrement) => {
+    skillsState.setLoadingSubjectSkills(true)
     return SkillsService.updateSkill(row, actionToSubmit)
       .then(() => {
-        const index = skillsState.subjectSkills.findIndex((item) => item.skillId === row.skillId)
+        const skills = row.groupId ? skillsState.getGroupSkills(row.groupId) : skillsState.subjectSkills
+        const index = skills.findIndex((item) => item.skillId === row.skillId)
         const newIndex = index + displayIndexIncrement
 
-        const movedSkill = skillsState.subjectSkills[index]
-        const otherSkill = skillsState.subjectSkills[newIndex]
+        const movedSkill = skills[index]
+        const otherSkill = skills[newIndex]
 
         // switch display orders
         const movedSkillDisplayOrder = movedSkill.displayOrder
         movedSkill.displayOrder = otherSkill.displayOrder
         otherSkill.displayOrder = movedSkillDisplayOrder
         // this.skills = this.skills.map((s) => s);
-        disableFirstAndLastButtons()
+        disableFirstAndLastButtons(row.groupId)
+
+        if (row.groupId) {
+          skillsState.setGroupSkills(row.groupId, skills)
+        }
+
+        skillsState.setLoadingSubjectSkills(false)
       })
   }
-  const disableFirstAndLastButtons = () => {
-    if (skillsState.subjectSkills && skillsState.subjectSkills.length > 0) {
-      const tableData = skillsState.subjectSkills.sort((a, b) => a.displayOrder - b.displayOrder)
+  const disableFirstAndLastButtons = (groupId) => {
+    const skills = groupId ? skillsState.getGroupSkills(groupId) : skillsState.subjectSkills
+
+    if (skills && skills.length > 0) {
+      const tableData = skills.sort((a, b) => a.displayOrder - b.displayOrder)
       for (let i = 0; i < tableData.length; i += 1) {
         tableData[i].disabledUpButton = false
         tableData[i].disabledDownButton = false
@@ -46,6 +56,9 @@ export const useSubjSkillsDisplayOrder = () => {
 
       tableData[0].disabledUpButton = true
       tableData[tableData.length - 1].disabledDownButton = true
+      if (groupId) {
+        skillsState.setGroupSkills(tableData)
+      }
     }
   }
 

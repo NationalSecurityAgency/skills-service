@@ -133,7 +133,10 @@ export default {
       .get(
         `/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/skills`
       )
-      .then((response) => response.data.map((item) => ({ ...item, groupId })))
+      .then((response) => response.data.map((item) => {
+        item.groupId = groupId
+        return this.addMetaToSkillObj(item)
+      }))
   },
   saveSkill(skill) {
     const copy = enrichSkillObjWithRequiredAtts(skill)

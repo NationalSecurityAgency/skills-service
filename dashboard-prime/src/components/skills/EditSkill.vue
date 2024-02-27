@@ -13,16 +13,22 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useDebounceFn } from '@vueuse/core'
+import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 
 const show = defineModel()
 const route = useRoute()
 const props = defineProps({
   skill: Object,
   isEdit: Boolean,
-  isCopy: Boolean
+  isCopy: Boolean,
+  groupId: {
+    type: String,
+    default: null,
+  }
 })
 const emit = defineEmits(['skill-saved'])
 const appConfig = useAppConfig()
+const skillYupValidators = useSkillYupValidators()
 
 const latestSkillVersion = ref(0)
 const maxSkillVersion = ref(1)
@@ -67,24 +73,6 @@ if (props.isCopy) {
   modalTitle = 'Copy Skill'
 }
 
-const checkSkillNameUnique = useDebounceFn((value) => {
-  if (!value || value.length === 0) {
-    return true
-  }
-  const origName = props.skill.name
-  if (props.isEdit && (origName === value || origName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
-    return true
-  }
-  return SkillsService.skillWithNameExists(route.params.projectId, value).then((remoteRes) => remoteRes)
-}, appConfig.formFieldDebounceInMs)
-const checkSkillIdUnique = useDebounceFn((value) => {
-  if (!value || value.length === 0 || (props.isEdit && props.skill.skillId === value)) {
-    return true
-  }
-  return SkillsService.skillWithIdExists(route.params.projectId, value)
-    .then((remoteRes) => remoteRes)
-
-}, appConfig.formFieldDebounceInMs)
 const schema = object({
   'skillName': string()
     .trim()
@@ -93,7 +81,7 @@ const schema = object({
     .max(appConfig.maxSkillNameLength)
     .nullValueNotAllowed()
     .customNameValidator('Skill Name')
-    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => checkSkillNameUnique(value))
+    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => skillYupValidators.checkSkillNameUnique(value, props.skill.name, props.isEdit))
     .label('Skill Name'),
   'skillId': string()
     .required()
@@ -101,7 +89,7 @@ const schema = object({
     .max(appConfig.maxIdLength)
     .nullValueNotAllowed()
     .matches(/^[\w%]+$/, (fieldProps) => `${fieldProps.label} may only contain alpha-numeric, underscore or percent characters`)
-    .test('uniqueId', 'The value for the Skill ID is already taken', (value) => checkSkillIdUnique(value))
+    .test('uniqueId', 'The value for the Skill ID is already taken', (value) => skillYupValidators.checkSkillIdUnique(value, props.skill.skillId, props.isEdit))
     .label('Skill ID'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
@@ -191,6 +179,7 @@ const saveSkill = (values) => {
     subjectId: route.params.subjectId,
     projectId: route.params.projectId,
     isEdit: props.isEdit,
+    groupId: props.groupId,
     name: InputSanitizer.sanitize(values.skillName),
     skillId: InputSanitizer.sanitize(values.skillId),
     pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0,
@@ -210,9 +199,6 @@ const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
 }
 
-const close = () => {
-
-}
 </script>
 
 <template>
@@ -227,7 +213,7 @@ const close = () => {
     :initial-values="initialSkillData"
     :enable-return-focus="true"
     @saved="onSkillSaved"
-    @close="close">
+  >
     <div class="flex flex-wrap">
       <div class="flex-1">
         <SkillsNameAndIdInput

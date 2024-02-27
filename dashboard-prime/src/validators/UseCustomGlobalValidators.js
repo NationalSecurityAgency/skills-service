@@ -50,9 +50,7 @@ export const useCustomGlobalValidators = () => {
   function urlValidator(fieldName = 'Help URL/Path') {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
-      console.log(`value is ${value}`)
       if (!value || value.trim().length === 0) {
-        console.log('returned true')
         return true;
       }
 

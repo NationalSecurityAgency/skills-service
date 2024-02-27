@@ -37,6 +37,7 @@ export const useAppConfig = () => {
   const maxTimeWindowInMinutes = toNumOr0(store.getters.config.maxTimeWindowInMinutes)
   const maxAnswersPerQuizQuestion = store.getters.config.maxAnswersPerQuizQuestion
   const maxTimeWindowInHrs = maxTimeWindowInMinutes / 60
+  const maxSkillsPerSubject = store.getters.config.maxSkillsPerSubject
   return {
     rankingAndProgressViewsEnabled,
     docsHost,
@@ -58,5 +59,6 @@ export const useAppConfig = () => {
     maxNumPointIncrementMaxOccurrences,
     maxTimeWindowInHrs,
     maxAnswersPerQuizQuestion,
+    maxSkillsPerSubject
   }
 }
