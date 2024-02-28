@@ -94,7 +94,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.contains('Display Order').click()
+    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
@@ -145,7 +145,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.contains('Display Order').click()
+    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
@@ -195,11 +195,11 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} th`).contains('Skill').click()
     cy.validateTable(tableSelector, expected.map((item) => item).reverse(), 10)
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, expected, 10)
 
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, expected.map((item) => item).reverse(), 10)
   })
 
@@ -321,7 +321,7 @@ describe('Skills Table Tests', () => {
     // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
     cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
     cy.get('[data-pc-section="panel"] [aria-label="Time Window"]').click()
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 0' }, { colIndex: 5, value: 'Time Window Disabled' }],
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 5, value: 'Time Window N/A' }],
