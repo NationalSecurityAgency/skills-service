@@ -60,7 +60,7 @@ describe('Markdown Tests', () => {
         cy.get('a[href="https://google.com"]')
             .should('have.attr', 'target', '_blank');
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
             .click();
         cy.get('a[href="https://google.com"]')
             .should('have.attr', 'target', '_blank');
@@ -80,7 +80,7 @@ describe('Markdown Tests', () => {
           .should('have.attr', 'target', '_blank');
         cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
           .click();
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
@@ -124,7 +124,7 @@ describe('Markdown Tests', () => {
           .should('have.attr', 'target', '_blank');
         cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
           .click();
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
@@ -222,7 +222,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy=saveSkillButton]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').should('not.exist');
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]').click();
 
         attachmentFiles.forEach((file) => {
             cy.get('[data-cy="skillOverviewDescription"]').get(`a[href^="/api/download/"]:contains(${file})`).should('exist');

@@ -270,7 +270,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy="expandDetailsBtn_group5"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill1"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill1');

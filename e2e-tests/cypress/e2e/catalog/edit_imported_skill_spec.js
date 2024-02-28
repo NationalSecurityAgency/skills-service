@@ -280,7 +280,7 @@ describe('Edit Imported Skill Tests', () => {
         // drill-down and validate the points
         cy.get('[data-cy="closeSkillButton"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill1"]')
             .click();
         cy.get('[data-cy="skillOverviewTotalpoints"]')
             .contains('2,002');

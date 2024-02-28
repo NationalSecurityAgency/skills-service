@@ -218,7 +218,7 @@ describe('Inception Skills Tests', () => {
         cy.assertInceptionPoints('Skills', 'CreateSkill', 0, false)
 
         cy.get('[data-cy="saveSkillButton"]').click();
-        cy.get('[data-cy="manageSkillBtn_SkillSkill"]')
+        cy.get('[data-cy="manageSkillLink_SkillSkill"]')
 
         cy.assertInceptionPoints('Skills', 'CreateSkill', 10)
         // because crate group credit is given when group's skill is saved

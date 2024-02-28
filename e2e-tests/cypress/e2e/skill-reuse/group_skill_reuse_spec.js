@@ -69,7 +69,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('have.text', '600');
 
-        cy.get('[data-cy="manageSkillBtn_skill3STREUSESKILLST0"]')
+        cy.get('[data-cy="manageSkillLink_skill3STREUSESKILLST0"]')
             .click();
         cy.get('[data-cy="pageHeader"] [data-cy="importedBadge"]')
             .contains('Reused');

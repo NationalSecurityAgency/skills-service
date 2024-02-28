@@ -156,7 +156,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="breadcrumb-Projects"]').click()
         cy.get('[data-cy="projCard_proj2_manageBtn"]').click()
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="manageSkillBtn_skill1"]').click()
+        cy.get('[data-cy="manageSkillLink_skill1"]').click()
         cy.get('[data-cy="nav-Video"').click();
         cy.wait('@getVideoPropsProj2')
         cy.wait('@getSkillInfoProj2')
@@ -168,7 +168,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="breadcrumb-Projects"]').click()
         cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="manageSkillBtn_skill1"]').click()
+        cy.get('[data-cy="manageSkillLink_skill1"]').click()
         cy.get('[data-cy="nav-Video"').click();
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
@@ -227,7 +227,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="manageSkillBtn_skill1"]').click()
+        cy.get('[data-cy="manageSkillLink_skill1"]').click()
         cy.get('[data-cy="nav-Video"]').click()
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
@@ -280,7 +280,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="newSkillButton"]').click()
         cy.get('[data-cy="skillName"]').type('skill1')
         cy.get('[data-cy="saveSkillButton"]').should('be.enabled').click()
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click()
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]').click()
         cy.get('[data-cy="nav-Video"]').click()
         cy.wait('@getVideoProps1')
         cy.wait('@getSkillInfo1')

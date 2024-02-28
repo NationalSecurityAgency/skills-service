@@ -688,7 +688,7 @@ describe('Subjects Tests', () => {
         cy.wait('@saveSkill');
         cy.contains('Edited Skill Name').should('be.visible');
 
-        cy.get('[data-cy=manageSkillBtn_skill1]').click();
+        cy.get('[data-cy=manageSkillLink_skill1]').click();
         cy.get('[data-cy=breadcrumb-entirelyNewId]').should('be.visible');
         cy.get('[data-cy=breadcrumb-entirelyNewId]').click();
         cy.wait('@loadSubject2');

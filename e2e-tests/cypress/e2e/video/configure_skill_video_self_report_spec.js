@@ -95,7 +95,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="saveSkillButton"]').should('not.exist')
         cy.wait('@getSubjectSkills').then(() => {
             cy.wait(1000)
-            cy.get('[data-cy="skillsTable"] [data-cy="manageSkillBtn_skill1"]')
+            cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill1"]')
             cy.get('[data-cy="skillsTable-additionalColumns"] [value="selfReportingType"]')
                 .click({ force: true });
             cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')

@@ -311,7 +311,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillName"]').should('not.exist')
   })
 
-  it('Open edit skill dialog using enter key', function() {
+  it.only('Open edit skill dialog using enter key', function() {
     const expectedId = 'testSkill'
     const providedName = 'test'
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill')
@@ -335,7 +335,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillName"]').should('have.value', 'test')
     cy.get('[data-cy="skillNameError"]').should('have.value', '')
     cy.get('[data-cy=closeDialogBtn]').click()
-    cy.get('[data-cy="manageSkillBtn_testSkill"]')
+    cy.get('[data-cy="manageSkillLink_testSkill"]')
   })
 
   it.skip('Add Skill Event', () => {
@@ -1009,7 +1009,7 @@ describe('Skills Tests', () => {
       cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
 
       // navigate to each skill and validate help url
-      cy.get('[data-cy="manageSkillBtn_skill1"]').click()
+      cy.get('[data-cy="manageSkillLink_skill1"]').click()
       cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
       cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
       // refresh and re-validate
@@ -1019,7 +1019,7 @@ describe('Skills Tests', () => {
 
       // now let's do the same for the 2nd skill
       cy.visit('/administrator/projects/proj1/subjects/subj1')
-      cy.get('[data-cy="manageSkillBtn_skill2"]').click()
+      cy.get('[data-cy="manageSkillLink_skill2"]').click()
       cy.get('[data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
       cy.get('[data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
       cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2')

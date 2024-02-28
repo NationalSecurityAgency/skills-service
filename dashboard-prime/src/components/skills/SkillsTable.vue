@@ -348,7 +348,9 @@ const disableRow = (row) => {
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field == 'name'" class="flex flex-wrap align-items-center w-min-20rem">
+          <div v-if="slotProps.field == 'name'"
+               class="flex flex-wrap align-items-center w-min-20rem"
+               :data-cy="`nameCell_${slotProps.data.skillId}`">
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
                 <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Group</span>

@@ -590,11 +590,11 @@ describe('Finalize Imported Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="disabledBadge-skill1"]')
             .should('not.exist');
-        cy.get('[data-cy="manageSkillBtn_skill3"]')
+        cy.get('[data-cy="manageSkillLink_skill3"]')
             .should('exist');
-        cy.get('[data-cy="manageSkillBtn_skill2"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
             .should('exist');
-        cy.get('[data-cy="manageSkillBtn_skill3"]')
+        cy.get('[data-cy="manageSkillLink_skill3"]')
             .should('exist');
 
         cy.get('[data-cy="importFinalizeAlert"]')

@@ -75,7 +75,7 @@ describe('Single Skill and Catalog Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .click();
 
-        cy.get('[data-cy="manageSkillBtn_skill2"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill2');
@@ -90,7 +90,7 @@ describe('Single Skill and Catalog Tests', () => {
         // now check non-import skills to validate that section selectors are correct
         cy.get('[data-cy="breadcrumb-subj1"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill4"]')
+        cy.get('[data-cy="manageSkillLink_skill4"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill4');
@@ -121,7 +121,7 @@ describe('Single Skill and Catalog Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
 
-        cy.get('[data-cy="manageSkillBtn_skill2"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill2');
@@ -136,7 +136,7 @@ describe('Single Skill and Catalog Tests', () => {
         // now check non-import skills to validate that section selectors are correct
         cy.get('[data-cy="breadcrumb-subj1"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill4"]')
+        cy.get('[data-cy="manageSkillLink_skill4"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill4');

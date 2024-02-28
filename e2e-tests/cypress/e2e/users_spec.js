@@ -641,7 +641,7 @@ describe('Users Tests', () => {
 
         // validate skill where users have 100%
         cy.clickNav('Skills');
-        cy.get('[data-cy="manageSkillBtn_skill1Subj2"]').click();
+        cy.get('[data-cy="manageSkillLink_skill1Subj2"]').click();
         cy.clickNav('Users');
         cy.wait('@getSkill1Users')
         cy.get('[data-pc-section="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();

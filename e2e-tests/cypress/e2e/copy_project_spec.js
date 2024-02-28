@@ -65,8 +65,8 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="manageBtn_subj2"]');
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]');
-        cy.get('[data-cy="manageSkillBtn_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
 
         // refresh and verify that project still good
         cy.visit('/administrator/');
@@ -90,8 +90,8 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="manageBtn_subj2"]');
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]');
-        cy.get('[data-cy="manageSkillBtn_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
     });
 
     it('focus is returned after modal close button is clicked', () => {
@@ -174,8 +174,8 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="manageBtn_subj2"]');
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]');
-        cy.get('[data-cy="manageSkillBtn_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
     });
 
     it('project copy cause view to switch to a table', () => {

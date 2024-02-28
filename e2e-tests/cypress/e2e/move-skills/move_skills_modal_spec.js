@@ -166,8 +166,8 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[data-cy="noContent"] [data-cy="refreshBtn"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill3"]');
-        cy.get('[data-cy="manageSkillBtn_skill4"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+        cy.get('[data-cy="manageSkillLink_skill4"]');
     });
 
     it('cancel modal will focus on the Clear button', () => {

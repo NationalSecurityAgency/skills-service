@@ -259,7 +259,7 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
         //view skill
-        cy.get('[data-cy=manageSkillBtn_skill1]')
+        cy.get('[data-cy=manageSkillLink_skill1]')
             .click();
         cy.contains('Help URL');
         cy.contains('http://doHelpOnThisSkill.com');

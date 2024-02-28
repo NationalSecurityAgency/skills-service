@@ -526,7 +526,7 @@ describe('Skills Table Tests', () => {
     ], 10, false, null, false)
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
-    cy.get('[data-cy="manageSkillBtn_skill3"]').click()
+    cy.get('[data-cy="manageSkillLink_skill3"]').click()
     cy.get('[data-cy="pageHeader"]').contains('ID: skill3')
   })
 
@@ -707,7 +707,7 @@ describe('Skills Table Tests', () => {
     }
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy=manageSkillBtn_skill2]').click()
+    cy.get('[data-cy=manageSkillLink_skill2]').click()
     cy.contains('ID: skill2')
     cy.contains('Overview')
     cy.contains('300 Points')

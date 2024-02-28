@@ -200,9 +200,9 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="deleteSkillButton_skill3"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="deleteSkillButton_skill3"]').should(`${chainerPrepend}exist`)
 
-            cy.get('[data-cy="manageSkillBtn_skill3"]').contains(manageButtonTxt)
-            cy.get('[data-cy="manageSkillBtn_skill3"]').contains(manageButtonTxt)
-            cy.get('[data-cy="manageSkillBtn_skill3"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
 
             cy.get('[data-cy="skillSelect-skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="skillSelect-skill2"]').should(`${chainerPrepend}exist`)

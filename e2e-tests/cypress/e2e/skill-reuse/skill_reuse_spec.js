@@ -40,9 +40,9 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
 
         // navigate down to a skill page
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
             .contains('View');
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
             .click();
 
         cy.get('[data-cy="pageHeader"] [data-cy="importedBadge"]')
@@ -79,7 +79,7 @@ describe('Skill Reuse Tests', () => {
 
         // from the skill page by navigating down to the skill page
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
             .click();
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
