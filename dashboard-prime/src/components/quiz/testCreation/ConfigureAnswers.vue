@@ -11,7 +11,7 @@ const props = defineProps({
     required: true,
   }
 })
-const { remove, insert, push, fields } = useFieldArray('answers');
+const { remove, insert, push, replace, fields } = useFieldArray('answers');
 const appConfig = useAppConfig()
 const isQuizType = computed(() => {
   return props.quizType === 'Quiz';
@@ -37,6 +37,13 @@ function addNewAnswer(index) {
 function removeAnswer(index) {
   remove(index)
 }
+const replaceAnswers = (answers) => {
+  replace(answers)
+}
+
+defineExpose( {
+  replaceAnswers
+})
 </script>
 
 <template>

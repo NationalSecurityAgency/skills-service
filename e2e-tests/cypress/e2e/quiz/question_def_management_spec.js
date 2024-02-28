@@ -61,6 +61,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('3')
 
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
@@ -83,6 +84,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-3"] [data-cy="answerText"]').type('4')
 
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         // q2
