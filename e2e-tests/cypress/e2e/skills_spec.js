@@ -311,7 +311,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillName"]').should('not.exist')
   })
 
-  it.only('Open edit skill dialog using enter key', function() {
+  it('Open edit skill dialog using enter key', function() {
     const expectedId = 'testSkill'
     const providedName = 'test'
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/${expectedId}`).as('postNewSkill')
