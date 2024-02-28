@@ -28,13 +28,9 @@ const props = defineProps({
     required: false,
     default: false,
   },
-  enableReturnFocus: {
-    type: Boolean,
-    default: false
-  },
   focusOnCloseId: {
     type: String,
-    required: true,
+    required: false,
   },
   loading: {
     type: Boolean,
@@ -56,7 +52,7 @@ const publishHidden = (e) => {
 };
 
 const removeAction = () => {
-  if (Boolean(props.focusOnCloseId)) {
+  if (props.focusOnCloseId) {
     focusState.setElementId(props.focusOnCloseId);
   }
   close()
@@ -81,7 +77,7 @@ const close =() => {
       :show-ok-button="!removalNotAvailable"
       @on-ok="removeAction"
       @on-cancel="publishHidden"
-      :enable-return-focus="enableReturnFocus || Boolean(focusOnCloseId)"
+      :enable-return-focus="true"
       :style="{ width: '40rem !important' }">
     <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
     <div v-if="!loading" class="px-2">

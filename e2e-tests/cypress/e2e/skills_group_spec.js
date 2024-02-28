@@ -401,7 +401,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="noContent"]').contains('Group has no Skills');
     });
 
-    it.skip('total points are updated when skill is removed', () => {
+    it('total points are updated when skill is removed', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
         cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 });
@@ -410,15 +410,19 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`).click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
 
-        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Points').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
+        cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 4 skills');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
         cy.acceptRemovalSafetyCheck();;
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
+        cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 3 skills');
     })
 
     it.skip('edit skill', () => {

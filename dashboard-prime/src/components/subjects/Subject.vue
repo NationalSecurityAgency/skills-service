@@ -174,7 +174,6 @@ const createOrUpdateSubject = inject('createOrUpdateSubject')
       :item-name="subjectInternal.name"
       item-type="subject"
       @do-remove="doDeleteSubject"
-      @hidden="handleDeleteCancelled"
       :value="showDeleteDialog">
       Subject with id [{{subjectInternal.subjectId}}] will be removed. Deletion <b>cannot</b> be undone and permanently removes its skill definitions and users' performed skills.
     </removal-validation>
