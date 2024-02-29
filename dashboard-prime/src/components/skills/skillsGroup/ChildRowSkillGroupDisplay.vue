@@ -8,6 +8,8 @@ import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
+import skills from '@/store/modules/skills.js'
+import EditNumRequiredSkills from '@/components/skills/skillsGroup/EditNumRequiredSkills.vue'
 
 const props = defineProps({
   skill: {
@@ -52,7 +54,9 @@ const requiredSkillsNum = computed(() => {
   // -1 == all skills required
   return (props.skill.numSkillsRequired === -1) ? skills.value.length : props.skill.numSkillsRequired
 })
-
+const lessThanTwoSkills = computed(() => {
+  return skillsState.getGroupSkills(props.skill.skillId).length < 2;
+})
 const showImportCatalogModal = ref(false)
 
 const addDisabled = computed(() => {
@@ -68,6 +72,8 @@ const addDisabledMessage = computed(() => {
 })
 
 const createOrUpdateSkill = inject('createOrUpdateSkill')
+
+const showEditRequiredSkillsDialog = ref(false)
 
 </script>
 
@@ -91,13 +97,27 @@ const createOrUpdateSkill = inject('createOrUpdateSkill')
           <div>
             <span class="mr-1 font-italic">Required: </span>
             <span v-if="!allSkillsRequired">
-            <Tag severity="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</Tag>
-            <span class="ml-1">out of <Tag data-cy="numSkillsInGroup">{{ skill.numSkillsInGroup
-              }}</Tag> skills</span>
-          </span>
+              <Tag severity="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</Tag>
+              <span class="ml-1">out of <Tag data-cy="numSkillsInGroup">{{ skill.numSkillsInGroup
+                }}</Tag> skills</span>
+            </span>
             <span v-if="allSkillsRequired" data-cy="requiredAllSkills">
-            <Tag severity="info" class="uppercase">all skills</Tag>
-          </span>
+              <Tag severity="info" class="uppercase">all skills</Tag>
+            </span>
+            <SkillsButton
+              :id="`editNumSkillsReq${skillInfo.skillId}`"
+              icon="far fa-edit"
+              severity="outline"
+              size="small"
+              outlined
+              @click="showEditRequiredSkillsDialog=true"
+              :track-for-focus="true"
+              :disabled="lessThanTwoSkills"
+              :aria-label="'Edit Number of Required skills for '+ skillInfo.name + ' group'"
+              data-cy="editRequired" class="ml-2" />
+            <div v-if="lessThanTwoSkills"
+              class="font-italic text-small mt-1 font-light">** Must have at least 2 skills to modify</div>
+
           </div>
           <div class="flex-1 text-right">
             <div class="p-buttonset">
@@ -137,31 +157,36 @@ const createOrUpdateSkill = inject('createOrUpdateSkill')
         </div>
         <div>
 
-<!--        :subject-name="subjectName"-->
-<!--        @skill-removed="skillRemoved"-->
-<!--        @skills-change="skillChanged"-->
-<!--        @skills-reused="skillReused"-->
-<!--        :disableDeleteButtonsInfo="disableDeleteButtonInfo"-->
-<!--        :page-size="this.maxSkillsToShow"-->
-<!--        :table-id="`groupSkills_${skillInfo.skillId}`"-->
-<!--        :ref="`groupSkills_${skillInfo.skillId}`"-->
-<!--        :skills-prop="skills"-->
-<!--        :is-top-level="true"-->
-<!--        :project-id="this.$route.params.projectId"-->
-<!--        :subject-id="this.$route.params.subjectId"-->
-<!--        actions-btn-size="sm"-->
-<!--        :show-search="false"-->
-<!--        :show-header="false"-->
-<!--        :show-paging="false"-->
-        <skills-table v-if="hasSkills" :group-id="skillInfo.skillId"/>
-        <no-content2
-          v-if="!hasSkills"
-          title="Group has no Skills"
-          class="py-8"
-          message="Click 'Add Skill' button to add skills to this group" />
-      </div>
+          <!--        :subject-name="subjectName"-->
+          <!--        @skill-removed="skillRemoved"-->
+          <!--        @skills-change="skillChanged"-->
+          <!--        @skills-reused="skillReused"-->
+          <!--        :disableDeleteButtonsInfo="disableDeleteButtonInfo"-->
+          <!--        :page-size="this.maxSkillsToShow"-->
+          <!--        :table-id="`groupSkills_${skillInfo.skillId}`"-->
+          <!--        :ref="`groupSkills_${skillInfo.skillId}`"-->
+          <!--        :skills-prop="skills"-->
+          <!--        :is-top-level="true"-->
+          <!--        :project-id="this.$route.params.projectId"-->
+          <!--        :subject-id="this.$route.params.subjectId"-->
+          <!--        actions-btn-size="sm"-->
+          <!--        :show-search="false"-->
+          <!--        :show-header="false"-->
+          <!--        :show-paging="false"-->
+          <skills-table v-if="hasSkills" :group-id="skillInfo.skillId" />
+          <no-content2
+            v-if="!hasSkills"
+            title="Group has no Skills"
+            class="py-8"
+            message="Click 'Add Skill' button to add skills to this group" />
+        </div>
       </Fieldset>
     </div>
+
+    <edit-num-required-skills
+      v-if="showEditRequiredSkillsDialog"
+      v-model="showEditRequiredSkillsDialog"
+      :group="skillInfo" />
   </div>
 </template>
 

@@ -72,6 +72,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
     setGroupSkills,
     getGroupSkills,
     loadGroupSkills,
+    groupSkills
   }
 
 })

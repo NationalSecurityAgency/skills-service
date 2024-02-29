@@ -34,7 +34,7 @@ const { value, errorMessage } = useField(() => props.name);
 </script>
 
 <template>
-  <div class="m-0 p-0">
+  <div class="field">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
     <Dropdown v-model="value"
               :options="options"

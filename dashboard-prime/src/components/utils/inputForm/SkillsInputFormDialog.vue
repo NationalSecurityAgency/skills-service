@@ -36,6 +36,15 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  dialogClass: {
+    type: String,
+    default: 'w-11 xl:w-10'
+  },
+  enableInputFormResiliency: {
+    type: Boolean,
+    default: true
+  },
+
 })
 const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
@@ -50,13 +59,17 @@ const skillsDialog = ref(null)
 const close = () => {
   skillsDialog.value.handleClose()
   model.value = false
-  inputFormResiliency.stop()
+  if (props.enableInputFormResiliency) {
+    inputFormResiliency.stop()
+  }
 }
 const isSaving = ref(false)
 const onSubmit = handleSubmit(formValue => {
   isSaving.value = true
   props.saveDataFunction(formValue).then((res) => {
-    inputFormResiliency.stop()
+    if (props.enableInputFormResiliency) {
+      inputFormResiliency.stop()
+    }
     emit('saved', res)
     close()
     isSaving.value = false
@@ -67,7 +80,7 @@ provide('doSubmitForm', onSubmit)
 provide('setFieldValue', setFieldValue)
 
 const isDialogLoading = computed(() => {
-  return props.loading || inputFormResiliency.isInitializing
+  return props.loading || (inputFormResiliency.isInitializing && props.enableInputFormResiliency)
 })
 
 watch(() => meta.value.dirty, (newValue) => {
@@ -83,19 +96,23 @@ if (props.asyncLoadDataFunction) {
     for (const [key, value] of Object.entries(res)) {
       setFieldValue(key, value)
     }
-    inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
-      .then(() => {
-        validateIfNotEmpty()
-      })
+    if (props.enableInputFormResiliency) {
+      inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
+        .then(() => {
+          validateIfNotEmpty()
+        })
+    }
   }).finally(() => {
     isLoadingAsyncData.value = false
   })
 } else {
   isLoadingAsyncData.value = false
-  inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
-    .then(() => {
-      validateIfNotEmpty()
-    })
+  if (props.enableInputFormResiliency) {
+    inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
+      .then(() => {
+        validateIfNotEmpty()
+      })
+  }
 }
 
 const validateIfNotEmpty = () => {
@@ -125,9 +142,10 @@ const validateIfNotEmpty = () => {
     ok-button-icon="far fa-save"
     :ok-button-disabled="!meta.valid || isSubmitting"
     :enable-return-focus="enableReturnFocus"
+    :dialog-class="dialogClass"
   >
     <form-reload-warning
-      v-if="inputFormResiliency.isRestoredFromStore"
+      v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
       @discard-changes="inputFormResiliency.discard" />
 
     <div class="loading-indicator" v-if="isSaving || isSubmitting">

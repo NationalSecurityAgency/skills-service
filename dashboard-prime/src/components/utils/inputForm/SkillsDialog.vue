@@ -35,6 +35,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  dialogClass: {
+    type: String,
+    default: 'w-11 xl:w-10'
+  },
 })
 const emit = defineEmits(['on-ok', 'on-cancel'])
 const focusState = useFocusState()
@@ -73,7 +77,7 @@ defineExpose({
           v-model:visible="model"
           :maximizable="true"
           :header="header"
-          class="w-11 xl:w-10"
+          :class="dialogClass"
   >
     <skills-spinner :is-loading="loading" />
 
