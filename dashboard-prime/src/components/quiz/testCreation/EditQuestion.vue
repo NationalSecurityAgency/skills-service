@@ -31,12 +31,14 @@ const modalId = props.isEdit ? `questionEditModal${props.questionDef.id}` : 'que
 const appConfig = useAppConfig()
 
 onMounted(() => {
+  console.error('begin onMmounted')
   if (props.questionDef.questionType === QuestionType.Rating && props.isEdit) {
     initialQuestionData.currentScaleValue = props.questionDef.answers.length;
   }
   if (props.isEdit) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
   }
+  console.error('end onMmounted')
 });
 
 function questionTypeChanged(inputItem) {
