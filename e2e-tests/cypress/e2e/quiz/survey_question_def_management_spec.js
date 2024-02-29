@@ -38,6 +38,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
         // multiple choice question
+        cy.get('[data-cy="btn_Questions"]').should('be.enabled')
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
         cy.get('[data-cy="answerTypeSelector"]').click()
