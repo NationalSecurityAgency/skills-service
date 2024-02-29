@@ -31,7 +31,7 @@ describe('Survey Question CRUD Tests', () => {
         });
     });
 
-    it.only('create survey questions', function () {
+    it('create survey questions', function () {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="noQuestionsYet"]')

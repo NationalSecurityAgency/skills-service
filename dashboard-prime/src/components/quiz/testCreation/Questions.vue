@@ -51,7 +51,7 @@ function loadQuestions(quizId) {
         loadingQuestions.value = false;
         enableDropAndDrop();
       });
-};
+}
 
 function enableDropAndDrop() {
   if (hasData.value) {
@@ -85,7 +85,6 @@ function sortOrderUpdate(updateEvent) {
 }
 
 function openNewQuestionModal() {
-  console.error(`opening console`);
   editQuestionInfo.value.questionDef = {
     id: null,
     question: '',

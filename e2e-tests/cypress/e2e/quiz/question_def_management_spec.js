@@ -46,7 +46,7 @@ describe('Quiz Question CRUD Tests', () => {
         });
     });
 
-    it.only('create choice questions', function () {
+    it('create choice questions', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="noQuestionsYet"]')
