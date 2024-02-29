@@ -140,7 +140,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          ../.github/scripts/runSubsetOfCypressTests.sh -t 2 -c ${{ matrix.container }} -f 'survey_question_def'
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 2 -c ${{ matrix.container }} -f 'question_def'
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
