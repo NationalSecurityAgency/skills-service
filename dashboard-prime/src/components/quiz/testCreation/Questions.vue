@@ -32,7 +32,6 @@ const editQuestionInfo = ref({
   showDialog: false,
   isEdit: true,
   questionDef: {},
-  initiatedBtnId: null,
 })
 const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig || loadingQuestions.value);
 const hasData = computed(() => questions.value && questions.value.length > 0)
@@ -85,7 +84,8 @@ function sortOrderUpdate(updateEvent) {
       });
 }
 
-function openNewQuestionModal(initiatedBtnId) {
+function openNewQuestionModal() {
+  console.error(`opening console`);
   editQuestionInfo.value.questionDef = {
     id: null,
     question: '',
@@ -103,7 +103,6 @@ function openNewQuestionModal(initiatedBtnId) {
   };
   editQuestionInfo.value.isEdit =  false;
   editQuestionInfo.value.showDialog = true;
-  editQuestionInfo.initiatedBtnId = initiatedBtnId;
 }
 function questionDefSaved(questionDef) {
   try {
@@ -127,16 +126,12 @@ function questionDefSaved(questionDef) {
   } finally {
     announcer.polite('Question was successfully updated.');
     operationInProgress.value = false;
-    if (!questionDef.isEdit) {
-      handleNewQuestionBtnFocus()
-    }
   }
 }
 function initiatedEditQuestionDef(questionDef) {
   editQuestionInfo.value.questionDef = { ...questionDef, quizId: route.params.quizId, quizType: quizType.value };
   editQuestionInfo.value.isEdit =  true;
   editQuestionInfo.value.showDialog = true;
-  editQuestionInfo.initiatedBtnId = null;
 }
 
 function deleteQuestion(questionDef) {
@@ -179,7 +174,7 @@ function handleKeySortRequest(sortRequestInfo) {
   }
 }
 function handleNewQuestionBtnFocus() {
-  focusState.setElementId(editQuestionInfo.initiatedBtnId ? editQuestionInfo.initiatedBtnId : 'btn_Questions');
+  focusState.setElementId('btn_Questions');
   focusState.focusOnLastElement()
 }
 </script>
@@ -188,7 +183,7 @@ function handleNewQuestionBtnFocus() {
   <div>
     <SubPageHeader ref="subPageHeader"
                    title="Questions"
-                   :is-loading="isLoading"
+                   :is-loading="quizConfig.loadingQuizConfig"
                    aria-label="new question">
 
       <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
@@ -244,7 +239,7 @@ function handleNewQuestionBtnFocus() {
 
         <template #footer v-if="!quizConfig.isReadOnlyQuiz">
           <div class="flex justify-content-end flex-wrap p-3">
-            <SkillsButton @click="openNewQuestionModal('newQuestionOnBottomBtn')"
+            <SkillsButton @click="openNewQuestionModal()"
                           icon="fas fa-plus-circle"
                           outlined
                           size="small"
