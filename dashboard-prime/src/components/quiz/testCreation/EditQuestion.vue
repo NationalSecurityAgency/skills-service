@@ -221,7 +221,6 @@ const onSavedQuestion = (savedQuestion) => {
       :loading="loadingComponent"
       :validation-schema="schema"
       :initial-values="initialQuestionData"
-      :async-load-data-function="asyncLoadData"
       :save-data-function="saveQuiz"
       @saved="onSavedQuestion"
       @close="close"
