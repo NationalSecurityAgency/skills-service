@@ -31,18 +31,16 @@ describe('Survey Question CRUD Tests', () => {
         });
     });
 
-    it.only('create survey questions', function () {
+    it('create survey questions', function () {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="noQuestionsYet"]')
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
         // multiple choice question
-        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]').should('be.enabled')
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="btn_Questions"]').click({force: true})
-        cy.wait(1000)
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
