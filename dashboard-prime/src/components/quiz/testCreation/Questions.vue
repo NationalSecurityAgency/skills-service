@@ -204,9 +204,9 @@ function handleNewQuestionBtnFocus() {
           <div>
             <SkillsSpinner :is-loading="isLoading" class="my-5"/>
             <div>
-              <NoContent2 v-if="!hasData"
+              <NoContent2 v-if="!hasData && !isLoading"
                           title="No Questions Yet..."
-                          class="mt-5"
+                          class="mt-5 pt-5"
                           message="Create a question to get started."
                           data-cy="noQuestionsYet"/>
               <div v-if="hasData" id="questionsCard">
