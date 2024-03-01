@@ -16,19 +16,18 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue';
 import Badge from 'primevue/badge';
-import dayjs from '@/common-components/DayJsCustomizer';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+
+const timeUtils = useTimeUtils();
 
 const props = defineProps(['value', 'fromStartOfDay', 'cssClass']);
 
 const fromNow = computed(() => {
-  if (props.fromStartOfDay) {
-    return dayjs().startOf('day').to(dayjs(props.value));
-  }
-  return dayjs(props.value).startOf('seconds').fromNow();
+  return timeUtils.timeFromNow(props.value, props.fromStartOfDay);
 })
 
 const isToday = (timestamp) => {
-  return dayjs().utc().isSame(dayjs(timestamp), 'day');
+  return timeUtils.isToday(timestamp);
 };
 </script>
 
