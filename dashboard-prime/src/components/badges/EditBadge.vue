@@ -3,7 +3,7 @@ import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from "vue-router";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import { useAppConfig } from "@/components/utils/UseAppConfig.js";
-import { string } from "yup";
+import {number, string} from "yup";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -65,18 +65,22 @@ const schema = {
   'helpUrl': string()
       .urlValidator()
       .label('Help URL'),
+  'expirationDays': number().label('Expiration Days'),
+  'expirationHrs': number().label('Expiration Hours'),
+  'expirationMins': number().label('Expiration Minutes')
+
 };
 
-let awardAttrs;
+let awardAttrs = {
+  name: 'Speedy Finish',
+  iconClass: 'fas fa-car-side',
+  numMinutes: 0,
+};
+
 if (props.badge.awardAttrs && props.badge.awardAttrs.name !== null) {
   awardAttrs = props.badge.awardAttrs;
-} else {
-  awardAttrs = {
-    name: 'Speedy Finish',
-    iconClass: 'fas fa-car-side',
-    numMinutes: 0,
-  };
 }
+
 const minutesPerDay = 24 * 60;
 const expirationDays = awardAttrs.numMinutes ? Math.floor((awardAttrs.numMinutes / minutesPerDay)) : 0;
 const remainingHrs = awardAttrs.numMinutes - (expirationDays * minutesPerDay);
@@ -100,7 +104,21 @@ const initialBadgeData = {
   projectId: route.params.projectId
 };
 
-let badgeInternal = ref(null);
+let badgeInternal = ref({
+  originalBadgeId: props.badge.badgeId,
+  isEdit: props.isEdit,
+  description: '',
+  startDate: null,
+  endDate: null,
+  badgeId: props.badge.badgeId,
+  awardAttrs: awardAttrs,
+  expirationDays,
+  expirationHrs,
+  expirationMins,
+  timeLimitEnabled,
+  ...props.badge,
+});
+
 let limitTimeframe = ref(limitedTimeframe);
 let currentFocus = ref( null);
 let previousFocus = ref( null);
@@ -131,9 +149,9 @@ const checkBadgeNameUnique = (value) => {
 //   return `${badgeScope}-${$options.name}${isEdit ? 'Edit' : ''}`;
 // });
 
-// const maxTimeLimitMessage = computed(() => {
-//   return `Time Window must be less then ${$store.getters.config.maxBadgeBonusInMinutes / (60 * 24)} days`;
-// });
+const maxTimeLimitMessage = computed(() => {
+  return `Time Window must be less then ` //${$store.getters.config.maxBadgeBonusInMinutes / (60 * 24)} days`;
+});
 //
 // // methods
 const trackFocus = () => {
@@ -142,6 +160,8 @@ const trackFocus = () => {
 };
 
 const updateBadge = (values) => {
+  console.log(values);
+  console.log(badgeInternal);
   let badgeToSave = {
     ...values,
     iconClass: currentIcon.value,
@@ -151,6 +171,15 @@ const updateBadge = (values) => {
     name: InputSanitizer.sanitize(values.name),
     subjectId: InputSanitizer.sanitize(values.badgeId)
   };
+
+  if(badgeInternal.value.timeLimitEnabled) {
+    badgeToSave.timeLimitEnabled = true;
+    badgeToSave.awardAttrs = badgeInternal.value.awardAttrs;
+    badgeToSave.expirationDays = badgeInternal.value.expirationDays;
+    badgeToSave.expirationHrs = badgeInternal.value.expirationHrs;
+    badgeToSave.expirationMins = badgeInternal.value.expirationMins;
+  }
+
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
     emit('badge-updated', { isEdit: props.isEdit, ...resp });
   });
@@ -250,6 +279,78 @@ const close = (e) => {
           :name-to-id-sync-enabled="!props.isEdit" />
 
       <markdown-editor class="mt-5" name="description" />
+
+      <Card v-if="!global" data-cy="bonusAwardCard">
+        <template #content>
+          <div>
+            <div>
+              <Checkbox data-cy="timeLimitCheckbox" id="checkbox-1" inputId="enableAward" class="d-inline" :binary="true" name="timeLimitEnabled" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>
+              <label for="enableAward">
+                Enable Bonus Award
+              </label>
+            </div>
+            <div class="grid" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
+              <div class="text-left col">
+<!--                  <icon-picker :startIcon="badgeInternal.awardAttrs.iconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>-->
+                <div>
+                  <label for="awardName">Award Name</label>
+                  <SkillsTextInput
+                      placeholder="Award Name"
+                      v-model="badgeInternal.awardAttrs.name"
+                      data-cy="awardName"
+                      id="awardName"
+                      name="awardAttrs.name"/>
+  <!--                    <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|customNameValidator"-->
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-4" v-if="badgeInternal.timeLimitEnabled">
+              <div class="flex flex-1">
+  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|daysMaxTimeLimit:@timeLimitHours,@timeLimitMinutes|cantBe0IfHours0Minutes0" vid="timeLimitDays" v-slot="{errors}" name="Days">-->
+                  <InputGroup>
+                    <InputNumber
+                        v-model="badgeInternal.expirationDays"
+                        :initial-value="initialBadgeData.expirationDays"
+                        data-cy="timeLimitDays"
+                        id="timeLimitDays"
+                        name="expirationDays"/>
+                    <InputGroupAddon>
+                      Days
+                    </InputGroupAddon>
+                  </InputGroup>
+              </div>
+              <div class="flex flex-1">
+  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:23|hoursMaxTimeLimit:@timeLimitDays,@timeLimitMinutes|cantBe0IfMins0Days0" vid="timeLimitHours" v-slot="{errors}" name="Hours">-->
+                  <InputGroup>
+                    <InputNumber
+                        v-model="badgeInternal.expirationHrs"
+                        :initial-value="initialBadgeData.expirationHrs"
+                        data-cy="timeLimitHours"
+                        id="timeLimitHours"
+                        name="expirationHrs"/>
+                    <InputGroupAddon>
+                      Hours
+                    </InputGroupAddon>
+                  </InputGroup>
+              </div>
+              <div class="flex flex-1">
+  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitDays,@timeLimitHours|cantBe0IfHours0Days0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">-->
+                <InputGroup>
+                  <InputNumber
+                      v-model="badgeInternal.expirationMins"
+                      :initial-value="initialBadgeData.expirationMins"
+                      data-cy="timeLimitMinutes"
+                      id="timeLimitMinutes"
+                      name="expirationMins"/>
+                  <InputGroupAddon>
+                    Minutes
+                  </InputGroupAddon>
+                </InputGroup>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
 
       <help-url-input class="mt-3"
                       :next-focus-el="previousFocus"
