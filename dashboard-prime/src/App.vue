@@ -14,6 +14,7 @@ import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 const store = useStore()
 const route = useRoute()
@@ -233,6 +234,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <ConfirmDialog></ConfirmDialog>
     <!--    <dashboard-footer />-->
     <!--    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>-->
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->

@@ -3,7 +3,6 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
-import ConfirmDialog from 'primevue/confirmdialog';
 import {useConfirm} from "primevue/useconfirm";
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
@@ -170,7 +169,7 @@ const filterSkills = (searchQuery) => {
   <!--                             :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>-->
 
           <div v-if="badgeSkills && badgeSkills.length > 0">
-            <DataTable :value="badgeSkills" paginator :rows="5" :totalRecords="badgeSkills.length" :rowsPerPageOptions="[5, 10, 15, 20]" >
+            <DataTable :value="badgeSkills" :paginator="badgeSkills.length > 5" :rows="5" :totalRecords="badgeSkills.length" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="badgeSkillsTable">
               <Column header="Skill Name" field="name" style="width: 40%;" sortable>
                 <template #body="slotProps">
                   <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.skillId" :to="{ name:'SkillOverview',
@@ -191,12 +190,15 @@ const filterSkills = (searchQuery) => {
                   </SkillsButton>
                 </template>
               </Column>
+
+              <template #paginatorstart>
+                <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ badgeSkills.length }}</span>
+              </template>
             </DataTable>
           </div>
           <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
-        <ConfirmDialog id="confirm" />
       </template>
     </Card>
   </div>

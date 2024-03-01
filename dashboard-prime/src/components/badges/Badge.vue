@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue';
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import EditBadge from "@/components/badges/EditBadge.vue";
 
 const props = defineProps({
   badge: Object,
@@ -16,7 +17,7 @@ const props = defineProps({
   }}
 );
 
-const emit = defineEmits(['sort-changed-requested', 'badge-updated', 'badge-deleted']);
+const emit = defineEmits(['sort-changed-requested', 'badge-updated', 'badge-deleted', 'publish-badge']);
 
 let isLoading = ref(false);
 let badgeInternal = ref({ ...props.badge });
@@ -100,21 +101,6 @@ const badgeEdited = (badge) => {
 const badgeDeleted = () => {
   emit('badge-deleted', badgeInternal.value);
 };
-const canPublish = () => {
-  if (props.global) {
-    return badgeInternal.value.numSkills > 0 || badgeInternal.value.requiredProjectLevels.length > 0;
-  }
-
-  return badgeInternal.value.numSkills > 0;
-};
-const getNoPublishMsg = () => {
-  let msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
-  if (props.global) {
-    msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
-  }
-
-  return msg;
-};
 const sortRequested = (info) => {
   const withId = {
     ...info,
@@ -126,32 +112,7 @@ const focusSortControl = () => {
   // $refs.navCardWithStatsAndControls.focusSortControl();
 };
 const handlePublish = () => {
-  if (canPublish()) {
-    const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
-        Please note that once the badge is live, it cannot be disabled.`;
-    // msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
-    //     .then((res) => {
-    //       if (res) {
-    //         badgeInternal.value.enabled = 'true';
-    //         const toSave = { ...badgeInternal.value };
-    //         if (!toSave.originalBadgeId) {
-    //           toSave.originalBadgeId = toSave.badgeId;
-    //         }
-    //         toSave.startDate = toDate(toSave.startDate);
-    //         toSave.endDate = toDate(toSave.endDate);
-    //         badgeEdited(toSave);
-    //       }
-    //     });
-  } else {
-    // msgOk(getNoPublishMsg(), 'Empty Badge!');
-  }
-};
-const toDate = (value) => {
-  let dateVal = value;
-  if (value && !(value instanceof Date)) {
-    dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
-  }
-  return dateVal;
+  emit('publish-badge', badgeInternal.value);
 };
 const handleHidden = (e) => {
   if (!e || !e.updated) {
@@ -168,7 +129,6 @@ const handleDeleteCancelled = () => {
     // $refs.cardNavControls.focusOnDelete();
   });
 };
-
 </script>
 
 <template>
@@ -177,11 +137,11 @@ const handleDeleteCancelled = () => {
                                       :disable-sort-control="disableSortControl"
                                       ref="navCardWithStatsAndControls" @sort-changed-requested="sortRequested"
                                       :data-cy="`badgeCard-${badgeInternal.badgeId}`">
-      <div slot="header-top-right">
-      </div>
       <template #underTitle>
         <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
+                                         :to="buildManageLink()"
                                          :options="cardOptions.controls"
+                                         :button-id-suffix="badgeInternal.badgeId"
                                          @edit="showEditBadge=true"
                                          @delete="deleteBadge"/>
       </template>
@@ -192,7 +152,8 @@ const handleDeleteCancelled = () => {
             <div v-if="!live" data-cy="badgeStatus" style="">
               <span class="text-secondary" style="height: 3rem;">Status: </span>
               <span class="text-uppercase" :class="{ 'border-right pr-2 mr-2' : !isReadOnlyProj }">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span>
-              <a href="#0" v-if="!isReadOnlyProj" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>
+              <SkillsButton size="small" label="Go Live" v-if="!isReadOnlyProj" data-cy="goLive" @click.stop="handlePublish"></SkillsButton>
+<!--              <a href="#0" v-if="!isReadOnlyProj" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>-->
             </div>
             <div v-else data-cy="badgeStatus"  style="">
               <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
@@ -200,8 +161,8 @@ const handleDeleteCancelled = () => {
           </div>
         </div>
 
-<!--        <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"-->
-<!--                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>-->
+        <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
       </template>
     </nav-card-with-stats-and-controls>
     <removal-validation

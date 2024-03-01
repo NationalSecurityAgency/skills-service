@@ -13,6 +13,8 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import BadgesService from '@/components/badges/BadgesService';
 import Badge from '@/components/badges/Badge.vue';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import EditBadge from '@/components/badges/EditBadge.vue';
+import {useConfirm} from "primevue/useconfirm";
 
 const announcer = useSkillsAnnouncer()
 const projConfig = useProjConfig();
@@ -20,7 +22,9 @@ const projConfig = useProjConfig();
 const emit = defineEmits(['badge-deleted', 'badges-changed']);
 const store = useStore();
 const route = useRoute();
+const confirm = useConfirm();
 
+let global = ref(false);
 let isLoadingData = ref(true);
 let badges = ref([]);
 let displayNewBadgeModal = ref(false);
@@ -130,28 +134,34 @@ const deleteBadge = (badge) => {
 };
 
 const saveBadge = (badge) => {
+  BadgesService.saveBadge(badge).then(() => {
+    badgeUpdated(badge);
+  });
+}
+
+const badgeUpdated = (badge) => {
   isLoadingData.value = true;
   const requiredIds = badge.requiredSkills.map((item) => item.skillId);
   const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
   const { isEdit } = badge;
-  BadgesService.saveBadge(badgeReq).then(() => {
-    let afterLoad = null;
-    if (isEdit) {
-      afterLoad = () => {
-        const refKey = `badge_${badgeReq.badgeId}`;
+
+  let afterLoad = null;
+  //   if (isEdit) {
+  afterLoad = () => {
+    const refKey = `badge_${badgeReq.badgeId}`;
         // const ref = $refs[refKey];
         // if (ref) {
         //   ref[0].handleFocus();
         // }
-      };
-    }
-    loadBadges(afterLoad).then(() => {
-      const msg = isEdit ? 'edited' : 'created';
-      nextTick(() => announcer.polite(`Badge ${badge.name} has been ${msg}`));
-    });
-    // loadProjectDetailsState({ projectId: projectId.value });
-    emit('badges-changed', badge.badgeId);
+  };
+  //   }
+  loadBadges(afterLoad).then(() => {
+    const msg = isEdit ? 'edited' : 'created';
+    nextTick(() => announcer.polite(`Badge ${badge.name} has been ${msg}`));
   });
+  //   // loadProjectDetailsState({ projectId: projectId.value });
+  emit('badges-changed', badge.badgeId);
+  // });
   if (badge.startDate) {
     SkillsReporter.reportSkill('CreateGem');
   } else {
@@ -202,6 +212,59 @@ const sortOrderUpdate = (updateEvent) => {
         SkillsReporter.reportSkill('ChangeBadgeDisplayOrder');
       });
 };
+
+const canPublish = (badge) => {
+  if (global.value) {
+    return badge.numSkills > 0 || badge.requiredProjectLevels.length > 0;
+  }
+
+  return badge.numSkills > 0;
+};
+const getNoPublishMsg = () => {
+  let msg = 'This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.';
+  if (global.value) {
+    msg = 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
+  }
+
+  return msg;
+};
+const publishBadge = (badge) => {
+  if (canPublish(badge)) {
+    const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
+        Please note that once the badge is live, it cannot be disabled.`;
+    confirm.require({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Yes, Go Live!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        badge.enabled = 'true';
+        const toSave = { ...badge };
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
+        toSave.startDate = toDate(toSave.startDate);
+        toSave.endDate = toDate(toSave.endDate);
+        saveBadge(toSave);
+      }
+    });
+  } else {
+    confirm.require({
+      message: getNoPublishMsg(),
+      header: 'Empty Badge',
+      rejectClass: 'hidden',
+      acceptLabel: 'OK',
+    })
+  }
+}
+
+const toDate = (value) => {
+  let dateVal = value;
+  if (value && !(value instanceof Date)) {
+    dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
+  }
+  return dateVal;
+};
 </script>
 
 <template>
@@ -225,9 +288,10 @@ const sortOrderUpdate = (updateEvent) => {
 
                 <badge :badge="badge"
                        :ref="'badge_'+badge.badgeId"
-                       @badge-updated="saveBadge"
+                       @badge-updated="badgeUpdated"
                        @badge-deleted="deleteBadge"
                        @sort-changed-requested="updateSortAndReloadSubjects"
+                       @publish-badge="publishBadge"
                        :disable-sort-control="badges.length === 1"/>
               </BlockUI>
             </div>
@@ -240,10 +304,10 @@ const sortOrderUpdate = (updateEvent) => {
 <!--      </transition>-->
     </loading-container>
 
-<!--    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal"-->
-<!--                :badge="emptyNewBadge"-->
-<!--                @badge-updated="saveBadge"-->
-<!--                @hidden="handleHidden"></edit-badge>-->
+    <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal"
+                :badge="emptyNewBadge"
+                @badge-updated="badgeUpdated"
+                @hidden="handleHidden"></edit-badge>
   </div>
 </template>
 

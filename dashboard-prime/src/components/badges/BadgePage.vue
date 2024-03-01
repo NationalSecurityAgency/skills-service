@@ -7,6 +7,8 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import BadgesService from '@/components/badges/BadgesService';
 import { useBadgeState } from '@/stores/UseBadgeState.js';
 import { storeToRefs } from 'pinia';
+import EditBadge from "@/components/badges/EditBadge.vue";
+import {useConfirm} from "primevue/useconfirm";
 
 const route = useRoute();
 const router = useRouter();
@@ -14,6 +16,7 @@ const projConfig = useProjConfig();
 const badgeState = useBadgeState();
 const { badge } = storeToRefs(badgeState);
 const isReadOnlyProj = projConfig.isReadOnlyProj;
+const confirm = useConfirm();
 
 const navItems = [
   {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'BadgeSkills'},
@@ -70,15 +73,19 @@ const loadBadge = () => {
   }
 };
 
-const badgeEdited = (editedBadge) => {
-  BadgesService.saveBadge(editedBadge).then((resp) => {
-    const origId = badge.value.badgeId;
-    badgeState.badge = resp;
-    if (origId !== resp.badgeId) {
-      router.replace({ name: route.name, params: { ...route.params, badgeId: resp.badgeId } });
-      badgeId.value = resp.badgeId;
-    }
+const saveBadge = (badge) => {
+  BadgesService.saveBadge(badge).then(() => {
+    badgeEdited(badge);
   });
+}
+
+const badgeEdited = (editedBadge) => {
+  const origId = badge.value.badgeId;
+  badgeState.badge = editedBadge;
+  if (origId !== editedBadge.badgeId) {
+    router.replace({ name: route.name, params: { ...route.params, badgeId: editedBadge.badgeId } });
+    badgeId.value = editedBadge.badgeId;
+  }
 };
 
 const handleHidden = (e) => {
@@ -101,21 +108,29 @@ const handlePublish = () => {
   if (canPublish()) {
     const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
-    // this.msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
-    //     .then((res) => {
-    //       if (res) {
-            badge.value.enabled = 'true';
-            const toSave = { ...badge };
-            if (!toSave.originalBadgeId) {
-              toSave.originalBadgeId = toSave.badgeId;
-            }
-            toSave.startDate = toDate(toSave.startDate);
-            toSave.endDate = toDate(toSave.endDate);
-            badgeEdited(toSave);
-          // }
-        // });
-  // } else {
-    // this.msgOk(this.getNoPublishMsg(), 'Empty Badge!');
+    confirm.require({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Yes, Go Live!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        badge.value.enabled = 'true';
+        const toSave = {...badge};
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
+        toSave.startDate = toDate(toSave.startDate);
+        toSave.endDate = toDate(toSave.endDate);
+        saveBadge(toSave);
+      }
+    });
+  } else {
+    confirm.require({
+      message: getNoPublishMsg(),
+      header: 'Empty Badge',
+      rejectClass: 'hidden',
+      acceptLabel: 'OK',
+    })
   }
 };
 
@@ -171,8 +186,8 @@ const toDate = (value) => {
     </page-header>
 
     <navigation v-if="!isLoading" :nav-items="navItems"></navigation>
-<!--    <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"-->
-<!--                :global="false" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>-->
+    <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
+                :global="false" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
   </div>
 </template>
 

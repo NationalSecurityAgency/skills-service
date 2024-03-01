@@ -6,7 +6,6 @@ import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnounc
 import SettingService from '@/components/settings/SettingsService.js'
 import LevelService from './LevelService.js';
 import Column from "primevue/column";
-import ConfirmDialog from 'primevue/confirmdialog';
 import {useConfirm} from "primevue/useconfirm";
 import NewLevel from './NewLevel.vue';
 
@@ -334,7 +333,6 @@ const handleFocus = (e) => {
         </DataTable>
       </template>
     </Card>
-    <ConfirmDialog id="confirm" />
     <new-level v-if="displayLevelModal && levels"
                v-model="displayLevelModal"
                @load-levels="loadLevels"
