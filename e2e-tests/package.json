@@ -77,14 +77,14 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "axe-core": "4.4.3",
+    "axe-core": "4.8.4",
     "badge-maker": "3.3.1",
     "cypress": "13.6.6",
     "cypress-audit": "1.1.0",
     "cypress-axe": "1.5.0",
     "cypress-file-upload": "5.0.8",
     "cypress-plugin-tab": "1.0.5",
-    "cypress-real-events": "1.11.0",
+    "cypress-real-events": "1.12.0",
     "cypress-visual-regression": "3.0.0",
     "cypress-wait-until": "1.7.2",
     "dayjs": "1.10.4",
@@ -93,13 +93,13 @@
     "license-check-and-add": "4.0.5",
     "license-checker": "25.0.1",
     "moment": "2.29.4",
-    "moment-timezone": "0.5.37",
+    "moment-timezone": "0.5.45",
     "number-format.js": "2.0.9",
     "object-scan": "14.0.0",
     "stop-only": "3.3.1",
     "wait-on": "5.2.1"
   },
   "dependencies": {
-    "idb-keyval": "6.2.0"
+    "idb-keyval": "6.2.1"
   }
 }

@@ -268,9 +268,9 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'Question 2 - First Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'Question 2 - Second Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'Question 2 - Third Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - First Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - Second Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - Third Answer')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
@@ -286,9 +286,9 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'Question 2 - First Answer-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'b')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="input"]').should('have.value', 'c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'c')
     });
 
     it('edit a question - change the scale of a rating', function () {
@@ -575,6 +575,7 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
         cy.log("Operation: 1")
+        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{downArrow}');
@@ -582,7 +583,9 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]').should('have.focus');
+
         cy.log("Operation: 2")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{downArrow}');
@@ -592,12 +595,14 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the lowest item - should not change anything
         cy.log("Operation: 3")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_2"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 3', 'question # 1']);
 
         cy.log("Operation: 4")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{upArrow}');
@@ -607,6 +612,7 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the top item - should not change anything
         cy.log("Operation: 5")
+        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{upArrow}');
