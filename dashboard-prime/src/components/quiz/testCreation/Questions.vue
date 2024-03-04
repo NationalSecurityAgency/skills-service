@@ -33,7 +33,7 @@ const editQuestionInfo = ref({
   isEdit: true,
   questionDef: {},
 })
-const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig || loadingQuestions.value);
+const isLoading = computed(() => quizConfig.loadingQuizConfig || loadingQuestions.value);
 const hasData = computed(() => questions.value && questions.value.length > 0)
 
 onMounted(() => {
@@ -89,7 +89,7 @@ function openNewQuestionModal() {
     id: null,
     question: '',
     type: QuestionType.MultipleChoice,
-    quizType: this.quizType,
+    quizType: quizType.value,
     answers: [{
       id: null,
       answer: '',
