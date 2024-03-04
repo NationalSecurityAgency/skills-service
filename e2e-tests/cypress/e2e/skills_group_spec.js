@@ -441,7 +441,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill2"]').click();
         cy.get('[data-cy="skillName"]').clear().type('other');
-        cy.get('[data-cy=enableIdInput]').click({force: true});
+        cy.get('[data-cy="enableIdInput"]').click()
         cy.get('[data-cy="idInputValue"]').clear().type('newId');
         cy.get('[data-cy="pointIncrement"]').clear().type(50);
         cy.get('button').contains('Save').click();
