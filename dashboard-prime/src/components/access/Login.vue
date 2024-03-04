@@ -147,7 +147,7 @@ const onSubmit = handleSubmit((values) => {
                   <Button
                     type="submit"
                     label="Login"
-                    icon="pi pi-arrow-circle-right"
+                    icon="far fa-arrow-alt-circle-right"
                     data-cy="login"
                     :disabled="!meta.valid"
                     :loading="authenticating"

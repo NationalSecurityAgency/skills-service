@@ -12,7 +12,7 @@ const menu = ref()
 let allItemsTmp = [
   {
     label: 'Official Docs',
-    icon: 'pi pi-book',
+    icon: 'fas fa-book',
     url: `${appConfig.docsHost.value}`
   },
   {
@@ -23,12 +23,12 @@ let allItemsTmp = [
     items: [
       {
         label: 'Dashboard',
-        icon: 'pi pi-info-circle',
+        icon: 'fas fa-info-circle',
         url: `${appConfig.docsHost.value}/dashboard/user-guide/`
       },
       {
         label: 'Integration',
-        icon: 'pi pi-info-circle',
+        icon: 'fas fa-hands-helping',
         url: `${appConfig.docsHost.value}/skills-client/`
       }
     ]
@@ -64,7 +64,7 @@ const toggle = (event) => {
 <template>
   <div class="d-inline">
     <Button
-      icon="pi pi-question"
+      icon="fas fa-question"
       severity="success"
       outlined
       raised
@@ -75,7 +75,7 @@ const toggle = (event) => {
     <Menu ref="menu" id="help_settings_menu" :model="items" :popup="true">
       <template #item="{ item, props }">
         <a :href="item.url" target="_blank" v-bind="props.action">
-          <span :class="item.icon" />
+          <span class="w-1rem"><i :class="item.icon"/></span>
           <span class="ml-2">{{ item.label }}</span>
         </a>
       </template>

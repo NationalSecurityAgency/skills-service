@@ -241,6 +241,5 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-@import 'primeicons/primeicons.css';
+<style scoped>
 </style>

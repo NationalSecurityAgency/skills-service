@@ -30,7 +30,7 @@ const appConfig = useAppConfig()
 if (appConfig.rankingAndProgressViewsEnabled) {
   allItems.push({
     label: 'Progress and Ranking',
-    icon: 'pi pi-chart-bar',
+    icon: 'fas fa-chart-bar',
     command: () => {
       router.push({ path: pagePath.progressAndRankingHomePage })
     },
@@ -40,7 +40,7 @@ if (appConfig.rankingAndProgressViewsEnabled) {
 
 allItems.push({
   label: 'Project Admin',
-  icon: 'pi pi-user-edit',
+  icon: 'fas fa-user-edit',
   command: () => {
     router.push({ path: pagePath.adminHomePage })
   },
@@ -48,7 +48,7 @@ allItems.push({
 })
 allItems.push({
   label: 'Settings',
-  icon: 'pi pi-cog',
+  icon: 'fas fa-cog',
   command: () => {
     router.push({ path: pagePath.settingsHomePage })
   },
@@ -61,7 +61,7 @@ if (userInfo.isFormAuthenticatedUser.value) {
   })
   allItems.push({
     label: 'Log Out',
-    icon: 'pi pi-sign-out',
+    icon: 'fas fa-sign-out-alt',
     command: () => {
       store.dispatch('logout')
     }
@@ -78,7 +78,7 @@ const toggle = (event) => {
 <template>
   <div class="d-inline">
     <Button
-      icon="pi pi-user"
+      icon="fas fa-user"
       severity="info"
       outlined
       raised
@@ -89,7 +89,7 @@ const toggle = (event) => {
     <Menu ref="menu" id="user_settings_menu" :model="items" :popup="true">
       <template #start>
         <div class="mx-3 mt-2">
-          <Avatar icon="pi pi-user" class="bg-lime-900 text-white" />
+          <Avatar icon="fas fa-user" class="bg-lime-900 text-white" />
           <span data-cy="settingsButton-loggedInName" class="ml-1">{{ displayName }}</span>
         </div>
       </template>
