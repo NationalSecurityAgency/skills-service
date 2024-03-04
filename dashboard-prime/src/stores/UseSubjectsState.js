@@ -1,15 +1,18 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import SubjectsService from '@/components/subjects/SubjectsService.js'
+import { useRoute } from 'vue-router'
 
 export const useSubjectsState = defineStore('subjectsState', () => {
   const subject = ref({})
   const isLoadingSubject = ref(false)
 
-  function loadSubjectDetailsState(projectId, subjectId) {
+  const route = useRoute()
+
+  function loadSubjectDetailsState() {
     isLoadingSubject.value = true
     return new Promise((resolve, reject) => {
-      SubjectsService.getSubjectDetails(projectId, subjectId)
+      SubjectsService.getSubjectDetails(route.params.projectId, route.params.subjectId)
         .then((response) => {
           subject.value = response
           resolve(response)

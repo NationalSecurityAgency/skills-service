@@ -94,7 +94,7 @@ const minimumPoints = computed(() => {
 // });
 
 const loadSubject = () => {
-  subjectState.loadSubjectDetailsState(route.params.projectId, route.params.subjectId)
+  subjectState.loadSubjectDetailsState()
 }
 
 const displayEditSubject = () => {

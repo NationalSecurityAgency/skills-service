@@ -123,14 +123,18 @@ const tableSkills = computed(() => {
 
 const filteredCount = ref(-1)
 const totalRows = computed(() => {
+  let res = null
   if (filteredCount.value > 0) {
-    return filteredCount.value
+    res = filteredCount.value
+  } else if (props.groupId) {
+    res = skillsState.getGroupSkills(props.groupId).length
+  } else {
+    res = skillsState.subjectSkills.length
   }
-  if (props.groupId) {
-    return skillsState.getGroupSkills(props.groupId).length
-  }
-  return skillsState.subjectSkills.length
+  console.log(res);
+  return  res
 })
+
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 })
@@ -197,7 +201,7 @@ const doDeleteSkill = () => {
         parentGroup.numSkillsInGroup -= 1
       }
       announcer.polite(`Removed ${skill.name} skill`)
-      subjectState.loadSubjectDetailsState(skill.projectId, skill.subjectId)
+      subjectState.loadSubjectDetailsState()
       skillsState.setLoadingSubjectSkills(false)
     })
 }
@@ -264,7 +268,7 @@ const disableRow = (row) => {
       v-model:sort-order="options.sortOrder"
       @filter="onFilter"
       @sort="onColumnSort"
-      :paginator="totalRows >= pagination.pageSize"
+      :paginator="true"
       :rows="pagination.pageSize"
       :rowsPerPageOptions="pagination.possiblePageSizes"
       stateStorage="local"

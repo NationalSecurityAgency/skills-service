@@ -2,19 +2,20 @@
 import { computed, ref, onMounted, provide } from 'vue'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useRoute } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
-import SkillsService from '@/components/skills/SkillsService.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 
 const projConfig = useProjConfig()
 const route = useRoute()
 const skillsState = useSubjectSkillsState()
+const subjectState = useSubjectsState()
 const announcer = useSkillsAnnouncer()
 const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
@@ -108,6 +109,8 @@ const skillCreatedOrUpdated = (skill) => {
   }
   // attribute based skills should report on new or update operation
   reportSkills(createdSkill)
+
+  subjectState.loadSubjectDetailsState()
 
   const msg = skill.type === 'SkillGroup' ? `Group ${skill.name} has been saved` : `Skill ${skill.name} has been saved`
   announcer.polite(msg)

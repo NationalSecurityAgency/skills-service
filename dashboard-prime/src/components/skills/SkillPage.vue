@@ -90,14 +90,13 @@ const displayEdit = () => {
 };
 
 const loadData = () => {
-  const { projectId, subjectId } = route.params;
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
     headerOptions.value = buildHeaderOptions();
     if (subjectState.subject.value) {
       navItems.value = buildNavItems()
     } else {
-      subjectState.loadSubjectDetailsState(projectId, subjectId).then(() => {
+      subjectState.loadSubjectDetailsState().then(() => {
         navItems.value = buildNavItems()
       });
     }

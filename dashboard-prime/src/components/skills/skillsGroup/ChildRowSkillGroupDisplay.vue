@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, computed, inject } from 'vue'
+import { onMounted, ref, computed, inject, watch } from 'vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
@@ -48,11 +48,11 @@ const loadSkillsInfo = () => {
 
 const allSkillsRequired = computed(() => {
   // -1 == all skills required
-  return (props.skill.numSkillsRequired < 0)
+  return (skillInfo.value.numSkillsRequired < 0)
 })
 const requiredSkillsNum = computed(() => {
   // -1 == all skills required
-  return (props.skill.numSkillsRequired === -1) ? skills.value.length : props.skill.numSkillsRequired
+  return (skillInfo.value.numSkillsRequired === -1) ? skills.value.length : skillInfo.value.numSkillsRequired
 })
 const lessThanTwoSkills = computed(() => {
   return skillsState.getGroupSkills(props.skill.skillId).length < 2;
@@ -75,6 +75,16 @@ const createOrUpdateSkill = inject('createOrUpdateSkill')
 
 const showEditRequiredSkillsDialog = ref(false)
 
+watch(() => skillsState.getGroupSkills(props.skill.skillId).length,
+  (newLength) => {
+    if (skillInfo.value.numSkillsRequired >= newLength) {
+      skillInfo.value.numSkillsRequired = -1
+    }
+  }
+)
+const groupChanged = (updatedGroup) => {
+  skillInfo.value.numSkillsRequired = updatedGroup.numSkillsRequired
+}
 </script>
 
 <template>
@@ -186,6 +196,7 @@ const showEditRequiredSkillsDialog = ref(false)
     <edit-num-required-skills
       v-if="showEditRequiredSkillsDialog"
       v-model="showEditRequiredSkillsDialog"
+      @group-changed="groupChanged"
       :group="skillInfo" />
   </div>
 </template>

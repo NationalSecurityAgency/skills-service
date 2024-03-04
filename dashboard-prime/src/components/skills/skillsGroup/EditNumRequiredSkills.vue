@@ -13,6 +13,7 @@ const props = defineProps({
     required: true
   }
 })
+const emit = defineEmits(['group-changed'])
 
 const save = (values) => {
   const updatedGroup = {
@@ -21,8 +22,9 @@ const save = (values) => {
   };
   return SkillsService.saveSkill(updatedGroup)
 }
-const afterSaved = () => {
-
+const afterSaved = (updatedGroup) => {
+  console.log(updatedGroup);
+  emit('group-changed', updatedGroup);
 }
 const initialSkillData = { }
 
@@ -76,7 +78,7 @@ onMounted(() => {
     <SkillsDropDown
       label="Number of Skills Required"
       name="numSkillsRequired"
-      data-cy="answerTypeSelector"
+      data-cy="requiredSkillsNumSelect"
       v-model="selected"
       :isRequired="true"
       :options="options">
