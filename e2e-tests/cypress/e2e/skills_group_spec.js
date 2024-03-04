@@ -801,17 +801,19 @@ describe('Skills Group Tests', () => {
     });
 
     it('More than 10 skills are visible in the group', () => {
-      cy.createSkillsGroup(1, 1, 1);
-      for (let step=1; step < 100; step++) {
-        cy.addSkillToGroup(1, 1, 1, step, { pointIncrement: 11, numPerformToCompletion: 2 });
-      }
-      cy.visit('/administrator/projects/proj1/subjects/subj1');
-      cy.contains('Awesome Group 1').should('be.visible');
-      cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.createSkillsGroup(1, 1, 1)
+        for (let step = 1; step < 25; step++) {
+            cy.addSkillToGroup(1, 1, 1, step, { pointIncrement: 11, numPerformToCompletion: 2 })
+        }
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.contains('Awesome Group 1').should('be.visible')
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
 
-      cy.get('[data-cy=manageSkillLink_skill99]').should('be.visible');
-        // cy.get('[data-cy=manageSkillLink_skill1]').should('be.visible');
-        // cy.get('[data-cy=manageSkillLink_skill50]').should('be.visible');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy=manageSkillLink_skill24]').should('be.visible')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-pc-section="pages"] [aria-label="Page 2"]').should('be.enabled').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy=manageSkillLink_skill14]').should('be.visible')
+        cy.get('[data-pc-section="pages"] [aria-label="Page 3"]').should('be.enabled').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy=manageSkillLink_skill4]').should('be.visible')
     });
 
 });
