@@ -392,7 +392,7 @@ const disableRow = (row) => {
 <!--                  />-->
                 </router-link>
 
-                <div v-if="!projConfig.isReadOnlyProj" class="p-buttonset mt-2">
+                <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2">
                   <SkillsButton
                     :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
@@ -435,7 +435,7 @@ const disableRow = (row) => {
                     :track-for-focus="true"
                     :class="{'delete-btn-border-fix' : !slotProps.data.reusedSkill }"
                     :disabled="deleteButtonsDisabled" />
-                </div>
+                </ButtonGroup>
               </div>
             </div>
           </div>
@@ -445,7 +445,7 @@ const disableRow = (row) => {
                 {{ slotProps.data[col.key] }}
               </div>
 
-              <div class="p-buttonset" v-if="reorderEnable">
+              <ButtonGroup v-if="reorderEnable">
                 <SkillsButton
                   icon="fas fa-arrow-circle-down"
                   @click="subjSkillsDisplayOrder.moveDisplayOrderDown(slotProps.data)"
@@ -464,7 +464,7 @@ const disableRow = (row) => {
                   :aria-label="'move '+slotProps.data.name+' up in the display order'"
                   :data-cy="`orderMoveUp_${slotProps.data.skillId}`" />
                 <!--                v-skills="'ChangeSkillDisplayOrder'"-->
-              </div>
+              </ButtonGroup>
             </div>
           </div>
           <div v-else-if="slotProps.field === 'created'">

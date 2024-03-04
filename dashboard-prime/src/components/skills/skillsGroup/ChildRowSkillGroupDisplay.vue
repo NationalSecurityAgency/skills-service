@@ -130,7 +130,7 @@ const groupChanged = (updatedGroup) => {
 
           </div>
           <div class="flex-1 text-right">
-            <div class="p-buttonset">
+            <ButtonGroup>
               <SkillsButton
                 :id="`group-${skillInfo.skillId}_importSkillBtn`"
                 :ref="`group-${skillInfo.skillId}_importSkillBtn`"
@@ -159,7 +159,7 @@ const groupChanged = (updatedGroup) => {
                 :disabled="addDisabled"
                 :aria-label="`Add skill to ${skillInfo.name} group`"
                 :data-cy="`addSkillToGroupBtn-${skillInfo.skillId}`" />
-            </div>
+            </ButtonGroup>
             <div v-if="addDisabled">
               {{ addDisabledMessage }}
             </div>

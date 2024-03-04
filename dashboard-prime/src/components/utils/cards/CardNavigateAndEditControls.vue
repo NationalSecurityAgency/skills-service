@@ -56,7 +56,7 @@ const handleManageClick = () => {
     </div>
 
     <div v-if="!isReadOnlyProj" class="col text-right">
-      <span class="p-buttonset">
+      <ButtonGroup>
         <SkillsButton
           v-if="options.showShare === true"
           :id="`shareBtn${buttonIdSuffix}`"
@@ -79,21 +79,21 @@ const handleManageClick = () => {
           label=""
           data-cy="editBtn" />
 
-          <SkillsButton
-            :id="`deleteBtn${buttonIdSuffix}`"
-            variant="outline-primary"
-            v-tooltip="options.deleteDisabledText"
-            ref="deleteBtn"
-            size="small"
-            @click="emit('delete')"
-            :disabled="options.isDeleteDisabled"
-            :title="`Delete ${options.type}`"
-            :track-for-focus="true"
-            :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
-            role="button"
-            label="" icon="text-warning fas fa-trash"
-            data-cy="deleteBtn"></SkillsButton>
-      </span>
+        <SkillsButton
+          :id="`deleteBtn${buttonIdSuffix}`"
+          variant="outline-primary"
+          v-tooltip="options.deleteDisabledText"
+          ref="deleteBtn"
+          size="small"
+          @click="emit('delete')"
+          :disabled="options.isDeleteDisabled"
+          :title="`Delete ${options.type}`"
+          :track-for-focus="true"
+          :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
+          role="button"
+          label="" icon="text-warning fas fa-trash"
+          data-cy="deleteBtn"></SkillsButton>
+      </ButtonGroup>
     </div>
   </div>
 </template>

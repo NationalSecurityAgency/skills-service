@@ -10,6 +10,7 @@ import store from '@/store/store'
 import VueAnnouncer from '@vue-a11y/announcer'
 
 import Button from 'primevue/button'
+import ButtonGroup from 'primevue/buttongroup'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
 import Toast from 'primevue/toast'
@@ -73,6 +74,7 @@ app.use(ToastService)
 app.use(VueAnnouncer)
 app.use(ConfirmationService)
 app.component('Button', Button)
+app.component('ButtonGroup', ButtonGroup)
 app.component('Card', Card)
 app.component('Panel', Panel)
 app.component('Toast', Toast)

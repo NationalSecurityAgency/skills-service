@@ -161,7 +161,7 @@ const toDate = (value) => {
 <!--        <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>-->
 <!--      </span>-->
       <template #subSubTitle v-if="badge && !isReadOnlyProj">
-        <span class="p-buttonset" v-if="!isReadOnlyProj">
+        <ButtonGroup v-if="!isReadOnlyProj">
           <SkillsButton @click="displayEditBadge"
                     ref="editBadgeButton"
                     class="btn btn-outline-primary"
@@ -181,7 +181,7 @@ const toDate = (value) => {
                     label="Go Live"
                     data-cy="goLive">Go Live
           </SkillsButton>
-        </span>
+        </ButtonGroup>
       </template>
     </page-header>
 

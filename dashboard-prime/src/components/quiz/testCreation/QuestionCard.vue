@@ -103,7 +103,7 @@ const moveQuestion = (changeIndexBy) => {
         </div>
       </div>
       <div class="flex flex-none">
-        <span class="p-buttonset ml-1 mt-2 mr-3">
+        <ButtonGroup class="ml-1 mt-2 mr-3">
           <SkillsButton @click="editQuestion"
                         icon="fas fa-edit"
                         label="Edit"
@@ -128,7 +128,7 @@ const moveQuestion = (changeIndexBy) => {
                         :track-for-focus="true"
                         title="Delete Question">
           </SkillsButton>
-        </span>
+        </ButtonGroup>
       </div>
 
       <removal-validation

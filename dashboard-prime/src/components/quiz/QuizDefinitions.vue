@@ -239,7 +239,7 @@ defineExpose({
                                   outlined
                                   size="small"/>
                   </router-link>
-                  <span class="p-buttonset ml-1">
+                  <ButtonGroup class="ml-1">
                     <SkillsButton @click="showUpdateModal(slotProps.data)"
                                   icon="fas fa-edit"
                                   outlined
@@ -260,7 +260,7 @@ defineExpose({
                                   :track-for-focus="true"
                                   title="Delete Quiz">
                     </SkillsButton>
-                  </span>
+                  </ButtonGroup>
                 </div>
             </div>
             <div v-else-if="slotProps.field === 'type'">

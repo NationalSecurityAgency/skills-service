@@ -65,24 +65,24 @@ defineExpose( {
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
-      <span class="p-buttonset ml-1">
-            <SkillsButton
-                :disabled="noMoreAnswers"
-                :aria-label="`Add New Answer at index ${index}`"
-                data-cy="addNewAnswer"
-                outlined
-                icon="fas fa-plus"
-                @click="addNewAnswer(index)">
-            </SkillsButton>
-            <SkillsButton
-                :disabled="twoOrLessAnswers"
-                :aria-label="`Delete Answer at index ${index}`"
-                data-cy="removeAnswer"
-                outlined
-                icon="fas fa-minus"
-                @click="removeAnswer(index)">
-            </SkillsButton>
-      </span>
+      <ButtonGroup class="ml-1">
+        <SkillsButton
+          :disabled="noMoreAnswers"
+          :aria-label="`Add New Answer at index ${index}`"
+          data-cy="addNewAnswer"
+          outlined
+          icon="fas fa-plus"
+          @click="addNewAnswer(index)">
+        </SkillsButton>
+        <SkillsButton
+          :disabled="twoOrLessAnswers"
+          :aria-label="`Delete Answer at index ${index}`"
+          data-cy="removeAnswer"
+          outlined
+          icon="fas fa-minus"
+          @click="removeAnswer(index)">
+        </SkillsButton>
+      </ButtonGroup>
     </div>
   </div>
 </template>

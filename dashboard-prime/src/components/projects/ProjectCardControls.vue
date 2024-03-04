@@ -64,53 +64,53 @@ const focusOnDelete = () => {
       icon="fas fa-ban"
       :aria-pressed="project.pinned">
     </SkillsButton>
-      <div class="p-buttonset mr-2 p-0 flex" v-if="!readOnlyProject">
-        <SkillsButton
-          :id="`editPojBtn${project.projectId}`"
-          :track-for-focus="true"
-          ref="editBtn"
-          outlined
-          severity="info"
-          size="small"
-          @click="emit('edit-project', $event.target.value)"
-          title="Edit Project"
-          :aria-label="'Edit Project ' + project.name"
-          role="button"
-          icon="fas fa-edit"
-          data-cy="editProjBtn" />
+    <ButtonGroup class="mr-2 p-0 flex" v-if="!readOnlyProject">
+      <SkillsButton
+        :id="`editPojBtn${project.projectId}`"
+        :track-for-focus="true"
+        ref="editBtn"
+        outlined
+        severity="info"
+        size="small"
+        @click="emit('edit-project', $event.target.value)"
+        title="Edit Project"
+        :aria-label="'Edit Project ' + project.name"
+        role="button"
+        icon="fas fa-edit"
+        data-cy="editProjBtn" />
 
-        <SkillsButton
-          :id="`copyPojBtn${project.projectId}`"
-          ref="copyBtn"
-          outlined
-          severity="info"
-          :track-for-focus="true"
-          size="small"
-          @click="emit('copy-project', $event.target.value)"
-          title="Copy Project"
-          :aria-label="'Copy Project ' + project.name"
-          role="button"
-          icon="fas fa-copy"
-          label=""
-          data-cy="copyProjBtn"/>
+      <SkillsButton
+        :id="`copyPojBtn${project.projectId}`"
+        ref="copyBtn"
+        outlined
+        severity="info"
+        :track-for-focus="true"
+        size="small"
+        @click="emit('copy-project', $event.target.value)"
+        title="Copy Project"
+        :aria-label="'Copy Project ' + project.name"
+        role="button"
+        icon="fas fa-copy"
+        label=""
+        data-cy="copyProjBtn" />
 
-          <SkillsButton
-            :id="`deletePojBtn${project.projectId}`"
-            outlined
-            severity="info"
-            ref="deleteBtn"
-            size="small"
-            :track-for-focus="true"
-            class="p-text-secondary"
-            @click="emit('delete-project', $event.target.value)"
-            :disabled="isDeleteDisabled"
-            v-tooltip="deleteDisabledText"
-            title="Delete Project"
-            :aria-label="'Delete Project ' + project.name"
-            role="button"
-            icon="text-warning fas fa-trash p-text-warning"
-            data-cy="deleteProjBtn" />
-      </div>
+      <SkillsButton
+        :id="`deletePojBtn${project.projectId}`"
+        outlined
+        severity="info"
+        ref="deleteBtn"
+        size="small"
+        :track-for-focus="true"
+        class="p-text-secondary"
+        @click="emit('delete-project', $event.target.value)"
+        :disabled="isDeleteDisabled"
+        v-tooltip="deleteDisabledText"
+        title="Delete Project"
+        :aria-label="'Delete Project ' + project.name"
+        role="button"
+        icon="text-warning fas fa-trash p-text-warning"
+        data-cy="deleteProjBtn" />
+    </ButtonGroup>
 
   </div>
 </template>
