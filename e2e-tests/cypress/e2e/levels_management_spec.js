@@ -137,8 +137,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
-        cy.get('[data-cy="usePointsForLevelsSwitch"]')
-            .click({ force: true });
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]')
             .click();
         cy.get('[data-cy="saveSettingsBtn"]')
@@ -311,8 +310,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
-        cy.get('[data-cy="usePointsForLevelsSwitch"]')
-            .click({ force: true });
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]')
             .click();
         cy.get('[data-cy="saveSettingsBtn"]')

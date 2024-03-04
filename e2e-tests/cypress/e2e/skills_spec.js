@@ -132,7 +132,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled')
 
     cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
-    cy.get('[data-cy=timeWindowCheckbox').click({ force: true })
+    cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}{del}')
     cy.get('[data-cy=numPointIncrementMaxOccurrencesError]').contains('Occurrences is a required field').should('be.visible')
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled')
@@ -227,8 +227,9 @@ describe('Skills Tests', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill')
     cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill')
 
-    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-section="input"]'
+    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-name="input"]'
     cy.visit('/administrator/projects/proj1/subjects/subj1')
+    cy.get('[data-cy="noContent"]')
     cy.get('[data-cy="newSkillButton"]').click()
     cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
     cy.get('[data-cy=skillName]').type('Skill 1')
@@ -397,7 +398,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="userIdInput"] .vs__dropdown-option').contains('foo').click({ force: true })
   })
 
-  it.skip('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
+  it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -843,7 +844,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveDialogBtn"]').click()
   })
 
-  it('edit skill on page', () => {
+  it.only('edit skill on page', () => {
     cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -882,7 +883,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=breadcrumb-skill1]').should('be.visible')
     cy.get('[data-cy=editSkillButton_skill1]').click()
-    cy.get('[data-cy=enableIdInput]').click({ force: true })
+    cy.get('[data-cy=enableIdInput]').click()
     cy.get('[data-cy=idInputValue]').type('{selectall}entirelyNewId')
     cy.get('[data-cy=pointIncrement]').click()
     cy.get('[data-cy=saveDialogBtn]').click()
@@ -917,13 +918,13 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillOverviewTotalpoints]').contains('10 repetitions to Completion').should('be.visible')
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
-    cy.get('[data-cy=timeWindowCheckbox').click({ force: true })
+    cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59')
     cy.get('[data-cy=saveDialogBtn]').click()
     cy.wait('@afterIdEdit')
     cy.contains('8 Hours 59 Minutes').should('be.visible')
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
-    cy.get('[data-cy=selfReportEnableCheckbox]').click({ force: true })
+    cy.get('[data-cy=selfReportEnableCheckbox]').click()
     cy.get('[data-cy=saveDialogBtn]').click()
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')

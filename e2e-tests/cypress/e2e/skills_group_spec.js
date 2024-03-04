@@ -77,7 +77,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
-
+    })
 
     it.skip('group\'s description supports markdown', () => {
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n";
