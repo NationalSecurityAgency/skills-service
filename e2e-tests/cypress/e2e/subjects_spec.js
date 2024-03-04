@@ -1056,7 +1056,7 @@ describe('Subjects Tests', () => {
       cy.get('[data-cy=breadcrumb-subj1]').should('exist');
       cy.get('[data-cy=btn_edit-subject]').click();
       cy.contains('Editing Existing Subject').should('be.visible');
-        cy.get('[data-cy=enableIdInput]').click({force: true});
+        cy.get('[data-cy=enableIdInput]').click();
         cy.get('[data-cy=idInputValue]')
             .type('11111111');
         cy.get('[data-cy=saveDialogBtn]')

@@ -108,8 +108,8 @@ describe('Skills Table Tests', () => {
     cy.get(`${makdownDivSelector}`).should('have.text', 'generic description')
     cy.get('[data-cy=skillName]').should('have.value', 'Copy of Very Great Skill # 2')
     cy.get('#idInput').should('have.value', 'copy_of_skill2')
-    cy.get('[data-cy=numPerformToCompletion] [data-pc-name="inputtext"]').should('have.value', '1')
-    cy.get('[data-cy=pointIncrement] [data-pc-name="inputtext"]').should('have.value', '150')
+    cy.get('[data-cy=numPerformToCompletion] [data-pc-name="input"]').should('have.value', '1')
+    cy.get('[data-cy=pointIncrement] [data-pc-name="input"]').should('have.value', '150')
     cy.get(makdownDivSelector).type('{selectall}copy description edit')
     cy.wait('@validateDescription')
     cy.get('[data-cy=numPerformToCompletion]').type('5')
@@ -584,7 +584,7 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get(`${tableSelector} th`).contains('Display').click()
 
     // look for the name
     cy.get('[data-cy="skillsTable-skillFilter"]').type('# 1')
@@ -637,7 +637,7 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get(`${tableSelector} th`).contains('Display Order').click()
+    cy.get(`${tableSelector} th`).contains('Display').click()
 
     // look for the name
     cy.validateTable(tableSelector, [
