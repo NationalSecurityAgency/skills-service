@@ -18,6 +18,8 @@ import SelfReportTableCell from '@/components/skills/skillsTableCells/SelfReport
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.vue'
 import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay.vue'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const props = defineProps({
   groupId: String,
@@ -280,14 +282,16 @@ const disableRow = (row) => {
 
       <template #header>
         <div class="flex gap-1">
-            <span class="p-input-icon-left flex flex-grow-1">
-              <i class="pi pi-search" />
-              <InputText
-                class="flex flex-grow-1"
-                v-model="filters['global'].value"
-                data-cy="skillsTable-skillFilter"
-                placeholder="Skill Search" />
-            </span>
+          <InputGroup>
+            <InputGroupAddon>
+              <i class="fas fa-search" aria-hidden="true"/>
+            </InputGroupAddon>
+            <InputText
+              class="flex flex-grow-1"
+              v-model="filters['global'].value"
+              data-cy="skillsTable-skillFilter"
+              placeholder="Skill Search" />
+          </InputGroup>
           <SkillsButton class="flex flex-grow-none"
                         label="Reset"
                         icon="fa fa-times"

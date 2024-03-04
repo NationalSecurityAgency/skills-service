@@ -6,6 +6,8 @@ import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 import Logo1 from '@/components/brand/Logo1.vue'
 import AccessService from '@/components/access/AccessService.js'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const store = useStore()
 const oAuthOnly = computed(() => {
@@ -89,13 +91,14 @@ const onSubmit = handleSubmit((values) => {
               <Message v-if="loginFailed" severity="error">Invalid Username or Password</Message>
               <div class="field text-left">
                 <label for="username" class="">Email Address</label>
-                <span class="p-input-icon-left w-full">
-                  <i class="pi pi-envelope" />
+                <InputGroup>
+                  <InputGroupAddon>
+                    <i class="far fa-envelope-open" aria-hidden="true"></i>
+                  </InputGroupAddon>
                   <InputText
                     id="username"
                     size="small"
                     placeholder="Enter email"
-                    class="w-full"
                     type="text"
                     v-model="username"
                     v-bind="usernameAttrs"
@@ -104,7 +107,7 @@ const onSubmit = handleSubmit((values) => {
                     :aria-invalid="errors.username ? null : true"
                     aria-describedby="username-error"
                     aria-errormessage="username-error" />
-                </span>
+                </InputGroup>
                 <small class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
               </div>
 
@@ -120,13 +123,14 @@ const onSubmit = handleSubmit((values) => {
                     </small>
                   </div>
                 </div>
-                <span class="p-input-icon-left w-full">
-                  <i class="pi pi-key" />
+                <InputGroup>
+                  <InputGroupAddon>
+                    <i class="fas fa-key" aria-hidden="true"></i>
+                  </InputGroupAddon>
                   <InputText
                     id="password"
                     size="small"
                     placeholder="Enter password"
-                    class="w-full"
                     type="password"
                     v-model="password"
                     v-bind="passwordAttrs"
@@ -135,7 +139,7 @@ const onSubmit = handleSubmit((values) => {
                     :aria-invalid="errors.password ? null : true"
                     aria-describedby="password-error"
                     aria-errormessage="password-error" />
-                </span>
+                </InputGroup>
                 <small class="p-error" id="password-error">{{ errors.password || '&nbsp;' }}</small>
               </div>
 

@@ -26,6 +26,8 @@ import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const announcer = useSkillsAnnouncer()
 const loading = ref(false);
@@ -180,13 +182,15 @@ defineExpose({
                  striped-rows>
         <template #header>
           <div class="flex gap-1">
-            <span class="p-input-icon-left flex flex-grow-1">
-              <i class="pi pi-search"/>
+            <InputGroup>
+              <InputGroupAddon>
+                <i class="fas fa-search" aria-hidden="true"/>
+              </InputGroupAddon>
               <InputText class="flex flex-grow-1"
                          v-model="filters['global'].value"
                          data-cy="quizNameFilter"
                          placeholder="Quiz/Survey Search"/>
-            </span>
+            </InputGroup>
             <SkillsButton class="flex flex-grow-none"
                           label="Reset"
                           icon="fa fa-times"
