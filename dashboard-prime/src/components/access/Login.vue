@@ -11,7 +11,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const store = useStore()
 const oAuthOnly = computed(() => {
-  return store.state.projectId
+  return store.getters.config.oAuthOnly
 })
 const verifyEmailAddresses = computed(() => {
   return store.getters.config && store.getters.config.verifyEmailAddresses

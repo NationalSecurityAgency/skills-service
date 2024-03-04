@@ -14,16 +14,18 @@ import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
 import ConfirmDialog from 'primevue/confirmdialog';
 
 const store = useStore()
+const projectInfo = useProjectInfo()
 const route = useRoute()
 const projConfig = useProjConfig()
 const quizConfig = useQuizConfig()
 const clientDisplayPath = useClientDisplayPath()
 const isSupervisor = ref(false)
 const activeProjectId = computed(() => {
-  return store.state.projectId
+  return projectInfo.currentProjectId
 })
 
 const addCustomIconCSS = () => {
@@ -109,7 +111,7 @@ const beforeEachNavGuard = (to, from, next) => {
         store.commit('previousUrl', from.fullPath)
       }
       if (isActiveProjectIdChange(to, from)) {
-        store.commit('currentProjectId', to.params.projectId)
+        projectInfo.setCurrentProjectId(to.params.projectId)
         if (isAdminPage(to) && to.params.projectId) {
           projConfig.loadProjConfigState({ projectId: to.params.projectId })
         }

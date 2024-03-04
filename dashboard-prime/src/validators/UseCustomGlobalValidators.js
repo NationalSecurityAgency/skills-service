@@ -2,10 +2,11 @@ import CustomValidatorsService from '@/validators/CustomValidatorsService.js'
 import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/components/utils/UseAppConfig.js'
 import { useDebounceFn } from '@vueuse/core'
-import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService.js'
+import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 
 export const useCustomGlobalValidators = () => {
 
+  const descriptionValidatorService = useDescriptionValidatorService()
   function customNameValidator(fieldName = '') {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
@@ -29,7 +30,7 @@ export const useCustomGlobalValidators = () => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
         return true
       }
-      return DescriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator).then((result) => {
+      return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator).then((result) => {
         if (result.valid) {
           return true
         }

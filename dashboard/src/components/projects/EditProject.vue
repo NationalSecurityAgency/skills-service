@@ -134,7 +134,7 @@ limitations under the License.
 
 <script>
   import { extend } from 'vee-validate';
-  import DescriptionValidatorService from '@/common-components/validators/DescriptionValidatorService';
+  import DescriptionValidatorService from '../../../../common-components/src/common/validators/UseDescriptionValidatorService';
   import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
   import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
   import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';

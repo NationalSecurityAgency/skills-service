@@ -29,16 +29,12 @@ import quizConfig from './modules/quizConfig'
 
 export default createStore({
   state: {
-    projectId: '',
     previousUrl: '',
     projectSearch: '',
     showUa: false,
     skillsClientDisplayPath: { path: '/', fromDashboard: false }
   },
   mutations: {
-    currentProjectId(state, projectId) {
-      state.projectId = projectId
-    },
     previousUrl(state, previousUrl) {
       state.previousUrl = previousUrl
     },

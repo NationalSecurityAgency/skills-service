@@ -15,7 +15,7 @@
  */
 import { extend } from 'vee-validate';
 import store from '../../store/store';
-import DescriptionValidatorService from './DescriptionValidatorService';
+import DescriptionValidatorService from '../../../../common-components/src/common/validators/UseDescriptionValidatorService.js';
 
 const validator = {
   validate(value, args) {

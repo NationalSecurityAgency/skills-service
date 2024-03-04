@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import store from '../../store/store';
+import { useProjectInfo } from '../stores/UseCurrentProjectInfo'
 
-export default {
-  validateDescription(description, enableProjectIdParam = true, useProtectedCommunityValidator = null) {
+export const useDescriptionValidatorService = () => {
+
+  const projectInfo = useProjectInfo
+
+  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null) => {
     const body = {
       value: description,
-      projectId: enableProjectIdParam ? store.state.projectId : null,
+      projectId: enableProjectIdParam ? projectInfo.currentProjectId : null,
       useProtectedCommunityValidator,
     };
     return axios.post('/api/validation/description', body).then((result) => result.data);
-  },
+  }
+
+  return {
+    validateDescription
+  }
 };
