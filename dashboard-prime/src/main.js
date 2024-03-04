@@ -60,6 +60,8 @@ import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButt
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
+import 'material-icons/css/material-icons.css';
+import 'material-icons/iconfont/material-icons.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 // import 'primevue/resources/themes/lara-light-green/theme.css'
 const pinia = createPinia()

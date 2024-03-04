@@ -233,7 +233,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-tabview-nav-link').contains('Font Awesome Free').click();
+        cy.get('.p-menuitem-link').contains('Font Awesome Free').click();
         cy.wait(1500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -259,7 +259,7 @@ describe('Subjects Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-tabview-nav-link').contains('Material').click();
+        cy.get('.p-menuitem-link').contains('Material').click();
         cy.wait(2500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -288,10 +288,10 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
         //filter should persist between tab changes
-        cy.get('.p-tabview-nav-link').contains('Material').click();
+        cy.get('.p-menuitem-link').contains('Material').click();
         cy.get('.mi.mi-directions-run').should('be.visible');
 
-        cy.get('.p-tabview-nav-link').contains('Font Awesome Free').click();
+        cy.get('.p-menuitem-link').contains('Font Awesome Free').click();
         cy.get('.fas.fa-running').should('be.visible');
 
         //filter should not persist when icon manager is re-opened
@@ -299,7 +299,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').should('have.value', '');
         cy.get('i.fas.fa-ad').should('be.visible');
-        cy.get('.p-tabview-nav-link').contains('Material').click();
+        cy.get('.p-menuitem-link').contains('Material').click();
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
@@ -325,7 +325,7 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-tabview-nav-link').contains('Custom').click();
+        cy.get('.p-menuitem-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
         cy.get('[data-cy="fileInput"]').attachFile(filename);
@@ -353,7 +353,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="iconPicker"]').click();
         // cy.wait('@getCustomIcons')
 
-        cy.get('.p-tabview-nav-link').contains('Custom').click();
+        cy.get('.p-menuitem-link').contains('Custom').click();
         // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
         cy.wait(2000)
 
@@ -381,7 +381,7 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-tabview-nav-link').contains('Custom').click();
+        cy.get('.p-menuitem-link').contains('Custom').click();
 
         const filename = 'valid_icon.png';
         cy.get('[data-cy="fileInput"]').attachFile(filename);

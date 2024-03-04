@@ -27,6 +27,7 @@ import fontAwesomeIconsCanonical from './font-awesome-index';
 import materialIconsCanonical from './material-index';
 import IconManagerService from './IconManagerService.js';
 import IconRow from './IconRow.vue';
+import TabMenu from "primevue/tabmenu";
 
 const route = useRoute();
 const emit = defineEmits(['selected-icon']);
@@ -100,7 +101,7 @@ let acceptType = 'image/*';
 let selected = '';
 let selectedCss = '';
 let selectedIconPack = '';
-let activePack = ref(fontAwesomeIconsCanonical.iconPack);
+let activePack = ref(0);
 let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
 let disableCustomUpload = false;
@@ -321,55 +322,57 @@ const beforeUpload = (upload) => {
         <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
                @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
 
-        <TabView content-class="mt-3" @tab-change="onChange" v-model:activeIndex="active">
-          <TabPanel v-for="pack in iconPacks" :key="pack.packName">
-              <template #header>
-                <i :class="pack.headerIcon"></i> {{ pack.packName }}
-              </template>
-              <span v-if="pack.icons?.length === 0 && activePack === pack.packName && filterCriteria?.length > 0">No icons matched your search</span>
-              <VirtualScroller v-if="activePack === pack.packName && pack.packName !== 'Custom' && pack.icons?.length > 0" :items="pack.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px; width: 100%;" data-cy="virtualIconList">
-                <template v-slot:item="{ item, options }">
-                  <IconRow :item="item" :options="options" @icon-selected="getIcon($event, fontAwesomeIcons.iconPack)" />
-                </template>
-              </VirtualScroller>
-              <FileUpload ref="uploader" @select="beforeUpload" v-if="pack.packName === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
-                <template #header>
-                  <div class="w-full">
-                    <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
-                    <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
-                  </div>
-                </template>
-                <template #content>
-                  <Message data-cy="iconErrorMessage" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
-                  <p>Drag and drop files to here to upload.</p>
-                  <div v-if="iconPacks[2].icons.length > 0">
-                    <div class="flex flex-wrap p-0 sm:p-5 gap-5">
-                      <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index">
-                        <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
-                          <div class="icon-item">
-                            <a href="#"
-                                @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
-                                :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
+      <TabMenu :model="iconPacks" @tab-change="onChange" v-model:activeIndex="active">
+        <template #item="{ item, props }">
+          <a v-bind="props.action" class="flex align-items-center gap-2">
+            <i :class="item.headerIcon"></i> {{ item.packName }}
+          </a>
+        </template>
+      </TabMenu>
+
+      <VirtualScroller v-if="activePack !== 'Custom' && iconPacks[active]?.icons?.length > 0" :items="iconPacks[active]?.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px; width: 100%;" data-cy="virtualIconList">
+        <template v-slot:item="{ item, options }">
+          <IconRow :item="item" :options="options" @icon-selected="getIcon($event, iconPacks[active]?.iconPack)" />
+        </template>
+      </VirtualScroller>
+      <FileUpload ref="uploader" @select="beforeUpload" v-if="activePack === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
+        <template #header>
+          <div class="w-full">
+            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
+            <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
+          </div>
+        </template>
+        <template #content>
+          <Message data-cy="iconErrorMessage" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
+          <p>Drag and drop files to here to upload.</p>
+          <div v-if="iconPacks[2].icons.length > 0">
+            <div class="flex flex-wrap p-0 sm:p-5 gap-5">
+              <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index">
+                <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
+                  <div class="icon-item">
+                    <a href="#"
+                       @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
+                       :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
                               <span class="icon is-large text-info">
                                 <i :class="file.cssClassname"></i>
                               </span>
-                            </a>
-                            <br/>
-                            <span class="iconName">
+                    </a>
+                    <br/>
+                    <span class="iconName">
                               <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
                                 <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
                               </a>
                               <span>{{ file.filename }}</span>
                             </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
-                </template>
-              </FileUpload>
-          </TabPanel>
-        </TabView>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </FileUpload>
+
+      <span v-if="iconPacks[active]?.icons?.length === 0 && activePack === iconPacks[active]?.packName && filterCriteria?.length > 0">No icons matched your search</span>
     </div>
 </template>
 
