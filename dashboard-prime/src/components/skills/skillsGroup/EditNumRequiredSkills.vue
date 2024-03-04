@@ -23,7 +23,6 @@ const save = (values) => {
   return SkillsService.saveSkill(updatedGroup)
 }
 const afterSaved = (updatedGroup) => {
-  console.log(updatedGroup);
   emit('group-changed', updatedGroup);
 }
 const initialSkillData = { }

@@ -66,85 +66,83 @@ watch(() => store.getters.userInfo, async (newUserInfo) => {
   }
 })
 
-
-const addNavGuards = () => {
-  const beforeEachNavGuard = (to, from, next) => {
-    if (to.query) {
-      const { skillsClientDisplayPath } = to.query
-      clientDisplayPath.setClientPathInfo({
-        path: skillsClientDisplayPath,
-        fromDashboard: true
-      })
-    }
-    const requestAccountPath = '/request-root-account'
-    if (
-      !isPki() &&
-      !isLoggedIn() &&
-      to.path !== requestAccountPath &&
-      store.getters.config.needToBootstrap
-    ) {
-      next({ path: requestAccountPath })
-    } else if (
-      !isPki() &&
-      to.path === requestAccountPath &&
-      !store.getters.config.needToBootstrap
-    ) {
-      next({ name: getLandingPage() })
-    } else {
-      /* eslint-disable no-lonely-if */
-      if (store.state.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
-        let p = ''
-        if (to.query?.redirect) {
-          p = to.query.redirect
-        } else {
-          p = to.fullPath
-        }
-        const ua =
-          p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
-        next(ua)
+const beforeEachNavGuard = (to, from, next) => {
+  if (to.query) {
+    const { skillsClientDisplayPath } = to.query
+    clientDisplayPath.setClientPathInfo({
+      path: skillsClientDisplayPath,
+      fromDashboard: true
+    })
+  }
+  const requestAccountPath = '/request-root-account'
+  if (
+    !isPki() &&
+    !isLoggedIn() &&
+    to.path !== requestAccountPath &&
+    store.getters.config.needToBootstrap
+  ) {
+    next({ path: requestAccountPath })
+  } else if (
+    !isPki() &&
+    to.path === requestAccountPath &&
+    !store.getters.config.needToBootstrap
+  ) {
+    next({ name: getLandingPage() })
+  } else {
+    /* eslint-disable no-lonely-if */
+    if (store.state.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
+      let p = ''
+      if (to.query?.redirect) {
+        p = to.query.redirect
       } else {
-        if (to.path === '/') {
-          const landingPageRoute = { name: getLandingPage() }
-          next(landingPageRoute)
+        p = to.fullPath
+      }
+      const ua =
+        p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
+      next(ua)
+    } else {
+      if (to.path === '/') {
+        const landingPageRoute = { name: getLandingPage() }
+        next(landingPageRoute)
+      }
+      if (from && from.path !== '/error') {
+        store.commit('previousUrl', from.fullPath)
+      }
+      if (isActiveProjectIdChange(to, from)) {
+        store.commit('currentProjectId', to.params.projectId)
+        if (isAdminPage(to) && to.params.projectId) {
+          projConfig.loadProjConfigState({ projectId: to.params.projectId })
         }
-        if (from && from.path !== '/error') {
-          store.commit('previousUrl', from.fullPath)
-        }
-        if (isActiveProjectIdChange(to, from)) {
-          store.commit('currentProjectId', to.params.projectId)
-          if (isAdminPage(to) && to.params.projectId) {
-            projConfig.loadProjConfigState({ projectId: to.params.projectId })
-          }
-        }
-        if (
-          to.path.startsWith('/administrator/quizzes/') &&
-          to.params.quizId &&
-          to.params.quizId !== from.params.quizId
-        ) {
-          // quizConfig.loadQuizConfigState({ quizId: to.params.quizId })
-        }
-        if (to.matched.some((record) => record.meta.requiresAuth)) {
-          // this route requires auth, check if logged in if not, redirect to login page.
-          if (!isLoggedIn()) {
-            const newRoute = { query: { redirect: to.fullPath } }
-            if (isPki()) {
-              newRoute.name = getLandingPage()
-            } else {
-              newRoute.name = 'Login'
-            }
-            next(newRoute)
+      }
+      if (
+        to.path.startsWith('/administrator/quizzes/') &&
+        to.params.quizId &&
+        (!quizConfig.quizConfig || to.params.quizId !== from.params.quizId)
+      ) {
+        quizConfig.loadQuizConfigState({ quizId: to.params.quizId })
+      }
+      if (to.matched.some((record) => record.meta.requiresAuth)) {
+        // this route requires auth, check if logged in if not, redirect to login page.
+        if (!isLoggedIn()) {
+          const newRoute = { query: { redirect: to.fullPath } }
+          if (isPki()) {
+            newRoute.name = getLandingPage()
           } else {
-            next()
+            newRoute.name = 'Login'
           }
+          next(newRoute)
         } else {
           next()
         }
+      } else {
+        next()
       }
     }
   }
+}
 
+const addNavGuards = () => {
   router.beforeEach(beforeEachNavGuard)
-
   const DEFAULT_TITLE = 'SkillTree Dashboard'
   router.afterEach((to, from) => {
     if (to.meta.reportSkillId) {
@@ -200,6 +198,12 @@ onMounted(() => {
     store.dispatch('restoreSessionIfAvailable').finally(() => {
       inceptionConfigurer.configure()
       addNavGuards()
+      const navTo = (navItem) => {
+        if (navItem) {
+          router.push(navItem)
+        }
+      }
+      beforeEachNavGuard(route, route, navTo)
       if (isAuthenticatedUser.value) {
         store.dispatch('access/isSupervisor').then((result) => {
           isSupervisor.value = result

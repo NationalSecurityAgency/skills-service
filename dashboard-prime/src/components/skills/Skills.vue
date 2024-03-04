@@ -55,7 +55,6 @@ const newSkillInfo = ref({
   version: 1
 })
 const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null) => {
-  console.log(skill)
   if (skill.isGroupType) {
     createOrUpdateGroup(skill, isEdit)
   } else {

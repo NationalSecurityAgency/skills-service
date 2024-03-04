@@ -133,7 +133,6 @@ const totalRows = computed(() => {
   } else {
     res = skillsState.subjectSkills.length
   }
-  console.log(res);
   return  res
 })
 

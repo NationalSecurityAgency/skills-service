@@ -5,7 +5,7 @@ import UserRolesUtil from '@/components/utils/UserRolesUtil.js'
 
 export const useQuizConfig = defineStore('quizConfig', () => {
   const quizConfig = ref(null)
-  const loadingQuizConfig = ref(false)
+  const loadingQuizConfig = ref(true)
 
   function loadQuizConfigState(params) {
     const { quizId } = params
@@ -27,9 +27,7 @@ export const useQuizConfig = defineStore('quizConfig', () => {
           resolve(response)
         })
         .finally(() => {
-          if (updateLoadingVar) {
-            loadingQuizConfig.value = false
-          }
+          loadingQuizConfig.value = false
         })
         .catch((error) => reject(error))
     })

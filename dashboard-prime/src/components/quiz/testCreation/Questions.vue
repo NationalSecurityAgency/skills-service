@@ -202,9 +202,9 @@ function handleNewQuestionBtnFocus() {
       <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
         <template #content>
           <div>
-            <SkillsSpinner :is-loading="isLoading" class="my-5"/>
-            <div>
-              <NoContent2 v-if="!hasData && !isLoading"
+            <SkillsSpinner :is-loading="isLoading" class="py-8"/>
+            <div v-if="!isLoading">
+              <NoContent2 v-if="!hasData"
                           title="No Questions Yet..."
                           class="mt-5 pt-5"
                           message="Create a question to get started."
@@ -236,7 +236,7 @@ function handleNewQuestionBtnFocus() {
           </div>
         </template>
 
-        <template #footer v-if="!quizConfig.isReadOnlyQuiz">
+        <template #footer v-if="!quizConfig.isReadOnlyQuiz && !quizConfig.loadingQuizConfig">
           <div class="flex justify-content-end flex-wrap p-3">
             <SkillsButton @click="openNewQuestionModal()"
                           icon="fas fa-plus-circle"
