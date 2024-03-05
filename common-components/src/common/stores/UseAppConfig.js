@@ -11,7 +11,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return SettingsService.getConfig()
       .then((response) => {
         config.value = response
-        console.log(config.value)
       })
       .finally(() => {
         loadingConfig.value = false

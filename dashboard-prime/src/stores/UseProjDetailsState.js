@@ -4,7 +4,6 @@ import ProjectsService from '@/components/projects/ProjectService'
 
 export const useProjDetailsState = defineStore('projDetailsState', () => {
   const project = ref(null)
-  const currentProjectId = ref('')
 
   function loadProjectDetailsState(payload) {
     return new Promise((resolve, reject) => {
@@ -20,6 +19,5 @@ export const useProjDetailsState = defineStore('projDetailsState', () => {
   return {
     project,
     loadProjectDetailsState,
-    currentProjectId,
   }
 })

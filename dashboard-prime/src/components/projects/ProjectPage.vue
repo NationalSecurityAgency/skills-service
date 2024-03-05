@@ -13,13 +13,12 @@ import EditProject from '@/components/projects/EditProject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 // const props = defineProps(['project'])
-const store = useStore();
 const router = useRouter()
 const route = useRoute();
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
 const announcer = useSkillsAnnouncer()
-const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
+// const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
 const isLoadingData = ref(true);
 const cancellingExpiration = ref(false);

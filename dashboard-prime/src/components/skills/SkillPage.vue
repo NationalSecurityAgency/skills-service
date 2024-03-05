@@ -78,7 +78,6 @@ const buildNavItems = () => {
 }
 
 const isImported = computed(() => {
-  console.log(skillsState.skill)
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0;
 });
 

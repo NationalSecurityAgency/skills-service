@@ -6,15 +6,9 @@ export const useUserInfo = () => {
   const appConfig = useAppConfig()
   const authState = useAuthState()
 
-  const userInfo = computed(() => {
-    return authState.userInfo
-  })
-  const isAuthenticated = computed(() => {
-    return authState.isAuthenticated()
-  })
-  const isFormAuthenticatedUser = computed(() => {
-    return isAuthenticated.value && !appConfig.isPkiAuthenticated
-  })
+  const userInfo = computed(() => authState.userInfo)
+  const isAuthenticated = computed(() => authState.isAuthenticated)
+  const isFormAuthenticatedUser = computed(() => isAuthenticated.value && !appConfig.isPkiAuthenticated)
   return {
     userInfo,
     isAuthenticated,

@@ -1,30 +1,26 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch, provide } from 'vue'
-import { useStore, createNamespacedHelpers } from 'vuex'
+import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { SkillsReporter } from '@skilltree/skills-client-js';
-import Sortable from 'sortablejs';
-import BlockUI from 'primevue/blockui';
-import LoadingContainer from '@/components/utils/LoadingContainer.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import SubjectsService from '@/components/subjects/SubjectsService';
-import { useProjConfig } from '@/stores/UseProjConfig.js'
-import NoContent2 from "@/components/utils/NoContent2.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
+import Sortable from 'sortablejs'
+import BlockUI from 'primevue/blockui'
+import LoadingContainer from '@/components/utils/LoadingContainer.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SubjectsService from '@/components/subjects/SubjectsService'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import Subject from './Subject.vue';
-import JumpToSkill from './JumpToSkill.vue';
-import EditSubject from '@/components/subjects/EditSubject.vue';
+import Subject from './Subject.vue'
+import JumpToSkill from './JumpToSkill.vue'
+import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const announcer = useSkillsAnnouncer()
-const config = useProjConfig();
 const appConfig = useAppConfig()
 const props = defineProps(['subject']);
 const emit = defineEmits(['subjects-changed']);
-const store = useStore();
 const route = useRoute();
-const projects = createNamespacedHelpers('projects');
+// const projects = createNamespacedHelpers('projects');
 
 const subjects = ref([])
   // store.getters["subjects/subjects"];

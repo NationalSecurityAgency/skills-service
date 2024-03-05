@@ -58,6 +58,8 @@ export const useAuthState = defineStore('authState', () => {
     }
 
     const handleLogin = (result) => {
+        console.log(result)
+        console.log(result.headers.authorization)
         const token = result.headers.authorization
         let expirationDate
         // special handling for oAuth
@@ -86,6 +88,8 @@ export const useAuthState = defineStore('authState', () => {
           })
     }
     const login = (authData) => {
+        console.log('calling logging with auth')
+        console.log(authData)
         return axios
           .post('/performLogin', authData, { handleError: false })
           .then((result) => {
@@ -131,7 +135,7 @@ export const useAuthState = defineStore('authState', () => {
                   .then(() => {
                       if (userInfoState.value) {
                           reAuthenticated = true
-                          localAuth.value = appConfig.isPkiAuthenticated
+                          localAuth.value = !appConfig.isPkiAuthenticated.value
                       } else {
                           // cannot obtain userInfo, so clear any other lingering auth data
                           clearAuthData()
@@ -196,15 +200,15 @@ export const useAuthState = defineStore('authState', () => {
         })
     }
 
-    const isAuthenticated = () => {
+    const isAuthenticated = computed(() => {
         return (
           (token.value !== null ||
-            appConfig.isPkiAuthenticated ||
+            appConfig.isPkiAuthenticated.value ||
             localAuth.value ||
             oAuthAuth.value) &&
           userInfoState.value !== null
         )
-    }
+    })
 
     return {
         signup,
