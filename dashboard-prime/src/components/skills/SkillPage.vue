@@ -68,7 +68,7 @@ const buildNavItems = () => {
   if (isReadOnlyNonSr) {
     msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting';
   }
-  if (!isImported && !isReadOnlyProj) {
+  if (!isImported?.value && !appConfig.isReadOnlyProj?.value) {
     items.push({
       name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr, msg,
     });
@@ -78,6 +78,7 @@ const buildNavItems = () => {
 }
 
 const isImported = computed(() => {
+  console.log(skillsState.skill)
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0;
 });
 
@@ -103,7 +104,7 @@ const loadData = () => {
 
 const skillEdited = (editedSkill) => {
   const origId = skillsState.skill.skillId
-  skillsState.skill = { ...editedSkill, subjectId: route.params.subjectId }
+  skillsState.setSkill({ ...editedSkill, subjectId: route.params.subjectId })
 
   if (origId !== skillsState.skill.skillId) {
     router.replace({ name: route.name, params: { ...route.params, skillId: skillsState.skill.skillId } })

@@ -17,6 +17,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
         loadingConfig.value = false
       })
   }
+  const isLoadingConfig = computed(() => loadingConfig.value)
 
   const toNumOr0 = (strNum) => {
     return strNum ? Number(strNum) : 0
@@ -85,7 +86,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const userCommunityDocsLink = computed(() => config.value.userCommunityDocsLink || '' )
   return {
     loadConfigState,
-    loadingConfig,
+    isLoadingConfig,
     getConfigsThatStartsWith,
     rankingAndProgressViewsEnabled,
     docsHost,

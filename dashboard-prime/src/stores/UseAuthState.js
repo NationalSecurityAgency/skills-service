@@ -11,7 +11,7 @@ export const useAuthState = defineStore('authState', () => {
     const token = ref(null)
     const userInfoState = ref(null)
     const userInfo = computed(() => userInfoState.value)
-    const restoringSessionState = ref(false)
+    const restoringSessionState = ref(true)
     const restoringSession = computed(() => restoringSessionState.value)
     const localAuth = ref(false)
     const oAuthAuth = ref(false)

@@ -44,7 +44,7 @@ const isAuthenticatedUser = computed(() => {
 })
 
 const isLoadingApp = computed(() => {
-  return appConfig.loadingConfig || authState.restoringSession
+  return appConfig.isLoadingConfig || authState.restoringSession
 })
 const showUserAgreement = computed(() => {
     return appInfoState.showUa
@@ -191,11 +191,12 @@ const customGlobalValidators = useCustomGlobalValidators()
 
 onMounted(() => {
   appConfig.loadConfigState().finally(() => {
-    customGlobalValidators.addValidators()
-    if (isAdminPage(route) && route.params.projectId) {
-      projConfig.loadProjConfigState({ projectId: route.params.projectId })
-    }
     authState.restoreSessionIfAvailable().finally(() => {
+      customGlobalValidators.addValidators()
+      if (isAdminPage(route) && route.params.projectId) {
+        projConfig.loadProjConfigState({ projectId: route.params.projectId })
+      }
+
       inceptionConfigurer.configure()
       addNavGuards()
       const navTo = (navItem) => {
