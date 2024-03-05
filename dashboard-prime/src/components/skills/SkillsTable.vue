@@ -517,14 +517,11 @@ const disableRow = (row) => {
           :skill="slotProps.data" :load-skill-async="true" />
       </template>
       <template #paginatorstart>
-<!--        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>-->
-      </template>
-      <template #paginatorend>
-        <!--        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>-->
-      </template>
-      <template #footer>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
       </template>
+<!--      <template #paginatorend>-->
+<!--        &lt;!&ndash;        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>&ndash;&gt;-->
+<!--      </template>-->
 
       <template #empty>
         <div class="flex justify-content-center flex-wrap">

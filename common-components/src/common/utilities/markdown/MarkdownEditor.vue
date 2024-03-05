@@ -252,7 +252,7 @@ watch(value, (newValue) =>{
 </script>
 
 <template>
-  <div id="markdown-editor" @drop="attachFile" class="field text-left">
+  <div id="markdown-editor" @drop="attachFile" class="field text-left" :data-cy="`${name}MarkdownEditor`">
     <label v-if="showLabel"
            data-cy="markdownEditorLabel"
            class="mb-3"

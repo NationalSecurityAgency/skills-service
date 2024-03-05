@@ -81,6 +81,15 @@ watch(() => skillsState.getGroupSkills(props.skill.skillId).length,
     }
   }
 )
+watch(
+  () => props.skill.description,
+  (newDescripton) => {
+    if (newDescripton) {
+      skillInfo.value.description = newDescripton
+    }
+  }
+)
+
 const groupChanged = (updatedGroup) => {
   skillInfo.value.numSkillsRequired = updatedGroup.numSkillsRequired
 }
