@@ -160,8 +160,6 @@ const trackFocus = () => {
 };
 
 const updateBadge = (values) => {
-  console.log(values);
-  console.log(badgeInternal);
   let badgeToSave = {
     ...values,
     iconClass: currentIcon.value,
@@ -174,7 +172,7 @@ const updateBadge = (values) => {
 
   if(badgeInternal.value.timeLimitEnabled) {
     badgeToSave.timeLimitEnabled = true;
-    badgeToSave.awardAttrs = badgeInternal.value.awardAttrs;
+    badgeToSave.awardAttrs = values.awardAttrs;
     badgeToSave.expirationDays = badgeInternal.value.expirationDays;
     badgeToSave.expirationHrs = badgeInternal.value.expirationHrs;
     badgeToSave.expirationMins = badgeInternal.value.expirationMins;

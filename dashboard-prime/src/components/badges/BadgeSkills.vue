@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
@@ -49,6 +49,12 @@ onMounted(() => {
   if (!badge.value) {
     loadBadgeInfo();
   }
+  loadAssignedBadgeSkills();
+});
+
+watch( () => route.params.badgeId, () => {
+  badgeId.value = route.params.badgeId;
+  loadBadgeInfo();
   loadAssignedBadgeSkills();
 });
 

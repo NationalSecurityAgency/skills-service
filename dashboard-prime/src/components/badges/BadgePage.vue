@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
@@ -74,6 +74,7 @@ const loadBadge = () => {
 };
 
 const saveBadge = (badge) => {
+  isLoading.value = true;
   BadgesService.saveBadge(badge).then(() => {
     badgeEdited(badge);
   });
@@ -84,8 +85,10 @@ const badgeEdited = (editedBadge) => {
   badgeState.badge = editedBadge;
   if (origId !== editedBadge.badgeId) {
     router.replace({ name: route.name, params: { ...route.params, badgeId: editedBadge.badgeId } });
+    badge.value = editedBadge;
     badgeId.value = editedBadge.badgeId;
   }
+  isLoading.value = false;
 };
 
 const handleHidden = (e) => {
@@ -115,7 +118,7 @@ const handlePublish = () => {
       rejectLabel: 'Cancel',
       accept: () => {
         badge.value.enabled = 'true';
-        const toSave = {...badge};
+        const toSave = {...badge.value};
         if (!toSave.originalBadgeId) {
           toSave.originalBadgeId = toSave.badgeId;
         }

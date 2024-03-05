@@ -18,7 +18,10 @@ import axios from 'axios'
 const enrichBadgeObjWithRequiredAtts = (badge) => {
   const copy = { ...badge }
   if (!badge.timeLimitEnabled) {
-    copy.awardAttrs.numMinutes = 0
+    copy.awardAttrs = {
+      numMinutes: 0
+    };
+    // copy.awardAttrs.numMinutes = 0
   } else {
     // convert to minutes
     copy.awardAttrs.numMinutes =
