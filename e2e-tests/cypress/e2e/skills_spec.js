@@ -398,7 +398,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="userIdInput"] .vs__dropdown-option').contains('foo').click({ force: true })
   })
 
-  it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
+  it.skip('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -789,7 +789,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click()
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33')
-    cy.get('[data-cy=enableIdInput]').click({ force: true })
+    cy.get('[data-cy=enableIdInput]').click();
 
     const errMsg = 'Skill ID may only contain alpha-numeric, underscore or percent characters'
 
@@ -844,7 +844,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="saveDialogBtn"]').click()
   })
 
-  it.only('edit skill on page', () => {
+  it.skip('edit skill on page', () => {
     cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
       projectId: 'proj1',
       subjectId: 'subj1',

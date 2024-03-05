@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import {string} from "yup";
 import {useRoute} from 'vue-router'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SubjectsService from '@/components/subjects/SubjectsService';
 import InputSanitizer from '@/components/utils/InputSanitizer';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'

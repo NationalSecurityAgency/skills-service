@@ -9,10 +9,10 @@ import { useCommonMarkdownOptions } from '@/common-components/utilities/markdown
 import { useMarkdownAccessibilityFixes } from '@/common-components/utilities/markdown/UseMarkdownAccessibilityFixes.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useByteFormat } from '@/common-components/filter/UseByteFormat.js'
-import { useAppCommonConfig } from '@/common-components/utilities/UseAppCommonConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import FileUploadService from '@/common-components/utilities/FileUploadService.js'
 
-const appCommonConfig = useAppCommonConfig()
+const appConfig = useAppConfig()
 
 const props = defineProps({
   value: String,
@@ -193,10 +193,10 @@ function handleFocus() {
   }
 }
 
-const allowedAttachmentFileTypes = appCommonConfig.allowedAttachmentFileTypes
-const maxAttachmentSize = appCommonConfig.maxAttachmentSize
-const attachmentWarningMessage = appCommonConfig.attachmentWarningMessage
-const allowedAttachmentMimeTypes = appCommonConfig.allowedAttachmentMimeTypes
+const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
+const maxAttachmentSize = appConfig.maxAttachmentSize
+const attachmentWarningMessage = appConfig.attachmentWarningMessage
+const allowedAttachmentMimeTypes = appConfig.allowedAttachmentMimeTypes
 
 const hasNewAttachment = ref(false)
 const byteFormat = useByteFormat()
@@ -282,7 +282,7 @@ watch(value, (newValue) =>{
         <div class="flex-1 text-right">
           <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
              aria-label="SkillTree documentation of rich text editor features"
-             :href="`${appCommonConfig.docsHost}/dashboard/user-guide/rich-text-editor.html`"
+             :href="`${appConfig.docsHost}/dashboard/user-guide/rich-text-editor.html`"
              target="_blank">
             <i class="far fa-question-circle editor-help-footer-help-icon" />
           </a>

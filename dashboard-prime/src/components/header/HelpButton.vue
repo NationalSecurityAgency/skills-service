@@ -1,11 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
-import { useAppConfig } from '@/components/utils/UseAppConfig'
+import { ref } from 'vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const store = useStore()
-const router = useRouter()
 const appConfig = useAppConfig()
 
 const menu = ref()
@@ -13,7 +9,7 @@ let allItemsTmp = [
   {
     label: 'Official Docs',
     icon: 'fas fa-book',
-    url: `${appConfig.docsHost.value}`
+    url: `${appConfig.docsHost}`
   },
   {
     separator: true
@@ -24,21 +20,20 @@ let allItemsTmp = [
       {
         label: 'Dashboard',
         icon: 'fas fa-info-circle',
-        url: `${appConfig.docsHost.value}/dashboard/user-guide/`
+        url: `${appConfig.docsHost}/dashboard/user-guide/`
       },
       {
         label: 'Integration',
         icon: 'fas fa-hands-helping',
-        url: `${appConfig.docsHost.value}/skills-client/`
+        url: `${appConfig.docsHost}/skills-client/`
       }
     ]
   }
 ]
 
-const configs = store.getters.config
-const dupKeys = Object.keys(configs)
-  .filter((conf) => conf.startsWith('supportLink'))
-  .map((filteredConf) => filteredConf.substr(0, 12))
+const keyLookup = 'supportLink'
+const configs = appConfig.getConfigsThatStartsWith(keyLookup)
+const dupKeys = Object.keys(configs).map((conf) => conf.substring(0, 12))
 const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i)
 if (keys && keys.length > 0) {
   const items = keys.map((key) => {

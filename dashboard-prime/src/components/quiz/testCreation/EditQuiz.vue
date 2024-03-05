@@ -4,7 +4,7 @@ import { object, string } from 'yup'
 import { useDebounceFn } from '@vueuse/core'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import QuizService from '@/components/quiz/QuizService.js';
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'

@@ -3,12 +3,11 @@ import { onMounted, ref, computed, inject, watch } from 'vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
-import skills from '@/store/modules/skills.js'
 import EditNumRequiredSkills from '@/components/skills/skillsGroup/EditNumRequiredSkills.vue'
 
 const props = defineProps({
@@ -52,7 +51,7 @@ const allSkillsRequired = computed(() => {
 })
 const requiredSkillsNum = computed(() => {
   // -1 == all skills required
-  return (skillInfo.value.numSkillsRequired === -1) ? skills.value.length : skillInfo.value.numSkillsRequired
+  return (skillInfo.value.numSkillsRequired === -1) ? skillsState.getGroupSkills(skillInfo.value.skillId).value.length : skillInfo.value.numSkillsRequired
 })
 const lessThanTwoSkills = computed(() => {
   return skillsState.getGroupSkills(props.skill.skillId).length < 2;

@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useAuthState } from '@/stores/UseAuthState.js'
 import { usePagePath } from '@/components/utils/UsePageLocation'
 import { useUserInfo } from '@/components/utils/UseUserInfo'
-import { useAppConfig } from '@/components/utils/UseAppConfig'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const store = useStore()
+const authState = useAuthState()
 const userInfo = useUserInfo()
 const displayName = computed(() => {
   const userInfoObj = userInfo.userInfo.value
@@ -63,7 +63,7 @@ if (userInfo.isFormAuthenticatedUser.value) {
     label: 'Log Out',
     icon: 'fas fa-sign-out-alt',
     command: () => {
-      store.dispatch('logout')
+      authState.logout()
     }
   })
 }

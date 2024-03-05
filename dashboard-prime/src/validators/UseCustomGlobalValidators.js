@@ -1,6 +1,6 @@
 import CustomValidatorsService from '@/validators/CustomValidatorsService.js'
 import { addMethod, string } from 'yup'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDebounceFn } from '@vueuse/core'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 

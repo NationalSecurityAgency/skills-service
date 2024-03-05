@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SettingsService from '@/components/settings/SettingsService.js'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
 

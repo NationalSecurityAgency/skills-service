@@ -14,31 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
-import Badge from 'primevue/badge';
+import Badge from 'primevue/badge'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SkillsService from '@/components/skills/SkillsService';
-import PageHeader from '@/components/utils/pages/PageHeader.vue';
-import Navigation from '@/components/utils/Navigation.vue';
-import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
+import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import Navigation from '@/components/utils/Navigation.vue'
+import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import { useSkillsState } from '@/stores/UseSkillsState.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import ShowMore from '@/components/skills/selfReport/ShowMore.vue';
+import ShowMore from '@/components/skills/selfReport/ShowMore.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const route = useRoute();
 const router = useRouter();
-const store = useStore();
 const announcer = useSkillsAnnouncer();
 const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
+const appConfig = useAppConfig()
 
-let subjectId = ref('');
-let headerOptions = ref({});
-let showEdit = ref(false);
+const headerOptions = ref({});
+const showEdit = ref(false);
 
 // let skill = ref(store.getters["skills/skill"]);
 
@@ -60,9 +58,9 @@ const buildNavItems = () => {
   items.push({ name: 'Expiration', iconClass: 'fa-hourglass-end skills-color-expiration', page: 'ConfigureExpiration' });
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
   const isReadOnlyNonSr = (skillsState.skill.readOnly === true && !skillsState.skill.selfReportType);
-  const addEventDisabled = subjectState.subject.totalPoints < store.getters.config.minimumSubjectPoints || isReadOnlyNonSr;
+  const addEventDisabled = subjectState.subject.totalPoints < appConfig.minimumSubjectPoints || isReadOnlyNonSr;
 
-  let msg = addEventDisabled ? `Subject needs at least ${store.getters.config.minimumSubjectPoints} points before events can be added` : '';
+  let msg = addEventDisabled ? `Subject needs at least ${appConfig.minimumSubjectPoints} points before events can be added` : '';
   const disabledDueToGroupBeingDisabled = skillsState.skill.groupId && !skillsState.skill.enabled;
   if (disabledDueToGroupBeingDisabled) {
     msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`;

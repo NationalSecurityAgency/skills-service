@@ -1,0 +1,134 @@
+import { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
+import SettingsService from '@/components/settings/SettingsService.js'
+
+export const useAppConfig = defineStore('dashboardAppConfig', () => {
+  const loadingConfig = ref(true)
+  const config = ref({})
+
+  const loadConfigState = () => {
+    loadingConfig.value = true
+    return SettingsService.getConfig()
+      .then((response) => {
+        config.value = response
+        console.log(config.value)
+      })
+      .finally(() => {
+        loadingConfig.value = false
+      })
+  }
+
+  const toNumOr0 = (strNum) => {
+    return strNum ? Number(strNum) : 0
+  }
+
+  const rankingAndProgressViewsEnabled = computed(() => {
+    return (
+      config.value.rankingAndProgressViewsEnabled === true ||
+      config.value.rankingAndProgressViewsEnabled === 'true'
+    )
+  })
+
+  const getConfigsThatStartsWith = (startsWith) => {
+    const configs = config.value
+    const res = Object.keys(configs)
+      .filter(key => key.startsWith(startsWith))
+      .reduce((obj, key) => {
+        obj[key] = configs[key]
+        return obj
+      }, {})
+    return res
+  }
+
+  const minNameLength = computed(() => config.value.minNameLength)
+  const maxProjectNameLength = computed(() => config.value.maxProjectNameLength)
+  const maxQuizNameLength = computed(() => config.value.maxQuizNameLength)
+  const nameValidationRegex = computed(() => config.value.nameValidationRegex)
+  const minIdLength = computed(() => config.value.minIdLength)
+  const maxIdLength = computed(() => config.value.maxIdLength)
+  const descriptionMaxLength = computed(() => config.value.descriptionMaxLength)
+  const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
+  const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
+  const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
+  const maxCustomLabelLength = computed(() => config.value.maxCustomLabelLength)
+  const maxSkillVersion = computed(() => config.value.maxSkillVersion)
+  const maxSkillNameLength = computed(() => config.value.maxSkillNameLength)
+  const maxPointIncrement = computed(() => toNumOr0(config.value.maxPointIncrement))
+  const maxNumPerformToCompletion = computed(() => toNumOr0(config.value.maxNumPerformToCompletion))
+  const maxNumPointIncrementMaxOccurrences = computed(() => toNumOr0(config.value.maxNumPointIncrementMaxOccurrences))
+  const maxTimeWindowInMinutes = computed(() => toNumOr0(config.value.maxTimeWindowInMinutes))
+  const maxAnswersPerQuizQuestion = computed(() => config.value.maxAnswersPerQuizQuestion)
+  const maxTimeWindowInHrs = computed(() => maxTimeWindowInMinutes.value / 60)
+  const maxSkillsPerSubject = computed(() => config.value.maxSkillsPerSubject)
+  const needToBootstrap = computed(() => config.value.needToBootstrap)
+  const verifyEmailAddresses = computed(() => config.value.verifyEmailAddresses)
+  const oAuthOnly = computed(() => config.value.oAuthOnly)
+  const enablePageVisitReporting = computed(() => config.value.enablePageVisitReporting === true || config.value.enablePageVisitReporting === 'true')
+  const allowedAttachmentFileTypes = computed(() => config.value.allowedAttachmentFileTypes)
+  const maxAttachmentSize = computed(() => config.value.maxAttachmentSize ? Number(config.value.maxAttachmentSize) : 0)
+  const attachmentWarningMessage = computed(() => config.value.attachmentWarningMessage)
+  const allowedAttachmentMimeTypes = computed(() => config.value.allowedAttachmentMimeTypes)
+  const docsHost = computed(() => config.value.docsHost)
+  const maxBadgesPerProject = computed(() => config.value.maxBadgesPerProject)
+  const isPkiAuthenticated = computed(() => config.value.authMode === 'PKI')
+  const expirationGracePeriod = computed(() => config.value.expirationGracePeriod)
+  const expireUnusedProjectsOlderThan = computed(() => config.value.expireUnusedProjectsOlderThan)
+  const minimumProjectPoints = computed(() => config.value.minimumProjectPoints)
+  const maxProjectsPerAdmin = computed(() => config.value.maxProjectsPerAdmin)
+  const numProjectsForTableView = computed(() => config.value.numProjectsForTableView)
+  const minimumSubjectPoints = computed(() => config.value.minimumSubjectPoints)
+  const maxSubjectsPerProject = computed(() => config.value.maxSubjectsPerProject)
+  const userCommunityBeforeLabel = computed(() => config.value.userCommunityBeforeLabel || '')
+  const userCommunityAfterLabel = computed(() => config.value.userCommunityAfterLabel || '')
+  const userCommunityRestrictedDescriptor = computed(() => config.value.userCommunityRestrictedDescriptor || '')
+  const userCommunityDocsLabel = computed(() => config.value.userCommunityDocsLabel || 'Learn More')
+  const userCommunityDocsLink = computed(() => config.value.userCommunityDocsLink || '' )
+  return {
+    loadConfigState,
+    loadingConfig,
+    getConfigsThatStartsWith,
+    rankingAndProgressViewsEnabled,
+    docsHost,
+    minNameLength,
+    maxProjectNameLength,
+    maxQuizNameLength,
+    nameValidationRegex,
+    minIdLength,
+    maxIdLength,
+    descriptionMaxLength,
+    formFieldDebounceInMs,
+    paragraphValidationRegex,
+    maxSubjectNameLength,
+    maxCustomLabelLength,
+    maxSkillVersion,
+    maxSkillNameLength,
+    maxPointIncrement,
+    maxNumPerformToCompletion,
+    maxNumPointIncrementMaxOccurrences,
+    maxTimeWindowInHrs,
+    maxAnswersPerQuizQuestion,
+    maxSkillsPerSubject,
+    needToBootstrap,
+    verifyEmailAddresses,
+    oAuthOnly,
+    enablePageVisitReporting,
+    allowedAttachmentFileTypes,
+    maxAttachmentSize,
+    attachmentWarningMessage,
+    allowedAttachmentMimeTypes,
+    maxBadgesPerProject,
+    isPkiAuthenticated,
+    expirationGracePeriod,
+    expireUnusedProjectsOlderThan,
+    minimumProjectPoints,
+    maxProjectsPerAdmin,
+    numProjectsForTableView,
+    minimumSubjectPoints,
+    maxSubjectsPerProject,
+    userCommunityBeforeLabel,
+    userCommunityAfterLabel,
+    userCommunityRestrictedDescriptor,
+    userCommunityDocsLabel,
+    userCommunityDocsLink
+  }
+})

@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { computed } from 'vue'
+import { useAccessState } from '@/stores/UseAccessState.js'
 
-const store = useStore();
+const accessState = useAccessState()
 const props = defineProps(['project', 'isDeleteDisabled', 'deleteDisabledText', 'readOnlyProject'])
 const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
 
-const isRootUser = computed(() => {
-  return store.getters['access/isRoot'];
-});
+const isRootUser = computed(() => accessState.isRoot)
 
 const focusOnEdit = () => {
   this.$refs.editBtn.focus();

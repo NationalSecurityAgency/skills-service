@@ -1,26 +1,26 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useStore } from 'vuex'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { SkillsReporter } from '@skilltree/skills-client-js';
-import Sortable from 'sortablejs';
-import BlockUI from 'primevue/blockui';
-import LoadingContainer from '@/components/utils/LoadingContainer.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import NoContent2 from "@/components/utils/NoContent2.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
+import Sortable from 'sortablejs'
+import BlockUI from 'primevue/blockui'
+import LoadingContainer from '@/components/utils/LoadingContainer.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import BadgesService from '@/components/badges/BadgesService';
-import Badge from '@/components/badges/Badge.vue';
+import BadgesService from '@/components/badges/BadgesService'
+import Badge from '@/components/badges/Badge.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import EditBadge from '@/components/badges/EditBadge.vue';
-import {useConfirm} from "primevue/useconfirm";
+import EditBadge from '@/components/badges/EditBadge.vue'
+import { useConfirm } from 'primevue/useconfirm'
 
 const announcer = useSkillsAnnouncer()
 const projConfig = useProjConfig();
 // const props = defineProps(['subject']);
 const emit = defineEmits(['badge-deleted', 'badges-changed']);
-const store = useStore();
+const appConfig = useAppConfig()
 const route = useRoute();
 const confirm = useConfirm();
 
@@ -57,15 +57,12 @@ const emptyNewBadge = computed(() => {
 });
 
 const addBadgeDisabled = computed(() => {
-  return badges.value && store.getters.config && badges.value.length >= store.getters.config.maxBadgesPerProject;
+  return badges.value && badges.value.length >= appConfig.maxBadgesPerProject;
 });
 
 const addBadgesDisabledMsg = computed(() => {
-  if (store.getters.config) {
-    return `The maximum number of Badges allowed is ${store.getters.config.maxBadgesPerProject}`;
-  }
-  return '';
-});
+  return `The maximum number of Badges allowed is ${appConfig.maxBadgesPerProject}`
+})
 
 const loadBadges = (afterLoad) => {
   return BadgesService.getBadges(projectId.value)

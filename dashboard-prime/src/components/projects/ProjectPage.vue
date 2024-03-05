@@ -10,12 +10,14 @@ import ProjectService from '@/components/projects/ProjectService'
 import ProjectDates from '@/components/projects/ProjectDates.vue'
 import dayjs from '@/common-components/DayJsCustomizer.js'
 import EditProject from '@/components/projects/EditProject.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 // const props = defineProps(['project'])
 const store = useStore();
 const router = useRouter()
 const route = useRoute();
 const projConfig = useProjConfig()
+const appConfig = useAppConfig()
 const announcer = useSkillsAnnouncer()
 const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
@@ -140,13 +142,13 @@ const headerOptions = computed(() => {
 });
 
 const minimumPoints = computed(() => {
-  return store.getters.config.minimumProjectPoints;
+  return appConfig.minimumProjectPoints;
 });
 const expirationDate = computed(() => {
   if (!project.value.expiring) {
     return '';
   }
-  const gracePeriodInDays = store.getters.config.expirationGracePeriod;
+  const gracePeriodInDays = appConfig.expirationGracePeriod.value;
   const expires = dayjs(project.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
   return expires.format('YYYY-MM-DD HH:mm');
 });
@@ -227,7 +229,7 @@ const setProject = (newProject) => {
           <span class="mr-2"
                 aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
                 v-tooltip="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over <b>{{ store.getters.config.expireUnusedProjectsOlderThan }} days</b> and will be deleted <b>{{
+            Project has not been used in over <b>{{ appConfig.expireUnusedProjectsOlderThan }} days</b> and will be deleted <b>{{
               fromExpirationDate()
             }}</b>.
           </span>

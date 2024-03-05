@@ -1,16 +1,18 @@
-import { useStore } from 'vuex'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useCommunityLabels = () => {
-  const store = useStore()
   const projConfig = useProjConfig()
-  const beforeCommunityLabel = (store.getters.config && store.getters.config.userCommunityBeforeLabel) || '';
-  const afterCommunityLabel = (store.getters.config && store.getters.config.userCommunityAfterLabel) || '';
-  const currentUserCommunity = store.getters.userInfo?.userCommunity
+  const appConfig = useAppConfig()
+  const authState = useAuthState()
+  const beforeCommunityLabel = appConfig.userCommunityBeforeLabel.value
+  const afterCommunityLabel = appConfig.userCommunityAfterLabel.value
+  const currentUserCommunity = authState.userInfo?.userCommunity
   const showManageUserCommunity = Boolean(currentUserCommunity);
-  const userCommunityRestrictedDescriptor = store.getters.config.userCommunityRestrictedDescriptor
-  const userCommunityDocsLabel = (store.getters.config && store.getters.config.userCommunityDocsLabel) || 'Learn More';
-  const userCommunityDocsLink = (store.getters.config && store.getters.config.userCommunityDocsLink) || null;
+  const userCommunityRestrictedDescriptor = appConfig.userCommunityRestrictedDescriptor.value
+  const userCommunityDocsLabel = appConfig.userCommunityDocsLabel.value;
+  const userCommunityDocsLink = appConfig.userCommunityDocsLink.value || null;
   const projectConfiguredUserCommunity = projConfig.getProjectCommunityValue()
 
   const isRestrictedUserCommunity = (communityName) =>{

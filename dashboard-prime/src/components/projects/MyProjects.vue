@@ -1,18 +1,18 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, provide } from 'vue'
-import { useStore } from 'vuex';
+import { computed, nextTick, onMounted, provide, ref } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import LoadingContainer from '@/components/utils/LoadingContainer.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import ProjectService from '@/components/projects/ProjectService';
-import SettingsService from '@/components/settings/SettingsService';
-import MyProject from '@/components/projects/MyProject.vue';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import ProjectService from '@/components/projects/ProjectService'
+import MyProject from '@/components/projects/MyProject.vue'
 import EditProject from '@/components/projects/EditProject.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAccessState } from '@/stores/UseAccessState.js'
 
-const store = useStore();
+const appConfig = useAppConfig()
+const accessState = useAccessState()
 const announcer = useSkillsAnnouncer()
 
 onMounted(() => {
@@ -38,19 +38,11 @@ const copyProgressModal = {
 };
 
 const addProjectDisabled = computed(() => {
-  return projects.value && store.getters.config && projects.value.length >= store.getters.config.maxProjectsPerAdmin && !store.getters['access/isRoot'];
+  return projects.value && projects.value.length >= appConfig.maxProjectsPerAdmin && !accessState.isRoot;
 });
 
-const addProjectsDisabledMsg = computed(() => {
-  if (store.getters.config) {
-    return `The maximum number of Projects allowed is ${store.getters.config.maxProjectsPerAdmin}`;
-  }
-  return '';
-});
-
-const isRootUser = computed(() => {
-  return store.getters['access/isRoot'];
-});
+const addProjectsDisabledMsg = computed(() => `The maximum number of Projects allowed is ${appConfig.maxProjectsPerAdmin}`)
+const isRootUser = computed(() => accessState.isRoot)
 
 // Functions
 const pinModalClosed = () => {
@@ -138,8 +130,7 @@ const projectEdited = (editedProject) => {
   });
 };
 const enableDropAndDrop = () => {
-  if (projects && projects.length > 0
-      && store.getters.config && projects.length < store.getters.config.numProjectsForTableView) {
+  if (projects.value && projects.value.length > 0 && projects.value.length < appConfig.numProjectsForTableView) {
     const self = this;
     nextTick(() => {
       const cards = document.getElementById('projectCards');
@@ -193,9 +184,7 @@ const updateSortAndReloadProjects = (updateInfo) => {
         });
   }
 };
-const isProgressAndRankingEnabled = () => {
-  return store.getters.config.rankingAndProgressViewsEnabled === true || store.getters.config.rankingAndProgressViewsEnabled === 'true';
-};
+
 const focusOnProjectCard = (projectId) => {
   nextTick(() => {
     const projCard = document.getElementById(`proj${projectId}`);

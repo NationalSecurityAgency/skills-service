@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const props = defineProps({
   timeWindowEnabledDefault: {

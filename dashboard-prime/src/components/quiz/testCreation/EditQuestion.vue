@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { array, boolean, object, string } from 'yup'
 import QuizService from '@/components/quiz/QuizService.js';
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import QuestionType from '@/common-components/quiz/QuestionType.js';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'

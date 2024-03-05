@@ -1,27 +1,28 @@
 <script setup>
-import { onMounted, computed, ref, nextTick, inject } from 'vue'
-import { useStore } from 'vuex';
+import { computed, inject, onMounted, ref } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import Badge from 'primevue/badge';
-import Avatar from 'primevue/avatar';
-import Card from 'primevue/card';
-import ProjectService from '@/components/projects/ProjectService';
-import SettingsService from '@/components/settings/SettingsService';
-import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue';
-import ProjectCardControls from '@/components/projects/ProjectCardControls.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import UserRolesUtil from '@/components/utils/UserRolesUtil';
-import dayjs from "@/common-components/DayJsCustomizer.js";
+import Badge from 'primevue/badge'
+import Avatar from 'primevue/avatar'
+import Card from 'primevue/card'
+import ProjectService from '@/components/projects/ProjectService'
+import SettingsService from '@/components/settings/SettingsService'
+import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue'
+import ProjectCardControls from '@/components/projects/ProjectCardControls.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import UserRolesUtil from '@/components/utils/UserRolesUtil'
+import dayjs from '@/common-components/DayJsCustomizer.js'
 import EditProject from '@/components/projects/EditProject.vue'
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import { useAccessState } from '@/stores/UseAccessState.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const props = defineProps(['project', 'disableSortControl'])
-const store = useStore();
+const appConfig = useAppConfig()
+const accessState = useAccessState()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 const announcer = useSkillsAnnouncer()
 
 // data items
-let isLoading = ref(false);
 let pinned = ref(false);
 let projectInternal = ref({ ...props.project });
 let stats = ref([]);
@@ -42,16 +43,16 @@ onMounted(() => {
 
 // computed
 const minimumPoints = computed(() => {
-  return store.getters.config.minimumProjectPoints;
+  return appConfig.minimumProjectPoints;
 });
 const isRootUser = computed(() => {
-  return store.getters['access/isRoot'];
+  return accessState.isRoot;
 });
 const expirationDate = computed(() => {
   if (!projectInternal.expiring) {
     return '';
   }
-  const gracePeriodInDays = store.getters.config.expirationGracePeriod;
+  const gracePeriodInDays = appConfig.expirationGracePeriod;
   const expires = dayjs(projectInternal.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
   return expires.format('YYYY-MM-DD HH:mm');
 });
@@ -247,7 +248,7 @@ const moveUp = () => {
 
         <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mt-2">
               <span class="mr-2" v-tooltip="'This Project has not been used recently, ' +
-               'it will  be deleted unless you explicitly retain it'">Project has not been used in over <b>{{store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.</span>
+               'it will  be deleted unless you explicitly retain it'">Project has not been used in over <b>{{appConfig.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.</span>
           <Button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">
             <span class="d-none d-sm-inline">Keep It</span> <SkillsSpinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
           </Button>

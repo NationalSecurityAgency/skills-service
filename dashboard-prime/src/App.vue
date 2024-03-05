@@ -1,47 +1,53 @@
 <script setup>
-import { ref, onMounted, computed, nextTick, watch } from 'vue'
-import { useStore } from 'vuex'
+import { computed, nextTick, onMounted, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import router from '@/router/index.js'
-import PageVisitService from '@/PageVisitService.js'
+import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
 import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useQuizConfig } from '@/stores/UseQuizConfig.js'
 import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
-import ConfirmDialog from 'primevue/confirmdialog';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useAccessState } from '@/stores/UseAccessState.js'
+import ConfirmDialog from 'primevue/confirmdialog'
 
-const store = useStore()
+const authState = useAuthState()
+const appInfoState = useAppInfoState()
+const appConfig = useAppConfig()
 const projectInfo = useProjectInfo()
 const route = useRoute()
 const projConfig = useProjConfig()
 const quizConfig = useQuizConfig()
 const clientDisplayPath = useClientDisplayPath()
-const isSupervisor = ref(false)
+const pageVisitService = usePageVisitService()
+const accessState = useAccessState()
 const activeProjectId = computed(() => {
   return projectInfo.currentProjectId
 })
 
 const addCustomIconCSS = () => {
   // This must be done here AFTER authentication
-  IconManagerService.refreshCustomIconCss(activeProjectId, isSupervisor.value)
+  IconManagerService.refreshCustomIconCss(activeProjectId, accessState.isSupervisor)
 }
 
 const isAuthenticatedUser = computed(() => {
-  return store.getters.isAuthenticated
+  return authState.isAuthenticated
 })
 
 const isLoadingApp = computed(() => {
-  return store.getters.loadingConfig || store.getters.restoringSession
+  return appConfig.loadingConfig || authState.restoringSession
 })
 const showUserAgreement = computed(() => {
-    return store.getters.showUa
+    return appInfoState.showUa
   })
 
 const themeHelper = useThemesHelper()
@@ -49,20 +55,12 @@ themeHelper.configureDefaultThemeFileInHeadTag()
 
 const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
 const isAdminPage = (route) => route.path.startsWith('/administrator')
-const isLoggedIn = () => store.getters.isAuthenticated
-const isPki = () => store.getters.isPkiAuthenticated
-const getLandingPage = () => {
-  let landingPage = 'MyProgressPage'
-  if (store.getters.userInfo) {
-    if (store.getters.userInfo.landingPage === 'admin') {
-      landingPage = 'AdminHomePage'
-    }
-  }
-  return landingPage
-}
+const isLoggedIn = () => authState.isAuthenticated
+const isPki = () => appConfig.isPkiAuthenticated
+const getLandingPage = () => authState.userInfo?.landingPage === 'admin' ? 'AdminHomePage' : 'MyProgressPage'
 
 const inceptionConfigurer = useInceptionConfigurer()
-watch(() => store.getters.userInfo, async (newUserInfo) => {
+watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
   }
@@ -81,18 +79,18 @@ const beforeEachNavGuard = (to, from, next) => {
     !isPki() &&
     !isLoggedIn() &&
     to.path !== requestAccountPath &&
-    store.getters.config.needToBootstrap
+    appConfig.needToBootstrap
   ) {
     next({ path: requestAccountPath })
   } else if (
     !isPki() &&
     to.path === requestAccountPath &&
-    !store.getters.config.needToBootstrap
+    !appConfig.needToBootstrap
   ) {
     next({ name: getLandingPage() })
   } else {
     /* eslint-disable no-lonely-if */
-    if (store.state.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
+    if (appInfoState.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
       let p = ''
       if (to.query?.redirect) {
         p = to.query.redirect
@@ -108,7 +106,7 @@ const beforeEachNavGuard = (to, from, next) => {
         next(landingPageRoute)
       }
       if (from && from.path !== '/error') {
-        store.commit('previousUrl', from.fullPath)
+        appInfoState.setPreviousUrl(from.fullPath)
       }
       if (isActiveProjectIdChange(to, from)) {
         projectInfo.setCurrentProjectId(to.params.projectId)
@@ -153,7 +151,7 @@ const addNavGuards = () => {
       })
     }
     if (isPki() || isLoggedIn()) {
-      PageVisitService.reportPageVisit(to.path, to.fullPath)
+      pageVisitService.reportPageVisit(to.path, to.fullPath)
     }
     // Use next tick to handle router history correctly
     // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
@@ -192,12 +190,12 @@ const addNavGuards = () => {
 const customGlobalValidators = useCustomGlobalValidators()
 
 onMounted(() => {
-  store.dispatch('loadConfigState').finally(() => {
+  appConfig.loadConfigState().finally(() => {
     customGlobalValidators.addValidators()
     if (isAdminPage(route) && route.params.projectId) {
       projConfig.loadProjConfigState({ projectId: route.params.projectId })
     }
-    store.dispatch('restoreSessionIfAvailable').finally(() => {
+    authState.restoreSessionIfAvailable().finally(() => {
       inceptionConfigurer.configure()
       addNavGuards()
       const navTo = (navItem) => {
@@ -207,13 +205,12 @@ onMounted(() => {
       }
       beforeEachNavGuard(route, route, navTo)
       if (isAuthenticatedUser.value) {
-        store.dispatch('access/isSupervisor').then((result) => {
-          isSupervisor.value = result
+
+        accessState.loadIsSupervisor().then(() => {
           addCustomIconCSS()
         })
-
-        store.dispatch('access/isRoot')
-        store.dispatch('loadEmailEnabled')
+        accessState.loadIsRoot()
+        appInfoState.loadEmailEnabled()
       }
     })
   })

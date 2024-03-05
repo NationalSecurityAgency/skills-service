@@ -1,26 +1,24 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
-import Card from 'primevue/card';
-import InputSwitch from 'primevue/inputswitch';
-import RadioButton from 'primevue/radiobutton';
-import Checkbox from 'primevue/checkbox';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import InlineHelp from '@/components/utils/InlineHelp.vue';
-import LoadingContainer from '@/components/utils/LoadingContainer.vue';
+import Card from 'primevue/card'
+import InputSwitch from 'primevue/inputswitch'
+import RadioButton from 'primevue/radiobutton'
+import Checkbox from 'primevue/checkbox'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import InlineHelp from '@/components/utils/InlineHelp.vue'
+import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SettingService from '@/components/settings/SettingsService';
+import SettingService from '@/components/settings/SettingsService'
 import { SkillsReporter } from '@skilltree/skills-client-js'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import SkillsSettingTextInput from "@/components/settings/SkillsSettingTextInput.vue";
+import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
 
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
-const store = useStore();
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 
@@ -179,9 +177,7 @@ const isDirty = computed(() => {
   return !!foundDirty;
 });
 
-const isProgressAndRankingEnabled = computed(() => {
-  return store.getters.config.rankingAndProgressViewsEnabled === true || store.getters.config.rankingAndProgressViewsEnabled === 'true';
-});
+const isProgressAndRankingEnabled = computed(() =>  appConfig.rankingAndProgressViewsEnabled)
 
 const approvalSelected = computed(() => {
   return selfReport.value.selected === 'Approval';

@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from "vue-router";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
-import { useAppConfig } from "@/components/utils/UseAppConfig.js";
+import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
 import {number, string} from "yup";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
@@ -150,7 +150,7 @@ const checkBadgeNameUnique = (value) => {
 // });
 
 const maxTimeLimitMessage = computed(() => {
-  return `Time Window must be less then ` //${$store.getters.config.maxBadgeBonusInMinutes / (60 * 24)} days`;
+  return `Time Window must be less then ` //${$appConfig.maxBadgeBonusInMinutes / (60 * 24)} days`;
 });
 //
 // // methods

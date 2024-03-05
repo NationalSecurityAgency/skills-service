@@ -5,7 +5,7 @@ import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdIn
 import SkillsService from '@/components/skills/SkillsService.js'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { object, string } from 'yup'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 

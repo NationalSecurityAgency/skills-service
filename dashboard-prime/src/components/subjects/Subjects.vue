@@ -15,9 +15,11 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import Subject from './Subject.vue';
 import JumpToSkill from './JumpToSkill.vue';
 import EditSubject from '@/components/subjects/EditSubject.vue';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const announcer = useSkillsAnnouncer()
 const config = useProjConfig();
+const appConfig = useAppConfig()
 const props = defineProps(['subject']);
 const emit = defineEmits(['subjects-changed']);
 const store = useStore();
@@ -64,16 +66,8 @@ const isLoading = computed(() => {
   return isLoadingData.value //|| config.isLoadingProjConfig;
 });
 
-const addSubjectDisabled = computed(() => {
-  return subjects.value && store.getters.config && subjects.value.length >= store.getters.config.maxSubjectsPerProject;
-});
-
-const addSubjectsDisabledMsg = computed(() => {
-  if (store.getters.config) {
-    return `The maximum number of Subjects allowed is ${store.getters.config.maxSubjectsPerProject}`;
-  }
-  return '';
-});
+const addSubjectDisabled = computed(() => subjects.value && subjects.value.length >= appConfig.maxSubjectsPerProject)
+const addSubjectsDisabledMsg = computed(() => `The maximum number of Subjects allowed is ${appConfig.maxSubjectsPerProject}`)
 
 // methods
 // ...projects.mapActions([

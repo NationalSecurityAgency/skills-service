@@ -1,21 +1,21 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { object, string } from 'yup'
 import { useDebounceFn } from '@vueuse/core'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SettingsService from '@/components/settings/SettingsService.js'
-import { useStore } from 'vuex'
+import { useAccessState } from '@/stores/UseAccessState.js'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
 const emit = defineEmits(['project-saved'])
-const store = useStore();
+const accessState = useAccessState()
 
 let formId = 'newProjectDialog'
 let modalTitle = 'New Project'
@@ -92,9 +92,7 @@ const asyncLoadData = props.isEdit ? loadDescription : null
 
 const close = () => { model.value = false }
 
-const isRootUser = computed(() => {
-  return store.getters['access/isRoot'];
-});
+const isRootUser = computed(() => accessState.isRoot)
 const saveProject = (values) => {
   const projToSave = {
     ...values,

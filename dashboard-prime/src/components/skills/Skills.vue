@@ -23,7 +23,7 @@ const isLoading = computed(() => {
 })
 
 const addSkillDisabled = computed(() => {
-  // return this.skills && this.$store.getters.config && this.numSubjectSkills >= this.$store.getters.config.maxSkillsPerSubject;
+  // return this.skills && this.numSubjectSkills >= appConfig.maxSkillsPerSubject;
   return false
 })
 

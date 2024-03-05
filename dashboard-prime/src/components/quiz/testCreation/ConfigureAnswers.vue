@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useFieldArray } from "vee-validate";
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
-import { useAppConfig } from '@/components/utils/UseAppConfig.js';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 
 const model = defineModel()
 const props = defineProps({

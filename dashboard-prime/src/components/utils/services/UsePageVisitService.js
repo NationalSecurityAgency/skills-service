@@ -13,34 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const getters = {
-  libVersion(state) {
-    return state.libVersion
-  }
-}
+import axios from 'axios'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const mutations = {
-  setLibVersion(state, value) {
-    state.libVersion = value
-  }
-}
 
-const actions = {
-  updateLibVersionIfDifferent({ commit, state }, incomingVersion) {
-    if (state.libVersion === undefined || state.libVersion !== incomingVersion) {
-      commit('setLibVersion', incomingVersion)
+export const usePageVisitService = () => {
+  const reportPageVisit = (path, fullPath) => {
+    if (useAppConfig.enablePageVisitReporting) {
+      const domain = new URL(window.location)
+      axios.put(
+        '/api/pageVisit',
+        {
+          path,
+          fullPath,
+          hostname: domain.hostname,
+          port: domain.port,
+          protocol: domain.protocol,
+          skillDisplay: false
+        },
+        { handleError: false }
+      )
     }
   }
-}
 
-const state = {
-  libVersion: undefined
-}
-
-export default {
-  namespaced: false,
-  state,
-  getters,
-  mutations,
-  actions
+  return {
+    reportPageVisit
+  }
 }

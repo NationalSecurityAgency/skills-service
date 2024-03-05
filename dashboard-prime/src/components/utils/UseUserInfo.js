@@ -1,17 +1,19 @@
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useUserInfo = () => {
-  const store = useStore()
+  const appConfig = useAppConfig()
+  const authState = useAuthState()
 
   const userInfo = computed(() => {
-    return store.getters.userInfo
+    return authState.userInfo
   })
   const isAuthenticated = computed(() => {
-    return store.getters.isAuthenticated
+    return authState.isAuthenticated()
   })
   const isFormAuthenticatedUser = computed(() => {
-    return isAuthenticated.value && !store.getters.isPkiAuthenticated
+    return isAuthenticated.value && !appConfig.isPkiAuthenticated
   })
   return {
     userInfo,

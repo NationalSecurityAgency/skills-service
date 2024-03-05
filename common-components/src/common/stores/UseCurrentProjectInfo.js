@@ -1,11 +1,12 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useProjectInfo = defineStore('useProjectInfo', () => {
-  const currentProjectId = ref('')
+  const currentProjectIdVal = ref('')
   const setCurrentProjectId = (newProjId) => {
-    currentProjectId.value = newProjId
+    currentProjectIdVal.value = newProjId
   }
+  const currentProjectId = computed(() => currentProjectIdVal.value)
 
   return {
     currentProjectId,

@@ -1,6 +1,6 @@
 import { useDebounceFn } from '@vueuse/core'
 import SkillsService from '@/components/skills/SkillsService.js'
-import { useAppConfig } from '@/components/utils/UseAppConfig.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useRoute } from 'vue-router'
 
 export const useSkillYupValidators = () => {

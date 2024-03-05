@@ -346,7 +346,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
     });
 
-    it.only('edit quiz id on the quiz page', function () {
+    it('edit quiz id on the quiz page', function () {
         cy.createQuizDef(1);
 
         cy.visit('/administrator/quizzes/quiz1')

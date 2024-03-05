@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useStore } from 'vuex'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useInceptionConfigurer = () => {
 
-  const store = useStore()
+  const appConfig = useAppConfig()
+  const authState = useAuthState()
   function configure() {
-    if (store.getters.userInfo && !store.getters.config.needToBootstrap) {
-      store.dispatch('configureSkillsClientForInception')
+    if (authState.userInfo && !appConfig.needToBootstrap) {
+      authState.configureSkillsClientForInception()
     }
   }
 

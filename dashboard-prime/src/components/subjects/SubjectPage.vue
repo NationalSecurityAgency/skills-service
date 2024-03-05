@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useStore } from 'vuex'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
@@ -9,8 +8,9 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import PageHeader from '@/components/utils/pages/PageHeader.vue'
 import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const store = useStore()
+const appConfig = useAppConfig()
 const route = useRoute()
 const router = useRouter()
 const announcer = useSkillsAnnouncer()
@@ -84,7 +84,7 @@ const headerOptions = computed(() => {
 })
 
 const minimumPoints = computed(() => {
-  return store.getters.config.minimumSubjectPoints
+  return appConfig.minimumSubjectPoints
 })
 
 // watch(subject, (newVal, oldVal) => {

@@ -1,34 +1,30 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
-import * as yup from 'yup'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
+import { object, string } from 'yup'
 import Logo1 from '@/components/brand/Logo1.vue'
 import AccessService from '@/components/access/AccessService.js'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 
-const store = useStore()
-const oAuthOnly = computed(() => {
-  return store.getters.config.oAuthOnly
-})
-const verifyEmailAddresses = computed(() => {
-  return store.getters.config && store.getters.config.verifyEmailAddresses
+const appConfig = useAppConfig()
+
+const schema = object({
+  username: string().required().email().min(5),
+  password: string().required().min(8).max(30)
 })
 
-const schema = yup.object({
-  username: yup.string().required().email().min(5),
-  password: yup.string().required().min(8).max(30)
-})
-
-const { values, defineField, errors, meta, handleSubmit } = useForm({
+const { defineField, errors, meta, handleSubmit } = useForm({
   validationSchema: schema,
 })
 
 const [username, usernameAttrs] = defineField('username')
 const [password, passwordAttrs] = defineField('password')
 
+const authState = useAuthState()
 const router = useRouter()
 const route = useRoute()
 const loginFailed = ref(false)
@@ -39,8 +35,7 @@ const performFormLogin = (values) => {
   const formData = new FormData()
   formData.append('username', values.username)
   formData.append('password', values.password)
-  store
-    .dispatch('login', formData)
+  authState.login(formData)
     .then(() => {
       loginFailed.value = false
       const pathToPush = route.query.redirect || '/'
@@ -58,12 +53,12 @@ const performFormLogin = (values) => {
       }
     })
     .finally(() => {
-      store.dispatch('loadConfigState')
+      appConfig.loadConfigState()
       authenticating.value = false
     })
 }
 const onSubmit = handleSubmit((values) => {
-  if (verifyEmailAddresses.value) {
+  if (appConfig.verifyEmailAddresses) {
     AccessService.userEmailIsVerified(values.username).then((result) => {
       if (!result) {
         router.push({ name: 'RequestEmailVerification', params: { email: values.username } })
@@ -85,8 +80,8 @@ const onSubmit = handleSubmit((values) => {
         </div>
       <div class="grid ">
         <div class="col-12 sm:col-8 sm:col-offset-2 md:col-6 md:col-offset-3 lg:col-4 lg:col-offset-4">
-        <Card v-if="!oAuthOnly" class="mt-3">
-          <template #content class="text-left">
+        <Card v-if="!appConfig.oAuthOnly" class="mt-3">
+          <template #content>
             <form @submit="onSubmit">
               <Message v-if="loginFailed" severity="error">Invalid Username or Password</Message>
               <div class="field text-left">

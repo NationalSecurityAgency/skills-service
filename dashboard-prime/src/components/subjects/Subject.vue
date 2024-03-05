@@ -1,16 +1,16 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch, inject, toRaw } from 'vue'
-import { useStore } from 'vuex';
-import Badge from 'primevue/badge';
+import { computed, inject, onMounted, ref, watch } from 'vue'
+import Badge from 'primevue/badge'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SubjectsService from '@/components/subjects/SubjectsService';
-import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue';
-import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
-import LoadingCard from '@/components/utils/LoadingCard.vue';
+import SubjectsService from '@/components/subjects/SubjectsService'
+import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue'
+import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import LoadingCard from '@/components/utils/LoadingCard.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const announcer = useSkillsAnnouncer()
-const store = useStore();
+const appConfig = useAppConfig()
 const emit = defineEmits(['sort-changed-requested', 'subject-deleted']);
 const props = defineProps(['subject', 'disableSortControl']);
 const subject = props.subject;
@@ -30,7 +30,7 @@ onMounted(() => {
 
 // computed
 const minimumPoints = computed(() => {
-  return store.getters.config.minimumSubjectPoints;
+  return appConfig.minimumSubjectPoints;
 });
 
 const alreadyShared = computed(() => {
