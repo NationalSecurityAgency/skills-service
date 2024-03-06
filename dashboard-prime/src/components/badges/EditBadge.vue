@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRoute } from "vue-router";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
@@ -9,9 +9,12 @@ import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdIn
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from "@/components/utils/HelpUrlInput.vue";
 import OverlayPanel from "primevue/overlaypanel";
+import Calendar from 'primevue/calendar';
 import IconManager from "@/components/utils/iconPicker/IconManager.vue";
 import BadgesService from '@/components/badges/BadgesService';
+import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js';
 import InputSanitizer from "@/components/utils/InputSanitizer.js";
+import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -55,9 +58,9 @@ const schema = {
       .max(appConfig.maxIdLength)
       .nullValueNotAllowed()
       .idValidator()
-      // .test('uniqueName', 'Subject ID is already taken', (value) => checkBadgeIdUnique(value))
+      // .test('uniqueName', 'Badge ID is already taken', (value) => checkBadgeIdUnique(value))
       .customNameValidator()
-      .label('Subject ID'),
+      .label('Badge ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .customDescriptionValidator('Badge Description')
@@ -108,8 +111,8 @@ let badgeInternal = ref({
   originalBadgeId: props.badge.badgeId,
   isEdit: props.isEdit,
   description: '',
-  startDate: null,
-  endDate: null,
+  startDate: props.badge.startDate,
+  endDate: props.badge.endDate,
   badgeId: props.badge.badgeId,
   awardAttrs: awardAttrs,
   expirationDays,
@@ -124,7 +127,7 @@ let currentFocus = ref( null);
 let previousFocus = ref( null);
 let loadingComponent = ref( true);
 let isAwardIcon = ref(false);
-
+let gemDates = ref([toDate(props.badge.startDate), toDate(props.badge.endDate)]);
 let currentIcon = ref((props.badge.iconClass || 'fas fa-book'));
 let awardIcon = ref(props.badge.awardAttrs?.iconClass);
 let op = ref();
@@ -138,22 +141,27 @@ const checkBadgeNameUnique = (value) => {
   if (props.isEdit && (value === props.badge.name || props.badge.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
     return true;
   }
-  // if (props.global) {
-  //   return GlobalBadgeService.badgeWithNameExists(value);
-  // }
+  if (props.global) {
+    return GlobalBadgeService.badgeWithNameExists(value);
+  }
   return BadgesService.badgeWithNameExists(route.params.projectId, value);
 }
 
-// const componentName = computed(() => {
-//   const badgeScope = badgeInternal.value.projectId ? badgeInternal.value.projectId : 'Global';
-//   return `${badgeScope}-${$options.name}${isEdit ? 'Edit' : ''}`;
-// });
+const checkBadgeIdUnique = (value) => {
+  if (props.isEdit && props.badge.badgeId === value) {
+    return true;
+  }
+  if (props.global) {
+    return GlobalBadgeService.badgeWithIdExists(value);
+  }
+  return BadgesService.badgeWithIdExists(route.params.projectId, value);
+};
 
 const maxTimeLimitMessage = computed(() => {
   return `Time Window must be less then ` //${$appConfig.maxBadgeBonusInMinutes / (60 * 24)} days`;
 });
-//
-// // methods
+
+// methods
 const trackFocus = () => {
   previousFocus.value = currentFocus.value;
   currentFocus.value = document.activeElement;
@@ -173,9 +181,15 @@ const updateBadge = (values) => {
   if(badgeInternal.value.timeLimitEnabled) {
     badgeToSave.timeLimitEnabled = true;
     badgeToSave.awardAttrs = values.awardAttrs;
+    badgeToSave.awardAttrs.iconClass = awardIcon.value;
     badgeToSave.expirationDays = badgeInternal.value.expirationDays;
     badgeToSave.expirationHrs = badgeInternal.value.expirationHrs;
     badgeToSave.expirationMins = badgeInternal.value.expirationMins;
+  }
+
+  if(limitTimeframe.value) {
+    badgeToSave.startDate = gemDates.value[0]; //badgeInternal.value.startDate;
+    badgeToSave.endDate = gemDates.value[1]; //badgeInternal.value.endDate;
   }
 
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
@@ -194,10 +208,8 @@ const updateBadge = (values) => {
 };
 
 const onSelectedIcon = (selectedIcon) => {
-
   if (isAwardIcon.value) {
     awardIcon.value = selectedIcon.css;
-    // badgeInternal.value.awardAttrs.iconClass = `${selectedIcon.css}`;
   } else {
     currentIcon.value = selectedIcon.css;
   }
@@ -207,8 +219,9 @@ const onSelectedIcon = (selectedIcon) => {
 const onEnableGemFeature = (value) => {
   if (!value) {
     nextTick(() => {
-      badgeInternal.value.startDate = null;
-      badgeInternal.value.endDate = null;
+      // gemDates.value = [];
+      // badgeInternal.value.startDate = null;
+      // badgeInternal.value.endDate = null;
     });
   }
 };
@@ -221,8 +234,7 @@ function toDate(value) {
   return dateVal;
 }
 
-const toggleIconDisplay = (event, isAward) => {
-  // displayIconManager.value = shouldDisplay;
+const toggleIconDisplay = (event, isAward = false) => {
   op.value.toggle(event);
   isAwardIcon.value = isAward;
 };
@@ -241,7 +253,6 @@ const close = (e) => {
 }
 </script>
 
-<!--      @saved="onBadgeSaved"-->
 <template>
   <SkillsInputFormDialog
       :id="formId"
@@ -254,19 +265,7 @@ const close = (e) => {
       :enable-return-focus="true"
       @close="close">
     <template #default>
-      <button class="icon-button surface-border border-round-sm"
-              @click="toggleIconDisplay"
-              id="iconPicker"
-              @keypress.enter="toggleIconDisplay"
-              role="button"
-              aria-roledescription="icon selector button"
-              aria-label="icon selector"
-              tabindex="0"
-              data-cy="iconPicker">
-        <div class="text-primary" style="min-height: 4rem;">
-          <i :class="[currentIcon]" />
-        </div>
-      </button>
+      <icon-picker :startIcon="currentIcon" class="mr-3" @select-icon="toggleIconDisplay" :disabled="false"></icon-picker>
 
       <SkillsNameAndIdInput
           name-label="Badge Name"
@@ -287,19 +286,19 @@ const close = (e) => {
                 Enable Bonus Award
               </label>
             </div>
-            <div class="grid" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
-              <div class="text-left col">
-<!--                  <icon-picker :startIcon="badgeInternal.awardAttrs.iconClass" class="mr-3" @select-icon="toggleIconDisplay(true, true)" :disabled="!badgeInternal.timeLimitEnabled"></icon-picker>-->
-                <div>
-                  <label for="awardName">Award Name</label>
-                  <SkillsTextInput
-                      placeholder="Award Name"
-                      v-model="badgeInternal.awardAttrs.name"
-                      data-cy="awardName"
-                      id="awardName"
-                      name="awardAttrs.name"/>
-  <!--                    <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|customNameValidator"-->
-                </div>
+            <div class="flex gap-2" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
+              <div>
+                <icon-picker :startIcon="awardIcon" class="mr-3" @select-icon="(e) => toggleIconDisplay(e, true)" :disabled="false"></icon-picker>
+              </div>
+              <div class="w-full">
+                <label for="awardName">Award Name</label>
+                <SkillsTextInput
+                    placeholder="Award Name"
+                    v-model="badgeInternal.awardAttrs.name"
+                    data-cy="awardName"
+                    id="awardName"
+                    name="awardAttrs.name"/>
+                <!--                    <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|customNameValidator"-->
               </div>
             </div>
             <div class="flex gap-4" v-if="badgeInternal.timeLimitEnabled">
@@ -354,6 +353,20 @@ const close = (e) => {
                       :next-focus-el="previousFocus"
                       name="helpUrl"
                       @keydown-enter="emit('keydown-enter')" />
+
+      <div v-if="!global" data-cy="gemEditContainer">
+        <Checkbox data-cy="gemCheckbox" inputId="enableGem" class="d-inline" :binary="true" name="gemCheckbox" v-model="limitTimeframe" v-on:input="onEnableGemFeature"/>
+        <label for="enableGem">
+          Enable Gem Feature
+        </label>
+
+        <div v-if="limitTimeframe" class="flex justify-content-center gap-4">
+          <div>
+            <label for="gemDate">* Date Range</label><br />
+            <Calendar v-model="gemDates" inline selectionMode="range" inputId="gemDate" name="gemDate" data-cy="gemDatePicker" />
+          </div>
+        </div>
+      </div>
 
       <OverlayPanel ref="op" :show-close-icon="true">
         <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>

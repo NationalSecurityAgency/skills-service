@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue';
 
-const emit = defineEmits(['select-icon', 'on-icon-selected']);
+const emit = defineEmits(['select-icon']);
 
 const props = defineProps({
   startIcon: String,
@@ -34,22 +34,8 @@ const props = defineProps({
   },
 });
 
-let hideAvailableIcons = ref(true);
-let selectedIconClass = ref(props.startIcon);
-
-const selectIcon = () => {
-  emit('select-icon');
-};
-
-const onSelectedIcon = (selectedIcon) => {
-  selectedIconClass.value = `${selectedIcon.css}`;
-  hideAvailableIcons.value = true;
-  emit('on-icon-selected', selectedIconClass.value);
-  // this.$bvModal.hide('icons');
-};
-
-const close = () => {
-  hideAvailableIcons.value = true;
+const selectIcon = (event) => {
+  emit('select-icon', event);
 };
 </script>
 
@@ -64,7 +50,7 @@ const close = () => {
        :disabled="disabled"
        data-cy="iconPicker">
     <div class="text-primary" style="min-height: 4rem;">
-      <i :class="[selectedIconClass]" />
+      <i :class="[startIcon]" />
     </div>
   </button>
 </template>
