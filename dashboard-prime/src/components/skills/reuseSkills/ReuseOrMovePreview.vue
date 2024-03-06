@@ -1,0 +1,184 @@
+<script setup>
+import { computed, onMounted, ref, toRaw } from 'vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+import { useRoute } from 'vue-router'
+import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
+import { SkillsReporter } from '@skilltree/skills-client-js'
+
+const props = defineProps({
+  skills: {
+    type: Array,
+    required: true
+  },
+  destination: {
+    type: Object,
+    required: true
+  },
+  isReuseType: {
+    type: Boolean,
+    default: false
+  },
+  nextStepNavFunction: {
+    type: Function,
+    required: true,
+  },
+  actionNameInPast: {
+    type: String,
+    required: true,
+  },
+  actionDirection: {
+    type: String,
+    required: true,
+  },
+})
+const emits = defineEmits(['on-cancel', 'on-changed'])
+const route = useRoute()
+const pluralSupport = useLanguagePluralSupport()
+
+const loadingReusedSkills = ref(true)
+const skillsForReuse = ref({
+  allAlreadyExist: [],
+  alreadyExist: [],
+  available: [],
+  skillsWithDeps: [],
+})
+
+const buildSummaryInfo = () => {
+  const parentId = props.destination.groupId || props.destination.subjectId
+  SkillsService.getReusedSkills(route.params.projectId, parentId)
+    .then((res) => {
+      skillsForReuse.value.allAlreadyExist = res
+      skillsForReuse.value.alreadyExist = props.skills.filter((skill) => res.find((e) => e.name === skill.name))
+      skillsForReuse.value.available = props.skills.filter((skill) => !res.find((e) => e.name === skill.name))
+      if (skillsForReuse.value.available.length > 0) {
+        loadDependencyInfo()
+      }
+    })
+    .finally(() => {
+      loadingReusedSkills.value = false
+    })
+}
+
+const loadingDependencyInfo = ref(true)
+const loadDependencyInfo = () => {
+  if (props.isReuseType) {
+    SkillsService.checkSkillsForDeps(route.params.projectId, skillsForReuse.value.available.map((item) => item.skillId))
+      .then((res) => {
+        const withDeps = res.filter((item) => item.hasDependency)
+        skillsForReuse.value.skillsWithDeps = skillsForReuse.value.available.filter((skill) => withDeps.find((e) => e.skillId === skill.skillId))
+        skillsForReuse.value.available = skillsForReuse.value.available.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId))
+      })
+      .finally(() => {
+        loadingDependencyInfo.value = false
+      })
+  } else {
+    loadingDependencyInfo.value = false
+  }
+}
+const isLoading = computed(() => loadingReusedSkills.value || loadingDependencyInfo.value || reuseInProgress.value)
+onMounted(() => {
+  buildSummaryInfo()
+})
+
+const reuseInProgress = ref(false)
+const doMoveOrReuse =() => {
+  reuseInProgress.value = true;
+  const skillIds = skillsForReuse.value.available.map((sk) => sk.skillId);
+  if (!props.isReuseType) {
+    SkillsService.moveSkills(route.params.projectId, skillIds, props.destination.subjectId, props.destination.groupId)
+      .then(() => {
+        handleActionCompleting();
+      })
+  } else {
+    SkillsService.reuseSkillInAnotherSubject(route.params.projectId, skillIds, props.destination.subjectId, props.destination.groupId)
+      .then(() => {
+        handleActionCompleting();
+      });
+  }
+}
+
+const handleActionCompleting = () => {
+  // this.state.reUseComplete = true;
+  if (props.isReuseType) {
+    SkillsReporter.reportSkill('ReuseSkill')
+  } else {
+    SkillsReporter.reportSkill('MoveSkill')
+  }
+  reuseInProgress.value = false;
+  props.nextStepNavFunction()
+  emits('on-changed', toRaw(skillsForReuse.value.available))
+}
+
+</script>
+
+<template>
+  <div>
+    <skills-spinner :is-loading="isLoading" class="my-5" />
+    <div v-if="!isLoading">
+      <div class="flex flex-column h-12rem">
+        <div
+          class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+
+          <div v-if="skillsForReuse.available.length > 0">
+            <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
+            skill{{ pluralSupport.plural(skillsForReuse.available) }} will be {{ actionNameInPast }}
+            {{ actionDirection }} the
+            <span v-if="destination.groupName">
+                <span class="text-primary font-weight-bold">[{{
+                    destination.groupName
+                  }}]</span>
+                group.
+              </span>
+            <span v-else>
+                <span class="text-primary font-weight-bold">[{{
+                    destination.subjectName
+                  }}]</span>
+                subject.
+              </span>
+          </div>
+          <div v-else>
+            <i class="fas fa-exclamation-triangle text-warning mr-2" />
+            Selected skills can NOT be {{ actionNameInPast }} {{ actionDirection }} the
+            <span v-if="destination.groupName"><span
+              class="text-primary font-weight-bold">{{ destination.groupName }} </span> group</span>
+            <span v-else><span
+              class="text-primary font-weight-bold">{{ destination.subjectName }} </span> subject</span>.
+            Please cancel and select different skills.
+          </div>
+          <div v-if="skillsForReuse.alreadyExist.length > 0">
+            <Tag severity="warning">{{ skillsForReuse.alreadyExist.length }}</Tag>
+            selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.alreadyExist) }} <span
+            class="text-primary font-weight-bold">already</span> been reused in that <span
+            v-if="destination.groupName">group</span><span v-else>subject</span>!
+          </div>
+          <div v-if="skillsForReuse.skillsWithDeps.length > 0">
+            <Tag severity="warning">{{ skillsForReuse.skillsWithDeps.length }}</Tag>
+            selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.skillsWithDeps) }} other skill
+            dependencies, reusing skills with dependencies is not allowed!
+          </div>
+
+        </div>
+      </div>
+
+      <div class="flex pt-4 justify-content-end">
+        <SkillsButton
+          label="Cancel"
+          icon="far fa-times-circle"
+          outlined
+          class="mr-2"
+          severity="warning"
+          @click="emits('on-cancel')" />
+        <SkillsButton
+          label="Move"
+          icon="fas fa-shipping-fast"
+          @click="doMoveOrReuse"
+          data-cy="reuseButton"
+          outlined />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+
+</style>

@@ -58,8 +58,6 @@ export const useAuthState = defineStore('authState', () => {
     }
 
     const handleLogin = (result) => {
-        console.log(result)
-        console.log(result.headers.authorization)
         const token = result.headers.authorization
         let expirationDate
         // special handling for oAuth
@@ -88,8 +86,6 @@ export const useAuthState = defineStore('authState', () => {
           })
     }
     const login = (authData) => {
-        console.log('calling logging with auth')
-        console.log(authData)
         return axios
           .post('/performLogin', authData, { handleError: false })
           .then((result) => {

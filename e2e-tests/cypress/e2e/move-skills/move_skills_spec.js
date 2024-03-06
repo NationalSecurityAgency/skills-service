@@ -35,14 +35,11 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill3"]')
-            .click({ force: true });
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillMoveBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[ data-cy="reuseSkillsModalStep1"]');
@@ -100,8 +97,7 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
@@ -111,14 +107,11 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,200');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill8"]')
-            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillMoveBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -141,8 +134,6 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '1 skill');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
             .should('not.exist');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
@@ -183,8 +174,7 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
@@ -194,12 +184,10 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,200');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill8"]')
-            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillMoveBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -222,8 +210,6 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '2 skills');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]')
@@ -240,8 +226,8 @@ describe('Move Skills Tests', () => {
             .click();
         cy.get('[data-cy="nameCell_group12Subj3"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '1 skill');
-        cy.get('[data-cy="expandDetailsBtn_group12Subj3"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj3"] [data-cy="manageSkillLink_skill6"]')
             .should('not.exist');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj3"] [data-cy="manageSkillLink_skill7"]')
@@ -263,8 +249,7 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
@@ -274,16 +259,12 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill7"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill8"]')
-            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillMoveBtn"]')
-            .click();
+          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -311,10 +292,8 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill8"]');
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '0 skills');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"]')
-            .contains('No Skills Yet');
+            .contains('Group has no Skills');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
             .should('have.text', '5');
@@ -340,8 +319,7 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '1 skill');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
@@ -349,16 +327,11 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
 
-        cy.get('[data-cy="skillSelect-skill6"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill7"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .first()
-            .click();
-        cy.get('[data-cy="skillMoveBtn"]')
-            .first()
-            .click();
+        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+
+        cy.get('[data-cy="skillActionsBtn"]').first().click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -381,14 +354,11 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="manageSkillLink_skill1"]');
         cy.get('[data-cy="manageSkillLink_skill2"]');
-        cy.get('[data-cy="manageSkillLink_skill6"]')
-            .should('not.exist');
-        cy.get('[data-cy="manageSkillLink_skill7"]')
-            .should('not.exist');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '3 skills');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
@@ -397,6 +367,10 @@ describe('Move Skills Tests', () => {
             .should('have.text', '5');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
+
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).first().click()
+        cy.get('[data-cy="manageSkillLink_skill6"]').should('not.exist')
+        cy.get('[data-cy="manageSkillLink_skill7"]').should('not.exist')
     });
 
     it('move skills with deps from subject into a subject', () => {
@@ -413,14 +387,13 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill2"]')
-            .click({ force: true });
+        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillMoveBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+
 
         // step 1
         cy.get('[ data-cy="reuseSkillsModalStep1"]');
@@ -475,23 +448,19 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill7"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill8"]')
-            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillMoveBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -514,13 +483,11 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '0 skills');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
         cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .click();
         cy.get('[data-cy="skillName"]')
             .type('new skill');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
         // validate skill was created

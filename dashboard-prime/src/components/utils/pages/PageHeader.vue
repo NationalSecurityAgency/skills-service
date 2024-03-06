@@ -1,8 +1,9 @@
 <script setup>
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const props = defineProps(['loading', 'options'])
-
+const numberFormat = useNumberFormat()
 </script>
 
 <template>
@@ -34,7 +35,7 @@ const props = defineProps(['loading', 'options'])
                       <div class="uppercase text-color-secondary">{{ stat.label }}</div>
                       <div class="font-bold text-xl">
                         <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
-                        <span v-else data-cy="statValue">{{ stat.count }}</span>
+                        <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                       </div>
 
                       <span v-if="stat.warnMsg" class="ml-1">

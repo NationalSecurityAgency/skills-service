@@ -1,0 +1,201 @@
+<script setup>
+import { computed, onMounted, ref, toRaw } from 'vue'
+import { useRoute } from 'vue-router'
+import Stepper from 'primevue/stepper'
+import StepperPanel from 'primevue/stepperpanel'
+import SkillsService from '@/components/skills/SkillsService.js'
+import CatalogService from '@/components/skills/catalog/CatalogService.js'
+import ReuseOrMovePreview from '@/components/skills/reuseSkills/ReuseOrMovePreview.vue'
+import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
+
+const props = defineProps({
+  skills: {
+    type: Array,
+    required: true
+  },
+  isReuseType: {
+    type: Boolean,
+    default: false
+  }
+})
+const model = defineModel()
+const route = useRoute()
+const pluralSupport = useLanguagePluralSupport()
+const emits = defineEmits(['on-moved'])
+
+const textCustomization = props.isReuseType ?
+  { actionName: 'Reuse', actionDirection: 'in' } :
+  { actionName: 'Move', actionDirection: 'to' }
+
+const actionNameInPast = computed(() => `${textCustomization.actionName.toLowerCase()}d`)
+const actionDirection = computed(() => textCustomization.actionDirection)
+
+const onCancel = () => {
+  model.value = false
+
+  if (movedOrReusedSkills.value) {
+    emits('on-moved', { moved: toRaw(movedOrReusedSkills.value), destination: toRaw(selectedDestination.value) })
+  }
+}
+
+const state = ref({
+  skillsWereMovedOrReusedAlready: false
+})
+const loadingDest = ref(true)
+const destinations = ref([])
+const selectedDestination = ref({})
+const loadDestinations = () => {
+  const skillId = props.skills[0].skillId
+  SkillsService.getSkillInfo(route.params.projectId, skillId)
+    .then((skillInfo) => {
+      if (skillInfo.subjectId !== route.params.subjectId) {
+        state.value.skillsWereMovedOrReusedAlready = true
+        loadingDest.value = false
+      } else {
+        SkillsService.getReuseDestinationsForASkill(route.params.projectId, skillId)
+          .then((res) => {
+            destinations.value = res
+            // this.updateDestinationPage(this.destinations.currentPageNum);
+          })
+          .finally(() => {
+            loadingDest.value = false
+          })
+      }
+    })
+}
+const loadingFinalizeInfo = ref(true)
+const finalizeInfo = ref({})
+const loadFinalizeInfo = () => {
+  CatalogService.getCatalogFinalizeInfo(route.params.projectId)
+    .then((res) => {
+      finalizeInfo.value = res
+    })
+    .finally(() => {
+      loadingFinalizeInfo.value = false
+    })
+}
+const isLoadingData = computed(() => loadingDest.value || loadingFinalizeInfo.value)
+
+onMounted(() => {
+  loadDestinations()
+  loadFinalizeInfo()
+})
+
+const movedOrReusedSkills = ref([])
+const onReuseOrMove = (changedSkills) => {
+  movedOrReusedSkills.value = changedSkills
+}
+
+</script>
+
+<template>
+  <Dialog
+    modal
+    header="Move Skills in this Project"
+    :maximizable="true"
+    :close-on-escape="true"
+    class="w-11 xl:w-8"
+    v-model:visible="model"
+  >
+    <div class="card flex justify-content-center pb-3">
+      <skills-spinner :is-loading="isLoadingData" class="my-8" />
+      <Stepper v-if="!isLoadingData" :linear="true">
+        <StepperPanel header="Select Destination">
+          <template #content="{ nextCallback }">
+            <div data-cy="reuseSkillsModalStep1">
+              <Listbox
+                v-model="selectedDestination"
+                :options="destinations"
+                filter
+                @update:modelValue="nextCallback"
+                class="w-full">
+                <template #option="item">
+                  <div class="flex" :data-cy="`selectDest_subj${item.option.subjectId}${item.option.groupId || ''}`">
+                    <div class="mr-2">
+                      <i v-if="item.option.groupId" class="fas fa-layer-group" aria-hidden="true" />
+                      <i v-else class="fas fa-cubes" aria-hidden="true" />
+                    </div>
+
+                    <div v-if="!item.option.groupId">
+                      <span class="font-italic">Subject:</span>
+                      <span class="ml-1 font-semibold text-primary">{{
+                          item.option.subjectName
+                        }}</span>
+                    </div>
+                    <div v-if="item.option.groupId">
+                      <div>
+                        <span class="font-italic">Group:</span>
+                        <span class="ml-1 font-semibold text-primary">{{
+                            item.option.groupName
+                          }}</span>
+                      </div>
+                      <div>
+                        <span class="font-italic">In subject:</span> {{ item.option.subjectName }}
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </Listbox>
+              <div class="flex pt-4 justify-content-end">
+                <SkillsButton
+                  label="Cancel"
+                  icon="far fa-times-circle"
+                  outlined
+                  class="mr-2"
+                  severity="warning"
+                  @click="onCancel" />
+                <SkillsButton
+                  label="Move"
+                  :disabled="true"
+                  icon="fas fa-arrow-right"
+                  outlined />
+              </div>
+            </div>
+          </template>
+        </StepperPanel>
+        <StepperPanel header="Preview">
+          <template #content="{ nextCallback }">
+            <reuse-or-move-preview
+              data-cy="reuseSkillsModalStep2"
+              :skills="skills"
+              :destination="selectedDestination"
+              @on-cancel="onCancel"
+              @on-changed="onReuseOrMove"
+              :action-direction="actionDirection"
+              :action-name-in-past="actionNameInPast"
+              :next-step-nav-function="nextCallback"
+            />
+          </template>
+        </StepperPanel>
+        <StepperPanel header="Confirmation">
+          <template #content>
+            <div data-cy="reuseSkillsModalStep3">
+              <div class="flex flex-column h-12rem">
+                <div
+                  class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+                <span><span class="text-primary">Successfully</span> {{ actionNameInPast }}
+                <Tag severity="info">{{ movedOrReusedSkills.length }}</Tag>
+                skill{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
+                </div>
+              </div>
+              <div class="flex pt-4 justify-content-end">
+                <SkillsButton
+                  label="OK"
+                  icon="fas fa-shipping-fast"
+                  @click="onCancel"
+                  data-cy="okButton"
+                  outlined />
+              </div>
+            </div>
+          </template>
+        </StepperPanel>
+      </Stepper>
+    </div>
+  </Dialog>
+</template>
+
+<style scoped>
+.p-stepper {
+  flex-basis: 100rem;
+}
+</style>

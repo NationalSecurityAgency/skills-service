@@ -18,8 +18,7 @@ import SelfReportTableCell from '@/components/skills/skillsTableCells/SelfReport
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.vue'
 import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay.vue'
-import InputGroup from 'primevue/inputgroup'
-import InputGroupAddon from 'primevue/inputgroupaddon'
+import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMoveSkillsDialog.vue'
 
 const props = defineProps({
   groupId: String,
@@ -31,9 +30,7 @@ const projConfig = useProjConfig()
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
-const subjectId = computed(() => {
-  return route.params.subjectId
-})
+const subjectId = computed(() => route.params.subjectId)
 const tableId = props.groupId || route.params.subjectId
 const pagination = {
   pageSize: 10,
@@ -169,9 +166,6 @@ const onColumnSort = () => {
 }
 
 const addSkillDisabled = ref(false)
-
-const editImportedSkillInfo = ref({ skill: {}, show: false })
-
 const createOrUpdateSkill = inject('createOrUpdateSkill')
 
 const deleteButtonsDisabled = ref(false)
@@ -198,8 +192,12 @@ const doDeleteSkill = () => {
       if (skill.groupId) {
         skillsState.setGroupSkills(skill.groupId, skills)
         const parentGroup = skillsState.subjectSkills.find((item) => item.skillId = skill.groupId)
-        parentGroup.totalPoints -= skill.totalPoints
-        parentGroup.numSkillsInGroup -= 1
+        parentGroup.totalPoints = skills
+          .map((item) => item.totalPoints)
+          .reduce((accumulator, currentValue) => {
+            return accumulator + currentValue
+          }, 0)
+        parentGroup.numSkillsInGroup = skills.length
       }
       announcer.polite(`Removed ${skill.name} skill`)
       subjectState.loadSubjectDetailsState()
@@ -222,7 +220,10 @@ const actionsMenu = ref([
   },
   {
     label: 'Move Skills',
-    icon: 'fas fa-shipping-fast'
+    icon: 'fas fa-shipping-fast',
+    command: () => {
+      showMoveSkillsInfoModal.value = true
+    }
   },
   {
     label: 'Add To Badge',
@@ -244,6 +245,7 @@ const actionsMenu = ref([
 ])
 const expandedRows = ref([])
 
+const showMoveSkillsInfoModal = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -253,27 +255,46 @@ const expandedRows = ref([])
 const disableRow = (row) => {
   return row.isGroupType ? 'remove-checkbox' : '';
 }
+
+const onMoved = (movedInfo) => {
+  skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId, false)
+  if (movedInfo.destination.groupId) {
+    skillsState.loadGroupSkills(route.params.projectId, movedInfo.destination.groupId)
+  }
+  // if skills moved out of a group, refresh that group too
+  const groupSkill = movedInfo.moved.find((sk) => sk.groupId)
+  if (groupSkill) {
+    skillsState.loadGroupSkills(route.params.projectId, groupSkill.groupId)
+  }
+
+  selectedRows.value = []
+  subjectState.loadSubjectDetailsState()
+}
 </script>
 
 <template>
   <div>
+<!--    <pre>-->
+<!--      {{ skillsState.subjectSkills }}-->
+<!--    </pre>-->
+
     <DataTable
       :id="tableId"
       :loading="skillsState.loadingSubjectSkills"
       :value="tableSkills"
+      dataKey="skillId"
       :reorderableColumns="true"
       v-model:expandedRows="expandedRows"
       v-model:selection="selectedRows"
       v-model:filters="filters"
       v-model:sort-field="options.sortBy"
       v-model:sort-order="options.sortOrder"
+      @update:first="(val) => indexOfFirstRow = val"
       @filter="onFilter"
       @sort="onColumnSort"
-      :paginator="true"
+      :paginator="totalRows > pagination.pageSize"
       :rows="pagination.pageSize"
       :rowsPerPageOptions="pagination.possiblePageSizes"
-      stateStorage="local"
-      stateKey="subjectSkillsTable"
       :globalFilterFields="['name']"
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"
@@ -335,7 +356,11 @@ const disableRow = (row) => {
               <Badge :value="selectedSkills.length" data-cy="skillActionsNumSelected"></Badge>
               <i class="fas fa-caret-down ml-2"></i>
             </Button>
-            <Menu ref="skillsActionsMenu" id="skillsActionsMenu" :model="actionsMenu" :popup="true">
+            <Menu ref="skillsActionsMenu"
+                  id="skillsActionsMenu"
+                  data-cy="skillsActionsMenu"
+                  :model="actionsMenu"
+                  :popup="true">
             </Menu>
           </div>
         </div>
@@ -361,6 +386,7 @@ const disableRow = (row) => {
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
                 <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Group</span>
+                <Tag class="uppercase ml-2" data-cy="numSkillsInGroup">{{ slotProps.data.numSkillsInGroup }} skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}</Tag>
               </div>
               <highlighted-value
                 class="text-lg"
@@ -545,6 +571,12 @@ const disableRow = (row) => {
       v-model="deleteSkillInfo.show"
       :skill="deleteSkillInfo.skill"
       @do-remove="doDeleteSkill" />
+    <reuse-or-move-skills-dialog
+      v-if="showMoveSkillsInfoModal"
+      v-model="showMoveSkillsInfoModal"
+      :skills="selectedRows"
+      @on-moved="onMoved"
+    />
   </div>
 </template>
 

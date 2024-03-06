@@ -71,7 +71,6 @@ export const useGlobalNavGuards = () => {
         if (from && from.path !== '/error') {
           appInfoState.setPreviousUrl(from.fullPath)
         }
-        console.log(`${from.path} => ${to.path}`)
         if (isActiveProjectIdChange(to, from)) {
           projectInfo.setCurrentProjectId(to.params.projectId)
           if (isAdminPage(to) && to.params.projectId) {

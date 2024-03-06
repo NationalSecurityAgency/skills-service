@@ -32,10 +32,10 @@ const focusSortControl = () => {
       <div class="flex mb-2 nav-cards-header">
         <div class="col">
           <div class="flex">
-            <router-link v-if="options.icon" tag="a"
+            <router-link v-if="options.icon"
                          :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
-                         tabindex="-1" class="subject-icon-container">
-              <div class="d-inline-block mr-2 border rounded text-info text-center icon-link" style="min-width: 3.2rem; height: inherit; width: inherit;" aria-hidden="true">
+                         tabindex="-1" class="">
+              <div class="d-inline-block mr-2 border-1 text-center border-round w-4rem" aria-hidden="true">
                 <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
               </div>
             </router-link>
@@ -63,9 +63,9 @@ const focusSortControl = () => {
       <div class="flex text-center justify-content-center flex-grow-1">
         <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
           <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 surface-100 p-3">
-            <i :class="stat.icon"></i>
-            <p class="uppercase text-muted count-label">{{ stat.label }}</p>
-            <strong class="h4" data-cy="statNum">{{ stat.count }}</strong>
+            <i :class="stat.icon" class="text-xl"></i>
+            <div class="uppercase mt-1">{{ stat.label }}</div>
+            <div class="text-2xl mt-2" data-cy="statNum">{{ stat.count }}</div>
             <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
                style="font-size: 1.5rem;"
                v-tooltip="stat.warnMsg"

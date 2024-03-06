@@ -38,12 +38,10 @@ import RadioButton from 'primevue/radiobutton';
 import Checkbox from 'primevue/checkbox';
 import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
+import Listbox from 'primevue/listbox';
+
 import ConfirmationService from 'primevue/confirmationservice';
-
-
-
 import BadgeDirective from 'primevue/badgedirective';
-
 
 import Tooltip from 'primevue/tooltip';
 import FocusTrap from 'primevue/focustrap';
@@ -104,6 +102,7 @@ app.component('RadioButton', RadioButton)
 app.component('Checkbox', Checkbox)
 app.component('Rating', Rating)
 app.component('Textarea', Textarea)
+app.component('Listbox', Listbox)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

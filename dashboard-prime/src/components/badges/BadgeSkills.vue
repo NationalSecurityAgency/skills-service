@@ -121,10 +121,7 @@ const skillAdded = (newItem) => {
   SkillsService.assignSkillToBadge(projectId.value, badgeId.value, newItem.skillId)
       .then(() => {
         badgeSkills.value.push(newItem);
-        console.log(newItem.skillId);
-        console.log(availableSkills.value);
         availableSkills.value = availableSkills.value.filter((item) => item.skillId !== newItem.skillId);
-        console.log(availableSkills.value);
         badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
         loading.value.skillOp = false;
         SkillsReporter.reportSkill('AssignGemOrBadgeSkills');

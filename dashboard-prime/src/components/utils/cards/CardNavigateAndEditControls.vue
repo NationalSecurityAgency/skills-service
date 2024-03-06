@@ -44,9 +44,11 @@ const handleManageClick = () => {
 
 <template>
   <div class="flex" :class="{ 'justify-content-center' : isReadOnlyProj }">
-    <div class="col-auto">
+    <div class="">
       <SkillsButton
         size="small"
+        outlined
+        severity="info"
         @click="handleManageClick"
         :aria-label="`Manage ${options.type} ${options.name}`"
         icon="fas fa-arrow-circle-right"
@@ -55,14 +57,15 @@ const handleManageClick = () => {
       </SkillsButton>
     </div>
 
-    <div v-if="!isReadOnlyProj" class="col text-right">
+    <div v-if="!isReadOnlyProj" class="flex-1 text-right">
       <ButtonGroup>
         <SkillsButton
           v-if="options.showShare === true"
           :id="`shareBtn${buttonIdSuffix}`"
           ref="shareBtn"
           size="small"
-          label=""
+          outlined
+          severity="info"
           :icon="shareBtnIcon"
           @click="handleShareClick"
           :title="shareTitle" />
@@ -71,6 +74,8 @@ const handleManageClick = () => {
           ref="editBtn"
           icon="fas fa-edit"
           size="small"
+          outlined
+          severity="info"
           @click="emit('edit')"
           :track-for-focus="true"
           :title="`Edit ${options.type}`"
@@ -85,6 +90,8 @@ const handleManageClick = () => {
           v-tooltip="options.deleteDisabledText"
           ref="deleteBtn"
           size="small"
+          outlined
+          severity="info"
           @click="emit('delete')"
           :disabled="options.isDeleteDisabled"
           :title="`Delete ${options.type}`"
@@ -99,9 +106,5 @@ const handleManageClick = () => {
 </template>
 
 <style scoped>
-.last-right-group-btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
+
 </style>
