@@ -44,11 +44,11 @@ function addClicked() {
 </script>
 
 <template>
-  <div class="grid border-bottom py-2 text-center" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
-    <div class="col-6 text-left">
+  <div class="flex flex-wrap py-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
+    <div class="flex-1 text-left">
       <div class="text-2xl uppercase font-normal">{{ title }}</div>
     </div>
-    <div class="col-6 pt-0 text-right" data-cy="subPageHeaderControls">
+    <div class="flex pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
         <slot v-if="!isReadOnlyProjUnderAdminUrl">
           <SkillsButton ref="actionButton" v-if="action" type="button" size="small" outlined

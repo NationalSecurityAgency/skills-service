@@ -19,11 +19,13 @@ import SkillsService from '@/components/skills/SkillsService.js'
 import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.vue'
 import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay.vue'
 import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMoveSkillsDialog.vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const props = defineProps({
   groupId: String,
 })
 
+const responsive = useResponsiveBreakpoints()
 const skillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
@@ -274,10 +276,6 @@ const onMoved = (movedInfo) => {
 
 <template>
   <div>
-<!--    <pre>-->
-<!--      {{ skillsState.subjectSkills }}-->
-<!--    </pre>-->
-
     <DataTable
       :id="tableId"
       :loading="skillsState.loadingSubjectSkills"
@@ -304,26 +302,28 @@ const onMoved = (movedInfo) => {
         <div class="flex gap-1">
           <InputGroup>
             <InputGroupAddon>
-              <i class="fas fa-search" aria-hidden="true"/>
+              <i class="fas fa-search" aria-hidden="true" />
             </InputGroupAddon>
             <InputText
               class="flex flex-grow-1"
               v-model="filters['global'].value"
               data-cy="skillsTable-skillFilter"
               placeholder="Skill Search" />
+            <InputGroupAddon class="p-0 m-0">
+              <SkillsButton icon="fa fa-times"
+                            text
+                            outlined
+                            @click="clearFilter"
+                            aria-label="Reset skills filter"
+                            data-cy="filterResetBtn" />
+            </InputGroupAddon>
           </InputGroup>
-          <SkillsButton class="flex flex-grow-none"
-                        label="Reset"
-                        icon="fa fa-times"
-                        outlined
-                        @click="clearFilter"
-                        aria-label="Reset skills filter"
-                        data-cy="filterResetBtn" />
         </div>
         <div class="mt-4">
-          <div class="mt-2 flex">
-            <div class="flex-1 text-left">
+          <div class="mt-2 flex flex-wrap">
+            <div class="flex-1 w-full lg:w-auto">
               <MultiSelect
+                class="w-full lg:w-auto"
                 v-model="additionalSelectedColumns"
                 :options="additionalColumns"
                 display="chip"
@@ -333,48 +333,55 @@ const onMoved = (movedInfo) => {
                 placeholder="Optional Fields"
                 data-cy="skillsTable-additionalColumns" />
             </div>
-            <div class="align-items-center flex">
-              <label for="sortEnabledSwitch" class="ml-3 mr-1">Reorder:</label>
-              <InputSwitch
-                id="sortEnabledSwitch"
-                data-cy="enableDisplayOrderSort"
-                @update:modelValue="onReorderSwitchChanged"
-                aria-label="When enabled move-up and move-down buttons will be visible within each display order cell"
-                v-model="reorderEnable" />
+            <div class="w-full lg:w-auto flex mt-3 lg:mt-0">
+              <div class="flex-1 align-items-center flex">
+                <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
+                <InputSwitch
+                  id="sortEnabledSwitch"
+                  data-cy="enableDisplayOrderSort"
+                  @update:modelValue="onReorderSwitchChanged"
+                  aria-label="When enabled move-up and move-down buttons will be visible within each display order cell"
+                  v-model="reorderEnable" />
+              </div>
+              <Button
+                severity="info"
+                class="ml-3"
+                @click="toggleActionsMenu"
+                aria-label="User Settings Button"
+                aria-haspopup="true"
+                aria-controls="user_settings_menu"
+                :disabled="selectedSkills.length === 0"
+                data-cy="skillActionsBtn">
+                <i class="fas fa-tools mr-1" aria-hidden="true"></i>
+                <span>Action</span>
+                <Badge :value="selectedSkills.length" data-cy="skillActionsNumSelected"></Badge>
+                <i class="fas fa-caret-down ml-2"></i>
+              </Button>
+              <Menu ref="skillsActionsMenu"
+                    id="skillsActionsMenu"
+                    data-cy="skillsActionsMenu"
+                    :model="actionsMenu"
+                    :popup="true">
+              </Menu>
             </div>
-            <Button
-              severity="info"
-              class="ml-3"
-              @click="toggleActionsMenu"
-              aria-label="User Settings Button"
-              aria-haspopup="true"
-              aria-controls="user_settings_menu"
-              :disabled="selectedSkills.length === 0"
-              data-cy="skillActionsBtn">
-              <i class="fas fa-tools mr-1" aria-hidden="true"></i>
-              <span>Action</span>
-              <Badge :value="selectedSkills.length" data-cy="skillActionsNumSelected"></Badge>
-              <i class="fas fa-caret-down ml-2"></i>
-            </Button>
-            <Menu ref="skillsActionsMenu"
-                  id="skillsActionsMenu"
-                  data-cy="skillsActionsMenu"
-                  :model="actionsMenu"
-                  :popup="true">
-            </Menu>
           </div>
         </div>
       </template>
 
-      <Column expander style="width: 2rem" />
-      <Column selectionMode="multiple">
-<!--        <template #rowcheckboxicon>-->
-<!--          <i  class="fas fa-layer-group" />-->
-<!--        </template>-->
+      <Column expander class="lg:w-2rem" :class="{'flex': responsive.lg.value }">
+        <template #header>
+          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
+        </template>
+      </Column>
+      <Column selectionMode="multiple" :class="{'flex': responsive.lg.value }">
+        <template #header>
+          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"  aria-hidden="true"></i> Select Rows:</span>
+        </template>
       </Column>
       <Column v-for="col of displayedColumns"
               :key="col.key"
               :field="col.key"
+              :class="{'flex': responsive.lg.value }"
               :sortable="col.sortable">
         <template #header>
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
