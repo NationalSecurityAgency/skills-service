@@ -171,6 +171,7 @@ const newBadge = () => {
 };
 
 const handleHidden = (e) => {
+  displayNewBadgeModal.value = false;
   if (!e || !e.update) {
     handleFocus();
   }

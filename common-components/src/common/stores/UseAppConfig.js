@@ -50,6 +50,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
   const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
   const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
+  const maxBadgeNameLength = computed(() => config.value.maxBadgeNameLength)
   const maxCustomLabelLength = computed(() => config.value.maxCustomLabelLength)
   const maxSkillVersion = computed(() => config.value.maxSkillVersion)
   const maxSkillNameLength = computed(() => config.value.maxSkillNameLength)
@@ -99,6 +100,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     formFieldDebounceInMs,
     paragraphValidationRegex,
     maxSubjectNameLength,
+    maxBadgeNameLength,
     maxCustomLabelLength,
     maxSkillVersion,
     maxSkillNameLength,

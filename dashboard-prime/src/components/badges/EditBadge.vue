@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 import { useRoute } from "vue-router";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
-import {number, string} from "yup";
+import {array, number, string, date} from "yup";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -30,9 +30,13 @@ const props = defineProps({
   },
 });
 const appConfig = useAppConfig()
-const emit = defineEmits(['hidden', 'badge-saved']);
+const emit = defineEmits(['hidden', 'badge-updated', 'keydown-enter']);
 const route = useRoute()
-const announcer = useSkillsAnnouncer();
+const announcer = useSkillsAnnouncer()
+
+onMounted(() => {
+  document.addEventListener('focusin', trackFocus);
+});
 
 let formId = 'newBadgeDialog'
 let modalTitle = 'New Badge'
@@ -46,19 +50,19 @@ const schema = {
       .trim()
       .required()
       .min(appConfig.minNameLength)
-      // .max(appConfig.maxSubjectNameLength)
+      .max(appConfig.maxBadgeNameLength)
       .nullValueNotAllowed()
       .test('uniqueName', 'Badge Name is already taken', (value) => checkBadgeNameUnique(value))
       .customNameValidator()
       .label('Badge Name'),
   'badgeId': string()
-      .trim()
+      // .trim()
       .required()
       .min(appConfig.minIdLength)
       .max(appConfig.maxIdLength)
       .nullValueNotAllowed()
       .idValidator()
-      // .test('uniqueName', 'Badge ID is already taken', (value) => checkBadgeIdUnique(value))
+      .test('uniqueId', 'Badge ID is already taken', (value) => checkBadgeIdUnique(value))
       .customNameValidator()
       .label('Badge ID'),
   'description': string()
@@ -70,7 +74,11 @@ const schema = {
       .label('Help URL'),
   'expirationDays': number().label('Expiration Days'),
   'expirationHrs': number().label('Expiration Hours'),
-  'expirationMins': number().label('Expiration Minutes')
+  'expirationMins': number().label('Expiration Minutes'),
+  // 'gemDates': array().of(date()).label('Gem Date').test('notInPast', 'Date can not be in the past', (value) => {
+  //   console.log('Checking value...');
+  //   console.log(value);
+  // })
 
 };
 
@@ -125,7 +133,6 @@ let badgeInternal = ref({
 let limitTimeframe = ref(limitedTimeframe);
 let currentFocus = ref( null);
 let previousFocus = ref( null);
-let loadingComponent = ref( true);
 let isAwardIcon = ref(false);
 let gemDates = ref([toDate(props.badge.startDate), toDate(props.badge.endDate)]);
 let currentIcon = ref((props.badge.iconClass || 'fas fa-book'));
@@ -148,6 +155,10 @@ const checkBadgeNameUnique = (value) => {
 }
 
 const checkBadgeIdUnique = (value) => {
+  if(!value) {
+    return true;
+  }
+
   if (props.isEdit && props.badge.badgeId === value) {
     return true;
   }
@@ -188,23 +199,17 @@ const updateBadge = (values) => {
   }
 
   if(limitTimeframe.value) {
-    badgeToSave.startDate = gemDates.value[0]; //badgeInternal.value.startDate;
-    badgeToSave.endDate = gemDates.value[1]; //badgeInternal.value.endDate;
+    badgeToSave.startDate = gemDates.value[0];
+    badgeToSave.endDate = gemDates.value[1];
+  } else {
+    badgeToSave.startDate = null;
+    badgeToSave.endDate = null;
   }
 
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
-    emit('badge-updated', { isEdit: props.isEdit, ...resp });
+    badgeInternal.value = resp;
+    // emit('badge-updated', { isEdit: props.isEdit, ...resp });
   });
-
-  // $refs.observer.validate()
-  //     .then((res) => {
-  //       if (res) {
-  //   publishHidden({ updated: true });
-  //   badgeInternal.value.badgeId = InputSanitizer.sanitize(badgeInternal.value.badgeId);
-  //   badgeInternal.value.name = InputSanitizer.sanitize(badgeInternal.value.name);
-  // emit('badge-updated', { isEdit: isEdit, ...badgeInternal.value });
-      //   }
-      // });
 };
 
 const onSelectedIcon = (selectedIcon) => {
@@ -216,14 +221,14 @@ const onSelectedIcon = (selectedIcon) => {
   op.value.hide();
 };
 
-const onEnableGemFeature = (value) => {
-  if (!value) {
-    nextTick(() => {
-      // gemDates.value = [];
-      // badgeInternal.value.startDate = null;
-      // badgeInternal.value.endDate = null;
-    });
-  }
+const onEnableGemFeature = () => {
+  nextTick(() => {
+    if (!limitTimeframe.value) {
+      gemDates.value = [];
+    } else {
+      gemDates.value = [new Date(), new Date()];
+    }
+  })
 };
 
 function toDate(value) {
@@ -251,6 +256,11 @@ const close = (e) => {
   emit('hidden', e);
   model.value = false
 }
+
+const onBadgeSaved = () => {
+  emit('badge-updated', badgeInternal.value );
+  close();
+};
 </script>
 
 <template>
@@ -263,6 +273,7 @@ const close = (e) => {
       :initial-values="initialBadgeData"
       :save-data-function="updateBadge"
       :enable-return-focus="true"
+      @saved="onBadgeSaved"
       @close="close">
     <template #default>
       <icon-picker :startIcon="currentIcon" class="mr-3" @select-icon="toggleIconDisplay" :disabled="false"></icon-picker>
@@ -355,15 +366,15 @@ const close = (e) => {
                       @keydown-enter="emit('keydown-enter')" />
 
       <div v-if="!global" data-cy="gemEditContainer">
-        <Checkbox data-cy="gemCheckbox" inputId="enableGem" class="d-inline" :binary="true" name="gemCheckbox" v-model="limitTimeframe" v-on:input="onEnableGemFeature"/>
+        <Checkbox data-cy="gemCheckbox" inputId="enableGem" class="d-inline" :binary="true" name="gemCheckbox" v-model="limitTimeframe" v-on:change="onEnableGemFeature"/>
         <label for="enableGem">
           Enable Gem Feature
         </label>
 
         <div v-if="limitTimeframe" class="flex justify-content-center gap-4">
           <div>
-            <label for="gemDate">* Date Range</label><br />
-            <Calendar v-model="gemDates" inline selectionMode="range" inputId="gemDate" name="gemDate" data-cy="gemDatePicker" />
+            <label for="gemDates">* Date Range</label><br />
+            <Calendar v-model="gemDates" inline selectionMode="range" inputId="gemDates" name="gemDates" data-cy="gemDatePicker" />
           </div>
         </div>
       </div>
