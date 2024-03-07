@@ -401,14 +401,10 @@ describe('Skills Table Tests', () => {
     ], 10, false, null, false)
 
     // sort does not exist by default
-    cy.get('[data-cy="orderMoveUp_skill1"]').should('not.exist')
-    cy.get('[data-cy="orderMoveUp_skill2"]').should('not.exist')
-    cy.get('[data-cy="orderMoveUp_skill3"]').should('not.exist')
-    cy.get('[data-cy="orderMoveUp_skill4"]').should('not.exist')
-    cy.get('[data-cy="orderMoveDown_skill1"]').should('not.exist')
-    cy.get('[data-cy="orderMoveDown_skill2"]').should('not.exist')
-    cy.get('[data-cy="orderMoveDown_skill3"]').should('not.exist')
-    cy.get('[data-cy="orderMoveDown_skill4"]').should('not.exist')
+    for (let i = 1; i <=4 ; i++) {
+      cy.get(`[data-cy="orderMoveUp_skill${i}"]`).should('not.exist')
+      cy.get(`[data-cy="orderMoveDown_skill${i}"]`).should('not.exist')
+    }
 
     // enable reorder should add buttons and sort by display order
     cy.get('[data-cy="enableDisplayOrderSort"]').click()
