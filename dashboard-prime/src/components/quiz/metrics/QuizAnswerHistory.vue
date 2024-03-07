@@ -65,7 +65,7 @@ onMounted(() => {
   if (userTagsUtils.showUserTagColumn) {
     fields.push({
       key: 'userTag',
-      label: userTagsUtils.userTagLabel,
+      label: userTagsUtils.userTagLabel.value,
       sortable: true,
     });
   }
@@ -146,6 +146,10 @@ const expandIcon = (truncated) => {
                stateKey="quizAnswerHistoryTable"
                data-cy="quizAnswerHistoryTable">
 
+      <template #paginatorstart>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ tableOptions.pagination.totalRows }}</span>
+      </template>
+
       <template #empty>
         <div class="flex justify-content-center flex-wrap">
           <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
@@ -155,7 +159,7 @@ const expandIcon = (truncated) => {
         </div>
       </template>
 
-      <Column v-for="(col, index) of tableOptions.fields"
+      <Column v-for="col of tableOptions.fields"
               :key="col.key"
               :field="col.key"
               :sortable="col.sortable"
@@ -165,7 +169,7 @@ const expandIcon = (truncated) => {
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field == 'answerTxt'" :data-cy="`row${index}-colAnswerTxt`">
+          <div v-if="slotProps.field == 'answerTxt'" :data-cy="`row${slotProps.index}-colAnswerTxt`">
             <pre v-if="slotProps.data.truncated" data-cy="textTruncated">{{ truncateFormatter.truncate(slotProps.data[col.key], answerTxtTruncate.truncateTo) }}</pre>
             <pre v-else data-cy="text">{{ slotProps.data[col.key] }}</pre>
             <div class="text-right">
@@ -179,7 +183,7 @@ const expandIcon = (truncated) => {
               </SkillsButton>
             </div>
           </div>
-          <div v-else-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap align-items-center"  :data-cy="`row${index}-colUserId`">
+          <div v-else-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap align-items-center"  :data-cy="`row${slotProps.index}-colUserId`">
             <div class="flex flex-grow-1 justify-content-start mb-2">
               {{ userInfo.getUserDisplay(slotProps.data, true) }}
             </div>
@@ -197,7 +201,7 @@ const expandIcon = (truncated) => {
             </div>
           </div>
           <div v-else-if="slotProps.field === 'userTag'">
-            <span :data-cy="`row${index}-userTag`">{{ slotProps.data[col.key] }}</span>
+            <span :data-cy="`row${slotProps.index}-userTag`">{{ slotProps.data[col.key] }}</span>
           </div>
           <div v-else-if="slotProps.field === 'updated'" style="min-width: 13rem;">
             <DateCell :value="slotProps.data[col.key]" />
