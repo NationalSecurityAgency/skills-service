@@ -4,6 +4,7 @@ import SkillsService from '@/components/skills/SkillsService.js'
 import { useRoute } from 'vue-router'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 
 const props = defineProps({
   skills: {
@@ -80,6 +81,7 @@ onMounted(() => {
   buildSummaryInfo()
 })
 
+const skillsWereMovedOrReusedAlready = ref(false)
 const reuseInProgress = ref(false)
 const doMoveOrReuse =() => {
   reuseInProgress.value = true;
@@ -115,9 +117,16 @@ const handleActionCompleting = () => {
   <div>
     <skills-spinner :is-loading="isLoading" class="my-5" />
     <div v-if="!isLoading">
-      <div class="flex flex-column h-12rem">
-        <div
-          class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+        <no-content2
+          v-if="skillsWereMovedOrReusedAlready"
+          class="mt-3"
+          title="Please Refresh"
+          :show-refresh-action="true"
+          message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
+
+        <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-column h-12rem">
+          <div
+            class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
 
           <div v-if="skillsForReuse.available.length > 0">
             <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
@@ -167,6 +176,7 @@ const handleActionCompleting = () => {
           outlined
           class="mr-2"
           severity="warning"
+          data-cy="closeButton"
           @click="emits('on-cancel')" />
         <SkillsButton
           label="Move"

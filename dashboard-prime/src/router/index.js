@@ -43,6 +43,8 @@ import Skills from '@/components/skills/Skills.vue';
 import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue';
 import BadgePage from '@/components/badges/BadgePage.vue';
 import BadgeSkills from '@/components/badges/BadgeSkills.vue';
+import ErrorPage from '@/components/utils/errors/ErrorPage.vue';
+import NotFoundPage from '@/components/utils/errors/NotFoundPage.vue';
 
 const routes = [
   {
@@ -66,6 +68,29 @@ const routes = [
         message: 'Login'
       }
     }
+  },
+  {
+    path: '/error',
+    name: 'ErrorPage',
+    component: ErrorPage,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Error Page',
+      },
+    },
+  },
+  {
+    path: '/not-found',
+    name: 'NotFoundPage',
+    component: NotFoundPage,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Not Found',
+      },
+    },
   },
   {
     path: '/settings',

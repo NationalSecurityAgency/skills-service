@@ -310,12 +310,14 @@ const onMoved = (movedInfo) => {
               data-cy="skillsTable-skillFilter"
               placeholder="Skill Search" />
             <InputGroupAddon class="p-0 m-0">
-              <SkillsButton icon="fa fa-times"
-                            text
-                            outlined
-                            @click="clearFilter"
-                            aria-label="Reset skills filter"
-                            data-cy="filterResetBtn" />
+              <SkillsButton
+                id="skillsFilterResetBtn"
+                icon="fa fa-times"
+                text
+                outlined
+                @click="clearFilter"
+                aria-label="Reset skills filter"
+                data-cy="filterResetBtn" />
             </InputGroupAddon>
           </InputGroup>
         </div>

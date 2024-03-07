@@ -14,12 +14,14 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { useGlobalNavGuards } from '@/router/UseGlobalNavGuards.js'
+import { useErrorHandling } from '@/interceptors/UserErrorHandling.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
 const appConfig = useAppConfig()
 const projectInfo = useProjectInfo()
 const accessState = useAccessState()
+const errorHandling = useErrorHandling()
 
 const addCustomIconCSS = () => {
   // This must be done here AFTER authentication
@@ -44,6 +46,7 @@ const globalNavGuards = useGlobalNavGuards()
 onMounted(() => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
+      errorHandling.registerErrorHandling()
       customGlobalValidators.addValidators()
       inceptionConfigurer.configure()
       globalNavGuards.addNavGuards()

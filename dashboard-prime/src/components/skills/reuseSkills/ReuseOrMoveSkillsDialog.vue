@@ -7,6 +7,8 @@ import SkillsService from '@/components/skills/SkillsService.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import ReuseOrMovePreview from '@/components/skills/reuseSkills/ReuseOrMovePreview.vue'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import { useFocusState } from '@/stores/UseFocusState.js'
 
 const props = defineProps({
   skills: {
@@ -21,13 +23,15 @@ const props = defineProps({
 const model = defineModel()
 const route = useRoute()
 const pluralSupport = useLanguagePluralSupport()
+const focusState = useFocusState()
 const emits = defineEmits(['on-moved'])
 
 const textCustomization = props.isReuseType ?
   { actionName: 'Reuse', actionDirection: 'in' } :
   { actionName: 'Move', actionDirection: 'to' }
 
-const actionNameInPast = computed(() => `${textCustomization.actionName.toLowerCase()}d`)
+const actionNameLowerCase = computed(() => textCustomization.actionName.toLowerCase())
+const actionNameInPast = computed(() => `${actionNameLowerCase.value}d`)
 const actionDirection = computed(() => textCustomization.actionDirection)
 
 const onCancel = () => {
@@ -36,6 +40,8 @@ const onCancel = () => {
   if (movedOrReusedSkills.value) {
     emits('on-moved', { moved: toRaw(movedOrReusedSkills.value), destination: toRaw(selectedDestination.value) })
   }
+
+  handleFocus()
 }
 
 const state = ref({
@@ -85,12 +91,27 @@ const movedOrReusedSkills = ref([])
 const onReuseOrMove = (changedSkills) => {
   movedOrReusedSkills.value = changedSkills
 }
+const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
+const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value)
 
+const onVisibleChanged = (isVisible) => {
+  console.log(`onClose: ${isVisible}`)
+  if (!isVisible) {
+    handleFocus()
+  }
+}
+const handleFocus = () => {
+  const groupId = props.skills[0].groupId
+  const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
+  focusState.setElementId(focusOn)
+  focusState.focusOnLastElement()
+}
 </script>
 
 <template>
   <Dialog
     modal
+    @update:visible="onVisibleChanged"
     header="Move Skills in this Project"
     :maximizable="true"
     :close-on-escape="true"
@@ -99,7 +120,20 @@ const onReuseOrMove = (changedSkills) => {
   >
     <div class="card flex justify-content-center pb-3">
       <skills-spinner :is-loading="isLoadingData" class="my-8" />
-      <Stepper v-if="!isLoadingData" :linear="true">
+      <div v-if="!isLoadingData">
+        <no-content2
+          class="mt-3"
+          v-if="state.skillsWereMovedOrReusedAlready"
+          title="Please Refresh"
+          :show-refresh-action="true"
+          message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
+        <no-content2
+          class="mt-3"
+          v-if="!hasDestinations && !state.skillsWereMovedOrReusedAlready"
+          title="No Destinations Available"
+          :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
+
+        <Stepper v-if="showStepper" :linear="true">
         <StepperPanel header="Select Destination">
           <template #content="{ nextCallback }">
             <div data-cy="reuseSkillsModalStep1">
@@ -109,6 +143,10 @@ const onReuseOrMove = (changedSkills) => {
                 filter
                 @update:modelValue="nextCallback"
                 class="w-full">
+                <template #empty>
+                  There are no <b>Subjects</b> or <b>Groups</b> that this skill can be {{actionNameInPast}} {{actionDirection}}.
+                  Please create additional subjects and/or groups if you want to {{actionNameLowerCase}} skills.
+                </template>
                 <template #option="item">
                   <div class="flex" :data-cy="`selectDest_subj${item.option.subjectId}${item.option.groupId || ''}`">
                     <div class="mr-2">
@@ -143,10 +181,12 @@ const onReuseOrMove = (changedSkills) => {
                   outlined
                   class="mr-2"
                   severity="warning"
+                  data-cy="closeButton"
                   @click="onCancel" />
                 <SkillsButton
                   label="Move"
                   :disabled="true"
+                  data-cy="reuseButton"
                   icon="fas fa-arrow-right"
                   outlined />
               </div>
@@ -190,6 +230,7 @@ const onReuseOrMove = (changedSkills) => {
           </template>
         </StepperPanel>
       </Stepper>
+      </div>
     </div>
   </Dialog>
 </template>

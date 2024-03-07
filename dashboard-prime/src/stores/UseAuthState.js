@@ -216,5 +216,6 @@ export const useAuthState = defineStore('authState', () => {
         isAuthenticated,
         userInfo,
         restoringSession,
+        clearAuthData
     }
 })
