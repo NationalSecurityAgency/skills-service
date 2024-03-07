@@ -716,7 +716,7 @@ describe('Skills Table Tests', () => {
 
   })
 
-  it.only('sort column is saved in local storage', () => {
+  it('sort column is saved in local storage', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
 
