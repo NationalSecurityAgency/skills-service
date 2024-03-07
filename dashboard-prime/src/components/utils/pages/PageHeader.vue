@@ -52,15 +52,15 @@ const numberFormat = useNumberFormat()
                   <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted"
                        v-html="stat.secondaryPreformatted"
                        :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
-                  <div v-if="stat.secondaryStats">
+                  <div v-if="stat.secondaryStats" class="mt-2">
                     <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
-                      <div v-if="secCount.count > 0" style="font-size: 0.9rem"
-                           class="text-left">
-                        <Badge :severity="`${secCount.badgeVariant}`" value="{{ secCount.count }}"
+                      <div v-if="secCount.count > 0" class="text-left">
+                        <Tag
+                          :severity="`${secCount.badgeVariant}`"
                                :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
-                          <span></span>
-                        </Badge>
-                        <span class="text-left text-secondary text-uppercase ml-1"
+                          {{ numberFormat.pretty(secCount.count) }}
+                        </Tag>
+                        <span class="text-left uppercase ml-1"
                               style="font-size: 0.8rem">{{ secCount.label }}</span>
                       </div>
                     </div>

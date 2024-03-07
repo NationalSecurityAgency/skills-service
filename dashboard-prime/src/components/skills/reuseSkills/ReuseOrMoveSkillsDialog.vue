@@ -95,7 +95,6 @@ const hasDestinations = computed(() => destinations.value && destinations.value.
 const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value)
 
 const onVisibleChanged = (isVisible) => {
-  console.log(`onClose: ${isVisible}`)
   if (!isVisible) {
     handleFocus()
   }
@@ -112,15 +111,15 @@ const handleFocus = () => {
   <Dialog
     modal
     @update:visible="onVisibleChanged"
-    header="Move Skills in this Project"
+    :header="`${textCustomization.actionName} Skills in this Project`"
     :maximizable="true"
     :close-on-escape="true"
     class="w-11 xl:w-8"
     v-model:visible="model"
   >
-    <div class="card flex justify-content-center pb-3">
+    <div>
       <skills-spinner :is-loading="isLoadingData" class="my-8" />
-      <div v-if="!isLoadingData">
+      <div v-if="!isLoadingData" class="w-100">
         <no-content2
           class="mt-3"
           v-if="state.skillsWereMovedOrReusedAlready"
@@ -133,7 +132,7 @@ const handleFocus = () => {
           title="No Destinations Available"
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
 
-        <Stepper v-if="showStepper" :linear="true">
+        <Stepper v-if="showStepper" :linear="true" class="w-100">
         <StepperPanel header="Select Destination">
           <template #content="{ nextCallback }">
             <div data-cy="reuseSkillsModalStep1">
@@ -184,10 +183,10 @@ const handleFocus = () => {
                   data-cy="closeButton"
                   @click="onCancel" />
                 <SkillsButton
-                  label="Move"
+                  :label="textCustomization.actionName"
                   :disabled="true"
                   data-cy="reuseButton"
-                  icon="fas fa-arrow-right"
+                  icon="fas fa-shipping-fast"
                   outlined />
               </div>
             </div>
@@ -201,8 +200,9 @@ const handleFocus = () => {
               :destination="selectedDestination"
               @on-cancel="onCancel"
               @on-changed="onReuseOrMove"
+              :is-reuse-type="isReuseType"
               :action-direction="actionDirection"
-              :action-name-in-past="actionNameInPast"
+              :action-name="textCustomization.actionName"
               :next-step-nav-function="nextCallback"
             />
           </template>

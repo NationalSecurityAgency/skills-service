@@ -23,7 +23,7 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-  actionNameInPast: {
+  actionName: {
     type: String,
     required: true,
   },
@@ -111,6 +111,7 @@ const handleActionCompleting = () => {
   emits('on-changed', toRaw(skillsForReuse.value.available))
 }
 
+const actionNameInPast = computed(() => `${props.actionName.value}d`)
 </script>
 
 <template>
@@ -126,7 +127,7 @@ const handleActionCompleting = () => {
 
         <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-column h-12rem">
           <div
-            class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+            class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
 
           <div v-if="skillsForReuse.available.length > 0">
             <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
@@ -179,7 +180,7 @@ const handleActionCompleting = () => {
           data-cy="closeButton"
           @click="emits('on-cancel')" />
         <SkillsButton
-          label="Move"
+          :label="actionName"
           icon="fas fa-shipping-fast"
           @click="doMoveOrReuse"
           data-cy="reuseButton"

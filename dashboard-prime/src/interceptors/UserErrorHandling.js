@@ -10,22 +10,16 @@ export const useErrorHandling = () => {
   const appConfig = useAppConfig()
 
   const errorResponseHandler = (error) => {
-
-    console.log('handling error')
-    console.log(error)
     if (axios.isCancel(error)) {
-      console.log('isCancel')
       return Promise.resolve({ data: {} });
     }
 
     // check if the caller wants to handle all errors
     if (Object.prototype.hasOwnProperty.call(error.config, 'handleError') && error.config.handleError === false) {
-      console.log('reject')
       return Promise.reject(error);
     }
 
     const errorCode = error.response ? error.response.status : undefined;
-    console.log(`Error code is ${errorCode}`)
     // check if the caller wants to handle a specific error status code
     if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
       if (Array.isArray(error.config.handleErrorCode)) {

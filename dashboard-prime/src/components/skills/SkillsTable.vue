@@ -160,8 +160,7 @@ const onReorderSwitchChanged = (enabled) => {
   if (enabled) {
     subjSkillsDisplayOrder.disableFirstAndLastButtons(props.groupId)
     sortInfo.value.sortBy = 'displayOrder'
-    sortInfo.value.sortOrder = -1
-    options.value.sortOrder = 1
+    sortInfo.value.sortOrder = 1
     clearFilter()
   }
 }
@@ -220,7 +219,10 @@ const actionsMenu = ref([
   },
   {
     label: 'Reuse in this Project',
-    icon: 'fas fa-recycle'
+    icon: 'fas fa-recycle',
+    command: () => {
+      showSkillsReuseModal.value = true
+    }
   },
   {
     label: 'Move Skills',
@@ -250,6 +252,7 @@ const actionsMenu = ref([
 const expandedRows = ref([])
 
 const showMoveSkillsInfoModal = ref(false)
+const showSkillsReuseModal = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -414,6 +417,9 @@ const onMoved = (movedInfo) => {
                   class="text-lg"
                   :value="slotProps.data.name" :filter="filters.global.value" />
               </router-link>
+              <Tag v-if="slotProps.data.reusedSkill" class="ml-2" :data-cy="`importedBadge-${slotProps.data.skillId}`">
+                <span><i class="fas fa-recycle" aria-hidden="true"></i> Reused</span>
+              </Tag>
             </div>
             <div class="flex-none">
               <div class="flex">
@@ -583,8 +589,17 @@ const onMoved = (movedInfo) => {
       :skill="deleteSkillInfo.skill"
       @do-remove="doDeleteSkill" />
     <reuse-or-move-skills-dialog
+      id="moveSkillsModal"
       v-if="showMoveSkillsInfoModal"
       v-model="showMoveSkillsInfoModal"
+      :skills="selectedRows"
+      @on-moved="onMoved"
+    />
+    <reuse-or-move-skills-dialog
+      id="reuseSkillsModal"
+      :is-reuse-type="true"
+      v-if="showSkillsReuseModal"
+      v-model="showSkillsReuseModal"
       :skills="selectedRows"
       @on-moved="onMoved"
     />
