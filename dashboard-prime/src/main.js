@@ -7,6 +7,7 @@ import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import router from './router'
 import VueAnnouncer from '@vue-a11y/announcer'
+import VueApexCharts from 'vue3-apexcharts';
 
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
@@ -70,6 +71,7 @@ app.use(pinia)
 app.use(PrimeVue)
 app.use(ToastService)
 app.use(VueAnnouncer)
+app.use(VueApexCharts)
 app.use(ConfirmationService)
 app.component('Button', Button)
 app.component('ButtonGroup', ButtonGroup)

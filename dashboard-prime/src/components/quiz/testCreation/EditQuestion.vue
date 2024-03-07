@@ -241,7 +241,7 @@ const onSavedQuestion = (savedQuestion) => {
       <div class="mt-3 mb-2">
         <span class="font-bold text-primary">Answers</span>
       </div>
-      <div>
+      <div v-if="questionDef.quizType === 'Survey'" class="mb-2">
         <SkillsDropDown
             name="questionType"
             data-cy="answerTypeSelector"

@@ -13,48 +13,32 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+const model = defineModel()
+const props = defineProps({
+  readOnly: {
+    type: Boolean,
+    default: false,
+  },
+  fontSize: {
+    type: String,
+    default: '2.1rem',
+  },
+})
+const flipSelected = () => {
+  if (!props.readOnly) {
+    model.value = !model.value;
+  }
+}
+</script>
+
 <template>
   <span v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0"
         aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}">
-    <i v-if="!selected" class="far fa-square" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
-    <i v-if="selected" class="far fa-check-square text-success" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
+    <i v-if="!model" class="far fa-square" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
+    <i v-if="model" class="far fa-check-square text-success" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
   </span>
 </template>
-
-<script>
-  export default {
-    name: 'CheckSelector',
-    props: {
-      value: Boolean,
-      readOnly: {
-        type: Boolean,
-        default: false,
-      },
-      fontSize: {
-        type: String,
-        default: '2.1rem',
-      },
-    },
-    data() {
-      return {
-        selected: this.value,
-      };
-    },
-    watch: {
-      selected(newValue) {
-        this.$emit('input', newValue);
-      },
-    },
-    methods: {
-      flipSelected() {
-        if (!this.readOnly) {
-          this.selected = !this.selected;
-          this.$emit('selected', this.selected);
-        }
-      },
-    },
-  };
-</script>
 
 <style scoped>
 i {

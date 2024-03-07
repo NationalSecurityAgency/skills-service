@@ -64,6 +64,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const needToBootstrap = computed(() => config.value.needToBootstrap)
   const verifyEmailAddresses = computed(() => config.value.verifyEmailAddresses)
   const oAuthOnly = computed(() => config.value.oAuthOnly)
+  const oAuthProviders = computed(() => config.value.oAuthProviders)
   const enablePageVisitReporting = computed(() => config.value.enablePageVisitReporting === true || config.value.enablePageVisitReporting === 'true')
   const allowedAttachmentFileTypes = computed(() => config.value.allowedAttachmentFileTypes)
   const maxAttachmentSize = computed(() => config.value.maxAttachmentSize ? Number(config.value.maxAttachmentSize) : 0)
@@ -84,6 +85,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const userCommunityRestrictedDescriptor = computed(() => config.value.userCommunityRestrictedDescriptor || '')
   const userCommunityDocsLabel = computed(() => config.value.userCommunityDocsLabel || 'Learn More')
   const userCommunityDocsLink = computed(() => config.value.userCommunityDocsLink || '' )
+  const usersTableAdditionalUserTagKey = computed(() => config.value.usersTableAdditionalUserTagKey)
+  const usersTableAdditionalUserTagLabel = computed(() => config.value.usersTableAdditionalUserTagLabel)
   return {
     loadConfigState,
     isLoadingConfig,
@@ -113,6 +116,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     needToBootstrap,
     verifyEmailAddresses,
     oAuthOnly,
+    oAuthProviders,
     enablePageVisitReporting,
     allowedAttachmentFileTypes,
     maxAttachmentSize,
@@ -131,6 +135,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     userCommunityAfterLabel,
     userCommunityRestrictedDescriptor,
     userCommunityDocsLabel,
-    userCommunityDocsLink
+    userCommunityDocsLink,
+    usersTableAdditionalUserTagKey,
+    usersTableAdditionalUserTagLabel
   }
 })
