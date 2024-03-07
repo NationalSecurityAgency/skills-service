@@ -716,5 +716,23 @@ describe('Skills Table Tests', () => {
 
   })
 
+  it.only('sort column is saved in local storage', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+    cy.get(`${tableSelector} th`).contains('Skill').click()
+    cy.validateTable(tableSelector, [
+      [{ colIndex: 2, value: 'Very Great Skill 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill 2' }, { colIndex: 3, value: 2 }]
+    ], 10, false, null, false)
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+    cy.validateTable(tableSelector, [
+      [{ colIndex: 2, value: 'Very Great Skill 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Very Great Skill 2' }, { colIndex: 3, value: 2 }]
+    ], 10, false, null, false)
+  })
+
 })
 

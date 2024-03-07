@@ -32,19 +32,20 @@ const projConfig = useProjConfig()
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
+
 const subjectId = computed(() => route.params.subjectId)
 const tableId = props.groupId || route.params.subjectId
 const pagination = {
   pageSize: 10,
   possiblePageSizes: [10, 20, 50, 100]
 }
+
+const sortInfo = useStorage(`skillsTable-sort-${tableId}`, {  sortOrder: -1, sortBy: 'created' })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   bordered: true,
   outlined: true,
   stacked: 'md',
-  sortBy: 'created',
-  sortOrder: -1,
   fields: [
     {
       key: 'name',
@@ -158,7 +159,8 @@ const reorderEnable = ref(false)
 const onReorderSwitchChanged = (enabled) => {
   if (enabled) {
     subjSkillsDisplayOrder.disableFirstAndLastButtons(props.groupId)
-    options.value.sortBy = 'displayOrder'
+    sortInfo.value.sortBy = 'displayOrder'
+    sortInfo.value.sortOrder = -1
     options.value.sortOrder = 1
     clearFilter()
   }
@@ -285,8 +287,8 @@ const onMoved = (movedInfo) => {
       v-model:expandedRows="expandedRows"
       v-model:selection="selectedRows"
       v-model:filters="filters"
-      v-model:sort-field="options.sortBy"
-      v-model:sort-order="options.sortOrder"
+      v-model:sort-field="sortInfo.sortBy"
+      v-model:sort-order="sortInfo.sortOrder"
       @update:first="(val) => indexOfFirstRow = val"
       @filter="onFilter"
       @sort="onColumnSort"
