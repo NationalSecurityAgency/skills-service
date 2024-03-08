@@ -61,6 +61,7 @@ onMounted(() => {
     label: 'User',
     sortable: true,
     imageClass: 'fas fa-user skills-color-users',
+    dataCy: 'usrColumnHeader',
   });
   if (userTagsUtils.showUserTagColumn) {
     fields.push({
@@ -87,7 +88,7 @@ const loadData = () => {
   tableOptions.value.busy = true;
   const params = {
     limit: tableOptions.value.pagination.pageSize,
-    ascending: !tableOptions.value.sortAsc,
+    ascending: tableOptions.value.sortAsc,
     page: tableOptions.value.pagination.currentPage,
     orderBy: tableOptions.value.sortBy,
   };
@@ -140,6 +141,8 @@ const expandIcon = (truncated) => {
                :paginator="true"
                :rows="tableOptions.pagination.pageSize"
                :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
+               :sort-field="tableOptions.sortBy"
+               :sort-order="tableOptions.sortAsc ? 1 : -1"
                @page="pageChanged"
                @sort="sortField"
                stateStorage="local"
@@ -166,7 +169,7 @@ const expandIcon = (truncated) => {
               class="vertical-align-top"
       >
         <template #header>
-          <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+          <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field == 'answerTxt'" :data-cy="`row${slotProps.index}-colAnswerTxt`">
