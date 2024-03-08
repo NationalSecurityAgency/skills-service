@@ -37,7 +37,7 @@ const actionDirection = computed(() => textCustomization.actionDirection)
 const onCancel = () => {
   model.value = false
 
-  if (movedOrReusedSkills.value) {
+  if (movedOrReusedSkills.value && movedOrReusedSkills.value.length > 0) {
     emits('on-moved', { moved: toRaw(movedOrReusedSkills.value), destination: toRaw(selectedDestination.value) })
   }
 
@@ -90,6 +90,11 @@ onMounted(() => {
 
 const movedOrReusedSkills = ref([])
 const onReuseOrMove = (changedSkills) => {
+  // after reuse/move action button will be disabled so need to focus on another button
+  const groupId = props.skills[0].groupId
+  const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
+  focusState.setElementId(focusOn)
+
   movedOrReusedSkills.value = changedSkills
 }
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
@@ -101,9 +106,6 @@ const onVisibleChanged = (isVisible) => {
   }
 }
 const handleFocus = () => {
-  const groupId = props.skills[0].groupId
-  const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
-  focusState.setElementId(focusOn)
   focusState.focusOnLastElement()
 }
 </script>

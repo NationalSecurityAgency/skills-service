@@ -397,7 +397,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('cancel modal will focus on the Clear button', () => {
+    it('cancel modal will focus on the Actions button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -406,65 +406,74 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.get('[data-cy="closeButton"]')
             .click();
-        cy.get('[data-cy="clearSelectedSkillsBtn"]')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('have.focus');
 
         // close with X on top right
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
 
         cy.get('[aria-label="Close"]')
             .click();
-        cy.get('[data-cy="clearSelectedSkillsBtn"]')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('have.focus');
     });
 
-    it.skip('successful reuse should focus on the Select All button', () => {
+    it('successful reuse should focus on the New Skill button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="okButton"]')
             .click();
-        cy.get('[data-cy="selectAllSkillsBtn"]')
+        cy.get('[data-cy="newSkillButton"]')
             .should('have.focus');
     });
 
-    it.skip('successful reuse from a group should focus on the Select All button of its parent table', () => {
+    it('successful reuse from a group should focus on its New Skill button of its parent table', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="expandDetailsBtn_group11"]')
-            .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillSelect-skill6"]')
-            .click({ force: true });
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillReuseBtn"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="okButton"]')
             .click();
-        cy.get('[data-cy="selectAllSkillsBtn"]')
+        cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .should('have.focus');
+    });
+
+    it('in a group canceling modal will focus on the Actions button', () => {
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
+        // cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click();
+        cy.get('[data-cy="closeButton"]').click();
+        cy.get('[data-cy="closeButton"]').should('not.exist')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
+          .should('have.focus');
     });
 
 });

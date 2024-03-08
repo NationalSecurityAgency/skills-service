@@ -35,9 +35,11 @@ const onClick = (event) =>{
 
 <template>
   <Button :disabled="disabled || loading" @click="onClick" role="button">
-    <span v-if="label">{{ label }}</span>
-    <i v-if="!loading && icon && icon.trim().length > 0" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>
-    <ProgressSpinner v-if="loading" style="width: 0.9rem; height: 0.9rem;" class="ml-1" />
+    <slot>
+      <span v-if="label">{{ label }}</span>
+      <i v-if="!loading && icon && icon.trim().length > 0" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>
+      <ProgressSpinner v-if="loading" style="width: 0.9rem; height: 0.9rem;" class="ml-1" />
+    </slot>
   </Button>
 </template>
 

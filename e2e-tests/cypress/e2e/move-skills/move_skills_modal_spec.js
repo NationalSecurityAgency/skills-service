@@ -127,7 +127,7 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[data-cy="closeButton"]')
             .click();
-        cy.get('[data-cy="newSkillButton"]')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('have.focus');
 
         // close with X on top right
@@ -138,7 +138,7 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[aria-label="Close"]')
             .click();
-        cy.get('[data-cy="newSkillButton"]')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('have.focus');
     });
 

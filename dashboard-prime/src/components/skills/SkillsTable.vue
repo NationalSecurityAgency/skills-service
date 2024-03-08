@@ -350,7 +350,8 @@ const onMoved = (movedInfo) => {
                   aria-label="When enabled move-up and move-down buttons will be visible within each display order cell"
                   v-model="reorderEnable" />
               </div>
-              <Button
+              <SkillsButton
+                :id="`skillActionsBtn${groupId || ''}`"
                 severity="info"
                 class="ml-3"
                 @click="toggleActionsMenu"
@@ -358,12 +359,13 @@ const onMoved = (movedInfo) => {
                 aria-haspopup="true"
                 aria-controls="user_settings_menu"
                 :disabled="selectedSkills.length === 0"
+                :track-for-focus="true"
                 data-cy="skillActionsBtn">
                 <i class="fas fa-tools mr-1" aria-hidden="true"></i>
                 <span>Action</span>
                 <Badge :value="selectedSkills.length" data-cy="skillActionsNumSelected"></Badge>
                 <i class="fas fa-caret-down ml-2"></i>
-              </Button>
+              </SkillsButton>
               <Menu ref="skillsActionsMenu"
                     id="skillsActionsMenu"
                     data-cy="skillsActionsMenu"
