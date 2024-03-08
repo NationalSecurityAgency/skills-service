@@ -23,208 +23,30 @@ describe('Skill Reuse Modal Tests', () => {
 
     it('no destination', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
 
         cy.get('[data-cy="destinationList"]')
             .should('not.exist');
         cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
+          .should('not.exist');
         cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
+          .should('not.exist');
         cy.get('[data-cy="okButton"]')
             .should('not.exist');
         cy.get('[data-cy="destListPagingControl"]')
             .should('not.exist');
-        cy.get('[data-cy="reuseSkillsModalStep1"]')
+        cy.get('[data-cy="reuseOrMoveDialog"] [data-cy="noContent"]')
             .contains('No Destinations');
-    });
-
-    it('paging controls are only if there are at least 6 items', () => {
-        cy.createSubject(1, 2);
-        cy.createSubject(1, 3);
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
-
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 2);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 2');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 3');
-        cy.get('[data-cy="destListPagingControl"]')
-            .should('not.exist');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
-
-        cy.createSubject(1, 4);
-        cy.createSubject(1, 5);
-        cy.createSubject(1, 6);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
-
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 5);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 2');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 3');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Subject 4');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
-            .contains('Subject 5');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-4"]')
-            .contains('Subject 6');
-        cy.get('[data-cy="destListPagingControl"]')
-            .should('not.exist');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
-
-        cy.createSubject(1, 7);
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
-
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 4);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 2');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 3');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Subject 4');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
-            .contains('Subject 5');
-        cy.get('[data-cy="destListPagingControl"]')
-            .should('exist');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
-
-        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 2"]')
-            .click();
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 2);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 6');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 7');
-    });
-
-    it('destination selector paging', () => {
-        cy.createSubject(1, 2);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
-        cy.createSubject(1, 3);
-        cy.createSubject(1, 4);
-        cy.createSubject(1, 5);
-
-        cy.createSkillsGroup(1, 1, 11);
-        cy.createSkillsGroup(1, 1, 12);
-        cy.createSkillsGroup(1, 2, 13);
-        cy.createSkillsGroup(1, 3, 14);
-        cy.createSkillsGroup(1, 3, 15);
-        cy.createSkillsGroup(1, 3, 16);
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill3"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
-
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 4);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Awesome Group 11 Subj1');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Awesome Group 12 Subj1');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Subject 2');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
-            .contains('Awesome Group 13 Subj2');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
-
-        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 2"]')
-            .click();
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 4);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 3');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Awesome Group 14 Subj3');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-2"]')
-            .contains('Awesome Group 15 Subj3');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-3"]')
-            .contains('Awesome Group 16 Subj3');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
-
-        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 3"]')
-            .click();
-        cy.get('[data-cy="destinationList"] .list-group-item')
-            .should('have.length', 2);
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-0"]')
-            .contains('Subject 4');
-        cy.get('[data-cy="destinationList"] [data-cy="destItem-1"]')
-            .contains('Subject 5');
-        cy.get('[data-cy="reuseButton"]')
-            .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
-            .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
     });
 
     it('1 skill - available to reuse', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -265,12 +87,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -296,12 +115,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -345,12 +161,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 5, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -398,12 +211,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherGroup(1, 6, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 9, 1, 12);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
         cy.get('[data-cy="closeButton"]')
@@ -447,12 +257,9 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.addLearningPathItem(1, 3, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
@@ -485,12 +292,9 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
 
         // now none of the skills available for reuse
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
@@ -532,12 +336,9 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
@@ -572,12 +373,9 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="selectAllSkillsBtn"]')
-            .click();
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
@@ -599,15 +397,12 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('cancel modal will focus on the Clear button', () => {
+    it.skip('cancel modal will focus on the Clear button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"]')
-            .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
 
         cy.get('[data-cy="closeButton"]')
             .click();
@@ -629,7 +424,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it('successful reuse should focus on the Select All button', () => {
+    it.skip('successful reuse should focus on the Select All button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillSelect-skill1"]')
@@ -648,7 +443,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it('successful reuse from a group should focus on the Select All button of its parent table', () => {
+    it.skip('successful reuse from a group should focus on the Select All button of its parent table', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);

@@ -12,6 +12,7 @@ import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
 
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
@@ -123,6 +124,8 @@ const loadSkill = () => {
       })
   }
 }
+
+const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skillInfo.value.skillId))
 </script>
 
 <template>
@@ -141,6 +144,10 @@ const loadSkill = () => {
       <Badge class="text-uppercase"><i class="fas fa-recycle"></i> reused</Badge>
       copy
       of another skill in this project and can only be edited from the
+      <link-to-skill-page
+        :project-id="skillInfo.projectId"
+        :skillId="skillIdOfTheOriginalSkill"
+        link-label="Original Skill" data-cy="linkToTheOriginalSkill" />
       <!--      <link-to-skill-page v-if="skillId" :project-id="skillInfo.projectId" :skill-id="skillId"-->
       <!--                          link-label="Original Skill" data-cy="linkToTheOriginalSkill"/>-->
       .

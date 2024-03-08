@@ -26,24 +26,22 @@ describe('Skill Reuse Tests', () => {
         cy.createSubject(1, 2);
     });
 
-    it.skip('skill is reused in another subject', () => {
+    it('skill is reused in another subject', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.get('[data-cy="importedBadge-skill1STREUSESKILLST0"]')
             .contains('Reused');
-        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="smtText"]')
+        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="highlightedValue"]')
             .should('have.text', 'Very Great Skill 1');
 
-        cy.get('[data-cy="expandDetailsBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
 
         // navigate down to a skill page
-        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
-            .contains('View');
-        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get('[data-cy="copySkillButton_skill1STREUSESKILLST0]').should('not.exist')
+        cy.get('[data-cy="editSkillButton_skill1STREUSESKILLST0"]').should('not.exist')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]').click()
 
         cy.get('[data-cy="pageHeader"] [data-cy="importedBadge"]')
             .contains('Reused');
@@ -64,12 +62,11 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
     });
 
-    it.skip('ability to navigate to the original skill from the reused skill', () => {
+    it('ability to navigate to the original skill from the reused skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="expandDetailsBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -98,7 +95,7 @@ describe('Skill Reuse Tests', () => {
             .should('have.text', 'ID: skill1');
     });
 
-    it.skip('search reused skills', () => {
+    it('search reused skills', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
@@ -111,7 +108,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill3STREUSESKILLST0"]');
 
         cy.get('[data-cy="skillsTable-skillFilter"]')
-            .type('skill1{enter}');
+            .type('skill 1');
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]');
         cy.get('[data-cy="manageSkillLink_skill2STREUSESKILLST0"]')
             .should('not.exist');
@@ -120,7 +117,7 @@ describe('Skill Reuse Tests', () => {
 
         cy.get('[data-cy="skillsTable-skillFilter"]')
             .clear()
-            .type('Skill 2 {enter}');
+            .type('Skill 2');
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
             .should('not.exist');
         cy.get('[data-cy="manageSkillLink_skill2STREUSESKILLST0"]');
@@ -128,7 +125,7 @@ describe('Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('reuse skill into a subject', () => {
+    it('reuse skill into a subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);
@@ -143,14 +140,10 @@ describe('Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 3, 16);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill3"]')
-            .click({ force: true });
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
-        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 2"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"]')

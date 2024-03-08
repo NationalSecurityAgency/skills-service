@@ -592,7 +592,7 @@ const onMoved = (movedInfo) => {
       id="moveSkillsModal"
       v-if="showMoveSkillsInfoModal"
       v-model="showMoveSkillsInfoModal"
-      :skills="selectedRows"
+      :skills="selectedSkills"
       @on-moved="onMoved"
     />
     <reuse-or-move-skills-dialog
@@ -600,7 +600,7 @@ const onMoved = (movedInfo) => {
       :is-reuse-type="true"
       v-if="showSkillsReuseModal"
       v-model="showSkillsReuseModal"
-      :skills="selectedRows"
+      :skills="selectedSkills"
       @on-moved="onMoved"
     />
   </div>

@@ -29,9 +29,13 @@ const highlightValue = computed(() =>{
 </script>
 
 <template>
-  <span v-html="highlightValue" />
+  <div v-html="highlightValue" data-cy="highlightedValue" class="max-wrap"/>
 </template>
 
 <style scoped>
-
+.max-wrap {
+  max-width: 20rem;
+  word-wrap: break-word;
+  display: inline-block;
+}
 </style>

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import Badge from 'primevue/badge'
@@ -28,78 +28,97 @@ import ShowMore from '@/components/skills/selfReport/ShowMore.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const route = useRoute();
-const router = useRouter();
-const announcer = useSkillsAnnouncer();
+const route = useRoute()
+const router = useRouter()
+const announcer = useSkillsAnnouncer()
 const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
 
-const headerOptions = ref({});
-const showEdit = ref(false);
+const headerOptions = ref({})
+const showEdit = ref(false)
 
 // let skill = ref(store.getters["skills/skill"]);
 
-const skillsState = useSkillsState();
+const skillsState = useSkillsState()
 
 onMounted(() => {
-  loadData();
-});
+  loadData()
+})
+
+// Vue caches components and when re-directed to the same component the path will be pushed
+// to the url but the component will NOT be re-mounted therefore we must listen for events and re-load
+// the data; alternatively could update
+//    <router-view :key="$route.fullPath"/>
+// but components will never get cached - caching maybe important for components that want to update
+// the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
+watch(
+  () => route.params.skillId,
+  () => loadData()
+)
 
 const isLoading = computed(() => {
   return subjectState.isLoadingSubject || projConfig.isReadOnlyProj || skillsState.loadingSkill
-});
+})
 
 const navItems = ref([])
 const buildNavItems = () => {
-  const items = [];
-  items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' });
-  items.push({ name: 'Video', iconClass: 'fa-video skills-color-video', page: 'ConfigureVideo' });
-  items.push({ name: 'Expiration', iconClass: 'fa-hourglass-end skills-color-expiration', page: 'ConfigureExpiration' });
-  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' });
-  const isReadOnlyNonSr = (skillsState.skill.readOnly === true && !skillsState.skill.selfReportType);
-  const addEventDisabled = subjectState.subject.totalPoints < appConfig.minimumSubjectPoints || isReadOnlyNonSr;
+  const items = []
+  items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' })
+  items.push({ name: 'Video', iconClass: 'fa-video skills-color-video', page: 'ConfigureVideo' })
+  items.push({
+    name: 'Expiration',
+    iconClass: 'fa-hourglass-end skills-color-expiration',
+    page: 'ConfigureExpiration'
+  })
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
+  const isReadOnlyNonSr = (skillsState.skill.readOnly === true && !skillsState.skill.selfReportType)
+  const addEventDisabled = subjectState.subject.totalPoints < appConfig.minimumSubjectPoints || isReadOnlyNonSr
 
-  let msg = addEventDisabled ? `Subject needs at least ${appConfig.minimumSubjectPoints} points before events can be added` : '';
-  const disabledDueToGroupBeingDisabled = skillsState.skill.groupId && !skillsState.skill.enabled;
+  let msg = addEventDisabled ? `Subject needs at least ${appConfig.minimumSubjectPoints} points before events can be added` : ''
+  const disabledDueToGroupBeingDisabled = skillsState.skill.groupId && !skillsState.skill.enabled
   if (disabledDueToGroupBeingDisabled) {
-    msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`;
+    msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`
   }
   if (isReadOnlyNonSr) {
-    msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting';
+    msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting'
   }
   if (!isImported?.value && !appConfig.isReadOnlyProj?.value) {
     items.push({
-      name: 'Add Event', iconClass: 'fa-user-plus skills-color-events', page: 'AddSkillEvent', isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr, msg,
-    });
+      name: 'Add Event',
+      iconClass: 'fa-user-plus skills-color-events',
+      page: 'AddSkillEvent',
+      isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr,
+      msg
+    })
   }
-  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' });
-  return items;
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' })
+  return items
 }
 
 const isImported = computed(() => {
-  return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0;
-});
+  return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0
+})
 
 // Methods
 const displayEdit = () => {
   // should only enable edit button if dirty, isn't currently
-  showEdit.value = true;
-};
+  showEdit.value = true
+}
 
 const loadData = () => {
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
-    headerOptions.value = buildHeaderOptions();
-    if (subjectState.subject.value) {
-      navItems.value = buildNavItems()
-    } else {
-      subjectState.loadSubjectDetailsState().then(() => {
+      headerOptions.value = buildHeaderOptions()
+      if (subjectState.subject.value) {
         navItems.value = buildNavItems()
-      });
-    }
-  });
-};
+      } else {
+        subjectState.loadSubjectDetailsState().then(() => {
+          navItems.value = buildNavItems()
+        })
+      }
+    })
+}
 
 const skillEdited = (editedSkill) => {
   const origId = skillsState.skill.skillId
@@ -113,7 +132,7 @@ const skillEdited = (editedSkill) => {
 }
 
 const buildHeaderOptions = () => {
-  const skillId = skillsState.skill?.skillId ? SkillReuseIdUtil.removeTag(skillsState.skill.skillId) : '';
+  const skillId = skillsState.skill?.skillId ? SkillReuseIdUtil.removeTag(skillsState.skill.skillId) : ''
   return {
     icon: 'fas fa-graduation-cap skills-color-skills',
     title: `SKILL: ${skillsState.skill?.name}`,
@@ -121,21 +140,22 @@ const buildHeaderOptions = () => {
     stats: [{
       label: 'Points',
       count: skillsState.skill?.totalPoints,
-      icon: 'far fa-arrow-alt-circle-up skills-color-points',
-    }],
-  };
-};
+      icon: 'far fa-arrow-alt-circle-up skills-color-points'
+    }]
+  }
+}
 
 const skillId = computed(() => {
-  return skillsState.skill ? `ID: ${SkillReuseIdUtil.removeTag(skillsState.skill.skillId)}` : 'Loading...';
-});
+  return skillsState.skill ? `ID: ${SkillReuseIdUtil.removeTag(skillsState.skill.skillId)}` : 'Loading...'
+})
 </script>
 
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
       <template #subTitle v-if="skillsState.skill">
-        <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block" :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`">
+        <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block"
+             :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`">
           <Badge variant="info">
             <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
           </Badge>
@@ -144,7 +164,8 @@ const skillId = computed(() => {
           <show-more :limit="54" :text="skillId"></show-more>
         </div>
         <div class="h5 text-muted" v-if="skillsState.skill && skillsState.skill.groupId">
-          <span style="font-size: 1rem">Group ID:</span> <span v-tooltip="`Name: ${ skillsState.skill.groupName }`">{{ skillsState.skill.groupId }}</span>
+          <span style="font-size: 1rem">Group ID:</span> <span
+          v-tooltip="`Name: ${ skillsState.skill.groupName }`">{{ skillsState.skill.groupId }}</span>
         </div>
       </template>
       <template #subSubTitle v-if="!isImported">
@@ -165,7 +186,7 @@ const skillId = computed(() => {
       <template #right-of-header
                 v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)">
         <Badge v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
-            class="fas fa-book"></i> EXPORTED
+          class="fas fa-book"></i> EXPORTED
         </Badge>
         <Badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge">
           <span v-if="skillsState.skill.reusedSkill"><i class="fas fa-recycle"></i> Reused</span>

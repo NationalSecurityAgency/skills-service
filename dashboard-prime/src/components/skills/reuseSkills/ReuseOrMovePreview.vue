@@ -21,16 +21,16 @@ const props = defineProps({
   },
   nextStepNavFunction: {
     type: Function,
-    required: true,
+    required: true
   },
   actionName: {
     type: String,
-    required: true,
+    required: true
   },
   actionDirection: {
     type: String,
-    required: true,
-  },
+    required: true
+  }
 })
 const emits = defineEmits(['on-cancel', 'on-changed'])
 const route = useRoute()
@@ -41,7 +41,7 @@ const skillsForReuse = ref({
   allAlreadyExist: [],
   alreadyExist: [],
   available: [],
-  skillsWithDeps: [],
+  skillsWithDeps: []
 })
 
 const buildSummaryInfo = () => {
@@ -51,9 +51,7 @@ const buildSummaryInfo = () => {
       skillsForReuse.value.allAlreadyExist = res
       skillsForReuse.value.alreadyExist = props.skills.filter((skill) => res.find((e) => e.name === skill.name))
       skillsForReuse.value.available = props.skills.filter((skill) => !res.find((e) => e.name === skill.name))
-      if (skillsForReuse.value.available.length > 0) {
-        loadDependencyInfo()
-      }
+      loadDependencyInfo()
     })
     .finally(() => {
       loadingReusedSkills.value = false
@@ -62,7 +60,7 @@ const buildSummaryInfo = () => {
 
 const loadingDependencyInfo = ref(true)
 const loadDependencyInfo = () => {
-  if (props.isReuseType) {
+  if (props.isReuseType && skillsForReuse.value.available.length > 0) {
     SkillsService.checkSkillsForDeps(route.params.projectId, skillsForReuse.value.available.map((item) => item.skillId))
       .then((res) => {
         const withDeps = res.filter((item) => item.hasDependency)
@@ -83,19 +81,19 @@ onMounted(() => {
 
 const skillsWereMovedOrReusedAlready = ref(false)
 const reuseInProgress = ref(false)
-const doMoveOrReuse =() => {
-  reuseInProgress.value = true;
-  const skillIds = skillsForReuse.value.available.map((sk) => sk.skillId);
+const doMoveOrReuse = () => {
+  reuseInProgress.value = true
+  const skillIds = skillsForReuse.value.available.map((sk) => sk.skillId)
   if (!props.isReuseType) {
     SkillsService.moveSkills(route.params.projectId, skillIds, props.destination.subjectId, props.destination.groupId)
       .then(() => {
-        handleActionCompleting();
+        handleActionCompleting()
       })
   } else {
     SkillsService.reuseSkillInAnotherSubject(route.params.projectId, skillIds, props.destination.subjectId, props.destination.groupId)
       .then(() => {
-        handleActionCompleting();
-      });
+        handleActionCompleting()
+      })
   }
 }
 
@@ -106,28 +104,32 @@ const handleActionCompleting = () => {
   } else {
     SkillsReporter.reportSkill('MoveSkill')
   }
-  reuseInProgress.value = false;
+  reuseInProgress.value = false
   props.nextStepNavFunction()
   emits('on-changed', toRaw(skillsForReuse.value.available))
 }
 
-const actionNameInPast = computed(() => `${props.actionName.value}d`)
+const actionName = computed(() => props.actionName.toLocaleLowerCase())
+const actionNameInPast = computed(() => `${actionName.value}d`)
+const isReuseBtnDisabled = computed(() => {
+  return reuseInProgress.value || (skillsForReuse.value.available && skillsForReuse.value.available.length === 0)
+})
 </script>
 
 <template>
   <div>
     <skills-spinner :is-loading="isLoading" class="my-5" />
     <div v-if="!isLoading">
-        <no-content2
-          v-if="skillsWereMovedOrReusedAlready"
-          class="mt-3"
-          title="Please Refresh"
-          :show-refresh-action="true"
-          message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
+      <no-content2
+        v-if="skillsWereMovedOrReusedAlready"
+        class="mt-3"
+        title="Please Refresh"
+        :show-refresh-action="true"
+        message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
 
-        <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-column h-12rem">
-          <div
-            class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
+      <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-column h-12rem">
+        <div
+          class="p-4 border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
 
           <div v-if="skillsForReuse.available.length > 0">
             <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
@@ -147,13 +149,14 @@ const actionNameInPast = computed(() => `${props.actionName.value}d`)
               </span>
           </div>
           <div v-else>
-            <i class="fas fa-exclamation-triangle text-warning mr-2" />
-            Selected skills can NOT be {{ actionNameInPast }} {{ actionDirection }} the
-            <span v-if="destination.groupName"><span
-              class="text-primary font-weight-bold">{{ destination.groupName }} </span> group</span>
-            <span v-else><span
-              class="text-primary font-weight-bold">{{ destination.subjectName }} </span> subject</span>.
-            Please cancel and select different skills.
+            <Message severity="warn" :closable="false">
+              Selected skills can NOT be {{ actionNameInPast }} {{ actionDirection }} the
+              <span v-if="destination.groupName"><span
+                class="text-primary font-weight-bold">{{ destination.groupName }} </span> group</span>
+              <span v-else><span
+                class="text-primary font-weight-bold">{{ destination.subjectName }} </span> subject</span>.
+              Please cancel and select different skills.
+            </Message>
           </div>
           <div v-if="skillsForReuse.alreadyExist.length > 0">
             <Tag severity="warning">{{ skillsForReuse.alreadyExist.length }}</Tag>
@@ -184,6 +187,7 @@ const actionNameInPast = computed(() => `${props.actionName.value}d`)
           icon="fas fa-shipping-fast"
           @click="doMoveOrReuse"
           data-cy="reuseButton"
+          :disabled="isReuseBtnDisabled"
           outlined />
       </div>
     </div>

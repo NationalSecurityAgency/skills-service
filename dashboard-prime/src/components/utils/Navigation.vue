@@ -78,7 +78,7 @@ const navOnSmallScreen = (changeEvent) => {
                           :aria-current="isExactActive ? 'page' : false"
                           :data-cy="`nav-${navItem.name}`">
                     <div class="" :class="{'mr-4': !collapsed}">
-                      <i :class="navItem.iconClass" class="fas text-base mr-2"
+                      <i :class="navItem.iconClass" class="fas text-base mr-2 w-2rem"
                          aria-hidden="true" /> <span v-if="!collapsed" class="font-medium">{{ navItem.name }}</span>
                       <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-red-500 ml-1" />
                     </div>

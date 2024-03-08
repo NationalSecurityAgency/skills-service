@@ -45,7 +45,8 @@ const onCancel = () => {
 }
 
 const state = ref({
-  skillsWereMovedOrReusedAlready: false
+  skillsWereMovedOrReusedAlready: false,
+  reUseInProgress: false,
 })
 const loadingDest = ref(true)
 const destinations = ref([])
@@ -117,17 +118,17 @@ const handleFocus = () => {
     class="w-11 xl:w-8"
     v-model:visible="model"
   >
-    <div>
+    <div data-cy="reuseOrMoveDialog">
       <skills-spinner :is-loading="isLoadingData" class="my-8" />
       <div v-if="!isLoadingData" class="w-100">
         <no-content2
-          class="mt-3"
+          class="mt-5 mb-4"
           v-if="state.skillsWereMovedOrReusedAlready"
           title="Please Refresh"
           :show-refresh-action="true"
           message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
         <no-content2
-          class="mt-3"
+          class="mt-5 mb-4"
           v-if="!hasDestinations && !state.skillsWereMovedOrReusedAlready"
           title="No Destinations Available"
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
@@ -139,7 +140,9 @@ const handleFocus = () => {
               <Listbox
                 v-model="selectedDestination"
                 :options="destinations"
-                filter
+                :filter="destinations.length > 4"
+                :filter-fields="['subjectName', 'groupName']"
+                listStyle="max-height:250px"
                 @update:modelValue="nextCallback"
                 class="w-full">
                 <template #empty>
