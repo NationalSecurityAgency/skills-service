@@ -146,7 +146,7 @@ const handleDeleteCancelled = () => {
                                          @delete="deleteBadge"/>
       </template>
       <template #footer>
-        <i v-if="badgeInternal.endDate" class="fas fa-gem position-absolute" style="font-size: 1rem; top: 1rem; left: 1rem; color: purple" aria-hidden="true"/>
+        <i v-if="badgeInternal.endDate" class="fas fa-gem absolute" style="font-size: 1rem; top: 2.6rem; left: 1.6rem; color: purple" aria-hidden="true"/>
         <div class="mt-1 row align-items-centerflex justify-content-end" style="height: 2rem;">
           <div class="col text-right small">
             <div v-if="!live" data-cy="badgeStatus" style="">

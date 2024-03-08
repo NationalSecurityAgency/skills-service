@@ -3,7 +3,7 @@ import { ref, computed, nextTick, onMounted } from 'vue';
 import { useRoute } from "vue-router";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
-import {array, number, string, date} from "yup";
+import {object, array, number, string, date} from "yup";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -45,7 +45,21 @@ if (props.isEdit) {
   modalTitle = 'Editing Existing Badge'
 }
 
-const schema = {
+const maximumDays = computed(() => {
+  return appConfig.maxBadgeBonusInMinutes / (60 * 24)
+});
+
+const validateTime = (value, testContext) => {
+  console.log(testContext);
+  return true;
+  // return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxBadgeBonusInMinutes;
+}
+
+const maxTimeLimitMessage = computed(() => {
+  return `Time Window must be less then ${appConfig.maxBadgeBonusInMinutes / (60 * 24)} days`;
+});
+
+const schema = object({
   'name': string()
       .trim()
       .required()
@@ -72,15 +86,32 @@ const schema = {
   'helpUrl': string()
       .urlValidator()
       .label('Help URL'),
-  'expirationDays': number().label('Expiration Days'),
-  'expirationHrs': number().label('Expiration Hours'),
-  'expirationMins': number().label('Expiration Minutes'),
+  'awardAttrs.name': string()
+      .label('Award Name')
+      .min(appConfig.minNameLength)
+      .max(appConfig.maxBadgeNameLength),
+  'expirationHrs': number()
+      .label('Expiration Hours')
+      .min(0)
+      .max(23),
+  'expirationMins': number()
+      .label('Expiration Minutes')
+      .min(0)
+      .max(59),
+  'expirationDays': number()
+      .label('Expiration Days')
+      .min(0)
+      .when(['expirationMins', 'expirationHrs'],  {
+        is: (expirationMins, expirationHrs) => expirationHrs > 0 || expirationMins > 0,
+        then: (sch) => sch.max(maximumDays.value - 1),
+        otherwise: (sch) => sch.max(maximumDays.value)
+      }),
   // 'gemDates': array().of(date()).label('Gem Date').test('notInPast', 'Date can not be in the past', (value) => {
   //   console.log('Checking value...');
   //   console.log(value);
   // })
 
-};
+});
 
 let awardAttrs = {
   name: 'Speedy Finish',
@@ -136,7 +167,7 @@ let previousFocus = ref( null);
 let isAwardIcon = ref(false);
 let gemDates = ref([toDate(props.badge.startDate), toDate(props.badge.endDate)]);
 let currentIcon = ref((props.badge.iconClass || 'fas fa-book'));
-let awardIcon = ref(props.badge.awardAttrs?.iconClass);
+let awardIcon = ref(props.badge.awardAttrs?.iconClass || 'fas fa-car-side');
 let op = ref();
 
 // computed
@@ -168,10 +199,6 @@ const checkBadgeIdUnique = (value) => {
   return BadgesService.badgeWithIdExists(route.params.projectId, value);
 };
 
-const maxTimeLimitMessage = computed(() => {
-  return `Time Window must be less then ` //${$appConfig.maxBadgeBonusInMinutes / (60 * 24)} days`;
-});
-
 // methods
 const trackFocus = () => {
   previousFocus.value = currentFocus.value;
@@ -193,9 +220,6 @@ const updateBadge = (values) => {
     badgeToSave.timeLimitEnabled = true;
     badgeToSave.awardAttrs = values.awardAttrs;
     badgeToSave.awardAttrs.iconClass = awardIcon.value;
-    badgeToSave.expirationDays = badgeInternal.value.expirationDays;
-    badgeToSave.expirationHrs = badgeInternal.value.expirationHrs;
-    badgeToSave.expirationMins = badgeInternal.value.expirationMins;
   }
 
   if(limitTimeframe.value) {
@@ -208,7 +232,6 @@ const updateBadge = (values) => {
 
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
     badgeInternal.value = resp;
-    // emit('badge-updated', { isEdit: props.isEdit, ...resp });
   });
 };
 
@@ -261,6 +284,7 @@ const onBadgeSaved = () => {
   emit('badge-updated', badgeInternal.value );
   close();
 };
+
 </script>
 
 <template>
@@ -291,7 +315,7 @@ const onBadgeSaved = () => {
       <Card v-if="!global" data-cy="bonusAwardCard">
         <template #content>
           <div>
-            <div>
+            <div class="pb-3">
               <Checkbox data-cy="timeLimitCheckbox" id="checkbox-1" inputId="enableAward" class="d-inline" :binary="true" name="timeLimitEnabled" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>
               <label for="enableAward">
                 Enable Bonus Award
@@ -314,46 +338,36 @@ const onBadgeSaved = () => {
             </div>
             <div class="flex gap-4" v-if="badgeInternal.timeLimitEnabled">
               <div class="flex flex-1">
-  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|daysMaxTimeLimit:@timeLimitHours,@timeLimitMinutes|cantBe0IfHours0Minutes0" vid="timeLimitDays" v-slot="{errors}" name="Days">-->
-                  <InputGroup>
-                    <InputNumber
-                        v-model="badgeInternal.expirationDays"
-                        :initial-value="initialBadgeData.expirationDays"
-                        data-cy="timeLimitDays"
-                        id="timeLimitDays"
-                        name="expirationDays"/>
-                    <InputGroupAddon>
-                      Days
-                    </InputGroupAddon>
-                  </InputGroup>
+                <SkillsNumberInput v-model="badgeInternal.expirationDays"
+                                   class="w-full"
+                                   :initial-value="initialBadgeData.expirationDays"
+                                   label="Days"
+                                   data-cy="timeLimitDays"
+                                   id="timeLimitDays"
+                                   :min="0"
+                                   name="expirationDays" />
               </div>
               <div class="flex flex-1">
-  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:23|hoursMaxTimeLimit:@timeLimitDays,@timeLimitMinutes|cantBe0IfMins0Days0" vid="timeLimitHours" v-slot="{errors}" name="Hours">-->
-                  <InputGroup>
-                    <InputNumber
-                        v-model="badgeInternal.expirationHrs"
-                        :initial-value="initialBadgeData.expirationHrs"
-                        data-cy="timeLimitHours"
-                        id="timeLimitHours"
-                        name="expirationHrs"/>
-                    <InputGroupAddon>
-                      Hours
-                    </InputGroupAddon>
-                  </InputGroup>
+                <SkillsNumberInput v-model="badgeInternal.expirationHrs"
+                                   class="w-full"
+                                   :initial-value="initialBadgeData.expirationHrs"
+                                   label="Hours"
+                                   data-cy="timeLimitHours"
+                                   id="timeLimitHours"
+                                   :min="0"
+                                   :max="23"
+                                   name="expirationHrs" />
               </div>
               <div class="flex flex-1">
-  <!--              <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeLimit:@timeLimitDays,@timeLimitHours|cantBe0IfHours0Days0" vid="timeLimitMinutes" v-slot="{errors}" name="Minutes">-->
-                <InputGroup>
-                  <InputNumber
-                      v-model="badgeInternal.expirationMins"
-                      :initial-value="initialBadgeData.expirationMins"
-                      data-cy="timeLimitMinutes"
-                      id="timeLimitMinutes"
-                      name="expirationMins"/>
-                  <InputGroupAddon>
-                    Minutes
-                  </InputGroupAddon>
-                </InputGroup>
+                <SkillsNumberInput v-model="badgeInternal.expirationMins"
+                                   class="w-full"
+                                   :initial-value="initialBadgeData.expirationMins"
+                                   label="Minutes"
+                                   data-cy="timeLimitMinutes"
+                                   id="timeLimitMinutes"
+                                   :min="0"
+                                   :max="59"
+                                   name="expirationMins" />
               </div>
             </div>
           </div>

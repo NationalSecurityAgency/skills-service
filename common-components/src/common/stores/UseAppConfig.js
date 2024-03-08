@@ -40,6 +40,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return res
   }
 
+  const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
   const minNameLength = computed(() => config.value.minNameLength)
   const maxProjectNameLength = computed(() => config.value.maxProjectNameLength)
   const maxQuizNameLength = computed(() => config.value.maxQuizNameLength)
@@ -137,6 +138,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     userCommunityDocsLabel,
     userCommunityDocsLink,
     usersTableAdditionalUserTagKey,
-    usersTableAdditionalUserTagLabel
+    usersTableAdditionalUserTagLabel,
+    maxBadgeBonusInMinutes
   }
 })

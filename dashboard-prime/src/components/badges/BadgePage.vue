@@ -160,9 +160,9 @@ const toDate = (value) => {
 <template>
   <div>
     <page-header :loading="isLoading" :options="headerOptions">
-<!--      <span slot="right-of-header">-->
-<!--        <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>-->
-<!--      </span>-->
+      <template #right-of-header>
+        <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
+      </template>
       <template #subSubTitle v-if="badge && !isReadOnlyProj">
         <ButtonGroup v-if="!isReadOnlyProj">
           <SkillsButton @click="displayEditBadge"
