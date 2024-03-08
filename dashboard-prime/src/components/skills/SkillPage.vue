@@ -54,7 +54,11 @@ onMounted(() => {
 // the url so the state can be re-build later (example include browsing a map or dependency graph in our case)
 watch(
   () => route.params.skillId,
-  () => loadData()
+  () => {
+    if (!route.query.preventReload) {
+      loadData()
+    }
+  }
 )
 
 const isLoading = computed(() => {
@@ -125,7 +129,7 @@ const skillEdited = (editedSkill) => {
   skillsState.setSkill({ ...editedSkill, subjectId: route.params.subjectId })
 
   if (origId !== skillsState.skill.skillId) {
-    router.replace({ name: route.name, params: { ...route.params, skillId: skillsState.skill.skillId } })
+    router.replace({ name: route.name, params: { ...route.params, skillId: skillsState.skill.skillId }, query: { preventReload: true} })
   }
   headerOptions.value = buildHeaderOptions()
   announcer.polite(`Skill ${editedSkill.name} has been edited`)
