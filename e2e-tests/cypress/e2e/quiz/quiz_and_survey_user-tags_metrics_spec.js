@@ -94,13 +94,13 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.get(`${q2TableSelector} [data-cy="row2-userTag"]`).should('not.have.text')
 
         // multiple/single choice question by expanding history table
-        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtoggler"]').click()
         const q1Answer1HistoryTable = '[data-cy="metrics-q1"] [data-cy="row0-answerHistory"] [data-cy="quizAnswerHistoryTable"]'
         cy.get(`${q1Answer1HistoryTable} [data-cy="row0-userTag"]`).should('have.text', 'ABC')
         cy.get(`${q1Answer1HistoryTable} [data-cy="row1-userTag"]`).should('have.text', 'ABC1')
 
         // multiple/single choice question by expanding history table
-        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').click()
         const q1Answer3HistoryTable = '[data-cy="metrics-q1"] [data-cy="row2-answerHistory"] [data-cy="quizAnswerHistoryTable"]'
         cy.get(`${q1Answer3HistoryTable} [data-cy="row0-userTag"]`).should('have.text', 'ABC')
         cy.get(`${q1Answer3HistoryTable} [data-cy="row1-userTag"]`).should('not.have.text')

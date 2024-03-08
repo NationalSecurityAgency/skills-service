@@ -137,12 +137,14 @@ const expandIcon = (truncated) => {
   <div>
     <DataTable :value="answerHistory"
                :loading="tableOptions.busy"
-               stripedRows showGridlines lazy
+               stripedRows showGridlines
+               lazy
                :paginator="true"
                :rows="tableOptions.pagination.pageSize"
                :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
                :sort-field="tableOptions.sortBy"
                :sort-order="tableOptions.sortAsc ? 1 : -1"
+               :total-records="tableOptions.pagination.totalRows"
                @page="pageChanged"
                @sort="sortField"
                stateStorage="local"
