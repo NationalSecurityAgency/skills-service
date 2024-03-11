@@ -9,12 +9,13 @@ import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdIn
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from "@/components/utils/HelpUrlInput.vue";
 import OverlayPanel from "primevue/overlaypanel";
-import Calendar from 'primevue/calendar';
+import SkillsCalendarInput from '@/components/utils/inputForm/SkillsCalendarInput.vue';
 import IconManager from "@/components/utils/iconPicker/IconManager.vue";
 import BadgesService from '@/components/badges/BadgesService';
 import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js';
 import InputSanitizer from "@/components/utils/InputSanitizer.js";
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
+import dayjs from "dayjs";
 
 const model = defineModel()
 const props = defineProps({
@@ -77,7 +78,6 @@ const schema = object({
       .nullValueNotAllowed()
       .idValidator()
       .test('uniqueId', 'Badge ID is already taken', (value) => checkBadgeIdUnique(value))
-      .customNameValidator()
       .label('Badge ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
@@ -106,10 +106,21 @@ const schema = object({
         then: (sch) => sch.max(maximumDays.value - 1),
         otherwise: (sch) => sch.max(maximumDays.value)
       }),
-  // 'gemDates': array().of(date()).label('Gem Date').test('notInPast', 'Date can not be in the past', (value) => {
-  //   console.log('Checking value...');
-  //   console.log(value);
-  // })
+  'gemDates': array().of(date().label('Date Range'))
+      .label('Gem Date')
+      .min(2)
+      .max(2)
+      .test('notInPast', 'End date can not be in the past', (value) => {
+    let valid = true;
+    // only trigger this validation on new badge entry, not edits
+    if(value && value.length === 2) {
+      const [startDate, endDate] = value;
+      if (limitTimeframe.value && endDate && !badgeInternal.value.badgeId) {
+        valid = dayjs(endDate).isAfter(dayjs());
+      }
+    }
+    return valid;
+  })
 
 });
 
@@ -246,11 +257,7 @@ const onSelectedIcon = (selectedIcon) => {
 
 const onEnableGemFeature = () => {
   nextTick(() => {
-    if (!limitTimeframe.value) {
-      gemDates.value = [];
-    } else {
-      gemDates.value = [new Date(), new Date()];
-    }
+    gemDates.value = [];
   })
 };
 
@@ -387,8 +394,7 @@ const onBadgeSaved = () => {
 
         <div v-if="limitTimeframe" class="flex justify-content-center gap-4">
           <div>
-            <label for="gemDates">* Date Range</label><br />
-            <Calendar v-model="gemDates" inline selectionMode="range" inputId="gemDates" name="gemDates" data-cy="gemDatePicker" />
+            <SkillsCalendarInput name="gemDates" v-model="gemDates" label="Date Range" />
           </div>
         </div>
       </div>

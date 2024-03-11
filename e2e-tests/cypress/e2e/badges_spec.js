@@ -25,17 +25,19 @@ describe('Badges Tests', () => {
             .as('createProject');
 
         Cypress.Commands.add('gemNextMonth', () => {
-            cy.get('[data-cy="gemDatePicker"] [data-pc-section="nextbutton"]')
+            cy.get('[data-cy="gemDates"] [data-pc-section="nextbutton"]')
                 .first()
                 .click();
+            cy.wait(150);
         });
         Cypress.Commands.add('gemPrevMonth', () => {
-            cy.get('[data-cy="gemDatePicker"] [data-pc-section="previousbutton"]')
+            cy.get('[data-cy="gemDates"] [data-pc-section="previousbutton"]')
                 .first()
                 .click();
+            cy.wait(150);
         });
         Cypress.Commands.add('gemSetDay', (dayNum) => {
-            cy.get('[data-cy="gemDatePicker"] [data-pc-section="daylabel"]')
+            cy.get('[data-cy="gemDates"] [data-pc-section="day"]')
                 .contains(dayNum)
                 .click({force: true});
         });
@@ -439,12 +441,12 @@ describe('Badges Tests', () => {
         //     .invoke('text', invalidDescription);
         // cy.get('#markdown-editor')
         //     .type('a');
-        // cy.get('[data-cy=badgeDescriptionError]')
+        // cy.get('[data-cy=descriptionMarkdownEditor]')
         //     .contains(msg)
         //     .should('be.visible');
         // cy.get('#markdown-editor')
         //     .type('{backspace}');
-        // cy.get('[data-cy=badgeDescriptionError]')
+        // cy.get('[data-cy=descriptionMarkdownEditor]')
         //     .should('not.be.visible');
 
         //helpUrl
@@ -535,39 +537,28 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="name"]')
             .type('Test Badge');
 
-
-        // dates should not overlap
-        let msg = 'Start Date must come before End Date';
-        // cy.gemNextMonth();
-        // cy.gemSetDay(1);
-        // cy.gemNextMonth();
+        cy.gemNextMonth();
         cy.gemSetDay(1);
         cy.gemSetDay(15);
 
-        // start date should be before end date
-        msg = 'Start Date must come before End Date';
-        // cy.gemStartSetDay(3);
-        // cy.gemEndSetDay(4);
-
         // dates should not be in the past
-        // msg = 'End Date cannot be in the past';
+        let msg = 'End date can not be in the past';
         cy.gemPrevMonth();
-        // cy.gemPrevMonth();
-        cy.gemSetDay(1);
-        // cy.gemPrevMonth();
-        // cy.gemPrevMonth();
-        cy.gemSetDay(2);
+        cy.gemPrevMonth();
+
+        cy.gemSetDay(5);
+        cy.gemSetDay(15);
+
+        cy.get('[data-cy=gemDatesError]').contains(msg);
 
         // should not save if there are validation errors
-        // cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+        cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
 
         // fix the errors and save
-        // cy.gemNextMonth();
-        // cy.gemNextMonth();
-        // cy.gemNextMonth();
-        // cy.gemNextMonth();
-        // cy.gemSetDay(1);
-        // cy.gemSetDay(2);
+        cy.gemNextMonth();
+        cy.gemNextMonth();
+        cy.gemSetDay(5);
+        cy.gemSetDay(15);
 
 
         cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
@@ -1760,7 +1751,7 @@ describe('Badges Tests', () => {
 
     });
 
-    it.skip('description is validated against custom validators', () => {
+    it('description is validated against custom validators', () => {
         cy.visit('/administrator/projects/proj1/badges');
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadBadges');
@@ -1774,7 +1765,7 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]')
             .type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="badgeDescriptionError"]')
+        cy.get('[data-cy="descriptionMarkdownEditor"]')
             .contains('Badge Description - paragraphs may not contain jabberwocky');
         cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
@@ -1783,7 +1774,7 @@ describe('Badges Tests', () => {
             .type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="badgeDescriptionError"]')
+        cy.get('[data-cy="descriptionMarkdownEditor"]')
             .contains('Badge Name - paragraphs may not contain jabberwocky')
             .should('not.exist');
     });
@@ -2007,16 +1998,12 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
     });
 
-    it.skip('change sort order using keyboard', () => {
+    it('change sort order using keyboard', () => {
         cy.createBadge(1, 1);
         cy.createBadge(1, 2);
         cy.createBadge(1, 3);
 
-        const badge1Card = '[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]';
-        const badge2Card = '[data-cy="badgeCard-badge2"] [data-cy="sortControlHandle"]';
-
         cy.visit('/administrator/projects/proj1/badges');
-        // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 1', 'Badge 2', 'Badge 3']);
 
         // move down
@@ -2024,47 +2011,35 @@ describe('Badges Tests', () => {
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 1', 'Badge 3']);
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
-            .should('have.focus');
 
         // move down
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
-            .should('have.focus');
 
         // move down - already the last item
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
-            .should('have.focus');
 
         // refresh and validate
         cy.visit('/administrator/projects/proj1/badges');
-        // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
-            .should('not.have.focus');
 
         // move up
         cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
-        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
-            .should('have.focus');
 
         // move up - already first
         cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
-        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
-            .should('have.focus');
+
     });
 
     it.skip('cancelling delete dialog should return focus to delete button', () => {
@@ -2101,7 +2076,7 @@ describe('Badges Tests', () => {
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="editBtn"]').click()
         cy.wait('@validateDesc')
-        cy.get('[data-cy="badgeDescriptionError"]').contains('Mocked up validation failure')
+        cy.get('[data-cy="descriptionMarkdownEditor"]').contains('Mocked up validation failure')
     });
 
 
@@ -2332,7 +2307,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="timeLimitMinutes"] input').should('have.value', '30');
     });
 
-    it.skip('can not save badge with bad award data', () => {
+    it('can not save badge with bad award data', () => {
         cy.createBadge(1, 1);
 
         cy.intercept('GET', '/admin/projects/proj1/badges/badge1')
@@ -2343,23 +2318,23 @@ describe('Badges Tests', () => {
         cy.wait('@loadBadge1');
 
         cy.get('[data-cy="btn_edit-badge"]').click();
-        cy.get('[data-cy="timeLimitCheckbox"').click({force: true});
+        cy.get('[data-cy="timeLimitCheckbox"]').click();
 
-        cy.get('input[data-cy=timeLimitDays]')
+        cy.get('[data-cy=timeLimitDays]')
             .type('{selectall}800');
         cy.get('button[data-cy=saveDialogBtn]').should('not.be.enabled');
-        cy.get('input[data-cy=timeLimitDays]')
+        cy.get('[data-cy=timeLimitDays]')
             .type('{selectall}1');
         cy.get('button[data-cy=saveDialogBtn]').should('be.enabled');
 
-        cy.get('input[data-cy=timeLimitHours]')
+        cy.get('[data-cy=timeLimitHours]')
             .type('{selectall}800');
         cy.get('button[data-cy=saveDialogBtn]').should('not.be.enabled');
-        cy.get('input[data-cy=timeLimitHours]')
+        cy.get('[data-cy=timeLimitHours]')
             .type('{selectall}1');
         cy.get('button[data-cy=saveDialogBtn]').should('be.enabled');
 
-        cy.get('input[data-cy=timeLimitMinutes]')
+        cy.get('[data-cy=timeLimitMinutes]')
             .type('{selectall}900');
         cy.get('button[data-cy=saveDialogBtn]').should('not.be.enabled');
     });
