@@ -104,7 +104,7 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-    it.skip('Open new subject dialog with enter key', () => {
+    it('Open new subject dialog with enter key', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/administrator/projects/proj1');
@@ -112,12 +112,12 @@ describe('Subjects Tests', () => {
 
         cy.get('[data-cy=btn_Subjects]').focus().realPress("Enter");
         cy.get('[data-cy="subjectName"]').should('have.value', '');
-        cy.get('#nameError').should('have.value', '');
+        cy.get('[data-cy="subjectNameError"]').should('not.be.visible');
         cy.get('[data-cy=closeDialogBtn]').click();
         cy.get('[data-cy="titleLink"]').should('not.exist');
     });
 
-    it.skip('Open edit subject dialog using enter key', function () {
+    it('Open edit subject dialog using enter key', function () {
         const expectedId = 'testSubject';
         const providedName = "test";
         cy.intercept('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
@@ -140,8 +140,8 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=editBtn]').focus();
         cy.realPress("Enter");
 
-        cy.get('[data-cy="subjectName"]').contains('have.value', 'test');
-        cy.get('#nameError').should('have.value', '');
+        cy.get('[data-cy="subjectName"]').should('have.value', 'test');
+        cy.get('[data-cy="subjectNameError"]').should('not.be.visible');
         cy.get('[data-cy=closeDialogBtn]').click();
         cy.contains('test');
         cy.contains('ID: test');
@@ -559,7 +559,7 @@ describe('Subjects Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
-    it.skip('viewing subject user details does not break breadcrumb navigation', () => {
+    it('viewing subject user details does not break breadcrumb navigation', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -583,7 +583,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=breadcrumb-Users]').should('be.visible');
     })
 
-    it.skip('description is validated against custom validators', () => {
+    it('description is validated against custom validators', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/administrator/projects/proj1');
@@ -594,7 +594,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         //
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="subjectDescError"]').contains('Subject Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="descriptionError"]').contains('Subject Description - paragraphs may not contain jabberwocky');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
@@ -630,7 +630,7 @@ describe('Subjects Tests', () => {
           .should('be.enabled');
     });
 
-    it.skip('edit in place', () => {
+    it('edit in place', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -669,7 +669,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=breadcrumb-subj1]').should('be.visible');
 
         cy.get('[data-cy=btn_edit-subject]').click();
-        cy.get('[data-cy=enableIdInput]').click({force: true});
+        cy.get('[data-cy=enableIdInput]').click();
         cy.get('input[data-cy=idInputValue]').type('{selectall}entirelyNewId');
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSubject1');
@@ -695,7 +695,7 @@ describe('Subjects Tests', () => {
         cy.contains('SUBJECT: Edited Subject Name').should('be.visible');
 
         cy.get('[data-cy=copySkillButton_skill1]').click();
-        cy.get('[data-cy=saveSkillButton]').click();
+        cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveSkill2');
         cy.contains('Copy of Edited Skill Name').should('be.visible');
 

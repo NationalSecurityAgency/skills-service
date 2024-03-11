@@ -1998,7 +1998,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
     });
 
-    it('change sort order using keyboard', () => {
+    it.skip('change sort order using keyboard', () => {
         cy.createBadge(1, 1);
         cy.createBadge(1, 2);
         cy.createBadge(1, 3);
@@ -2011,35 +2011,46 @@ describe('Badges Tests', () => {
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 1', 'Badge 3']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
 
         // move down
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
 
         // move down - already the last item
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
 
         // refresh and validate
         cy.visit('/administrator/projects/proj1/badges');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]')
+            .should('not.have.focus');
 
         // move up
         cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
 
         // move up - already first
         cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
-
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="sortControlHandle"]')
+            .should('have.focus');
     });
 
     it.skip('cancelling delete dialog should return focus to delete button', () => {

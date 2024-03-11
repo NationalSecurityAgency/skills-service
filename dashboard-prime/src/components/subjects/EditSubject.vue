@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
-import {string} from "yup";
+import {string, object} from "yup";
 import {useRoute} from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SubjectsService from '@/components/subjects/SubjectsService';
@@ -73,7 +73,7 @@ const checkSubjectIdUnique = (value) => {
   return SubjectsService.subjectWithIdExists(route.params.projectId, value);
 }
 
-const schema = {
+const schema = object({
   'subjectName': string()
       .trim()
       .required()
@@ -100,7 +100,7 @@ const schema = {
   'helpUrl': string()
     .urlValidator()
     .label('Help URL'),
-};
+});
 
 const initialSubjData = {
   projectId: route.params.projectId,
