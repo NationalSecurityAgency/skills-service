@@ -316,69 +316,39 @@ describe('Badges Tests', () => {
 
         // name too long
         msg = 'Badge Name must be at most 50 characters';
-        cy.contains('Enable')
-            .click();
-        cy.getIdField()
-            .clear()
-            .type('badgeId');
-        const invalidName = Array(55)
-            .fill('a')
-            .join('');
-        cy.get('[data-cy="name"]')
-            .clear();
-        cy.get('[data-cy="name"]')
-            .type(invalidName);
-        cy.get('[data-cy="name"]')
-            .type('b');
-        cy.get('[data-cy=nameError]')
-            .contains(msg)
-            .should('be.visible');
-        cy.get('[data-cy=saveDialogBtn]')
-            .should('be.disabled');
-        cy.get('[data-cy="name"]')
-            .type('{backspace}');
-        cy.get('[data-cy=nameError]')
-            .should('not.be.visible');
+        cy.contains('Enable').click();
+        cy.getIdField().clear().type('badgeId');
+        const invalidName = Array(50).fill('a').join('');
+        cy.get('[data-cy="name"]').clear();
+        cy.get('[data-cy="name"]').type(invalidName);
+        cy.get('[data-cy="name"]').type('b');
+        cy.get('[data-cy=nameError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+        cy.get('[data-cy="name"]').type('{backspace}');
+        cy.get('[data-cy=nameError]').should('not.be.visible');
 
         // id too short
         msg = 'Badge ID must be at least 3 characters';
 
-        cy.getIdField()
-            .clear()
-            .type('aa');
-        cy.get('[data-cy=idError]')
-            .contains(msg)
-            .should('be.visible');
-        cy.get('[data-cy=saveDialogBtn]')
-            .should('be.disabled');
-        cy.getIdField()
-            .type('a');
-        cy.get('[data-cy=idError]')
-            .should('not.be.visible');
+        cy.getIdField().clear().type('aa');
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+        cy.getIdField().type('a');
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id too long
         msg = 'Badge ID must be at most 50 characters';
-        const invalidId = Array(51)
-            .fill('a')
-            .join('');
-        cy.getIdField()
-            .clear();
-        cy.getIdField()
-            .click()
-            .type(invalidId);
-        cy.get('[data-cy=idError]')
-            .contains(msg)
-            .should('be.visible');
-        cy.getIdField()
-            .type('{backspace}');
-        cy.get('[data-cy=idError]')
-            .should('not.be.visible');
+        const invalidId = Array(51).fill('a').join('');
+        cy.getIdField().clear();
+        cy.getIdField().click().type(invalidId);
+        cy.get('[data-cy=idError]').contains(msg).should('be.visible');
+        cy.getIdField().type('{backspace}');
+        cy.wait(50);
+        cy.get('[data-cy=idError]').should('not.be.visible');
 
         // id must not have special chars
         msg = 'Badge ID may only contain alpha-numeric characters';
-        cy.getIdField()
-            .clear()
-            .type('With$Special');
+        cy.getIdField().clear().type('With$Special');
         cy.get('[data-cy=idError]')
             .contains(msg)
             .should('be.visible');
