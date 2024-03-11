@@ -321,7 +321,7 @@ describe('Badges Tests', () => {
         cy.getIdField()
             .clear()
             .type('badgeId');
-        const invalidName = Array(50)
+        const invalidName = Array(55)
             .fill('a')
             .join('');
         cy.get('[data-cy="name"]')
