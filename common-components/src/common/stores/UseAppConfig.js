@@ -88,6 +88,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const userCommunityDocsLink = computed(() => config.value.userCommunityDocsLink || '' )
   const usersTableAdditionalUserTagKey = computed(() => config.value.usersTableAdditionalUserTagKey)
   const usersTableAdditionalUserTagLabel = computed(() => config.value.usersTableAdditionalUserTagLabel)
+  const maxSkillsInBulkImport = computed(() => config.value.maxSkillsInBulkImport)
   return {
     loadConfigState,
     isLoadingConfig,
@@ -139,6 +140,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     userCommunityDocsLink,
     usersTableAdditionalUserTagKey,
     usersTableAdditionalUserTagLabel,
-    maxBadgeBonusInMinutes
+    maxBadgeBonusInMinutes,
+    maxSkillsInBulkImport
   }
 })

@@ -11,6 +11,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
+import ImportFromCatalogDialog from '@/components/skills/catalog/ImportFromCatalogDialog.vue'
 
 const projConfig = useProjConfig()
 const route = useRoute()
@@ -209,6 +210,9 @@ const skillCreatedOrUpdated = (skill) => {
       :is-edit="editGroup.isEdit"
       @skill-saved="skillCreatedOrUpdated"
       />
+    <import-from-catalog-dialog
+      v-if="showImportDialog"
+      v-model="showImportDialog"/>
   </div>
 </template>
 
