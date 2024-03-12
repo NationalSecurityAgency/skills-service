@@ -578,7 +578,7 @@ const onMoved = (movedInfo) => {
                           link
                           size="small"
                           @click="clearFilter"
-                          aria-label="Reset surveys and quizzes filter"
+                          aria-label="Reset skills filter"
                           data-cy="skillResetBtnNoFilterRes" /> to clear the existing filter.
               </span>
         </div>
