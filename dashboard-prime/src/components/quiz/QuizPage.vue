@@ -106,7 +106,7 @@ function updateQuizDef(quizDef) {
   <div>
     <PageHeader :loading="isLoading" :options="headerOptions">
       <template #subSubTitle v-if="quizSummaryState.quizSummary">
-        <div v-if="!quizConfig.isReadOnlyQuiz">
+        <div v-if="!quizConfig.isReadOnlyQuiz" class="mt-2">
             <SkillsButton
                 id="editQuizButton"
                 @click="editQuizInfo.showDialog = true"
@@ -136,7 +136,7 @@ function updateQuizDef(quizDef) {
                   :aria-label="`Preview Quiz ${quizSummaryState.quizSummary.name}`">
               </SkillsButton>
             </router-link>
-          <div class="mt-2" v-if="!isLoading">
+          <div class="mt-3" v-if="!isLoading">
             <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userRoleForDisplay }}</span>
           </div>
         </div>

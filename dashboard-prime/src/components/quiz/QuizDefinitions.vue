@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import QuizService from '@/components/quiz/QuizService.js';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import NoContent2 from '@/components/utils/NoContent2.vue';
@@ -25,7 +25,6 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
-import { SkillsReporter } from '@skilltree/skills-client-js'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 
@@ -189,7 +188,8 @@ defineExpose({
               <InputText class="flex flex-grow-1"
                          v-model="filters['global'].value"
                          data-cy="quizNameFilter"
-                         placeholder="Quiz/Survey Search"/>
+                         placeholder="Quiz/Survey Search"
+                         aria-label="Quiz/Survey Name Filter"/>
             </InputGroup>
             <SkillsButton class="flex flex-grow-none"
                           label="Reset"
