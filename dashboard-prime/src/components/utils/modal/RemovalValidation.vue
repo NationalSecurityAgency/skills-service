@@ -36,6 +36,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  removalTextPrefix: {
+    type: String,
+    required: false,
+    default: 'This will remove',
+  },
 });
 
 const model = defineModel()
@@ -83,7 +88,7 @@ const close =() => {
     <div v-if="!loading" class="px-2">
       <div data-cy="removalSafetyCheckMsg">
         <div v-if="!removalNotAvailable">
-          This will remove <span
+          {{ removalTextPrefix }} <span
           class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
         </div>
         <Message severity="warn" :closable="false">

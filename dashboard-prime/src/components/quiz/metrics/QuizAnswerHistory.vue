@@ -63,10 +63,10 @@ onMounted(() => {
     imageClass: 'fas fa-user skills-color-users',
     dataCy: 'usrColumnHeader',
   });
-  if (userTagsUtils.showUserTagColumn) {
+  if (userTagsUtils.showUserTagColumn()) {
     fields.push({
       key: 'userTag',
-      label: userTagsUtils.userTagLabel.value,
+      label: userTagsUtils.userTagLabel(),
       sortable: true,
     });
   }
@@ -127,7 +127,8 @@ const sortField = (column) => {
 
 const expandIcon = (truncated) => {
   return truncated ? 'fas fa-expand-arrows-alt' : 'fas fa-compress-arrows-alt';
-};const expandLabel = (truncated) => {
+};
+const expandLabel = (truncated) => {
   return truncated ? 'Expand Text' : 'Collapse';
 };
 

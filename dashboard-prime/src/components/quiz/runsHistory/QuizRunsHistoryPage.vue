@@ -1,11 +1,321 @@
 <script setup>
 
+import { onMounted, ref } from 'vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useUserTagsUtils } from '@/components/utils/UseUserTagsUtils.js';
+import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
+import { FilterMatchMode } from 'primevue/api';
+import { useRoute } from 'vue-router';
+import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
+import { useFocusState } from '@/stores/UseFocusState.js';
+import { useStorage } from '@vueuse/core';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart.vue';
+import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart.vue';
+import InputGroup from "primevue/inputgroup";
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue';
+import DateCell from '@/components/utils/table/DateCell.vue';
+import InputGroupAddon from 'primevue/inputgroupaddon';
+import Column from 'primevue/column';
+import QuizService from '@/components/quiz/QuizService.js';
+import DataTable from 'primevue/datatable';
+import InputText from 'primevue/inputtext';
+import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus.vue';
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+
+const route = useRoute();
+const userInfo = useUserInfo();
+const timeUtils = useTimeUtils();
+const focusState = useFocusState()
+const quizSummaryState = useQuizSummaryState()
+const userTagsUtils = useUserTagsUtils();
+const announcer = useSkillsAnnouncer()
+const quizType = ref('');
+const runsHistory = ref([]);
+const filtering = ref(false);
+const options = ref({
+  emptyText: 'Click Test+ on the top-right to create a test!',
+  busy: false,
+  bordered: true,
+  outlined: true,
+  stacked: 'md',
+  sortBy: 'started',
+  sortAsc: false,
+  fields: [
+    {
+      key: 'userIdForDisplay',
+      label: 'User',
+      sortable: true,
+      imageClass: 'fas fa-user skills-color-users',
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      imageClass: 'fas fa-trophy skills-color-points',
+    },
+    {
+      key: 'runtime',
+      label: 'Runtime',
+      sortable: false,
+      imageClass: 'fas fa-user-clock skills-color-access',
+    },
+    {
+      key: 'started',
+      label: 'Started',
+      sortable: true,
+      imageClass: 'fas fa-clock text-warning',
+    },
+    {
+      key: 'controls',
+      label: '',
+      sortable: false,
+      class: 'controls-column',
+    },
+  ],
+  pagination: {
+    server: true,
+    currentPage: 1,
+    totalRows: 0,
+    pageSize: 10,
+    possiblePageSizes: [10, 20, 50],
+  },
+});
+const sortInfo = useStorage('quizRunsHistoryTable', {  sortOrder: -1, sortBy: 'started' })
+const deleteQuizRunInfo = ref( {
+  showDialog: false,
+  quizRun: {},
+});
+const totalRows = ref(0)
+
+onMounted(() => {
+  if (userTagsUtils.showUserTagColumn()) {
+    options.value.fields.splice(1, 0, {
+      key: 'userTag',
+      label: userTagsUtils.userTagLabel(),
+      sortable: true,
+    });
+  }
+  loadData()
+})
+
+const loadData = () => {
+  options.value.busy = true;
+  const params = {
+    query: filters.value.global.value ? filters.value.global.value.trim() : '',
+    limit: options.value.pagination.pageSize,
+    ascending: sortInfo.value.sortOrder === 1 ? true : false,
+    page: options.value.pagination.currentPage,
+    orderBy: sortInfo.value.sortBy,
+  };
+
+  return quizSummaryState.afterQuizSummaryLoaded().then((quizSummary) => {
+    quizType.value = quizSummary.type;
+    return QuizService.getQuizRunsHistory(route.params.quizId, params)
+        .then((res) => {
+          let items = res.data;
+          runsHistory.value = items;
+          options.value.pagination.totalRows = res.count;
+          totalRows.value = res.count;
+        })
+        .finally(() => {
+          options.value.busy = false;
+        });
+  });
+}
+
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+})
+
+const clearFilter = () => {
+  filters.value.global.value = null
+  loadData().then(() => filtering.value = false)
+}
+const onFilter = (filterEvent) => {
+  loadData().then(() => filtering.value = true)
+}
+const pageChanged = (pagingInfo) => {
+  options.value.pagination.pageSize = pagingInfo.rows;
+  options.value.pagination.currentPage = pagingInfo.page + 1;
+  loadData();
+};
+const sortField = (column) => {
+  options.value.sortBy = column.sortField;
+  options.value.sortAsc = column.sortOrder === 1;
+
+  // set to the first page
+  options.value.pagination.currentPage = 1;
+  loadData();
+};
+
+const initiateDelete = (quizRun) => {
+  deleteQuizRunInfo.value.quizRun = quizRun;
+  deleteQuizRunInfo.value.showDialog = true;
+}
+const deleteRun = () => {
+  options.value.busy = true;
+  QuizService.deleteQuizRunHistoryItem(route.params.quizId, deleteQuizRunInfo.value.quizRun.attemptId)
+      .then(() => {
+        loadData().then(() => {
+          focusState.setElementId('filterResetBtn');
+          focusState.focusOnLastElement()
+          announcer.polite(`${quizType.value} Run for ${deleteQuizRunInfo.value.quizRun.userIdForDisplay} was successfully removed!`);
+        });
+      });
+}
 </script>
 
 <template>
-  <div>Quiz Runs History Page</div>
+  <div class="flex flex-column flex-wrap">
+    <SubPageHeader title="Runs"
+                   aria-label="Runs">
+    </SubPageHeader>
+    <QuizAttemptsTimeChart class="flex-1 w-full my-3" />
+    <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-3" />
+
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
+        <DataTable :value="runsHistory" tableStyle="min-width: 50rem"
+                   :loading="options.busy"
+                   show-gridlines
+                   striped-rows
+                   lazy
+                   paginator
+                   data-cy="quizRunsHistoryTable"
+                   v-model:filters="filters"
+                   :globalFilterFields="['userIdForDisplay']"
+                   @filter="onFilter"
+                   @page="pageChanged"
+                   @sort="sortField"
+                   :rows="options.pagination.pageSize"
+                   :rowsPerPageOptions="options.pagination.possiblePageSizes"
+                   v-model:sort-field="sortInfo.sortBy"
+                   v-model:sort-order="sortInfo.sortOrder">
+          <template #header>
+            <div class="flex gap-1">
+              <InputGroup>
+                <InputGroupAddon>
+                  <i class="fas fa-search" aria-hidden="true"/>
+                </InputGroupAddon>
+                <InputText class="flex flex-grow-1"
+                           v-model="filters['global'].value"
+                           v-on:keydown.enter="onFilter"
+                           data-cy="userNameFilter"
+                           placeholder="User filter"
+                           aria-label="User Name Filter"/>
+              </InputGroup>
+            </div>
+            <div class="flex flex-wrap pt-3">
+              <SkillsButton label="Filter"
+                            icon="fa fa-filter"
+                            size="small"
+                            outlined
+                            @click="onFilter"
+                            :aria-label="`Filter ${quizType} results`"
+                            data-cy="userFilterBtn"/>
+              <SkillsButton id="filterResetBtn"
+                            class="ml-1"
+                            label="Reset"
+                            icon="fa fa-times"
+                            size="small"
+                            outlined
+                            @click="clearFilter"
+                            :aria-label="`Reset filter for ${quizType} results`"
+                            data-cy="userResetBtn"/>
+            </div>
+          </template>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          </template>
+
+          <template #empty>
+            <div class="flex justify-content-center flex-wrap h-12rem">
+              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
+                 aria-hidden="true"></i>
+              <span class="w-full">
+                <span class="flex align-items-center justify-content-center">There are no records to show</span>
+                <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
+                    <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                                  label="Reset"
+                                  link
+                                  size="small"
+                                  @click="clearFilter"
+                                  :aria-label="`Reset filter for ${quizType} results`"
+                                  data-cy="userResetBtn"/> to clear the existing filter.
+              </span>
+            </span>
+            </div>
+          </template>
+          <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+            <template #header>
+              <span v-if="col.key === 'controls'" class="sr-only">Controls Heading - Not sortable</span>
+              <span v-else><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+            </template>
+            <template #body="slotProps">
+              <div v-if="slotProps.field == 'userIdForDisplay'" class="flex flex-row flex-wrap"
+                   :data-cy="`row${slotProps.index}-userCell`">
+                <div class="flex align-items-start justify-content-start">
+                  <highlighted-value :value="userInfo.getUserDisplay(slotProps.data, true)"
+                                     :filter="filters.global.value"/>
+                </div>
+                <div class="flex flex-grow-1 align-items-start justify-content-end">
+                  <router-link :data-cy="`row${slotProps.index}-viewRun`"
+                               :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.attemptId } }"
+                               :aria-label="`View Run Details for user ${slotProps.data.userIdForDisplay}`">
+                    <SkillsButton icon="fas fa-list-ul"
+                                  outlined
+                                  size="small"/>
+                  </router-link>
+                </div>
+              </div>
+              <div v-else-if="slotProps.field === 'status'">
+                <QuizRunStatus :quiz-type="quizType" :status="slotProps.data.status" />
+              </div>
+              <div v-else-if="slotProps.field === 'runtime'">
+                <span :data-cy="`row${slotProps.index}-runtime`">{{ timeUtils.formatDurationDiff(slotProps.data.started, slotProps.data.completed) }}</span>
+              </div>
+              <div v-else-if="slotProps.field === 'started'">
+                <DateCell :value="slotProps.data[col.key]"/>
+              </div>
+              <div v-else-if="slotProps.field === 'controls'">
+                <SkillsButton :data-cy="`row${slotProps.data.index}-deleteBtn`"
+                              :id="`deleteAttempt-${slotProps.data.attemptId}`"
+                              @click="initiateDelete(slotProps.data)"
+                              icon="fa fa-trash"
+                              size="small"
+                              outlined
+                              :track-for-focus="true"
+                              :aria-label="`delete ${quizType} result for ${slotProps.data.userIdForDisplay}`"/>
+              </div>
+              <div v-else>
+                <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data[col.key] }}</span>
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+      </template>
+    </Card>
+
+    <RemovalValidation
+        v-if="deleteQuizRunInfo.showDialog"
+        v-model="deleteQuizRunInfo.showDialog"
+        @do-remove="deleteRun"
+        :removal-text-prefix="`This will remove the ${quizType} result for`"
+        :item-name="deleteQuizRunInfo.quizRun.userIdForDisplay"
+        item-type="user"
+        :enable-return-focus="true">
+      <div>
+        Deletion <b>cannot</b> be undone and permanently removes all of the underlying user's answers.
+      </div>
+    </RemovalValidation>
+  </div>
 </template>
 
 <style scoped>
-
+.controls-column {
+  max-width: 2.5rem !important;
+}
 </style>

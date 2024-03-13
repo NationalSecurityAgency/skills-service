@@ -190,14 +190,16 @@ defineExpose({
                          data-cy="quizNameFilter"
                          placeholder="Quiz/Survey Search"
                          aria-label="Quiz/Survey Name Filter"/>
+              <InputGroupAddon class="p-0 m-0">
+                <SkillsButton
+                              icon="fa fa-times"
+                              text
+                              outlined
+                              @click="clearFilter"
+                              aria-label="Reset surveys and quizzes filter"
+                              data-cy="quizResetBtn"/>
+              </InputGroupAddon>
             </InputGroup>
-            <SkillsButton class="flex flex-grow-none"
-                          label="Reset"
-                          icon="fa fa-times"
-                          outlined
-                          @click="clearFilter"
-                          aria-label="Reset surveys and quizzes filter"
-                          data-cy="quizResetBtn"/>
           </div>
         </template>
 

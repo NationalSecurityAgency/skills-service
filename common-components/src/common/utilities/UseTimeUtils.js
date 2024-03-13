@@ -23,6 +23,38 @@ export const useTimeUtils = () => {
     return dayjs(timestamp).format('YYYY-MM-DD HH:mm');
   }
 
+  const simpleClockFilter = (valueInMs) => {
+    if (valueInMs === null || valueInMs === undefined) {
+      return 'N/A';
+    }
+    if (valueInMs < second) {
+      return '00:00:00';
+    }
+    if (valueInMs < minute) {
+      const seconds = Math.trunc(valueInMs / second);
+      return `00:00:${seconds.toString().padStart(2, '0')}`;
+    }
+    if (valueInMs < hour) {
+      const totalSeconds = Math.trunc(valueInMs / second);
+      const minutes = Math.trunc(totalSeconds / 60);
+      const seconds = totalSeconds - (minutes * 60);
+      return `00:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    const totalMinutes = Math.trunc(valueInMs / minute);
+    const hours = Math.trunc(totalMinutes / 60);
+    const minutes = totalMinutes - (hours * 60);
+    const totalSeconds = Math.trunc(valueInMs / second);
+    const seconds = totalSeconds - (hours * 60 * 60) - (minutes * 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  const formatDurationDiff = (startDate, completedDate, detailedDays = false, asClock = false) => {
+    const start = dayjs(startDate);
+    const end = completedDate ? dayjs(completedDate) : dayjs();
+    const valueInMs = end.diff(start);
+    return asClock ? simpleClockFilter(valueInMs) : formatDuration(valueInMs, false, detailedDays);
+  }
+
   const formatDuration = (valueInMs, alwaysIncludeSecondsWithMinutes = false, detailedDays = false) => {
     if (valueInMs === null || valueInMs === undefined) {
       return 'N/A';
@@ -76,6 +108,8 @@ export const useTimeUtils = () => {
     timeFromNow,
     isToday,
     formatDate,
-    formatDuration
+    formatDuration,
+    formatDurationDiff,
+    simpleClockFilter
   }
 }

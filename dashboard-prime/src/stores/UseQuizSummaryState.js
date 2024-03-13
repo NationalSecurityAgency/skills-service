@@ -4,7 +4,7 @@ import QuizService from '@/components/quiz/QuizService.js';
 
 export const useQuizSummaryState = defineStore('quizSummaryState', () => {
   const quizSummary = ref(null);
-  const loadingQuizSummary = ref(false)
+  const loadingQuizSummary = ref(true)
 
   function loadQuizSummary(quizId) {
     return new Promise((resolve, reject) => {
@@ -21,9 +21,20 @@ export const useQuizSummaryState = defineStore('quizSummaryState', () => {
     });
   }
 
+  const afterQuizSummaryLoaded = () => {
+    return new Promise((resolve) => {
+      (function waitForQuizSummary() {
+        if (!loadingQuizSummary.value) return resolve(quizSummary.value);
+        setTimeout(waitForQuizSummary, 100);
+        return quizSummary.value;
+      }());
+    });
+  }
+
   return {
     quizSummary,
     loadQuizSummary,
-    loadingQuizSummary
+    loadingQuizSummary,
+    afterQuizSummaryLoaded
   }
 });

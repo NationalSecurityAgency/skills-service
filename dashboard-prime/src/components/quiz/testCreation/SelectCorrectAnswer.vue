@@ -40,7 +40,7 @@ function flipSelected(){
 <template>
   <SkillsOverlay :show="readOnly && markIncorrect" opacity="0">
     <template #overlay>
-      <i v-if="model" class="fa fa-ban text-danger text-red-500 text-red-500 " style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
+      <i v-if="model" class="fa fa-ban text-danger text-red-500" style="font-size: 1.5rem;" data-cy="wrongSelection"></i>
       <i v-else class="fa fa-check text-danger text-red-500 " style="font-size: 1rem;" data-cy="missedSelection"></i>
     </template>
     <div v-on:keydown.space="flipSelected"

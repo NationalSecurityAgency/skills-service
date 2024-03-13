@@ -4,9 +4,9 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 export const useUserTagsUtils = () => {
   const appConfig = useAppConfig()
 
-  const showUserTagColumn = computed(() => !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel))
-  const userTagKey = computed(() => appConfig.usersTableAdditionalUserTagKey)
-  const userTagLabel = computed(() => appConfig.usersTableAdditionalUserTagLabel)
+  const showUserTagColumn = () => { return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel) }
+  const userTagKey = () => { return appConfig.usersTableAdditionalUserTagKey }
+  const userTagLabel = () => { return appConfig.usersTableAdditionalUserTagLabel }
 
   return {
     showUserTagColumn,
