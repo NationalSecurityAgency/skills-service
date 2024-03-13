@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useRoute } from 'vue-router'
 import SettingsService from '@/components/settings/SettingsService.js'
@@ -8,6 +8,8 @@ import Column from 'primevue/column'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import DataTable from 'primevue/datatable'
+import SkillToImportInfo from '@/components/skills/catalog/SkillToImportInfo.vue'
+import { useStorage } from '@vueuse/core'
 
 const model = defineModel()
 const route = useRoute()
@@ -21,8 +23,7 @@ const totalRows = ref(1)
 const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
 const currentPage = ref(1)
-const ascending = ref(false)
-const sortBy = ref('skillId')
+const sortInfo = useStorage('importFromSkillsCatalogTable', {  sortOrder: 1, sortBy: 'name' })
 const initialLoadHadData = ref(false)
 const isInFinalizeState = ref(false)
 const filters = ref({
@@ -45,22 +46,19 @@ const pageChanged = (pagingInfo) => {
   currentPage.value = pagingInfo.page + 1
   loadData()
 }
-const sortField = (column) => {
-  sortBy.value = column.sortField
-  ascending.value = column.sortOrder === 1
-
-  // set to the first page
-  currentPage.value = 1
-  loadData()
-}
+watch(sortInfo.value,
+  () => {
+    currentPage.value = 1
+    loadData()
+  })
 
 const loadData = () => {
   reloadData.value = true
   const params = {
     limit: pageSize.value,
     page: currentPage.value,
-    orderBy: sortBy.value,
-    ascending: ascending.value,
+    orderBy: sortInfo.value.sortBy,
+    ascending: sortInfo.value.sortOrder === 1,
     projectNameSearch: encodeURIComponent(filters.value.projectName.trim()),
     subjectNameSearch: encodeURIComponent(filters.value.subjectName.trim()),
     skillNameSearch: encodeURIComponent(filters.value.skillName.trim())
@@ -113,6 +111,14 @@ const reset = () => {
   filters.value.subjectName = ''
   loadData()
 }
+const setProjectFilter = (projectName) => {
+  filters.value.projectName = projectName;
+  loadData();
+}
+const setSubjectFilter = (projectName) => {
+  filters.value.subjectName = projectName;
+  loadData();
+}
 </script>
 
 <template>
@@ -140,21 +146,39 @@ const reset = () => {
       </no-content2>
 
 
-      <div class="flex gap-2">
-        <div class="field mb-0">
+      <div class="md:flex gap-2">
+        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
           <label for="skill-name-filter">Skill Name:</label>
-          <InputText id="skill-name-filter" v-model="filters.skillName" data-cy="skillNameFilter" class="w-full"/>
+          <InputText
+            id="skill-name-filter"
+            v-model="filters.skillName"
+            v-on:keydown.enter="loadData"
+            data-cy="skillNameFilter"
+            maxlength="50"
+            class="w-full"/>
         </div>
-        <div class="field mb-0">
+        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
           <label for="project-name-filter">Project Name:</label>
-          <InputText id="project-name-filter" v-model="filters.projectName" data-cy="projectNameFilter" class="w-full"/>
+          <InputText
+            id="project-name-filter"
+            v-model="filters.projectName"
+            v-on:keydown.enter="loadData"
+            data-cy="projectNameFilter"
+            maxlength="50"
+            class="w-full"/>
         </div>
-        <div class="field mb-0">
+        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
           <label for="subject-name-filter">Subject Name:</label>
-          <InputText id="subject-name-filter" v-model="filters.subjectName" data-cy="subjectNameFilter" class="w-full" />
+          <InputText
+            id="subject-name-filter"
+            v-model="filters.subjectName"
+            v-on:keydown.enter="loadData"
+            data-cy="subjectNameFilter"
+            maxlength="50"
+            class="w-full" />
         </div>
       </div>
-      <div class="mb-3">
+      <div class="mb-3 mt-1">
         <SkillsButton
           label="Filter"
           icon="fa fa-filter"
@@ -183,6 +207,8 @@ const reset = () => {
         :loading="reloadData"
         v-model:selection="selectedRows"
         v-model:expandedRows="expandedRows"
+        v-model:sort-field="sortInfo.sortBy"
+        v-model:sort-order="sortInfo.sortOrder"
         stripedRows
         paginator
         lazy
@@ -190,22 +216,30 @@ const reset = () => {
         :rows="pageSize"
         @page="pageChanged"
         tableStoredStateId="usersTable"
-        data-cy="usersTable"
-        :rowsPerPageOptions="possiblePageSizes"
-        @sort="sortField">
+        data-cy="importSkillsFromCatalogTable"
+        :rowsPerPageOptions="possiblePageSizes">
         <!--      <template #loading> Loading customers data. Please wait. </template>-->
-        <Column expander class="lg:w-2rem" :class="{'flex': responsive.lg.value }">
+        <Column expander :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
+            <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
           </template>
         </Column>
-        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-        <Column field="name" header="Skill" :sortable="true">
+        <Column selectionMode="multiple" :class="{'flex': responsive.md.value }" >
+          <template #header>
+            <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-check-double"  aria-hidden="true"></i> Select Rows:</span>
+          </template>
+        </Column>
+        <Column field="name" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user mr-1" aria-hidden="true"></i>
           </template>
+          <template #body="slotProps">
+            <div class="max-wrap">
+              {{ slotProps.data.name }}
+            </div>
+          </template>
         </Column>
-        <Column field="projectName" header="Project" :sortable="true">
+        <Column field="projectName" header="Project" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
           </template>
@@ -217,14 +251,16 @@ const reset = () => {
               <div>
                 <SkillsButton
                   aria-label="Filter by Project Name"
+                  @click="setProjectFilter(slotProps.data.projectName)"
                   data-cy="addProjectFilter"
                   icon="fas fa-search-plus"
-                  size="small" rounded text />
+                  size="small"
+                  rounded text />
               </div>
             </div>
           </template>
         </Column>
-        <Column field="subjectName" header="Subject" :sortable="true">
+        <Column field="subjectName" header="Subject" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-cubes mr-1" aria-hidden="true"></i>
           </template>
@@ -237,13 +273,14 @@ const reset = () => {
                 <SkillsButton
                   aria-label="Filter by Subject Name"
                   data-cy="addSubjectFilter"
+                  @click="setSubjectFilter(slotProps.data.subjectName)"
                   icon="fas fa-search-plus"
                   size="small" rounded text />
               </div>
             </div>
           </template>
         </Column>
-        <Column field="totalPoints" header="Points" :sortable="true">
+        <Column field="totalPoints" header="Points" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-arrow-alt-circle-up mr-1" aria-hidden="true"></i>
           </template>
@@ -253,8 +290,11 @@ const reset = () => {
           <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
         </template>
         <template #expansion="slotProps">
-          <div>
-           how are you?
+          <skill-to-import-info :skill="slotProps.data" />
+        </template>
+        <template #empty>
+          <div class="text-center">
+            <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
           </div>
         </template>
       </DataTable>
@@ -297,5 +337,9 @@ const reset = () => {
 </template>
 
 <style scoped>
-
+.max-wrap {
+  max-width: 20rem;
+  word-wrap: break-word;
+  display: inline-block;
+}
 </style>
