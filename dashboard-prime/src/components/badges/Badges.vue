@@ -33,6 +33,7 @@ let sortOrder = ref({
   loading: false,
   loadingBadgeId: '-1',
 });
+const badgeRef = ref([]);
 
 let isReadOnlyProj = false;
 
@@ -104,10 +105,10 @@ const updateSortAndReloadSubjects = (updateInfo) => {
           loadBadges()
               .then(() => {
                 isLoadingData.value = false;
-                // const foundRef = $refs[`badge_${updateInfo.id}`];
-                // nextTick(() => {
-                //   foundRef[0].focusSortControl();
-                // });
+                const foundRef = badgeRef.value[updateInfo.id];
+                nextTick(() => {
+                  foundRef.focusSortControl();
+                });
               });
         });
   }
@@ -277,15 +278,15 @@ const toDate = (value) => {
             <div v-for="(badge) of badges" :id="badge.badgeId"
                  :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
               <BlockUI :blocked="sortOrder.loading">
-                <div class="absolute z-5 top-50 w-full text-center" :data-cy="`${badge.badgeId}_overlayShown`">
+                <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
                     <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                    <skills-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                    <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
                   </div>
                 </div>
 
                 <badge :badge="badge"
-                       :ref="'badge_'+badge.badgeId"
+                       :ref="(el) => (badgeRef[badge.badgeId] = el)"
                        @badge-updated="badgeUpdated"
                        @badge-deleted="deleteBadge"
                        @sort-changed-requested="updateSortAndReloadSubjects"

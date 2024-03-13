@@ -8,6 +8,7 @@ const emit = defineEmits(['sort-changed-requested']);
 
 let isReadOnlyProj = false;
 let overSortControl = ref(false);
+const sortControl = ref();
 
 const moveDown = () => {
     emit('sort-changed-requested', {
@@ -22,8 +23,12 @@ const moveUp = () => {
 };
 
 const focusSortControl = () => {
-  this.$refs.sortControl.focus();
+  sortControl.value.focus();
 };
+
+defineExpose({
+  focusSortControl
+})
 </script>
 
 <template>

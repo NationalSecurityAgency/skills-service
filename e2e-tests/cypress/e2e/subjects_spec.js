@@ -828,7 +828,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="sortControlHandle"]');
     })
 
-    it.skip('drag-and-drag sort should spinner while backend operation is happening', () => {
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
         cy.intercept('/admin/projects/proj1/subjects/subj1', (req) => {
             req.reply((res) => {
                 res.send({ delay: 6000})
@@ -1072,7 +1072,7 @@ describe('Subjects Tests', () => {
 
     });
 
-    it.skip('change sort order using keyboard', () => {
+    it('change sort order using keyboard', () => {
         cy.createSubject(1, 1);
         cy.createSubject(1, 2);
         cy.createSubject(1, 3);

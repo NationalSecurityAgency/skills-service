@@ -26,6 +26,7 @@ let showEditBadge = ref(false);
 let showDeleteDialog = ref(false);
 let deleteDisabledText = ref('');
 let isDeleteDisabled = ref(false);
+const navCardWithStatsAndControls = ref();
 
 let isReadOnlyProj = false;
 
@@ -108,8 +109,9 @@ const sortRequested = (info) => {
   };
   emit('sort-changed-requested', withId);
 };
+
 const focusSortControl = () => {
-  // $refs.navCardWithStatsAndControls.focusSortControl();
+  navCardWithStatsAndControls.value.focusSortControl();
 };
 const handlePublish = () => {
   emit('publish-badge', badgeInternal.value);
@@ -129,6 +131,10 @@ const handleDeleteCancelled = () => {
     // $refs.cardNavControls.focusOnDelete();
   });
 };
+
+defineExpose({
+  focusSortControl
+});
 </script>
 
 <template>

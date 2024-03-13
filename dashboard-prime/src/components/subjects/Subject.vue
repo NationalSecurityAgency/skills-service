@@ -23,6 +23,7 @@ let cardOptions = ref({ controls: {} });
 let subjectInternal = ref({ ...subject });
 let deleteSubjectDisabled = ref(false);
 let deleteSubjectToolTip = ref('');
+const navCardWithStatsAndControls = ref();
 
 onMounted(() => {
   buildCardOptions();
@@ -34,7 +35,7 @@ const minimumPoints = computed(() => {
 });
 
 const alreadyShared = computed(() => {
-  return subjectInternal?.exported === true;
+  return subjectInternal.value?.exported === true;
 });
 
 // methods
@@ -137,6 +138,13 @@ watch(
 
 const createOrUpdateSubject = inject('createOrUpdateSubject')
 
+const focusSortControl = () => {
+  navCardWithStatsAndControls.value.focusSortControl();
+}
+
+defineExpose({
+  focusSortControl
+});
 </script>
 
 <template>

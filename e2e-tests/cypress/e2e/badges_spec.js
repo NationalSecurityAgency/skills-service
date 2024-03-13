@@ -1036,7 +1036,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="sortControlHandle"]');
     });
 
-    it.skip('drag-and-drag sort should spinner while backend operation is happening', () => {
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
         cy.intercept('/admin/projects/proj1/badges/badge1', (req) => {
             req.reply((res) => {
                 res.send({ delay: 6000 });
@@ -1998,7 +1998,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
     });
 
-    it.skip('change sort order using keyboard', () => {
+    it('change sort order using keyboard', () => {
         cy.createBadge(1, 1);
         cy.createBadge(1, 2);
         cy.createBadge(1, 3);
