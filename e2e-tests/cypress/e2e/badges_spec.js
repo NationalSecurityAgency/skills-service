@@ -357,8 +357,8 @@ describe('Badges Tests', () => {
             .should('not.be.visible');
 
         // id too long
-        msg = 'Badge ID must be at most 50 characters';
-        const invalidId = Array(51)
+        msg = 'Badge ID must be at most 100 characters';
+        const invalidId = Array(101)
             .fill('a')
             .join('');
         cy.getIdField()
@@ -432,22 +432,22 @@ describe('Badges Tests', () => {
             .should('not.be.visible');
 
         // max description
-        // msg = 'Badge Description cannot exceed 2000 characters';
-        // const invalidDescription = Array(2000)
-        //     .fill('a')
-        //     .join('');
-        // // it takes way too long using .type method
-        // cy.get(makdownDivSelector)
-        //     .invoke('text', invalidDescription);
-        // cy.get('#markdown-editor')
-        //     .type('a');
-        // cy.get('[data-cy=descriptionMarkdownEditor]')
-        //     .contains(msg)
-        //     .should('be.visible');
-        // cy.get('#markdown-editor')
-        //     .type('{backspace}');
-        // cy.get('[data-cy=descriptionMarkdownEditor]')
-        //     .should('not.be.visible');
+        msg = 'Badge Description must be at most 2000 characters';
+        const invalidDescription = Array(2000)
+            .fill('a')
+            .join('');
+        // it takes way too long using .type method
+        cy.get(makdownDivSelector)
+            .invoke('text', invalidDescription);
+        cy.get('#markdown-editor')
+            .type('a', 0);
+        cy.get('[data-cy=descriptionError]')
+            .contains(msg)
+            .should('be.visible');
+        cy.get('#markdown-editor')
+            .type('{backspace}');
+        cy.get('[data-cy=descriptionError]')
+            .should('not.be.visible');
 
         //helpUrl
         cy.get('[data-cy=skillHelpUrl]')
@@ -1779,7 +1779,7 @@ describe('Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('name is validated against custom validators', () => {
+    it('name is validated against custom validators', () => {
         cy.visit('/administrator/projects/proj1/badges');
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadBadges');
@@ -2053,7 +2053,7 @@ describe('Badges Tests', () => {
             .should('have.focus');
     });
 
-    it.skip('cancelling delete dialog should return focus to delete button', () => {
+    it('cancelling delete dialog should return focus to delete button', () => {
         cy.createBadge(1, 1);
         cy.createBadge(1, 2);
         cy.createBadge(1, 3);
@@ -2069,7 +2069,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
             .click();
         cy.contains('Removal Safety Check');
-        cy.get('[data-cy=closeRemovalSafetyCheck]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
             .should('have.focus');

@@ -68,7 +68,7 @@ const schema = object({
       .max(appConfig.maxBadgeNameLength)
       .nullValueNotAllowed()
       .test('uniqueName', 'Badge Name is already taken', (value) => checkBadgeNameUnique(value))
-      .customNameValidator()
+      .customNameValidator('Badge Name')
       .label('Badge Name'),
   'badgeId': string()
       // .trim()

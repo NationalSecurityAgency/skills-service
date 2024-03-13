@@ -23,8 +23,8 @@ const shareTitle = computed(() => {
   return props.options?.shareEnabled === true ? `Share ${props.options?.type}` : `Unshare ${props.options?.type}`
 })
 
-const editBtn = ref(null)
-const deleteBtn = ref(null)
+const editBtn = ref();
+const deleteBtn = ref();
 
 const handleShareClick = () => {
   let eventName = 'share'
@@ -39,6 +39,19 @@ const handleManageClick = () => {
     router.push(props.to)
   }
 }
+
+const focusOnEdit = () => {
+  // editBtn.value.focus();
+}
+
+const focusOnDelete = () => {
+  // deleteBtn.value.focus();
+}
+
+defineExpose({
+  focusOnEdit,
+  focusOnDelete,
+})
 
 </script>
 

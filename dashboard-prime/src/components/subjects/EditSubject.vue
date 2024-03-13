@@ -80,8 +80,8 @@ const schema = object({
       .min(appConfig.minNameLength)
       .max(appConfig.maxSubjectNameLength)
       .nullValueNotAllowed()
+      .customNameValidator('Subject Name')
       .test('uniqueName', 'Subject Name is already taken', (value) => checkSubjectNameUnique(value))
-      .customNameValidator()
       .label('Subject Name'),
   'subjectId': string()
       .trim()
@@ -91,7 +91,6 @@ const schema = object({
       .nullValueNotAllowed()
       .idValidator()
       .test('uniqueName', 'Subject ID is already taken', (value) => checkSubjectIdUnique(value))
-      .customNameValidator()
       .label('Subject ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)

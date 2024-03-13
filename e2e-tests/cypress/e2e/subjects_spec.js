@@ -601,7 +601,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
-    it.skip('name is validated against custom validators', () => {
+    it('name is validated against custom validators', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
 
         cy.visit('/administrator/projects/proj1');

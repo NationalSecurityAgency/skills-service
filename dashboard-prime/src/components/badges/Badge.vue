@@ -27,6 +27,7 @@ let showDeleteDialog = ref(false);
 let deleteDisabledText = ref('');
 let isDeleteDisabled = ref(false);
 const navCardWithStatsAndControls = ref();
+const cardNavControls = ref(null);
 
 let isReadOnlyProj = false;
 
@@ -123,12 +124,12 @@ const handleHidden = (e) => {
 };
 const handleFocus = () => {
   nextTick(() => {
-    // $refs.cardNavControls.focusOnEdit();
+    // cardNavControls.value.focusOnEdit();
   });
 };
 const handleDeleteCancelled = () => {
   nextTick(() => {
-    // $refs.cardNavControls.focusOnDelete();
+    cardNavControls.value.focusOnDelete();
   });
 };
 
@@ -168,7 +169,7 @@ defineExpose({
         </div>
 
         <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                    :global="global" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>
+                    :global="global" @badge-updated="badgeEdited" @hidden="handleFocus"></edit-badge>
       </template>
     </nav-card-with-stats-and-controls>
     <removal-validation
