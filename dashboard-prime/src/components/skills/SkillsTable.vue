@@ -419,9 +419,23 @@ const onMoved = (movedInfo) => {
                   class="text-lg"
                   :value="slotProps.data.name" :filter="filters.global.value" />
               </router-link>
-              <Tag v-if="slotProps.data.reusedSkill" class="ml-2" :data-cy="`importedBadge-${slotProps.data.skillId}`">
-                <span><i class="fas fa-recycle" aria-hidden="true"></i> Reused</span>
-              </Tag>
+              <div class="flex gap-1">
+                <Tag
+                  v-if="slotProps.data.isCatalogImportedSkills"
+                  severity="success"
+                  class="mt-1"
+                  :data-cy="`importedBadge-${slotProps.data.skillId}`">
+                  <span v-if="slotProps.data.reusedSkill"><i class="fas fa-recycle" aria-hidden="true"></i> Reused</span>
+                  <span><i class="fas fa-book" aria-hidden="true"></i> Imported</span>
+                </Tag>
+                <Tag
+                  v-if="!slotProps.data.enabled"
+                  severity="secondary"
+                  class="mt-1"
+                  :data-cy="`disabledBadge-${slotProps.data.skillId}`">
+                  <span><i class="fas fa-book"  aria-hidden="true"></i> Disabled</span>
+                </Tag>
+              </div>
             </div>
             <div class="flex-none">
               <div class="flex">
@@ -539,6 +553,21 @@ const onMoved = (movedInfo) => {
               <div class="text-lg">{{ slotProps.data.totalPoints }}</div>
               <div v-if="slotProps.data.isSkillType" class="text-color-secondary">{{ slotProps.data.pointIncrement  }} pts x {{ slotProps.data.numPerformToCompletion }} repetitions</div>
               <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag> skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : ''}}</div>
+            </div>
+          </div>
+          <div v-else-if="slotProps.field === 'catalogType'">
+            <div v-if="slotProps.data.isCatalogImportedSkills && !slotProps.data.reusedSkill">
+              <Tag severity="success"><i class="fas fa-book mr-1" aria-hidden="true" /> IMPORTED</Tag>
+              <p class="text-secondary">Imported from <span
+                class="text-primary">{{ slotProps.data.copiedFromProjectName }}</span></p>
+            </div>
+            <div v-if="slotProps.data.sharedToCatalog">
+              <Tag severity="secondary"><i class="fas fa-book mr-1" aria-hidden="true"/> EXPORTED</Tag>
+              <p class="text-secondary">Exported to Skill Catalog</p>
+            </div>
+
+            <div v-if="!slotProps.data.isCatalogSkill" class="">
+              N/A
             </div>
           </div>
           <div v-else>

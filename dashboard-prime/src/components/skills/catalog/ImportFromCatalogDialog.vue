@@ -10,11 +10,17 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import DataTable from 'primevue/datatable'
 import SkillToImportInfo from '@/components/skills/catalog/SkillToImportInfo.vue'
 import { useStorage } from '@vueuse/core'
+import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const model = defineModel()
 const route = useRoute()
 const appConfig = useAppConfig()
 const responsive = useResponsiveBreakpoints()
+const subjectState = useSubjectsState()
+const skillsState = useSubjectSkillsState()
 
 const initialLoad = ref(true)
 const reloadData = ref(false)
@@ -100,10 +106,34 @@ const maxSkillsInSubjectExceeded = computed(() => {
   //   > this.$store.getters.config.maxSkillsPerSubject;
 })
 
-const validatingImport = ref(false)
+const importInProgress = ref(false)
 const importDisabled = computed(() => selectedRows.value <= 0)
 const doImport = () => {
-
+  importInProgress.value = true
+  loadFinalizationState()
+    .then(() => {
+      if (!isInFinalizeState.value) {
+        const projAndSkillIds = selectedRows.value.map((skill) => ({
+          projectId: skill.projectId,
+          skillId: skill.skillId
+        }))
+        CatalogService.bulkImport(route.params.projectId, route.params.subjectId, projAndSkillIds)
+          .then(() => {
+            skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+            subjectState.loadSubjectDetailsState()
+            // this.loadSkills(true);
+            // this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
+            // this.loadFinalizeInfo({ projectId: this.projectId });
+            SkillsReporter.reportSkill('ImportSkillfromCatalog');
+          }).finally(() => {
+          handleClose()
+        });
+      } else {
+        selectedRows.value = []
+      }
+    }).finally(() => {
+    importInProgress.value = false
+  })
 }
 const reset = () => {
   filters.value.skillName = ''
@@ -118,6 +148,13 @@ const setProjectFilter = (projectName) => {
 const setSubjectFilter = (projectName) => {
   filters.value.subjectName = projectName;
   loadData();
+}
+const isImportBtnDisabled = computed(() => {
+  return importDisabled.value || importInProgress.value || maxBulkImportExceeded.value || maxSkillsInSubjectExceeded.value
+})
+
+const handleClose = () => {
+  model.value = false
 }
 </script>
 
@@ -146,63 +183,63 @@ const setSubjectFilter = (projectName) => {
       </no-content2>
 
 
-      <div class="md:flex gap-2">
-        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
-          <label for="skill-name-filter">Skill Name:</label>
-          <InputText
-            id="skill-name-filter"
-            v-model="filters.skillName"
-            v-on:keydown.enter="loadData"
-            data-cy="skillNameFilter"
-            maxlength="50"
-            class="w-full"/>
+      <div v-if="showTable">
+        <div class="md:flex gap-2">
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+            <label for="skill-name-filter">Skill Name:</label>
+            <InputText
+              id="skill-name-filter"
+              v-model="filters.skillName"
+              v-on:keydown.enter="loadData"
+              data-cy="skillNameFilter"
+              maxlength="50"
+              class="w-full"/>
+          </div>
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+            <label for="project-name-filter">Project Name:</label>
+            <InputText
+              id="project-name-filter"
+              v-model="filters.projectName"
+              v-on:keydown.enter="loadData"
+              data-cy="projectNameFilter"
+              maxlength="50"
+              class="w-full"/>
+          </div>
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+            <label for="subject-name-filter">Subject Name:</label>
+            <InputText
+              id="subject-name-filter"
+              v-model="filters.subjectName"
+              v-on:keydown.enter="loadData"
+              data-cy="subjectNameFilter"
+              maxlength="50"
+              class="w-full" />
+          </div>
         </div>
-        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
-          <label for="project-name-filter">Project Name:</label>
-          <InputText
-            id="project-name-filter"
-            v-model="filters.projectName"
-            v-on:keydown.enter="loadData"
-            data-cy="projectNameFilter"
-            maxlength="50"
-            class="w-full"/>
+        <div class="mb-3 mt-1">
+          <SkillsButton
+            label="Filter"
+            icon="fa fa-filter"
+            severity="primary"
+            @click="loadData"
+            size="small"
+            outlined
+            class="mt-1"
+            data-cy="filterBtn" />
+          <SkillsButton
+            label="Reset"
+            icon="fa fa-times"
+            outlined
+            size="small"
+            severity="primary"
+            @click="reset"
+            class="ml-1 mt-1"
+            data-cy="filterResetBtn" />
+
         </div>
-        <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
-          <label for="subject-name-filter">Subject Name:</label>
-          <InputText
-            id="subject-name-filter"
-            v-model="filters.subjectName"
-            v-on:keydown.enter="loadData"
-            data-cy="subjectNameFilter"
-            maxlength="50"
-            class="w-full" />
-        </div>
-      </div>
-      <div class="mb-3 mt-1">
-        <SkillsButton
-          label="Filter"
-          icon="fa fa-filter"
-          severity="primary"
-          @click="loadData"
-          size="small"
-          outlined
-          class="mt-1"
-          data-cy="filterBtn" />
-        <SkillsButton
-          label="Reset"
-          icon="fa fa-times"
-          outlined
-          size="small"
-          severity="primary"
-          @click="reset"
-          class="ml-1 mt-1"
-          data-cy="filterResetBtn" />
 
-      </div>
+        <DataTable
 
-
-      <DataTable
-        v-if="showTable"
         :value="data"
         :loading="reloadData"
         v-model:selection="selectedRows"
@@ -298,6 +335,7 @@ const setSubjectFilter = (projectName) => {
           </div>
         </template>
       </DataTable>
+      </div>
 
       <div v-if="!emptyCatalog" class="text-right mt-3">
         <SkillsButton
@@ -307,7 +345,7 @@ const setSubjectFilter = (projectName) => {
           size="small"
           class="mr-2"
           outlined
-          @click="model=false"
+          @click="handleClose"
           data-cy="closeButton" />
         <SkillsButton
           v-if="!emptyCatalog"
@@ -317,22 +355,18 @@ const setSubjectFilter = (projectName) => {
           @click="doImport"
           data-cy="importBtn"
           badge="2"
-          :disabled="importDisabled || validatingImport || maxBulkImportExceeded || maxSkillsInSubjectExceeded">Import
+          :disabled="isImportBtnDisabled">Import
           <!--          <i class="far fa-arrow-alt-circle-down ml-1" aria-hidden="true"/>-->
           <Badge :value="selectedRows.length" severity="info" data-cy="numSelectedSkills" class="ml-2" />
-          <ProgressSpinner v-if="validatingImport" style="width: 0.9rem; height: 0.9rem;" class="ml-1" />
         </SkillsButton>
-        <!--        <SkillsButton-->
-        <!--          label="Import"-->
-        <!--          icon="fas fa-thumbs-up"-->
-        <!--          severity="success"-->
-        <!--          size="small"-->
-        <!--          outlined-->
-        <!--          data-cy="importBtn"-->
-        <!--          class="float-right"-->
-        <!--          @click="doImport" />-->
       </div>
     </div>
+
+
+    <div class="loading-indicator" v-if="importInProgress">
+      <skills-spinner :is-loading="true"/>
+    </div>
+
   </Dialog>
 </template>
 
@@ -341,5 +375,30 @@ const setSubjectFilter = (projectName) => {
   max-width: 20rem;
   word-wrap: break-word;
   display: inline-block;
+}
+
+.loading-indicator {
+  position: fixed;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: show;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+/* Transparent Overlay */
+.loading-indicator:before {
+  content: '';
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(222, 217, 217, 0.53);
 }
 </style>
