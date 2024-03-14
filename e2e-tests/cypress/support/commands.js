@@ -1424,3 +1424,9 @@ Cypress.Commands.add('visitAdmin', () => {
     cy.visit('/administrator');
     cy.get('[data-cy="inception-button"]').contains('Level');
 });
+
+Cypress.Commands.add('selectItem', (selector, item) => {
+    let itemToSelect = selector + ' [data-pc-section="trigger"]';
+    cy.get(itemToSelect).click();
+    cy.get('[data-pc-section="item"]').contains(item).click();
+})

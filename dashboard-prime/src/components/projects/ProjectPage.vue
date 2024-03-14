@@ -32,7 +32,7 @@ let isReadOnlyProj = false;
 //   'project',
 // ]),
 const isLoading = computed(() => {
-  return isLoadingData.value; // || isLoadingProjConfig;
+  return isLoadingData.value || projConfig.loadingProjConfig;
 });
 
 onMounted(() => {
@@ -68,23 +68,23 @@ const navItems = computed(() => {
 });
 
 const headerOptions = computed(() => {
-  if (!project.value || !projConfig) {
+  if (!project.value || !projConfig.projConfig) {
     return {};
   }
   let visibilityLabel = 'Project Catalog';
   let visibilityIcon = 'fas fa-eye-slash text-warning';
   let visibilityDescription = '';
   let visibilityType = 'Hidden';
-  // if (isProjConfigInviteOnly) {
-  //   visibilityLabel = 'Protection';
-  //   visibilityDescription = 'Invite Only';
-  //   visibilityIcon = 'fas fa-user-lock text-danger';
-  //   visibilityType = 'PRIVATE';
-  // } else if (isProjConfigDiscoverable) {
-  //   visibilityType = 'Discoverable';
-  //   visibilityIcon = 'fas fa-search-plus text-success';
-  //   visibilityDescription = '';
-  // }
+  if (projConfig.isProjConfigInviteOnly) {
+    visibilityLabel = 'Protection';
+    visibilityDescription = 'Invite Only';
+    visibilityIcon = 'fas fa-user-lock text-danger';
+    visibilityType = 'PRIVATE';
+  } else if (projConfig.isProjConfigDiscoverable) {
+    visibilityType = 'Discoverable';
+    visibilityIcon = 'fas fa-search-plus text-success';
+    visibilityDescription = '';
+  }
 
   const stats = [];
   stats.push({

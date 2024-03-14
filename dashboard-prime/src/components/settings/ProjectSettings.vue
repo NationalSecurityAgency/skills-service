@@ -16,11 +16,13 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
+import { useConfirm } from 'primevue/useconfirm'
 
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
+const confirm = useConfirm();
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
@@ -216,7 +218,7 @@ const projectVisibilityOptions = computed(() => {
   const opts = [
     { value: publicNotDiscoverable, text: 'Not in the Project Catalog' },
   ];
-  if (isProgressAndRankingEnabled) {
+  if (isProgressAndRankingEnabled.value) {
     opts.push({ value: discoverableProgressAndRanking, text: 'Add to the Project Catalog' });
   }
   opts.push({ value: privateInviteOnly, text: 'Private Invite Only' });
@@ -224,7 +226,7 @@ const projectVisibilityOptions = computed(() => {
 });
 
 const projectVisibilityHelpMsg = computed(() => {
-  if (isProgressAndRankingEnabled) {
+  if (isProgressAndRankingEnabled.value) {
     return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
         + '<b>Add to the Project Catalog</b> projects can be accessed directly and can be found in the Project Catalog. <br/><br/>'
         + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite. ';
@@ -299,19 +301,22 @@ const hideProjectDescriptionChanged = ((value) => {
 });
 
 const projectVisibilityChanged = ((value) => {
-  const dirty = `${value}` !== `${settings.value.projectVisibility.lastLoadedValue}`;
+  const dirty = `${value.value}` !== `${settings.value.projectVisibility.lastLoadedValue}`;
   settings.value.projectVisibility.dirty = dirty;
   if (dirty) {
-    if (value === publicNotDiscoverable) {
+    if (value.value === publicNotDiscoverable) {
       settings.value.inviteOnlyProject.value = 'false';
       settings.value.productionModeEnabled.value = 'false';
-    } else if (value === privateInviteOnly) {
+    } else if (value.value === privateInviteOnly) {
       settings.value.inviteOnlyProject.value = 'true';
       settings.value.productionModeEnabled.value = 'false';
-      msgOk('Changing this Project to Invite Only '
-          + 'will restrict access to the training profile and '
-          + 'skill reporting to only invited users.', 'Changing to Invite Only', 'Ok', { size: 'mg' });
-    } else if (value === discoverableProgressAndRanking) {
+      confirm.require({
+        message: 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.',
+        header: 'Changing to Invite Only',
+        rejectClass: 'hidden',
+        acceptLabel: 'OK',
+      })
+    } else if (value.value === discoverableProgressAndRanking) {
       settings.value.inviteOnlyProject.value = 'false';
       settings.value.productionModeEnabled.value = 'true';
     }
@@ -467,7 +472,7 @@ const saveSettings = ((dirtyChanges) => {
                   msg="Change to true to calculate levels based on explicit point values instead of percentages."/>
             </div>
             <div class="md:col-7 xl:col-9">
-              <InputSwitch v-model="settings.levelPointsEnabled.value" v-on:input="levelPointsEnabledChanged" name="check-button" aria-labelledby="pointsForLevelsLabel" data-cy="usePointsForLevelsSwitch" /> {{ usePointsForLevelsLabel }}
+              <InputSwitch v-model="settings.levelPointsEnabled.value" v-on:update:modelValue="levelPointsEnabledChanged" name="check-button" aria-labelledby="pointsForLevelsLabel" data-cy="usePointsForLevelsSwitch" /> {{ usePointsForLevelsLabel }}
             </div>
           </div>
 
@@ -489,7 +494,7 @@ const saveSettings = ((dirtyChanges) => {
             <div class="md:col-7 xl:col-9">
               <InputSwitch v-model="selfReport.enabled"
                                name="check-button"
-                               v-on:input="selfReportingControl"
+                               v-on:update:modelValue="selfReportingControl"
                                aria-labelledby="selfReportLabel"
                                data-cy="selfReportSwitch" />{{ selfReportingEnabledLabel }}
 
@@ -542,7 +547,7 @@ const saveSettings = ((dirtyChanges) => {
             <div class="md:col-7 xl:col-9">
               <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
                            name="check-button"
-                           v-on:input="rankAndLeaderboardOptOutChanged"
+                           v-on:update:modelValue="rankAndLeaderboardOptOutChanged"
                            aria-labelledby="rankAndLeaderboardOptOutLabel"
                            data-cy="rankAndLeaderboardOptOutSwitch"/> {{ rankOptOutLabel }}
             </div>
@@ -602,7 +607,7 @@ const saveSettings = ((dirtyChanges) => {
             <div class="md:col-7 xl:col-9">
               <InputSwitch v-model="settings.groupDescriptions.value"
                                name="check-button"
-                               v-on:input="groupDescriptionsChanged"
+                               v-on:update:modelValue="groupDescriptionsChanged"
                                aria-labelledby="groupDescriptionsLabel"
                                data-cy="groupDescriptionsSwitch"/> {{ groupDescriptionsLabel }}
             </div>

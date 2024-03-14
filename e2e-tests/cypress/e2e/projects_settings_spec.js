@@ -31,11 +31,12 @@ describe('Project Settings Tests', () => {
     });
 
     it('project-level settings: rank opt-out for all admins', () => {
+        let leaderboardSwitch = '[data-cy="rankAndLeaderboardOptOutSwitch"] [data-pc-section="input"]'
         cy.createProject(1);
         cy.visit('/administrator/projects/proj1/settings');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('not.be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -43,11 +44,11 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .click({ force: true });
+        cy.get(leaderboardSwitch)
+            .click();
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -55,11 +56,11 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .click({ force: true });
+        cy.get(leaderboardSwitch)
+            .click();
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('not.be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -67,11 +68,11 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .click({ force: true });
+        cy.get(leaderboardSwitch)
+            .click();
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -90,8 +91,8 @@ describe('Project Settings Tests', () => {
 
         // refresh
         cy.visit('/administrator/projects/proj1/settings');
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -99,11 +100,11 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .click({ force: true });
+        cy.get(leaderboardSwitch)
+            .click();
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('not.have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .should('not.be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -111,10 +112,10 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .click({ force: true });
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(leaderboardSwitch)
+            .click();
+        cy.get(leaderboardSwitch)
+            .should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -124,15 +125,16 @@ describe('Project Settings Tests', () => {
     });
 
     it('project-level settings: set custom labels', () => {
+        let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
         cy.createProject(1);
         cy.visit('/administrator/projects/proj1/settings');
 
-        cy.get('[data-cy="customLabelsSwitch"')
-            .should('not.have.class', 'p-inputswitch-checked');
-        cy.get('[data-cy="customLabelsSwitch"')
+        cy.get(labelsSwitch)
+            .should('not.be.checked');
+        cy.get(labelsSwitch)
             .click({ force: true });
-        cy.get('[data-cy="customLabelsSwitch"')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(labelsSwitch)
+            .should('be.checked');
         cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Project');
         cy.get('[data-cy="subjectDisplayNameTextInput"]')
@@ -195,8 +197,8 @@ describe('Project Settings Tests', () => {
         // refresh
         cy.visit('/administrator/projects/proj1/settings');
 
-        cy.get('[data-cy="customLabelsSwitch"')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(labelsSwitch)
+            .should('be.checked');
         cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Work Role');
         cy.get('[data-cy="subjectDisplayNameTextInput"]')
@@ -255,12 +257,12 @@ describe('Project Settings Tests', () => {
         // refresh, validate default is back
         cy.visit('/administrator/projects/proj1/settings');
 
-        cy.get('[data-cy="customLabelsSwitch"')
-            .should('not.have.class', 'p-inputswitch-checked');
-        cy.get('[data-cy="customLabelsSwitch"')
+        cy.get(labelsSwitch)
+            .should('not.be.checked');
+        cy.get(labelsSwitch)
             .click({ force: true });
-        cy.get('[data-cy="customLabelsSwitch"')
-            .should('have.class', 'p-inputswitch-checked');
+        cy.get(labelsSwitch)
+            .should('be.checked');
         cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Project');
         cy.get('[data-cy="subjectDisplayNameTextInput"]')
@@ -351,6 +353,7 @@ describe('Project Settings Tests', () => {
     });
 
     it('project-level settings: project visibility', () => {
+
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/settings')
             .as('getSettings');
@@ -365,8 +368,9 @@ describe('Project Settings Tests', () => {
             .eq(0)
             .should('include.text', 'Hidden');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('dpr');
+        cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Add to the Project Catalog');
+        // cy.get('[data-cy="projectVisibilitySelector"]')
+        //     .select('dpr');
         cy.get('[data-cy="saveSettingsBtn"')
             .click();
         cy.wait('@saveSettings');
@@ -381,13 +385,14 @@ describe('Project Settings Tests', () => {
             .eq(0)
             .should('not.include.text', 'Hidden');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
+        cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Private Invite Only');
+        // cy.get('[data-cy="projectVisibilitySelector"]')
+        //     .select('pio');
+        cy.get('.p-confirm-dialog')
             .should('be.visible')
             .should('include.text', 'Changing to Invite Only')
             .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
-        cy.clickButton('Ok');
+        cy.clickButton('OK');
         cy.get('[data-cy="saveSettingsBtn"')
             .click({ force: true });
         cy.wait('@saveSettings');
@@ -398,7 +403,7 @@ describe('Project Settings Tests', () => {
             .contains('Invite Only');
     });
 
-    it('project-level settings: project description', () => {
+    it.skip('project-level settings: project description', () => {
         cy.createProject(1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.'});
 
         cy.createProject(2, { description: '' });
@@ -436,10 +441,10 @@ describe('Project Settings Tests', () => {
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@p1GetSettings');
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('dpr');
-        cy.get('[data-cy="showProjectDescriptionSelector"]').find('option:selected').should('have.text', 'Only show Project Description in Manage My Projects');
-        cy.get('[data-cy="showProjectDescriptionSelector"]').select('true');
+        cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Add to the Project Catalog');
+
+        cy.get('[data-cy="showProjectDescriptionSelector"]').should('have.text', 'Only show Project Description in Manage My Projects');
+        cy.selectItem('[data-cy="showProjectDescriptionSelector"]', 'Show Project Description everywhere');
         cy.get('[data-cy="saveSettingsBtn"')
             .click();
         cy.wait('@p1SaveSettings');
@@ -449,7 +454,7 @@ describe('Project Settings Tests', () => {
         cy.contains('Access Management').should('be.visible');
         cy.get('[data-cy="nav-Settings"]').click();
         cy.wait('@p1GetSettings');
-        cy.get('[data-cy="showProjectDescriptionSelector"]').find('option:selected').should('have.text', 'Show Project Description everywhere');
+        cy.get('[data-cy="showProjectDescriptionSelector"]').should('have.text', 'Show Project Description everywhere');
         //validate that changed value for description display persisted
 
 

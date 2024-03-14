@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div>Access Settings</div>
+  <div>Access Management</div>
 </template>
 
 <style scoped></style>
