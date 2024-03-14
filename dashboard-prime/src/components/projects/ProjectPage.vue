@@ -1,6 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { createNamespacedHelpers, useStore } from 'vuex'
+import { computed, onMounted, ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
@@ -18,7 +17,6 @@ const route = useRoute();
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
 const announcer = useSkillsAnnouncer()
-// const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
 
 const isLoadingData = ref(true);
 const cancellingExpiration = ref(false);
@@ -28,11 +26,8 @@ const shareUrl = ref('');
 const project = ref({});
 let isReadOnlyProj = false;
 
-// ...mapGetters([
-//   'project',
-// ]),
 const isLoading = computed(() => {
-  return isLoadingData.value || projConfig.loadingProjConfig;
+  return isLoadingData.value; // || projConfig.loadingProjConfig;
 });
 
 onMounted(() => {
@@ -152,13 +147,6 @@ const expirationDate = computed(() => {
   return expires.format('YYYY-MM-DD HH:mm');
 });
 
-// ...mapActions([
-//   'loadProjectDetailsState',
-// ]),
-// ...mapMutations([
-//   'setProject',
-// ]),
-
 const loadProjectDetailsState = (payload) => {
   return new Promise((resolve, reject) => {
     ProjectService.getProjectDetails(payload.projectId)
@@ -205,6 +193,7 @@ const projectSaved = (updatedProject) => {
     }
     announcer.polite(`Project ${updatedProject.name} has been edited`);
 };
+
 const keepIt = () => {
   cancellingExpiration.value = true;
   ProjectService.cancelUnusedProjectDeletion(route.params.projectId).then(() => {
@@ -223,8 +212,8 @@ const setProject = (newProject) => {
 <template>
   <div ref="mainFocus">
     <PageHeader :loading="isLoading" :options="headerOptions">
-      <div slot="banner" v-if="project && project.expiring && !isReadOnlyProj" data-cy="projectExpiration"
-           class="w-100 text-center alert-danger p-2 mb-3">
+      <template #banner v-if="project && project.expiring && !isReadOnlyProj">
+        <div data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
           <span class="mr-2"
                 aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
                 v-tooltip="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
@@ -232,10 +221,11 @@ const setProject = (newProject) => {
               fromExpirationDate()
             }}</b>.
           </span>
+        </div>
         <SkillsButton @click="keepIt" data-cy="keepIt" size="small" variant="alert"
                   :aria-label="'Keep Project '+ project.value.name" label="Keep It" :icon="!cancellingExpiration ? 'fas fa-shield-alt' : ''">
         </SkillsButton>
-      </div>
+      </template>
       <template #subTitle v-if="project">
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
           <span class="border p-1 border-danger rounded"><i
@@ -320,8 +310,6 @@ const setProject = (newProject) => {
       :enable-return-focus="true"
       @project-saved="projectSaved"/>
 
-<!--    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"-->
-<!--                  @project-saved="projectSaved" @hidden="editProjectHidden"/>-->
 <!--    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"-->
 <!--                         :share-url="shareUrl"-->
 <!--                         @hidden="focusOnShareButton"/>-->
