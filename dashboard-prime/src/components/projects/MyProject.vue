@@ -15,6 +15,7 @@ import EditProject from '@/components/projects/EditProject.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
@@ -87,8 +88,6 @@ const createCardOptions = () => {
   }, {
     label: 'Points',
     count: projectInternal.value.totalPoints,
-    warn: (projectInternal.value.totalPoints + projectInternal.value.totalPointsReused) < minimumPoints.value,
-    warnMsg: 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.',
     icon: 'far fa-arrow-alt-circle-up skills-color-points',
     secondaryStats: [{
       label: 'reused',
@@ -101,6 +100,14 @@ const createCardOptions = () => {
     icon: 'fas fa-award skills-color-badges',
   }];
 };
+const warningMsgAboutPoints = computed(() => {
+  const shouldWarn = (projectInternal.value.totalPoints + projectInternal.value.totalPointsReused) < minimumPoints.value
+  if (!shouldWarn) {
+    return null
+  }
+  return `Project has insufficient points assigned. Skills cannot be achieved until project has at least ${minimumPoints.value} points.`
+})
+
 const checkIfProjectBelongsToGlobalBadge = () => {
   ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
       .then((res) => {
@@ -214,10 +221,10 @@ const moveUp = () => {
 
         <div class="grid text-center justify-content-center mt-2">
           <div v-for="(stat) in stats" :key="stat.label" class="col mt-1" style="min-width: 10rem;">
-            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 stat-card surface-100">
-              <i :class="stat.icon"></i>
-              <div class="uppercase text-muted count-label">{{ stat.label }}</div>
-              <strong class="text-2xl font-normal" data-cy="statNum">{{ stat.count ? stat.count : '0' }}</strong>
+            <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 stat-card surface-100">
+              <i :class="stat.icon" aria-hidden="true" class="text-xl text-primary"/>
+              <div class="uppercase">{{ stat.label }}</div>
+              <div class="text-2xl mt-1 font-semibold" data-cy="statNum">{{ stat.count ? stat.count : '0' }}</div>
               <i v-if="stat.warn" class="fas fa-exclamation-circle text-yellow-400 ml-1"
                  style="font-size: 1.5rem;"
                  v-tooltip.hover="stat.warnMsg"
@@ -253,6 +260,10 @@ const moveUp = () => {
             <span class="d-none d-sm-inline">Keep It</span> <SkillsSpinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
           </Button>
         </div>
+        <ReminderMessage
+          v-if="warningMsgAboutPoints"
+          :id="`projectCardWarning_${projectInternal.projectId}`"
+          severity="info">{{ warningMsgAboutPoints}}</ReminderMessage>
       </template>
 
       <div v-if="!disableSortControl"
@@ -314,10 +325,6 @@ const moveUp = () => {
 
 .preview-card-subTitle {
   font-size: 0.8rem;
-}
-
-.count-label {
-  font-size: 0.9rem;
 }
 
 

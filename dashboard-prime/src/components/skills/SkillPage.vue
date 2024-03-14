@@ -189,14 +189,17 @@ const skillId = computed(() => {
       </template>
       <template #right-of-header
                 v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)">
-        <Badge v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
-          class="fas fa-book"></i> EXPORTED
-        </Badge>
-        <Badge v-if="isImported" class="ml-2" variant="success" data-cy="importedBadge">
+        <Tag v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
+          class="fas fa-book" aria-hidden="true"></i> EXPORTED
+        </Tag>
+        <Tag v-if="isImported" class="ml-2" severity="success" data-cy="importedBadge">
           <span v-if="skillsState.skill.reusedSkill"><i class="fas fa-recycle"></i> Reused</span>
-          <span v-else><i class="fas fa-book"></i> IMPORTED</span>
-        </Badge>
-        <Badge v-if="!skillsState.skill.enabled" class="ml-2" data-cy="disabledSkillBadge"> DISABLED</Badge>
+          <span v-else><i class="fas fa-book" aria-hidden="true"></i> IMPORTED</span>
+        </Tag>
+        <Tag v-if="!skillsState.skill.enabled"
+             severity="secondary"
+             class="ml-2" data-cy="disabledSkillBadge"><i
+          class="fas fa-book mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
     </page-header>
     <navigation :nav-items="navItems">

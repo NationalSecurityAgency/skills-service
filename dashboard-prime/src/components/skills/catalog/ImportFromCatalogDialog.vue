@@ -14,6 +14,8 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning.vue'
+import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 
 const model = defineModel()
 const route = useRoute()
@@ -21,6 +23,7 @@ const appConfig = useAppConfig()
 const responsive = useResponsiveBreakpoints()
 const subjectState = useSubjectsState()
 const skillsState = useSubjectSkillsState()
+const finalizeState = useFinalizeInfoState()
 
 const initialLoad = ref(true)
 const reloadData = ref(false)
@@ -121,9 +124,7 @@ const doImport = () => {
           .then(() => {
             skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
             subjectState.loadSubjectDetailsState()
-            // this.loadSkills(true);
-            // this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subject.subjectId });
-            // this.loadFinalizeInfo({ projectId: this.projectId });
+            finalizeState.loadInfo()
             SkillsReporter.reportSkill('ImportSkillfromCatalog');
           }).finally(() => {
           handleClose()
@@ -156,6 +157,7 @@ const isImportBtnDisabled = computed(() => {
 const handleClose = () => {
   model.value = false
 }
+const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist) ? 'remove-checkbox' : ''
 </script>
 
 <template>
@@ -239,7 +241,6 @@ const handleClose = () => {
         </div>
 
         <DataTable
-
         :value="data"
         :loading="reloadData"
         v-model:selection="selectedRows"
@@ -252,6 +253,7 @@ const handleClose = () => {
         :totalRecords="totalRows"
         :rows="pageSize"
         @page="pageChanged"
+        :rowClass="rowClass"
         tableStoredStateId="usersTable"
         data-cy="importSkillsFromCatalogTable"
         :rowsPerPageOptions="possiblePageSizes">
@@ -271,6 +273,7 @@ const handleClose = () => {
             <i class="fas fa-user mr-1" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
+            <skill-already-existing-warning :skill="slotProps.data" />
             <div class="max-wrap">
               {{ slotProps.data.name }}
             </div>
@@ -400,5 +403,12 @@ const handleClose = () => {
   width: 100%;
   height: 100%;
   background-color: rgba(222, 217, 217, 0.53);
+}
+
+</style>
+
+<style>
+.remove-checkbox .p-checkbox {
+  visibility: hidden !important;
 }
 </style>

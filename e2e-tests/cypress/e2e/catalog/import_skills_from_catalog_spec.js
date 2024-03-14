@@ -331,7 +331,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="importedBadge-skill4"]');
     });
 
-    it.skip('remove imported skill should re-appear in the import table', () => {
+    it('remove imported skill should re-appear in the import table', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -357,7 +357,7 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .contains('Nothing Available for Import');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-pc-section="closebutton"]')
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .should('not.exist');
@@ -376,10 +376,10 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
         ], 5, false, null, false);
@@ -417,24 +417,24 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 3'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
         ], 5, false, null, false);
@@ -453,24 +453,24 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 3'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 1'
             }],
         ], 5, false, null, false);
@@ -484,7 +484,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('do not allow import if skill id or name already exist', () => {
+    it('do not allow import if skill id or name already exist', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -512,23 +512,18 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="alreadyExistWarning_proj1-skill2"]')
             .contains('Cannot import!Skill ID and name already exist in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill2"]')
-            .should('be.disabled');
-
         cy.get('[data-cy="alreadyExistWarning_proj1-skill3"]')
             .should('not.exist');
-        cy.get('[data-cy="skillSelect_proj1-skill3"]')
-            .should('be.enabled');
-
         cy.get('[data-cy="alreadyExistWarning_proj1-skill4"]')
             .contains('Cannot import!Skill ID already exists in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .should('be.disabled');
-
         cy.get('[data-cy="alreadyExistWarning_proj1-skill5"]')
             .contains('Cannot import!Skill name already exists in this project!');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .should('be.disabled');
+
+        // anything that cannot be imported must not have a selection
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
+        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').should('be.visible')
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
+        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
 
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
@@ -614,7 +609,7 @@ describe('Import skills from Catalog Tests', () => {
 
     });
 
-    it.skip('imported skills are disabled and finalization alert is displayed', () => {
+    it('imported skills are disabled and finalization alert is displayed', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -629,17 +624,17 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 1,
+                colIndex: 3,
                 value: 'This is project 2'
             }],
         ], 5, false, null, false);
@@ -648,10 +643,8 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="skillSelect_proj2-skill1"]')
-            .check({ force: true });
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .check({ force: true });
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
@@ -696,7 +689,7 @@ describe('Import skills from Catalog Tests', () => {
 
         // navigate down from projects and validate
         cy.visit('/administrator');
-        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+        cy.get('[data-cy="projCard_proj1_manageLink"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('There are 2 imported skills in this project that are not yet finalized.');
@@ -710,7 +703,7 @@ describe('Import skills from Catalog Tests', () => {
             .contains('There are 2 imported skills in this project that are not yet finalized.');
     });
 
-    it.skip('imported skill has disabled badge on the skill page', () => {
+    it('imported skill has disabled badge on the skill page', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -741,7 +734,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('cancel finalize modal', () => {
+    it('cancel finalize modal', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -764,14 +757,14 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('exist');
@@ -779,14 +772,14 @@ describe('Import skills from Catalog Tests', () => {
         // now close via the X on top right
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[class="modal-content"] [aria-label="Close"]')
+        cy.get('[aria-label="Close"]')
             .click();
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('exist');
@@ -811,12 +804,12 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -848,8 +841,8 @@ describe('Import skills from Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('be.enabled');
-        // cy.get('[data-cy="doPerformFinalizeButton"]').should('be.enabled');
-        // cy.get('[data-cy="finalizeCancelButton"]').should('be.enabled');
+        // cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        // cy.get('[data-cy="closeDialogBtn"]').should('be.enabled');
 
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();

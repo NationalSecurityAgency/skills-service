@@ -8,8 +8,8 @@ import Navigation from '@/components/utils/Navigation.vue'
 import ProjectService from '@/components/projects/ProjectService'
 import ProjectDates from '@/components/projects/ProjectDates.vue'
 import dayjs from '@/common-components/DayJsCustomizer.js'
-import EditProject from '@/components/projects/EditProject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 
 // const props = defineProps(['project'])
 const router = useRouter()
@@ -293,10 +293,9 @@ const setProject = (newProject) => {
 <!--          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>-->
 <!--        </div>-->
       </template>
-<!--      <div slot="footer">-->
-<!--        <import-finalize-alert />-->
-<!--      </div>-->
     </PageHeader>
+
+    <import-finalize-alert />
 
     <Navigation v-if="!isLoading" :nav-items="navItems">
     </Navigation>

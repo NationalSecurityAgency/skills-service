@@ -67,7 +67,7 @@ defineExpose({
 
       <div class="flex text-center justify-content-center flex-grow-1">
         <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
-          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="border-round border-1 border-300 surface-100 p-3">
+          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 surface-100 p-3">
             <i :class="stat.icon" class="text-xl"></i>
             <div class="uppercase mt-1">{{ stat.label }}</div>
             <div class="text-2xl mt-2" data-cy="statNum">{{ stat.count }}</div>

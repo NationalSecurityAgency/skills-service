@@ -9,6 +9,7 @@ import PageHeader from '@/components/utils/pages/PageHeader.vue'
 import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 
 const appConfig = useAppConfig()
 const route = useRoute()
@@ -138,6 +139,8 @@ const subjectEdited = (updatedSubject) => {
         <!--        <import-finalize-alert />-->
       </template>
     </page-header>
+
+    <import-finalize-alert />
 
     <navigation v-if="!isLoadingData" :nav-items="navItems">
     </navigation>

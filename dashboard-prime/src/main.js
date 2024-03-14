@@ -18,6 +18,7 @@ import Avatar from 'primevue/avatar'
 import InputText from 'primevue/inputtext'
 import Divider from 'primevue/divider'
 import Message from 'primevue/message'
+import InlineMessage from 'primevue/inlinemessage'
 import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
@@ -82,6 +83,7 @@ app.component('Avatar', Avatar)
 app.component('InputText', InputText)
 app.component('Divider', Divider)
 app.component('Message', Message)
+app.component('InlineMessage', InlineMessage)
 app.component('Menu', Menu)
 app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
