@@ -154,4 +154,79 @@ describe('Quiz Runs History With Reused Data Tests', () => {
     });
 
 
+    it('sort column and order is saved in local storage', () => {
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        // initial sort order
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
+        ], 10);
+
+        // sort by user
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(headerSelector)
+          .contains('User')
+          .click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+        ], 10);
+
+        cy.get(headerSelector)
+          .contains('User')
+          .click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
+        ], 10);
+
+        // refresh and validate
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
+        ], 10);
+    });
+
 });

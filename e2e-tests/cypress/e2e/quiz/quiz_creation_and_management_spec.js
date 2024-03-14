@@ -507,5 +507,61 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizDescription"] div.ProseMirror.toastui-editor-contents blockquote p').should('contain', 'What a cool quiz #1! Thank you for taking it!')
         cy.get('[data-cy="quizDescription"] div.ProseMirror.toastui-editor-contents blockquote p').should('not.contain', '> What a cool quiz #1! Thank you for taking it!')
     });
+
+    it('sort column and order is saved in local storage', () => {
+        cy.createQuizDef(1, { name: 'a Quiz 1' });
+        cy.createSurveyDef(2, { name: 'b Survey 1' });
+        cy.createQuizDef(3, { name: 'c Quiz 2' });
+        cy.createSurveyDef(4, { name: 'd Survey 2' });
+        cy.createQuizDef(5, { name: 'e Quiz 3' });
+
+        cy.visit('/administrator/quizzes/')
+
+        // initial sort order
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'a Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'b Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'c Quiz 2' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'd Survey 2' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'e Quiz 3' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        // sort by type
+        const headerSelector = `${quizTableSelector} thead tr th`;
+        cy.get(headerSelector)
+          .contains('Type')
+          .click();
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'e Quiz 3' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'c Quiz 2' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'a Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'd Survey 2' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'b Survey 1' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+
+        cy.get(headerSelector)
+          .contains('Type')
+          .click();
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'd Survey 2' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'b Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'e Quiz 3' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'c Quiz 2' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'a Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        // refresh and validate
+        cy.visit('/administrator/quizzes/')
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'd Survey 2' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'b Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'e Quiz 3' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'c Quiz 2' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'a Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+    });
+
 });
 

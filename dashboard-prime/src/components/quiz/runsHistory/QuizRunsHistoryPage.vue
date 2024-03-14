@@ -40,8 +40,6 @@ const options = ref({
   bordered: true,
   outlined: true,
   stacked: 'md',
-  sortBy: 'started',
-  sortAsc: false,
   fields: [
     {
       key: 'userIdForDisplay',
@@ -142,9 +140,6 @@ const pageChanged = (pagingInfo) => {
   loadData();
 };
 const sortField = (column) => {
-  options.value.sortBy = column.sortField;
-  options.value.sortAsc = column.sortOrder === 1;
-
   // set to the first page
   options.value.pagination.currentPage = 1;
   loadData();
@@ -191,6 +186,7 @@ const deleteRun = () => {
                    @sort="sortField"
                    :rows="options.pagination.pageSize"
                    :rowsPerPageOptions="options.pagination.possiblePageSizes"
+                   :total-records="options.pagination.totalRows"
                    v-model:sort-field="sortInfo.sortBy"
                    v-model:sort-order="sortInfo.sortOrder">
           <template #header>

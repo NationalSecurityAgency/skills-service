@@ -1,14 +1,15 @@
 <script setup>
 
 import { ref, onMounted, computed } from 'vue';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
 import { useRoute } from 'vue-router'
-import QuizService from '@/components/quiz/QuizService.js';
-import DateCell from "@/components/utils/table/DateCell.vue";
+import { useStorage } from '@vueuse/core';
 import { useTruncateFormatter } from '@/components/utils/UseTruncateFormatter.js';
 import { useUserTagsUtils} from '@/components/utils/UseUserTagsUtils.js';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import QuizService from '@/components/quiz/QuizService.js';
+import DateCell from "@/components/utils/table/DateCell.vue";
 
 const props = defineProps({
   answerDefId: Number,
@@ -18,20 +19,18 @@ const props = defineProps({
   },
 })
 
-
 const route = useRoute();
 const truncateFormatter = useTruncateFormatter();
 const userTagsUtils = useUserTagsUtils();
 const userInfo = useUserInfo();
 const quizId = ref(route.params.quizId);
 const answerHistory = ref([]);
+const sortInfo = useStorage('quizAnswerHistoryTable', {  sortOrder: 1, sortBy: 'updated' })
 const tableOptions = ref({
   busy: false,
   bordered: true,
   outlined: true,
   stacked: 'md',
-  sortBy: 'updated',
-  sortAsc: true,
   fields: [],
   pagination: {
     server: true,
@@ -88,9 +87,9 @@ const loadData = () => {
   tableOptions.value.busy = true;
   const params = {
     limit: tableOptions.value.pagination.pageSize,
-    ascending: tableOptions.value.sortAsc,
+    ascending: sortInfo.value.sortOrder === 1 ? true : false,
     page: tableOptions.value.pagination.currentPage,
-    orderBy: tableOptions.value.sortBy,
+    orderBy: sortInfo.value.sortBy,
   };
   return QuizService.getQuizAnswerSelectionHistory(quizId.value, props.answerDefId, params)
       .then((res) => {
@@ -117,9 +116,6 @@ const pageChanged = (pagingInfo) => {
 };
 
 const sortField = (column) => {
-  tableOptions.value.sortBy = column.sortField;
-  tableOptions.value.sortAsc = column.sortOrder === 1;
-
   // set to the first page
   tableOptions.value.pagination.currentPage = 1;
   loadData();
@@ -138,18 +134,17 @@ const expandLabel = (truncated) => {
   <div>
     <DataTable :value="answerHistory"
                :loading="tableOptions.busy"
-               stripedRows showGridlines
+               stripedRows
+               showGridlines
                lazy
                :paginator="true"
                :rows="tableOptions.pagination.pageSize"
                :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
-               :sort-field="tableOptions.sortBy"
-               :sort-order="tableOptions.sortAsc ? 1 : -1"
                :total-records="tableOptions.pagination.totalRows"
                @page="pageChanged"
                @sort="sortField"
-               stateStorage="local"
-               stateKey="quizAnswerHistoryTable"
+               v-model:sort-field="sortInfo.sortBy"
+               v-model:sort-order="sortInfo.sortOrder"
                data-cy="quizAnswerHistoryTable">
 
       <template #paginatorstart>

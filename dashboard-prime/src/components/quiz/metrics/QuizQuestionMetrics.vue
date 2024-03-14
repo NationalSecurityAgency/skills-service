@@ -71,8 +71,6 @@ const tableOptions = {
   bordered: true,
   outlined: true,
   stacked: 'md',
-  sortBy: 'userId',
-  sortDesc: true,
   fields: [
     {
       key: 'answer',

@@ -141,4 +141,50 @@ describe('Quiz Metrics With Reused Data Tests', () => {
             [{ colIndex: 0, value: 'user9' }],
         ], 10, true, 5, false);
     });
+
+    it('sort column and order is saved in local storage', () => {
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+
+        const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
+
+        // sort by user
+        cy.get(`${headerSelector} [data-cy="usrColumnHeader"]`).click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user10' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user9' }],
+        ], 5);
+
+        cy.get(`${headerSelector} [data-cy="usrColumnHeader"]`).click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
+    });
 });
