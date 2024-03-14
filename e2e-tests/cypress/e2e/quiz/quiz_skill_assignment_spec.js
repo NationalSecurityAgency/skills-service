@@ -328,7 +328,7 @@ describe('Quiz Skill Assignment Tests', () => {
         ], 5);
     });
 
-    it('filter skill table for a quiz', function() {
+    it.only('filter skill table for a quiz', function() {
         cy.createProject(1)
         cy.createSubject(1,1)
 

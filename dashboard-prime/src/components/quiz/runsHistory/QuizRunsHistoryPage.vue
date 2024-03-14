@@ -277,7 +277,7 @@ const deleteRun = () => {
                 <DateCell :value="slotProps.data[col.key]"/>
               </div>
               <div v-else-if="slotProps.field === 'controls'">
-                <SkillsButton :data-cy="`row${slotProps.data.index}-deleteBtn`"
+                <SkillsButton :data-cy="`row${slotProps.index}-deleteBtn`"
                               :id="`deleteAttempt-${slotProps.data.attemptId}`"
                               @click="initiateDelete(slotProps.data)"
                               icon="fa fa-trash"
