@@ -16,21 +16,23 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
 const accessState = useAccessState()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
+const numberFormat = useNumberFormat()
 const announcer = useSkillsAnnouncer()
 
 // data items
-let pinned = ref(false);
-let projectInternal = ref({ ...props.project });
-let stats = ref([]);
+const pinned = ref(false);
+const projectInternal = ref({ ...props.project });
+const stats = ref([]);
 const showEditProjectModal = ref(false);
-let deleteProjectDisabled = ref(false);
-let deleteProjectToolTip = ref('');
-let cancellingExpiration = ref(false);
+const deleteProjectDisabled = ref(false);
+const deleteProjectToolTip = ref('');
+const cancellingExpiration = ref(false);
 const showDeleteValidation = ref(false)
 let copyProjectInfo = {
   showModal: false,
@@ -224,7 +226,7 @@ const moveUp = () => {
             <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 stat-card surface-100">
               <i :class="stat.icon" aria-hidden="true" class="text-xl text-primary"/>
               <div class="uppercase">{{ stat.label }}</div>
-              <div class="text-2xl mt-1 font-semibold" data-cy="statNum">{{ stat.count ? stat.count : '0' }}</div>
+              <div class="text-2xl mt-1 font-semibold" data-cy="statNum">{{ numberFormat.pretty(stat.count) }}</div>
               <i v-if="stat.warn" class="fas fa-exclamation-circle text-yellow-400 ml-1"
                  style="font-size: 1.5rem;"
                  v-tooltip.hover="stat.warnMsg"
@@ -237,7 +239,7 @@ const moveUp = () => {
                   <div v-if="secCount.count > 0" style="font-size: 0.9rem">
                     <Badge :severity="`${secCount.badgeVariant}`"
                              :data-cy="`pagePreviewCardStat_${stat.label}_${secCount.label}`">
-                      <span>{{ secCount.count }}</span>
+                      <span>{{ numberFormat.pretty(secCount.count) }}</span>
                     </Badge>
                     <span class="text-left uppercase ml-1"
                           style="font-size: 0.8rem">{{ secCount.label }}</span>

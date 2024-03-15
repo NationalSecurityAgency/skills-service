@@ -10,6 +10,7 @@ import ProjectDates from '@/components/projects/ProjectDates.vue'
 import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
+import EditProject from '@/components/projects/EditProject.vue'
 
 // const props = defineProps(['project'])
 const router = useRouter()
