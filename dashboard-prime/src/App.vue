@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -22,10 +22,11 @@ const appConfig = useAppConfig()
 const projectInfo = useProjectInfo()
 const accessState = useAccessState()
 const errorHandling = useErrorHandling()
+const route = useRoute();
 
 const addCustomIconCSS = () => {
   // This must be done here AFTER authentication
-  IconManagerService.refreshCustomIconCss(projectInfo.currentProjectId?.value, accessState.isSupervisor)
+  IconManagerService.refreshCustomIconCss(route.params.projectId, accessState.isSupervisor)
 }
 
 const isLoadingApp = computed(() => appConfig.isLoadingConfig || authState.restoringSession)
@@ -39,6 +40,14 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     inceptionConfigurer.configure()
   }
 })
+
+watch(() => authState.isAuthenticated, async () => {
+  addCustomIconCSS()
+});
+
+watch(() => route.params.projectId, async () => {
+  addCustomIconCSS();
+});
 
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
