@@ -114,8 +114,8 @@ const checkIfProjectBelongsToGlobalBadge = () => {
   ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
       .then((res) => {
         if (res) {
-          deleteProjectDisabled = true;
-          deleteProjectToolTip = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
+          deleteProjectDisabled.value = true;
+          deleteProjectToolTip.value = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
         }
       });
 };
@@ -153,13 +153,13 @@ const unpin = () => {
       });
 };
 const keepIt = () => {
-  cancellingExpiration = true;
+  cancellingExpiration.value = true;
   ProjectService.cancelUnusedProjectDeletion(projectInternal.value.projectId)
       .then(() => {
         projectInternal.value.expiring = false;
       })
       .finally(() => {
-        cancellingExpiration = false;
+        cancellingExpiration.value = false;
       });
 };
 const moveDown = () => {
