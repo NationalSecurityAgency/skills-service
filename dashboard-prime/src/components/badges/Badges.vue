@@ -185,7 +185,7 @@ const handleFocus = () => {
 };
 
 const enableDragAndDrop = () => {
-  if (badges.value && badges.value.length > 0 && projConfig && !isReadOnlyProj) {
+  if (badges.value && badges.value.length > 0) {
     nextTick(() => {
       const cards = document.getElementById('badgeCards');
       Sortable.create(cards, {
