@@ -9,6 +9,8 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
 import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
+import { useAccessState } from '@/stores/UseAccessState.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -19,6 +21,7 @@ export const useGlobalNavGuards = () => {
   const appInfoState = useAppInfoState()
   const appConfig = useAppConfig()
   const projectInfo = useProjectInfo()
+  const accessState = useAccessState()
   const projConfig = useProjConfig()
   const router = useRouter()
   const route = useRoute()
@@ -76,6 +79,7 @@ export const useGlobalNavGuards = () => {
           if (isAdminPage(to) && to.params.projectId) {
             projConfig.loadProjConfigState({ projectId: to.params.projectId })
           }
+          IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
         }
         if (
           to.path.startsWith('/administrator/quizzes/') &&

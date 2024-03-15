@@ -41,14 +41,6 @@ watch(() => authState.userInfo, async (newUserInfo) => {
   }
 })
 
-watch(() => authState.isAuthenticated, async () => {
-  addCustomIconCSS()
-});
-
-watch(() => route.params.projectId, async () => {
-  addCustomIconCSS();
-});
-
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
 
@@ -59,7 +51,7 @@ onMounted(() => {
       customGlobalValidators.addValidators()
       inceptionConfigurer.configure()
       globalNavGuards.addNavGuards()
-      if (authState.isAuthenticated.value) {
+      if (authState.isAuthenticated) {
         accessState.loadIsSupervisor().then(() => {
           addCustomIconCSS()
         })
