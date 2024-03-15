@@ -7,6 +7,7 @@ import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import FinalizeWarningSkillsPointsTable from '@/components/skills/catalog/FinalizeWarningSkillsPointsTable.vue'
 
 const model = defineModel()
 const pluralSupport = useLanguagePluralSupport()
@@ -57,7 +58,7 @@ const loadFinalizeInfo = () => {
 
 const finalizeInfo = computed(() => finalizeInfoState.info)
 
-const showFinalizeWarningSkillsPointsTable = ref (false)
+const showFinalizeWarningSkillsPointsTable = ref(false)
 const close = () => {
   model.value = false
 }
@@ -96,32 +97,44 @@ const close = () => {
           </li>
         </ul>
       </p>
-      <p v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0"
-         class="alert alert-danger" data-cy="outOfRangeWarning">
-        <i class="fas fa-exclamation-triangle"></i> Your Project skills point values range from <span
-        class="text-primary font-weight-bold">[{{ numberFormat.pretty(finalizeInfo.projectSkillMinPoints) }}]</span> to
-        <span class="text-primary font-weight-bold">[{{ numberFormat.pretty(finalizeInfo.projectSkillMaxPoints)
-          }}]</span>.
-        <Tag variant="info">{{ numberFormat.pretty(finalizeInfo.skillsWithOutOfBoundsPoints.length) }}</Tag>
-        skills you are importing fall outside of that point value. This could cause the imported
-        skills to have an outsized impact on the achievements within your Project. Please consider changing the <b>Point
-        Increment</b> of the imported skills.
-        <SkillsButton
-          :label="`View ${numberFormat.pretty(finalizeInfo.skillsWithOutOfBoundsPoints.length)} skills`"
-          size="small"
-          severity="info"
-          @click="showFinalizeWarningSkillsPointsTable = !showFinalizeWarningSkillsPointsTable"
-          data-cy="viewSkillsWithPtsOutOfRange"/>
-        outside of the point value.
-
-        <!--        <finalize-warning-skills-points-table v-if="showFinalizeWarningSkillsPointsTable" class="mt-2"-->
-        <!--                                              :project-skill-min-points="finalizeInfo.projectSkillMinPoints"-->
-        <!--                                              :project-skill-max-points="finalizeInfo.projectSkillMaxPoints"-->
-        <!--                                              :skills-with-out-of-bounds-points="finalizeInfo.skillsWithOutOfBoundsPoints" />-->
-      </p>
-      <p v-if="!canFinalize" data-cy="no-finalize">
-        <i class="fas fa-exclamation-circle mr-1 text-warning" aria-hidden="true" /> {{ noFinalizeMsg }}
-      </p>
+      <Message
+        v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0"
+        :closable="false"
+        data-cy="outOfRangeWarning">
+        <div>
+          Your Project skills point values range from <span
+          class="text-primary font-weight-bold">[{{ numberFormat.pretty(finalizeInfo.projectSkillMinPoints) }}]</span>
+          to
+          <span class="text-primary font-weight-bold">[{{ numberFormat.pretty(finalizeInfo.projectSkillMaxPoints)
+            }}]</span>.
+          <Tag variant="info">{{ numberFormat.pretty(finalizeInfo.skillsWithOutOfBoundsPoints.length) }}</Tag>
+          skills you are importing fall outside of that point value. This could cause the imported
+          skills to have an outsized impact on the achievements within your Project.
+        </div>
+        <div class="my-2">
+          Please consider changing the <b>Point
+          Increment</b> of the imported skills.
+        </div>
+        <div>
+          <SkillsButton
+            :label="`View ${numberFormat.pretty(finalizeInfo.skillsWithOutOfBoundsPoints.length)} skills`"
+            size="small"
+            @click="showFinalizeWarningSkillsPointsTable = !showFinalizeWarningSkillsPointsTable"
+            data-cy="viewSkillsWithPtsOutOfRange" />
+          outside of the point value.
+        </div>
+        <finalize-warning-skills-points-table
+          v-if="showFinalizeWarningSkillsPointsTable" class="mt-2"
+          :project-skill-min-points="finalizeInfo.projectSkillMinPoints"
+          :project-skill-max-points="finalizeInfo.projectSkillMaxPoints"
+          :skills-with-out-of-bounds-points="finalizeInfo.skillsWithOutOfBoundsPoints" />
+      </Message>
+      <Message
+        v-if="!canFinalize"
+        severity="error"
+        data-cy="no-finalize">
+        {{ noFinalizeMsg }}
+      </Message>
     </div>
   </SkillsDialog>
 </template>

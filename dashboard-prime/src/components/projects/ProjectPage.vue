@@ -11,6 +11,7 @@ import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 import EditProject from '@/components/projects/EditProject.vue'
+import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 
 // const props = defineProps(['project'])
 const router = useRouter()
@@ -18,13 +19,15 @@ const route = useRoute();
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
 const announcer = useSkillsAnnouncer()
+const projectDetailsState = useProjDetailsState();
 
-const isLoadingData = ref(true);
+
 const cancellingExpiration = ref(false);
 const editProject = ref(false);
 const shareProjModal = ref(false);
 const shareUrl = ref('');
-const project = ref({});
+const project = computed(() => projectDetailsState.project)
+const isLoadingData = computed(() => projectDetailsState.isLoading);
 let isReadOnlyProj = false;
 
 const isLoading = computed(() => {
@@ -32,7 +35,7 @@ const isLoading = computed(() => {
 });
 
 onMounted(() => {
-  loadProjects();
+  projectDetailsState.loadProjectDetailsState(true)
 });
 
 const navItems = computed(() => {
@@ -148,17 +151,6 @@ const expirationDate = computed(() => {
   return expires.format('YYYY-MM-DD HH:mm');
 });
 
-const loadProjectDetailsState = (payload) => {
-  return new Promise((resolve, reject) => {
-    ProjectService.getProjectDetails(payload.projectId)
-        .then((response) => {
-          // commit('setProject', response);
-          setProject(response);
-          resolve(response);
-        })
-        .catch((error) => reject(error));
-  });
-};
 
 const copyAndDisplayShareProjInfo = () => {
   const host = window.location.origin;
@@ -171,18 +163,6 @@ const copyAndDisplayShareProjInfo = () => {
 const fromExpirationDate = () => {
   return dayjs().startOf('day').to(dayjs(expirationDate));
 };
-const loadProjects = () => {
-  isLoadingData.value = true
-  if (route.params.project) {
-    setProject(route.params.project)
-    isLoadingData.value = false
-  } else {
-    loadProjectDetailsState({ projectId: route.params.projectId })
-      .finally(() => {
-        isLoadingData.value = false
-      })
-  }
-}
 const projectSaved = (updatedProject) => {
     const origProjId = project.value.projectId;
     setProject(updatedProject);
@@ -205,7 +185,7 @@ const keepIt = () => {
 };
 
 const setProject = (newProject) => {
-  project.value = newProject;
+  projectDetailsState.project.value = newProject
 };
 
 </script>

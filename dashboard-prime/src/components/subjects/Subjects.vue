@@ -14,16 +14,13 @@ import Subject from './Subject.vue'
 import JumpToSkill from './JumpToSkill.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 
 const announcer = useSkillsAnnouncer()
 const appConfig = useAppConfig()
-const props = defineProps(['subject']);
 const emit = defineEmits(['subjects-changed']);
 const route = useRoute();
-// const projects = createNamespacedHelpers('projects');
-
-const subjects = ref([])
-  // store.getters["subjects/subjects"];
+const subjectsState =useSubjectsState()
 
 const subjRef = ref([]);
 const mainFocus = ref();
@@ -62,7 +59,7 @@ const isLoading = computed(() => {
   return isLoadingData.value //|| config.isLoadingProjConfig;
 });
 
-const addSubjectDisabled = computed(() => subjects.value && subjects.value.length >= appConfig.maxSubjectsPerProject)
+const addSubjectDisabled = computed(() => subjectsState.subjects && subjectsState.subjects.length >= appConfig.maxSubjectsPerProject)
 const addSubjectsDisabledMsg = computed(() => `The maximum number of Subjects allowed is ${appConfig.maxSubjectsPerProject}`)
 
 // methods
@@ -86,13 +83,12 @@ const openNewSubjectModal = (subject = {}, isEdit = false) => {
 provide('createOrUpdateSubject', openNewSubjectModal)
 
 const doLoadSubjects = () => {
-  return SubjectsService.getSubjects(route.params.projectId).then((res) => {
-    subjects.value = res;
-  }).finally(() => {
-    isLoadingData.value = false;
-    enableDropAndDrop();
-  });
-};
+  return subjectsState.loadSubjects()
+    .finally(() => {
+      isLoadingData.value = false
+      enableDropAndDrop()
+    })
+}
 
 const deleteSubject = (subject) => {
   isLoadingData.value = true;
@@ -107,7 +103,7 @@ const deleteSubject = (subject) => {
 };
 
 const updateSortAndReloadSubjects = (updateInfo) => {
-  const sortedSubjects = subjects.value.sort((a, b) => {
+  const sortedSubjects = subjectsState.subjects.sort((a, b) => {
     if (a.displayOrder > b.displayOrder) {
       return 1;
     }
@@ -118,7 +114,7 @@ const updateSortAndReloadSubjects = (updateInfo) => {
   });
   const currentIndex = sortedSubjects.findIndex((item) => item.subjectId === updateInfo.id);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex >= 0 && (newIndex) < subjects.value.length) {
+  if (newIndex >= 0 && (newIndex) < subjectsState.subjects.length) {
     isLoadingData.value = true;
     const { projectId } = route.params;
     SubjectsService.updateSubjectsDisplaySortOrder(projectId, updateInfo.id, newIndex)
@@ -136,11 +132,11 @@ const updateSortAndReloadSubjects = (updateInfo) => {
 };
 
 const subjectAdded = (subject) => {
-  const existingIndex = subjects.value.findIndex((item) => item.subjectId === subject.originalSubjectId)
+  const existingIndex = subjectsState.subjects.findIndex((item) => item.subjectId === subject.originalSubjectId)
   if (existingIndex >= 0) {
-    subjects.value.splice(existingIndex, 1, subject)
+    subjectsState.subjects.splice(existingIndex, 1, subject)
   } else {
-    subjects.value.push(subject)
+    subjectsState.subjects.push(subject)
     SkillsReporter.reportSkill('CreateSubject');
   }
   announcer.polite(`Subject ${subject.name} has been saved`);
@@ -162,7 +158,7 @@ const handleFocus = () => {
 };
 
 const enableDropAndDrop = () => {
-  if (subjects.value && subjects.value.length > 0) {
+  if (subjectsState.subjects && subjectsState.subjects.length > 0) {
     nextTick(() => {
       const cards = document.getElementById('subjectCards');
       Sortable.create(cards, {
@@ -197,8 +193,8 @@ const sortOrderUpdate = (updateEvent) => {
                        :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                        :aria-label="'new subject'"/>
       <jump-to-skill />
-      <div v-if="subjects && subjects.length" class="flex flex-wrap align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
-        <div v-for="(subject) of subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3" style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
+      <div v-if="subjectsState.subjects && subjectsState.subjects.length" class="flex flex-wrap align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
+        <div v-for="(subject) of subjectsState.subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3" style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
           <div>
             <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
@@ -212,7 +208,7 @@ const sortOrderUpdate = (updateEvent) => {
                        :ref="(el) => (subjRef[subject.subjectId] = el)"
                        @subject-deleted="deleteSubject"
                        @sort-changed-requested="updateSortAndReloadSubjects"
-                       :disable-sort-control="subjects.length === 1"/>
+                       :disable-sort-control="subjectsState.subjects.length === 1"/>
             </BlockUI>
           </div>
         </div>

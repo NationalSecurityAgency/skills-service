@@ -30,20 +30,17 @@ export const useSubjectsState = defineStore('subjectsState', () => {
   const subjects = ref([])
   const isLoadingSubjects = ref(false)
 
-  function loadSubjects(payload) {
-    isLoadingSubjects.value = true
-    return new Promise((resolve, reject) => {
-        SubjectsService.getSubjects(payload.projectId)
-          .then((response) => {
-            subjects.value = response
-            resolve(response)
-          })
-          .catch((error) => reject(error))
-          .finally(() => {
-            isLoadingSubjects.value = false
-          })
-      }
-    )
+  function loadSubjects(updateLoading = false) {
+    if (updateLoading) {
+      isLoadingSubjects.value = true
+    }
+    return SubjectsService.getSubjects(route.params.projectId)
+      .then((response) => {
+        subjects.value = response
+      })
+      .finally(() => {
+        isLoadingSubjects.value = false
+      })
   }
 
   function setSubjects(subjects) {

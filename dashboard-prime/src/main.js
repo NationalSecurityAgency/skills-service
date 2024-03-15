@@ -32,6 +32,7 @@ import MultiSelect from 'primevue/multiselect'
 import InputNumber from 'primevue/inputnumber'
 import Tag from 'primevue/tag';
 import DataTable from 'primevue/datatable';
+import Column from 'primevue/column'
 import InputGroup from 'primevue/inputgroup';
 import InputGroupAddon from 'primevue/inputgroupaddon';
 import Fieldset from 'primevue/fieldset';
@@ -97,6 +98,7 @@ app.component('SkillsSpinner', SkillsSpinner)
 app.component('MultiSelect', MultiSelect)
 app.component('Tag', Tag)
 app.component('DataTable', DataTable)
+app.component('Column', Column)
 app.component('InputNumber', InputNumber)
 app.component('InputGroup', InputGroup)
 app.component('InputGroupAddon', InputGroupAddon)

@@ -63,7 +63,7 @@ const checkFinalizationState = () => {
             // this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
             // this.loadSubjects({ projectId: this.$route.params.projectId })
             subjectsState.loadSubjects({ projectId: route.params.projectId })
-            projDetailsState.loadProjectDetailsState({ projectId: route.params.projectId })
+            projDetailsState.loadProjectDetailsState()
           }
         } else {
           finalizeState.info.finalizeIsRunning = false
