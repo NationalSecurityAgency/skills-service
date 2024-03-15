@@ -1,12 +1,22 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import FinalizePreviewModal from '@/components/skills/catalog/FinalizePreviewModal.vue'
+import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue'
+import { useRoute } from 'vue-router'
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
+import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 
 const finalizeState = useFinalizeInfoState()
 const pluralSupport = useLanguagePluralSupport()
+const route = useRoute()
+const subjectsState = useSubjectsState()
+const subjectSkillsState = useSubjectSkillsState()
+const projDetailsState = useProjDetailsState()
 const appConfig = useAppConfig()
 onMounted(() => {
   finalizeState.loadInfo()
@@ -18,25 +28,85 @@ const dashboardSkillsCatalogGuide = computed(() => {
 })
 
 const showFinalizeModal = ref(false)
+watch(
+  () => finalizeInfo.value.finalizeIsRunning,
+  (isRunning) => {
+    if (isRunning) {
+      checkFinalizationState()
+    }
+  })
+
+const getFinalizationState = () => {
+  return SettingsService.getProjectSetting(route.params.projectId, 'catalog.finalize.state', false);
+}
+const checkFinalizationState = () => {
+  setTimeout(() => {
+    getFinalizationState().then((res) => {
+      if (res) {
+        if (res.value === 'RUNNING') {
+          checkFinalizationState()
+        } else if (res.value === 'COMPLETED') {
+          finalizeState.info.finalizeIsRunning = false
+          finalizeState.info.finalizeSuccessfullyCompleted = true
+          if (route.params.subjectId) {
+            subjectsState.loadSubjectDetailsState()
+            subjectSkillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+            // this.loadSubjectSkills({
+            //   projectId: this.$route.params.projectId,
+            //   subjectId: this.$route.params.subjectId
+            // })
+            // this.loadSubjectDetailsState({
+            //   projectId: this.$route.params.projectId,
+            //   subjectId: this.$route.params.subjectId
+            // })
+          } else if (route.params.projectId) {
+            // this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
+            // this.loadSubjects({ projectId: this.$route.params.projectId })
+            subjectsState.loadSubjects({ projectId: route.params.projectId })
+            projDetailsState.loadProjectDetailsState({ projectId: route.params.projectId })
+          }
+        } else {
+          finalizeState.info.finalizeIsRunning = false
+          finalizeState.info.finalizeCompletedAndFailed = true
+        }
+      }
+    })
+      .catch(() => {
+        checkFinalizationState()
+      })
+  }, 5000)
+}
 </script>
 
 <template>
   <div v-if="shouldShow" data-cy="importFinalizeAlert" class="mb-0 mt-1">
-    <Message v-if="finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeIsRunning">
-      <i class="fas fa-thumbs-up"></i> Successfully finalized
+    <Message
+      v-if="finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeIsRunning"
+      icon="fas fa-thumbs-up"
+      severity="success">
+      Successfully finalized
       <Tag severity="info">{{ finalizeInfo.numSkillsToFinalize }}</Tag>
       imported skill{{ pluralSupport.sOrNone(finalizeInfo.numSkillsToFinalize) }}! Please enjoy your day!
     </Message>
-    <Message v-if="finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning">
-      <i class="fas fa-thumbs-down"></i> Well this is sad. Looks like finalization failed, please
-      reach out to the SkillTree team for further assistance.
+    <Message
+      v-if="finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning"
+      icon="fas fa-thumbs-down"
+      severity="error">
+      Well this is sad. Looks like finalization failed, please reach out to the SkillTree team for further assistance.
     </Message>
-    <Message v-if="finalizeInfo.finalizeIsRunning && !finalizeInfo.finalizeSuccessfullyCompleted" :closable="false">
-      <i class="fas fa-running"></i> Catalog finalization is in progress. Finalizing
+    <Message
+      v-if="finalizeInfo.finalizeIsRunning && !finalizeInfo.finalizeSuccessfullyCompleted"
+      icon="fas fa-running"
+      :closable="false">
+      Catalog finalization is in progress. Finalizing
       <Tag severity="info">{{ finalizeInfo.numSkillsToFinalize }}</Tag>
       imported skill{{ pluralSupport.sOrNone(finalizeInfo.numSkillsToFinalize) }}! The process may take a few
       minutes.
-      <!--      <lengthy-operation-progress-bar name="Finalize" class="mb-3"/>-->
+      <lengthy-operation-progress-bar
+        style="height: 6px"
+        :showValue="false"
+        aria-label="Finalize Progress"
+        class="mt-1" />
     </Message>
     <Message
       severity="warn"

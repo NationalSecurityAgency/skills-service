@@ -44,6 +44,18 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
     })
   }
 
+  const totalNumSkillsInSubject = computed(() => {
+    const initValue = 0;
+    const currentSkills= subjectSkills.value || [];
+    const totalCurrentSkills = currentSkills.reduce((previousValue, currentValue) => {
+      if (currentValue.numSkillsInGroup !== null) {
+        return previousValue + currentValue.numSkillsInGroup;
+      }
+      return previousValue + 1;
+    }, initValue);
+    return totalCurrentSkills;
+  })
+
   function setGroupSkills(groupId, value) {
     groupSkills.value.set(groupId, value)
   }
@@ -69,10 +81,11 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
     setLoadingSubjectSkills,
     loadSubjectSkills,
     hasSkills,
+    totalNumSkillsInSubject,
     setGroupSkills,
     getGroupSkills,
     loadGroupSkills,
-    groupSkills
+    groupSkills,
   }
 
 })

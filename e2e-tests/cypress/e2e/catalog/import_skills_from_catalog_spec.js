@@ -101,7 +101,7 @@ describe('Import skills from Catalog Tests', () => {
 
 
         cy.get('[data-cy="importBtn"]').should('be.disabled');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
         cy.get('[data-cy="importBtn"]').should('be.enabled').click();
         cy.get('[data-cy="importedBadge-skill1"]');
@@ -265,13 +265,13 @@ describe('Import skills from Catalog Tests', () => {
             .should('have.text', '0');
 
         for (let i= 0; i < 5 ; i++) {
-            cy.get(`[data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`[data-cy="importSkillsFromCatalogTable"]  [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
         }
 
         cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
 
         for (let i= 0; i < 5 ; i++) {
-            cy.get(`[data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
         }
 
         cy.get('[data-cy="importBtn"]')
@@ -321,7 +321,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get(`${tableSelector} tbody tr`)
             .should('have.length', '3');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
 
         cy.get('[data-cy="importBtn"]')
             .click();
@@ -520,10 +520,10 @@ describe('Import skills from Catalog Tests', () => {
             .contains('Cannot import!Skill name already exists in this project!');
 
         // anything that cannot be imported must not have a selection
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').should('be.visible')
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').should('be.visible')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="3"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]').should('not.be.visible')
 
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
@@ -643,8 +643,8 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
@@ -785,7 +785,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('exist');
     });
 
-    it.skip('must not be able to import while finalizing', () => {
+    it('must not be able to import while finalizing', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -822,7 +822,7 @@ describe('Import skills from Catalog Tests', () => {
             .contains('Finalization in Progress');
     });
 
-    it.skip('must not be able to import while finalizing - state session has catalog already loaded', () => {
+    it('must not be able to import while finalizing - state session has catalog already loaded', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -846,8 +846,7 @@ describe('Import skills from Catalog Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .check({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '1');
 
@@ -862,7 +861,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('be.disabled');
     });
 
-    it.skip('import more than 1 page of skills', () => {
+    it('import more than 1 page of skills', () => {
         // mix skill names since it's sorted by skillId - this will force different projects in the first page
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 6);
@@ -909,78 +908,44 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill3"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .should('not.be.checked');
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        }
 
-        cy.get('[data-cy="selectPageOfSkillsBtn"]')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
 
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill3"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .should('be.checked');
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        }
 
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '5');
-        cy.get('[aria-label="Go to page 2"')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 2"]')
             .click();
         cy.wait('@getCatalogSkills');
 
-        cy.get('[data-cy="skillSelect_proj1-skill6"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill7"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill8"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill67"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="selectPageOfSkillsBtn"]')
-            .click();
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        }
+
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"]`).click()
+        }
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '10');
-        cy.get('[data-cy="skillSelect_proj1-skill6"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill7"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill8"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill67"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .should('be.checked');
-        cy.get('[aria-label="Go to page 1"')
-            .click();
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        }
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 1"]')
+          .click();
         cy.wait('@getCatalogSkills');
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj2-skill3"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .should('be.checked');
+        for (let i= 0; i < 5 ; i++) {
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        }
         cy.get('[data-cy="importBtn"]')
             .click();
 
@@ -1004,7 +969,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('have.length', '1');
     });
 
-    it.skip('respect maxSkillsInBulkImport configuration', () => {
+    it('respect maxSkillsInBulkImport configuration', () => {
         // mix skill names since it's sorted by skillId - this will force different projects in the first page
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -1061,45 +1026,38 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj2-skill2"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj2-skill3"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
-            .contains('cannot import more than 3 Skills at once');
+            .contains('Cannot import more than 3 Skills at once');
 
-        cy.get('[aria-label="Go to page 2"')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 2"]')
+          .click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
-            .contains('cannot import more than 3 Skills at once');
+            .contains('Cannot import more than 3 Skills at once');
 
-        cy.get('[aria-label="Go to page 1"')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 1"]').click();
         cy.wait('@getCatalogSkills');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .should('not.be.checked');
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="4"] [data-pc-name="rowcheckbox"] input').should('not.be.checked')
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
-            .contains('cannot import more than 3 Skills at once');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .click({ force: true });
+            .contains('Cannot import more than 3 Skills at once');
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy=maximum-selected]')
@@ -1278,7 +1236,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('have.text', '0');
     });
 
-    it.skip('respect maxSkillsPerSubject configuration', () => {
+    it('respect maxSkillsPerSubject configuration', () => {
         // mix skill names since it's sorted by skillId - this will force different projects in the first page
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -1336,32 +1294,27 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill5"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill6"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="4"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 6');
 
-        cy.get('[aria-label="Go to page 2"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 2"]')
+          .click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
@@ -1370,11 +1323,9 @@ describe('Import skills from Catalog Tests', () => {
             .contains('No more than 10 Skills per Subject are allowed, this project already has 6');
         // for some reason two elements with the same aria-label are created in this test, we have to get the 2nd element
         // or the click event doesn't do anything
-        cy.get('[aria-label="Go to page 1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 1"]').click();
         cy.wait('@getCatalogSkills');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="4"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy=maximum-selected]')
@@ -1399,24 +1350,20 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 8');
 
-        cy.get('[aria-label="Go to page 2"]')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 2"]').click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
@@ -1424,16 +1371,14 @@ describe('Import skills from Catalog Tests', () => {
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 8');
 
-        cy.get('[aria-label="Go to page 1"]')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 1"]').click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 8');
-        cy.get('[data-cy="skillSelect_proj1-skill66"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy=maximum-selected]')
@@ -1455,36 +1400,31 @@ describe('Import skills from Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="skillSelect_proj1-skill4"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 9');
 
-        cy.get('[aria-label="Go to page 2"]')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 2"]').click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 9');
-        cy.get('[aria-label="Go to page 1"]')
-            .click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [aria-label="Page 1"]').click();
         cy.wait('@getCatalogSkills');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
         cy.get('[data-cy=maximum-selected]')
             .should('exist')
             .contains('No more than 10 Skills per Subject are allowed, this project already has 9');
-        cy.get('[data-cy="skillSelect_proj1-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy=maximum-selected]')

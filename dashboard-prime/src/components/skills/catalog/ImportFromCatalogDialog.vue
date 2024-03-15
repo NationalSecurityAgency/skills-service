@@ -104,9 +104,7 @@ const maxBulkImportExceeded = computed(() => {
   return selectedRows.value.length > appConfig.maxSkillsInBulkImport
 })
 const maxSkillsInSubjectExceeded = computed(() => {
-  return false
-  // return selectedRows.value.length + this.currentSkillCount
-  //   > this.$store.getters.config.maxSkillsPerSubject;
+  return (selectedRows.value.length + skillsState.totalNumSkillsInSubject) > appConfig.maxSkillsPerSubject;
 })
 
 const importInProgress = ref(false)
@@ -340,6 +338,14 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
       </DataTable>
       </div>
 
+      <Message v-if="maxBulkImportExceeded" data-cy="maximum-selected" :closable="false" severity="warn">
+        Cannot import more than <Tag>{{ appConfig.maxSkillsInBulkImport }}</Tag> Skills at once
+      </Message>
+      <Message v-if="maxSkillsInSubjectExceeded"  data-cy="maximum-selected" :closable="false" severity="warn">
+        No more than <Tag>{{ appConfig.maxSkillsPerSubject }}</Tag> Skills per Subject are allowed, this project already has
+        <Tag>{{ skillsState.totalNumSkillsInSubject }}</Tag>
+      </Message>
+
       <div v-if="!emptyCatalog" class="text-right mt-3">
         <SkillsButton
           label="Cancel"
@@ -364,7 +370,6 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
         </SkillsButton>
       </div>
     </div>
-
 
     <div class="loading-indicator" v-if="importInProgress">
       <skills-spinner :is-loading="true"/>
