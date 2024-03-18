@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { object, string, number } from 'yup'
@@ -154,8 +154,12 @@ const schema = object({
     .urlValidator()
     .nullable()
     .label('Help URL'),
+  'associatedQuiz': object()
+      .nullable()
+      .test('quizRequired', 'Please select an available Quiz/Survey', (value) => !!(selfReportingType.value !== 'Quiz' || value))
+      .label('Quiz/Survey'),
 })
-const selfReportingType = props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null
+const selfReportingType = ref(props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null)
 const initialSkillData = {
   skillId: props.skill.skillId || '',
   skillName: props.skill.name || '',
@@ -167,9 +171,10 @@ const initialSkillData = {
   pointIncrementIntervalMins: props.skill.pointIncrementIntervalMins || 0,
   numMaxOccurrencesIncrementInterval: props.skill.numMaxOccurrencesIncrementInterval || 1,
   numPointIncrementMaxOccurrences: props.skill.numPointIncrementMaxOccurrences || 1,
-  selfReportingType,
-  selfReportingEnabled: selfReportingType !== null,
-  description: props.skill.description || ''
+  selfReportingType: selfReportingType.value,
+  selfReportingEnabled: selfReportingType.value !== null,
+  description: props.skill.description || '',
+  quizId: props.skill.quizId
 }
 
 const saveSkill = (values) => {
@@ -182,6 +187,7 @@ const saveSkill = (values) => {
     groupId: props.groupId,
     name: InputSanitizer.sanitize(values.skillName),
     skillId: InputSanitizer.sanitize(values.skillId),
+    quizId: values.associatedQuiz ? values.associatedQuiz.quizId : null,
     pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0,
     selfReportingType: values.selfReportingType && values.selfReportingType !== 'Disabled' ? values.selfReportingType : null,
   }
@@ -198,6 +204,10 @@ const saveSkill = (values) => {
 const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
 }
+
+const occurrencesToCompletionDisabled = computed(() => {
+  return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
+})
 
 </script>
 
@@ -251,6 +261,7 @@ const onSkillSaved = (skill) => {
         showButtons
         :min="0"
         :is-required="true"
+        :disabled="occurrencesToCompletionDisabled"
         label="Occurrences to Completion"
         name="numPerformToCompletion" />
 
@@ -261,7 +272,7 @@ const onSkillSaved = (skill) => {
       :time-window-enabled-default="skill.timeWindowEnabled"
       class="mb-3"/>
 
-    <self-reporting-type-input class="mt-1"/>
+    <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
 
     <markdown-editor
       class="mt-5"

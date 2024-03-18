@@ -200,9 +200,9 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
               class="text-primary">approval</b> queue.</span>
             <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
             <span v-if="skillInfo.selfReportingType === 'Quiz'">and points will be awarded after the
-              <!--              <router-link-->
-              <!--                  :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"-->
-              <!--                  tag="a">{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!-->
+              <router-link
+                  :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
+                  tag="a">{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!
             </span>
           </div>
           <div v-else>

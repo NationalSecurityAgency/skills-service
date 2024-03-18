@@ -54,7 +54,7 @@ const { value, errorMessage } = useField(() => props.name);
         <slot name="option" :option="slotProps.option"></slot>
       </template>
     </Dropdown>
-    <small
+    <small v-if="errorMessage"
         role="alert"
         class="p-error"
         :data-cy="`${name}Error`"

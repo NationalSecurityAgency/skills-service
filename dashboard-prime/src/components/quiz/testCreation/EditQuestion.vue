@@ -1,14 +1,14 @@
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { array, boolean, object, string } from 'yup'
-import QuizService from '@/components/quiz/QuizService.js';
+import { useRoute } from 'vue-router';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import QuizService from '@/components/quiz/QuizService.js';
 import QuestionType from '@/common-components/quiz/QuestionType.js';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
-import { useRoute } from 'vue-router';
 
 const model = defineModel()
 const props = defineProps({

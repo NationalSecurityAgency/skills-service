@@ -18,7 +18,11 @@ const props = defineProps({
   autofocus: {
     type: Boolean,
     default: false
-  }
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['input', 'keydown-enter'])
 
@@ -56,6 +60,7 @@ const handleOnInput = (event) => {
       v-model="value"
       @keydown.enter="onEnter"
       @input="handleOnInput"
+      :disabled="disabled"
       :data-cy="name"
       :autofocus="autofocus"
       :id="name"
