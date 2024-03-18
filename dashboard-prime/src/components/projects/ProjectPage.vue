@@ -178,14 +178,14 @@ const projectSaved = (updatedProject) => {
 const keepIt = () => {
   cancellingExpiration.value = true;
   ProjectService.cancelUnusedProjectDeletion(route.params.projectId).then(() => {
-    loadProjects();
+    // loadProjects();
   }).finally(() => {
     cancellingExpiration.value= false;
   });
 };
 
 const setProject = (newProject) => {
-  projectDetailsState.project.value = newProject
+  projectDetailsState.project = newProject
 };
 
 </script>
@@ -278,7 +278,7 @@ const setProject = (newProject) => {
 
     <import-finalize-alert />
 
-    <Navigation v-if="!isLoading" :nav-items="navItems">
+    <Navigation  :nav-items="navItems">
     </Navigation>
 
     <edit-project

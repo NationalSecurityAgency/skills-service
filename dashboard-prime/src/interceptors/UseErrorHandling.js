@@ -2,12 +2,14 @@ import axios from 'axios';
 import { useRouter } from 'vue-router'
 import { useAuthState } from '@/stores/UseAuthState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { userErrorState } from '@/stores/UserErrorState.js'
 
 export const useErrorHandling = () => {
 
   const router = useRouter()
   const authState = useAuthState()
   const appConfig = useAppConfig()
+  const errorState = userErrorState()
 
   const errorResponseHandler = (error) => {
     if (axios.isCancel(error)) {
@@ -56,18 +58,21 @@ export const useErrorHandling = () => {
       if (explanation && ec === 'private_project') {
         router.push({ name: 'PrivateProjectAccessRequestPage', params: { explanation, projectId } });
       } else {
-        router.push({ name: 'NotAuthorizedPage', params: { explanation } });
+        errorState.setErrorParams('User Not Authorized', explanation, 'fas fa-shield-alt')
+        router.push({ name: 'ErrorPage'});
       }
     } else if (errorCode === 404) {
       let explanation;
       if (error.response && error.response.data && error.response.data.explanation) {
         ({ explanation } = error.response.data);
       }
-      router.push({ name: 'NotFoundPage', params: { explanation } });
+      errorState.setErrorParams('Resource Not Found', explanation, 'fas fa-exclamation-triangle')
+      router.push({ name: 'ErrorPage' });
     } else if (errorCode === 503 && error?.response?.data?.errorCode === 'DbUpgradeInProgress') {
       router.push({ name: 'DbUpgradeInProgressPage' });
       return Promise.reject(error);
     } else {
+      errorState.resetToDfeault()
       router.push({ name: 'ErrorPage' });
     }
     return Promise.resolve({ data: {} });

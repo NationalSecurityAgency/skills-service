@@ -115,29 +115,28 @@ describe('Projects Admin Management Tests', () => {
             });
         cy.get('[data-cy=btn_edit-project]').should('be.focused')
 
-        // TODO: put back
-        // cy.get('[data-cy="manageBtn_subj1"]')
-        //     .click();
-        // cy.contains('SUBJECT: Subject 1')
-        //     .should('be.visible');
-        // cy.get('[data-cy=breadcrumb-editedProjectId]')
-        //     .click();
-        // cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
-        //     .click();
-        // cy.get('input[data-cy=subjectNameInput]')
-        //     .type('{selectall}I Am A Changed Subject');
-        // cy.get('button[data-cy=saveSubjectButton]')
-        //     .click();
-        // cy.contains('I Am A Changed Subject')
-        //     .should('be.visible');
-        // cy.get('button[data-cy=btn_Subjects]')
-        //     .click();
-        // cy.get('input[data-cy=subjectNameInput]')
-        //     .type('A new subject');
-        // cy.get('button[data-cy=saveSubjectButton]')
-        //     .click();
-        // cy.contains('A new subject')
-        //     .should('be.visible');
+        cy.get('[data-cy="manageBtn_subj1"]')
+            .click();
+        cy.contains('SUBJECT: Subject 1')
+            .should('be.visible');
+        cy.get('[data-cy=breadcrumb-editedProjectId]')
+            .click();
+        cy.wait('@newIdSubjects')
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+        cy.get('input[data-cy=subjectName]')
+            .type('{selectall}I Am A Changed Subject');
+        cy.get('button[data-cy=saveDialogBtn]')
+            .click();
+        cy.contains('I Am A Changed Subject')
+            .should('be.visible');
+        cy.get('button[data-cy=btn_Subjects]')
+            .click();
+        cy.get('input[data-cy=subjectName]')
+            .type('A new subject');
+        cy.get('button[data-cy=saveDialogBtn]')
+            .click();
+        cy.contains('A new subject')
+            .should('be.visible');
     });
 
     it('Create new project using enter key', function () {

@@ -21,6 +21,7 @@ const appConfig = useAppConfig()
 const emit = defineEmits(['subjects-changed']);
 const route = useRoute();
 const subjectsState =useSubjectsState()
+const dropAndDragEnabled = ref(false)
 
 const subjRef = ref([]);
 const mainFocus = ref();
@@ -140,25 +141,11 @@ const subjectAdded = (subject) => {
     SkillsReporter.reportSkill('CreateSubject');
   }
   announcer.polite(`Subject ${subject.name} has been saved`);
-};
-
-const handleHide = (e) => {
-  if (!e || !e.update) {
-    handleFocus();
-  }
-};
-
-const handleFocus = () => {
-  return new Promise((resolve) => {
-    nextTick(() => {
-      // this.$refs?.subPageHeader?.$refs?.actionButton?.focus();
-      resolve();
-    });
-  });
+  enableDropAndDrop()
 };
 
 const enableDropAndDrop = () => {
-  if (subjectsState.subjects && subjectsState.subjects.length > 0) {
+  if (subjectsState.subjects && subjectsState.subjects.length > 1 && !dropAndDragEnabled.value) {
     nextTick(() => {
       const cards = document.getElementById('subjectCards');
       Sortable.create(cards, {
@@ -169,6 +156,7 @@ const enableDropAndDrop = () => {
           sortOrderUpdate(event);
         },
       });
+      dropAndDragEnabled.value = true
     });
   }
 };
@@ -223,8 +211,7 @@ const sortOrderUpdate = (updateEvent) => {
       v-model="subjectDialogInfo.show"
       :is-edit="subjectDialogInfo.isEdit"
       :subject="subjectDialogInfo.subject"
-      @subject-saved="subjectAdded"
-      @hidden="handleHide" />
+      @subject-saved="subjectAdded" />
   </div>
 </template>
 

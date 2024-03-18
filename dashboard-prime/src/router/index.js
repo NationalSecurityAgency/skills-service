@@ -3,48 +3,47 @@ import Login from '@/components/access/Login.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
 import createProgressAndRankingRoutes from './ProgressAndRankingRoutes.js'
-import createQuizRoutes from "@/router/QuizRoutes.js";
+import createQuizRoutes from '@/router/QuizRoutes.js'
 import GlobalSettings from '@/components/settings/GlobalSettings.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
-import Preferences from '@/components/settings/Preferences.vue';
-import SecuritySettings from '@/components/settings/SecuritySettings.vue';
-import EmailSettings from '@/components/settings/EmailSettings.vue';
-import SystemSettings from '@/components/settings/SystemSettings.vue';
-import ProjectPage from '@/components/projects/ProjectPage.vue';
-import Subjects from '@/components/subjects/Subjects.vue';
-import Badges from '@/components/badges/Badges.vue';
-import Levels from '@/components/levels/Levels.vue';
-import FullDependencyGraph from '@/components/skills/dependencies/FullDependencyGraph.vue';
-import Users from '@/components/users/Users.vue';
-import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav.vue';
-import SelfReportStatusPage from '@/components/skills/selfReport/SelfReportStatusPage.vue';
-import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage.vue';
-import AccessSettings from '@/components/access/AccessSettings.vue';
-import ProjectSettings from '@/components/settings/ProjectSettings.vue';
-import UserActionsPage from '@/components/userActions/UserActionsPage.vue';
-import ExpirationHistory from '@/components/expiration/ExpirationHistory.vue';
-import EmailUsers from '@/components/projects/EmailUsers.vue';
-import ProjectErrorsPage from '@/components/projects/ProjectErrors.vue';
-import MetricsPageNav from '@/components/metrics/MetricsPageNav.vue';
-import ProjectMetrics from '@/components/metrics/ProjectMetrics.vue';
-import UsersAchievementsMetricPage from '@/components/metrics/projectAchievements/UsersAchievementsMetricPage.vue';
-import SubjectMetricsPage from '@/components/metrics/projectSubjects/SubjectMetricsPage.vue';
-import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue';
-import SkillsMetricsPage from '@/components/metrics/projectSkills/SkillsMetricsPage.vue';
-import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue';
-import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue';
-import AddSkillEvent from '@/components/skills/AddSkillEvent.vue';
-import VideoConfigPage from '@/components/video/VideoConfigPage.vue';
-import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue';
-import SkillPage from '@/components/skills/SkillPage.vue';
-import SkillOverview from '@//components/skills/SkillOverview.vue';
-import SubjectPage from '@/components/subjects/SubjectPage.vue';
-import Skills from '@/components/skills/Skills.vue';
-import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue';
-import BadgePage from '@/components/badges/BadgePage.vue';
-import BadgeSkills from '@/components/badges/BadgeSkills.vue';
-import ErrorPage from '@/components/utils/errors/ErrorPage.vue';
-import NotFoundPage from '@/components/utils/errors/NotFoundPage.vue';
+import Preferences from '@/components/settings/Preferences.vue'
+import SecuritySettings from '@/components/settings/SecuritySettings.vue'
+import EmailSettings from '@/components/settings/EmailSettings.vue'
+import SystemSettings from '@/components/settings/SystemSettings.vue'
+import ProjectPage from '@/components/projects/ProjectPage.vue'
+import Subjects from '@/components/subjects/Subjects.vue'
+import Badges from '@/components/badges/Badges.vue'
+import Levels from '@/components/levels/Levels.vue'
+import FullDependencyGraph from '@/components/skills/dependencies/FullDependencyGraph.vue'
+import Users from '@/components/users/Users.vue'
+import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav.vue'
+import SelfReportStatusPage from '@/components/skills/selfReport/SelfReportStatusPage.vue'
+import SelfReportConfigurePage from '@/components/skills/selfReport/SelfReportConfigurePage.vue'
+import AccessSettings from '@/components/access/AccessSettings.vue'
+import ProjectSettings from '@/components/settings/ProjectSettings.vue'
+import UserActionsPage from '@/components/userActions/UserActionsPage.vue'
+import ExpirationHistory from '@/components/expiration/ExpirationHistory.vue'
+import EmailUsers from '@/components/projects/EmailUsers.vue'
+import ProjectErrorsPage from '@/components/projects/ProjectErrors.vue'
+import MetricsPageNav from '@/components/metrics/MetricsPageNav.vue'
+import ProjectMetrics from '@/components/metrics/ProjectMetrics.vue'
+import UsersAchievementsMetricPage from '@/components/metrics/projectAchievements/UsersAchievementsMetricPage.vue'
+import SubjectMetricsPage from '@/components/metrics/projectSubjects/SubjectMetricsPage.vue'
+import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue'
+import SkillsMetricsPage from '@/components/metrics/projectSkills/SkillsMetricsPage.vue'
+import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue'
+import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue'
+import AddSkillEvent from '@/components/skills/AddSkillEvent.vue'
+import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
+import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
+import SkillPage from '@/components/skills/SkillPage.vue'
+import SkillOverview from '@//components/skills/SkillOverview.vue'
+import SubjectPage from '@/components/subjects/SubjectPage.vue'
+import Skills from '@/components/skills/Skills.vue'
+import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue'
+import BadgePage from '@/components/badges/BadgePage.vue'
+import BadgeSkills from '@/components/badges/BadgeSkills.vue'
+import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
 
 const routes = [
   {
@@ -73,22 +72,11 @@ const routes = [
     path: '/error',
     name: 'ErrorPage',
     component: ErrorPage,
-    meta: {
-      requiresAuth: false,
-      announcer: {
-        message: 'Error Page',
-      },
-    },
-  },
-  {
-    path: '/not-found',
-    name: 'NotFoundPage',
-    component: NotFoundPage,
     props: true,
     meta: {
       requiresAuth: false,
       announcer: {
-        message: 'Not Found',
+        message: 'Error Page',
       },
     },
   },

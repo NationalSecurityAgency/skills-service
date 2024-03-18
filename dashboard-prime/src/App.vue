@@ -14,7 +14,7 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { useGlobalNavGuards } from '@/router/UseGlobalNavGuards.js'
-import { useErrorHandling } from '@/interceptors/UserErrorHandling.js'
+import { useErrorHandling } from '@/interceptors/UseErrorHandling.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
