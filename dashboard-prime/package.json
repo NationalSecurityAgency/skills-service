@@ -40,6 +40,7 @@
     "sortablejs": "1.15.2",
     "tui-editor-plugin-font-size": "1.0.4",
     "vee-validate": "4.12.6",
+    "vis-network": "^9.1.9",
     "vue": "3.4.21",
     "vue-router": "4.3.0",
     "vue3-apexcharts": "1.5.2",

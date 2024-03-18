@@ -1,0 +1,150 @@
+<script setup>
+import { ref, onMounted, nextTick } from 'vue';
+import { useConfirm } from 'primevue/useconfirm'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SkillsService from '@/components/skills/SkillsService';
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+
+const props = defineProps(['isLoading', 'data']);
+const emit = defineEmits(['update']);
+const announcer = useSkillsAnnouncer();
+const confirm = useConfirm();
+
+const fields = [
+  {
+    key: 'fromItem',
+    label: 'From',
+    sortable: true,
+  },
+  {
+    key: 'toItem',
+    label: 'To',
+    sortable: true,
+  },
+];
+// if (!isReadOnlyProjMethod()) {
+//   fields.push({
+//     key: 'edit',
+//     label: 'Remove',
+//     sortable: false,
+//   });
+// }
+
+
+const learningPaths = ref([]);
+const isProcessing = ref(true);
+const table = ref({
+    options: {
+      busy: false,
+      bordered: false,
+      outlined: true,
+      stacked: 'md',
+      fields,
+      pagination: {
+        server: false,
+        currentPage: 1,
+        totalRows: 1,
+        pageSize: 5,
+        possiblePageSizes: [5, 10, 15, 20],
+      },
+    },
+  });
+
+onMounted(() => {
+  if (props.data && props.data.edges && props.data.edges.length > 0) {
+    const { nodes, edges } = props.data;
+
+    if (edges && edges.length > 0) {
+      edges.forEach((edge) => {
+        const fromNode = nodes.find((node) => node.id === edge.from);
+        const toNode = nodes.find((node) => node.id === edge.to);
+
+        learningPaths.value.push({
+          fromItem: fromNode.details.name,
+          fromNode: fromNode.details,
+          toItem: toNode.details.name,
+          toNode: toNode.details,
+        });
+      });
+    }
+    isProcessing.value = false;
+  }
+});
+
+const removeLearningPath = (data) => {
+  const message = `Do you want to remove the path from ${data.fromItem} to ${data.toItem}?`;
+  confirm.require({
+    message: message,
+    header: 'Remove Learning Path',
+    acceptLabel: 'Remove',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      SkillsService.removeDependency(data.toNode.projectId, data.toNode.skillId, data.fromNode.skillId, data.fromNode.projectId).then(() => {
+        emit('update');
+      }).finally(() => {
+        nextTick(() => announcer.assertive(`Successfully removed Learning Path route of ${data.fromItem} to ${data.toItem}`));
+      });
+    }
+  });
+};
+
+const getUrl = (item) => {
+  let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`;
+  if (item.type === 'Skill') {
+    url += `/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
+  } else if (item.type === 'Badge') {
+    url += `/badges/${encodeURIComponent(item.skillId)}/`;
+  }
+
+  return url;
+};
+</script>
+
+<template>
+  <Card style="margin-bottom:10px;">
+    <template #header>
+      <div class="border-bottom-1 p-3 surface-border surface-100" data-cy="metricsCard-header">
+        <span class="font-bold">Learning Path Routes</span>
+      </div>
+    </template>
+    <template #content>
+      <div v-if="!isLoading && !isProcessing && learningPaths.length > 0" class="my-4">
+        <DataTable :value="learningPaths"
+                   v-if="!isProcessing"
+                   data-cy="learningPathTable"
+                   paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+                   show-gridlines
+                   striped-rows>
+          <Column field="fromItem" header="From">
+            <template #body="slotProps">
+              <a :href="getUrl(slotProps.data.fromNode)">{{ slotProps.data.fromItem }}</a>
+            </template>
+          </Column>
+          <Column field="toItem" header="To">
+            <template #body="slotProps">
+              <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
+            </template>
+          </Column>
+          <Column field="edit" header="Edit">
+            <template #body="slotProps">
+              <Button @click="removeLearningPath(slotProps.data)"
+                      variant="outline-info" size="small" class="text-info"
+                      :aria-label="`Remove learning path route of ${slotProps.data.fromItem} to ${slotProps.data.toItem}`"
+                      data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></Button>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+      <div v-else>
+        <no-content2 title="No Learning Paths Yet..." icon="fas fa-share-alt" class="my-5"
+                     message="Add a path between a Skill/Badge and another Skill/Badge"/>
+      </div>
+    </template>
+  </Card>
+</template>
+
+<style scoped>
+
+</style>
