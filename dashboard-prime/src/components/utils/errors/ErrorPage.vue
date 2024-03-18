@@ -16,7 +16,7 @@ const errorState = userErrorState()
         </div>
         <div class="text-2xl text-primary">{{ errorState.title }}</div>
 
-        <p v-if="errorState.explanation">
+        <p v-if="errorState.explanation" data-cy="errExplanation">
           {{ errorState.explanation }}
         </p>
 
@@ -27,6 +27,7 @@ const errorState = userErrorState()
             outlined
             size="medium"
             severity="info"
+            data-cy=takeMeHome
             class="mt-5" />
         </router-link>
       </div>

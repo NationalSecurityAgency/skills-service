@@ -60,6 +60,7 @@ export const useErrorHandling = () => {
       } else {
         errorState.setErrorParams('User Not Authorized', explanation, 'fas fa-shield-alt')
         router.push({ name: 'ErrorPage'});
+        return Promise.reject(error);
       }
     } else if (errorCode === 404) {
       let explanation;
@@ -68,12 +69,14 @@ export const useErrorHandling = () => {
       }
       errorState.setErrorParams('Resource Not Found', explanation, 'fas fa-exclamation-triangle')
       router.push({ name: 'ErrorPage' });
+      return Promise.reject(error);
     } else if (errorCode === 503 && error?.response?.data?.errorCode === 'DbUpgradeInProgress') {
       router.push({ name: 'DbUpgradeInProgressPage' });
       return Promise.reject(error);
     } else {
       errorState.resetToDfeault()
       router.push({ name: 'ErrorPage' });
+      return Promise.reject(error);
     }
     return Promise.resolve({ data: {} });
   }

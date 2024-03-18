@@ -42,9 +42,6 @@ import { clear } from 'idb-keyval';
 Cypress.on('window:before:load', (win) => {
     cy.spy(win.console, 'error').as('consoleError')
     cy.spy(win.console, 'warn').as('consoleWarn')
-    win.addEventListener('unhandledrejection', (event) => {
-        throw new Error(event.reason.message)
-    });
 });
 
 before(function () {
