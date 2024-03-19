@@ -176,7 +176,7 @@ const handleEditBtnClick = (skill) => {
     editImportedSkillInfo.value.skill = skill
     editImportedSkillInfo.value.show = true
   } else {
-    createOrUpdateSkill(skill.data, false, true, skill.groupId)
+    createOrUpdateSkill(skill, true, false, skill.groupId)
   }
 }
 
