@@ -1,5 +1,26 @@
 <script setup>
+import { ref, onMounted } from 'vue';
+import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
+import SharedSkillsTable from "@/components/skills/crossProjects/SharedSkillsTable.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
 
+const props = defineProps(['projectId']);
+
+const loading = ref(true);
+const sharedSkills = ref([]);
+
+const loadSharedSkills = () => {
+  loading.value = true;
+  SkillsShareService.getSharedWithmeSkills(props.projectId)
+      .then((data) => {
+        sharedSkills.value = data;
+        loading.value = false;
+      });
+};
+
+onMounted(() => {
+  loadSharedSkills();
+})
 </script>
 
 <template>
@@ -10,6 +31,13 @@
       </div>
     </template>
     <template #content>
+      <div v-if="sharedSkills && sharedSkills.length > 0">
+        <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
+      </div>
+      <div v-else>
+        <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
+                     message="Coordinate with other projects to share skills with this project."></no-content2>
+      </div>
     </template>
   </Card>
 </template>

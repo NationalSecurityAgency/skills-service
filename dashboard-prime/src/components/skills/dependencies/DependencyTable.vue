@@ -110,7 +110,7 @@ const getUrl = (item) => {
       </div>
     </template>
     <template #content>
-      <div v-if="!isLoading && !isProcessing && learningPaths.length > 0" class="my-4">
+      <div v-if="!isLoading && !isProcessing && learningPaths.length > 0">
         <DataTable :value="learningPaths"
                    v-if="!isProcessing"
                    data-cy="learningPathTable"

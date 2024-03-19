@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import 'vis-network/styles/vis-network.css';
 import { Network } from 'vis-network';
@@ -65,11 +65,11 @@ onMounted(() => {
   loadGraphDataAndCreateGraph();
 })
 
-// beforeDestroy() {
-//   if (this.network) {
-//     this.network.destroy();
-//   }
-// },
+onBeforeUnmount(() => {
+  if (network.value) {
+    network.value.destroy();
+  }
+})
 
 const hasGraphData = computed(() => {
   return graph.value && graph.value.nodes && graph.value.nodes.length > 0;
@@ -243,8 +243,8 @@ const setVisNetworkTabIndex = () => {
     </Card>
 
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" />
-    <share-skills-with-other-projects />
-    <shared-skills-from-other-projects />
+    <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
+    <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
   </div>
 </template>
 
