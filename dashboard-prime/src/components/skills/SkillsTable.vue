@@ -22,9 +22,12 @@ import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMove
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import EditImportedSkillDialog from '@/components/skills/skillsGroup/EditImportedSkillDialog.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
+import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDialog.vue'
 
 const props = defineProps({
-  groupId: String,
+  groupId: String
 })
 
 const responsive = useResponsiveBreakpoints()
@@ -35,6 +38,7 @@ const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
+const inviteOnlyProjectState = useInviteOnlyProjectState()
 
 const subjectId = computed(() => route.params.subjectId)
 const tableId = props.groupId || route.params.subjectId
@@ -43,7 +47,7 @@ const pagination = {
   possiblePageSizes: [10, 20, 50, 100]
 }
 
-const sortInfo = useStorage(`skillsTable-sort-${tableId}`, {  sortOrder: -1, sortBy: 'created' })
+const sortInfo = useStorage(`skillsTable-sort-${tableId}`, { sortOrder: -1, sortBy: 'created' })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   bordered: true,
@@ -107,7 +111,7 @@ const options = ref({
       sortable: true,
       imageClass: 'fas fa-code-branch'
     }
-  ],
+  ]
 })
 
 const additionalColumns = ref(options.value.fields.filter((f) => !f.isSticky))
@@ -136,7 +140,7 @@ const totalRows = computed(() => {
   } else {
     res = skillsState.subjectSkills.length
   }
-  return  res
+  return res
 })
 
 const filters = ref({
@@ -199,9 +203,9 @@ const doDeleteSkill = () => {
       const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
       const itemIndex = skills.findIndex((item) => item.skillId === skill.skillId)
       skills.splice(itemIndex, 1)
-      skills.sort((a,b) => a.displayOrder - b.displayOrder)
+      skills.sort((a, b) => a.displayOrder - b.displayOrder)
       for (let i = 0; i < skills.length; i++) {
-        skills[i].displayOrder = i+1
+        skills[i].displayOrder = i + 1
       }
       if (skill.groupId) {
         skillsState.setGroupSkills(skill.groupId, skills)
@@ -233,8 +237,11 @@ const toggleActionsMenu = (event) => {
 }
 const actionsMenu = ref([
   {
-    label: ' Export To Catalog',
-    icon: 'far fa-arrow-alt-circle-up'
+    label: 'Export To Catalog',
+    icon: 'far fa-arrow-alt-circle-up',
+    command: () => {
+      showExportToCatalogDialog.value = true
+    }
   },
   {
     label: 'Reuse in this Project',
@@ -272,6 +279,7 @@ const expandedRows = ref([])
 
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
+const showExportToCatalogDialog = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -279,7 +287,7 @@ const showSkillsReuseModal = ref(false)
 // };
 
 const disableRow = (row) => {
-  return row.isGroupType ? 'remove-checkbox' : '';
+  return row.isGroupType ? 'remove-checkbox' : ''
 }
 
 const onMoved = (movedInfo) => {
@@ -297,11 +305,23 @@ const onMoved = (movedInfo) => {
   subjectState.loadSubjectDetailsState()
 }
 
+const onExported = (groupId = null) => {
+  skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId, false)
+  if (groupId) {
+    skillsState.loadGroupSkills(route.params.projectId, groupId)
+  }
+
+  selectedRows.value = []
+  subjectState.loadSubjectDetailsState()
+}
+
 
 const editImportedSkillInfo = ref({
   show: false,
-  skill: {},
+  skill: {}
 })
+
+
 </script>
 
 <template>
@@ -404,12 +424,14 @@ const editImportedSkillInfo = ref({
 
       <Column expander class="lg:w-2rem" :class="{'flex': responsive.lg.value }">
         <template #header>
-          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
+          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt"
+                                                  aria-hidden="true"></i> Expand Rows</span>
         </template>
       </Column>
       <Column selectionMode="multiple" :class="{'flex': responsive.lg.value }">
         <template #header>
-          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"  aria-hidden="true"></i> Select Rows:</span>
+          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"
+                                                  aria-hidden="true"></i> Select Rows:</span>
         </template>
       </Column>
       <Column v-for="col of displayedColumns"
@@ -427,7 +449,9 @@ const editImportedSkillInfo = ref({
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
                 <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Group</span>
-                <Tag class="uppercase ml-2" data-cy="numSkillsInGroup">{{ slotProps.data.numSkillsInGroup }} skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}</Tag>
+                <Tag class="uppercase ml-2" data-cy="numSkillsInGroup">{{ slotProps.data.numSkillsInGroup }}
+                  skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}
+                </Tag>
               </div>
               <highlighted-value
                 class="text-lg"
@@ -450,7 +474,8 @@ const editImportedSkillInfo = ref({
                   severity="success"
                   class="mt-1"
                   :data-cy="`importedBadge-${slotProps.data.skillId}`">
-                  <span v-if="slotProps.data.reusedSkill"><i class="fas fa-recycle" aria-hidden="true"></i> Reused</span>
+                  <span v-if="slotProps.data.reusedSkill"><i class="fas fa-recycle"
+                                                             aria-hidden="true"></i> Reused</span>
                   <span><i class="fas fa-book" aria-hidden="true"></i> Imported</span>
                 </Tag>
                 <Tag
@@ -458,7 +483,13 @@ const editImportedSkillInfo = ref({
                   severity="secondary"
                   class="mt-1"
                   :data-cy="`disabledBadge-${slotProps.data.skillId}`">
-                  <span><i class="fas fa-book"  aria-hidden="true"></i> Disabled</span>
+                  <span><i class="fas fa-book" aria-hidden="true"></i> Disabled</span>
+                </Tag>
+                <Tag
+                  v-if="slotProps.data.sharedToCatalog"
+                  class="mt-1"
+                  :data-cy="`exportedBadge-${slotProps.data.skillId}`">
+                  <span><i class="fas fa-book" aria-hidden="true"></i> Exported</span>
                 </Tag>
               </div>
             </div>
@@ -467,16 +498,16 @@ const editImportedSkillInfo = ref({
                 <router-link
                   :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
                 >
-<!--                  <SkillsButton-->
-<!--                    v-if="!slotProps.data.isGroupType"-->
-<!--                    :label="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'View' : 'Manage'"-->
-<!--                    :icon="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'fas fa-eye' : 'fas fa-arrow-circle-right'"-->
-<!--                    size="small"-->
-<!--                    outlined-->
-<!--                    severity="info"-->
-<!--                    :aria-label="`Manage skill ${slotProps.data.name}`"-->
-<!--                    :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"-->
-<!--                  />-->
+                  <!--                  <SkillsButton-->
+                  <!--                    v-if="!slotProps.data.isGroupType"-->
+                  <!--                    :label="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'View' : 'Manage'"-->
+                  <!--                    :icon="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'fas fa-eye' : 'fas fa-arrow-circle-right'"-->
+                  <!--                    size="small"-->
+                  <!--                    outlined-->
+                  <!--                    severity="info"-->
+                  <!--                    :aria-label="`Manage skill ${slotProps.data.name}`"-->
+                  <!--                    :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"-->
+                  <!--                  />-->
                 </router-link>
 
                 <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2">
@@ -576,8 +607,16 @@ const editImportedSkillInfo = ref({
           <div v-else-if="slotProps.field === 'totalPoints'">
             <div :data-cy="`totalPointsCell_${slotProps.data.skillId}`">
               <div class="text-lg">{{ numberFormat.pretty(slotProps.data.totalPoints) }}</div>
-              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">{{ numberFormat.pretty(slotProps.data.pointIncrement)  }} pts x {{ slotProps.data.numPerformToCompletion }} repetitions</div>
-              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from <Tag>{{ numberFormat.pretty(slotProps.data.totalPoints) }}</Tag> skills in <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag> skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : ''}}</div>
+              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">
+                {{ numberFormat.pretty(slotProps.data.pointIncrement) }} pts x {{ slotProps.data.numPerformToCompletion
+                }} repetitions
+              </div>
+              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from
+                <Tag>{{ numberFormat.pretty(slotProps.data.totalPoints) }}</Tag>
+                skills in
+                <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag>
+                skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}
+              </div>
             </div>
           </div>
           <div v-else-if="slotProps.field === 'catalogType'">
@@ -587,7 +626,7 @@ const editImportedSkillInfo = ref({
                 class="text-primary">{{ slotProps.data.copiedFromProjectName }}</span></p>
             </div>
             <div v-if="slotProps.data.sharedToCatalog">
-              <Tag severity="secondary"><i class="fas fa-book mr-1" aria-hidden="true"/> EXPORTED</Tag>
+              <Tag severity="secondary"><i class="fas fa-book mr-1" aria-hidden="true" /> EXPORTED</Tag>
               <p class="text-secondary">Exported to Skill Catalog</p>
             </div>
 
@@ -618,9 +657,9 @@ const editImportedSkillInfo = ref({
       <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
       </template>
-<!--      <template #paginatorend>-->
-<!--        &lt;!&ndash;        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>&ndash;&gt;-->
-<!--      </template>-->
+      <!--      <template #paginatorend>-->
+      <!--        &lt;!&ndash;        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>&ndash;&gt;-->
+      <!--      </template>-->
 
       <template #empty>
         <div class="flex justify-content-center flex-wrap">
@@ -644,6 +683,13 @@ const editImportedSkillInfo = ref({
       v-model="deleteSkillInfo.show"
       :skill="deleteSkillInfo.skill"
       @do-remove="doDeleteSkill" />
+    <export-to-catalog-dialog
+      v-if="showExportToCatalogDialog"
+      v-model="showExportToCatalogDialog"
+      :skills="selectedSkills"
+      :show-invite-only-warning="inviteOnlyProjectState.isInviteOnlyProject"
+      @on-exported="onExported"
+    />
     <reuse-or-move-skills-dialog
       id="moveSkillsModal"
       v-if="showMoveSkillsInfoModal"
@@ -663,7 +709,7 @@ const editImportedSkillInfo = ref({
       v-if="editImportedSkillInfo.show"
       v-model="editImportedSkillInfo.show"
       :skill="editImportedSkillInfo.skill"
-      @skill-updated="importedSkillUpdated"/>
+      @skill-updated="importedSkillUpdated" />
   </div>
 </template>
 

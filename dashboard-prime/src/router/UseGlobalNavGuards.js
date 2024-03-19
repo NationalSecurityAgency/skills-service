@@ -11,6 +11,7 @@ import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
+import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -21,6 +22,7 @@ export const useGlobalNavGuards = () => {
   const appInfoState = useAppInfoState()
   const appConfig = useAppConfig()
   const projectInfo = useProjectInfo()
+  const inviteOnlyProjectState = useInviteOnlyProjectState()
   const accessState = useAccessState()
   const projConfig = useProjConfig()
   const router = useRouter()
@@ -78,6 +80,7 @@ export const useGlobalNavGuards = () => {
           projectInfo.setCurrentProjectId(to.params.projectId)
           if (isAdminPage(to) && to.params.projectId) {
             projConfig.loadProjConfigState({ projectId: to.params.projectId })
+            inviteOnlyProjectState.loadInviteOnlySetting(to.params.projectId)
           }
           IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
         }
