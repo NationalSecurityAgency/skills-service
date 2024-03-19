@@ -28,7 +28,15 @@ const addSkillDisabled = computed(() => {
   return false
 })
 
-const showImportDialog = ref(false)
+const importDialog = ref({
+  show: false,
+  groupId: ''
+})
+const initiateImport = (groupId = '') => {
+  importDialog.value.groupId = groupId
+  importDialog.value.show = true
+}
+provide('initiateImport', initiateImport)
 const editGroup = ref({
   skill: {},
   show: false,
@@ -140,8 +148,9 @@ const skillCreatedOrUpdated = (skill) => {
           outlined
           class="bg-primary-reverse"
           icon="fas fa-book"
-          @click="showImportDialog=true"
+          @click="initiateImport()"
           size="small"
+          :track-for-focus="true"
           aria-label="import from catalog"
           data-cy="importFromCatalogBtn" />
         <SkillsButton
@@ -211,8 +220,9 @@ const skillCreatedOrUpdated = (skill) => {
       @skill-saved="skillCreatedOrUpdated"
       />
     <import-from-catalog-dialog
-      v-if="showImportDialog"
-      v-model="showImportDialog"/>
+      v-if="importDialog.show"
+      v-model="importDialog.show"
+      :group-id="importDialog.groupId"/>
   </div>
 </template>
 

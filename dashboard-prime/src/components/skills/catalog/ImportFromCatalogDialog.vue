@@ -16,8 +16,15 @@ import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning.vue'
 import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
+import { useFocusState } from '@/stores/UseFocusState.js'
 
 const model = defineModel()
+const props = defineProps({
+  groupId: {
+    type: String,
+    default: ''
+  }
+})
 const route = useRoute()
 const appConfig = useAppConfig()
 const responsive = useResponsiveBreakpoints()
@@ -32,7 +39,7 @@ const totalRows = ref(1)
 const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
 const currentPage = ref(1)
-const sortInfo = useStorage('importFromSkillsCatalogTable', {  sortOrder: 1, sortBy: 'name' })
+const sortInfo = useStorage('importFromSkillsCatalogTable', { sortOrder: 1, sortBy: 'name' })
 const initialLoadHadData = ref(false)
 const isInFinalizeState = ref(false)
 const filters = ref({
@@ -104,7 +111,7 @@ const maxBulkImportExceeded = computed(() => {
   return selectedRows.value.length > appConfig.maxSkillsInBulkImport
 })
 const maxSkillsInSubjectExceeded = computed(() => {
-  return (selectedRows.value.length + skillsState.totalNumSkillsInSubject) > appConfig.maxSkillsPerSubject;
+  return (selectedRows.value.length + skillsState.totalNumSkillsInSubject) > appConfig.maxSkillsPerSubject
 })
 
 const importInProgress = ref(false)
@@ -118,15 +125,29 @@ const doImport = () => {
           projectId: skill.projectId,
           skillId: skill.skillId
         }))
-        CatalogService.bulkImport(route.params.projectId, route.params.subjectId, projAndSkillIds)
-          .then(() => {
-            skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
-            subjectState.loadSubjectDetailsState()
-            finalizeState.loadInfo()
-            SkillsReporter.reportSkill('ImportSkillfromCatalog');
-          }).finally(() => {
-          handleClose()
-        });
+        const commonActionsAfterImport = () => {
+          subjectState.loadSubjectDetailsState()
+          finalizeState.loadInfo()
+          SkillsReporter.reportSkill('ImportSkillfromCatalog')
+        }
+        if (props.groupId && props.groupId.length > 0) {
+          CatalogService.bulkImportIntoGroup(route.params.projectId, route.params.subjectId, props.groupId, projAndSkillIds)
+            .then(() => {
+              skillsState.loadGroupSkills(route.params.projectId, props.groupId)
+              commonActionsAfterImport()
+            }).finally(() => {
+            handleClose()
+          })
+
+        } else {
+          CatalogService.bulkImport(route.params.projectId, route.params.subjectId, projAndSkillIds)
+            .then(() => {
+              skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+              commonActionsAfterImport()
+            }).finally(() => {
+            handleClose()
+          })
+        }
       } else {
         selectedRows.value = []
       }
@@ -141,21 +162,29 @@ const reset = () => {
   loadData()
 }
 const setProjectFilter = (projectName) => {
-  filters.value.projectName = projectName;
-  loadData();
+  filters.value.projectName = projectName
+  loadData()
 }
 const setSubjectFilter = (projectName) => {
-  filters.value.subjectName = projectName;
-  loadData();
+  filters.value.subjectName = projectName
+  loadData()
 }
 const isImportBtnDisabled = computed(() => {
   return importDisabled.value || importInProgress.value || maxBulkImportExceeded.value || maxSkillsInSubjectExceeded.value
 })
 
+const focusState = useFocusState()
 const handleClose = () => {
   model.value = false
+  focusState.focusOnLastElement()
 }
 const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist) ? 'remove-checkbox' : ''
+
+const onUpdateVisible = (newVal) => {
+  if (!newVal) {
+    handleClose()
+  }
+}
 </script>
 
 <template>
@@ -165,6 +194,7 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
     :maximizable="true"
     :close-on-escape="true"
     class="w-11 xl:w-8"
+    @update:visible="onUpdateVisible"
     v-model:visible="model"
   >
     <skills-spinner :is-loading="initialLoad" />
@@ -193,7 +223,7 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
               v-on:keydown.enter="loadData"
               data-cy="skillNameFilter"
               maxlength="50"
-              class="w-full"/>
+              class="w-full" />
           </div>
           <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
             <label for="project-name-filter">Project Name:</label>
@@ -203,7 +233,7 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
               v-on:keydown.enter="loadData"
               data-cy="projectNameFilter"
               maxlength="50"
-              class="w-full"/>
+              class="w-full" />
           </div>
           <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
             <label for="subject-name-filter">Subject Name:</label>
@@ -239,110 +269,115 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
         </div>
 
         <DataTable
-        :value="data"
-        :loading="reloadData"
-        v-model:selection="selectedRows"
-        v-model:expandedRows="expandedRows"
-        v-model:sort-field="sortInfo.sortBy"
-        v-model:sort-order="sortInfo.sortOrder"
-        stripedRows
-        paginator
-        lazy
-        :totalRecords="totalRows"
-        :rows="pageSize"
-        @page="pageChanged"
-        :rowClass="rowClass"
-        tableStoredStateId="usersTable"
-        data-cy="importSkillsFromCatalogTable"
-        :rowsPerPageOptions="possiblePageSizes">
-        <!--      <template #loading> Loading customers data. Please wait. </template>-->
-        <Column expander :class="{'flex': responsive.md.value }">
-          <template #header>
-            <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
-          </template>
-        </Column>
-        <Column selectionMode="multiple" :class="{'flex': responsive.md.value }" >
-          <template #header>
-            <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-check-double"  aria-hidden="true"></i> Select Rows:</span>
-          </template>
-        </Column>
-        <Column field="name" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
-          <template #header>
-            <i class="fas fa-user mr-1" aria-hidden="true"></i>
-          </template>
-          <template #body="slotProps">
-            <skill-already-existing-warning :skill="slotProps.data" />
-            <div class="max-wrap">
-              {{ slotProps.data.name }}
-            </div>
-          </template>
-        </Column>
-        <Column field="projectName" header="Project" :sortable="true" :class="{'flex': responsive.md.value }">
-          <template #header>
-            <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
-          </template>
-          <template #body="slotProps">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                {{ slotProps.data.projectName }}
+          :value="data"
+          :loading="reloadData"
+          v-model:selection="selectedRows"
+          v-model:expandedRows="expandedRows"
+          v-model:sort-field="sortInfo.sortBy"
+          v-model:sort-order="sortInfo.sortOrder"
+          stripedRows
+          paginator
+          lazy
+          :totalRecords="totalRows"
+          :rows="pageSize"
+          @page="pageChanged"
+          :rowClass="rowClass"
+          tableStoredStateId="usersTable"
+          data-cy="importSkillsFromCatalogTable"
+          :rowsPerPageOptions="possiblePageSizes">
+          <!--      <template #loading> Loading customers data. Please wait. </template>-->
+          <Column expander :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
+            </template>
+          </Column>
+          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-check-double"
+                                                      aria-hidden="true"></i> Select Rows:</span>
+            </template>
+          </Column>
+          <Column field="name" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <i class="fas fa-user mr-1" aria-hidden="true"></i>
+            </template>
+            <template #body="slotProps">
+              <skill-already-existing-warning :skill="slotProps.data" />
+              <div class="max-wrap">
+                {{ slotProps.data.name }}
               </div>
-              <div>
-                <SkillsButton
-                  aria-label="Filter by Project Name"
-                  @click="setProjectFilter(slotProps.data.projectName)"
-                  data-cy="addProjectFilter"
-                  icon="fas fa-search-plus"
-                  size="small"
-                  rounded text />
+            </template>
+          </Column>
+          <Column field="projectName" header="Project" :sortable="true" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
+            </template>
+            <template #body="slotProps">
+              <div class="flex align-items-center">
+                <div class="flex-1">
+                  {{ slotProps.data.projectName }}
+                </div>
+                <div>
+                  <SkillsButton
+                    aria-label="Filter by Project Name"
+                    @click="setProjectFilter(slotProps.data.projectName)"
+                    data-cy="addProjectFilter"
+                    icon="fas fa-search-plus"
+                    size="small"
+                    rounded text />
+                </div>
               </div>
-            </div>
-          </template>
-        </Column>
-        <Column field="subjectName" header="Subject" :sortable="true" :class="{'flex': responsive.md.value }">
-          <template #header>
-            <i class="fas fa-cubes mr-1" aria-hidden="true"></i>
-          </template>
-          <template #body="slotProps">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                {{ slotProps.data.subjectName }}
+            </template>
+          </Column>
+          <Column field="subjectName" header="Subject" :sortable="true" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <i class="fas fa-cubes mr-1" aria-hidden="true"></i>
+            </template>
+            <template #body="slotProps">
+              <div class="flex align-items-center">
+                <div class="flex-1">
+                  {{ slotProps.data.subjectName }}
+                </div>
+                <div>
+                  <SkillsButton
+                    aria-label="Filter by Subject Name"
+                    data-cy="addSubjectFilter"
+                    @click="setSubjectFilter(slotProps.data.subjectName)"
+                    icon="fas fa-search-plus"
+                    size="small" rounded text />
+                </div>
               </div>
-              <div>
-                <SkillsButton
-                  aria-label="Filter by Subject Name"
-                  data-cy="addSubjectFilter"
-                  @click="setSubjectFilter(slotProps.data.subjectName)"
-                  icon="fas fa-search-plus"
-                  size="small" rounded text />
-              </div>
-            </div>
-          </template>
-        </Column>
-        <Column field="totalPoints" header="Points" :sortable="true" :class="{'flex': responsive.md.value }">
-          <template #header>
-            <i class="fas fa-arrow-alt-circle-up mr-1" aria-hidden="true"></i>
-          </template>
-        </Column>
+            </template>
+          </Column>
+          <Column field="totalPoints" header="Points" :sortable="true" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <i class="fas fa-arrow-alt-circle-up mr-1" aria-hidden="true"></i>
+            </template>
+          </Column>
 
-        <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
-        </template>
-        <template #expansion="slotProps">
-          <skill-to-import-info :skill="slotProps.data" />
-        </template>
-        <template #empty>
-          <div class="text-center">
-            <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
-          </div>
-        </template>
-      </DataTable>
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          </template>
+          <template #expansion="slotProps">
+            <skill-to-import-info :skill="slotProps.data" />
+          </template>
+          <template #empty>
+            <div class="text-center">
+              <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
+            </div>
+          </template>
+        </DataTable>
       </div>
 
       <Message v-if="maxBulkImportExceeded" data-cy="maximum-selected" :closable="false" severity="warn">
-        Cannot import more than <Tag>{{ appConfig.maxSkillsInBulkImport }}</Tag> Skills at once
+        Cannot import more than
+        <Tag>{{ appConfig.maxSkillsInBulkImport }}</Tag>
+        Skills at once
       </Message>
-      <Message v-if="maxSkillsInSubjectExceeded"  data-cy="maximum-selected" :closable="false" severity="warn">
-        No more than <Tag>{{ appConfig.maxSkillsPerSubject }}</Tag> Skills per Subject are allowed, this project already has
+      <Message v-if="maxSkillsInSubjectExceeded" data-cy="maximum-selected" :closable="false" severity="warn">
+        No more than
+        <Tag>{{ appConfig.maxSkillsPerSubject }}</Tag>
+        Skills per Subject are allowed, this project already has
         <Tag>{{ skillsState.totalNumSkillsInSubject }}</Tag>
       </Message>
 
@@ -372,7 +407,7 @@ const rowClass = (row) => (row.skillIdAlreadyExist || row.skillNameAlreadyExist)
     </div>
 
     <div class="loading-indicator" v-if="importInProgress">
-      <skills-spinner :is-loading="true"/>
+      <skills-spinner :is-loading="true" />
     </div>
 
   </Dialog>

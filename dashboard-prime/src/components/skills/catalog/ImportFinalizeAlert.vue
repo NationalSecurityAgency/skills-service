@@ -50,18 +50,16 @@ const checkFinalizationState = () => {
           finalizeState.info.finalizeSuccessfullyCompleted = true
           if (route.params.subjectId) {
             subjectsState.loadSubjectDetailsState()
-            subjectSkillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
-            // this.loadSubjectSkills({
-            //   projectId: this.$route.params.projectId,
-            //   subjectId: this.$route.params.subjectId
-            // })
-            // this.loadSubjectDetailsState({
-            //   projectId: this.$route.params.projectId,
-            //   subjectId: this.$route.params.subjectId
-            // })
+            subjectSkillsState.subjectSkills.forEach((sk) => {
+              sk.enabled = true
+            })
+            // iterate over loaded group ids and update enabled attribute
+            subjectSkillsState.groupSkills.forEach((values) => {
+              values.forEach((sk) => {
+                sk.enabled = true
+              })
+            })
           } else if (route.params.projectId) {
-            // this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
-            // this.loadSubjects({ projectId: this.$route.params.projectId })
             subjectsState.loadSubjects({ projectId: route.params.projectId })
             projDetailsState.loadProjectDetailsState()
           }

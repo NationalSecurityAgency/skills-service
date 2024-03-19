@@ -56,7 +56,6 @@ const requiredSkillsNum = computed(() => {
 const lessThanTwoSkills = computed(() => {
   return skillsState.getGroupSkills(props.skill.skillId).length < 2;
 })
-const showImportCatalogModal = ref(false)
 
 const addDisabled = computed(() => {
   if (props.skill.enabled) {
@@ -71,7 +70,7 @@ const addDisabledMessage = computed(() => {
 })
 
 const createOrUpdateSkill = inject('createOrUpdateSkill')
-
+const initiateImport = inject('initiateImport')
 const showEditRequiredSkillsDialog = ref(false)
 
 watch(() => skillsState.getGroupSkills(props.skill.skillId).length,
@@ -146,7 +145,7 @@ const groupChanged = (updatedGroup) => {
                 size="small"
                 outlined
                 severity="info"
-                @click="showImportCatalogModal=true"
+                @click="initiateImport(skillInfo.skillId)"
                 label="Import Skills"
                 icon="fas fa-book"
                 :track-for-focus="true"

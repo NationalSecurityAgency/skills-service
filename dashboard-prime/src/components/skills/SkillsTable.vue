@@ -20,6 +20,7 @@ import SkillRemovalValidation from '@/components/skills/SkillRemovalValidation.v
 import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowSkillGroupDisplay.vue'
 import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMoveSkillsDialog.vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import EditImportedSkillDialog from '@/components/skills/skillsGroup/EditImportedSkillDialog.vue'
 
 const props = defineProps({
   groupId: String,
@@ -170,6 +171,14 @@ const onColumnSort = () => {
 
 const addSkillDisabled = ref(false)
 const createOrUpdateSkill = inject('createOrUpdateSkill')
+const handleEditBtnClick = (skill) => {
+  if (skill.isCatalogSkill && skill.catalogType === 'imported') {
+    editImportedSkillInfo.value.skill = skill
+    editImportedSkillInfo.value.show = true
+  } else {
+    createOrUpdateSkill(skill.data, false, true, skill.groupId)
+  }
+}
 
 const deleteButtonsDisabled = ref(false)
 const deleteSkillInfo = ref({
@@ -206,6 +215,14 @@ const doDeleteSkill = () => {
       subjectState.loadSubjectDetailsState()
       skillsState.setLoadingSubjectSkills(false)
     })
+}
+
+const importedSkillUpdated = (skill) => {
+  const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
+  const itemIndex = skills.findIndex((item) => item.skillId === skill.skillId)
+  skills[itemIndex].pointIncrement = skill.pointIncrement
+  skills[itemIndex].totalPoints = skill.pointIncrement * skill.numPerformToCompletion
+  announcer.polite(`Updated imported ${skill.name} skill's point increment to ${skill.pointIncrement}`)
 }
 
 const skillsActionsMenu = ref(false)
@@ -277,6 +294,12 @@ const onMoved = (movedInfo) => {
   selectedRows.value = []
   subjectState.loadSubjectDetailsState()
 }
+
+
+const editImportedSkillInfo = ref({
+  show: false,
+  skill: {},
+})
 </script>
 
 <template>
@@ -459,7 +482,7 @@ const onMoved = (movedInfo) => {
                     :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
                     icon="fas fa-edit"
-                    @click="createOrUpdateSkill(slotProps.data, true, false, slotProps.data.groupId)"
+                    @click="handleEditBtnClick(slotProps.data)"
                     size="small"
                     outlined
                     severity="info"
@@ -634,6 +657,11 @@ const onMoved = (movedInfo) => {
       :skills="selectedSkills"
       @on-moved="onMoved"
     />
+    <edit-imported-skill-dialog
+      v-if="editImportedSkillInfo.show"
+      v-model="editImportedSkillInfo.show"
+      :skill="editImportedSkillInfo.skill"
+      @skill-updated="importedSkillUpdated"/>
   </div>
 </template>
 
