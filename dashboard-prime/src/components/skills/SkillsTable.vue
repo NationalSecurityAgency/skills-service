@@ -21,6 +21,7 @@ import ChildRowSkillGroupDisplay from '@/components/skills/skillsGroup/ChildRowS
 import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMoveSkillsDialog.vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import EditImportedSkillDialog from '@/components/skills/skillsGroup/EditImportedSkillDialog.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const props = defineProps({
   groupId: String,
@@ -33,6 +34,7 @@ const projConfig = useProjConfig()
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
+const numberFormat = useNumberFormat()
 
 const subjectId = computed(() => route.params.subjectId)
 const tableId = props.groupId || route.params.subjectId
@@ -573,9 +575,9 @@ const editImportedSkillInfo = ref({
           </div>
           <div v-else-if="slotProps.field === 'totalPoints'">
             <div :data-cy="`totalPointsCell_${slotProps.data.skillId}`">
-              <div class="text-lg">{{ slotProps.data.totalPoints }}</div>
-              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">{{ slotProps.data.pointIncrement  }} pts x {{ slotProps.data.numPerformToCompletion }} repetitions</div>
-              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag> skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : ''}}</div>
+              <div class="text-lg">{{ numberFormat.pretty(slotProps.data.totalPoints) }}</div>
+              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">{{ numberFormat.pretty(slotProps.data.pointIncrement)  }} pts x {{ slotProps.data.numPerformToCompletion }} repetitions</div>
+              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from <Tag>{{ numberFormat.pretty(slotProps.data.totalPoints) }}</Tag> skills in <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag> skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : ''}}</div>
             </div>
           </div>
           <div v-else-if="slotProps.field === 'catalogType'">
