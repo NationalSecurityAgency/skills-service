@@ -15,6 +15,7 @@ const props = defineProps({
     type: Array,
     required: true
   },
+  groupId: String,
   showInviteOnlyWarning: {
     type: Boolean,
     required: false,
@@ -104,7 +105,7 @@ const handleExport = () => {
     .then(() => {
       state.value.exported = true
       SkillsReporter.reportSkill('ExporttoCatalog')
-      emit('on-exported')
+      emit('on-exported', props.groupId)
     })
     .finally(() => {
       state.value.exporting = false

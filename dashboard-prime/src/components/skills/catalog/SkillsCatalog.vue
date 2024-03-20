@@ -1,10 +1,12 @@
 <script setup>
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import ExportedSkills from '@/components/skills/catalog/ExportedSkills.vue'
 </script>
 
 <template>
-  <div>Skills Catalog</div>
-  <div data-cy="exportedSkillsTable">
-
+  <div>
+    <sub-page-header title="Skill Catalog" />
+    <exported-skills />
   </div>
 </template>
 

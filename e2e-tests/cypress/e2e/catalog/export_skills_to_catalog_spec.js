@@ -741,7 +741,7 @@ describe('Export Skills to the Catalog Tests', () => {
         ], 10);
     });
 
-    it.skip('expanded skill details show exported status', () => {
+    it('expanded skill details show exported status', () => {
         cy.createSkill(1, 1, 1); // 1
         cy.createSkill(1, 1, 2); // 2
         cy.createSkill(1, 1, 3); // 3 - exported
@@ -761,10 +761,10 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
-                colIndex: 2,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
-                colIndex: 3,
+                colIndex: 1,
                 value: 'Subject 1'
             }],
         ], 5);
@@ -847,7 +847,7 @@ describe('Export Skills to the Catalog Tests', () => {
         ], 5);
     });
 
-    it.skip('export then drill down into the skill', () => {
+    it('export then drill down into the skill', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
 
@@ -883,7 +883,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -901,7 +901,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('do not allow to export skills with duplicate Skill ID or Skill Name', () => {
+    it('do not allow to export skills with duplicate Skill ID or Skill Name', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -1035,11 +1035,11 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 5'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 4'
             }],
         ], 5);

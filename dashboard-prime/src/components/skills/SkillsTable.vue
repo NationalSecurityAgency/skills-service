@@ -690,6 +690,7 @@ const editImportedSkillInfo = ref({
       v-model="showExportToCatalogDialog"
       :skills="selectedSkills"
       :show-invite-only-warning="inviteOnlyProjectState.isInviteOnlyProject"
+      :group-id="groupId"
       @on-exported="onExported"
       @on-nothing-to-export="removeSelectedRows"
     />
