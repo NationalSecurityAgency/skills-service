@@ -38,17 +38,18 @@ const focusOnDelete = () => {
 
 <template>
   <div class="flex justify-content-end flex-wrap">
-    <SkillsButton
-        :to="{ name:'Subjects', params: { projectId: project.projectId, project: project }}"
-        size="small"
-        class="mr-2"
-        outlined
-        severity="info"
-        :data-cy="'projCard_' + project.projectId + '_manageBtn'"
-        :label="readOnlyProject ? 'View' : 'Manage'"
-        icon="fas fa-arrow-circle-right"
-        :aria-label="'manage project + project.name'">
-    </SkillsButton>
+    <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}">
+      <SkillsButton
+          size="small"
+          class="mr-2"
+          outlined
+          severity="info"
+          :data-cy="'projCard_' + project.projectId + '_manageBtn'"
+          :label="readOnlyProject ? 'View' : 'Manage'"
+          icon="fas fa-arrow-circle-right"
+          :aria-label="'manage project + project.name'">
+      </SkillsButton>
+    </router-link>
     <SkillsButton
       v-if="isRootUser"
       outlined

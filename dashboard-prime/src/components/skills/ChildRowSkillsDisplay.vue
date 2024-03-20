@@ -9,14 +9,16 @@ import SkillsService from '@/components/skills/SkillsService'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
-import { useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
+import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
+import { useRoute } from 'vue-router'
 
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
+const route = useRoute()
 const props = defineProps({
   skill: {
     type: Object,
@@ -28,8 +30,9 @@ const props = defineProps({
   }
 })
 
-let loading = ref(true)
-let skillInfo = ref({})
+const loading = ref(true)
+const skillInfo = ref({})
+const projectId = computed(() => route.params.projectId)
 
 onMounted(() => {
   loadSkill()
@@ -91,7 +94,7 @@ const helpUrl = computed(() => {
   }
   const rootHelpUrlSetting = rootHelpUrl.value
   if (rootHelpUrlSetting) {
-    return `${rootHelpUrlSetting}${skillInfo.value.helpUrl}`;
+    return `${rootHelpUrlSetting}${skillInfo.value.helpUrl}`
   }
   return skillInfo.value.helpUrl
 })
@@ -201,8 +204,9 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
             <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
             <span v-if="skillInfo.selfReportingType === 'Quiz'">and points will be awarded after the
               <router-link
-                  :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
-                  tag="a">{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!
+                :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
+                tag="a">{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType
+              }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!
             </span>
           </div>
           <div v-else>
@@ -230,7 +234,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
 
     <InputGroup class="mt-3">
       <InputGroupAddon>
-        <div class="input-group-text"><i class="fas fa-link mr-1" aria-hidden="true"/> Help URL:</div>
+        <div class="input-group-text"><i class="fas fa-link mr-1" aria-hidden="true" /> Help URL:</div>
       </InputGroupAddon>
       <div class="p-inputtext p-component">
         <div v-if="helpUrl">
@@ -247,17 +251,16 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       </div>
     </InputGroup>
 
-    <Card v-if="skillInfo.sharedToCatalog" class="mt-3" header="Skill Catalog" data-cy="exportedToCatalogCard">
-      This skill was exported to the
-      <Badge class=""><i class="fas fa-book"></i> CATALOG</Badge>
-      .
-      Please visit
-      <SkillsButton data-cy="navigateToSkillCatalog" variant="outline-info" size="sm"
-                    :to="{ name:'SkillsCatalog', params: { projectId: projectId} }"
-                    aria-label="View Skill Catalog">Skill Catalog
-      </SkillsButton>
-      page to manage exported skills.
-    </Card>
+    <Message
+      v-if="skillInfo.sharedToCatalog"
+      icon="fas fa-book"
+      :closable="false"
+      data-cy="exportedToCatalogCard">
+        This skill was exported to the <strong>CATALOG</strong>.
+        Please visit
+        <router-link :to="{ name:'SkillsCatalog', params: { projectId: skill.projectId} }" data-cy="navigateToSkillCatalog">Skill Catalog</router-link>
+        page to manage exported skills.
+    </Message>
 
   </loading-container>
 </template>

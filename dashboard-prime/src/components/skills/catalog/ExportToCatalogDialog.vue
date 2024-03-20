@@ -7,6 +7,7 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
+import ScrollPanel from 'primevue/scrollpanel'
 
 const model = defineModel()
 const props = defineProps({
@@ -20,11 +21,16 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits(['on-exported'])
+const emit = defineEmits(['on-exported', 'on-nothing-to-export'])
 const focusState = useFocusState()
 const route = useRoute()
 const communityLabels = useCommunityLabels()
 const appConfig = useAppConfig()
+
+const handleOkBtn = () => {
+  emit('on-nothing-to-export')
+  handleClose()
+}
 const handleClose = () => {
   model.value = false
   focusState.focusOnLastElement()
@@ -42,7 +48,6 @@ const insufficientSubjectPoints = ref(false)
 const isUserCommunityRestricted = ref(false)
 const skillsFiltered = ref([])
 const notExportableSkills = ref([])
-const notExportableSkillsToShow = ref([])
 const numAlreadyExported = ref(0)
 const allSkillsExportedAlready = ref(false)
 const isSingleId = ref(false)
@@ -80,7 +85,6 @@ const prepSkillsForExport = () => {
         const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies
 
         notExportableSkills.value = enrichedSkills.filter((skill) => !isExportableSkill(skill))
-        notExportableSkillsToShow.value = notExportableSkills.value.length > 9 ? notExportableSkills.value.slice(0, 8) : notExportableSkills.value
         allSkillsAreDups.value = enrichedSkills.length === notExportableSkills.value.length
         skillsFiltered.value = enrichedSkills.filter((skill) => isExportableSkill(skill))
         numAlreadyExported.value = props.skills.length - skillsFiltered.value.length - notExportableSkills.value.length
@@ -160,7 +164,8 @@ const isExportable = computed(() => {
               This will export <span v-if="isSingleId">
             <b class="text-primary">[{{ firstSkillName }}]</b> Skill</span><span v-else><Tag
               severity="info">{{ skillsFiltered.length }}</Tag> Skills</span> to the
-              <Tag>SkillTree Catalog</Tag>.
+              <Tag>SkillTree Catalog</Tag>
+              .
               Other project administrators will then be able to import a <b class="text-primary">read-only</b> version
               of this skill.
             </p>
@@ -172,12 +177,21 @@ const isExportable = computed(() => {
             </p>
 
             <div v-if="notExportableSkills && notExportableSkills.length > 0">
-              Cannot export
-              <Tag severity="primary">{{ notExportableSkills.length }}</Tag>
-              skill(s):
+              <Message severity="warn" :closable="false">
+                Cannot export <Tag severity="primary">{{ notExportableSkills.length }}</Tag> skill(s):
+              </Message>
+              <ScrollPanel
+                :pt="{
+                      wrapper: {
+                          style: { 'border-right': '10px solid var(--surface-ground)' }
+                      },
+                      bary: 'hover:bg-primary-400 bg-primary-300 opacity-100'
+                  }"
+                class="mb-3"
+                style="width: 100%; max-height: 200px">
               <ul>
-                <li v-for="dupSkill in notExportableSkillsToShow" :key="dupSkill.skillId"
-                    :data-cy="`dupSkill-${dupSkill.skillId}`">
+                <li v-for="dupSkill in notExportableSkills" :key="dupSkill.skillId"
+                    :data-cy="`dupSkill-${dupSkill.skillId}`" class="line-height-4">
                   {{ dupSkill.name }}
                   <Tag severity="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
                     Name Conflict
@@ -187,17 +201,9 @@ const isExportable = computed(() => {
                   </Tag>
                   <Tag severity="warning" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
                   </Tag>
-                  <div>
-                    Skills that have prerequisites cannot be exported to the catalog
-                  </div>
-                </li>
-                <li v-if="notExportableSkills.length > notExportableSkillsToShow.length"
-                    data-cy="cantExportTruncatedMsg">
-                  <span
-                    class="text-primary font-weight-bold">{{ notExportableSkills.length - notExportableSkillsToShow.length
-                    }}</span> <span class="font-italic">more items...</span>
                 </li>
               </ul>
+              </ScrollPanel>
             </div>
           </skills-overlay>
 
@@ -234,7 +240,7 @@ const isExportable = computed(() => {
               severity="success"
               outlined
               size="small"
-              class="" @click="handleClose"
+              @click="handleOkBtn"
               data-cy="okButton"
               :disabled="loadingData" />
           </div>

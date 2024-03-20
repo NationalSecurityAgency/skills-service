@@ -158,7 +158,7 @@ const onFilter = (filterEvent) => {
 
 const selectedRows = ref([])
 const selectedSkills = computed(() => {
-  return selectedRows.value.filter((row) => row.isSkillType)
+  return selectedRows.value.filter((row) => row.isSkillType && !row.isCatalogImportedSkills)
 })
 
 const subjSkillsDisplayOrder = useSubjSkillsDisplayOrder()
@@ -287,7 +287,7 @@ const showExportToCatalogDialog = ref(false)
 // };
 
 const disableRow = (row) => {
-  return row.isGroupType ? 'remove-checkbox' : ''
+  return (row.isGroupType || row.isCatalogImportedSkills) ? 'remove-checkbox' : ''
 }
 
 const onMoved = (movedInfo) => {
@@ -301,7 +301,7 @@ const onMoved = (movedInfo) => {
     skillsState.loadGroupSkills(route.params.projectId, groupSkill.groupId)
   }
 
-  selectedRows.value = []
+  removeSelectedRows()
   subjectState.loadSubjectDetailsState()
 }
 
@@ -310,9 +310,11 @@ const onExported = (groupId = null) => {
   if (groupId) {
     skillsState.loadGroupSkills(route.params.projectId, groupId)
   }
-
-  selectedRows.value = []
+  removeSelectedRows()
   subjectState.loadSubjectDetailsState()
+}
+const removeSelectedRows = () => {
+  selectedRows.value = []
 }
 
 
@@ -689,6 +691,7 @@ const editImportedSkillInfo = ref({
       :skills="selectedSkills"
       :show-invite-only-warning="inviteOnlyProjectState.isInviteOnlyProject"
       @on-exported="onExported"
+      @on-nothing-to-export="removeSelectedRows"
     />
     <reuse-or-move-skills-dialog
       id="moveSkillsModal"
