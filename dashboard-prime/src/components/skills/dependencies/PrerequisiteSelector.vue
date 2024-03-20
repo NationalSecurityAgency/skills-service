@@ -1,6 +1,8 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useForm } from 'vee-validate';
+import { object, string } from 'yup'
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import SkillsService from '@/components/skills/SkillsService';
 import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
@@ -12,10 +14,16 @@ const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills',
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 
+const { errors, defineField } = useForm({
+  validationSchema: object({
+    toSkillId: string().label('To Skill').required(false).test(validate)
+  })
+});
+const [toSkillId, toSkillIdAttrs] = defineField('toSkillId');
+
 const allSkills = ref([]);
 const allPotentialSkills = ref([]);
 const selectedToSkills = ref([]);
-const toSkillId = ref(null);
 const toSkillName = ref(null);
 const toProjectId = ref(null);
 const loadingPotentialSkills = ref(false);
@@ -66,8 +74,8 @@ const updatePotentialSkills = () => {
   loadingPotentialSkills.value = true;
   SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId)
       .then((skills) => {
-        if (props.selectedFromSkills.length > 0 && props.selectedFromSkills[0].skillId) {
-          allPotentialSkills.value = skills.filter((skill) => (skill.skillId !== props.selectedFromSkills[0].skillId || (skill.skillId === props.selectedFromSkills[0].skillId && skill.projectId !== props.selectedFromSkills[0].projectId)));
+        if (props.selectedFromSkills && props.selectedFromSkills.skillId) {
+          allPotentialSkills.value = skills.filter((skill) => (skill.skillId !== props.selectedFromSkills.skillId || (skill.skillId === props.selectedFromSkills.skillId && skill.projectId !== props.selectedFromSkills.projectId)));
         }
         if (selectedToSkills.value.length > 0) {
           selectedToSkills.value.forEach((skill) => {
@@ -79,9 +87,15 @@ const updatePotentialSkills = () => {
 };
 
 const onToSelected = (item) => {
-  toSkillId.value = item.skillId;
-  toSkillName.value = item.name;
-  toProjectId.value = item.projectId;
+  if(item) {
+    toSkillId.value = item.skillId;
+    toSkillName.value = item.name;
+    toProjectId.value = item.projectId;
+  } else {
+    toSkillId.value = null;
+    toSkillName.value = null;
+    toProjectId.value = null;
+  }
 };
 
 const onToDeselected = () => {
@@ -113,24 +127,19 @@ const onFromDeselected = () => {
 };
 
 const onAddPath = () => {
-  // $refs.validationObserver.validate()
-  //     .then((res) => {
-  //       if (res) {
-          SkillsService.assignDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills[0].skillId, props.selectedFromSkills[0].projectId)
-              .then(() => {
-                const from = props.selectedFromSkills[0].name;
-                const to = toSkillName.value;
-                if (toProjectId.value === props.selectedFromSkills[0].projectId) {
-                  SkillsReporter.reportSkill('CreateSkillDependencies');
-                } else {
-                  SkillsReporter.reportSkill('CreateCrossProjectSkillDependencies');
-                }
-                nextTick(() => announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
-                clearData();
-                emit('update');
-              });
-        // }
-      // });
+  SkillsService.assignDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills.skillId, props.selectedFromSkills.projectId)
+    .then(() => {
+      const from = props.selectedFromSkills.name;
+      const to = toSkillName.value;
+      if (toProjectId.value === props.selectedFromSkills.projectId) {
+        SkillsReporter.reportSkill('CreateSkillDependencies');
+      } else {
+        SkillsReporter.reportSkill('CreateCrossProjectSkillDependencies');
+      }
+      nextTick(() => announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
+      clearData();
+      emit('update');
+  });
 };
 
 const clearData = () => {
@@ -148,48 +157,41 @@ const clearToData = () => {
   toSelector.value.clearValue();
 };
 
-// registerValidation() {
-//   const self = this;
-//   extend('validLearningPath', {
-//     validate() {
-//       if (!self || !self.toProjectId || !self.toSkillId || !self.selectedFromSkills[0].skillId || !self.selectedFromSkills[0].projectId) {
-//         return true;
-//       }
-//       return SkillsService.validateDependency(self.toProjectId, self.toSkillId, self.selectedFromSkills[0].skillId, self.selectedFromSkills[0].projectId)
-//           .then((res) => {
-//             if (res.possible) {
-//               return true;
-//             }
-//
-//             let reason = '';
-//             if (res.failureType && res.failureType === 'CircularLearningPath') {
-//               const additionalBadgeMsg = res.violatingSkillInBadgeName ? `under the badge <b>${res.violatingSkillInBadgeName}</b> ` : '';
-//               reason = `<b>${self.toSkillName}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
-//             } else if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
-//               reason = 'Multiple badges on the same Learning path cannot have overlapping skills. '
-//                   + `Both <b>${res.violatingSkillInBadgeName}</b> badge and <b>${self.toSkillName}</b> badge have <b>${res.violatingSkillName}</b> skill.`;
-//             } else if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
-//               reason = `Provided badge <b>${self.toSkillName}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
-//             } else if (res.failureType && res.failureType === 'AlreadyExist') {
-//               reason = `Learning path from <b>${res.violatingSkillName}</b> to <b>${self.toSkillName}</b> already exists.`;
-//             } else if (res.failureType && res.failureType === 'SkillInCatalog') {
-//               reason = `Skill <b>${self.toSkillName}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
-//             } else if (res.failureType && res.failureType === 'ReusedSkill') {
-//               reason = `Skill <b>${self.toSkillName}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
-//             } else {
-//               reason = res.reason;
-//             }
-//
-//             const div = document.createElement('div');
-//             div.innerHTML = reason;
-//             const reasonWithoutHtmlTags = div.textContent || div.innerText || '';
-//             self.$nextTick(() => self.$announcer.polite(`Learning Path item cannot be added. ${reasonWithoutHtmlTags}`));
-//             return `${reason}`;
-//           });
-//     },
-//   });
-// },
+function validate(value, ctx) {
+  if (!toProjectId.value || !toSkillId.value || !props.selectedFromSkills.skillId || !props.selectedFromSkills.projectId) {
+    return true;
+  }
+  return SkillsService.validateDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills.skillId, props.selectedFromSkills.projectId).then((res) => {
+    if (res.possible) {
+      return true;
+    }
 
+    let reason = '';
+    if (res.failureType && res.failureType === 'CircularLearningPath') {
+      const additionalBadgeMsg = res.violatingSkillInBadgeName ? `under the badge <b>${res.violatingSkillInBadgeName}</b> ` : '';
+      reason = `<b>${toSkillName.value}</b> already exists in the learning path ${additionalBadgeMsg}and adding it again will cause a <b>circular/infinite learning path</b>.`;
+    } else if (res.failureType && res.failureType === 'BadgeOverlappingSkills') {
+      reason = 'Multiple badges on the same Learning path cannot have overlapping skills. '
+      + `Both <b>${res.violatingSkillInBadgeName}</b> badge and <b>${toSkillName.value}</b> badge have <b>${res.violatingSkillName}</b> skill.`;
+    } else if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
+      reason = `Provided badge <b>${toSkillName.value}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
+    } else if (res.failureType && res.failureType === 'AlreadyExist') {
+      reason = `Learning path from <b>${res.violatingSkillName}</b> to <b>${toSkillName.value}</b> already exists.`;
+    } else if (res.failureType && res.failureType === 'SkillInCatalog') {
+      reason = `Skill <b>${toSkillName.value}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
+    } else if (res.failureType && res.failureType === 'ReusedSkill') {
+      reason = `Skill <b>${toSkillName.value}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
+    } else {
+      reason = res.reason;
+    }
+
+    const div = document.createElement('div');
+    div.innerHTML = reason;
+    const reasonWithoutHtmlTags = div.textContent || div.innerText || '';
+    // nextTick(() => announcer.polite(`Learning Path item cannot be added. ${reasonWithoutHtmlTags}`));
+    return ctx.createError({ message: reason });
+  });
+}
 </script>
 
 <template>
@@ -225,7 +227,7 @@ const clearToData = () => {
                            v-on:removed="onToDeselected"
                            v-on:added="onToSelected"
                            @selection-removed="onToSelectionRemoved"
-                           :disabled="selectedFromSkills?.length === 0"
+                           :disabled="!selectedFromSkills || !selectedFromSkills.skillId"
                            placeholder="To Skill or Badge"
                            placeholder-icon="fas fa-search"
                            :selected="selectedToSkills"
@@ -238,8 +240,12 @@ const clearToData = () => {
                   class="mt-3"
                   data-cy="addLearningPathItemBtn"
                   aria-label="Add item to the learning path"
-                  :disabled="selectedFromSkills?.length === 0 || !toSkillId">Add <i class="fas fa-plus-circle" aria-hidden="true"/></Button>
+                  :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || errors.toSkillId">Add <i class="fas fa-plus-circle" aria-hidden="true"/></Button>
         </div>
+      </div>
+      <div>
+        <input v-model="toSkillId" v-bind="toSkillIdAttrs" class="hidden" aria-hidden="true" aria-label="Used to validate learning path route"/>
+        <Message v-if="errors.toSkillId" severity="error" data-cy="learningPathError" :closable="false"><span v-html="errors.toSkillId" /></Message>
       </div>
     </template>
   </Card>

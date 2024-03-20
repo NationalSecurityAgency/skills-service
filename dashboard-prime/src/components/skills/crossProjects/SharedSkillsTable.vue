@@ -4,40 +4,12 @@ import Column from "primevue/column";
 
 const props = defineProps(['sharedSkills', 'disableDelete']);
 const emit = defineEmits(['skill-removed']);
+const sortField = ref('');
+const sortOrder = ref(0);
 
 const loaded = ref(false);
-const table = ref({
-  options: {
-    busy: false,
-        bordered: false,
-        outlined: true,
-        stacked: 'md',
-        fields: [
-        {
-          key: 'skillName',
-          label: 'Shared Skill',
-          sortable: true,
-        },
-        {
-          key: 'projectName',
-          label: 'Project',
-          sortable: true,
-        },
-      ],
-        pagination: {
-      remove: true,
-    },
-  },
-});
 
 onMounted(() => {
-  if (!props.disableDelete) {
-    table.value.options.fields.push({
-      key: 'edit',
-      label: 'Remove',
-      sortable: false,
-    });
-  }
   loaded.value = true;
 })
 
@@ -58,17 +30,22 @@ const getProjectId = (row) => {
   }
   return row.projectId;
 };
+
+const sortTable = (criteria) => {
+  sortField.value = criteria.sortField;
+  sortOrder.value = criteria.sortOrder;
+}
 </script>
 
 <template>
   <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length" data-cy="sharedSkillsTableDiv">
-    <DataTable v-if="loaded" :options="table.options" :value="sharedSkills" data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable">
-      <Column field="skillName" header="Shared Skill">
+    <DataTable v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable" data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable">
+      <Column field="skillName" header="Shared Skill" sortable>
         <template #body="slotProps">
           {{ slotProps.data.skillName }}
         </template>
       </Column>
-      <Column field="projectName" header="Project">
+      <Column field="projectName" header="Project" sortable>
         <template #body="slotProps">
           <div><i v-if="slotProps.data.sharedWithAllProjects" class="fas fa-globe text-secondary" /> {{ getProjectName(slotProps.data) }}</div>
           <div v-if="slotProps.data.projectName" class="text-secondary" style="font-size: 0.9rem;">ID: {{ getProjectId(slotProps.data) }}</div>

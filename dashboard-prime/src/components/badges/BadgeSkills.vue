@@ -125,7 +125,8 @@ const skillAdded = (newItem) => {
         badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
         loading.value.skillOp = false;
         SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
-        nameQuery.value = null;
+        nameQuery.value = null
+        filterSkills('');
       }).catch((e) => {
     if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
       loading.value.skillOp = false;
@@ -162,12 +163,11 @@ const filterSkills = (searchQuery) => {
                            select-label="Select skill(s)"
                            :onlySingleSelectedValue="true">
           </skills-selector>
-          <div v-if="learningPathViolationErr.show" class="alert alert-danger mx-3" data-cy="learningPathErrMsg">
-            <i class="fas fa-exclamation-triangle" aria-hidden="true" />
+          <Message v-if="learningPathViolationErr.show" severity="error" data-cy="learningPathErrMsg">
             Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
             Adding this skill would result in a <b>circular/infinite learning path</b>.
-  <!--          Please visit project's <b-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</b-link> page to review.-->
-          </div>
+            Please visit project's <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link> page to review.
+          </Message>
             <!--        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" class="mt-2"-->
   <!--                             :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>-->
 

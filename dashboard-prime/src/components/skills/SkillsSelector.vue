@@ -13,7 +13,7 @@ const props = defineProps({
     required: true,
   },
   selected: {
-    type: Array,
+    type: Object,
   },
   onlySingleSelectedValue: {
     type: Boolean,
@@ -71,6 +71,9 @@ let multipleSelection = ref(true);
 let currentSearch = ref('');
 let isMounted = ref(false);
 
+watch(() => props.selected, async () => {
+  setSelectedInternal();
+})
 // methods
 const removeReuseTag = (val) => {
   return SkillReuseIdUtil.removeTag(val);
@@ -78,7 +81,7 @@ const removeReuseTag = (val) => {
 
 const setSelectedInternal = () => {
   if (props.selected) {
-    selectedInternal.value = props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+    selectedInternal.value = { entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected }; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
   }
 };
 
@@ -123,9 +126,9 @@ const added = (addedItem) => {
   // }
 };
 
-const searchChanged = (query, loadingFunction) => {
-  currentSearch.value = query;
-  emit('search-change', query, loadingFunction);
+const searchChanged = (query) => {
+  currentSearch.value = query.value;
+  emit('search-change', query.value);
 };
 
 const valChanged = (val) => {
@@ -154,8 +157,8 @@ defineExpose({
 
 <template>
   <Dropdown :options="options" :placeholder="placeholder" class="st-skills-selector" v-model="selectedInternal" label="name"
-            data-cy="skillsSelector" editable :class="props.class" style="min-width: 100%;" :disabled="disabled" :loading="isLoading"
-            @update:model-value="searchChanged" @change="added" option-label="name">
+            data-cy="skillsSelector" :class="props.class" style="min-width: 100%;" :disabled="disabled" :loading="isLoading" filter
+            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide showClear>
 
     <template #option="slotProps">
       <slot name="dropdown-item" :option="slotProps">
@@ -172,11 +175,12 @@ defineExpose({
                     class="uppercase mr-1 font-italic">Project ID:</span><span
                     class="font-bold"
                     data-cy="skillsSelector-projectId">{{ slotProps.option.projectId }}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId"><span
-                    class="uppercase mr-1 font-italic">ID:</span><span class="font-bold"
-                                                                            data-cy="skillsSelector-skillId">{{
-                    removeReuseTag(slotProps.option.skillId)
-                  }}</span></span>
+                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId">
+                  <span class="uppercase mr-1 font-italic">ID:</span>
+                  <span class="font-bold" data-cy="skillsSelector-skillId">
+                  {{ removeReuseTag(slotProps.option.skillId) }}
+                  </span>
+                </span>
               </span>
             <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
             <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span>
@@ -198,7 +202,12 @@ defineExpose({
       </slot>
     </template>
     <template #value="slotProps">
-      Selected
+      <div v-if="slotProps.value && slotProps.value.name">
+        {{ slotProps.value.name }}
+      </div>
+      <div v-else>
+        {{ slotProps.placeholder }}
+      </div>
     </template>
     <template #footer v-if="afterListSlotText">
       <li>

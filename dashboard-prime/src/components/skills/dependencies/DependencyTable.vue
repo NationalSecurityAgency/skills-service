@@ -35,22 +35,8 @@ const fields = [
 
 const learningPaths = ref([]);
 const isProcessing = ref(true);
-const table = ref({
-    options: {
-      busy: false,
-      bordered: false,
-      outlined: true,
-      stacked: 'md',
-      fields,
-      pagination: {
-        server: false,
-        currentPage: 1,
-        totalRows: 1,
-        pageSize: 5,
-        possiblePageSizes: [5, 10, 15, 20],
-      },
-    },
-  });
+const sortField = ref('');
+const sortOrder = ref(0);
 
 onMounted(() => {
   if (props.data && props.data.edges && props.data.edges.length > 0) {
@@ -100,6 +86,11 @@ const getUrl = (item) => {
 
   return url;
 };
+
+const sortTable = (criteria) => {
+  sortField.value = criteria.sortField;
+  sortOrder.value = criteria.sortOrder;
+}
 </script>
 
 <template>
@@ -116,13 +107,16 @@ const getUrl = (item) => {
                    data-cy="learningPathTable"
                    paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
                    show-gridlines
+                   :sortField="sortField"
+                   :sortOrder="sortOrder"
+                   @sort="sortTable"
                    striped-rows>
-          <Column field="fromItem" header="From">
+          <Column field="fromItem" header="From" sortable>
             <template #body="slotProps">
               <a :href="getUrl(slotProps.data.fromNode)">{{ slotProps.data.fromItem }}</a>
             </template>
           </Column>
-          <Column field="toItem" header="To">
+          <Column field="toItem" header="To" sortable>
             <template #body="slotProps">
               <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
             </template>
@@ -135,6 +129,10 @@ const getUrl = (item) => {
                       data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></Button>
             </template>
           </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ learningPaths.length }}</span>
+          </template>
         </DataTable>
       </div>
       <div v-else>

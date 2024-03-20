@@ -21,7 +21,7 @@ const confirm = useConfirm();
 
 const isLoading = ref(true);
 const showGraph = ref(true);
-const selectedFromSkills = ref([]);
+const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
 const network = ref(null);
@@ -76,15 +76,20 @@ const hasGraphData = computed(() => {
 });
 
 const updateSelectedFromSkills = (item) => {
-  selectedFromSkills.value = [item];
+  if(item) {
+    selectedFromSkills.value = item;
+  }
+  else {
+    clearSelectedFromSkills();
+  }
 };
 
 const clearSelectedFromSkills = () => {
-  selectedFromSkills.value = [];
+  selectedFromSkills.value = {};
 };
 
 const handleUpdate = () => {
-  selectedFromSkills.value = [];
+  clearSelectedFromSkills();
   graph.value = [];
   network.value = null;
   nodes.value = [];
@@ -128,7 +133,8 @@ const createGraph = () => {
     network.value.on('selectNode', (params) => {
       const selectedNode = params.nodes[0];
       const nodeValue = nodes.value.find((node) => node.id === selectedNode);
-      selectedFromSkills.value = [nodeValue.details];
+      // selectedFromSkills.value = [nodeValue.details];
+      updateSelectedFromSkills(nodeValue.details);
     });
 
     network.value.on('selectEdge', (params) => {

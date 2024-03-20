@@ -1425,8 +1425,16 @@ Cypress.Commands.add('visitAdmin', () => {
     cy.get('[data-cy="inception-button"]').contains('Level');
 });
 
-Cypress.Commands.add('selectItem', (selector, item) => {
+Cypress.Commands.add('selectItem', (selector, item, openPicker = true) => {
+    if (openPicker) {
+        let itemToSelect = selector + ' [data-pc-section="trigger"]';
+        cy.get(itemToSelect).click();
+    }
+    cy.get('[data-pc-section="item"]').contains(item).click();
+})
+
+Cypress.Commands.add('filterSelection', (selector, filter) => {
     let itemToSelect = selector + ' [data-pc-section="trigger"]';
     cy.get(itemToSelect).click();
-    cy.get('[data-pc-section="item"]').contains(item).click();
+    cy.get('[data-pc-section="filterinput"]').type(filter);
 })
