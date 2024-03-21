@@ -1033,14 +1033,17 @@ describe('Export Skills to the Catalog Tests', () => {
             .click();
         cy.get('[data-cy="nav-Skill Catalog"]')
             .click();
+        cy.get(`[data-cy="exportedSkillsTable"] th`)
+          .contains('Skill')
+          .click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
                 colIndex: 1,
-                value: 'Very Great Skill 5'
+                value: 'Very Great Skill 4'
             }],
             [{
                 colIndex: 1,
-                value: 'Very Great Skill 4'
+                value: 'Very Great Skill 5'
             }],
         ], 5);
     });

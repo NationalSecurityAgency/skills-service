@@ -571,7 +571,7 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
     });
 
-    it.skip('Select larger page', () => {
+    it('Select larger page', () => {
         cy.intercept('/admin/projects/proj1/skills/exported?*').as('loadExportedSkills')
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
@@ -602,112 +602,112 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '11');
-        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`)
-            .select('10');
+        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get('[data-pc-section="list"] [aria-label="10"]').click()
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} table tbody [role="row"]`).should('have.length', 10)
 
         cy.get(`${tableSelector} th`)
-            .contains('Subject')
+            .contains('Skill')
             .click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 1'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 10 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 11 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 3'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 4'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 5 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 6 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 7 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 8 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 9 Subj2'
             }],
         ], 10);
 
-        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`)
-            .select('25');
+        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get('[data-pc-section="list"] [aria-label="25"]').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 1'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 10 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 11 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 3'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 4'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 5 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 6 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 7 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 8 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 9 Subj2'
             }],
         ], 25);
     });
 
-    it.skip('Change exported skills attributes - imported attributes are updated', () => {
+    it('Change exported skills attributes - imported attributes are updated', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1')
             .as('saveSkill1');
 
@@ -725,20 +725,20 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.get('[data-cy="skillName"]')
             .type('A');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('66');
         cy.get('[data-cy="numPerformToCompletion"]')
             .clear()
             .type('7');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.wait('@saveSkill1');
         cy.get('[data-cy="nameCell_skill1"]')
             .contains('Very Great Skill 1A');
-        cy.get('[data-cy="skillsTable-additionalColumns"]')
-            .contains('Points')
-            .click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('66 pts x 7 repetitions');
 
@@ -750,9 +750,6 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
-        cy.get('[data-cy="skillsTable-additionalColumns"]')
-            .contains('Points')
-            .click();
         // occurrences are synced but not points
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('100 pts x 7 repetitions');
@@ -760,7 +757,7 @@ describe('Skills Exported to Catalog Tests', () => {
             .contains('Very Great Skill 1A');
     });
 
-    it.skip('View imported details for exported skills', () => {
+    it('View imported details for exported skills', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -803,29 +800,26 @@ describe('Skills Exported to Catalog Tests', () => {
                 value: '1'
             }],
         ], 5);
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill2"')
             .contains('This skill has not been imported by any other projects yet...');
 
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
             [{
-                colIndex: 1,
+                colIndex: 0,
                 value: 'This is project 2'
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill3"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]', [
             [{
-                colIndex: 1,
+                colIndex: 0,
                 value: 'This is project 3Disabled'
             }],
         ], 5, true, null, false);

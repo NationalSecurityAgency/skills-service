@@ -115,7 +115,6 @@ const doRemoveSkill = () => {
             :totalRecords="totalRows"
             :rows="pageSize"
             @page="pageChanged"
-            tableStoredStateId="usersTable"
             data-cy="exportedSkillsTable"
             :rowsPerPageOptions="possiblePageSizes">
             <template #header>Exported to Catalog</template>

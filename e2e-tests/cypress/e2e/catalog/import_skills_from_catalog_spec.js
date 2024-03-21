@@ -105,9 +105,6 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
         cy.get('[data-cy="importBtn"]').should('be.enabled').click();
         cy.get('[data-cy="importedBadge-skill1"]');
-        // cy.get('[data-cy="skillsTable-additionalColumns"]')
-        //     .contains('Catalog')
-        //     .click();
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Catalog"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
