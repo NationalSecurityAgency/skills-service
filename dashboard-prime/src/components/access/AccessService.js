@@ -171,5 +171,12 @@ export default {
         { handleError: false }
       )
       .then((resp) => resp.data)
+  },
+  suggestUsers(query, suggestUrl) {
+    return axios
+      .post(suggestUrl, {
+        suggestQuery: query ? query : ''
+      })
+      .then((resp) => resp.data)
   }
 }

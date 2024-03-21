@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, useSlots } from 'vue';
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 
 const focusState = useFocusState()
+const slots = useSlots();
 
 const emit = defineEmits(['hidden', 'do-remove']);
 
@@ -64,9 +65,13 @@ const removeAction = () => {
   emit('do-remove');
 };
 
-const close =() => {
+const close = () => {
   model.value = false
 }
+const hasSlot = computed((name = 'default') => {
+  const hasSlot = (slots && slots[name]) ? true : false;
+  return hasSlot
+})
 </script>
 
 <template>
@@ -91,7 +96,7 @@ const close =() => {
           {{ removalTextPrefix }} <span
           class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
         </div>
-        <Message severity="warn" :closable="false">
+        <Message v-if="hasSlot" severity="warn" :closable="false">
           <div class="pl-2"><slot /></div>
         </Message>
       </div>

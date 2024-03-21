@@ -3,6 +3,8 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Sortable from 'sortablejs';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
@@ -10,8 +12,6 @@ import NoContent2 from '@/components/utils/NoContent2.vue';
 import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
 import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
 import QuizService from '@/components/quiz/QuizService.js';
-import { useFocusState } from '@/stores/UseFocusState.js'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import QuestionType from "@/common-components/quiz/QuestionType.js";
 
 const announcer = useSkillsAnnouncer()

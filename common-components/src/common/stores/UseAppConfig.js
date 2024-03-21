@@ -89,6 +89,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const usersTableAdditionalUserTagKey = computed(() => config.value.usersTableAdditionalUserTagKey)
   const usersTableAdditionalUserTagLabel = computed(() => config.value.usersTableAdditionalUserTagLabel)
   const maxSkillsInBulkImport = computed(() => config.value.maxSkillsInBulkImport)
+  const userSuggestOptions = computed(() => config.value.userSuggestOptions)
   return {
     loadConfigState,
     isLoadingConfig,
@@ -141,6 +142,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     usersTableAdditionalUserTagKey,
     usersTableAdditionalUserTagLabel,
     maxBadgeBonusInMinutes,
-    maxSkillsInBulkImport
+    maxSkillsInBulkImport,
+    userSuggestOptions
   }
 })

@@ -57,7 +57,7 @@ const options = ref({
 });
 const sortInfo = useStorage('quizSkillsTable', {  sortOrder: -1, sortBy: 'projectId' })
 
-const docsUrl = computed(() =>{
+const docsUrl = computed(() => {
   return `${appConfig.docsHost}/dashboard/user-guide/quizzes-and-surveys.html#skill-association`;
 })
 
@@ -147,17 +147,17 @@ const onFilter = (filterEvent) => {
                     <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
                        aria-hidden="true"></i>
                     <span class="w-full">
-              <span class="flex align-items-center justify-content-center">There are no records to show</span>
-              <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
-                  <SkillsButton class="flex flex align-items-center justify-content-center px-1"
-                                label="Reset"
-                                link
-                                size="small"
-                                @click="clearFilter"
-                                :aria-label="`Reset filter for ${quizType} results`"
-                                data-cy="clearFilterBtn2"/> to clear the existing filter.
-            </span>
-          </span>
+                      <span class="flex align-items-center justify-content-center">There are no records to show</span>
+                      <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
+                        <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                                      label="Reset"
+                                      link
+                                      size="small"
+                                      @click="clearFilter"
+                                      :aria-label="`Reset filter for ${quizType} results`"
+                                      data-cy="clearFilterBtn2"/> to clear the existing filter.
+                      </span>
+                    </span>
                   </div>
                 </template>
                 <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
