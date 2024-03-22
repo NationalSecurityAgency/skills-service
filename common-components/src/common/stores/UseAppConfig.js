@@ -91,9 +91,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxSkillsInBulkImport = computed(() => config.value.maxSkillsInBulkImport)
   const userSuggestOptions = computed(() => config.value.userSuggestOptions)
   const maxContactOwnersMessageLength = computed(() => config.value.maxContactOwnersMessageLength)
+  const defaultLandingPage = computed(() => config.value.defaultLandingPage)
   return {
     loadConfigState,
     isLoadingConfig,
+    defaultLandingPage,
     getConfigsThatStartsWith,
     rankingAndProgressViewsEnabled,
     docsHost,

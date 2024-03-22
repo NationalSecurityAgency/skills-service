@@ -2,6 +2,11 @@
 import { ref, onMounted, computed } from 'vue';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import SettingsService from "@/components/settings/SettingsService.js";
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+// import { useAuthState } from '@/stores/UseAuthState.js'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+
+const appConfig = useAppConfig();
 
 const isLoading = ref(true);
 const settings = ref({
@@ -47,12 +52,11 @@ function loadSettings() {
               }
               if (key === 'rankAndLeaderboardOptOut') {
                 settings.value[key].value = settings.value[key].value.toLowerCase() === 'true';
-                // settings.value[key].lastLoadedValue = !!settings.value[key].lastLoadedValue;
               }
             }
           });
           if (!hasHomeKey) {
-            // settings.value.homePage.value = $store.getters.config.defaultLandingPage;
+            settings.value.homePage.value = appConfig.defaultLandingPage;
           }
         }
       })
@@ -98,8 +102,7 @@ function saveUserSettings(dirtyChanges) {
 }
 
 function isProgressAndRankingEnabled() {
-  // return $store.getters.config.rankingAndProgressViewsEnabled === true || $store.getters.config.rankingAndProgressViewsEnabled === 'true';
-  return true;
+  return appConfig.rankingAndProgressViewsEnabled === true || appConfig.rankingAndProgressViewsEnabled === 'true';
 }
 
 function homePagePrefChanged() {
