@@ -21,6 +21,26 @@ const props = defineProps({
     type: String,
     default: 'Save'
   },
+  saveButtonIcon: {
+    type: String,
+    default: 'far fa-save'
+  },
+  showSaveButton: {
+    type: Boolean,
+    default: true
+  },
+  cancelButtonLabel: {
+    type: String,
+    default: 'Cancel'
+  },
+  cancelButtonIcon: {
+    type: String,
+    default: 'far fa-times-circle'
+  },
+  cancelButtonSeverity: {
+    type: String,
+    default: 'warning'
+  },
   validationSchema: Object,
   initialValues: Object,
   enableReturnFocus: {
@@ -44,7 +64,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-
+  closeOnSuccess: {
+    type: Boolean,
+    default: true
+  },
 })
 const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
@@ -71,7 +94,9 @@ const onSubmit = handleSubmit(formValue => {
       inputFormResiliency.stop()
     }
     emit('saved', res)
-    close()
+    if (props.closeOnSuccess) {
+      close()
+    }
     isSaving.value = false
   })
 })
@@ -139,10 +164,14 @@ const validateIfNotEmpty = () => {
     @on-cancel="close"
     @on-ok="onSubmit"
     :ok-button-label="saveButtonLabel"
-    ok-button-icon="far fa-save"
+    :ok-button-icon="saveButtonIcon"
+    :show-ok-button="showSaveButton"
     :ok-button-disabled="!meta.valid || isSubmitting"
     :enable-return-focus="enableReturnFocus"
     :dialog-class="dialogClass"
+    :cancel-button-label="cancelButtonLabel"
+    :cancel-button-icon="cancelButtonIcon"
+    :cancel-button-severity="cancelButtonSeverity"
   >
     <form-reload-warning
       v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"

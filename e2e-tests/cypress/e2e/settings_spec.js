@@ -679,7 +679,7 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=portError]')
             .contains('Port must be 65535 or less');
         cy.get$('[data-cy=portInput]')
-            .type('{selectall}1026');
+            .type('{selectall}1025');
         cy.get$('[data-cy=protocolInput]')
             .clear();
         cy.get$('[data-cy=protocolError')
@@ -731,7 +731,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=hostInput]')
             .should('have.value', 'localhost');
         cy.get('[data-cy=portInput]')
-            .should('have.value', '1026');
+            .should('have.value', '1025');
         cy.get('[data-cy=protocolInput]')
             .should('have.value', 'smtp');
         cy.get('[data-cy=tlsSwitch]')
@@ -867,7 +867,7 @@ describe('Settings Tests', () => {
         cy.get$('[data-cy=hostInput]')
             .type('{selectall}localhost');
         cy.get$('[data-cy=portInput]')
-            .type('{selectall}1026');
+            .type('{selectall}1025');
         cy.get$('[data-cy=protocolInput]')
             .type('{selectall}smtp');
         cy.get$('[data-cy=publicUrlInput]')
@@ -886,7 +886,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=hostInput]')
             .should('have.value', 'localhost');
         cy.get('[data-cy=portInput]')
-            .should('have.value', '1026');
+            .should('have.value', '1025');
         cy.get('[data-cy=protocolInput]')
             .should('have.value', 'smtp');
         cy.get('[data-cy=publicUrlInput]')
@@ -922,7 +922,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=hostInput]')
             .should('have.value', 'localhost');
         cy.get('[data-cy=portInput]')
-            .should('have.value', '1026');
+            .should('have.value', '1025');
         cy.get('[data-cy=protocolInput]')
             .should('have.value', 'smtp');
         cy.get('[data-cy=publicUrlInput]')

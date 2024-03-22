@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
+import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
 
 const props = defineProps({
   skill: Object
@@ -30,8 +31,16 @@ const loadImportedProjectDetails = () => {
 const isEmailEnabled = computed(() => {
   return true
 })
-const contactProjAdmins = () => {
 
+const contactDialog = ref({
+  show: false,
+  projectId: null,
+  projectName: null
+})
+const contactProjAdmins = (projInfo) => {
+  contactDialog.value.projectId = projInfo.importingProjectId
+  contactDialog.value.projectName = projInfo.importingProjectName
+  contactDialog.value.show = true
 }
 </script>
 
@@ -52,7 +61,9 @@ const contactProjAdmins = () => {
             <div class="flex">
               <div class="flex-1">
                 <div>{{ slotProps.data.importingProjectName }}</div>
-                <div v-if="slotProps.data.enabled !== 'true'" class="uppercase"><Tag severity="warning">Disabled</Tag></div>
+                <div v-if="slotProps.data.enabled !== 'true'" class="uppercase">
+                  <Tag severity="warning">Disabled</Tag>
+                </div>
               </div>
               <div class="">
                 <SkillsButton
@@ -62,7 +73,7 @@ const contactProjAdmins = () => {
                   size="small"
                   v-if="isEmailEnabled"
                   :aria-label="`Contact ${slotProps.data.name} project owner`"
-                  @click="contactProjAdmins(slotProps.data, slotProps.data.importingProjectId)"
+                  @click="contactProjAdmins(slotProps.data)"
                   :data-cy="`contactOwnerBtn_${ slotProps.data.importingProjectId}`" />
               </div>
             </div>
@@ -82,6 +93,13 @@ const contactProjAdmins = () => {
     <div v-else>
       <Message :closable="false">This skill has not been imported by any other projects yet...</Message>
     </div>
+
+    <contact-owners-dialog
+      v-if="contactDialog.show"
+      v-model="contactDialog.show"
+      :project-id="contactDialog.projectId"
+      :project-name="contactDialog.projectName"
+       />
   </div>
 </template>
 

@@ -289,7 +289,7 @@ Cypress.Commands.add("login", (user, pass) => {
 Cypress.Commands.add("resetEmail", () => {
     cy.request({
        method: "DELETE",
-       url: "http://localhost:1081/api/emails"
+       url: "http://localhost:1080/email/all"
     });
 });
 
@@ -801,7 +801,7 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 });
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
-    const emailUrl = 'http://localhost:1081/api/emails';
+    const emailUrl = 'http://localhost:1080/email';
     cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
         errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
         timeout: 120000, // waits up to 2 minutes

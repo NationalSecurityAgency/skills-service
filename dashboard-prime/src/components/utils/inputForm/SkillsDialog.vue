@@ -22,6 +22,14 @@ const props = defineProps({
     type: String,
     default: 'success'
   },
+  cancelButtonLabel: {
+    type: String,
+    default: 'Cancel'
+  },
+  cancelButtonIcon: {
+    type: String,
+    default: 'far fa-times-circle'
+  },
   cancelButtonSeverity: {
     type: String,
     default: 'warning'
@@ -86,8 +94,8 @@ defineExpose({
 
       <div class="text-right">
         <SkillsButton
-          label="Cancel"
-          icon="far fa-times-circle"
+          :label="cancelButtonLabel"
+          :icon="cancelButtonIcon"
           :severity="cancelButtonSeverity"
           outlined size="small"
           class="float-right mr-2"

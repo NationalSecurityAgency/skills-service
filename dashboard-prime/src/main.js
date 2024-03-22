@@ -57,6 +57,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
 import SkillsCheckboxInput from '@/components/utils/inputForm/SkillsCheckboxInput.vue'
 import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButtonInput.vue'
+import SkillsTextarea from '@/components/utils/inputForm/SkillsTextarea.vue'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -117,6 +118,7 @@ app.component('SkillsDialog', SkillsDialog)
 app.component('SkillsNumberInput', SkillsNumberInput)
 app.component('SkillsCheckboxInput', SkillsCheckboxInput)
 app.component('SkillsRadioButtonInput', SkillsRadioButtonInput)
+app.component('SkillsTextarea', SkillsTextarea)
 
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);

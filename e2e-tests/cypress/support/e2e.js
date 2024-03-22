@@ -91,7 +91,7 @@ beforeEach(function () {
                 publicUrl: 'http://localhost:8082/',
                 fromEmail: 'noreploy@skilltreeemail.org',
                 host: 'localhost',
-                port: 1026,
+                port: 1025,
                 'protocol': 'smtp'
             },
         });

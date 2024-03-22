@@ -71,7 +71,7 @@
     "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display  ${procid}\"; kill -9 $procid; done",
     "cyServices:kill": "npm run cyServices:kill:skills-service && npm run cyServices:kill:client-display && npm run cyServices:kill:client-display:1 && npm run fake-smtp:stop",
     "print-env": "print-env",
-    "fake-smtp:start": "fake-smtp-server --smtp-ip 127.0.0.1 --smtp-port 1026 --http-ip 127.0.0.1 --http-port 1081",
+    "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 maildev/maildev",
     "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start > ./logs/fake-smtp.log &",
     "fake-smtp:stop": "fuser -k 1081/tcp"
   },
@@ -89,7 +89,6 @@
     "cypress-wait-until": "1.7.2",
     "dayjs": "1.10.4",
     "eslint": "7.9.0",
-    "fake-smtp-server": "0.8.0",
     "license-check-and-add": "4.0.5",
     "license-checker": "25.0.1",
     "moment": "2.29.4",
