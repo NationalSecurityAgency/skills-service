@@ -1,8 +1,149 @@
 <script setup>
+import { ref, onMounted, computed } from 'vue';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import SettingsService from "@/components/settings/SettingsService.js";
+
+const isLoading = ref(true);
+const settings = ref({
+  homePage: {
+    settingGroup: 'user.prefs',
+    value: 'admin',
+    setting: 'home_page',
+    lastLoadedValue: '',
+    dirty: false,
+  },
+  rankAndLeaderboardOptOut: {
+    settingGroup: 'user.prefs',
+    value: false,
+    setting: 'rank_and_leaderboard_optOut',
+    lastLoadedValue: false,
+    dirty: false,
+  },
+});
+const errMsg = ref(null);
+const showSavedMsg = ref(false);
+
+onMounted(() => {
+  loadSettings();
+})
+
+let isDirty = computed(() => {
+  return Object.values(settings.value).find((item) => item.dirty);
+});
+
+function loadSettings() {
+  SettingsService.getUserSettings()
+      .then((response) => {
+        if (response) {
+          const entries = Object.entries(settings.value);
+          let hasHomeKey = false;
+          entries.forEach((entry) => {
+            const [key, value] = entry;
+            const found = response.find((item) => item.setting === value.setting);
+            if (found) {
+              settings.value[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+              if (key === 'homePage') {
+                hasHomeKey = true;
+              }
+              if (key === 'rankAndLeaderboardOptOut') {
+                settings.value[key].value = settings.value[key].value.toLowerCase() === 'true';
+                // settings.value[key].lastLoadedValue = !!settings.value[key].lastLoadedValue;
+              }
+            }
+          });
+          if (!hasHomeKey) {
+            // settings.value.homePage.value = $store.getters.config.defaultLandingPage;
+          }
+        }
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+}
+
+function save() {
+  const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty);
+  if (dirtyChanges) {
+    isLoading.value = true;
+    SettingsService.checkUserSettingsValidity(dirtyChanges)
+        .then((res) => {
+          if (res.valid) {
+            saveUserSettings(dirtyChanges);
+          } else {
+            errMsg.value = res.explanation;
+            isLoading.value = false;
+          }
+        });
+  }
+}
+
+function saveUserSettings(dirtyChanges) {
+  SettingsService.saveUserSettings(dirtyChanges)
+      .then(() => {
+        showSavedMsg.value = true;
+        setTimeout(() => { showSavedMsg.value = false; }, 4000);
+        const entries = Object.entries(settings.value);
+        entries.forEach((entry) => {
+          const [key, value] = entry;
+          settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+          if (key === 'homePage') {
+            // const userInfo = { ...$store.getters.userInfo, landingPage: value.value };
+            // $store.commit('storeUser', userInfo);
+          }
+        });
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+}
+
+function isProgressAndRankingEnabled() {
+  // return $store.getters.config.rankingAndProgressViewsEnabled === true || $store.getters.config.rankingAndProgressViewsEnabled === 'true';
+  return true;
+}
+
+function homePagePrefChanged() {
+  settings.value.homePage.dirty = `${settings.value.homePage.value}` !== `${settings.value.homePage.lastLoadedValue}`;
+}
+
+function rankAndLeaderboardOptOutPrefChanged() {
+  settings.value.rankAndLeaderboardOptOut.dirty = `${settings.value.rankAndLeaderboardOptOut.value}` !== `${settings.value.rankAndLeaderboardOptOut.lastLoadedValue}`;
+}
 </script>
 
 <template>
-  <div>Preferences</div>
+  <sub-page-header title="Preferences"/>
+
+  <Card>
+    <template #content>
+      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()">
+        <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
+        <div class="pt-2 pl-2">
+          <RadioButton v-model="settings.homePage.value" value="admin" inputId="admin" @change="homePagePrefChanged" />
+          <label for="admin">Project Admin</label>
+        </div>
+        <div class="pt-2 pl-2">
+          <RadioButton v-model="settings.homePage.value" value="progress" inputId="progress" @change="homePagePrefChanged"/>
+          <label for="progress">Progress and Rankings</label>
+        </div>
+      </div>
+      <div data-cy="rankOptOut" class="pt-4 pb-2">
+        <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
+        <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value" data-cy="rankAndLeaderboardOptOutSwitch" class="ml-2"
+                     @change="rankAndLeaderboardOptOutPrefChanged" />
+        <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
+      </div>
+      <hr />
+      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" />
+      <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
+              <i class="fa fa-exclamation-circle" /> Unsaved Changes
+      </span>
+      <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
+        <i class="fa fa-check" />
+        Settings Updated!
+      </span>
+    </template>
+  </Card>
 </template>
 
 <style scoped></style>
