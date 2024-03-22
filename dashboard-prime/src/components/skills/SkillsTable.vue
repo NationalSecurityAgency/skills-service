@@ -25,6 +25,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import SettingsService from '@/components/settings/SettingsService.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDialog.vue'
+import AddSkillsToBadgeDialog from '@/components/skills/badges/AddSkillsToBadgeDialog.vue'
 
 const props = defineProps({
   groupId: String
@@ -259,7 +260,10 @@ const actionsMenu = ref([
   },
   {
     label: 'Add To Badge',
-    icon: 'fas fa-award'
+    icon: 'fas fa-award',
+    command: () => {
+      showAddSkillsToBadgeDialog.value = true
+    }
   },
   {
     label: 'Tags',
@@ -280,6 +284,7 @@ const expandedRows = ref([])
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
 const showExportToCatalogDialog = ref(false)
+const showAddSkillsToBadgeDialog = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -714,6 +719,13 @@ const editImportedSkillInfo = ref({
       v-model="editImportedSkillInfo.show"
       :skill="editImportedSkillInfo.skill"
       @skill-updated="importedSkillUpdated" />
+    <add-skills-to-badge-dialog
+      id="addSkillsToBadgeModal"
+      v-if="showAddSkillsToBadgeDialog"
+      v-model="showAddSkillsToBadgeDialog"
+      :skills="selectedSkills"
+      @on-moved="onMoved"
+    />
   </div>
 </template>
 

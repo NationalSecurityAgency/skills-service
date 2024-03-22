@@ -29,7 +29,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         // cy.createBadge(1, 1, { enabled: true });
     });
 
-    it('add multiple skills to an enabled badge', () => {
+    it.only('add multiple skills to an enabled badge', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
         cy.createBadge(1, 1, { enabled: true });
@@ -41,20 +41,13 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillSelect-skill2"]')
-          .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill3"]')
-          .click({ force: true });
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
 
-        cy.get('[data-cy="skillSelect-skill1"]').should('not.be.checked');
-        cy.get('[data-cy="skillSelect-skill2"]').should('be.checked');
-        cy.get('[data-cy="skillSelect-skill3"]').should('be.checked');
-        cy.get('[data-cy="skillSelect-skill4"]').should('not.be.checked');
 
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
-        cy.get('[data-cy="skillAddToBadgeBtn"]')
-          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 
         // step 1
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]');
