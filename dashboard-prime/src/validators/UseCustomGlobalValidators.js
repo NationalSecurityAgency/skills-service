@@ -75,12 +75,23 @@ export const useCustomGlobalValidators = () => {
     return this.matches(/^\w+$/, (fieldProps) => `${fieldProps.label} may only contain alpha-numeric characters`)
   }
 
+  function noScript() {
+    const scriptRegex = /<[^>]*script/;
+    return this.test('noScript', 'script tags are not allowed', (value) => {
+      if (value) {
+        return value.match(scriptRegex) === null;
+      }
+      return false;
+    })
+  }
+
   const addValidators = () => {
     addMethod(string, "customNameValidator", customNameValidator);
     addMethod(string, "nullValueNotAllowed", nullValueNotAllowed);
     addMethod(string, 'customDescriptionValidator', customDescriptionValidator)
     addMethod(string, 'urlValidator', urlValidator)
     addMethod(string, 'idValidator', idValidator)
+    addMethod(string, 'noScript', noScript)
   }
 
   return {

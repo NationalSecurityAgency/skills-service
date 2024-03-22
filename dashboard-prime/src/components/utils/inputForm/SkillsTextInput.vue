@@ -58,6 +58,7 @@ const onEnter = (event) => {
       :aria-invalid="errorMessage ? null : true"
       :aria-errormessage="`${name}Error`"
       :aria-describedby="`${name}Error`" />
+      <slot name="footer" />
       <small
         role="alert"
         class="p-error"
