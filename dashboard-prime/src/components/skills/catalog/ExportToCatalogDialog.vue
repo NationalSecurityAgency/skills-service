@@ -34,6 +34,9 @@ const handleOkBtn = () => {
 }
 const handleClose = () => {
   model.value = false
+  if (state.value.exported) {
+    focusState.setElementId('newSkillBtn')
+  }
   focusState.focusOnLastElement()
 }
 const onUpdateVisible = (newVal) => {
@@ -43,7 +46,6 @@ const onUpdateVisible = (newVal) => {
 }
 
 const loadingData = ref(true)
-const visibilityToAllProjects = ref(true)
 const selectedProject = ref(null)
 const insufficientSubjectPoints = ref(false)
 const isUserCommunityRestricted = ref(false)

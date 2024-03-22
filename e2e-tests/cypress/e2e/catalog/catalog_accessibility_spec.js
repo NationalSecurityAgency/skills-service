@@ -68,27 +68,23 @@ describe('Catalog Accessibility Tests', () => {
             .should('have.focus');
     });
 
-    it.skip('set focus to the Select All button after export is done', () => {
+    it('set focus to the Select All button after export is done', () => {
         cy.createSkill(1, 1, 1);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy="newSkillButton"]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.contains('This will export [Very Great Skill 1] Skill');
 
@@ -96,86 +92,77 @@ describe('Catalog Accessibility Tests', () => {
             .click();
         cy.get('[data-cy="okButton"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('have.focus');
     });
 
-    it.skip('set focus to the Clear button after export modal is cancelled', () => {
+    it('set focus to the Clear button after export modal is cancelled', () => {
         cy.createSkill(1, 1, 1);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=clearSelectedSkillsBtn]')
+        cy.get('[data-cy=skillActionsBtn]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.contains('This will export [Very Great Skill 1] Skill');
         cy.get('[data-cy="closeButton"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
-        cy.get('[data-cy=clearSelectedSkillsBtn]')
+        cy.get('[data-cy=skillActionsBtn]')
             .should('have.focus');
     });
 
-    it.skip('set focus to the Select All button after export is done even if modal is closed with X', () => {
+    it('set focus to the Select All button after export is done even if modal is closed with X', () => {
         cy.createSkill(1, 1, 1);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click();
 
         cy.contains('This will export [Very Great Skill 1] Skill');
 
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
-        cy.get('[class="modal-content"] [aria-label="Close"]')
+        cy.get('[aria-label="Close"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('have.focus');
     });
 
