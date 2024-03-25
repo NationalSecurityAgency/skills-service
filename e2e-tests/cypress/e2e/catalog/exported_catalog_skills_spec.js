@@ -571,6 +571,148 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
     });
 
+
+    it('table sort is saved in local storage', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 3);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 4);
+        cy.wait(100);
+
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 5);
+        cy.createSkill(1, 2, 6);
+        cy.createSkill(1, 2, 7);
+        cy.exportSkillToCatalog(1, 2, 5);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 2, 6);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 2, 7);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj1/skills-catalog');
+        cy.get(`${tableSelector} th`)
+          .contains('Skill')
+          .click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 4'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+        ], 5);
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 4'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+        ], 5);
+    });
+
+
     it('Select larger page', () => {
         cy.intercept('/admin/projects/proj1/skills/exported?*').as('loadExportedSkills')
         cy.createSkill(1, 1, 1);
