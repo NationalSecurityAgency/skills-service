@@ -44,8 +44,8 @@ import './cliend-display-commands';
 import 'cypress-file-upload';
 import 'cypress-wait-until';
 var moment = require('moment-timezone');
-const compareSnapshotCommand = require('cypress-visual-regression/dist/command');
-compareSnapshotCommand({
+const { addCompareSnapshotCommand } = require('cypress-visual-regression/dist/command')
+addCompareSnapshotCommand({
     errorThreshold: 0.01
 });
 

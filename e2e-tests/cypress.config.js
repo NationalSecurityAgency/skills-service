@@ -1,6 +1,6 @@
 const { defineConfig } = require('cypress')
 const fs = require('fs')
-const getCompareSnapshotsPlugin = require('cypress-visual-regression/dist/plugin');
+const { configureVisualRegression } = require('cypress-visual-regression')
 
 module.exports = defineConfig({
   projectId: '7kivjf',
@@ -42,7 +42,7 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:8080',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
     setupNodeEvents(on, config) {
-      getCompareSnapshotsPlugin(on, config);
+      configureVisualRegression(on);
     }
   },
   env: {
