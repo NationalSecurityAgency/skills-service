@@ -165,6 +165,54 @@ describe('Add Multiple Skills to Badge Tests', () => {
           .should('exist');
     });
 
+    it('add multiple Group\'s skills to disabled badge', () => {
+        cy.createBadge(1, 1)
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
+
+        // step 1
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge1"]').click()
+
+        // step 2
+        cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
+          .contains('2 skills will be added to the [Badge 1] badge.')
+        cy.get('[data-cy="addSkillsToBadgeButton"]').click()
+
+        // step 3
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
+          .contains('Successfully added 2 skills to the [Badge 1] badge.')
+        cy.get('[data-cy="okButton"]').click()
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get(`${tableSelector} th`)
+          .contains('Skill ID')
+          .click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill6'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill7'
+            }],
+        ], 5, true, 2, false);
+
+        cy.get('[data-cy=statPreformatted]')
+          .contains('Disabled')
+          .should('exist');
+    })
+
     it('add multiple skills to a badge, some skills already added to badge', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
@@ -422,6 +470,67 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="okButton"]').click()
 
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
+    })
+
+    it('focus returned to the Group\'s Action button if dialog is cancelled', () => {
+        cy.createBadge(1, 1);
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
+
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"]');
+        cy.get('[data-cy="closeButton"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').should('have.focus')
+        for (let i= 0; i < 2 ; i++) {
+            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        }
+
+        // use dialog's close button on top right
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
+
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"]');
+        cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').should('have.focus')
+        for (let i= 0; i < 2 ; i++) {
+            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        }
+    });
+
+    it('focus is set on Group\'s new skill button when add operation is successful', () => {
+        cy.createBadge(1, 1)
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
+
+        // step 1
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge1"]').click()
+
+        // step 2
+        cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
+          .contains('2 skills will be added to the [Badge 1] badge.')
+        cy.get('[data-cy="addSkillsToBadgeButton"]').click()
+
+        // step 3
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
+          .contains('Successfully added 2 skills to the [Badge 1] badge.')
+        cy.get('[data-cy="okButton"]').click()
+
+        cy.get('[data-cy="addSkillToGroupBtn-group11"]').should('have.focus')
     })
 
 });
