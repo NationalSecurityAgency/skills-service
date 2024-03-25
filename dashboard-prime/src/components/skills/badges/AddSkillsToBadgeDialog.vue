@@ -9,6 +9,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import BadgesService from '@/components/badges/BadgesService.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useErrorChecker } from '@/components/utils/errors/UseErrorChecker.js'
 
 const props = defineProps({
   skills: {
@@ -20,6 +21,7 @@ const model = defineModel()
 const route = useRoute()
 const pluralSupport = useLanguagePluralSupport()
 const focusState = useFocusState()
+const errorChecker = useErrorChecker()
 const emits = defineEmits(['on-added'])
 
 const addedSkills = ref([])
@@ -28,7 +30,7 @@ const onCancel = () => {
   model.value = false
 
   if (addedSkills.value && addedSkills.value.length > 0) {
-    emits('on-moved', { moved: toRaw(addedSkills.value), destination: toRaw(selectedDestination.value) })
+    emits('on-added', { moved: toRaw(addedSkills.value), destination: toRaw(selectedDestination.value) })
   }
 
   handleFocus()
@@ -36,7 +38,8 @@ const onCancel = () => {
 
 const state = ref({
   addedAlready: false,
-  inProgress: false
+  inProgress: false,
+  errorOnSave: false,
 })
 const loadingDest = ref(true)
 const destinations = ref([])
@@ -56,14 +59,6 @@ onMounted(() => {
   loadDestinations()
 })
 
-const onReuseOrMove = (changedSkills) => {
-  // after reuse/move action button will be disabled so need to focus on another button
-  const groupId = props.skills[0].groupId
-  const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
-  focusState.setElementId(focusOn)
-
-  addedSkills.value = changedSkills
-}
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
 const showStepper = computed(() => !state.value.addedAlready && hasDestinations.value)
 
@@ -123,11 +118,16 @@ const addSkillsToBadge = (navToNextStep) => {
     .then(() => {
       state.value.addSkillsToBadgeInProgress = false;
       state.value.addSkillsToBadgeComplete = true;
+      addedSkills.value = skillsForBadge.value.available
+
+      const groupId = skillsForBadge.value.available[0].groupId
+      const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
+      focusState.setElementId(focusOn)
+
       SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
     })
     .catch((e) => {
-      if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
-        this.state.addSkillsToBadgeInProgress = false;
+      if (errorChecker.isLearningPathErrorCode(e)) {
         learningPathViolationErr.value.show = true;
         learningPathViolationErr.value.skillName = skillsForBadge.value.available.find((sk) => sk.skillId === e.response.data.skillId)?.name;
         state.value.errorOnSave = true;
@@ -151,20 +151,13 @@ const addSkillsToBadge = (navToNextStep) => {
     <div data-cy="addSkillsToBadgeModalContent">
       <skills-spinner :is-loading="isLoadingData" class="my-8" />
 
-      <div v-if="learningPathViolationErr.show" class="alert alert-danger mx-3" data-cy="learningPathErrMsg">
-        <i class="fas fa-exclamation-triangle" aria-hidden="true" />
-        Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
-        Adding this skill would result in a <b>circular/infinite learning path</b>.
-        Please visit project's
-        <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link>
-        page to review.
-      </div>
-
       <div v-if="!isLoadingData" class="w-100">
 
         <no-content2
           v-if="!hasDestinations"
+          class="my-5"
           title="No Badges Available"
+          data-cy="noBadgesAvailable"
           message="There are no Badges available. A badge must be created before adding skills to it." />
 
         <Stepper v-if="showStepper" :linear="true" class="w-100">
@@ -180,7 +173,7 @@ const addSkillsToBadge = (navToNextStep) => {
                   @update:modelValue="selectDestination($event, nextCallback)"
                   class="w-full">
                   <template #option="item">
-                    <div class="" :data-cy="`destItem-${item.index}`">
+                    <div :data-cy="`selectDest_${item.option.badgeId}`">
                       <i class="fas fa-cubes" aria-hidden="true" />
                       <span class="font-italic ml-1">Badge:</span>
                       <span class="ml-1 font-semibold text-primary">{{
@@ -224,7 +217,7 @@ const addSkillsToBadge = (navToNextStep) => {
                     skill{{ pluralSupport.plural(skillsForBadge.available) }} will be added to the
                     <span><span class="text-primary font-semibold">[{{ selectedDestination.name }}]</span> badge.</span>
                   </div>
-                  <Message v-else :closable="false" icon="fas fa-exclamation-triangle">
+                  <Message v-else :closable="false" severity="warn">
                     Selected skills can NOT be added to the
                     <span class="text-primary font-semibold">{{ selectedDestination.name }} </span> badge.
                     Please cancel and select different skills.
@@ -235,16 +228,20 @@ const addSkillsToBadge = (navToNextStep) => {
                     selected skill{{ pluralSupport.pluralWithHave(skillsForBadge.alreadyExist) }} <span
                     class="text-primary font-weight-bold">already</span> been added to that badge!
                   </div>
-                  <div v-for="(skill) in skillsForBadge.skillsWithLearningPathViolations" :key="skill.skillId"
-                       class="alert alert-danger mx-3" :data-cy="`learningPathErrMsg-${skill.skillId}`">
-                    <i class="fas fa-exclamation-triangle" aria-hidden="true" />
+                  <Message
+                    v-for="(skill) in skillsForBadge.skillsWithLearningPathViolations"
+                    :key="skill.skillId"
+                    :closable="false"
+                    :data-cy="`learningPathErrMsg-${skill.skillId}`"
+                    severity="error"
+                  >
                     Unable to add <b>{{ skill.name }}</b> skill to the badge.
                     Adding this skill would result in a <b>circular/infinite learning path</b>.
                     Please visit project's
                     <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path
                     </router-link>
                     page to review.
-                  </div>
+                  </Message>
                 </div>
                 <div class="flex pt-4 justify-content-end">
                   <SkillsButton
@@ -269,15 +266,32 @@ const addSkillsToBadge = (navToNextStep) => {
           <StepperPanel header="Confirmation">
             <template #content>
               <div data-cy="addSkillsToBadgeModalStep3">
-                <span class="text-success">Successfully</span> added <Tag>{{ skillsForBadge.available.length }}</Tag>
-                  skill{{ pluralSupport.plural(skillsForBadge.available) }} to the <span>
-                  <span class="text-primary font-semibold">[{{selectedDestination.name }}]</span>
-              badge.
-            </span>
+
+                <Message
+                  v-if="learningPathViolationErr.show"
+                  :closable="false"
+                  severity="error"
+                  data-cy="learningPathErrMsg">
+                  Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
+                  Adding this skill would result in a <b>circular/infinite learning path</b>.
+                  Please visit project's
+                  <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link>
+                  page to review.
+                </Message>
+                <div
+                  v-if="!learningPathViolationErr.show"
+                  class="p-4 border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
+                  <div>
+                    <span class="text-success">Successfully</span> added
+                    <Tag>{{ skillsForBadge.available.length }}</Tag>
+                    skill{{ pluralSupport.plural(skillsForBadge.available) }} to the <span>
+                    <span class="text-primary font-semibold">[{{ selectedDestination.name }}]</span> badge.</span>
+                  </div>
+                </div>
                 <div class="flex pt-4 justify-content-end">
                   <SkillsButton
                     label="OK"
-                    icon="fas fa-shipping-fast"
+                    icon="fas fa-thumbs-up"
                     @click="onCancel"
                     data-cy="okButton"
                     outlined />

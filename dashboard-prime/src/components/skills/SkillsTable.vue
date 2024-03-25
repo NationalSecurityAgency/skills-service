@@ -310,6 +310,10 @@ const onMoved = (movedInfo) => {
   subjectState.loadSubjectDetailsState()
 }
 
+const onAddedToBadge = () => {
+  removeSelectedRows()
+}
+
 const onExported = (groupId = null) => {
   skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId, false)
   if (groupId) {
@@ -724,7 +728,7 @@ const editImportedSkillInfo = ref({
       v-if="showAddSkillsToBadgeDialog"
       v-model="showAddSkillsToBadgeDialog"
       :skills="selectedSkills"
-      @on-moved="onMoved"
+      @on-added="onAddedToBadge"
     />
   </div>
 </template>
