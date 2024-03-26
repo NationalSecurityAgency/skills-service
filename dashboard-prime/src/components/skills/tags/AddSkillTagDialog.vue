@@ -69,7 +69,8 @@ const afterSave = (taggedInfo) => {
     sk.tags.push({ tagId: taggedInfo.tagId, tagValue: taggedInfo.tagValue })
   })
   emit('added-tag', taggedInfo)
-  focusState.setElementId('newSkillBtn')
+  const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
+  focusState.setElementId(focusOn)
   focusState.focusOnLastElement()
 }
 const disableExistingTagsSelector = ref(false)

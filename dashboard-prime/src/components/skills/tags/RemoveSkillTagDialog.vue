@@ -51,7 +51,8 @@ const afterDelete = (taggedInfo) => {
     sk.tags = sk.tags.filter((tag) => tag.tagId !== taggedInfo.tagId)
   })
   emit('removed-tag', taggedInfo)
-  focusState.setElementId('newSkillBtn')
+  const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
+  focusState.setElementId(focusOn)
   focusState.focusOnLastElement()
 }
 </script>

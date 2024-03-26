@@ -740,6 +740,7 @@ const editImportedSkillInfo = ref({
       v-if="showAddSkillsTag"
       v-model="showAddSkillsTag"
       :skills="selectedSkills"
+      :group-id="groupId"
       @added-tag="removeSelectedRows"
     />
     <remove-skill-tag-dialog
@@ -747,6 +748,7 @@ const editImportedSkillInfo = ref({
       v-if="showRemoveSkillsTag"
       v-model="showRemoveSkillsTag"
       :skills="selectedSkills"
+      :group-id="groupId"
       @removed-tag="removeSelectedRows"
     />
   </div>
