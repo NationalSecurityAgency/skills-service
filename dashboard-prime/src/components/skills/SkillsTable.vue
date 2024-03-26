@@ -26,6 +26,8 @@ import SettingsService from '@/components/settings/SettingsService.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDialog.vue'
 import AddSkillsToBadgeDialog from '@/components/skills/badges/AddSkillsToBadgeDialog.vue'
+import AddSkillTagDialog from '@/components/skills/tags/AddSkillTagDialog.vue'
+import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.vue'
 
 const props = defineProps({
   groupId: String
@@ -266,15 +268,21 @@ const actionsMenu = ref([
     }
   },
   {
-    label: 'Tags',
+    label: 'Skill Tags',
     items: [
       {
         label: 'Add',
-        icon: 'fas fa-tag'
+        icon: 'fas fa-tag',
+        command: () => {
+          showAddSkillsTag.value = true
+        }
       },
       {
         label: 'Remove',
-        icon: 'fas fa-trash'
+        icon: 'fas fa-trash',
+        command: () => {
+          showRemoveSkillsTag.value = true
+        }
       }
     ]
   }
@@ -285,6 +293,8 @@ const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
 const showExportToCatalogDialog = ref(false)
 const showAddSkillsToBadgeDialog = ref(false)
+const showAddSkillsTag = ref(false)
+const showRemoveSkillsTag = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -308,10 +318,6 @@ const onMoved = (movedInfo) => {
 
   removeSelectedRows()
   subjectState.loadSubjectDetailsState()
-}
-
-const onAddedToBadge = () => {
-  removeSelectedRows()
 }
 
 const onExported = (groupId = null) => {
@@ -479,7 +485,7 @@ const editImportedSkillInfo = ref({
                   class="text-lg"
                   :value="slotProps.data.name" :filter="filters.global.value" />
               </router-link>
-              <div class="flex gap-1">
+              <div class="flex flex-wrap gap-1">
                 <Tag
                   v-if="slotProps.data.isCatalogImportedSkills"
                   severity="success"
@@ -502,26 +508,25 @@ const editImportedSkillInfo = ref({
                   :data-cy="`exportedBadge-${slotProps.data.skillId}`">
                   <span><i class="fas fa-book" aria-hidden="true"></i> Exported</span>
                 </Tag>
+                <Tag
+                  v-for="(tag) in slotProps.data.tags"
+                  :key="tag.tagId"
+                  class="mt-1"
+                  :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`"
+                  severity="info">
+                  <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
+                </Tag>
               </div>
+
             </div>
             <div class="flex-none">
               <div class="flex">
                 <router-link
                   :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
                 >
-                  <!--                  <SkillsButton-->
-                  <!--                    v-if="!slotProps.data.isGroupType"-->
-                  <!--                    :label="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'View' : 'Manage'"-->
-                  <!--                    :icon="slotProps.data.isCatalogImportedSkills || projConfig.isReadOnlyProj ? 'fas fa-eye' : 'fas fa-arrow-circle-right'"-->
-                  <!--                    size="small"-->
-                  <!--                    outlined-->
-                  <!--                    severity="info"-->
-                  <!--                    :aria-label="`Manage skill ${slotProps.data.name}`"-->
-                  <!--                    :data-cy="`manageSkillBtn_${slotProps.data.skillId}`"-->
-                  <!--                  />-->
                 </router-link>
 
-                <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2">
+                <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2 ml-1">
                   <SkillsButton
                     :id="`editSkillButton_${slotProps.data.skillId}`"
                     v-if="!slotProps.data.reusedSkill"
@@ -728,7 +733,21 @@ const editImportedSkillInfo = ref({
       v-if="showAddSkillsToBadgeDialog"
       v-model="showAddSkillsToBadgeDialog"
       :skills="selectedSkills"
-      @on-added="onAddedToBadge"
+      @on-added="removeSelectedRows"
+    />
+    <add-skill-tag-dialog
+      id="addTagSkillsModal"
+      v-if="showAddSkillsTag"
+      v-model="showAddSkillsTag"
+      :skills="selectedSkills"
+      @added-tag="removeSelectedRows"
+    />
+    <remove-skill-tag-dialog
+      id="removeTagSkillsModal"
+      v-if="showRemoveSkillsTag"
+      v-model="showRemoveSkillsTag"
+      :skills="selectedSkills"
+      @removed-tag="removeSelectedRows"
     />
   </div>
 </template>

@@ -142,6 +142,9 @@ if (props.asyncLoadDataFunction) {
 
 const validateIfNotEmpty = () => {
   const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
+  if (!props.initialValues) {
+    console.error(`Initial values for SkillsInputFormDialog id=[${props.id}] not provided.`)
+  }
   const foundNonEmpty = Object.entries(values)
     .find(([key, value]) =>
       key !== 'skipTheseAttrsWhenValidatingOnInit'

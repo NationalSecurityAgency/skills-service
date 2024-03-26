@@ -1,8 +1,8 @@
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import { object, string, number } from 'yup'
+import { number, object, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
@@ -12,7 +12,6 @@ import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingT
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
-import { useDebounceFn } from '@vueuse/core'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 
 const show = defineModel()

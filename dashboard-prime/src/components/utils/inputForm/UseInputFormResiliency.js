@@ -60,11 +60,12 @@ export const useInputFormResiliency = () => {
 
   const discard = (updateModel = true) => {
     if (updateModel) {
-      for (const [key, value] of Object.entries(operationsContainer.originalModal)) {
-
-        if (value !== operationsContainer.currentReactiveModel[key]) {
-          operationsContainer.setFieldValueFunction(key, value)
-          isRestoredFromStore.value = true
+      if (operationsContainer.originalModal) {
+        for (const [key, value] of Object.entries(operationsContainer.originalModal)) {
+          if (value !== operationsContainer.currentReactiveModel[key]) {
+            operationsContainer.setFieldValueFunction(key, value)
+            isRestoredFromStore.value = true
+          }
         }
       }
     }

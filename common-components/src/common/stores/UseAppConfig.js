@@ -92,6 +92,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const userSuggestOptions = computed(() => config.value.userSuggestOptions)
   const maxContactOwnersMessageLength = computed(() => config.value.maxContactOwnersMessageLength)
   const defaultLandingPage = computed(() => config.value.defaultLandingPage)
+  const maxSkillTagLength = computed(() => config.value.maxSkillTagLength)
   return {
     loadConfigState,
     isLoadingConfig,
@@ -147,6 +148,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxBadgeBonusInMinutes,
     maxSkillsInBulkImport,
     userSuggestOptions,
-    maxContactOwnersMessageLength
+    maxContactOwnersMessageLength,
+    maxSkillTagLength
   }
 })

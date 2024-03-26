@@ -75,7 +75,7 @@ jobs:
       matrix:
         #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
 #        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
-        container: [ 1, 2, 3]
+        container: [ 1, 2, 3, 4]
 
     services:
       postgres:
@@ -140,7 +140,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          ../.github/scripts/runSubsetOfCypressTests.sh -t 3 -c ${{ matrix.container }} -f 'projects_crud|/skills_table_spec|/skill_reuse_spec|quiz_creation|question_def|metrics-reUsedData_spec|quiz_and_survey|quiz_runs|quiz_skill_assignment|quiz_read|quiz_role|/skills_spec|/users_spec|/subjects_spec|/levels_management_spec|/skills_group_spec|/skills_group_modal_spec|/move-skills/|/badges_spec|/skill-reuse/skill_reuse/|/catalog/|/project_settings_spec|/icon_manager_spec|/not_found_spec|/error_pages_spec|/learning-path/learning_path_management_spec|/learning-path/learning_path_management_validation_spec|/add_skills_to_badge_spec'
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 4 -c ${{ matrix.container }} -f 'projects_crud|/skills_table_spec|/skill_reuse_spec|quiz_creation|question_def|metrics-reUsedData_spec|quiz_and_survey|quiz_runs|quiz_skill_assignment|quiz_read|quiz_role|/skills_spec|/users_spec|/subjects_spec|/levels_management_spec|/skills_group_spec|/skills_group_modal_spec|/move-skills/|/badges_spec|/skill-reuse/skill_reuse/|/catalog/|/project_settings_spec|/icon_manager_spec|/not_found_spec|/error_pages_spec|/learning-path/learning_path_management_spec|/learning-path/learning_path_management_validation_spec|/add_skills_to_badge_spec|/tag-skills'
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
