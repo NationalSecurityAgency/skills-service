@@ -107,13 +107,13 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillName]').type('{selectall}Skill123')
     cy.get('[data-cy=skillNameError]').should('not.be.visible')
 
-    cy.get('[data-cy=skillVersion]').type('{selectall}1000')
+    cy.get('[data-cy=version]').type('{selectall}1000')
     cy.get('[data-cy=versionError]').contains('Version must be less than or equal to 999').should('be.visible')
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled')
-    cy.get('[data-cy=skillVersion]').type('{selectall}2')
+    cy.get('[data-cy=version]').type('{selectall}2')
     cy.get('[data-cy=versionError]').contains('Version 0 is the latest; max supported version is 1 (latest + 1)').should('be.visible')
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled')
-    cy.get('[data-cy=skillVersion]').type('{selectall}1')
+    cy.get('[data-cy=version]').type('{selectall}1')
     cy.get('[data-cy=versionError]').should('not.be.visible')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
 

@@ -239,7 +239,6 @@ const occurrencesToCompletionDisabled = computed(() => {
         <SkillsNumberInput
           showButtons
           :min="latestSkillVersion"
-          data-cy="skillVersion"
           label="Version"
           name="version" />
       </div>

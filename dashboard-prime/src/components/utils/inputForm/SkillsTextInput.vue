@@ -1,7 +1,13 @@
 <script setup>
 import { inject } from 'vue'
 import { useField } from 'vee-validate'
+import {
+  useSkillsInputFallthroughAttributes
+} from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
 
+defineOptions({
+  inheritAttrs: false
+})
 const props = defineProps({
   name: {
     type: String,
@@ -38,15 +44,17 @@ const onEnter = (event) => {
   }
   emit('keydown-enter', event.target.value)
 }
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
-  <div class="field text-left">
+  <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
     <label :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputText
       class="w-full"
       type="text"
       v-model="value"
+      v-bind="fallthroughAttributes.inputAttrs.value"
       @input="emit('input', $event.target.value)"
       @keydown.enter="onEnter"
       :data-cy="$attrs['data-cy'] || name"

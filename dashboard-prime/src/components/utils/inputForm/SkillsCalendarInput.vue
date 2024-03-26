@@ -2,7 +2,13 @@
 import { computed, inject, useAttrs } from 'vue'
 import { useField } from 'vee-validate'
 import Calendar from "primevue/calendar";
+import {
+  useSkillsInputFallthroughAttributes
+} from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
 
+defineOptions({
+  inheritAttrs: false
+})
 const props = defineProps({
   name: {
     type: String,
@@ -32,25 +38,17 @@ const onEnter = (event) => {
   emit('keydown-enter', event.target.value)
 }
 
-const filterAttrs = ['class']
-const attrs = useAttrs()
-const inputNumFallthroughAttrs = computed(() => {
-  return Object.fromEntries(
-      Object.entries(attrs).filter(
-          ([key]) => !filterAttrs.includes(key)
-      )
-  )
-})
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 const handleOnInput = (event) => {
   value.value = event.value
 }
 </script>
 
 <template>
-  <div class="field">
+  <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
     <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
     <Calendar v-model="value" inline
-              v-bind="inputNumFallthroughAttrs"
+              v-bind="fallthroughAttributes.inputAttrs.value"
               @keydown.enter="onEnter"
               @input="handleOnInput"
               selectionMode="range"

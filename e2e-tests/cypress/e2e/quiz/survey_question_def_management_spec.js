@@ -268,9 +268,9 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - First Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - Second Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - Third Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
@@ -286,9 +286,9 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'Question 2 - First Answer-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'b')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"] [data-pc-name="inputtext"]').should('have.value', 'c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'c')
     });
 
     it('edit a question - change the scale of a rating', function () {

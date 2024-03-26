@@ -1,6 +1,12 @@
 <script setup>
 import { useField } from 'vee-validate'
+import {
+  useSkillsInputFallthroughAttributes
+} from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
 
+defineOptions({
+  inheritAttrs: false
+})
 const props = defineProps({
   name: {
     type: String,
@@ -27,19 +33,17 @@ const props = defineProps({
     default: false
   },
 })
-defineOptions({
-  inheritAttrs: false
-})
 const { value, errorMessage } = useField(() => props.name);
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
-  <div class="field">
+  <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
     <Dropdown v-model="value"
               :options="options"
               class="w-full"
-              v-bind="$attrs"
+              v-bind="fallthroughAttributes.inputAttrs.value"
               :autofocus="autofocus"
               :id="name"
               :disabled="disabled"

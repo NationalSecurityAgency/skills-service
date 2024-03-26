@@ -60,7 +60,6 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
         :min="1"
         showButtons
         :disabled="!timeWindowEnabled"
-        data-cy="maxOccurrences"
         label="Window's Max Occurrences"
         name="numPointIncrementMaxOccurrences" />
 

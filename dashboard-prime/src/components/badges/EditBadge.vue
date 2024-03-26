@@ -336,44 +336,38 @@ const onBadgeSaved = () => {
                 <label for="awardName">Award Name</label>
                 <SkillsTextInput
                     placeholder="Award Name"
-                    v-model="badgeInternal.awardAttrs.name"
-                    data-cy="awardName"
                     id="awardName"
                     name="awardAttrs.name"/>
-                <!--                    <ValidationProvider rules="required|minNameLength|maxBadgeNameLength|customNameValidator"-->
               </div>
             </div>
             <div class="flex gap-4" v-if="badgeInternal.timeLimitEnabled">
               <div class="flex flex-1">
                 <SkillsNumberInput v-model="badgeInternal.expirationDays"
                                    class="w-full"
-                                   :initial-value="initialBadgeData.expirationDays"
                                    label="Days"
-                                   data-cy="timeLimitDays"
                                    id="timeLimitDays"
                                    :min="0"
+                                   data-cy="timeLimitDays"
                                    name="expirationDays" />
               </div>
               <div class="flex flex-1">
                 <SkillsNumberInput v-model="badgeInternal.expirationHrs"
                                    class="w-full"
-                                   :initial-value="initialBadgeData.expirationHrs"
                                    label="Hours"
-                                   data-cy="timeLimitHours"
                                    id="timeLimitHours"
                                    :min="0"
                                    :max="23"
+                                   data-cy="timeLimitHours"
                                    name="expirationHrs" />
               </div>
               <div class="flex flex-1">
                 <SkillsNumberInput v-model="badgeInternal.expirationMins"
                                    class="w-full"
-                                   :initial-value="initialBadgeData.expirationMins"
                                    label="Minutes"
-                                   data-cy="timeLimitMinutes"
                                    id="timeLimitMinutes"
                                    :min="0"
                                    :max="59"
+                                   data-cy="timeLimitMinutes"
                                    name="expirationMins" />
               </div>
             </div>
