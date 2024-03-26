@@ -25,6 +25,9 @@ const schema = object({
 
 const { defineField, meta } = useForm({
   validationSchema: schema,
+  initialValues: {
+    resetTokenExpiration: '2H'
+  }
 })
 
 const isSaving = ref(false);
@@ -33,8 +36,6 @@ const [resetTokenExpiration] = defineField('resetTokenExpiration');
 const [customHeader] = defineField('customHeader');
 const [customFooter] = defineField('customFooter');
 const [userAgreement] = defineField('userAgreement');
-
-resetTokenExpiration.value = '2H';
 
 onMounted(() => {
   loadSystemSettings();

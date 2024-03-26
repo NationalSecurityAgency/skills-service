@@ -16,8 +16,6 @@ limitations under the License.
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import TabPanel from 'primevue/tabpanel';
-import TabView from 'primevue/tabview';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
 import Message from 'primevue/message';
