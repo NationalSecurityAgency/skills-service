@@ -67,7 +67,6 @@ defineExpose({
         </div>
       </InputGroupAddon>
     <InputText
-      autofocus
       type="text"
       class="w-full"
       :class="{ 'surface-300': !canEdit, 'p-invalid': errorMessage }"

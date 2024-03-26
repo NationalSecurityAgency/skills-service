@@ -257,9 +257,9 @@ watch(value, (newValue) =>{
            data-cy="markdownEditorLabel"
            class="mb-3"
            :class="`${labelClass}`"
-           for="toastuiEditor" @click="focusOnMarkdownEditor">{{ label }}</label>
+           :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
     <BlockUI :blocked="disabled">
-      <toast-ui-editor id="toastuiEditor"
+      <toast-ui-editor :id="name"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
                        class="markdown"
                        data-cy="markdownEditorInput"

@@ -60,16 +60,21 @@ const isSubmitting = useIsSubmitting()
 <template>
   <div :class="{ 'flex flex-wrap md:flex-nowrap' : isInline }">
     <div :class="{ 'md:mr-1 flex-1' : isInline }">
-      <SkillsTextInput
-        class=""
-        style="min-width: 16rem;"
-        :label="nameLabel"
-        :is-required="true"
-        :disabled="disabled || isSubmitting"
-        :name="nameFieldName"
-        :autofocus="true"
-        @input="updateIdBasedOnName"
-        @keydown-enter="emit('keydown-enter')" />
+      <div class="flex gap-3">
+        <slot name="beforeName"></slot>
+        <div class="flex-1">
+          <SkillsTextInput
+            class=""
+            style="min-width: 16rem;"
+            :label="nameLabel"
+            :is-required="true"
+            :disabled="disabled || isSubmitting"
+            :name="nameFieldName"
+            :autofocus="true"
+            @input="updateIdBasedOnName"
+            @keydown-enter="emit('keydown-enter')" />
+        </div>
+      </div>
     </div>
     <div :class="{ 'md:ml-1 w-full md:w-min lg:w-auto' : isInline }" class="">
       <SkillsIdInput

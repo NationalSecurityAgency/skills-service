@@ -117,7 +117,7 @@ const isReuseBtnDisabled = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div role="alert">
     <skills-spinner :is-loading="isLoading" class="my-5" />
     <div v-if="!isLoading">
       <no-content2

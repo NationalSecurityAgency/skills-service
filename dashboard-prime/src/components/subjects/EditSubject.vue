@@ -1,25 +1,25 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
-import {string, object} from "yup";
-import {useRoute} from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import { string, object } from 'yup'
+import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import SubjectsService from '@/components/subjects/SubjectsService';
-import InputSanitizer from '@/components/utils/InputSanitizer';
+import SubjectsService from '@/components/subjects/SubjectsService'
+import InputSanitizer from '@/components/utils/InputSanitizer'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
-import HelpUrlInput from '@/components/utils/HelpUrlInput.vue';
+import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
-import IconManager from '@/components/utils/iconPicker/IconManager.vue';
-import OverlayPanel from 'primevue/overlaypanel';
+import IconManager from '@/components/utils/iconPicker/IconManager.vue'
+import OverlayPanel from 'primevue/overlaypanel'
 
 const model = defineModel()
 const props = defineProps({
   subject: Object,
   isEdit: Boolean,
-  value: Boolean,
-});
+  value: Boolean
+})
 const appConfig = useAppConfig()
-const emit = defineEmits(['hidden', 'subject-saved']);
+const emit = defineEmits(['hidden', 'subject-saved'])
 const route = useRoute()
 
 let formId = 'newSubjectDialog'
@@ -29,77 +29,79 @@ if (props.isEdit) {
   modalTitle = 'Editing Existing Subject'
 }
 
-let canAutoGenerateId = ref(true);
-let restoredFromStorage = ref(false);
-let currentFocus = ref(null);
-let previousFocus = ref(null);
+let canAutoGenerateId = ref(true)
+let restoredFromStorage = ref(false)
+let currentFocus = ref(null)
+let previousFocus = ref(null)
 
 onMounted(() => {
-  document.addEventListener('focusin', trackFocus);
+  document.addEventListener('focusin', trackFocus)
 })
 
 const trackFocus = () => {
-  previousFocus.value = currentFocus.value;
-  currentFocus.value = document.activeElement;
-};
+  previousFocus.value = currentFocus.value
+  currentFocus.value = document.activeElement
+}
 
 const title = computed(() => {
-  return props.isEdit ? 'Editing Existing Subject' : 'New Subject';
-});
+  return props.isEdit ? 'Editing Existing Subject' : 'New Subject'
+})
 
 
-const close = () => { model.value = false }
+const close = () => {
+  model.value = false
+}
 
 const onSelectedIcon = (selectedIcon) => {
-  currentIcon.value = selectedIcon.css;
-  op.value.hide();
-};
+  currentIcon.value = selectedIcon.css
+  op.value.hide()
+}
 
 const toggleIconDisplay = (event) => {
-  op.value.toggle(event);
-};
+  op.value.toggle(event)
+}
 
 const checkSubjectNameUnique = (value) => {
   if (!value || value === props.subject.name) {
-    return true;
+    return true
   }
-  return SubjectsService.subjectWithNameExists(route.params.projectId, value);
+  return SubjectsService.subjectWithNameExists(route.params.projectId, value)
 }
 
 const checkSubjectIdUnique = (value) => {
   if (!value || value === props.subject.subjectId) {
-    return true;
+    return true
   }
-  return SubjectsService.subjectWithIdExists(route.params.projectId, value);
+  return SubjectsService.subjectWithIdExists(route.params.projectId, value)
 }
 
 const schema = object({
   'subjectName': string()
-      .trim()
-      .required()
-      .min(appConfig.minNameLength)
-      .max(appConfig.maxSubjectNameLength)
-      .nullValueNotAllowed()
-      .customNameValidator('Subject Name')
-      .test('uniqueName', 'Subject Name is already taken', (value) => checkSubjectNameUnique(value))
-      .label('Subject Name'),
+    .trim()
+    .required()
+    .min(appConfig.minNameLength)
+    .max(appConfig.maxSubjectNameLength)
+    .nullValueNotAllowed()
+    .customNameValidator('Subject Name')
+    .test('uniqueName', 'Subject Name is already taken', (value) => checkSubjectNameUnique(value))
+    .label('Subject Name'),
   'subjectId': string()
-      .trim()
-      .required()
-      .min(appConfig.minIdLength)
-      .max(appConfig.maxIdLength)
-      .nullValueNotAllowed()
-      .idValidator()
-      .test('uniqueName', 'Subject ID is already taken', (value) => checkSubjectIdUnique(value))
-      .label('Subject ID'),
+    .trim()
+    .required()
+    .min(appConfig.minIdLength)
+    .max(appConfig.maxIdLength)
+    .nullValueNotAllowed()
+    .idValidator()
+    .test('uniqueName', 'Subject ID is already taken', (value) => checkSubjectIdUnique(value))
+    .label('Subject ID'),
   'description': string()
-      .max(appConfig.descriptionMaxLength)
-      .customDescriptionValidator('Subject Description')
-      .label('Subject Description'),
+    .max(appConfig.descriptionMaxLength)
+    .customDescriptionValidator('Subject Description')
+    .label('Subject Description'),
   'helpUrl': string()
     .urlValidator()
-    .label('Help URL'),
-});
+    .label('Help URL')
+})
 
 const initialSubjData = {
   projectId: route.params.projectId,
@@ -107,11 +109,11 @@ const initialSubjData = {
   subjectName: props.subject.name || '',
   helpUrl: props.subject.helpUrl || '',
   description: props.subject.description || '',
-  iconClass: props.subject.iconClass || 'fas fa-book',
-};
+  iconClass: props.subject.iconClass || 'fas fa-book'
+}
 
-let currentIcon = ref((props.subject.iconClass || 'fas fa-book'));
-let op = ref();
+let currentIcon = ref((props.subject.iconClass || 'fas fa-book'))
+let op = ref()
 
 const updateSubject = (values) => {
   const subjToSave = {
@@ -126,66 +128,65 @@ const updateSubject = (values) => {
   return SubjectsService.saveSubject(subjToSave).then((subjRes) => {
     return {
       ...subjRes,
-      originalSubjectId: props.subject.subjectId,
+      originalSubjectId: props.subject.subjectId
     }
   })
-};
-const onSubjectSaved = (subject) =>{
-  emit('subject-saved', subject);
+}
+const onSubjectSaved = (subject) => {
+  emit('subject-saved', subject)
   close()
 }
-const asyncLoadData = () => { return; };
+const asyncLoadData = () => {
+  return
+}
 
 </script>
 
 <template>
   <SkillsInputFormDialog
-      :id="formId"
-      v-model="model"
-      :header="modalTitle"
-      saveButtonLabel="Save"
-      :validation-schema="schema"
-      :initial-values="initialSubjData"
-      :save-data-function="updateSubject"
-      :enable-return-focus="true"
-      @saved="onSubjectSaved"
-      @close="close">
+    :id="formId"
+    v-model="model"
+    :header="modalTitle"
+    saveButtonLabel="Save"
+    :validation-schema="schema"
+    :initial-values="initialSubjData"
+    :save-data-function="updateSubject"
+    :enable-return-focus="true"
+    @saved="onSubjectSaved"
+    @close="close">
     <template #default>
-      <button class="icon-button surface-border border-round-sm"
-              @click="toggleIconDisplay"
-              id="iconPicker"
-              @keypress.enter="toggleIconDisplay"
-              role="button"
-              aria-roledescription="icon selector button"
-              aria-label="icon selector"
-              tabindex="0"
-              data-cy="iconPicker">
-        <div class="text-primary" style="min-height: 4rem;">
-          <i :class="[currentIcon]" />
+      <div class="flex gap-3">
+        <div class="flex-1">
+          <SkillsNameAndIdInput
+            name-label="Subject Name"
+            name-field-name="subjectName"
+            id-label="Subject ID"
+            id-field-name="subjectId"
+            id-suffix="Subject"
+            :name-to-id-sync-enabled="!props.isEdit">
+            <template #beforeName>
+              <div>
+                <SkillsButton
+                  @click="toggleIconDisplay"
+                  outlined
+                  id="iconPicker"
+                  @keypress.enter="toggleIconDisplay"
+                  role="button"
+                  aria-roledescription="icon selector button"
+                  aria-label="icon selector"
+                  tabindex="0"
+                  data-cy="iconPicker">
+                  <div class="text-primary">
+                    <i :class="[currentIcon]" />
+                  </div>
+                </SkillsButton>
+              </div>
+            </template>
+          </SkillsNameAndIdInput>
         </div>
-      </button>
+      </div>
 
-      <SkillsNameAndIdInput
-        name-label="Subject Name"
-        name-field-name="subjectName"
-        id-label="Subject ID"
-        id-field-name="subjectId"
-        id-suffix="Subject"
-        :name-to-id-sync-enabled="!props.isEdit" />
-
-      <markdown-editor class="mt-5" name="description" />
-<!--          <div class="mt-3">-->
-<!--            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Subject Description">-->
-<!--              <markdown-editor v-model="subjectInternal.description"-->
-<!--                               :project-id="subjectInternal.projectId"-->
-<!--                               :skill-id="isEdit ? subjectInternal.subjectId : null"-->
-<!--                               aria-errormessage="subjectDescError"-->
-<!--                               aria-describedby="subjectDescError"-->
-<!--                               :aria-invalid="errors && errors.length > 0"/>-->
-<!--              <small role="alert" id="subjectDescError" class="form-text text-danger" data-cy="subjectDescError">{{ errors[0] }}</small>-->
-<!--            </ValidationProvider>-->
-<!--          </div>-->
-
+      <markdown-editor class="" name="description" />
       <help-url-input class="mt-3"
                       :next-focus-el="previousFocus"
                       name="helpUrl"

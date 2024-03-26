@@ -156,6 +156,7 @@ const onFilter = (filterEvent) => {
   filteredCount.value = filterEvent.filteredValue.length
   if (filterEvent.filters?.global?.value) {
     reorderEnable.value = false
+    announcer.polite(`Filtered by ${filterEvent.filters?.global?.value} and returned ${filterEvent.filteredValue.length} results`)
   }
 }
 
@@ -174,8 +175,9 @@ const onReorderSwitchChanged = (enabled) => {
     clearFilter()
   }
 }
-const onColumnSort = () => {
+const onColumnSort = (sortEvent) => {
   reorderEnable.value = false
+  announcer.polite(`Sorted by ${sortEvent.sortField} in ${sortEvent.sortOrder === 1 ? 'ascending' : 'descending'} order`)
 }
 
 const addSkillDisabled = ref(false)
@@ -271,14 +273,14 @@ const actionsMenu = ref([
     label: 'Skill Tags',
     items: [
       {
-        label: 'Add',
+        label: 'Add Tag',
         icon: 'fas fa-tag',
         command: () => {
           showAddSkillsTag.value = true
         }
       },
       {
-        label: 'Remove',
+        label: 'Remove Tag',
         icon: 'fas fa-trash',
         command: () => {
           showRemoveSkillsTag.value = true
@@ -409,7 +411,7 @@ const editImportedSkillInfo = ref({
                   id="sortEnabledSwitch"
                   data-cy="enableDisplayOrderSort"
                   @update:modelValue="onReorderSwitchChanged"
-                  aria-label="When enabled move-up and move-down buttons will be visible within each display order cell"
+                  aria-label="Sorting Control - when enabled move-up and move-down buttons will be visible within each display order cell"
                   v-model="reorderEnable" />
               </div>
               <SkillsButton
@@ -417,7 +419,7 @@ const editImportedSkillInfo = ref({
                 severity="info"
                 class="ml-3"
                 @click="toggleActionsMenu"
-                aria-label="User Settings Button"
+                aria-label="Skill's actions button"
                 aria-haspopup="true"
                 aria-controls="user_settings_menu"
                 :disabled="selectedSkills.length === 0"

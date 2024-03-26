@@ -214,7 +214,7 @@ const handleFocus = () => {
         </StepperPanel>
         <StepperPanel header="Confirmation">
           <template #content>
-            <div data-cy="reuseSkillsModalStep3">
+            <div data-cy="reuseSkillsModalStep3" role="alert">
               <div class="flex flex-column h-12rem">
                 <div
                   class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">

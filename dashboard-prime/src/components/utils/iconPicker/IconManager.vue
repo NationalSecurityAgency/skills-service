@@ -63,7 +63,7 @@ onMounted(() => {
   });
 
   enquire.register(xsAndSmaller, () => {
-    rowLength = 2;
+    rowLength = 1;
     modalWidth.value = "25rem";
   });
   enquire.register(smAndUp, () => {
@@ -316,7 +316,7 @@ const beforeUpload = (upload) => {
 </script>
 
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div :style="{ width: modalWidth }">
+    <div class="flex flex-column gap-3" :style="`width: ${modalWidth}`">
         <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
                @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
 

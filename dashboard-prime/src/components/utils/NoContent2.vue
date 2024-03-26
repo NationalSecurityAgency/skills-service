@@ -45,7 +45,7 @@ function refresh() {
 </script>
 
 <template>
-  <div class="text-color-secondary text-center" data-cy="noContent">
+  <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="grid justify-content-center text-center">
       <div class="col">
         <span class="fa-stack text-center" :class="iconSize" style="vertical-align: top;">

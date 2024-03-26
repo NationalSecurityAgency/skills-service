@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useRoute } from 'vue-router'

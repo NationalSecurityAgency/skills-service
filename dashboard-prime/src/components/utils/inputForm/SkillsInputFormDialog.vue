@@ -180,11 +180,10 @@ const validateIfNotEmpty = () => {
       v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
       @discard-changes="inputFormResiliency.discard" />
 
-    <div class="loading-indicator" v-if="isSaving || isSubmitting">
-      <skills-spinner :is-loading="true"/>
-    </div>
-
-    <slot></slot>
+    <BlockUI :blocked="isSaving || isSubmitting" :full-screen="false">
+      <skills-spinner :is-loading="true" v-if="isSaving || isSubmitting" class="loading-indicator"/>
+      <slot></slot>
+    </BlockUI>
   </SkillsDialog>
 </template>
 
@@ -202,15 +201,4 @@ const validateIfNotEmpty = () => {
   right: 0;
 }
 
-/* Transparent Overlay */
-.loading-indicator:before {
-  content: '';
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(222, 217, 217, 0.53);
-}
 </style>
