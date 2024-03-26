@@ -43,7 +43,7 @@ const { value, errorMessage } = useField(() => props.name);
               :autofocus="autofocus"
               :id="name"
               :disabled="disabled"
-              :data-cy="name"
+              :data-cy="$attrs['data-cy'] || name"
               :class="{ 'p-invalid': errorMessage }"
               :aria-invalid="errorMessage ? null : true"
               :aria-errormessage="`${name}Error`"

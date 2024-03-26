@@ -56,7 +56,7 @@ const handleOnInput = (event) => {
               selectionMode="range"
               :inputId="`input${name}`"
               :id="name"
-              :data-cy="name" />
+              :data-cy="$attrs['data-cy'] || name" />
     <small
         role="alert"
         class="p-error block"

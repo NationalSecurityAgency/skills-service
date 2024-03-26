@@ -49,7 +49,7 @@ const onEnter = (event) => {
       v-model="value"
       @input="emit('input', $event.target.value)"
       @keydown.enter="onEnter"
-      :data-cy="name"
+      :data-cy="$attrs['data-cy'] || name"
       :autofocus="autofocus"
       :id="name"
       :disabled="disabled"

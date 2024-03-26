@@ -61,7 +61,7 @@ const handleOnInput = (event) => {
       @keydown.enter="onEnter"
       @input="handleOnInput"
       :disabled="disabled"
-      :data-cy="name"
+      :data-cy="$attrs['data-cy'] || name"
       :autofocus="autofocus"
       :id="name"
       :inputId="`input${name}`"
