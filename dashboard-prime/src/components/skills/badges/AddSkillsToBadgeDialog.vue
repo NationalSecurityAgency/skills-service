@@ -134,7 +134,10 @@ const addSkillsToBadge = (navToNextStep) => {
       } else {
         throw e
       }
-    });
+    })
+    .finally(() => {
+      state.value.inProgress = false
+    })
 }
 </script>
 
@@ -266,35 +269,38 @@ const addSkillsToBadge = (navToNextStep) => {
           <StepperPanel header="Confirmation">
             <template #content>
               <div data-cy="addSkillsToBadgeModalStep3">
-
-                <Message
-                  v-if="learningPathViolationErr.show"
-                  :closable="false"
-                  severity="error"
-                  data-cy="learningPathErrMsg">
-                  Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
-                  Adding this skill would result in a <b>circular/infinite learning path</b>.
-                  Please visit project's
-                  <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link>
-                  page to review.
-                </Message>
-                <div
-                  v-if="!learningPathViolationErr.show"
-                  class="p-4 border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
-                  <div>
-                    <span class="text-success">Successfully</span> added
-                    <Tag>{{ skillsForBadge.available.length }}</Tag>
-                    skill{{ pluralSupport.plural(skillsForBadge.available) }} to the <span>
+                <skills-spinner :is-loading="state.inProgress" />
+                <div v-if="!state.inProgress">
+                  <Message
+                    v-if="learningPathViolationErr.show"
+                    :closable="false"
+                    severity="error"
+                    data-cy="learningPathErrMsg">
+                    Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
+                    Adding this skill would result in a <b>circular/infinite learning path</b>.
+                    Please visit project's
+                    <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path
+                    </router-link>
+                    page to review.
+                  </Message>
+                  <div
+                    v-if="!learningPathViolationErr.show"
+                    class="p-4 border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
+                    <div>
+                      <span class="text-success">Successfully</span> added
+                      <Tag>{{ skillsForBadge.available.length }}</Tag>
+                      skill{{ pluralSupport.plural(skillsForBadge.available) }} to the <span>
                     <span class="text-primary font-semibold">[{{ selectedDestination.name }}]</span> badge.</span>
+                    </div>
                   </div>
-                </div>
-                <div class="flex pt-4 justify-content-end">
-                  <SkillsButton
-                    label="OK"
-                    icon="fas fa-thumbs-up"
-                    @click="onCancel"
-                    data-cy="okButton"
-                    outlined />
+                  <div class="flex pt-4 justify-content-end">
+                    <SkillsButton
+                      label="OK"
+                      icon="fas fa-thumbs-up"
+                      @click="onCancel"
+                      data-cy="okButton"
+                      outlined />
+                  </div>
                 </div>
               </div>
             </template>
