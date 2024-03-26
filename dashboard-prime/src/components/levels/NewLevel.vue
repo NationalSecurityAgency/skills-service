@@ -155,26 +155,26 @@ if (props.isEdit) {
     <template #default>
       <template v-if="isEdit">
         <div class="w-full">
-          <SkillsNumberInput isRequired :min="1" data-cy="levelInput" label="Level" name="level" disabled />
+          <SkillsNumberInput isRequired :min="1" label="Level" name="level" disabled />
         </div>
         <template v-if="!levelAsPoints">
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" data-cy="percentInput" label="Percent" name="percent" />
+            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" label="Percent" name="percent" />
           </div>
         </template>
         <template v-else>
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsFromInput" label="Points From" name="pointsFrom" />
+            <SkillsNumberInput showButtons isRequired :min="0" label="Points From" name="pointsFrom" />
           </div>
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsToInput" label="Points To" name="pointsTo" />
+            <SkillsNumberInput showButtons isRequired :min="0" label="Points To" name="pointsTo" />
           </div>
         </template>
       </template>
       <template v-else>
         <template v-if="!levelAsPoints">
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" data-cy="percentInput" label="Percent" name="percent" />
+            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" label="Percent" name="percent" />
           </div>
         </template>
         <template v-else>

@@ -125,7 +125,7 @@ const doRemoveSkill = () => {
               </template>
             </Column>
 
-            <Column field="skillName" header="Skill" :sortable="true">
+            <Column field="skillName" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>
                 <i class="fas fa-graduation-cap mr-1" aria-hidden="true"></i>
               </template>
@@ -147,12 +147,12 @@ const doRemoveSkill = () => {
                 </div>
               </template>
             </Column>
-            <Column field="importedProjectCount" header="Projects Imported" :sortable="true">
+            <Column field="importedProjectCount" header="Projects Imported" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>
                 <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
               </template>
             </Column>
-            <Column field="exportedOn" header="Exported On" :sortable="true">
+            <Column field="exportedOn" header="Exported On" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>
                 <i class="fas fa-clock mr-1" aria-hidden="true"></i>
               </template>
@@ -160,7 +160,7 @@ const doRemoveSkill = () => {
                 <date-cell :value="slotProps.data.exportedOn" />
               </template>
             </Column>
-            <Column class="w-2rem">
+            <Column class="md:w-2rem" :class="{'flex': responsive.md.value }">
               <template #body="slotProps">
                 <SkillsButton
                   :id="`deleteSkillButton_${slotProps.data.skillId}`"
