@@ -166,18 +166,18 @@ const loadEmailSettings = () => {
 <template>
   <div data-cy="emailTemplateSettings">
     <TabView>
-      <TabPanel :header="htmlHeaderText" data-cy="htmlHeaderTitle">
+      <TabPanel :header="htmlHeaderText">
         <SkillsTextarea name="htmlHeader" />
       </TabPanel>
-      <TabPanel :header="plainTextHeaderText" data-cy="ptHeaderTitle">
+      <TabPanel :header="plainTextHeaderText">
         <SkillsTextarea name="plainTextHeader" />
       </TabPanel>
     </TabView>
     <TabView>
-      <TabPanel :header="htmlFooterText" data-cy="htmlFooterTitle">
+      <TabPanel :header="htmlFooterText">
         <SkillsTextarea name="htmlFooter" />
       </TabPanel>
-      <TabPanel :header="plainTextFooterText" data-cy="ptFooterTitle">
+      <TabPanel :header="plainTextFooterText">
         <SkillsTextarea name="plainTextFooter" />
       </TabPanel>
     </TabView>

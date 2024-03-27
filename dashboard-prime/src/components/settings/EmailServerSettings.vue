@@ -170,9 +170,7 @@ function isAuthValid() {
       <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" /> Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}
       <Card v-if="authEnabled">
         <template #header>
-          <div class="border-bottom-1 p-3 surface-border surface-100 mt-4" data-cy="metricsCard-header">
-            <span class="font-bold">Authentication Info</span>
-          </div>
+          <SkillsCardHeader title="Authentication Info"></SkillsCardHeader>
         </template>
         <template #content>
           <SkillsTextInput name="username" label="Username" is-required />

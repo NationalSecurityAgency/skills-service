@@ -155,9 +155,7 @@ const onShareWithAllProjects = (checked) => {
 <template>
   <Card style="margin-bottom:10px;">
     <template #header>
-      <div class="border-bottom-1 p-3 surface-border surface-100" data-cy="metricsCard-header">
-        <span class="font-bold">Share skills from this project with other projects</span>
-      </div>
+      <SkillsCardHeader title="Share skills from this project with other projects"></SkillsCardHeader>
     </template>
     <template #content>
 <!--      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">-->

@@ -96,9 +96,7 @@ const sortTable = (criteria) => {
 <template>
   <Card style="margin-bottom:10px;">
     <template #header>
-      <div class="border-bottom-1 p-3 surface-border surface-100" data-cy="metricsCard-header">
-        <span class="font-bold">Learning Path Routes</span>
-      </div>
+      <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
     </template>
     <template #content>
       <div v-if="!isLoading && !isProcessing && learningPaths.length > 0">

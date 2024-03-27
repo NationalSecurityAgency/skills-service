@@ -197,9 +197,7 @@ function validate(value, ctx) {
 <template>
   <Card style="margin-bottom:10px;">
     <template #header>
-      <div class="border-bottom-1 p-3 surface-border surface-100" data-cy="metricsCard-header">
-        <span class="font-bold">Add a new item to the learning path</span>
-      </div>
+      <SkillsCardHeader title="Add a new item to the learning path"></SkillsCardHeader>
     </template>
     <template #content>
       <div class="flex gap-2">
