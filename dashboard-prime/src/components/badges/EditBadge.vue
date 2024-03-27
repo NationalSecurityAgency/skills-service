@@ -1,21 +1,19 @@
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue';
-import { useRoute } from "vue-router";
-import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
-import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
-import {object, array, number, string, date} from "yup";
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { array, date, number, object, string } from 'yup'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
+import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
-import HelpUrlInput from "@/components/utils/HelpUrlInput.vue";
-import OverlayPanel from "primevue/overlaypanel";
-import SkillsCalendarInput from '@/components/utils/inputForm/SkillsCalendarInput.vue';
-import IconManager from "@/components/utils/iconPicker/IconManager.vue";
-import BadgesService from '@/components/badges/BadgesService';
-import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js';
-import InputSanitizer from "@/components/utils/InputSanitizer.js";
-import IconPicker from '@/components/utils/iconPicker/IconPicker.vue';
-import dayjs from "dayjs";
+import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
+import SkillsCalendarInput from '@/components/utils/inputForm/SkillsCalendarInput.vue'
+import BadgesService from '@/components/badges/BadgesService'
+import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import IconPicker from '@/components/utils/iconPicker/IconPicker.vue'
+import dayjs from 'dayjs'
 
 const model = defineModel()
 const props = defineProps({
@@ -172,14 +170,12 @@ let badgeInternal = ref({
   ...props.badge,
 });
 
-let limitTimeframe = ref(limitedTimeframe);
-let currentFocus = ref( null);
-let previousFocus = ref( null);
-let isAwardIcon = ref(false);
-let gemDates = ref([toDate(props.badge.startDate), toDate(props.badge.endDate)]);
-let currentIcon = ref((props.badge.iconClass || 'fas fa-book'));
-let awardIcon = ref(props.badge.awardAttrs?.iconClass || 'fas fa-car-side');
-let op = ref();
+const limitTimeframe = ref(limitedTimeframe);
+const currentFocus = ref( null);
+const previousFocus = ref( null);
+const gemDates = ref([toDate(props.badge.startDate), toDate(props.badge.endDate)]);
+const currentIcon = ref((props.badge.iconClass || 'fas fa-book'));
+const awardIcon = ref(props.badge.awardAttrs?.iconClass || 'fas fa-car-side');
 
 // computed
 const checkBadgeNameUnique = (value) => {
@@ -246,13 +242,12 @@ const updateBadge = (values) => {
   });
 };
 
-const onSelectedIcon = (selectedIcon) => {
-  if (isAwardIcon.value) {
+const onSelectedIcon = (selectedIcon, isAward = false) => {
+  if (isAward) {
     awardIcon.value = selectedIcon.css;
   } else {
     currentIcon.value = selectedIcon.css;
   }
-  op.value.hide();
 };
 
 const onEnableGemFeature = () => {
@@ -269,10 +264,6 @@ function toDate(value) {
   return dateVal;
 }
 
-const toggleIconDisplay = (event, isAward = false) => {
-  op.value.toggle(event);
-  isAwardIcon.value = isAward;
-};
 
 const resetTimeLimit = (checked) => {
   if (!checked) {
@@ -307,15 +298,21 @@ const onBadgeSaved = () => {
       @saved="onBadgeSaved"
       @close="close">
     <template #default>
-      <icon-picker :startIcon="currentIcon" class="mr-3" @select-icon="toggleIconDisplay" :disabled="false"></icon-picker>
-
       <SkillsNameAndIdInput
           name-label="Badge Name"
           name-field-name="name"
           id-label="Badge ID"
           id-field-name="badgeId"
           id-suffix="Badge"
-          :name-to-id-sync-enabled="!props.isEdit" />
+          :name-to-id-sync-enabled="!props.isEdit">
+        <template #beforeName>
+          <icon-picker
+            class="mb-3"
+            :startIcon="currentIcon"
+            @selected-icon="onSelectedIcon"
+          />
+        </template>
+      </SkillsNameAndIdInput>
 
       <markdown-editor class="mt-5" name="description" />
 
@@ -330,7 +327,7 @@ const onBadgeSaved = () => {
             </div>
             <div class="flex gap-2" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
               <div>
-                <icon-picker :startIcon="awardIcon" class="mr-3" @select-icon="(e) => toggleIconDisplay(e, true)" :disabled="false"></icon-picker>
+                <icon-picker :startIcon="awardIcon" class="mr-3" @selected-icon="(e) => onSelectedIcon(e, true)" :disabled="false"></icon-picker>
               </div>
               <div class="w-full">
                 <label for="awardName">Award Name</label>
@@ -393,9 +390,7 @@ const onBadgeSaved = () => {
         </div>
       </div>
 
-      <OverlayPanel ref="op" :show-close-icon="true">
-        <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
-      </OverlayPanel>
+
     </template>
   </SkillsInputFormDialog>
 </template>

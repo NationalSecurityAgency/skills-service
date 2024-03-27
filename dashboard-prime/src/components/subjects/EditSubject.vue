@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import { string, object } from 'yup'
+import { object, string } from 'yup'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SubjectsService from '@/components/subjects/SubjectsService'
@@ -9,8 +9,7 @@ import InputSanitizer from '@/components/utils/InputSanitizer'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
-import IconManager from '@/components/utils/iconPicker/IconManager.vue'
-import OverlayPanel from 'primevue/overlaypanel'
+import IconPicker from '@/components/utils/iconPicker/IconPicker.vue'
 
 const model = defineModel()
 const props = defineProps({
@@ -54,12 +53,8 @@ const close = () => {
 
 const onSelectedIcon = (selectedIcon) => {
   currentIcon.value = selectedIcon.css
-  op.value.hide()
 }
 
-const toggleIconDisplay = (event) => {
-  op.value.toggle(event)
-}
 
 const checkSubjectNameUnique = (value) => {
   if (!value || value === props.subject.name) {
@@ -112,8 +107,7 @@ const initialSubjData = {
   iconClass: props.subject.iconClass || 'fas fa-book'
 }
 
-let currentIcon = ref((props.subject.iconClass || 'fas fa-book'))
-let op = ref()
+const currentIcon = ref((props.subject.iconClass || 'fas fa-book'))
 
 const updateSubject = (values) => {
   const subjToSave = {
@@ -136,9 +130,6 @@ const onSubjectSaved = (subject) => {
   emit('subject-saved', subject)
   close()
 }
-const asyncLoadData = () => {
-  return
-}
 
 </script>
 
@@ -155,54 +146,32 @@ const asyncLoadData = () => {
     @saved="onSubjectSaved"
     @close="close">
     <template #default>
-      <div class="flex gap-3">
-        <div class="flex-1">
-          <SkillsNameAndIdInput
-            name-label="Subject Name"
-            name-field-name="subjectName"
-            id-label="Subject ID"
-            id-field-name="subjectId"
-            id-suffix="Subject"
-            :name-to-id-sync-enabled="!props.isEdit">
-            <template #beforeName>
-              <div>
-                <SkillsButton
-                  @click="toggleIconDisplay"
-                  outlined
-                  id="iconPicker"
-                  @keypress.enter="toggleIconDisplay"
-                  role="button"
-                  aria-roledescription="icon selector button"
-                  aria-label="icon selector"
-                  tabindex="0"
-                  data-cy="iconPicker">
-                  <div class="text-primary">
-                    <i :class="[currentIcon]" />
-                  </div>
-                </SkillsButton>
-              </div>
-            </template>
-          </SkillsNameAndIdInput>
-        </div>
-      </div>
+      <SkillsNameAndIdInput
+        name-label="Subject Name"
+        name-field-name="subjectName"
+        id-label="Subject ID"
+        id-field-name="subjectId"
+        id-suffix="Subject"
+        :name-to-id-sync-enabled="!props.isEdit">
+        <template #beforeName>
+          <icon-picker
+            class="mb-3"
+            :startIcon="currentIcon"
+            @selected-icon="onSelectedIcon"
+          />
+        </template>
+      </SkillsNameAndIdInput>
 
       <markdown-editor class="" name="description" />
       <help-url-input class="mt-3"
                       :next-focus-el="previousFocus"
                       name="helpUrl"
                       @keydown-enter="emit('keydown-enter')" />
-
-      <OverlayPanel ref="op" :show-close-icon="true">
-        <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
-      </OverlayPanel>
     </template>
   </SkillsInputFormDialog>
 </template>
 
 <style scoped>
-i {
-  font-size: 3rem;
-}
 
 .icon-button {
   cursor: pointer;

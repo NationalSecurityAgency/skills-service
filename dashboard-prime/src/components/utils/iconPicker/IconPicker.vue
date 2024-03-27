@@ -14,59 +14,64 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import IconManager from '@/components/utils/iconPicker/IconManager.vue'
+import OverlayPanel from 'primevue/overlaypanel'
 
-const emit = defineEmits(['select-icon']);
+const emit = defineEmits(['selected-icon'])
 
 const props = defineProps({
   startIcon: String,
   customIconHeight: {
     type: Number,
-    default: 48,
+    default: 48
   },
   customIconWidth: {
     type: Number,
-    default: 48,
+    default: 48
   },
   disabled: {
     type: Boolean,
-    default: false,
-  },
-});
+    default: false
+  }
+})
 
-const selectIcon = (event) => {
-  emit('select-icon', event);
-};
+const iconManagerOverlayPanel = ref()
+
+
+const toggleIconDisplay = (event) => {
+  iconManagerOverlayPanel.value.toggle(event)
+}
+
+const onSelectedIcon = (selectedIcon) => {
+  iconManagerOverlayPanel.value.hide()
+  emit('selected-icon', selectedIcon)
+}
 </script>
 
 <template>
-  <button class="icon-button"
-       @click="selectIcon"
-       @keypress.enter="selectIcon"
-       role="button"
-       aria-roledescription="icon selector button"
-       aria-label="icon selector"
-       tabindex="0"
-       :disabled="disabled"
-       data-cy="iconPicker">
-    <div class="text-primary" style="min-height: 4rem;">
-      <i :class="[startIcon]" />
-    </div>
-  </button>
+  <div>
+    <SkillsButton
+      @click="toggleIconDisplay"
+      outlined
+      class="p-0"
+      id="iconPicker"
+      role="button"
+      aria-roledescription="icon selector button"
+      aria-label="icon selector"
+      :disabled="disabled"
+      data-cy="iconPicker">
+      <div class="text-primary text-5xl w-6rem h-5rem flex align-items-center justify-content-center m-0">
+        <i :class="[startIcon]" />
+      </div>
+    </SkillsButton>
+
+    <OverlayPanel ref="iconManagerOverlayPanel" :show-close-icon="true">
+      <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
+    </OverlayPanel>
+  </div>
 </template>
 
 <style scoped>
-  i {
-    font-size: 3rem;
-  }
 
-  .icon-button {
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    border-radius: 0.25em;
-  }
-
-  .icon-button:disabled {
-    background-color: lightgrey;
-    cursor: none;
-  }
 </style>
