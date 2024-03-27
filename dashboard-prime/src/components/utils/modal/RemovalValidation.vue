@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed, useSlots } from 'vue';
+import { ref, computed, useSlots, watch } from 'vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const focusState = useFocusState()
 const slots = useSlots();
@@ -23,6 +24,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'Delete Me',
+  },
+  removeButtonLabel: {
+    type: String,
+    required: false,
+    default: 'Yes, Do Remove!',
   },
   removalNotAvailable: {
     type: Boolean,
@@ -51,6 +57,13 @@ let currentValidationText = ref('');
 const removeDisabled = computed(() => {
   return currentValidationText.value !== props.validationText;
 });
+const announcer = useSkillsAnnouncer()
+watch(removeDisabled, (newValue) => {
+  console.log(newValue)
+  if(!newValue) {
+    announcer.polite(`Removal operation successfully enabled. Please click on ${props.removeButtonLabel} button`)
+  }
+})
 
 const publishHidden = (e) => {
   close()
@@ -82,7 +95,7 @@ const hasSlot = computed((name = 'default') => {
       cancel-button-severity="secondary"
       ok-button-severity="danger"
       :ok-button-icon="'fas fa-trash'"
-      ok-button-label="Yes, Do Remove!"
+      :ok-button-label="removeButtonLabel"
       :ok-button-disabled="removeDisabled"
       :show-ok-button="!removalNotAvailable"
       @on-ok="removeAction"

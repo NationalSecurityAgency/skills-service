@@ -28,6 +28,7 @@ import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDi
 import AddSkillsToBadgeDialog from '@/components/skills/badges/AddSkillsToBadgeDialog.vue'
 import AddSkillTagDialog from '@/components/skills/tags/AddSkillTagDialog.vue'
 import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.vue'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 
 const props = defineProps({
   groupId: String
@@ -50,7 +51,7 @@ const pagination = {
   possiblePageSizes: [10, 20, 50, 100]
 }
 
-const sortInfo = useStorage(`skillsTable-sort-${tableId}`, { sortOrder: -1, sortBy: 'created' })
+const sortInfo = ref({ sortOrder: -1, sortBy: 'created' })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   bordered: true,
@@ -151,6 +152,7 @@ const filters = ref({
 })
 const clearFilter = () => {
   filters.value.global.value = null
+  announcer.polite('Skills filter was reset. Showing all results')
 }
 const onFilter = (filterEvent) => {
   filteredCount.value = filterEvent.filteredValue.length
@@ -177,7 +179,6 @@ const onReorderSwitchChanged = (enabled) => {
 }
 const onColumnSort = (sortEvent) => {
   reorderEnable.value = false
-  announcer.polite(`Sorted by ${sortEvent.sortField} in ${sortEvent.sortOrder === 1 ? 'ascending' : 'descending'} order`)
 }
 
 const addSkillDisabled = ref(false)
@@ -345,8 +346,9 @@ const editImportedSkillInfo = ref({
 
 <template>
   <div>
-    <DataTable
+    <SkillsDataTable
       :id="tableId"
+      :table-id="tableId"
       :loading="skillsState.loadingSubjectSkills"
       :value="tableSkills"
       dataKey="skillId"
@@ -694,7 +696,7 @@ const editImportedSkillInfo = ref({
               </span>
         </div>
       </template>
-    </DataTable>
+    </SkillsDataTable>
 
     <skill-removal-validation
       v-if="deleteSkillInfo.show"

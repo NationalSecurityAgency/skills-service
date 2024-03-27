@@ -59,6 +59,7 @@ import SkillsCheckboxInput from '@/components/utils/inputForm/SkillsCheckboxInpu
 import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButtonInput.vue'
 import SkillsTextarea from '@/components/utils/inputForm/SkillsTextarea.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -121,6 +122,7 @@ app.component('SkillsCheckboxInput', SkillsCheckboxInput)
 app.component('SkillsRadioButtonInput', SkillsRadioButtonInput)
 app.component('SkillsTextarea', SkillsTextarea)
 app.component('SkillsDropDown', SkillsDropDown)
+app.component('SkillsDataTable', SkillsDataTable)
 
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);

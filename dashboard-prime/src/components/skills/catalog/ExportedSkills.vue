@@ -1,9 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
-import { useStorage } from '@vueuse/core'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useRoute } from 'vue-router'
-import DataTable from 'primevue/datatable'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import Column from 'primevue/column'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
@@ -12,7 +10,6 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import ExportedSkillRemovalValidation from '@/components/skills/catalog/ExportedSkillRemovalValidation.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -25,7 +22,7 @@ const totalRows = ref(1)
 const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
 const currentPage = ref(1)
-const sortInfo = useStorage('projectExportedSkillsTable', { sortOrder: -1, sortBy: 'exportedOn' })
+const sortInfo = ref({ sortOrder: -1, sortBy: 'exportedOn' })
 const initialLoadHadData = ref(false)
 const selectedRows = ref([])
 const expandedRows = ref([])
@@ -101,7 +98,8 @@ const doRemoveSkill = () => {
             title="No skills exported to Skills Catalog"
             data-cy="noExportedSkills"
           />
-          <DataTable
+          <SkillsDataTable
+            tableId="exportedSkillsTable"
             v-if="initialLoadHadData"
             :value="data"
             :loading="reloadData"
@@ -186,7 +184,7 @@ const doRemoveSkill = () => {
                 <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
               </div>
             </template>
-          </DataTable>
+          </SkillsDataTable>
         </div>
       </template>
     </Card>
