@@ -117,16 +117,16 @@ function rankAndLeaderboardOptOutPrefChanged() {
 <template>
   <sub-page-header title="Preferences"/>
 
-  <Card>
+  <Card v-if="!isLoading">
     <template #content>
       <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()">
         <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
         <div class="pt-2 pl-2">
-          <RadioButton v-model="settings.homePage.value" value="admin" inputId="admin" @change="homePagePrefChanged" />
+          <RadioButton v-model="settings.homePage.value" data-cy="admin" value="admin" inputId="admin" @change="homePagePrefChanged" />
           <label for="admin">Project Admin</label>
         </div>
         <div class="pt-2 pl-2">
-          <RadioButton v-model="settings.homePage.value" value="progress" inputId="progress" @change="homePagePrefChanged"/>
+          <RadioButton v-model="settings.homePage.value" data-cy="progress" value="progress" inputId="progress" @change="homePagePrefChanged"/>
           <label for="progress">Progress and Rankings</label>
         </div>
       </div>
@@ -137,7 +137,7 @@ function rankAndLeaderboardOptOutPrefChanged() {
         <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
       </div>
       <hr />
-      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" />
+      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave"/>
       <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
               <i class="fa fa-exclamation-circle" /> Unsaved Changes
       </span>

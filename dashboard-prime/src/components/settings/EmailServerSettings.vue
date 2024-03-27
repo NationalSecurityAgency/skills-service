@@ -5,22 +5,30 @@ import {useForm} from "vee-validate";
 import SettingsService from '@/components/settings/SettingsService.js';
 
 const schema = object({
-  publicUrl: string(),
-  fromEmail: string(),
-  host: string(),
-  port: number(),
-  protocol: string(),
+  publicUrl: string().required().label('Public URL'),
+  fromEmail: string().required().label('From Email'),
+  host: string().required().label('Host'),
+  port: number().required().min(0).max(65535).label('Port'),
+  protocol: string().required().label('Protocol'),
   tlsEnabled: boolean(),
   authEnabled: boolean(),
-  username: string(),
-  password: string(),
+  username: string().label('Username').when(['authEnabled'],  {
+    is: (authEnabled) => authEnabled === true,
+    then: (sch) => sch.required(),
+    otherwise: (sch) => sch.notRequired()
+  }),
+  password: string().label('Password').when(['authEnabled'],  {
+    is: (authEnabled) => authEnabled === true,
+    then: (sch) => sch.required(),
+    otherwise: (sch) => sch.notRequired()
+  }),
 });
 
-const { defineField, meta } = useForm({
+const { defineField, errors, meta } = useForm({
   validationSchema: schema,
   initialValues: {
     host: 'localhost',
-    port: '25',
+    port: 25,
     protocol: 'smtp',
     username: '',
     password: '',
@@ -152,14 +160,14 @@ function isAuthValid() {
     <SkillsTextInput name="publicUrl" label="Public URL" is-required />
     <SkillsTextInput name="fromEmail" label="From Email" is-required />
     <SkillsTextInput name="host" label="Host" is-required />
-    <SkillsTextInput name="port" label="Port" is-required />
+    <SkillsNumberInput class="w-full" label="Port" :min="0" name="port" is-required :useGrouping="false" />
     <SkillsTextInput name="protocol" label="Protocol" is-required />
 
     <div>
-      <InputSwitch v-model="tlsEnabled" class="mr-2" /> TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}
+      <InputSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" /> TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}
     </div>
     <div class="mt-2">
-      <InputSwitch v-model="authEnabled" class="mr-2" /> Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}
+      <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" /> Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}
       <Card v-if="authEnabled">
         <template #header>
           <div class="border-bottom-1 p-3 surface-border surface-100 mt-4" data-cy="metricsCard-header">
@@ -180,10 +188,10 @@ function isAuthValid() {
     </Message>
 
     <div class="flex gap-2 mt-4">
-      <SkillsButton v-on:click="testConnection" :disabled="!meta.valid || missingRequiredValues() || isTesting || isSaving"
+      <SkillsButton v-on:click="testConnection" :disabled="!meta.valid || isTesting || isSaving"
               data-cy="emailSettingsTest" label="Test" :icon="testButtonClass" aria-roledescription="test email server settings button">
       </SkillsButton>
-      <SkillsButton v-on:click="saveEmailSettings" :disabled="!meta.valid || !meta.dirty || missingRequiredValues() || isSaving || isTesting"
+      <SkillsButton v-on:click="saveEmailSettings" :disabled="!meta.valid || !meta.dirty || isSaving || isTesting"
                     data-cy="emailSettingsSave" label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">
       </SkillsButton>
     </div>

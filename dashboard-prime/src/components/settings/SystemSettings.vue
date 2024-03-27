@@ -18,8 +18,8 @@ const schema = object({
         }
         return false;
       }),
-  customHeader: string().label('Custom Header').noScript(),
-  customFooter: string().label('Custom Footer').noScript(),
+  customHeader: string().label('Custom Header').max(3000).noScript(),
+  customFooter: string().label('Custom Footer').max(3000).noScript(),
   userAgreement: string().label('User Agreement').noScript()
 });
 
