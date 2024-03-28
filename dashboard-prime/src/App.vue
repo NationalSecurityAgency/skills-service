@@ -15,6 +15,8 @@ import { useAccessState } from '@/stores/UseAccessState.js'
 import ConfirmDialog from 'primevue/confirmdialog'
 import { useGlobalNavGuards } from '@/router/UseGlobalNavGuards.js'
 import { useErrorHandling } from '@/interceptors/UseErrorHandling.js'
+import CustomizableHeader from "@/components/customization/CustomizableHeader.vue";
+import CustomizableFooter from "@/components/customization/CustomizableFooter.vue";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -67,7 +69,7 @@ onMounted(() => {
   <div role="presentation" class="surface-ground">
     <VueAnnouncer class="sr-only" />
 
-    <!--    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>-->
+    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app" class="px-3">
       <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center"/>
       <div v-if="!isLoadingApp" class="m-0">
@@ -85,7 +87,7 @@ onMounted(() => {
     </div>
     <ConfirmDialog></ConfirmDialog>
     <!--    <dashboard-footer />-->
-    <!--    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>-->
+    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->
   </div>
 </template>

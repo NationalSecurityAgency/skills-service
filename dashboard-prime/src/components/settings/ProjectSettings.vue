@@ -29,7 +29,7 @@ const discoverableProgressAndRanking = 'dpr';
 const privateInviteOnly = 'pio';
 
 const schema = yup.object({
-  helpUrlHost: yup.string().max(appConfig.maxCustomLabelLength).label('Root Help Url'),
+  helpUrlHost: yup.string().max(appConfig.maxCustomLabelLength).label('Root Help Url').urlValidator(),
   projectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Project Display Text'),
   subjectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Subject Display Text'),
   groupDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Group Display Text'),
@@ -476,8 +476,6 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-  <!--        <ValidationProvider rules="root_help_url|customUrlValidator" v-slot="{errors}"-->
-  <!--                            name="Root Help Url">-->
           <SkillsSettingTextInput name="helpUrlHost"
                                   label="Root Help Url"
                                   @input="updateSettingsField"

@@ -6,7 +6,7 @@ import SettingsService from '@/components/settings/SettingsService.js';
 
 const schema = object({
   publicUrl: string().required().label('Public URL'),
-  fromEmail: string().required().label('From Email'),
+  fromEmail: string().required().label('From Email').email(),
   host: string().required().label('Host'),
   port: number().required().min(0).max(65535).label('Port'),
   protocol: string().required().label('Protocol'),

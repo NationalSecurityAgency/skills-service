@@ -16,6 +16,13 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
         loadingConfig.value = false
       })
   }
+
+  const refreshConfig = () => {
+    return SettingsService.getConfig()
+        .then((response) => {
+          config.value = response
+        })
+  }
   const isLoadingConfig = computed(() => loadingConfig.value)
 
   const toNumOr0 = (strNum) => {
@@ -93,8 +100,14 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxContactOwnersMessageLength = computed(() => config.value.maxContactOwnersMessageLength)
   const defaultLandingPage = computed(() => config.value.defaultLandingPage)
   const maxSkillTagLength = computed(() => config.value.maxSkillTagLength)
+  const customHeader = computed(() => config.value.customHeader)
+  const customFooter = computed(() => config.value.customFooter)
+  const dashboardVersion = computed(() => config.value.dashboardVersion)
+  const buildTimestamp = computed(() => config.value.buildTimestamp)
+  const currentUsersCommunityDescriptor = computed(() => config.value.currentUsersCommunityDescriptor)
   return {
     loadConfigState,
+    refreshConfig,
     isLoadingConfig,
     defaultLandingPage,
     getConfigsThatStartsWith,
@@ -149,6 +162,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxSkillsInBulkImport,
     userSuggestOptions,
     maxContactOwnersMessageLength,
-    maxSkillTagLength
+    maxSkillTagLength,
+    customHeader,
+    customFooter,
+    dashboardVersion,
+    buildTimestamp,
+    currentUsersCommunityDescriptor
   }
 })

@@ -8,6 +8,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import Column from "primevue/column";
+import DataTable from "primevue/datatable";
 
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
@@ -59,28 +60,8 @@ onMounted(() => {
 let table = ref({
   options: {
     busy: true,
-    bordered: false,
-    outlined: true,
-    stacked: 'md',
     sortBy: 'userId',
-    sortDesc: false,
-    fields: [
-      {
-        key: 'userId',
-        label: props.roleDescription,
-        sortable: true,
-      },
-      {
-        key: 'roleName',
-        label: 'Role',
-        sortable: true,
-      },
-      {
-        key: 'controls',
-        label: '',
-        sortable: false,
-      },
-    ],
+    sortDesc: 1,
     pagination: {
       hideUnnecessary: true,
       server: false,
@@ -92,6 +73,7 @@ let table = ref({
     tableDescription: `${props.roleDescription} table`,
   },
 });
+
 let data = ref([]);
 let userIds = ref([]);
 const selectedUser = ref(null);
@@ -139,7 +121,7 @@ function loadData() {
   table.value.options.busy = true;
   const pageParams = {
     limit: 200,
-    ascending: !table.value.options.sortDesc,
+    ascending: table.value.options.sortDesc === 1,
     page: 1,
     orderBy: table.value.options.sortBy,
   };
@@ -316,7 +298,14 @@ defineExpose({
       </div>
     </div>
 
-    <DataTable :value="data" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="roleManagerTable" striped-rows>
+    <Message v-if="errNotification.enable" severity="error" data-cy="error-msg">
+      <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
+    </Message>
+
+    <DataTable :value="data" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="roleManagerTable" striped-rows
+               v-model:sort-field="table.options.sortBy"
+               v-model:sort-order="table.options.sortDesc"
+               paginator :rows="5">
       <Column :header="roleDescription" field="userId" sortable>
         <template #header>
           <span class="mr-2"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> </span>
@@ -356,6 +345,9 @@ defineExpose({
           </div>
         </template>
       </Column>
+      <template #paginatorstart>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
+      </template>
       <template #empty>
         <span class="flex align-items-center justify-content-center">There are no records to show</span>
       </template>

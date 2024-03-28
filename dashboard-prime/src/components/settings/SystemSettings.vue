@@ -5,7 +5,9 @@ import { object, string } from 'yup'
 import {useForm} from "vee-validate";
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import SettingsService from '@/components/settings/SettingsService.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
+const appConfig = useAppConfig();
 const timePeriodRegex = /^(PT)?(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
 
 const schema = object({
@@ -57,6 +59,7 @@ function saveSystemSettings() {
     userAgreement: userAgreement.value,
   }).then(() => {
     overallErrMsg.value = 'Saved!'
+    appConfig.refreshConfig();
   }).catch(() => {
     overallErrMsg.value = 'Failed to Save System Settings!';
   }).finally(() => {

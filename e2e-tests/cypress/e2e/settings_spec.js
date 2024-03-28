@@ -40,7 +40,7 @@ describe('Settings Tests', () => {
     const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
     const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
 
-    it.skip('paging controls are visible if number of records are larger then smallest page size', () => {
+    it('paging controls are visible if number of records are larger then smallest page size', () => {
         cy.intercept({
             method: 'GET',
             url: '/root/isRoot'
@@ -154,8 +154,6 @@ describe('Settings Tests', () => {
         cy.wait('@loadRootUsers');
         cy.get('[data-cy="rootrm"] [data-cy="roleManagerTable"] [data-cy=skillsBTableTotalRows]')
             .should('have.text', '15');
-        cy.get('[data-cy="rootrm"] [data-cy="roleManagerTable"] [data-cy=skillsBTablePaging] .page-item')
-            .should('have.length', 7);
     });
 
     it('Add and remove Root User', () => {
@@ -307,9 +305,9 @@ describe('Settings Tests', () => {
         cy.wait('@getEligibleForRoot');
     });
 
-    it.skip('Add Root User With No Query', () => {
+    it('Add Root User With No Query', () => {
 
-        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
             .as('addRoot');
@@ -325,7 +323,7 @@ describe('Settings Tests', () => {
             .as('checkRoot');
 
         cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
+
         cy.wait('@getProjects')
 
         cy.get('[data-cy="settings-button"] button')
@@ -341,9 +339,8 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="existingUserInput"]')
-            .first()
-            .type('{enter}');
+        cy.get('[data-cy="existingUserInput"] [data-pc-section="trigger"]').first().click();
+
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org')
             .click();
@@ -521,7 +518,7 @@ describe('Settings Tests', () => {
 
     });
 
-    it.skip('Add Supervisor User Not Found', () => {
+    it('Add Supervisor User Not Found', () => {
 
         // cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR', [{
@@ -765,7 +762,7 @@ describe('Settings Tests', () => {
         cy.get('[data-pc-name="message"]').should('be.visible');
     });
 
-    it.skip('System Settings', () => {
+    it('System Settings', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
@@ -999,7 +996,7 @@ describe('Settings Tests', () => {
             .should('not.be.disabled');
     });
 
-    it.skip('from email validation', () => {
+    it('from email validation', () => {
 
         cy.intercept('GET', '/root/getEmailSettings')
             .as('loadEmailSettings');
@@ -1051,7 +1048,7 @@ describe('Settings Tests', () => {
             .should('not.be.disabled');
     });
 
-    it.skip('custom header/footer should be full width', () => {
+    it('custom header/footer should be full width', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
@@ -1132,7 +1129,7 @@ describe('Settings Tests', () => {
             });
     });
 
-    it.skip('custom header/footer dynamic variable replacement', () => {
+    it('custom header/footer dynamic variable replacement', () => {
 
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
@@ -1553,7 +1550,7 @@ describe('Settings Tests', () => {
 
     });
 
-    it.skip('root help url validation', () => {
+    it('root help url validation', () => {
         cy.intercept('POST', '/admin/projects/proj1/settings')
             .as('setSettings');
         cy.request('POST', '/app/projects/proj1', {
@@ -1591,7 +1588,6 @@ describe('Settings Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Settings');
         cy.get('[data-cy="customLabelsSwitch"]').click();
         cy.get('[data-cy=levelDisplayNameTextInput]')
@@ -1604,30 +1600,30 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=helpUrlHostTextInput]')
             .clear()
             .type('javascript:alert("uh oh");');
-        cy.get('[data-cy=rootHelpUrlError]')
+        cy.get('[data-cy=helpUrlHostError]')
             .should('be.visible');
-        cy.get('[data-cy=rootHelpUrlError]')
-            .should('have.text', 'Root Help Url must start with "http(s)"');
+        cy.get('[data-cy=helpUrlHostError]')
+            .should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
         cy.get('[data-cy=saveSettingsBtn]')
             .should('be.disabled');
         cy.get('[data-cy=helpUrlHostTextInput]')
             .clear()
             .type('/foo?p1=v1&p2=v2');
-        cy.get('[data-cy=rootHelpUrlError]')
-            .should('have.text', 'Root Help Url must start with "http(s)"');
+        cy.get('[data-cy=helpUrlHostError]')
+            .should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
         cy.get('[data-cy=saveSettingsBtn]')
             .should('be.disabled');
         cy.get('[data-cy=helpUrlHostTextInput]')
             .clear()
             .type('http://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=rootHelpUrlError]')
+        cy.get('[data-cy=helpUrlHostError]')
             .should('not.exist');
         cy.get('[data-cy=saveSettingsBtn]')
             .should('be.enabled');
         cy.get('[data-cy=helpUrlHostTextInput]')
             .clear()
             .type('https://foo.bar?p1=v1&p2=v2');
-        cy.get('[data-cy=rootHelpUrlError]')
+        cy.get('[data-cy=helpUrlHostError]')
             .should('not.exist');
         cy.get('[data-cy=saveSettingsBtn]')
             .should('be.enabled');
