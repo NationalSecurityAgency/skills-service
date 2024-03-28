@@ -60,7 +60,6 @@ const removeDisabled = computed(() => {
 });
 const announcer = useSkillsAnnouncer()
 watch(removeDisabled, (newValue) => {
-  console.log(newValue)
   if(!newValue) {
     announcer.polite(`Removal operation successfully enabled. Please click on ${props.removeButtonLabel} button`)
   }

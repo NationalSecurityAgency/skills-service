@@ -1,15 +1,13 @@
 <script setup>
 
-import { ref, onMounted, computed } from 'vue';
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useStorage } from '@vueuse/core';
-import { useTruncateFormatter } from '@/components/utils/UseTruncateFormatter.js';
-import { useUserTagsUtils} from '@/components/utils/UseUserTagsUtils.js';
-import { useUserInfo } from '@/components/utils/UseUserInfo.js';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import QuizService from '@/components/quiz/QuizService.js';
-import DateCell from "@/components/utils/table/DateCell.vue";
+import { useTruncateFormatter } from '@/components/utils/UseTruncateFormatter.js'
+import { useUserTagsUtils } from '@/components/utils/UseUserTagsUtils.js'
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import Column from 'primevue/column'
+import QuizService from '@/components/quiz/QuizService.js'
+import DateCell from '@/components/utils/table/DateCell.vue'
 
 const props = defineProps({
   answerDefId: Number,
@@ -25,7 +23,7 @@ const userTagsUtils = useUserTagsUtils();
 const userInfo = useUserInfo();
 const quizId = ref(route.params.quizId);
 const answerHistory = ref([]);
-const sortInfo = useStorage('quizAnswerHistoryTable', {  sortOrder: 1, sortBy: 'updated' })
+const sortInfo = ref({  sortOrder: 1, sortBy: 'updated' })
 const tableOptions = ref({
   busy: false,
   bordered: true,
@@ -132,7 +130,9 @@ const expandLabel = (truncated) => {
 
 <template>
   <div>
-    <DataTable :value="answerHistory"
+    <SkillsDataTable
+      tableStoredStateId="answerHistory"
+      :value="answerHistory"
                :loading="tableOptions.busy"
                stripedRows
                showGridlines
@@ -212,7 +212,7 @@ const expandLabel = (truncated) => {
           </div>
         </template>
       </Column>
-    </DataTable>
+    </SkillsDataTable>
   </div>
 </template>
 

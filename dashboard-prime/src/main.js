@@ -8,6 +8,7 @@ import App from './App.vue'
 import router from './router'
 import VueAnnouncer from '@vue-a11y/announcer'
 import VueApexCharts from 'vue3-apexcharts';
+import log from 'loglevel';
 
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
@@ -68,6 +69,10 @@ import 'material-icons/css/material-icons.css';
 import 'material-icons/iconfont/material-icons.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 // import 'primevue/resources/themes/lara-light-green/theme.css'
+
+
+log.setLevel('warn')
+
 const pinia = createPinia()
 
 const app = createApp(App)

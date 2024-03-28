@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
@@ -9,7 +9,6 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -22,13 +21,13 @@ import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMove
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import EditImportedSkillDialog from '@/components/skills/skillsGroup/EditImportedSkillDialog.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import SettingsService from '@/components/settings/SettingsService.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDialog.vue'
 import AddSkillsToBadgeDialog from '@/components/skills/badges/AddSkillsToBadgeDialog.vue'
 import AddSkillTagDialog from '@/components/skills/tags/AddSkillTagDialog.vue'
 import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 const props = defineProps({
   groupId: String
@@ -43,6 +42,7 @@ const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
 const inviteOnlyProjectState = useInviteOnlyProjectState()
+const log = useLog()
 
 const subjectId = computed(() => route.params.subjectId)
 const tableId = props.groupId || route.params.subjectId
@@ -177,7 +177,7 @@ const onReorderSwitchChanged = (enabled) => {
     clearFilter()
   }
 }
-const onColumnSort = (sortEvent) => {
+const onColumnSort = () => {
   reorderEnable.value = false
 }
 
@@ -309,12 +309,24 @@ const disableRow = (row) => {
 }
 
 const onMoved = (movedInfo) => {
-  skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId, false)
+  if (log.isTraceEnabled()) {
+    log.trace(`onMoved ${JSON.stringify(movedInfo)}`)
+  }
+  const movedSkillIds = movedInfo.moved.map((sk) => sk.skillId)
+  const groupSkill = movedInfo.moved.find((sk) => sk.groupId)
+  const origSkills = groupSkill ? skillsState.getGroupSkills(groupSkill.groupId) : skillsState.subjectSkills
+  const movedSkills = origSkills.filter((sk) => movedSkillIds.includes(sk.skillId))
+
+  if (route.params.subjectId === movedInfo.destination.subjectId && !movedInfo.destination.groupId) {
+    skillsState.pushIntoSubjectSkills(toRaw(movedSkills))
+  }
+  const aMovedSkills = movedInfo.moved[0]
+  if (route.params.subjectId === aMovedSkills.subjectId && !aMovedSkills.groupId) {
+    skillsState.removeSubjectSkillsBySkillIds(movedSkillIds)
+  }
   if (movedInfo.destination.groupId) {
     skillsState.loadGroupSkills(route.params.projectId, movedInfo.destination.groupId)
   }
-  // if skills moved out of a group, refresh that group too
-  const groupSkill = movedInfo.moved.find((sk) => sk.groupId)
   if (groupSkill) {
     skillsState.loadGroupSkills(route.params.projectId, groupSkill.groupId)
   }
@@ -323,10 +335,17 @@ const onMoved = (movedInfo) => {
   subjectState.loadSubjectDetailsState()
 }
 
-const onExported = (groupId = null) => {
-  skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId, false)
-  if (groupId) {
-    skillsState.loadGroupSkills(route.params.projectId, groupId)
+const onExported = (exportInfo) => {
+  const exportedSkillIds = exportInfo.exported.map((sk) => sk.skillId)
+
+  if (exportInfo.groupId) {
+    skillsState.loadGroupSkills(route.params.projectId, exportInfo.groupId)
+  } else {
+    skillsState.subjectSkills.forEach((skill) => {
+      if (exportedSkillIds.includes(skill.skillId)) {
+        skill.sharedToCatalog = true
+      }
+    })
   }
   removeSelectedRows()
   subjectState.loadSubjectDetailsState()
@@ -348,7 +367,7 @@ const editImportedSkillInfo = ref({
   <div>
     <SkillsDataTable
       :id="tableId"
-      :table-id="tableId"
+      :tableStoredStateId="tableId"
       :loading="skillsState.loadingSubjectSkills"
       :value="tableSkills"
       dataKey="skillId"

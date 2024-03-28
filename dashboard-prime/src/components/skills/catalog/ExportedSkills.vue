@@ -99,7 +99,7 @@ const doRemoveSkill = () => {
             data-cy="noExportedSkills"
           />
           <SkillsDataTable
-            tableId="exportedSkillsTable"
+            tableStoredStateId="exportedSkillsTable"
             v-if="initialLoadHadData"
             :value="data"
             :loading="reloadData"

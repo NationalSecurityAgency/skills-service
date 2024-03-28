@@ -8,7 +8,7 @@ const sortField = defineModel('sortField')
 const sortOrder = defineModel('sortOrder')
 const emit = defineEmits(['sort', 'filter', 'page'])
 const props = defineProps({
-  tableId: {
+  tableStoredStateId: {
     type: String,
     required: true
   }
@@ -16,7 +16,7 @@ const props = defineProps({
 const slots = useSlots()
 const announcer = useSkillsAnnouncer()
 
-const sortInfo = useStorage(`skillsTable-sort-${props.tableId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
+const sortInfo = useStorage(`skillsTable-sort-${props.tableStoredStateId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
 
 sortField.value = sortInfo.value.sortBy
 sortInfo.value.sortBy = toRef(() => sortField.value)
@@ -51,12 +51,9 @@ const onPage = (pageEvent) => {
     @filter="onFilter"
     @page="onPage"
   >
-
-    <template #footer>
-      sortField: {{ sortField }}, sortInfo: {{ sortInfo.sortBy }}
-    </template>
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
-      <slot :name="name" v-bind="{...slotData}" />
+      <slot v-if="slotData" :name="name" v-bind="slotData" />
+      <slot v-else :name="name" />
     </template>
   </DataTable>
 </template>
