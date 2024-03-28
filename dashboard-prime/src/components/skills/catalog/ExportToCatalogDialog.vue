@@ -29,14 +29,16 @@ const communityLabels = useCommunityLabels()
 const appConfig = useAppConfig()
 
 const handleOkBtn = () => {
-  if (state.value.exported) {
-    emit('on-exported', {groupId: props.groupId, exported: toRaw(skillsFiltered.value)})
-  } else {
+  if (!state.value.exported) {
     emit('on-nothing-to-export')
   }
   handleClose()
 }
 const handleClose = () => {
+  console.log(state.value.exported)
+  if (state.value.exported) {
+    emit('on-exported', {groupId: props.groupId, exported: toRaw(skillsFiltered.value)})
+  }
   model.value = false
   if (state.value.exported) {
     const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
