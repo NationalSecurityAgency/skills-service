@@ -7,7 +7,6 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import DataTable from 'primevue/datatable'
 import SkillToImportInfo from '@/components/skills/catalog/SkillToImportInfo.vue'
 import { useStorage } from '@vueuse/core'
 import { SkillsReporter } from '@skilltree/skills-client-js'
@@ -268,7 +267,8 @@ const onUpdateVisible = (newVal) => {
 
         </div>
 
-        <DataTable
+        <SkillsDataTable
+          tableStoredStateId="importSkillsFromCatalog"
           :value="data"
           :loading="reloadData"
           v-model:selection="selectedRows"
@@ -282,7 +282,6 @@ const onUpdateVisible = (newVal) => {
           :rows="pageSize"
           @page="pageChanged"
           :rowClass="rowClass"
-          tableStoredStateId="usersTable"
           data-cy="importSkillsFromCatalogTable"
           :rowsPerPageOptions="possiblePageSizes">
           <!--      <template #loading> Loading customers data. Please wait. </template>-->
@@ -366,7 +365,7 @@ const onUpdateVisible = (newVal) => {
               <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
             </div>
           </template>
-        </DataTable>
+        </SkillsDataTable>
       </div>
 
       <Message v-if="maxBulkImportExceeded" data-cy="maximum-selected" :closable="false" severity="warn">

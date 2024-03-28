@@ -298,8 +298,8 @@ const handleFocus = (e) => {
 
     <Card>
       <template #content>
-        <DataTable v-if="!loading" :options="table.options" :loading="loading" :value="levels"
-                   tableStoredStateId="levelsTable" data-cy="levelsTable" size="small" stripedRows>
+        <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
+                   data-cy="levelsTable" size="small" stripedRows>
           <Column field="level" header="Level">
             <template #body="slotProps">
               {{ slotProps.data.level }}
@@ -330,7 +330,7 @@ const handleFocus = (e) => {
               <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" />
             </template>
           </Column>
-        </DataTable>
+        </SkillsDataTable>
       </template>
     </Card>
     <new-level v-if="displayLevelModal && levels"

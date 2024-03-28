@@ -9,7 +9,6 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -22,7 +21,6 @@ import ReuseOrMoveSkillsDialog from '@/components/skills/reuseSkills/ReuseOrMove
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import EditImportedSkillDialog from '@/components/skills/skillsGroup/EditImportedSkillDialog.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import SettingsService from '@/components/settings/SettingsService.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 import ExportToCatalogDialog from '@/components/skills/catalog/ExportToCatalogDialog.vue'
 import AddSkillsToBadgeDialog from '@/components/skills/badges/AddSkillsToBadgeDialog.vue'
@@ -348,7 +346,7 @@ const editImportedSkillInfo = ref({
   <div>
     <SkillsDataTable
       :id="tableId"
-      :table-id="tableId"
+      :tableStoredStateId="tableId"
       :loading="skillsState.loadingSubjectSkills"
       :value="tableSkills"
       dataKey="skillId"

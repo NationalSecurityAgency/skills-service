@@ -1,40 +1,39 @@
 <script setup>
 
-import { computed, onMounted, ref } from 'vue';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
-import CheckSelector from '@/common-components/quiz/CheckSelector.vue';
-import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue';
+import { computed, onMounted, ref } from 'vue'
+import Column from 'primevue/column'
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import CheckSelector from '@/common-components/quiz/CheckSelector.vue'
+import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
 
 const props = defineProps({
   q: Object,
   isSurvey: Boolean,
-  num: Number,
+  num: Number
 })
 
 const averageScore = ref(0)
 const answers = ref([])
 const expandedRows = ref([])
 
-const series = [props.q.numAnsweredCorrect, props.q.numAnsweredWrong];
+const series = [props.q.numAnsweredCorrect, props.q.numAnsweredWrong]
 const chartOptions = {
   labels: ['Correct', 'Wrong'],
   colors: ['#007c49', '#ffc42b'],
   chart: {
     width: 300,
-    type: 'donut',
+    type: 'donut'
   },
   plotOptions: {
     pie: {
       startAngle: -180,
-      endAngle: 180,
-    },
+      endAngle: 180
+    }
   },
   dataLabels: {
     enabled: true,
     style: {
-      fontSize: '14px',
+      fontSize: '14px'
     },
     background: {
       enabled: true,
@@ -50,23 +49,23 @@ const chartOptions = {
         left: 1,
         blur: 1,
         color: '#000',
-        opacity: 0.45,
-      },
+        opacity: 0.45
+      }
     },
     dropShadow: {
-      enabled: false,
-    },
+      enabled: false
+    }
   },
   fill: {
-    type: 'gradient',
+    type: 'gradient'
   },
   legend: {
     position: 'left',
     formatter(val, opts) {
-      return `${val}: ${opts.w.globals.series[opts.seriesIndex]} Attempts`;
-    },
-  },
-};
+      return `${val}: ${opts.w.globals.series[opts.seriesIndex]} Attempts`
+    }
+  }
+}
 const tableOptions = {
   bordered: true,
   outlined: true,
@@ -76,14 +75,14 @@ const tableOptions = {
       key: 'answer',
       label: 'Answer',
       sortable: false,
-      imageClass: 'fas fa-check-double skills-color-projects',
+      imageClass: 'fas fa-check-double skills-color-projects'
     },
     {
       key: 'numAnswered',
       label: '# of Times Selected',
       sortable: false,
-      imageClass: 'fas fa-user-check skills-color-badges',
-    },
+      imageClass: 'fas fa-user-check skills-color-badges'
+    }
   ],
   pagination: {
     hideUnnecessary: true,
@@ -91,68 +90,78 @@ const tableOptions = {
     currentPage: 1,
     totalRows: props.q.answers.length,
     pageSize: 5,
-    possiblePageSizes: [5, 10, 15, 20],
-  },
+    possiblePageSizes: [5, 10, 15, 20]
+  }
 }
 
 onMounted(() => {
-  const totalNumUsers = props.q.numAnsweredCorrect + props.q.numAnsweredWrong;
-  answers.value = props.q.answers.map((a) => ({ ...a, selected: a.selected ? a.selected : false, percent: (totalNumUsers > 0 ? Math.trunc((a.numAnswered / totalNumUsers) * 100) : 0) }));
+  const totalNumUsers = props.q.numAnsweredCorrect + props.q.numAnsweredWrong
+  answers.value = props.q.answers.map((a) => ({
+    ...a,
+    selected: a.selected ? a.selected : false,
+    percent: (totalNumUsers > 0 ? Math.trunc((a.numAnswered / totalNumUsers) * 100) : 0)
+  }))
   if (isRating.value) {
-    let totalScore = 0;
-    let totalAnswers = 0;
+    let totalScore = 0
+    let totalAnswers = 0
     answers.value.forEach((answer) => {
-      totalAnswers += answer.numAnswered;
-      totalScore += (answer.answer * answer.numAnswered);
-    });
-    averageScore.value = totalScore / totalAnswers;
+      totalAnswers += answer.numAnswered
+      totalScore += (answer.answer * answer.numAnswered)
+    })
+    averageScore.value = totalScore / totalAnswers
   }
-});
+})
 
 const questionTypeLabel = computed(() => {
-  return props.q.questionType.match(/[A-Z][a-z]+/g).join(' ');
-});
+  return props.q.questionType.match(/[A-Z][a-z]+/g).join(' ')
+})
 const isMultipleChoice = computed(() => {
-  return props.q.questionType === 'MultipleChoice';
-});
+  return props.q.questionType === 'MultipleChoice'
+})
 const isTextInput = computed(() => {
-  return props.q.questionType === 'TextInput';
-});
+  return props.q.questionType === 'TextInput'
+})
 const isRating = computed(() => {
-  return props.q.questionType === 'Rating';
-});
+  return props.q.questionType === 'Rating'
+})
 const qNum = computed(() => {
-  return props.num + 1;
-});
+  return props.num + 1
+})
 const numberOfStars = computed(() => {
-  return props.q.answers.length;
-});
+  return props.q.answers.length
+})
 </script>
 
 <template>
   <div :data-cy="`metrics-q${qNum}`">
     <div class="p-4">
-      <div class="text-3xl">Question #{{qNum}} <Tag class="text-lg" severity="info" data-cy="qType">{{ questionTypeLabel }}</Tag></div>
+      <div class="text-3xl">Question #{{ qNum }}
+        <Tag class="text-lg" severity="info" data-cy="qType">{{ questionTypeLabel }}</Tag>
+      </div>
       <div>
         <markdown-text :text="q.question"
-                       :instance-id="`${q.id}`"/>
+                       :instance-id="`${q.id}`" />
       </div>
       <div v-if="!isSurvey">
         <div>
-          <apexchart :type="chartOptions.chart.type" :width="chartOptions.chart.width" :options="chartOptions" :series="series"></apexchart>
+          <apexchart :type="chartOptions.chart.type" :width="chartOptions.chart.width" :options="chartOptions"
+                     :series="series"></apexchart>
         </div>
       </div>
     </div>
 
     <div v-if="isRating && averageScore" class="flex align-items-baseline flex-wrap pl-3">
       Average Score:
-      <Rating class="flex-initial border-round py-3 px-4" v-model="averageScore" :stars="numberOfStars" readonly :cancel="false"/>
-      <span class="text-lg">{{averageScore}}</span>
+      <Rating class="flex-initial border-round py-3 px-4" v-model="averageScore" :stars="numberOfStars" readonly
+              :cancel="false" />
+      <span class="text-lg">{{ averageScore }}</span>
     </div>
 
-    <DataTable v-if="!isTextInput && answers"
-               v-model:expandedRows="expandedRows"
-               :value="answers">
+    <SkillsDataTable
+      tableStoredStateId="quizQuestionMetrics"
+      v-if="!isTextInput && answers"
+      v-model:expandedRows="expandedRows"
+      :value="answers">
       <Column expander
               style="width: 2rem"
               :pt="{
@@ -169,10 +178,13 @@ const numberOfStars = computed(() => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field === 'answer'" :data-cy="`row${slotProps.index}-colAnswer`">
-            <CheckSelector v-if="!isSurvey" :value="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem" :data-cy="`checkbox-${slotProps.data.isCorrect}`"/> {{ slotProps.data[col.key] }}
+            <CheckSelector v-if="!isSurvey" :value="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem"
+                           :data-cy="`checkbox-${slotProps.data.isCorrect}`" />
+            {{ slotProps.data[col.key] }}
           </div>
           <div v-else-if="slotProps.field === 'numAnswered'" :data-cy="`row${slotProps.index}-colNumAnswered`">
-            <span data-cy="num">{{ slotProps.data[col.key] }}</span> <Tag data-cy="percent">{{ slotProps.data.percent }}%</Tag>
+            <span data-cy="num">{{ slotProps.data[col.key] }}</span>
+            <Tag data-cy="percent">{{ slotProps.data.percent }}%</Tag>
           </div>
           <div v-else>
             {{ slotProps.data[col.key] }}
@@ -181,18 +193,19 @@ const numberOfStars = computed(() => {
       </Column>
       <template #expansion="slotProps">
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
-                             :data-cy="`row${slotProps.index}-answerHistory`"
-                             class="mb-4"/>
+                           :data-cy="`row${slotProps.index}-answerHistory`"
+                           class="mb-4" />
       </template>
-    </DataTable>
+    </SkillsDataTable>
 
     <div v-if="!isSurvey && isMultipleChoice" class="bg-gray-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
-      *** All of the required choices must be selected for the question to be counted as <span class="text-success uppercase">correct</span> ***
+      *** All of the required choices must be selected for the question to be counted as <span
+      class="text-success uppercase">correct</span> ***
     </div>
 
     <QuizAnswerHistory v-if="isSurvey && isTextInput"
-                         :question-type="q.questionType"
-                         :answer-def-id="q.answers[0].id"/>
+                       :question-type="q.questionType"
+                       :answer-def-id="q.answers[0].id" />
 
   </div>
 

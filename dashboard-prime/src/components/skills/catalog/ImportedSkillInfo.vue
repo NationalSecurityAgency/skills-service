@@ -48,7 +48,8 @@ const contactProjAdmins = (projInfo) => {
   <div :data-cy="`importSkillInfo-${skill.projectId}_${skill.skillId}`" class="ml-5">
 
     <div v-if="skill.importedProjectCount > 0">
-      <DataTable
+      <SkillsDataTable
+        tableStoredStateId="importSkillInfo"
         :value="importedProjects"
         sortField="skillName"
         :sortOrder="1"
@@ -87,7 +88,7 @@ const contactProjAdmins = (projInfo) => {
             <date-cell :value="slotProps.data.importedOn" />
           </template>
         </Column>
-      </DataTable>
+      </SkillsDataTable>
 
     </div>
     <div v-else>

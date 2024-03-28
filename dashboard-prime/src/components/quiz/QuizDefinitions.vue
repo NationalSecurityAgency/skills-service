@@ -15,25 +15,23 @@ limitations under the License.
 */
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useStorage } from '@vueuse/core';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import { FilterMatchMode } from 'primevue/api';
-import QuizService from '@/components/quiz/QuizService.js';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import NoContent2 from '@/components/utils/NoContent2.vue';
-import Column from 'primevue/column';
-import DateCell from '@/components/utils/table/DateCell.vue';
-import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import { FilterMatchMode } from 'primevue/api'
+import QuizService from '@/components/quiz/QuizService.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import Column from 'primevue/column'
+import DateCell from '@/components/utils/table/DateCell.vue'
+import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
-import DataTable from "primevue/datatable";
 
 const announcer = useSkillsAnnouncer()
 const loading = ref(false);
 const quizzes = ref([]);
-const sortInfo = useStorage('quizDefinitionsTable', {  sortOrder: 1, sortBy: 'created' })
+const sortInfo = ref({ sortOrder: 1, sortBy: 'created' })
 const options = ref({
   emptyText: 'Click Test+ on the top-right to create a test!',
   busy: false,
@@ -169,16 +167,19 @@ defineExpose({
                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
                 data-cy="noQuizzesYet"/>
     <div v-if="!loading && hasData">
-      <DataTable :value="quizzes" tableStyle="min-width: 50rem"
-                 data-cy="quizDefinitionsTable"
-                 v-model:filters="filters"
-                 :globalFilterFields="['name']"
-                 @filter="onFilter"
-                 v-model:sort-field="sortInfo.sortBy"
-                 v-model:sort-order="sortInfo.sortOrder"
-                 paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
-                 show-gridlines
-                 striped-rows>
+      <SkillsDataTable
+        tableStoredStateId="quizDefinitionsTable"
+        :value="quizzes"
+        tableStyle="min-width: 50rem"
+        data-cy="quizDefinitionsTable"
+        v-model:filters="filters"
+        :globalFilterFields="['name']"
+        @filter="onFilter"
+        v-model:sort-field="sortInfo.sortBy"
+        v-model:sort-order="sortInfo.sortOrder"
+        paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+        show-gridlines
+        striped-rows>
         <template #header>
           <div class="flex gap-1">
             <InputGroup>
@@ -280,7 +281,7 @@ defineExpose({
             </div>
           </template>
         </Column>
-      </DataTable>
+      </SkillsDataTable>
     </div>
 
     <edit-quiz
