@@ -1,4 +1,4 @@
-import { computed, useSlots } from 'vue';
+import { useSlots } from 'vue';
 
 
 export const useSlotsUtil = () => {
