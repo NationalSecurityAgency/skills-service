@@ -1,13 +1,14 @@
 <script setup>
-import { ref, computed, useSlots, watch } from 'vue'
+import { ref, computed, watch } from 'vue';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSlotsUtil } from '@/components/utils/UseSlotsUtil.js';
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
-import { useFocusState } from '@/stores/UseFocusState.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const focusState = useFocusState()
-const slots = useSlots();
+const slotsUtil = useSlotsUtil();
 
 const emit = defineEmits(['hidden', 'do-remove']);
 
@@ -81,9 +82,8 @@ const removeAction = () => {
 const close = () => {
   model.value = false
 }
-const hasSlot = computed((name = 'default') => {
-  const hasSlot = (slots && slots[name]) ? true : false;
-  return hasSlot
+const hasSlot = computed(() => {
+  return slotsUtil.hasSlot()
 })
 </script>
 
