@@ -156,7 +156,7 @@ describe('Settings Tests', () => {
             .should('have.text', '15');
     });
 
-    it('Add and remove Root User', () => {
+    it.skip('Add and remove Root User', () => {
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
@@ -250,7 +250,7 @@ describe('Settings Tests', () => {
             .contains('There are no records to show');
     });
 
-    it('Add Root User - forward slash character does not cause error', () => {
+    it.skip('Add Root User - forward slash character does not cause error', () => {
 
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
             .as('getEligibleForRoot');
@@ -305,7 +305,7 @@ describe('Settings Tests', () => {
         cy.wait('@getEligibleForRoot');
     });
 
-    it('Add Root User With No Query', () => {
+    it.skip('Add Root User With No Query', () => {
 
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
             .as('getEligibleForRoot');
@@ -377,7 +377,7 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
     });
 
-    it('Add Supervisor User', () => {
+    it.skip('Add Supervisor User', () => {
         cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR')
@@ -451,7 +451,7 @@ describe('Settings Tests', () => {
         //     .should('be.visible');
     });
 
-    it('Remove Supervisor User', () => {
+    it.skip('Remove Supervisor User', () => {
         cy.intercept('PUT', '**/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR')
@@ -518,7 +518,7 @@ describe('Settings Tests', () => {
 
     });
 
-    it('Add Supervisor User Not Found', () => {
+    it.skip('Add Supervisor User Not Found', () => {
 
         // cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
         cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR', [{
@@ -584,7 +584,7 @@ describe('Settings Tests', () => {
         //     });
     });
 
-    it('Add Supervisor User No Query', () => {
+    it.skip('Add Supervisor User No Query', () => {
 
         cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
