@@ -52,7 +52,8 @@ const onPage = (pageEvent) => {
     @page="onPage"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
-      <slot :name="name" v-bind="{...slotData}" />
+      <slot v-if="slotData" :name="name" v-bind="slotData" />
+      <slot v-else :name="name" />
     </template>
   </DataTable>
 </template>

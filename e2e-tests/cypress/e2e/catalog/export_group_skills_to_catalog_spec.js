@@ -58,6 +58,7 @@ describe('Export Group Skills to the Catalog Tests', () => {
             .should('exist');
         cy.get('[data-cy="exportedBadge-skill21"]')
             .should('not.exist');
+        cy.get('[data-cy="addSkillToGroupBtn-group20"]').should('have.focus')
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');

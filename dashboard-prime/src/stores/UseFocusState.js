@@ -1,15 +1,19 @@
 import { ref, nextTick } from 'vue'
 import { defineStore } from 'pinia'
 import { useTimeoutFn } from '@vueuse/core'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useFocusState = defineStore('focusState', () => {
+  const log = useLog()
   const elementId = ref('')
 
   function setElementId(newId) {
+    log.trace(`setting focus on [${newId}]`)
     elementId.value = newId
   }
 
   const focusAndReset = (element) => {
+    log.trace(`focusing on [${elementId.value}]`)
     element.focus()
     resetElementId()
   }
@@ -34,6 +38,8 @@ export const useFocusState = defineStore('focusState', () => {
     nextTick(() => {
       if (isElementIdPresent()) {
         checkOrWait(0)
+      } else {
+        log.trace(`No element to focus on [${elementId.value}]`)
       }
     })
   }
@@ -43,6 +49,7 @@ export const useFocusState = defineStore('focusState', () => {
   }
 
   function resetElementId() {
+    log.trace('reset focus elementId')
     return setElementId('')
   }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRaw } from 'vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useRoute } from 'vue-router'
@@ -29,13 +29,18 @@ const communityLabels = useCommunityLabels()
 const appConfig = useAppConfig()
 
 const handleOkBtn = () => {
-  emit('on-nothing-to-export')
+  if (state.value.exported) {
+    emit('on-exported', {groupId: props.groupId, exported: toRaw(skillsFiltered.value)})
+  } else {
+    emit('on-nothing-to-export')
+  }
   handleClose()
 }
 const handleClose = () => {
   model.value = false
   if (state.value.exported) {
-    focusState.setElementId('newSkillBtn')
+    const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
+    focusState.setElementId(focusOn)
   }
   focusState.focusOnLastElement()
 }
@@ -107,7 +112,6 @@ const handleExport = () => {
     .then(() => {
       state.value.exported = true
       SkillsReporter.reportSkill('ExporttoCatalog')
-      emit('on-exported', props.groupId)
     })
     .finally(() => {
       state.value.exporting = false

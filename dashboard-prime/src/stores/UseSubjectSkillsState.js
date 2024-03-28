@@ -2,15 +2,32 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useRoute } from 'vue-router'
 import SkillsService from '@/components/skills/SkillsService.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   const subjectSkills = ref([])
   const groupSkills = ref(new Map())
   const loadingSubjectSkills = ref(false)
   const route = useRoute()
+  const log = useLog()
 
   function setSubjectSkills(value) {
+    log.trace('called setSubjectSkills')
     subjectSkills.value = value
+  }
+
+  function pushIntoSubjectSkills(itemsToAdd) {
+    log.trace(`pushed ${itemsToAdd.length} into subjectSkills`)
+    if (itemsToAdd instanceof Array) {
+      subjectSkills.value.push(...itemsToAdd)
+    } else {
+      subjectSkills.value.push(itemsToAdd)
+    }
+  }
+
+  const removeSubjectSkillsBySkillIds = (skillIdsToRemove) => {
+    log.trace(`removing ${skillIdsToRemove.length} skills`)
+    subjectSkills.value = subjectSkills.value.filter((skill) => !skillIdsToRemove.includes(skill.skillId))
   }
 
   function setLoadingSubjectSkills(value) {
@@ -22,26 +39,23 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   })
 
   function loadSubjectSkills(projectId, subjectId, updateLoadingFlag = true) {
+    log.trace(`loading subject skills for project=[${projectId}], subject=[${subjectId}], updateLoadingFlag=[${updateLoadingFlag}]`)
     if (updateLoadingFlag) {
       setLoadingSubjectSkills(true)
     }
-    return new Promise((resolve, reject) => {
-      SkillsService.getSubjectSkills(projectId, subjectId)
-        .then((loadedSkills) => {
-          const updatedSkills = loadedSkills.map((loadedSkill) => ({
-            ...loadedSkill,
-            subjectId: route.params.subjectId,
-          }))
-          setSubjectSkills(updatedSkills)
-          resolve(updatedSkills)
-        })
-        .catch((error) => reject(error))
-        .finally(() => {
-          if (updateLoadingFlag) {
-            setLoadingSubjectSkills(false)
-          }
-        })
-    })
+    return SkillsService.getSubjectSkills(projectId, subjectId)
+      .then((loadedSkills) => {
+        const updatedSkills = loadedSkills.map((loadedSkill) => ({
+          ...loadedSkill,
+          subjectId: route.params.subjectId
+        }))
+        setSubjectSkills(updatedSkills)
+      })
+      .finally(() => {
+        if (updateLoadingFlag) {
+          setLoadingSubjectSkills(false)
+        }
+      })
   }
 
   const totalNumSkillsInSubject = computed(() => {
@@ -71,12 +85,19 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
           subjectId: route.params.subjectId
         }))
         setGroupSkills(groupId, updatedSkills)
+        const foundGroup = subjectSkills.value.find((skill) => skill.skillId === groupId)
+        if(foundGroup) {
+          foundGroup.numSkillsInGroup = updatedSkills.length
+        }
       })
   }
 
 
   return {
     subjectSkills,
+    setSubjectSkills,
+    pushIntoSubjectSkills,
+    removeSubjectSkillsBySkillIds,
     loadingSubjectSkills,
     setLoadingSubjectSkills,
     loadSubjectSkills,
