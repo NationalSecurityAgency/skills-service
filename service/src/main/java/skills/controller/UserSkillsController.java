@@ -31,8 +31,10 @@ import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import skills.PublicProps;
+import skills.auth.AuthMode;
 import skills.auth.UserInfoService;
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied;
+import skills.auth.inviteOnly.InviteOnlyAccessDeniedException;
 import skills.controller.exceptions.AttachmentValidator;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
@@ -42,12 +44,11 @@ import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
 import skills.controller.result.model.TableResult;
 import skills.controller.result.model.UploadAttachmentResult;
+import skills.controller.result.model.UserRoleRes;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
-import skills.services.AttachmentService;
-import skills.services.SelfReportingService;
-import skills.services.VersionService;
-import skills.services.VideoCaptionsService;
+import skills.services.*;
+import skills.services.admin.InviteOnlyProjectService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -55,6 +56,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
 import skills.storage.model.Attachment;
+import skills.storage.model.auth.RoleName;
 import skills.utils.MetricsLogger;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -116,6 +118,12 @@ class UserSkillsController {
 
     @Autowired
     AttachmentService attachmentService;
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService;
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService;
 
     @Autowired
     VideoCaptionsService videoCaptionsService;
@@ -528,6 +536,14 @@ class UserSkillsController {
         if (attachment == null) {
             throw new SkillException("Attachment for uuid [" + uuid + "] does not exist");
         }
+
+        if (attachment.getProjectId() != null && inviteOnlyProjectService.isInviteOnlyProject(attachment.getProjectId())) {
+            String userId = userInfoService.getCurrentUserId();
+            if (!inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.getProjectId(), userId)) {
+                throw new InviteOnlyAccessDeniedException("Access is denied", attachment.getProjectId());
+            }
+        }
+
         try (InputStream inputStream = attachment.getContent().getBinaryStream();
              OutputStream outputStream = response.getOutputStream()) {
             response.setContentType(attachment.getContentType());
