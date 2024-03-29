@@ -15,7 +15,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true
+    required: false
   },
   isRequired: {
     type: Boolean,
@@ -49,25 +49,29 @@ const handleOnInput = (event) => {
 
 <template>
   <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
-    <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
-    <InputNumber
-      inputClass="sm:w-3rem"
-      class="w-full"
-      type="number"
-      v-bind="fallthroughAttributes.inputAttrs.value"
-      v-model="value"
-      @keydown.enter="onEnter"
-      @input="handleOnInput"
-      :disabled="disabled"
-      :data-cy="$attrs['data-cy'] || name"
-      :autofocus="autofocus"
-      :id="name"
-      :inputId="`input${name}`"
-      :class="{ 'p-invalid': errorMessage }"
-      :aria-invalid="errorMessage ? null : true"
-      :aria-errormessage="`${name}Error`"
-      :aria-describedby="`${name}Error`" />
-    <small
+    <label v-if="label" :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
+    <InputGroup>
+      <slot name="addOnBefore"></slot>
+      <InputNumber
+          inputClass="sm:w-3rem"
+          class="w-full"
+          type="number"
+          v-bind="fallthroughAttributes.inputAttrs.value"
+          v-model="value"
+          @keydown.enter="onEnter"
+          @input="handleOnInput"
+          :disabled="disabled"
+          :data-cy="$attrs['data-cy'] || name"
+          :autofocus="autofocus"
+          :id="name"
+          :inputId="`input${name}`"
+          :class="{ 'p-invalid': errorMessage }"
+          :aria-invalid="errorMessage ? null : true"
+          :aria-errormessage="`${name}Error`"
+          :aria-describedby="`${name}Error`" />
+        <slot name="addOnAfter"></slot>
+    </InputGroup>
+    <small v-if="errorMessage"
       role="alert"
       class="p-error block"
       :data-cy="`${name}Error`"

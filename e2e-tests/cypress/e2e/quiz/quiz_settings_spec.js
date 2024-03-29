@@ -31,26 +31,28 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
 
-        cy.get('[data-cy="quizPassingSelector"]').select('2')
-        cy.get('[data-cy="quizPassingSelector"]').should('have.value', '2')
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('2').click();
+        cy.get('[data-cy="quizPassingSelector"]').contains('2')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="quizPassingSelector"]').should('have.value', '2')
+        cy.get('[data-cy="quizPassingSelector"]').contains('2')
 
         cy.visit('/administrator/quizzes/quiz1/settings');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
-        cy.get('[data-cy="quizPassingSelector"]').should('have.value', '2')
+        cy.get('[data-cy="quizPassingSelector"]').contains('2')
 
-        cy.get('[data-cy="quizPassingSelector"]').select('-1')
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('ALL').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
         cy.get('[data-cy="saveSettingsBtn"]').click()
-        cy.get('[data-cy="quizPassingSelector"]').should('have.value', '-1')
+        cy.get('[data-cy="quizPassingSelector"]').contains('ALL')
     });
 
     it('quiz setting: configure number of attempts', function () {
@@ -64,31 +66,30 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
 
-        cy.get('[data-cy="unlimitedAttemptsSwitch"]').click({force: true})
+        cy.get('[data-cy="unlimitedAttemptsSwitch"] [role="switch"]').click({force: true})
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
-        cy.get('[data-cy="numAttemptsInput"]').should('have.value', '3')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '3')
         cy.get('[data-cy="numAttemptsInput"]').type('0')
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="numAttemptsInput"]').should('have.value', '30')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '30')
 
         cy.visit('/administrator/quizzes/quiz1/settings');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="numAttemptsInput"]').should('have.value', '30')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '30')
 
-        cy.get('[data-cy="unlimitedAttemptsSwitch"]').click({force: true})
+        cy.get('[data-cy="unlimitedAttemptsSwitch"] [role="switch"]').click({force: true})
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
-
     });
 
     it('quiz setting: configure number of questions', function () {
@@ -102,15 +103,18 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
 
-        cy.get('[data-cy="quizNumQuestions"]').select(2);
+        cy.get('[data-cy="quizNumQuestions"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('2').click();
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(3);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('3').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(2);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('2').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
 
     });
@@ -126,31 +130,39 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
 
-        cy.get('[data-cy="quizNumQuestions"]').select(9);
+        cy.get('[data-cy="quizNumQuestions"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('9 Questions').click();
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(10);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('10 Correct').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(9);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('9 Correct').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="quizNumQuestions"]').select(12);
+        cy.get('[data-cy="quizNumQuestions"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('12 Questions').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(13);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('13 Correct').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(4);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('4 Correct').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="quizPassingSelector"]').select(14);
+        cy.get('[data-cy="quizPassingSelector"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('14 Correct').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="quizNumQuestions"]').select(14);
+        cy.get('[data-cy="quizNumQuestions"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('14 Questions').click();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
 
     });
@@ -167,12 +179,12 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="timeLimitHoursInput"]').should('not.exist')
         cy.get('[data-cy="timeLimitMinutesInput"]').should('not.exist')
 
-        cy.get('[data-cy="unlimitedTimeSwitch"]').click({force: true});
+        cy.get('[data-cy="unlimitedTimeSwitch"] [role="switch"]').click({force: true});
         cy.get('[data-cy="timeLimitHoursInput"]').should('exist')
         cy.get('[data-cy="timeLimitMinutesInput"]').should('exist')
 
-        cy.get('[data-cy="timeLimitHoursInput"]').should('have.value', '1')
-        cy.get('[data-cy="timeLimitMinutesInput"]').should('have.value', '0')
+        cy.get('[data-cy="timeLimitHoursInput"] [data-pc-name="input"]').should('have.value', '1')
+        cy.get('[data-cy="timeLimitMinutesInput"] [data-pc-name="input"]').should('have.value', '0')
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')

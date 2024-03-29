@@ -1,6 +1,7 @@
 <script setup>
 import { useField } from 'vee-validate'
 import InlineHelp from "@/components/utils/InlineHelp.vue";
+import { computed } from "vue";
 
 const props = defineProps({
   name: {
@@ -9,7 +10,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true,
+    required: false,
   },
   autofocus: {
     type: Boolean,
@@ -32,17 +33,25 @@ const emit = defineEmits(['input'])
 
 const { value, errorMessage } = useField(() => props.name);
 
+const labelClass = computed(() => {
+  return props.label ? 'md:col-5 xl:col-3 text-secondary' : null
+})
+
+const inputClass = computed(() => {
+  return props.label ? 'md:col-7 xl:col-9' : 'w-full'
+})
+
 </script>
 <!--v-bind="projectDisplayNameAttrs"-->
 <template>
   <div class="flex flex-row">
-    <div class="md:col-5 xl:col-3 text-secondary" :id="`${name}Label`">
+    <div v-if="label" :class="labelClass" :id="`${name}Label`">
       <label :for="name">
         {{ label }}
       </label>
       <inline-help :target-id="`${name}Help`" :msg='helpMessage'/>
     </div>
-    <div class="md:col-7 xl:col-9">
+    <div :class="inputClass">
       <InputText v-model="value"
                  :data-cy="`${name}TextInput`"
                  :id="name"
