@@ -375,7 +375,7 @@ class InviteOnlyProjectService {
     @Transactional(readOnly = true)
     boolean isPrivateProjRoleOrAdminRole(String projectId, String userId) {
         if (authMode == AuthMode.PKI) {
-            userId = userInfoService.getUserName(userId, true)
+            userId = userInfoService.getUserName(userId, true, UserInfoService.ID_IDTYPE)
         }
         List<UserRoleRes> roles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId)
         return roles?.find {it.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER || it.roleName == RoleName.ROLE_PROJECT_ADMIN}
