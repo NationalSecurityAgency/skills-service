@@ -72,6 +72,24 @@ class AttachmentService {
         )
     }
 
+    @Transactional
+    Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null) {
+        String uuid = UUID.randomUUID().toString()
+        Attachment res = new Attachment(
+                filename: attachment.filename,
+                contentType: attachment.contentType,
+                uuid: uuid,
+                size: attachment.size,
+                userId: attachment.userId,
+                projectId: newProjectId ?: attachment.projectId,
+                quizId: newProjectId ? null : attachment.quizId, // then now a quiz for sure
+                skillId: newProjectId ? null : attachment.skillId, // if a new project then skillId may not exist
+                content: attachment.content
+        )
+        attachmentRepo.save(res)
+        return res
+    }
+
     @Transactional(readOnly = true)
     Attachment getAttachment(String uuid) {
         return attachmentRepo.findByUuid(uuid)
@@ -87,11 +105,34 @@ class AttachmentService {
         if (description) {
             UUID_PATTERN.matcher(description).findAll().collect { it[1] }.each { uuid ->
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
-                attachment.setProjectId(projectId)
-                attachment.setQuizId(quizId)
-                attachment.setSkillId(skillId)
-                attachmentRepo.save(attachment)
+                boolean changed = false
+                if (attachment.projectId != projectId) {
+                    attachment.setProjectId(projectId)
+                    changed = true
+                }
+                if (attachment.quizId != quizId) {
+                    attachment.setQuizId(quizId)
+                    changed = true
+                }
+
+                // only override if skill is not already set
+                // this can happen if user copy-and-pasted description
+                if (!attachment.skillId && attachment.skillId != skillId) {
+                    attachment.setSkillId(skillId)
+                    changed = true
+                }
+                if (changed) {
+                    attachmentRepo.save(attachment)
+                }
             }
         }
     }
+
+    List<String> findAttachmentUuids(String description) {
+        if (description) {
+            return UUID_PATTERN.matcher(description).findAll().collect { it[1] }
+        }
+        return []
+    }
+
 }
