@@ -150,7 +150,7 @@ describe('Edit Imported Skill Tests', () => {
             .clear()
             .type('10000');
         cy.get('[data-cy="pointIncrementError"]')
-            .should('have.value', '');
+            .should('not.exist');
         cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
     });
