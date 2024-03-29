@@ -452,7 +452,7 @@ class LevelDefinitionStorageService {
                     percent: nextLevelRequest.percent,
                     skillRefId: skill?.id,
                     name: nextLevelRequest.name,
-                    pointsFrom: nextLevelRequest.points,
+                    pointsFrom: asPoints ? nextLevelRequest.points : null,
                     iconClass: nextLevelRequest.iconClass
             )
 
