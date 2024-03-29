@@ -25,16 +25,22 @@ import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.Settings
 import skills.skillLoading.RankingLoader
+import skills.storage.model.LevelDef
 import skills.storage.model.Attachment
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.LevelDefRepo
+
 import skills.storage.repos.AttachmentRepo
 import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CopyProjectSpecs extends DefaultIntSpec {
+
+    @Autowired
+    LevelDefRepo levelDefRepo
 
     @Autowired
     AttachmentRepo attachmentRepo
@@ -916,6 +922,32 @@ class CopyProjectSpecs extends DefaultIntSpec {
         String attachmentHref = result.href
         return attachmentHref
     }
+
+    def "copied percent-based levels do not have from/to points set in DB"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        Integer projRefId = projDefRepo.findByProjectId(projToCopy.projectId).id
+        List<LevelDef> levelDefList = levelDefRepo.findAllByProjectRefId(projRefId).sort { it.level}
+        then:
+        levelDefList.size() == 5
+        !levelDefList[0].pointsFrom
+        !levelDefList[0].pointsTo
+        !levelDefList[1].pointsFrom
+        !levelDefList[1].pointsTo
+        !levelDefList[2].pointsFrom
+        !levelDefList[2].pointsTo
+        !levelDefList[3].pointsFrom
+        !levelDefList[3].pointsTo
+        !levelDefList[4].pointsFrom
+        !levelDefList[4].pointsTo
+    }
+
 
     static class Edge {
         String from
