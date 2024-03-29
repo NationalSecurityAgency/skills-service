@@ -117,7 +117,7 @@ class AttachmentService {
 
                 // only override if skill is not already set
                 // this can happen if user copy-and-pasted description
-                if (!attachment.skillId && attachment.skillId != skillId) {
+                if (!attachment.skillId && skillId) {
                     attachment.setSkillId(skillId)
                     changed = true
                 }

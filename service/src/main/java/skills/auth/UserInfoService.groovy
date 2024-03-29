@@ -34,8 +34,8 @@ import skills.utils.RetryUtil
 @Slf4j
 class UserInfoService {
 
-    private static final String ID_IDTYPE = "ID"
-    private static final String DN_IDTYPE = "DN"
+    static final String ID_IDTYPE = "ID"
+    static final String DN_IDTYPE = "DN"
 
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
