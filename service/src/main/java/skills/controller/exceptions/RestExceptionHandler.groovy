@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
@@ -168,9 +169,27 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity(body, HttpStatus.FORBIDDEN)
     }
 
+    @ExceptionHandler(AsyncRequestNotUsableException)
+    protected ResponseEntity<Object> handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex, WebRequest request) {
+        if (log.isTraceEnabled()) {
+            log.trace("Received AsyncRequestNotUsableException", ex)
+        }
+        if (ex.getCause() instanceof ClientAbortException) {
+            handleClientAbortException(ex.getCause(), request)
+        } else {
+            log.error("${buildRequestInfo(request)}, AsyncRequestNotUsableException", ex)
+            String msg = "${ex.message}"
+            BasicErrBody body = new BasicErrBody(explanation: msg, errorCode: ErrorCode.BadParam)
+            return new ResponseEntity(body, HttpStatus.BAD_REQUEST)
+        }
+    }
+
     @Override
     ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (log.isTraceEnabled()) {
+            log.trace("handleHttpMessageNotReadable", ex)
+        }
         if (ex.getCause() instanceof ClientAbortException) {
             handleClientAbortException(ex.getCause(), request)
         } else {
