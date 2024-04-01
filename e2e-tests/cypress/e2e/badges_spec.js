@@ -546,7 +546,7 @@ describe('Badges Tests', () => {
         cy.gemPrevMonth();
         cy.gemPrevMonth();
 
-        cy.gemSetDay(5);
+        cy.gemSetDay(1);
         cy.gemSetDay(15);
 
         cy.get('[data-cy=gemDatesError]').contains(msg);
@@ -557,7 +557,7 @@ describe('Badges Tests', () => {
         // fix the errors and save
         cy.gemNextMonth();
         cy.gemNextMonth();
-        cy.gemSetDay(5);
+        cy.gemSetDay(1);
         cy.gemSetDay(15);
 
 
