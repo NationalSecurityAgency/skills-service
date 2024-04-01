@@ -156,8 +156,8 @@ describe('Settings Tests', () => {
             .should('have.text', '15');
     });
 
-    it.skip('Add and remove Root User', () => {
-        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
+    it('Add and remove Root User', () => {
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
             .as('addRoot');
@@ -181,7 +181,7 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="existingUserInput"] [data-pc-section="trigger"]').first().click();
+        cy.get('#existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('sk');
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org')
@@ -250,9 +250,9 @@ describe('Settings Tests', () => {
             .contains('There are no records to show');
     });
 
-    it.skip('Add Root User - forward slash character does not cause error', () => {
+    it('Add Root User - forward slash character does not cause error', () => {
 
-        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
             .as('addRoot');
@@ -305,9 +305,9 @@ describe('Settings Tests', () => {
         cy.wait('@getEligibleForRoot');
     });
 
-    it.skip('Add Root User With No Query', () => {
+    it('Add Root User With No Query', () => {
 
-        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER')
+        cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
             .as('addRoot');
@@ -339,7 +339,7 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="existingUserInput"] [data-pc-section="trigger"]').first().click();
+        cy.get('#existingUserInput [data-pc-section="trigger"]').first().click();
 
         cy.wait('@getEligibleForRoot');
         cy.contains('skills@skills.org')
@@ -377,10 +377,10 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
     });
 
-    it.skip('Add Supervisor User', () => {
+    it('Add Supervisor User', () => {
         cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR')
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
             .as('getEligibleForSupervisor');
         cy.intercept({
             method: 'GET',
@@ -416,7 +416,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
 
-        cy.get('[data-cy="supervisorrm"] [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
@@ -451,15 +451,15 @@ describe('Settings Tests', () => {
         //     .should('be.visible');
     });
 
-    it.skip('Remove Supervisor User', () => {
+    it('Remove Supervisor User', () => {
         cy.intercept('PUT', '**/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR')
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
             .as('getEligibleForSupervisor');
 
         cy.visit('/settings/security');
 
-        cy.get('[data-cy="supervisorrm"] [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
@@ -471,7 +471,7 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addSupervisor');
 
-        cy.get('[data-cy="supervisorrm"] [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('skills');
 
         cy.wait('@getEligibleForSupervisor');
@@ -518,10 +518,10 @@ describe('Settings Tests', () => {
 
     });
 
-    it.skip('Add Supervisor User Not Found', () => {
+    it('Add Supervisor User Not Found', () => {
 
         // cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR', [{
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{
             'userId': 'blah@skills.org',
             'userIdForDisplay': 'blah@skills.org',
             'first': 'Firstname',
@@ -563,7 +563,7 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
-        cy.get('[data-cy="supervisorrm"] [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('blah');
 
         cy.wait('@getEligibleForSupervisor');
@@ -584,11 +584,11 @@ describe('Settings Tests', () => {
         //     });
     });
 
-    it.skip('Add Supervisor User No Query', () => {
+    it('Add Supervisor User No Query', () => {
 
         cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
             .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR')
+        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
             .as('getEligibleForSupervisor');
         cy.intercept({
             method: 'GET',
@@ -623,7 +623,7 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.contains('Security')
             .click();
-        cy.get('[data-cy="supervisorrm"] [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
         cy.get('[data-pc-section="filterinput"]').type('sk/foo');
         cy.wait('@getEligibleForSupervisor');
     });
