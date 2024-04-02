@@ -130,23 +130,28 @@ class ProjectCopyService {
     void copyProject(String originalProjectId, ProjectRequest projectRequest) {
         lockingService.lockProjects()
 
-        ProjDef fromProject = loadProject(originalProjectId)
-        validate(projectRequest)
+        copiedAttachmentUuidsThreadLocal.set([:])
+        try {
+            ProjDef fromProject = loadProject(originalProjectId)
+            validate(projectRequest)
 
-        ProjDef toProj = saveToProject(projectRequest)
-        saveProjectSettings(fromProject, toProj)
+            ProjDef toProj = saveToProject(projectRequest)
+            saveProjectSettings(fromProject, toProj)
 
-        pinProjectForRootUser(toProj)
+            pinProjectForRootUser(toProj)
 
-        List<SkillInfo> allCollectedSkills = []
-        def newIcons = customIconFacade.copyIcons(originalProjectId, toProj.projectId)
-        saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
-        updateProjectAndSubjectLevels(fromProject, toProj)
-        saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
-        flushEntityCache()
-        saveDependencies(fromProject, toProj)
-        saveReusedSkills(allCollectedSkills, fromProject, toProj)
-        handleQuizBasedUserPointsAndAchievements(toProj)
+            List<SkillInfo> allCollectedSkills = []
+            def newIcons = customIconFacade.copyIcons(originalProjectId, toProj.projectId)
+            saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
+            updateProjectAndSubjectLevels(fromProject, toProj)
+            saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
+            flushEntityCache()
+            saveDependencies(fromProject, toProj)
+            saveReusedSkills(allCollectedSkills, fromProject, toProj)
+            handleQuizBasedUserPointsAndAchievements(toProj)
+        } finally {
+            copiedAttachmentUuidsThreadLocal.set([:])
+        }
     }
 
     private void flushEntityCache() {
@@ -426,9 +431,10 @@ class ProjectCopyService {
                 }
     }
 
-    private final Map<String,String> copiedAttachmentUuids = [:]
+    private final ThreadLocal<Map<String,String>> copiedAttachmentUuidsThreadLocal = new ThreadLocal<>();
     @Profile
     private String handleAttachmentsInDescription(String description, String newProjectId) {
+        Map<String,String> copiedAttachmentUuids = copiedAttachmentUuidsThreadLocal.get()
         String res = description
         if (description) {
             attachmentService.findAttachmentUuids(res).each { String uuid ->
@@ -438,6 +444,7 @@ class ProjectCopyService {
                     Attachment copiedAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, newProjectId)
                     copiedUuid = copiedAttachment.uuid
                     copiedAttachmentUuids[uuid] = copiedUuid
+                    copiedAttachmentUuidsThreadLocal.set(copiedAttachmentUuids)
                 }
                 res = res.replaceAll(uuid, copiedUuid)
             }

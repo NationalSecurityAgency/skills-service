@@ -105,6 +105,9 @@ class AttachmentService {
         if (description) {
             UUID_PATTERN.matcher(description).findAll().collect { it[1] }.each { uuid ->
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
+                if (!attachment) {
+                    throw new IllegalStateException("Failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], quizId: [${quizId}], skillId: [${skillId}]")
+                }
                 boolean changed = false
                 if (attachment.projectId != projectId) {
                     attachment.setProjectId(projectId)

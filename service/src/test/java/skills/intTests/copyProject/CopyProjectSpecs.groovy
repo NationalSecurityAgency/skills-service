@@ -974,6 +974,65 @@ class CopyProjectSpecs extends DefaultIntSpec {
         copyProj.data.itemId.sort() == [projToCopy.projectId, p1subj1.subjectId, p1Skills[0].skillId].sort()
     }
 
+    def "copy project with an attachment in description, then remove the copy then copy again"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        String contents = 'Test is a test'
+        String attachmentHref = attachFileAndReturnHref(p1.projectId, contents)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.createSubject(p1subj1)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def origSubj = skillsService.getSubject([projectId: p1.projectId, subjectId: p1subj1.subjectId])
+        def copySubj = skillsService.getSubject([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        assert attachments.size() == 2
+        Attachment originalAttachment = attachments.find {  attachmentHref.contains(it.uuid)}
+        Attachment newAttachment = attachments.find { !attachmentHref.contains(it.uuid)}
+
+        assert origSubj.description == "Here is a [Link](${attachmentHref})"
+        assert copySubj.description == "Here is a [Link](/api/download/${newAttachment.uuid})"
+
+        assert originalAttachment.projectId == p1.projectId
+        assert newAttachment.projectId == projToCopy.projectId
+
+        skillsService.deleteProject(projToCopy.projectId)
+
+        List<Attachment> attachmentsAfterDelete = attachmentRepo.findAll()
+        assert attachmentsAfterDelete.size() == 1
+        attachmentsAfterDelete.find {  attachmentHref.contains(it.uuid)}
+
+        def secondCopy = createProject(3)
+        skillsService.copyProject(p1.projectId, secondCopy)
+
+        def origSubjAfterSecondCopy = skillsService.getSubject([projectId: p1.projectId, subjectId: p1subj1.subjectId])
+        def copySubjAfterSecondCopy = skillsService.getSubject([projectId: secondCopy.projectId, subjectId: p1subj1.subjectId])
+        List<Attachment> attachmentsAfterSecondCopy = attachmentRepo.findAll()
+        then:
+        origSubjAfterSecondCopy.description == "Here is a [Link](${attachmentHref})"
+
+        attachmentsAfterSecondCopy.size() == 2
+        Attachment originalAttachmentAfterSecondCopy = attachmentsAfterSecondCopy.find {  attachmentHref.contains(it.uuid)}
+        Attachment newAttachmentAfterSecondCopy = attachmentsAfterSecondCopy.find { !attachmentHref.contains(it.uuid)}
+
+        originalAttachmentAfterSecondCopy.projectId == p1.projectId
+
+        newAttachmentAfterSecondCopy.projectId == secondCopy.projectId
+        copySubjAfterSecondCopy.description == "Here is a [Link](/api/download/${newAttachmentAfterSecondCopy.uuid})"
+
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment("/api/download/${newAttachmentAfterSecondCopy.uuid}")
+        File file = fileAndHeaders.file
+        file
+        file.bytes == contents.getBytes()
+    }
+
 
     static class Edge {
         String from
