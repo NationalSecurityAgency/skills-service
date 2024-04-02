@@ -86,7 +86,6 @@ const buildManageLink = () => {
     params: {
       projectId: badgeInternal.value.projectId,
       badgeId: badgeInternal.value.badgeId,
-      badge: badgeInternal.value,
     },
   };
   return link;

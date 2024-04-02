@@ -386,7 +386,7 @@ describe('Icon Manager Tests', () => {
         cy.get('.proj1-validiconpng');
     });
 
-    it('badge - upload custom icon - persists on navigating away', () => {
+    it.only('badge - upload custom icon - persists on navigating away', () => {
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
@@ -407,11 +407,12 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveBadge')
+        cy.get('[data-cy="manageBtn_badge1"]')
 
         cy.clickNav('Metrics');
-        // cy.clickNav('Badges');
+        cy.clickNav('Badges');
 
-        // cy.get('.proj1-validiconpng');
+        cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng');
     });
 
     it('badge - upload custom icon - persists on refresh', () => {

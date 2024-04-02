@@ -184,7 +184,7 @@ const moveUp = () => {
         <div class="flex flex-wrap">
           <div class="text-truncate">
             <router-link
-                :to="{ name:'Subjects', params: { projectId: projectInternal.projectId, project: projectInternal }}"
+                :to="{ name:'Subjects', params: { projectId: projectInternal.projectId }}"
                 class="no-underline mb-0 pb-0" :title="`${projectInternal.name}`"
                 :aria-label="`manage project ${projectInternal.name}`"
                 role="link"
