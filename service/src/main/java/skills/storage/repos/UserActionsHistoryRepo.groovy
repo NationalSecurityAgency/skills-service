@@ -58,6 +58,8 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                     userAttrs.lastName as lastName
                 from UserActionsHistory action, UserAttrs userAttrs
                 where action.userId = userAttrs.userId
+                    and (:projectId is null OR lower(action.projectId) = :projectId)
+                    and (:quizId is null OR lower(action.quizId) = :quizId)
                     and (:projectIdFilter is null OR lower(action.projectId) like :projectIdFilter)
                     and (:itemFilter is null OR action.item = :itemFilter)
                     and (:userFilter is null OR (
@@ -69,7 +71,9 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                     and (:itemIdFilter is null OR lower(action.itemId) like :itemIdFilter)
                     and (:actionFilter is null OR action.action = :actionFilter)
     ''')
-    Page<UserActionsPreview> getActions(@Nullable @Param("projectIdFilter") String projectIdFilter,
+    Page<UserActionsPreview> getActions(@Nullable @Param("projectId") String projectId,
+                                        @Nullable @Param("quizId") String quizId,
+                                        @Nullable @Param("projectIdFilter") String projectIdFilter,
                                         @Nullable @Param("itemFilter") DashboardItem itemFilter,
                                         @Nullable @Param("userFilter") String userFilter,
                                         @Nullable @Param("quizFilter") String quizFilter,

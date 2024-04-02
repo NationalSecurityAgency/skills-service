@@ -948,6 +948,32 @@ class CopyProjectSpecs extends DefaultIntSpec {
         !levelDefList[4].pointsTo
     }
 
+    def "user actions history"() {
+        def p1 = createProject(1)
+        p1.projectId = "newproject"
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.projectId = p1.projectId
+        def p1Skills = createSkills(1, 1, 1, 100)
+        p1Skills[0].projectId = p1.projectId
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        when:
+        def projToCopy = createProject(2)
+        projToCopy.projectId = "newprojectcopy"
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def origProj = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
+        def copyProj = skillsService.getUserActionsForProject(projToCopy.projectId, 10, 1, "projectId", true)
+        then:
+        origProj.count == 3
+        origProj.totalCount == 3
+        origProj.data.itemId == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId]
+
+        origProj.count == 3
+        copyProj.totalCount == 3
+        copyProj.data.itemId == [projToCopy.projectId, p1subj1.subjectId, p1Skills[0].skillId]
+    }
+
 
     static class Edge {
         String from
