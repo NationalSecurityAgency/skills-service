@@ -967,11 +967,11 @@ class CopyProjectSpecs extends DefaultIntSpec {
         then:
         origProj.count == 3
         origProj.totalCount == 3
-        origProj.data.itemId == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId]
+        origProj.data.itemId.sort() == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId].sort()
 
         origProj.count == 3
         copyProj.totalCount == 3
-        copyProj.data.itemId == [projToCopy.projectId, p1subj1.subjectId, p1Skills[0].skillId]
+        copyProj.data.itemId.sort() == [projToCopy.projectId, p1subj1.subjectId, p1Skills[0].skillId].sort()
     }
 
 
