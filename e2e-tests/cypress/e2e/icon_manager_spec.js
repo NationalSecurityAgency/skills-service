@@ -386,7 +386,7 @@ describe('Icon Manager Tests', () => {
         cy.get('.proj1-validiconpng');
     });
 
-    it.only('badge - upload custom icon - persists on navigating away', () => {
+    it('badge - upload custom icon - persists on navigating away', () => {
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
