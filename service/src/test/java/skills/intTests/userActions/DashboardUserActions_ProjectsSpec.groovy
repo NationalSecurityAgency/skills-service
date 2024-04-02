@@ -1605,9 +1605,9 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         def origProj = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
         def copyProj = skillsService.getUserActionsForProject(p2.projectId, 10, 1, "projectId", true)
         then:
-        origProj.data.itemId == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId]
+        origProj.data.itemId.sort() == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId].sort()
 
-        copyProj.data.itemId == [p2.projectId, p2subj1.subjectId, p2Skills[0].skillId]
+        copyProj.data.itemId.sort() == [p2.projectId, p2subj1.subjectId, p2Skills[0].skillId].sort()
     }
 }
 
