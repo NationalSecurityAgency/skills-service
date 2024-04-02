@@ -289,7 +289,7 @@ class LevelDefinitionStorageService {
      * @return
      */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef deleteLastLevel(String projectId, String skillId = null) {
+    LevelDef deleteLastLevel(String projectId, String skillId = null, boolean documentUserActionHistory = true) {
         LevelDef removed
         LevelDefRes result = getLevelDefs(projectId, skillId)
         List<LevelDef> existingDefinitions = result?.levels
@@ -325,18 +325,20 @@ class LevelDefinitionStorageService {
             }
         }
 
-        userActionsHistoryService.saveUserAction(new UserActionInfo(
-                action: DashboardAction.Delete,
-                item: DashboardItem.Level,
-                actionAttributes: removed,
-                itemId: skillId ?: projectId,
-                projectId: projectId,
-        ))
+        if (documentUserActionHistory) {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Delete,
+                    item: DashboardItem.Level,
+                    actionAttributes: removed,
+                    itemId: skillId ?: projectId,
+                    projectId: projectId,
+            ))
+        }
         return removed
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, Integer level, String skillId = null) {
+    LevelDef editLevel(String projectId, EditLevelRequest editLevelRequest, Integer level, String skillId = null, boolean documentUserActionHistory = true) {
         SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         assert editLevelRequest.name?.length() <= 50
         boolean asPoints = false
@@ -387,20 +389,21 @@ class LevelDefinitionStorageService {
         toEdit.iconClass = editLevelRequest.iconClass
         toEdit = levelDefinitionRepository.save(toEdit)
 
-
-        userActionsHistoryService.saveUserAction(new UserActionInfo(
-                action: DashboardAction.Edit,
-                item: DashboardItem.Level,
-                actionAttributes: toEdit,
-                itemId: skillId ?: projectId,
-                itemRefId: toEdit.id,
-                projectId: projectId,
-        ))
+        if (documentUserActionHistory) {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Edit,
+                    item: DashboardItem.Level,
+                    actionAttributes: toEdit,
+                    itemId: skillId ?: projectId,
+                    itemRefId: toEdit.id,
+                    projectId: projectId,
+            ))
+        }
         return toEdit
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    LevelDef addNextLevel(String projectId, NextLevelRequest nextLevelRequest, String skillId = null) {
+    LevelDef addNextLevel(String projectId, NextLevelRequest nextLevelRequest, String skillId = null, boolean documentUserActionHistory = true) {
         SettingsResult setting = settingsService.getProjectSetting(projectId, Settings.LEVEL_AS_POINTS.settingName)
         assert nextLevelRequest.name?.length() <= 50
         boolean asPoints = false
@@ -458,14 +461,16 @@ class LevelDefinitionStorageService {
 
             created = levelDefinitionRepository.save(created)
 
-            userActionsHistoryService.saveUserAction(new UserActionInfo(
-                    action: DashboardAction.Create,
-                    item: DashboardItem.Level,
-                    actionAttributes: created,
-                    itemId: skillId ?: projectId,
-                    itemRefId: created.id,
-                    projectId: projectId,
-            ))
+            if (documentUserActionHistory) {
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Create,
+                        item: DashboardItem.Level,
+                        actionAttributes: created,
+                        itemId: skillId ?: projectId,
+                        itemRefId: created.id,
+                        projectId: projectId,
+                ))
+            }
             log.debug("Added new level [{}]", created)
         }
 

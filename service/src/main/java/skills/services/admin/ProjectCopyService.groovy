@@ -223,7 +223,7 @@ class ProjectCopyService {
         if (levelsToRemove > 0) {
             (levelsToRemove).times {
                 try {
-                    levelDefinitionStorageService.deleteLastLevel(toProj.projectId, subjectId)
+                    levelDefinitionStorageService.deleteLastLevel(toProj.projectId, subjectId, false)
                     log.debug("PROJ COPY: [{}]=[{}] subj[{}] - removed last level", fromProject.projectId, toProj.projectId, subjectId)
                 } catch (Throwable t) {
                     throw new IllegalStateException("Failed to remove last level for proj=[${toProj.projectId}] and subjectId=[${subjectId}]", t)
@@ -241,7 +241,7 @@ class ProjectCopyService {
                     pointsFrom: fromLevel.pointsFrom,
                     pointsTo: (index > 0) ? fromLevel.pointsTo : null, // levels are reversed and the highest level must always have pointTo=null
             )
-            levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromLevel.level, subjectId)
+            levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromLevel.level, subjectId, false)
             log.debug("PROJ COPY: [{}]=[{}] subj[{}] - edited level to [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(editLevelRequest))
         }
         levelsToCreate.each { LevelDefinitionRes fromlevel ->
@@ -252,7 +252,7 @@ class ProjectCopyService {
                     iconClass: fromlevel.iconClass,
             )
 
-            levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId)
+            levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId, false)
             log.debug("PROJ COPY: [{}]=[{}] subj[{}] - new level [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(nextLevelRequest))
         }
     }
