@@ -2,14 +2,14 @@
 import Card from 'primevue/card';
 
 const props = defineProps({
-  title: String,
+  title: [String, Number],
   subTitle: String,
   iconClass: String,
 });
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{content: { class: 'p-0' } }">
     <template #content>
       <div class="flex flex-row">
         <div style="min-width: 5rem;" class="text-center">

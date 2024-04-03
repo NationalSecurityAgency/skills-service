@@ -159,7 +159,7 @@ const onFilter = (filterEvent) => {
   if (filterEvent.filters?.global?.value) {
     reorderEnable.value = false
     announcer.polite(`Filtered by ${filterEvent.filters?.global?.value} and returned ${filterEvent.filteredValue.length} results`)
-  }
+                         }
 }
 
 const selectedRows = ref([])
