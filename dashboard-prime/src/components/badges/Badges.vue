@@ -82,7 +82,7 @@ const loadBadges = (afterLoad) => {
       })
       .finally(() => {
         isLoadingData.value = false;
-        // enableDragAndDrop();
+        enableDragAndDrop();
       });
 };
 
