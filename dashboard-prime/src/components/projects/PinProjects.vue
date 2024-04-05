@@ -1,0 +1,205 @@
+<script setup>
+import { ref, computed, watch } from 'vue';
+import SettingsService from '@/components/settings/SettingsService.js';
+import ProjectService from '@/components/projects/ProjectService';
+import DateCell from "@/components/utils/table/DateCell.vue";
+import OptionalDateCell from "@/components/utils/table/OptionalDateCell.vue";
+import Column from "primevue/column";
+import InputGroup from "primevue/inputgroup";
+import InputText from "primevue/inputtext";
+import InputGroupAddon from "primevue/inputgroupaddon";
+
+const emit = defineEmits(['done']);
+
+const model = defineModel();
+
+const isLoading = ref(false);
+const searchValue = ref('');
+const tableStoredStateId = 'PinProjects-table';
+const result = ref({
+  values: [],
+    paging: {
+      totalRows: 1,
+      currentPage: 1,
+      perPage: 5,
+      pageOptions: [5, 10, 15],
+    },
+    fields: [{
+      key: 'name',
+      sortable: true,
+    },
+    {
+      key: 'numSkills',
+      label: 'Skills',
+      sortable: true,
+    },
+    {
+      key: 'lastReportedSkill',
+      label: 'Last Reported Skill',
+      sortable: true,
+    },
+    {
+      key: 'created',
+      label: 'Created',
+      sortable: true,
+    }],
+});
+
+const hasResults = computed(() => {
+  return result.value.values && result.value.values.length > 0;
+});
+
+const hasSearch = computed(() => {
+  return searchValue.value && searchValue.value.length > 0;
+});
+
+const done = () => {
+  emit('done');
+  searchValue.value = '';
+  result.value.values = [];
+};
+
+const searchData = (searchValue) => {
+  if (!searchValue) {
+    result.value.values = [];
+  } else {
+    isLoading.value = true;
+    ProjectService.searchProjects(searchValue)
+        .then((response) => {
+          result.value.values = response;
+        })
+        .finally(() => {
+          isLoading.value = false;
+        });
+  }
+};
+
+const loadAll = () => {
+  searchValue.value = '';
+  isLoading.value = true;
+  ProjectService.loadAllProjects()
+      .then((response) => {
+        result.value.values = response;
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+};
+
+const pinProject = (item) => {
+  const itemRef = item;
+  SettingsService.pinProject(item.projectId)
+      .then(() => {
+        itemRef.pinned = true;
+      });
+};
+
+const unpinProject = (item) => {
+  const itemRef = item;
+  SettingsService.unpinProject(item.projectId)
+      .then(() => {
+        itemRef.pinned = false;
+      });
+};
+// searchValue(newValue) {
+//   this.searchData(newValue);
+// },
+watch(searchValue, (newValue) => {
+  searchData(newValue);
+})
+</script>
+
+<template>
+  <SkillsDialog v-model="model"
+                header="Pin Projects"
+                :show-ok-button="false"
+                @on-cancel="done"
+                cancel-button-label="Done"
+                cancel-button-icon=""
+                cancel-button-severity="success">
+    <div class="flex gap-4 mb-4">
+      <InputGroup>
+        <InputText v-model="searchValue"
+                   placeholder="Search projects to pin"
+                   data-cy="pinProjectsSearchInput"
+                   aria-label="search for projects to pin" />
+        <InputGroupAddon @click="searchValue=''" data-cy="pinProjectsClearSearch">
+          <i class="fas fa-times" aria-hidden="true" />
+        </InputGroupAddon>
+      </InputGroup>
+      <span class="text-secondary">OR</span>
+      <SkillsButton label="Load All" size="small" @click="loadAll" data-cy="pinProjectsLoadAllButton" icon="fas fa-weight-hanging"/>
+    </div>
+    <div>
+      <SkillsDataTable :value="result.values" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="pinProjectsSearchResults" striped-rows paginator :rows="5" :table-stored-state-id="tableStoredStateId">
+        <Column field="name" header="Name" style="width: 50%;" sortable>
+          <template #body="slotProps">
+            <div class="flex">
+              <div class="flex flex-1">
+                {{ slotProps.data.name }}
+              </div>
+              <div class="flex flex-1 gap-2 justify-content-end">
+                <SkillsButton v-if="!slotProps.data.pinned" @click="pinProject(slotProps.data)" variant="outline-primary"
+                              size="small"
+                              data-cy="pinButton"
+                              icon="fas fa-thumbtack"
+                              label="Pin"
+                              :aria-label="`pin project ${slotProps.data.projectId}`">
+                </SkillsButton>
+                <SkillsButton v-if="slotProps.data.pinned" variant="outline-warning" @click="unpinProject(slotProps.data)"
+                              size="small"
+                              data-cy="unpinButton" icon="fas fa-ban" label="Unpin"
+                              :aria-label="`remove pin from project ${slotProps.data.projectId}`">
+                </SkillsButton>
+                <SkillsButton variant="outline-primary"
+                              :to="`/administrator/projects/${encodeURIComponent(slotProps.data.projectId)}`" target="_blank"
+                              size="small"
+                              icon="fas fa-eye"
+                              label="View"
+                              data-cy="viewProjectButton"
+                              :aria-label="`view project ${slotProps.data.projectId}`">
+                </SkillsButton>
+              </div>
+            </div>
+          </template>
+        </Column>
+        <Column field="numSkills" header="Skills" sortable></Column>
+        <Column field="lastReportedSkill" header="Last Reported Skill" sortable>
+          <template #body="slotProps">
+            <optional-date-cell :value="slotProps.data.lastReportedSkill" />
+          </template>
+        </Column>
+        <Column field="created" header="Created" sortable>
+          <template #body="slotProps">
+            <date-cell :value="slotProps.data.created" />
+          </template>
+        </Column>
+
+        <template #empty>
+          <div v-if="!hasResults && !hasSearch" class="text-center">
+            <i class="fas fa-2x fa-th-list text-secondary"></i>
+            <div class="h4 mt-2 text-secondary">
+              Search Project Catalog
+            </div>
+            <p class="small">
+              Search and browse projects to pin and unpin for the default view.
+            </p>
+          </div>
+          <div v-if="!hasResults && hasSearch" class="text-center">
+            <i class="fas fa-2x fa-dragon text-secondary"></i>
+            <div class="h4 mt-2 text-secondary">
+              No Results
+            </div>
+            <p class="small">
+              Modify your search string or use 'Load All' feature.
+            </p>
+          </div>
+        </template>
+      </SkillsDataTable>
+    </div>
+  </SkillsDialog>
+</template>
+
+<style scoped>
+
+</style>

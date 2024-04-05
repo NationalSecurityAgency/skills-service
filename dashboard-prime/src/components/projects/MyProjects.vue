@@ -10,6 +10,7 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
+import PinProjects from '@/components/projects/PinProjects.vue';
 
 const appConfig = useAppConfig()
 const accessState = useAccessState()
@@ -270,6 +271,8 @@ const hasData = computed(() => {
       :project="newProject.project"
       @project-saved="projectAdded"
       :enable-return-focus="true"/>
+    <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal"
+                  @done="pinModalClosed"/>
   </div>
 </template>
 
