@@ -27,7 +27,7 @@ const getFooterText = () => {
 <template>
   <my-progress-info-card-util title="Earned">
     <template #left-content>
-      <i class="fas fa-calendar-alt mt-1 mb-2 skills-color-events" style="font-size: 5rem;" />
+      <i class="fas fa-calendar-alt mt-1 mb-2 text-bluegray-600" style="font-size: 5rem;" />
     </template>
     <template #right-content>
       <div class="pt-2 pr-3">

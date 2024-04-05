@@ -12,12 +12,14 @@ const myProgress = computed(() => myProgressState.myProgress)
 <template>
   <my-progress-info-card-util title="Badges">
     <template #left-content>
-      <div class="mt-2 ml-1 text-dark">
-        <span style="font-size: 2.5rem;" class="text-warning"
-              data-cy="numAchievedBadges">{{ myProgress.numAchievedBadges }}</span> <span class="text-secondary"
-                                                                                          style="font-size: 1.2rem;"
-                                                                                          data-cy="numBadgesAvailable">/ {{ myProgress.totalBadges
-        }}</span>
+      <div class="">
+        <span
+          class="text-4xl text-orange-500 mr-1"
+          data-cy="numAchievedBadges">{{ myProgress.numAchievedBadges }}</span>
+        <span
+          class="text-secondary"
+          data-cy="numBadgesAvailable">/ {{ myProgress.totalBadges
+          }}</span>
       </div>
       <div v-if="myProgress.totalGlobalBadges > 0">
         <Tag severity="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ myProgress.numAchievedGlobalBadges
@@ -31,10 +33,10 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
     </template>
     <template #right-content>
-      <div style="font-size: 4.4rem;">
+      <div style="font-size: 3.5rem;" class="mt-2">
       <span class="fa-stack">
-            <i class="fas fa-circle fa-stack-2x text-secondary"></i>
-            <i class="fas fa-trophy fa-stack-1x text-0"></i>
+            <i class="fas fa-circle fa-stack-2x text-bluegray-600"></i>
+            <i class="fas fa-trophy fa-stack-1x text-primary"></i>
           </span>
       </div>
     </template>
