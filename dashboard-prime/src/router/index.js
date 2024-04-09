@@ -44,6 +44,7 @@ import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectP
 import BadgePage from '@/components/badges/BadgePage.vue'
 import BadgeSkills from '@/components/badges/BadgeSkills.vue'
 import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
+import SkillsDisplay from '@/skills-display/SkillsDisplayInIframe.vue'
 
 const routes = [
   {
@@ -54,6 +55,17 @@ const routes = [
       nonAdmin: true,
       announcer: {
         message: 'My Progress'
+      }
+    }
+  },
+  {
+    path: '/static/clientPortal/index.html',
+    component: SkillsDisplay,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Skills Display'
       }
     }
   },
