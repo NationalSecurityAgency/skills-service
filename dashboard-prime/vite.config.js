@@ -34,7 +34,6 @@ export default defineConfig({
       '^/createRootAccount$': proxyConf,
       '^/oauth2$': proxyConf,
       '^/login$': proxyConf,
-      '^/static/': proxyConf,
       '^/root/': proxyConf,
       '^/userExists': proxyConf,
       '^/supervisor/': proxyConf,
