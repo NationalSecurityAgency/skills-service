@@ -31,7 +31,8 @@ const props = defineProps({
   },
   roles: {
     type: Array,
-    // default: () => [ROLE_PROJECT_ADMIN, ROLE_PROJECT_APPROVER],
+    // eslint-disable-next-line vue/valid-define-props
+    default: () => [ROLE_PROJECT_ADMIN, ROLE_PROJECT_APPROVER],
     // validator: (value) => (value.every((v) => ALL_ROLES.includes(v))),
   },
   roleDescription: {
@@ -280,17 +281,11 @@ defineExpose({
       <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                            v-model="selectedUser" data-cy="existingUserInput"/>
     </div>
-    <div class="mt-3 mb-3">
-<!--      <div  v-if="!isOnlyOneRole" class="col">-->
-<!--        <b-form-select v-model="userRole.selected"-->
-<!--                       :options="userRole.options"-->
-<!--                       aria-label="Please select user's Role"-->
-<!--                       data-cy="userRoleSelector">-->
-<!--          <template #first>-->
-<!--            <b-form-select-option :value="null" disabled>&#45;&#45; Please select user's Role &#45;&#45;</b-form-select-option>-->
-<!--          </template>-->
-<!--        </b-form-select>-->
-<!--      </div>-->
+    <div class="mt-3 mb-3 flex gap-2">
+      <div v-if="!isOnlyOneRole" class="flex-1">
+        <Dropdown class="w-full" v-model="userRole.selected" :options="userRole.options" data-cy="userRoleSelector"
+                  placeholder="Please select user's Role" optionLabel="text" optionValue="value" />
+      </div>
       <div>
         <SkillsButton variant="outline-hc" @click="addUserRole" :disabled="addUsrBtnDisabled" data-cy="addUserBtn"
                       label="Add User" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">

@@ -50,13 +50,13 @@ const pinModalClosed = () => {
   showSearchProjectModal.value = false;
   loadProjects();
   nextTick(() => {
-    this.$refs.pinProjectsButton.focus();
+    document.getElementById('pinProjectsButton').focus();
   });
 };
 const projectUnpinned = (project) => {
   loadProjects().then(() => {
     nextTick(() => {
-      // this.$announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`);
+      announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`);
     });
   });
 };
@@ -87,7 +87,7 @@ const copyProject = (projectInfo) => {
       .then(() => {
         copyProgressModal.copiedProjectId = projectInfo.newProject.projectId;
         copyProgressModal.isComplete = true;
-        // this.$announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
+        announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
         SkillsReporter.reportSkill('CopyProject');
       });
 };
@@ -208,6 +208,7 @@ const hasData = computed(() => {
         label="Pin"
         icon="fas fa-thumbtack"
         outlined
+        id="pinProjectsButton"
         ref="pinProjectsButton"
         @click="showSearchProjectModal=true"
         aria-label="Pin projects to your Project page"

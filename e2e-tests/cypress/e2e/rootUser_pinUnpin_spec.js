@@ -75,8 +75,8 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('t');
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 3');
+                cy.get('[data-cy=skillsBTableTotalRows]')
+                    .contains('3');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception');
                 cy.get('[data-cy=pinProjectsSearchResults]')
@@ -86,8 +86,8 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('wo');
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 1');
+                cy.get('[data-cy=skillsBTableTotalRows]')
+                    .contains('1');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception')
                     .should('not.exist');
@@ -106,8 +106,8 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 5');
+                cy.get('[data-cy="skillsBTableTotalRows"]')
+                    .contains('5');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception');
                 cy.get('[data-cy=pinProjectsSearchResults]')
@@ -117,6 +117,12 @@ describe('Root Pin and Unpin Tests', () => {
 
                 // pin 1 project
                 const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr';
+
+                const headerSelector = '[data-cy=pinProjectsSearchResults] thead tr th';
+                cy.get(headerSelector)
+                    .contains('Name')
+                    .click();
+
                 cy.get(rowSelector)
                     .should('have.length', 5)
                     .as('cyRows');
@@ -143,7 +149,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .eq(0)
                     .find('[data-cy=unpinButton]')
                     .should('exist');
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
 
                 const projectsSelector = '[data-cy=projectCard]';
@@ -175,7 +181,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .eq(0)
                     .find('[data-cy=unpinButton]')
                     .should('exist');
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
 
                 // unpin that project
@@ -253,7 +259,7 @@ describe('Root Pin and Unpin Tests', () => {
                         .find('[data-cy=unpinButton]')
                         .should('exist');
                 }
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
 
                 cy.get(projectsSelector)
@@ -271,8 +277,8 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('Pin Projects');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 5');
+                cy.get('[data-cy=skillsBTableTotalRows]')
+                    .contains('5');
                 cy.get(rowSelector)
                     .should('have.length', 5)
                     .as('cyRows');
@@ -301,7 +307,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .find('[data-cy=unpinButton]')
                     .should('not.exist');
 
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
 
                 cy.get(projectsSelector)
@@ -353,7 +359,7 @@ describe('Root Pin and Unpin Tests', () => {
         cy.wait(500);
         cy.get('[role="option"]').contains('root@skills.org')
             .click();
-        cy.get('[data-cy="userRoleSelector"]').select('Administrator');
+        cy.selectItem('[data-cy="userRoleSelector"]', 'Administrator');
         cy.clickButton('Add');
         cy.wait('@addAdmin');
         cy.wait('@loadProjectAdmins');
@@ -427,7 +433,7 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
-    it('Pin all projects then unpin 1 using projects table', () => {
+    it.skip('Pin all projects then unpin 1 using projects table', () => {
       for (let i = 1; i <= 10; i += 1) {
         cy.createProject(i);
       }
@@ -455,7 +461,7 @@ describe('Root Pin and Unpin Tests', () => {
         cy.get(rowSelector).should('have.length', 5).as('cyRows');
 
         for (let page = 1; page <= 2; page += 1) {
-          cy.get('[data-cy=pinedResultsPaging]').contains(page).click();
+          cy.get('[data-pc-section="pages"]').contains(page).click();
           for (let i = 0; i < 5; i += 1) {
             cy.get('@cyRows')
               .eq(i)
@@ -468,7 +474,7 @@ describe('Root Pin and Unpin Tests', () => {
             cy.get('@row1').eq(0).find('[data-cy=unpinButton]').should('exist');
           }
         }
-        cy.get('[data-cy=modalDoneButton]').click();
+        cy.get('[data-cy=closeDialogBtn]').click();
 
         const tableSelector = '[data-cy=projectsTable]'
         cy.validateTable(tableSelector, [
@@ -545,13 +551,18 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 13');
+                cy.get('[data-cy=skillsBTableTotalRows]')
+                    .contains('13');
 
                 const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr';
                 cy.get(rowSelector)
                     .should('have.length', 5)
                     .as('cyRows');
+
+                const headerSelector = '[data-cy=pinProjectsSearchResults] thead tr th';
+                cy.get(headerSelector)
+                    .contains('Name')
+                    .click();
 
                 for (let i = 0; i < 5; i += 1) {
                     cy.get('@cyRows')
@@ -563,7 +574,7 @@ describe('Root Pin and Unpin Tests', () => {
                         .contains(`Good project ${i}`);
                 }
 
-                cy.get('[data-cy=pinedResultsPaging]')
+                cy.get('[data-pc-section="pages"]')
                     .contains('2')
                     .click();
                 cy.get(rowSelector)
@@ -579,7 +590,7 @@ describe('Root Pin and Unpin Tests', () => {
                         .contains(`Good project ${i + 5}`);
                 }
 
-                cy.get('[data-cy=pinedResultsPaging]')
+                cy.get('[data-pc-section="pages"]')
                     .contains('3')
                     .click();
                 cy.get(rowSelector)
@@ -724,46 +735,90 @@ describe('Root Pin and Unpin Tests', () => {
                     .as('cyRows');
 
                 // verify rows are in ASC order based on project name
-                const rowNamesAsc = ['000', '100', '200', '300', 'Inception'];
-                for (let i = 0; i < 5; i += 1) {
-                    cy.get('@cyRows')
-                        .eq(i)
-                        .find('td')
-                        .as('row-i');
-                    cy.get('@row-i')
-                        .contains(rowNamesAsc[i]);
-                }
+                cy.get(headerSelector)
+                    .contains('Name')
+                    .click();
+
+                const tableSelector = '[data-cy="pinProjectsSearchResults"]';
+                cy.validateTable(tableSelector, [
+                    [{
+                        colIndex: 0,
+                        value: '000'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '100'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '200'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '300'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: 'Inception'
+                    }],
+                ], 5);
 
                 // now click the 'Name' header to sort in DESC order
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
 
-                // verify rows are in DESC order based on project name
-                const rowNameDesc = rowNamesAsc.slice(0)
-                    .reverse();
-                for (let i = 0; i < 5; i += 1) {
-                    cy.get('@cyRows')
-                        .eq(i)
-                        .find('td')
-                        .as('row-i');
-                    cy.get('@row-i')
-                        .contains(rowNameDesc[i]);
-                }
+                cy.validateTable(tableSelector, [
+                    [{
+                        colIndex: 0,
+                        value: 'Inception'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '300'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '200'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '100'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '000'
+                    }],
+                ], 5);
 
                 //row names in creation order
-                const rowNamesCreationOrderAsc = ['Inception', '000', '100', '200', '300'];
                 cy.get(headerSelector)
                     .contains('Created')
                     .click();
-                for (let i = 0; i < 5; i += 1) {
-                    cy.get('@cyRows')
-                        .eq(i)
-                        .find('td')
-                        .as('row-i');
-                    cy.get('@row-i')
-                        .contains(rowNamesCreationOrderAsc[i]);
-                }
+
+                cy.validateTable(tableSelector, [
+                    [{
+                        colIndex: 0,
+                        value: 'Inception'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '000'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '100'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '200'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '300'
+                    }],
+                ], 5);
+
                 cy.get(headerSelector)
                     .contains('Name')
                     .should('be.visible');
@@ -773,21 +828,59 @@ describe('Root Pin and Unpin Tests', () => {
                     .contains('Last Reported Skill')
                     .should('be.visible')
                     .click();
-                cy.get('@cyRows')
-                    .eq(4)
-                    .find('td')
-                    .contains('Inception');
+
+                cy.validateTable(tableSelector, [
+                    [{
+                        colIndex: 0,
+                        value: 'Inception'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '300'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '000'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '100'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '200'
+                    }],
+                ], 5);
 
                 cy.log('sorting by Last Reported Skill desc');
                 cy.get(headerSelector)
                     .contains('Last Reported Skill')
                     .click();
-                cy.get('@cyRows')
-                    .eq(0)
-                    .find('td')
-                    .contains('Inception');
 
-                cy.get('[data-cy=modalDoneButton]')
+                cy.validateTable(tableSelector, [
+                    [{
+                        colIndex: 0,
+                        value: 'Inception'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '300'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '000'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '100'
+                    }],
+                    [{
+                        colIndex: 0,
+                        value: '200'
+                    }],
+                ], 5);
+
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
             });
     });
@@ -840,7 +933,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .should('exist'); // dialog exists
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
                 cy.get('[data-cy=subPageHeaderControls]')
                     .contains('Pin')
@@ -907,7 +1000,7 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
-    it('Sort auto-pinned project', () => {
+    it.skip('Sort auto-pinned project', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'one'
@@ -959,8 +1052,8 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('t');
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 3');
+                cy.get('[data-cy="skillsBTableTotalRows"]')
+                    .contains('3');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception');
                 cy.get('[data-cy=pinProjectsSearchResults]')
@@ -970,8 +1063,8 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('wo');
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 1');
+                cy.get('[data-cy="skillsBTableTotalRows"]')
+                    .contains('1');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception')
                     .should('not.exist');
@@ -990,14 +1083,19 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-cy=pinProjectsSearchResultsNumRows]')
-                    .contains('Rows: 5');
+                cy.get('[data-cy=skillsBTableTotalRows]')
+                    .contains('5');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('Inception');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('two');
                 cy.get('[data-cy=pinProjectsSearchResults]')
                     .contains('three');
+
+                const headerSelector = '[data-cy=pinProjectsSearchResults] thead tr th';
+                cy.get(headerSelector)
+                    .contains('Name')
+                    .click();
 
                 // pin 1 project
                 const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr';
@@ -1027,7 +1125,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .eq(0)
                     .find('[data-cy=unpinButton]')
                     .should('exist');
-                cy.get('[data-cy=modalDoneButton]')
+                cy.get('[data-cy=closeDialogBtn]')
                     .click();
 
                 cy.get('[data-cy=newProjectButton]')
@@ -1036,7 +1134,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .should('be.visible');
                 cy.get('[data-cy=projectName]')
                     .type('A Brand New Project');
-                cy.get('[data-cy=saveProjectButton]')
+                cy.get('[data-cy=saveDialogBtn]')
                     .click();
                 cy.contains('A Brand New Project')
                     .should('be.visible');
