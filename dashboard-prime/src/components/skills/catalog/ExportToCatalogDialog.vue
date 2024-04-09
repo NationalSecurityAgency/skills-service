@@ -35,7 +35,6 @@ const handleOkBtn = () => {
   handleClose()
 }
 const handleClose = () => {
-  console.log(state.value.exported)
   if (state.value.exported) {
     emit('on-exported', {groupId: props.groupId, exported: toRaw(skillsFiltered.value)})
   }

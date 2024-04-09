@@ -76,7 +76,8 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
 
 <template>
   <Card :pt="{ content: { class: 'p-0' }, body: { class: 'p-0 pb-2' } }"
-        style="min-width: 30rem; max-width: 50rem;"
+
+        class="conic"
         :class="{ 'proj-link-card' : !overSortControl }">
     <template #content>
       <div>
@@ -86,7 +87,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
               text
               icon="fas fa-arrows-alt"
               severity="secondary"
-              class="pl-2 pr-3 surface-ground"
+              class="pl-2 pr-3 surface-ground sort-control"
               :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"
               size="large"
               @keyup.down="moveDown"
@@ -99,26 +100,14 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
               icon="far fa-times-circle"
               severity="secondary"
               class="pr-3 pt-2"
-              :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"
+              :aria-label="`Remove ${proj.projectName} from My Projects`"
               size="large"></SkillsButton>
           </div>
 
-          <!--          <div-->
-          <!--            ref="sortControl"-->
-          <!--            @mouseover="overSortControl = true"-->
-          <!--            @mouseleave="overSortControl = false"-->
-          <!--            @keyup.down="moveDown"-->
-          <!--            @keyup.up="moveUp"-->
-          <!--            @click.prevent.self-->
-          <!--            tabindex="0"-->
-          <!--            class=" px-2 py-1 sort-control"-->
-          <!--            :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"-->
-          <!--            role="button"-->
-          <!--            data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>-->
         </div>
         <div class="flex">
           <div class="flex-grow-0 pt-3" style="width: 200px;">
-            <apexchart :name="proj.projectName" type="radialBar" height="200" :options="chartOptions"
+            <apexchart type="radialBar" height="200" :options="chartOptions"
                        :series="series"></apexchart>
           </div>
           <div class="flex-grow-1 pt-0 pr-3 text-right">
@@ -170,4 +159,5 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
 </template>
 
 <style scoped>
+
 </style>

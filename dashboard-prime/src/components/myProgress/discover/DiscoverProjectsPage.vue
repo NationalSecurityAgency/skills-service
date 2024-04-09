@@ -10,10 +10,12 @@ import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
 import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescriptionRow.vue'
+import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
 const appInfoState = useAppInfoState()
+const myProgressState = useMyProgressState()
 
 const isLoading = ref(true)
 const searchValue = ref('')
@@ -72,7 +74,10 @@ const addToMyProjects = (item) => {
     .then(() => {
       itemRef.isMyProject = true
       updateCounts()
-      announcer.polite(`${item.name} has been added to my projects`)
+      return myProgressState.loadMyProgressSummary()
+        .then(() => {
+          announcer.polite(`${item.name} has been added to my projects`)
+        })
     })
     .finally(() => {
       itemRef.loading = false
@@ -85,7 +90,10 @@ const removeFromMyProjects = (item) => {
     .then(() => {
       itemRef.isMyProject = false
       updateCounts()
-      announcer.polite(`${item.name} has been removed from my projects`)
+      return myProgressState.loadMyProgressSummary()
+        .then(() => {
+          announcer.polite(`${item.name} has been removed from my projects`)
+        })
     })
     .finally(() => {
       itemRef.loading = false

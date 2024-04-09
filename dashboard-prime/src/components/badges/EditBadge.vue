@@ -49,7 +49,6 @@ const maximumDays = computed(() => {
 });
 
 const validateTime = (value, testContext) => {
-  console.log(testContext);
   return true;
   // return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxBadgeBonusInMinutes;
 }

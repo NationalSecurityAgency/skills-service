@@ -12,17 +12,22 @@ export const useMyProgressState = defineStore('myProgressState', () => {
     myProjects.value = incomingProgress.projectSummaries
   }
 
-  const loadMyProgressSummary = () => {
-    isLoadingMyProgressSummary.value = true
-    MyProgressService.loadMyProgressSummary()
-      .then((response) => {
-        setMyProgress(response)
-      }).finally(() => {
-      isLoadingMyProgressSummary.value = false
-    })
+  const loadMyProgressSummary = (onlyIfNotAlreadyLoaded = false) => {
+    if (!onlyIfNotAlreadyLoaded || isLoadingMyProgressSummary.value) {
+      isLoadingMyProgressSummary.value = true
+      return MyProgressService.loadMyProgressSummary()
+        .then((response) => {
+          setMyProgress(response)
+        }).finally(() => {
+        isLoadingMyProgressSummary.value = false
+      })
+    }
+
+    return Promise.resolve()
   }
 
   const hasProjects = computed(() => myProjects.value.length > 0)
+
 
   return {
     isLoadingMyProgressSummary,
