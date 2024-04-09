@@ -407,7 +407,7 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy=saveDialogBtn]').click();
         cy.wait('@saveBadge')
-        cy.get('[data-cy="manageBtn_badge1"]')
+        cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng');
 
         cy.clickNav('Metrics');
         cy.clickNav('Badges');
