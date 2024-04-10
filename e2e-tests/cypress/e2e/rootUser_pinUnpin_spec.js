@@ -1000,7 +1000,7 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
-    it.skip('Sort auto-pinned project', () => {
+    it('Sort auto-pinned project', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'one'
