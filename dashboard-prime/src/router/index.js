@@ -45,6 +45,7 @@ import BadgePage from '@/components/badges/BadgePage.vue'
 import BadgeSkills from '@/components/badges/BadgeSkills.vue'
 import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
 import SkillsDisplay from '@/skills-display/SkillsDisplayInIframe.vue'
+import createSkillsDisplayRoutes from '@/router/SkillsDisplayRoutes.js'
 
 const routes = [
   {
@@ -55,17 +56,6 @@ const routes = [
       nonAdmin: true,
       announcer: {
         message: 'My Progress'
-      }
-    }
-  },
-  {
-    path: '/static/clientPortal/index.html',
-    component: SkillsDisplay,
-    meta: {
-      requiresAuth: true,
-      nonAdmin: true,
-      announcer: {
-        message: 'Skills Display'
       }
     }
   },
@@ -543,6 +533,7 @@ const routes = [
 routes.push(createAdminRoutes())
 routes.push(createProgressAndRankingRoutes())
 routes.push(createQuizRoutes())
+routes.push(createSkillsDisplayRoutes())
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

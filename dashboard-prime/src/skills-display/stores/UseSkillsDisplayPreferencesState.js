@@ -5,8 +5,19 @@ export const useSkillsDisplayPreferencesState = defineStore('skillsDisplayPrefer
   const isSummaryOnly = ref(false)
   const internalBackButton = ref(true)
 
+  const projectDisplayName = ref('Project')
+  const subjectDisplayName = ref('Subject')
+  const groupDisplayName = ref('Group')
+  const skillDisplayName = ref('Skill')
+  const levelDisplayName = ref('Level')
+
   return {
     isSummaryOnly,
-    internalBackButton
+    internalBackButton,
+    projectDisplayName,
+    subjectDisplayName,
+    groupDisplayName,
+    skillDisplayName,
+    levelDisplayName,
   }
 })

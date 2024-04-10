@@ -50,7 +50,7 @@ tryOnBeforeMount(() => {
     displayPreferences.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
 
     // whether or not to use an internal back button as opposed to the browser back button
-    displayPreferences.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+    // displayPreferences.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
     displayAttributes.projectId = parent.model.projectId
     parentState.serviceUrl = parent.model.serviceUrl

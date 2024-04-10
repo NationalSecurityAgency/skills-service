@@ -1,18 +1,21 @@
 <script setup>
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 </script>
 
 <template>
   <div>
-    <Card>
-      <template #content>
-        <div class="text-center text-2xl uppercase text-primary">
-        {{ skillsDisplayTheme.landingPageTitle }}
-        </div>
-      </template>
-    </Card>
+<!--    <Card>-->
+<!--      <template #content>-->
+<!--        <div class="text-center text-2xl uppercase text-primary">-->
+<!--        {{ skillsDisplayTheme.landingPageTitle }}-->
+<!--        </div>-->
+<!--      </template>-->
+<!--    </Card>-->
+
+    <skills-title :back-button="false">{{ skillsDisplayTheme.landingPageTitle }}</skills-title>
 
     <Card class="mt-3">
       <template #content>
