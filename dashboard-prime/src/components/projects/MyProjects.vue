@@ -11,6 +11,8 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import PinProjects from '@/components/projects/PinProjects.vue';
+import Sortable from 'sortablejs'
+import BlockUI from "primevue/blockui";
 
 const appConfig = useAppConfig()
 const accessState = useAccessState()
@@ -20,6 +22,7 @@ onMounted(() => {
   loadProjects();
 })
 
+const projRef = ref([]);
 const isLoading = ref(false);
 const projects = ref([]);
 const newProject = ref({
@@ -28,10 +31,10 @@ const newProject = ref({
   project: {},
 });
 const showSearchProjectModal = ref(false);
-const sortOrder = {
+const sortOrder = ref({
   loading: false,
   loadingProjectId: '-1',
-};
+});
 const copyProgressModal = {
   show: false,
   isComplete: false,
@@ -68,7 +71,7 @@ const loadProjects = () => {
       })
       .finally(() => {
         isLoading.value = false;
-        // enableDropAndDrop();
+        enableDropAndDrop();
       });
 };
 const projectRemoved = (project) => {
@@ -132,7 +135,6 @@ const projectEdited = (editedProject) => {
 };
 const enableDropAndDrop = () => {
   if (projects.value && projects.value.length > 0 && projects.value.length < appConfig.numProjectsForTableView) {
-    const self = this;
     nextTick(() => {
       const cards = document.getElementById('projectCards');
       // need to check for null because this logic is within nextTick method
@@ -143,7 +145,7 @@ const enableDropAndDrop = () => {
           animation: 150,
           ghostClass: 'skills-sort-order-ghost-class',
           onUpdate(event) {
-            self.sortOrderUpdate(event);
+            sortOrderUpdate(event);
           },
         });
       }
@@ -152,15 +154,15 @@ const enableDropAndDrop = () => {
 };
 const sortOrderUpdate = (updateEvent) => {
   const { id } = updateEvent.item;
-  sortOrder.loadingProjectId = id;
-  sortOrder.loading = true;
+  sortOrder.value.loadingProjectId = id;
+  sortOrder.value.loading = true;
   ProjectService.updateProjectDisplaySortOrder(id, updateEvent.newIndex)
       .finally(() => {
-        sortOrder.loading = false;
+        sortOrder.value.loading = false;
       });
 };
 const updateSortAndReloadProjects = (updateInfo) => {
-  const currentIndex = projects.sort((a, b) => {
+  const currentIndex = projects.value.sort((a, b) => {
     if (a.displayOrder > b.displayOrder) {
       return 1;
     }
@@ -171,15 +173,15 @@ const updateSortAndReloadProjects = (updateInfo) => {
   })
       .findIndex((item) => item.projectId === updateInfo.projectId);
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex >= 0 && (newIndex) < projects.length) {
+  if (newIndex >= 0 && (newIndex) < projects.value.length) {
     isLoading.value = true;
     ProjectService.updateProjectDisplaySortOrder(updateInfo.projectId, newIndex)
         .finally(() => {
           loadProjects()
               .then(() => {
-                const foundRef = this.$refs[`proj${updateInfo.projectId}`];
+                const foundRef = projRef.value[updateInfo.projectId];
                 nextTick(() => {
-                  foundRef[0].focusSortControl();
+                  foundRef.focusSortControl();
                 });
               });
         });
@@ -240,23 +242,21 @@ const hasData = computed(() => {
     <div v-if="hasData" id="projectCards">
       <div v-for="project of projects" :key="project.projectId" class="mb-3"
            :id="project.projectId">
-        <!--          <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">-->
-        <!--            <template #overlay>-->
-        <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
-          <div v-if="project.projectId===sortOrder.loadingProjectId"
-               data-cy="updatingSortMsg">
-            <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-            <SkillsSpinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info" />
+        <BlockUI :blocked="sortOrder.loading">
+          <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
+            <div v-if="project.projectId===sortOrder.loadingProjectId && sortOrder.loading"
+                 data-cy="updatingSortMsg">
+              <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+              <SkillsSpinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info" />
+            </div>
           </div>
-        </div>
-        <!--            </template>-->
-        <MyProject :id="`proj${project.projectId}`" tabindex="-1"
-                   :project="project" :disable-sort-control="projects.length === 1"
-                   :ref="`proj${project.projectId}`"
-                   @sort-changed-requested="updateSortAndReloadProjects"
-                   @copy-project="copyProject"
-                   v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned" />
-        <!--          </b-overlay>-->
+          <MyProject :id="`proj${project.projectId}`" tabindex="-1"
+                     :project="project" :disable-sort-control="projects.length === 1"
+                     :ref="(el) => (projRef[project.projectId] = el)"
+                     @sort-changed-requested="updateSortAndReloadProjects"
+                     @copy-project="copyProject"
+                     v-on:project-deleted="projectRemoved" v-on:pin-removed="projectUnpinned" />
+        </BlockUI>
       </div>
     </div>
 

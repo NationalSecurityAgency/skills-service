@@ -33,7 +33,10 @@ const showEditProjectModal = ref(false);
 const deleteProjectDisabled = ref(false);
 const deleteProjectToolTip = ref('');
 const cancellingExpiration = ref(false);
-const showDeleteValidation = ref(false)
+const showDeleteValidation = ref(false);
+let overSortControl = ref(false);
+const sortControl = ref();
+
 let copyProjectInfo = {
   showModal: false,
   newProject: {},
@@ -164,23 +167,30 @@ const keepIt = () => {
 };
 const moveDown = () => {
   emit('sort-changed-requested', {
-    projectId: project.projectId,
+    projectId: projectInternal.value.projectId,
     direction: 'down',
   });
 };
 const moveUp = () => {
   emit('sort-changed-requested', {
-    projectId: project.projectId,
+    projectId: projectInternal.value.projectId,
     direction: 'up',
   });
 };
 
+const focusSortControl = () => {
+  sortControl.value.focus();
+};
+
+defineExpose({
+  focusSortControl
+});
 </script>
 
 <template>
   <div data-cy="projectCard" class="h-100">
-    <Card :data-cy="`projectCard_${projectInternal.projectId}`">
-      <template #content class="p-0">
+    <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative">
+      <template #content>
         <div class="flex flex-wrap">
           <div class="text-truncate">
             <router-link
@@ -266,21 +276,21 @@ const moveUp = () => {
           v-if="warningMsgAboutPoints"
           :id="`projectCardWarning_${projectInternal.projectId}`"
           severity="info">{{ warningMsgAboutPoints}}</ReminderMessage>
-      </template>
 
-      <div v-if="!disableSortControl"
-           :id="`sortControl_${project.projectId}`"
-           ref="sortControl"
-           @mouseover="overSortControl = true"
-           @mouseleave="overSortControl = false"
-           @keyup.down="moveDown"
-           @keyup.up="moveUp"
-           @click.prevent.self
-           class="position-absolute text-secondary px-2 py-1 sort-control"
-           tabindex="0"
-           :aria-label="`Project Sort Control. Current position for ${project.name} project is ${project.displayOrder}. Press up or down to change the order of the project.`"
-           role="button"
-           data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
+        <div v-if="!disableSortControl"
+             :id="`sortControl_${project.projectId}`"
+             ref="sortControl"
+             @mouseover="overSortControl = true"
+             @mouseleave="overSortControl = false"
+             @keyup.down="moveDown"
+             @keyup.up="moveUp"
+             @click.prevent.self
+             class="absolute text-secondary px-2 py-1 sort-control"
+             tabindex="0"
+             :aria-label="`Project Sort Control. Current position for ${project.name} project is ${project.displayOrder}. Press up or down to change the order of the project.`"
+             role="button"
+             data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
+      </template>
     </Card>
 
     <edit-project
