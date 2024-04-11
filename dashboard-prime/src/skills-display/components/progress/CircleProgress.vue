@@ -1,5 +1,5 @@
 <script setup>
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useNumberFormat } from '../../../../../common-components/src/common/filter/UseNumberFormat.js'
 
 const props = defineProps({
   diameter: {

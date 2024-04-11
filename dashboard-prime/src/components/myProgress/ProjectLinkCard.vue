@@ -144,7 +144,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
           <router-link
             :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId } }"
             :aria-label="`Click to navigate to ${proj.projectName} project page.`"
-            :data-cy="`project-link-${proj.projectId}`" tabindex="0">
+            :data-cy="`project-link-${proj.projectId}`">
             <Button
               label="View"
               icon="far fa-eye"

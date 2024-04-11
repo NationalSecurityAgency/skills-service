@@ -18,14 +18,16 @@ const log = useLog()
 
 const getDocumentHeight = () => {
   const { body } = document
-  return Math.max(body.scrollHeight, body.offsetHeight)
+  return Math.max(body.scrollHeight, body.offsetHeight) + 10;
 }
 
-const onHeightChanged = useDebounceFn(() => {
+const onHeightChanged = () => {
   // if (process.env.NODE_ENV !== 'development') {
-  parentState.parentFrame.emit('height-changed', getDocumentHeight())
+  const newHeight = getDocumentHeight()
+  log.debug(`SkillsDisplayInIframe.vue: onHeightChanged: ${newHeight}`)
+  parentState.parentFrame.emit('height-changed', newHeight)
   // }
-}, 0)
+}
 
 tryOnBeforeMount(() => {
 

@@ -1,12 +1,12 @@
 <script setup>
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
-import CircleProgress from '@/skills-display/components/utilities/CircleProgress.vue'
+import CircleProgress from '@/skills-display/components/progress/CircleProgress.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { computed } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
-import SkillLevel from '@/skills-display/components/progress/SkillLevel.vue'
+import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 
 const userProgress = useUserProgressSummaryState()
 const themeState = useSkillsDisplayThemeState()
