@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { tryOnBeforeMount, useDebounceFn } from '@vueuse/core'
+import { tryOnBeforeMount } from '@vueuse/core'
 import Postmate from 'postmate'
 
 import { useSkillsDisplayParentFrameState } from './stores/UseSkillsDisplayParentFrameState'
@@ -21,14 +21,6 @@ const getDocumentHeight = () => {
   return Math.max(body.scrollHeight, body.offsetHeight) + 10;
 }
 
-const onHeightChanged = () => {
-  // if (process.env.NODE_ENV !== 'development') {
-  const newHeight = getDocumentHeight()
-  log.debug(`SkillsDisplayInIframe.vue: onHeightChanged: ${newHeight}`)
-  parentState.parentFrame.emit('height-changed', newHeight)
-  // }
-}
-
 tryOnBeforeMount(() => {
 
   log.debug('SkillsDisplayInIframe.vue: tryOnBeforeMount')
@@ -45,8 +37,13 @@ tryOnBeforeMount(() => {
     // Make sure to freeze the parent object so Pinia won't try to make it reactive
     // CORs won't allow this because parent object can't be changed from an iframe
     parentState.parentFrame = Object.freeze(parent)
-    window.addEventListener('resize', onHeightChanged)
-    onHeightChanged()
+    const resizeObserver = new ResizeObserver(function(entries) {
+      const observedEntry = entries[0].contentRect;
+      const newHeight = observedEntry.height + 10;
+      log.debug(`SkillsDisplayInIframe.vue: changing height to [${newHeight}]`)
+      parentState.parentFrame.emit('height-changed', newHeight)
+    });
+    resizeObserver.observe(document.querySelector("body"))
 
     // will only display summary and component will not be interactive
     displayPreferences.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
@@ -78,7 +75,7 @@ tryOnBeforeMount(() => {
 
     // No scroll bars for iframe.
     document.body.style['overflow-y'] = 'hidden';
-    //
+
     // this.loadConfigs();
     displayAttributes.loadingConfig = false
     // this.getCustomIconCss();
