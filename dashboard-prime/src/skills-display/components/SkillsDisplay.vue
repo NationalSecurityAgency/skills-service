@@ -1,37 +1,32 @@
 <script setup>
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
+import UserOverallProgress from '@/skills-display/components/home/UserOverallProgress.vue'
+import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
+import { onMounted } from 'vue'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
+const userProgress = useUserProgressSummaryState()
+const log = useLog()
+
+onMounted(() => {
+  log.debug('SkillsDisplay.vue: onMounted')
+  userProgress.loadUserProgressSummary()
+})
 </script>
 
 <template>
   <div>
-<!--    <Card>-->
-<!--      <template #content>-->
-<!--        <div class="text-center text-2xl uppercase text-primary">-->
-<!--        {{ skillsDisplayTheme.landingPageTitle }}-->
-<!--        </div>-->
-<!--      </template>-->
-<!--    </Card>-->
+    <skills-spinner :is-loading="userProgress.loadingUserProgressSummary"/>
+    <div v-if="!userProgress.loadingUserProgressSummary">
+      <skills-title :back-button="false">{{ skillsDisplayTheme.landingPageTitle }}</skills-title>
+  <!--    <project-description v-if="!isSummaryOnly && description && displayProjectDescription" :description="description"></project-description>-->
+  <!--    <user-skills-header :display-data="displayData" class="mb-3"/>-->
+      <user-overall-progress class="mt-3"/>
+  <!--    <subjects-container v-if="!isSummaryOnly" :subjects="displayData.userSkills.subjects" />-->
+    </div>
 
-    <skills-title :back-button="false">{{ skillsDisplayTheme.landingPageTitle }}</skills-title>
-
-    <Card class="mt-3">
-      <template #content>
-        <div class="flex text-center">
-          <div class="flex-1">
-            Overall Points
-          </div>
-          <div class="flex-1">
-            My Level
-          </div>
-          <div class="flex-1">
-            Level Progress
-          </div>
-        </div>
-      </template>
-    </Card>
   </div>
 </template>
 

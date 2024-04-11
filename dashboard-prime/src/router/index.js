@@ -44,7 +44,6 @@ import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectP
 import BadgePage from '@/components/badges/BadgePage.vue'
 import BadgeSkills from '@/components/badges/BadgeSkills.vue'
 import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
-import SkillsDisplay from '@/skills-display/SkillsDisplayInIframe.vue'
 import createSkillsDisplayRoutes from '@/router/SkillsDisplayRoutes.js'
 
 const routes = [

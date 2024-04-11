@@ -18,7 +18,6 @@ onMounted(() => {
 const build = () => {
   let ignoreNext = false;
   const path = route.path.replace('/static/clientPortal/index.html', '/')
-  console.log(path)
   const res = path.split('/').filter((item) => item);
   res.unshift('');
   let key = null;

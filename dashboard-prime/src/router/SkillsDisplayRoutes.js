@@ -1,20 +1,41 @@
-import AdminHomePage from '@/components/AdminHomePage.vue'
-import MyProjects from '@/components/projects/MyProjects.vue'
-import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage.vue'
-import SkillsDisplay from '@/skills-display/SkillsDisplayInIframe.vue'
+import SkillsDisplay from '@/skills-display/components/SkillsDisplay.vue'
+import SkillsDisplayErrorPage from '@/skills-display/components/errors/SkillsDisplayErrorPage.vue'
+import SkillsDisplayInIframe from '@/skills-display/SkillsDisplayInIframe.vue'
 
 const createSkillsDisplayRoutes = () => {
   return {
     path: '/static/clientPortal/index.html',
-    name: 'SkillsDisplayHome',
-    component: SkillsDisplay,
+    component: SkillsDisplayInIframe,
     meta: {
       requiresAuth: true,
       nonAdmin: true,
       announcer: {
         message: 'Skills Display'
       }
-    }
+    },
+    children: [{
+      name: 'SkillsDisplay',
+      path: '',
+      component: SkillsDisplay,
+      meta: {
+        requiresAuth: true,
+        nonAdmin: true,
+        announcer: {
+          message: 'Skills Display',
+        },
+      },
+    }, {
+      name: 'SkillsDisplayErrorPage',
+      path: 'error',
+      component: SkillsDisplayErrorPage,
+      meta: {
+        requiresAuth: false,
+        nonAdmin: true,
+        announcer: {
+          message: 'Error Page',
+        },
+      },
+    }]
   }
 }
 

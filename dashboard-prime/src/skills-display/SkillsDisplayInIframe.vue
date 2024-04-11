@@ -5,11 +5,11 @@ import Postmate from 'postmate'
 
 import { useSkillsDisplayParentFrameState } from './stores/UseSkillsDisplayParentFrameState'
 import { useLog } from '@/components/utils/misc/useLog.js'
-import SkillsDisplay from '@/skills-display/components/SkillsDisplay.vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
 
 const parentState = useSkillsDisplayParentFrameState()
 const displayPreferences = useSkillsDisplayPreferencesState()
@@ -53,6 +53,8 @@ tryOnBeforeMount(() => {
     // displayPreferences.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
     displayAttributes.projectId = parent.model.projectId
+    displayAttributes.serviceUrl = parent.model.serviceUrl
+    log.debug(`SkillsDisplayInIframe.vue: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
     parentState.serviceUrl = parent.model.serviceUrl
 
     if (parent.model.options) {
@@ -68,13 +70,15 @@ tryOnBeforeMount(() => {
     parentState.parentFrame.emit('needs-authentication')
 
     if (parent.model.minHeight) {
+      log.debug(`SkillsDisplayInIframe.vue: parent.model.minHeight: ${parent.model.minHeight}`)
       appStyleObject.value['min-height'] = parent.model.minHeight
     }
 
-    // // No scroll bars for iframe.
-    // document.body.style['overflow-y'] = 'hidden';
+    // No scroll bars for iframe.
+    document.body.style['overflow-y'] = 'hidden';
     //
     // this.loadConfigs();
+    displayAttributes.loadingConfig = false
     // this.getCustomIconCss();
   })
 })
@@ -111,7 +115,9 @@ const handleTheming = (theme) =>{
     :style="appStyleObject"
     aria-label="SkillTree Skills Display">
 <!--    <skills-spinner :is-loading="true" />-->
-    <skills-display />
+    <skills-display-home />
+
+<!--    <skills-display />-->
   </div>
 </template>
 

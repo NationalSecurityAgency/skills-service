@@ -3,6 +3,8 @@ import { useRouter } from 'vue-router'
 import { useAuthState } from '@/stores/UseAuthState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { userErrorState } from '@/stores/UserErrorState.js'
+import { useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useErrorHandling = () => {
 
@@ -10,6 +12,16 @@ export const useErrorHandling = () => {
   const authState = useAuthState()
   const appConfig = useAppConfig()
   const errorState = userErrorState()
+
+  const skillsDisplayInfo = useSkillsDisplayInfo()
+  const log = useLog()
+
+  const navToErrorPage = () => {
+    const errPageName =
+      skillsDisplayInfo.isSkillsDisplayPath ? 'SkillsDisplayErrorPage' : 'ErrorPage'
+    log.debug(`Navigating to error page: ${errPageName}`)
+    return router.push({ name: errPageName })
+  }
 
   const errorResponseHandler = (error) => {
     if (axios.isCancel(error)) {
@@ -59,7 +71,8 @@ export const useErrorHandling = () => {
         router.push({ name: 'PrivateProjectAccessRequestPage', params: { explanation, projectId } });
       } else {
         errorState.setErrorParams('User Not Authorized', explanation, 'fas fa-shield-alt')
-        router.push({ name: 'ErrorPage'});
+        // router.push({ name: 'ErrorPage'});
+        navToErrorPage()
         return Promise.reject(error);
       }
     } else if (errorCode === 404) {
@@ -68,14 +81,14 @@ export const useErrorHandling = () => {
         ({ explanation } = error.response.data);
       }
       errorState.setErrorParams('Resource Not Found', explanation, 'fas fa-exclamation-triangle')
-      router.push({ name: 'ErrorPage' });
+      navToErrorPage()
       return Promise.reject(error);
     } else if (errorCode === 503 && error?.response?.data?.errorCode === 'DbUpgradeInProgress') {
       router.push({ name: 'DbUpgradeInProgressPage' });
       return Promise.reject(error);
     } else {
       errorState.resetToDfeault()
-      router.push({ name: 'ErrorPage' });
+      navToErrorPage()
       return Promise.reject(error);
     }
     return Promise.resolve({ data: {} });
