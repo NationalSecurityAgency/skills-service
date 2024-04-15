@@ -87,6 +87,8 @@ class UserActionsHistoryService {
 
     @Transactional
     TableResult getUsersActions(PageRequest pageRequest,
+                                String projectId,
+                                String quizId,
                                 String projectIdFilter,
                                 DashboardItem itemFilter,
                                 String userFilter,
@@ -98,6 +100,7 @@ class UserActionsHistoryService {
         String quizFilterQuery = quizFilter ? '%' + quizFilter.toLowerCase() + '%' : null
         String itemIdFilterQuery = itemIdFilter ? '%' + itemIdFilter.toLowerCase() + '%' : null
         Page<UserActionsHistoryRepo.UserActionsPreview> userActionsPreviewFromDB = userActionsHistoryRepo.getActions(
+                projectId?.toLowerCase(), quizId?.toLowerCase(),
                 projectIdFilterQuery, itemFilter, userFilterQuery, quizFilterQuery, itemIdFilterQuery, actionFilter, pageRequest)
         Long totalRows = userActionsPreviewFromDB.getTotalElements()
         List<DashboardUserActionRes> actionResList = userActionsPreviewFromDB.getContent().collect {

@@ -223,4 +223,21 @@ class DashboardUserActions_QuizEndpointSpec extends DefaultIntSpec {
         q2Options.itemFilterOptions.sort() == [DashboardItem.Quiz.toString()].sort()
     }
 
+    def "two quizzes where one quiz's id is a substring of the other"() {
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.quizId = 'quiz'
+        skillsService.createQuizDef(q1)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.quizId = "${q1.quizId}a".toString()
+        skillsService.createQuizDef(q2)
+
+        when:
+        def q1Res = skillsService.getUserActionsForQuiz(q1.quizId,10, 1, "created", true, null, '', '', null)
+        def q2Res = skillsService.getUserActionsForQuiz(q2.quizId,10, 1, "created", true, null, '', '', null)
+        then:
+        q1Res.data.itemId == [q1.quizId]
+        q2Res.data.itemId == [q2.quizId]
+    }
+
 }

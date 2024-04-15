@@ -318,9 +318,11 @@ class QuizController {
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userActionsHistoryService.getUsersActions(pageRequest,
                 null,
+                quizId,
+                null,
                 itemFilter? DashboardItem.valueOf(itemFilter) : null,
                 userFilter ? URLDecoder.decode(userFilter, StandardCharsets.UTF_8) : null,
-                quizId,
+                null,
                 itemIdFilter ? URLDecoder.decode(itemIdFilter, StandardCharsets.UTF_8) : null,
                 actionFilter ? DashboardAction.valueOf(actionFilter) : null)
     }

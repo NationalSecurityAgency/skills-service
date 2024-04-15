@@ -1583,5 +1583,31 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         extend.duration == "PT1H"
     }
+
+    def "two projects where one project's id is a substring of the other"() {
+        def p1 = createProject(1)
+        p1.projectId = "proj"
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.projectId = p1.projectId
+        def p1Skills = createSkills(1, 1, 1, 100)
+        p1Skills[0].projectId = p1.projectId
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = createProject(2)
+        p2.projectId = "${p1.projectId}more".toString()
+        def p2subj1 = createSubject(2, 2)
+        p2subj1.projectId = p2.projectId
+        def p2Skills = createSkills(1, 2, 2, 100)
+        p2Skills[0].projectId = p2.projectId
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        when:
+        def origProj = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "projectId", true)
+        def copyProj = skillsService.getUserActionsForProject(p2.projectId, 10, 1, "projectId", true)
+        then:
+        origProj.data.itemId.sort() == [p1.projectId, p1subj1.subjectId, p1Skills[0].skillId].sort()
+
+        copyProj.data.itemId.sort() == [p2.projectId, p2subj1.subjectId, p2Skills[0].skillId].sort()
+    }
 }
 

@@ -122,28 +122,36 @@ class ProjectCopyService {
     @PersistenceContext
     EntityManager entityManager;
 
+    @Autowired
+    AttachmentService attachmentService
+
     @Transactional
     @Profile
     void copyProject(String originalProjectId, ProjectRequest projectRequest) {
         lockingService.lockProjects()
 
-        ProjDef fromProject = loadProject(originalProjectId)
-        validate(projectRequest)
+        copiedAttachmentUuidsThreadLocal.set([:])
+        try {
+            ProjDef fromProject = loadProject(originalProjectId)
+            validate(projectRequest)
 
-        ProjDef toProj = saveToProject(projectRequest)
-        saveProjectSettings(fromProject, toProj)
+            ProjDef toProj = saveToProject(projectRequest)
+            saveProjectSettings(fromProject, toProj)
 
-        pinProjectForRootUser(toProj)
+            pinProjectForRootUser(toProj)
 
-        List<SkillInfo> allCollectedSkills = []
-        def newIcons = customIconFacade.copyIcons(originalProjectId, toProj.projectId)
-        saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
-        updateProjectAndSubjectLevels(fromProject, toProj)
-        saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
-        flushEntityCache()
-        saveDependencies(fromProject, toProj)
-        saveReusedSkills(allCollectedSkills, fromProject, toProj)
-        handleQuizBasedUserPointsAndAchievements(toProj)
+            List<SkillInfo> allCollectedSkills = []
+            def newIcons = customIconFacade.copyIcons(originalProjectId, toProj.projectId)
+            saveSubjectsAndSkills(projectRequest, fromProject, toProj, allCollectedSkills, newIcons)
+            updateProjectAndSubjectLevels(fromProject, toProj)
+            saveBadgesAndTheirSkills(fromProject, toProj, newIcons)
+            flushEntityCache()
+            saveDependencies(fromProject, toProj)
+            saveReusedSkills(allCollectedSkills, fromProject, toProj)
+            handleQuizBasedUserPointsAndAchievements(toProj)
+        } finally {
+            copiedAttachmentUuidsThreadLocal.set([:])
+        }
     }
 
     private void flushEntityCache() {
@@ -220,7 +228,7 @@ class ProjectCopyService {
         if (levelsToRemove > 0) {
             (levelsToRemove).times {
                 try {
-                    levelDefinitionStorageService.deleteLastLevel(toProj.projectId, subjectId)
+                    levelDefinitionStorageService.deleteLastLevel(toProj.projectId, subjectId, false)
                     log.debug("PROJ COPY: [{}]=[{}] subj[{}] - removed last level", fromProject.projectId, toProj.projectId, subjectId)
                 } catch (Throwable t) {
                     throw new IllegalStateException("Failed to remove last level for proj=[${toProj.projectId}] and subjectId=[${subjectId}]", t)
@@ -238,7 +246,7 @@ class ProjectCopyService {
                     pointsFrom: fromLevel.pointsFrom,
                     pointsTo: (index > 0) ? fromLevel.pointsTo : null, // levels are reversed and the highest level must always have pointTo=null
             )
-            levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromLevel.level, subjectId)
+            levelDefinitionStorageService.editLevel(toProj.projectId, editLevelRequest, fromLevel.level, subjectId, false)
             log.debug("PROJ COPY: [{}]=[{}] subj[{}] - edited level to [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(editLevelRequest))
         }
         levelsToCreate.each { LevelDefinitionRes fromlevel ->
@@ -249,7 +257,7 @@ class ProjectCopyService {
                     iconClass: fromlevel.iconClass,
             )
 
-            levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId)
+            levelDefinitionStorageService.addNextLevel(toProj.projectId, nextLevelRequest, subjectId, false)
             log.debug("PROJ COPY: [{}]=[{}] subj[{}] - new level [{}]", fromProject.projectId, toProj.projectId, subjectId, JsonOutput.toJson(nextLevelRequest))
         }
     }
@@ -335,6 +343,7 @@ class ProjectCopyService {
             BadgeRequest badgeRequest = new BadgeRequest()
             Props.copy(fromBadge, badgeRequest)
             badgeRequest.badgeId = fromBadge.skillId
+            badgeRequest.description = handleAttachmentsInDescription(badgeRequest.description, toProj.projectId)
             badgeRequest.enabled = Boolean.FALSE.toString()
             if(newIcons[fromBadge.iconClass]) {
                 badgeRequest.iconClass = newIcons[fromBadge.iconClass];
@@ -361,6 +370,7 @@ class ProjectCopyService {
                     SubjectRequest toSubj = new SubjectRequest()
                     Props.copy(fromSubj, toSubj)
                     toSubj.subjectId = fromSubj.skillId
+                    toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
                     if(newIcons[fromSubj.iconClass]) {
                         toSubj.iconClass = newIcons[fromSubj.iconClass]
                     }
@@ -380,41 +390,67 @@ class ProjectCopyService {
         skillDefs?.findAll { it.enabled == "true" && (!it.copiedFrom) }
                 .sort { it.displayOrder }
                 .each { SkillDefWithExtra fromSkill ->
+                    try {
+                        SkillProjectCopyRequest skillRequest = new SkillProjectCopyRequest()
+                        Props.copy(fromSkill, skillRequest)
+                        skillRequest.projectId = desProjectId
+                        skillRequest.subjectId = subjectId
+                        skillRequest.type = fromSkill.type?.toString()
+                        skillRequest.version = 0
+                        skillRequest.description = handleAttachmentsInDescription(skillRequest.description, desProjectId)
 
-                    SkillProjectCopyRequest skillRequest = new SkillProjectCopyRequest()
-                    Props.copy(fromSkill, skillRequest)
-                    skillRequest.projectId = desProjectId
-                    skillRequest.subjectId = subjectId
-                    skillRequest.type = fromSkill.type?.toString()
-                    skillRequest.version = 0
+                        skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
+                        if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
+                            QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)
+                            skillRequest.quizId = quizNameAndId.quizId
+                        }
 
-                    skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
-                    if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
-                        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)
-                        skillRequest.quizId = quizNameAndId.quizId
-                    }
+                        if (fromSkill.type != SkillDef.ContainerType.SkillsGroup) {
+                            skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
+                        }
 
-                    if (fromSkill.type != SkillDef.ContainerType.SkillsGroup) {
-                        skillRequest.numPerformToCompletion = fromSkill.totalPoints / fromSkill.pointIncrement
-                    }
+                        // group partial requirement must be set after skills are added
+                        Integer groupNumSkillsRequired = -1
+                        if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
+                            groupNumSkillsRequired = fromSkill.numSkillsRequired
+                            skillRequest.numSkillsRequired = -1
+                        }
+                        SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes = skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId, false)
+                        if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
+                            createSkills(originalProjectId, desProjectId, subjectId, allCollectedSkills, fromSkill.skillId)
+                        }
+                        if (groupNumSkillsRequired > 0) {
+                            skillRequest.numSkillsRequired = groupNumSkillsRequired
+                            skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
+                        }
 
-                    // group partial requirement must be set after skills are added
-                    Integer groupNumSkillsRequired = -1
-                    if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
-                        groupNumSkillsRequired = fromSkill.numSkillsRequired
-                        skillRequest.numSkillsRequired = -1
+                        handleVideoAttributes(fromSkill, saveSkillTmpRes)
+                    } catch (Throwable t) {
+                        throw new SkillException("Error copying skill: ${fromSkill.skillId}", t)
                     }
-                    SkillsAdminService.SaveSkillTmpRes saveSkillTmpRes = skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId, false)
-                    if (fromSkill.type == SkillDef.ContainerType.SkillsGroup) {
-                        createSkills(originalProjectId, desProjectId, subjectId, allCollectedSkills, fromSkill.skillId)
-                    }
-                    if (groupNumSkillsRequired > 0) {
-                        skillRequest.numSkillsRequired = groupNumSkillsRequired
-                        skillsAdminService.saveSkill(fromSkill.skillId, skillRequest, true, groupId)
-                    }
-
-                    handleVideoAttributes(fromSkill, saveSkillTmpRes)
                 }
+    }
+
+    private final ThreadLocal<Map<String,String>> copiedAttachmentUuidsThreadLocal = new ThreadLocal<>();
+    @Profile
+    private String handleAttachmentsInDescription(String description, String newProjectId) {
+        Map<String,String> copiedAttachmentUuids = copiedAttachmentUuidsThreadLocal.get()
+        String res = description
+        if (description) {
+            attachmentService.findAttachmentUuids(res).each { String uuid ->
+                Attachment attachment = attachmentService.getAttachment(uuid)
+                String copiedUuid = copiedAttachmentUuids[uuid]
+                if (!copiedUuid) {
+                    Attachment copiedAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, newProjectId)
+                    copiedUuid = copiedAttachment.uuid
+                    copiedAttachmentUuids[uuid] = copiedUuid
+                    copiedAttachmentUuidsThreadLocal.set(copiedAttachmentUuids)
+                }
+                res = res.replaceAll(uuid, copiedUuid)
+            }
+        }
+
+        return res
     }
 
     @Profile
